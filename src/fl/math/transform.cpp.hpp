@@ -7,13 +7,14 @@
 #include "fl/math/intmap.h"
 #include "fl/math/trig8.h"
 #include "fl/stl/compiler_control.h"
+#include "fl/stl/noexcept.h"
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING(float-equal)
 
 namespace fl {
 
-vec2f TransformFloatImpl::transform(const vec2f &xy) const {
+vec2f TransformFloatImpl::transform(const vec2f &xy) const FL_NO_EXCEPT {
     if (is_identity()) {
         return xy;
     }
@@ -42,7 +43,7 @@ vec2f TransformFloatImpl::transform(const vec2f &xy) const {
     return vec2f(x, y);
 }
 
-Transform16 Transform16::ToBounds(alpha16 max_value) {
+Transform16 Transform16::ToBounds(alpha16 max_value) FL_NO_EXCEPT {
     Transform16 tx;
     // Compute a Q16 “scale” so that:
     //    (alpha16 * scale) >> 16  == max_value  when alpha16==0xFFFF
@@ -63,7 +64,7 @@ Transform16 Transform16::ToBounds(alpha16 max_value) {
 }
 
 Transform16 Transform16::ToBounds(const vec2<alpha16> &min,
-                                  const vec2<alpha16> &max, alpha16 rotation) {
+                                  const vec2<alpha16> &max, alpha16 rotation) FL_NO_EXCEPT {
     Transform16 tx;
     // Compute a Q16 “scale” so that:
     //    (alpha16 * scale) >> 16  == max_value  when alpha16==0xFFFF
@@ -90,7 +91,7 @@ Transform16 Transform16::ToBounds(const vec2<alpha16> &min,
     return tx;
 }
 
-vec2<alpha16> Transform16::transform(const vec2<alpha16> &xy) const {
+vec2<alpha16> Transform16::transform(const vec2<alpha16> &xy) const FL_NO_EXCEPT {
     vec2<alpha16> out = xy;
 
     // 1) Rotate around the 16‑bit center first
@@ -133,19 +134,19 @@ vec2<alpha16> Transform16::transform(const vec2<alpha16> &xy) const {
     return out;
 }
 
-float TransformFloatImpl::scale() const { return fl::min(scale_x, scale_y); }
+float TransformFloatImpl::scale() const FL_NO_EXCEPT { return fl::min(scale_x, scale_y); }
 
-void TransformFloatImpl::set_scale(float scale) {
+void TransformFloatImpl::set_scale(float scale) FL_NO_EXCEPT {
     scale_x = scale;
     scale_y = scale;
 }
 
-bool TransformFloatImpl::is_identity() const {
+bool TransformFloatImpl::is_identity() const FL_NO_EXCEPT {
     return (scale_x == 1.0f && scale_y == 1.0f && offset_x == 0.0f &&
             offset_y == 0.0f && rotation == 0.0f);
 }
 
-Matrix3x3f TransformFloat::compile() const {
+Matrix3x3f TransformFloat::compile() const FL_NO_EXCEPT {
     Matrix3x3f out;
     out.m[0][0] = scale_x() * cosf(rotation() * 2.0f * FL_PI);
     out.m[0][1] = -scale_y() * sinf(rotation() * 2.0f * FL_PI);

@@ -6,6 +6,7 @@
 // Forward declarations
 #include "fl/gfx/crgb.h"  // for fl::CRGB
 #include "fl/gfx/hsv.h"   // for fl::hsv8
+#include "fl/stl/noexcept.h"
 
 /// @file hsv2rgb.h
 /// Functions to convert from the HSV colorspace to the RGB colorspace
@@ -75,9 +76,9 @@ using CHSV = fl::hsv8;  // Bring the typedef into this namespace for consistency
 /// @param phsv CHSV array to convert to RGB. Max hue supported is HUE_MAX_RAINBOW
 /// @param prgb CRGB array to store the result of the conversion (will be modified)
 /// @param numLeds the number of array values to process
-void hsv2rgb_rainbow( const CHSV* phsv, CRGB * prgb, int numLeds);
-void hsv2rgb_rainbow( const CHSV& hsv, CRGB& rgb);
-CRGB hsv2rgb_rainbow( const CHSV& hsv);
+void hsv2rgb_rainbow( const CHSV* phsv, CRGB * prgb, int numLeds) FL_NO_EXCEPT;
+void hsv2rgb_rainbow( const CHSV& hsv, CRGB& rgb) FL_NO_EXCEPT;
+CRGB hsv2rgb_rainbow( const CHSV& hsv) FL_NO_EXCEPT;
 
 /// Max hue accepted for the hsv2rgb_rainbow() function
 #define HUE_MAX_RAINBOW 255
@@ -94,17 +95,17 @@ CRGB hsv2rgb_rainbow( const CHSV& hsv);
 ///
 /// @param hsv CHSV struct to convert to RGB. Max hue supported is HUE_MAX_SPECTRUM
 /// @param rgb CRGB struct to store the result of the conversion (will be modified)
-void hsv2rgb_spectrum( const CHSV& hsv, CRGB& rgb);
+void hsv2rgb_spectrum( const CHSV& hsv, CRGB& rgb) FL_NO_EXCEPT;
 
 /// Inline version of hsv2rgb_spectrum which returns a CRGB object.
-CRGB hsv2rgb_spectrum( const CHSV& hsv);
+CRGB hsv2rgb_spectrum( const CHSV& hsv) FL_NO_EXCEPT;
 
 /// @copybrief hsv2rgb_spectrum(const CHSV&, CRGB&)
 /// @see hsv2rgb_spectrum(const CHSV&, CRGB&)
 /// @param phsv CHSV array to convert to RGB. Max hue supported is HUE_MAX_SPECTRUM
 /// @param prgb CRGB array to store the result of the conversion (will be modified)
 /// @param numLeds the number of array values to process
-void hsv2rgb_spectrum( const CHSV* phsv, CRGB * prgb, int numLeds);
+void hsv2rgb_spectrum( const CHSV* phsv, CRGB * prgb, int numLeds) FL_NO_EXCEPT;
 
 /// Max hue accepted for the hsv2rgb_spectrum() function
 #define HUE_MAX_SPECTRUM 255
@@ -118,14 +119,14 @@ void hsv2rgb_spectrum( const CHSV* phsv, CRGB * prgb, int numLeds);
 /// of color balance.
 /// @param hsv CHSV struct to convert to RGB. Max hue supported is HUE_MAX
 /// @param rgb CRGB struct to store the result of the conversion (will be modified)
-void hsv2rgb_raw(const CHSV& hsv, CRGB & rgb);
+void hsv2rgb_raw(const CHSV& hsv, CRGB & rgb) FL_NO_EXCEPT;
 
 /// @copybrief hsv2rgb_raw(const CHSV&, CRGB&)
 /// @see hsv2rgb_raw(const CHSV&, CRGB&)
 /// @param phsv CHSV array to convert to RGB. Max hue supported is HUE_MAX
 /// @param prgb CRGB array to store the result of the conversion (will be modified)
 /// @param numLeds the number of array values to process
-void hsv2rgb_raw(const CHSV* phsv, CRGB * prgb, int numLeds);
+void hsv2rgb_raw(const CHSV* phsv, CRGB * prgb, int numLeds) FL_NO_EXCEPT;
 
 /// Max hue accepted for the hsv2rgb_raw() function
 #define HUE_MAX 191
@@ -138,17 +139,17 @@ void hsv2rgb_raw(const CHSV* phsv, CRGB * prgb, int numLeds);
 ///
 /// @param hsv CHSV struct to convert to RGB
 /// @param rgb CRGB struct to store the result of the conversion (will be modified)
-void hsv2rgb_fullspectrum( const CHSV& hsv, CRGB& rgb);
+void hsv2rgb_fullspectrum( const CHSV& hsv, CRGB& rgb) FL_NO_EXCEPT;
 
 /// version of hsv2rgb_fullspectrum which returns a CRGB object.
-CRGB hsv2rgb_fullspectrum( const CHSV& hsv);
+CRGB hsv2rgb_fullspectrum( const CHSV& hsv) FL_NO_EXCEPT;
 
 /// @copybrief hsv2rgb_fullspectrum(const CHSV&, CRGB&)
 /// @see hsv2rgb_fullspectrum(const CHSV&, CRGB&)
 /// @param phsv CHSV array to convert to RGB
 /// @param prgb CRGB array to store the result of the conversion (will be modified)
 /// @param numLeds the number of array values to process
-void hsv2rgb_fullspectrum( const CHSV* phsv, CRGB * prgb, int numLeds);
+void hsv2rgb_fullspectrum( const CHSV* phsv, CRGB * prgb, int numLeds) FL_NO_EXCEPT;
 
 
 
@@ -187,7 +188,7 @@ void hsv2rgb_fullspectrum( const CHSV* phsv, CRGB * prgb, int numLeds);
 /// @see https://en.wikipedia.org/wiki/Bijection
 /// @param rgb an RGB value to convert
 /// @returns the approximate HSV equivalent of the RGB value
-CHSV rgb2hsv_approximate( const CRGB& rgb);
+CHSV rgb2hsv_approximate( const CRGB& rgb) FL_NO_EXCEPT;
 
 
 

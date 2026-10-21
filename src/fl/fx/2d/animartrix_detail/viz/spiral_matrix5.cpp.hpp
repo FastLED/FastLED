@@ -2,13 +2,14 @@
 #include "fl/fx/2d/animartrix_detail/viz/spiral_matrix5.h"
 #include "fl/fx/2d/animartrix_detail/render_value_fp.h"
 #include "fl/fx/2d/animartrix_detail/perlin_float.h"
+#include "fl/stl/noexcept.h"
 
 FL_FAST_MATH_BEGIN
 FL_OPTIMIZATION_LEVEL_O3_BEGIN
 
 namespace fl {
 
-void SpiralMatrix5::draw(Context &ctx) {
+void SpiralMatrix5::draw(Context &ctx) FL_NO_EXCEPT {
     auto *e = ctx.mEngine.get();
     e->get_ready();
 
@@ -104,7 +105,7 @@ void SpiralMatrix5::draw(Context &ctx) {
 // Fixed-Point Implementation of SpiralMatrix5
 // ============================================================================
 
-void SpiralMatrix5_FP::draw(Context &ctx) {
+void SpiralMatrix5_FP::draw(Context &ctx) FL_NO_EXCEPT {
     auto *e = ctx.mEngine.get();
     e->get_ready();
     mState.ensureCache(e);

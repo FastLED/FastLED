@@ -182,6 +182,12 @@ public:
     /// @return true if enabled, false if disabled or not registered
     bool isDriverEnabled(const char* name) const FL_NO_EXCEPT;
 
+    /// @brief Enabled state of a driver instance, matched by pointer.
+    /// @note Per-frame show paths use this instead of the name overload: no
+    ///       fl::string is built and no names are compared (#4799). Falls back
+    ///       to the name when this instance is not the registered one.
+    bool isDriverEnabled(const IChannelDriver& driver) const FL_NO_EXCEPT;
+
     /// @brief Registration status of a driver by name (silent lookup)
     /// @note Values are prefixed (`STATUS_*`) because Arduino-ESP32's
     ///       `esp32-hal-gpio.h` defines `#define DISABLED 0x00` for pinMode
@@ -357,6 +363,7 @@ inline void ChannelManager::setExclusiveDriver() FL_NO_EXCEPT {
     // Priority above any platform default — see `bus_priorities.h` for the
     // default-priority constants (highest there is ~10 for native LCD/I2S SPI).
     constexpr int kExclusivePriority = 10000;
+    fl::detail::enable_clockless<fl::BusTraits<B, Which>>();  // #4793
     addDriver(kExclusivePriority, fl::BusTraits<B, Which>::instancePtr());
 }
 

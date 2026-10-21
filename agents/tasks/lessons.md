@@ -1,5 +1,22 @@
 # Lessons Learned
 
+- Verify the selected peripheral backend in the actual ELF before describing
+  size parity as preserving hardware-driver quality. Older ESP32 SDKs can
+  expose RMT geometry without `SOC_RMT_SUPPORTED`; silently selecting a
+  generic fallback invalidates RMT-versus-RMT conclusions even when the same
+  sketch and toolchain build successfully. Keep failed bring-up probes out
+  of production and retain their evidence separately.
+
+- Keep annotation enforcement in the existing `./lint` path. Before adding
+  SDK provisioning, a CI matrix, or a cache subsystem, test whether a small
+  source parser can reject missing annotations across inactive branches.
+  User requested this simpler approach for FL_NO_EXCEPT on 2026-10-20.
+
+- For WASM viewer fixes, run the compiled reproducer through the actual page
+  and worker, then retain and inspect before/after screenshots. Module-level
+  WebGL pixel tests do not verify app startup, asset staging or the worker
+  integration. Distinguish phone viewport emulation from a physical phone test.
+
 - A prerequisite abstraction is not progress toward a niche feature when no
   production path uses it. PR #4534 added hundreds of lines of optional
   presentation-timing API, but no built-in driver produced measured events and
@@ -488,3 +505,26 @@
   follow-up was a Python cache test that assumed the new Linux linker
   environment variable was absent. Run cache tests with the CI environment
   set as well as locally with defaults.
+
+- For matched firmware comparisons, copy the saved controlled sketch verbatim, including delay constants; do not reconstruct it from memory. Recreated Uno 500-ms controls were replaced by the exact historical 1000-ms sketch before final acceptance (same 3914/266 result). Also wait for an fbuild session to become terminal before bloat; otherwise the report can silently describe the preceding example's ELF.
+- GitHub closing-keyword parsing ignores negation: “Do not auto-close #4737” in PR #4752 created a closing reference and closed the parent on merge. Reopened it immediately, changed the body to “Parent #4737 must remain open,” and verified closingIssuesReferences. Use Refs for non-closing links; inspect that field before merging every memory PR.
+- In ESP32 HTTP lifecycle probes, assert the numeric status code and body: the current SDK response path emits numeric `200` without an `OK` reason phrase. Initialize the ESP-IDF default event loop alongside esp_netif; the old/new lifecycle probe then passes actual loopback requests, route additions, restart and registration-failure cleanup.
+
+- ESP32 SPI probes: booting QEMU and compiling the real SDK do not prove peripheral operations complete. A recovery probe stopped after host acquisition inside SPI bus initialization; repeat with verbose diagnostics and the unchanged implementation before attributing the timeout to a storage optimization. Keep compilation, accounting, HTTP loopback and physical waveform evidence distinct.
+
+- Native sanitizer verification: debug mode can report UBSan errors and still return success under recovery defaults. Use UBSAN_OPTIONS=halt_on_error=1:print_stacktrace=1 for the acceptance gate; compare named test inventories before describing cached results. The memory audit exposed integer minimum, negative-shift and signed Q15 defects that ordinary debug runs had masked.
+
+- Blink must remain a minimal LED example with no Serial initialization or banner prints. Serial links the AVR UART object and its RX/TX buffers even when only transmitting; keep example-induced overhead separate from library regressions and do not preserve accidental banner functionality as a requirement.
+- ChannelOptions and new emitter/source color profiles belong to the Channels API. Never store them in the legacy CLEDController base: legacy addLeds is the memory-conscious path, including on AVR Uno, which is not classified as the <=1 KB tiny-memory tier. Enforce the API boundary with legacy layout tests rather than protecting only a memory-tier macro.
+
+- ESP crash handlers and CPU faults do not imply supported C++ throw/catch paths
+  in FastLED. Verify compiler policy and maintainer contracts before adding
+  exception propagation or callback contract changes. Preserve system-owned
+  debug exception frames for crash tracing; FastLED still assumes no throw.
+
+- No-throw lint must use the function's semantic AST contract. Annotation tokens
+  inside return types, default-argument lambdas, or same-line bodies cannot
+  excuse an unannotated enclosing function. After deleting a regex exemption,
+  verify its remaining call sites as well as the added regression test.
+
+- A native-console hardware test must use the selected backend for both directions. AutoResearch formerly read through fl I/O but replied through Arduino Serial; raw RPC output must use fl::write_bytes to bypass log filtering while honoring console selection. Compare failing hardware behavior with a selective revert before attributing it to an optimization.

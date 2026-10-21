@@ -396,13 +396,21 @@ with brightness already applied as C4's flux scalar.
 
 ## Ownership and tiers (R9)
 
+New emitter/source profile configuration belongs exclusively to `fl::Channel`
+and its `ChannelOptions`. The legacy `CLEDController`/`FastLED.addLeds()` path
+stores only compact legacy settings; it has no new profile binding or pipeline
+accessor. Runtime profiles are disabled on AVR, including Uno. The traditional
+correction and temperature enums remain legacy RGB multipliers, and supported
+RGBW/RGBWW output remains available. UCS7604 gamma is driver-owned through
+`setGamma()` and `clearGamma()`, rather than stored in every controller.
+
 Runtime bindings own immutable profile/configuration data, including response
 tables, or accept an explicitly lifetime-bound immutable source handle. Global
 defaults always own their values. Do not retain a pointer to a caller's stack
 temporary. Rebinding replaces a profile/cache identity, not fields behind an
 unchanged cache key.
 
-The TINY minimal configuration uses compile-time/static profile specialization
+On supported non-AVR platforms, the TINY minimal configuration uses compile-time/static profile specialization
 with no additional per-controller runtime fields. Runtime profile storage is a
 separate capability on larger tiers. Prove disabled, static-minimal, and runtime
 layouts independently; default-null pointers are not zero added state.

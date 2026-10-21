@@ -1,4 +1,5 @@
 #include "fl/stl/cstdlib.h"
+#include "fl/stl/bit_cast.h"  // fl::reinterpret_cast_
 #include "fl/stl/cstring.h"
 #include "platforms/is_platform.h"  // IWYU pragma: keep
 
@@ -9,26 +10,62 @@
 #endif
 #ifdef FL_IS_STUB
     #include <cstdlib>  // ok include
+#include "fl/stl/noexcept.h"
 #endif
 // IWYU pragma: end_keep
 
 namespace fl {
 
+namespace detail {
+
+// Over-allocate with plain malloc and align by hand, stashing the original
+// pointer just before the aligned block for aligned_free_via_malloc(). Used
+// where newlib's aligned_alloc would need posix_memalign (#4817: returning
+// bare malloc silently ignored `alignment`, e.g. a 32-byte DMA/cache-line
+// request got 8-byte storage on Cortex-M). Built on every platform so host
+// tests cover it.
+void *aligned_alloc_via_malloc(fl::size_t alignment, fl::size_t size) FL_NO_EXCEPT {
+    if (alignment < sizeof(void *)) {
+        alignment = sizeof(void *);
+    }
+    if ((alignment & (alignment - 1)) != 0) {
+        return nullptr;  // alignment must be a power of two
+    }
+    const fl::size_t overhead = alignment - 1 + sizeof(void *);
+    if (size > static_cast<fl::size_t>(-1) - overhead) {
+        return nullptr;  // size + overhead would wrap
+    }
+    void *raw = ::malloc(size + overhead);
+    if (raw == nullptr) {
+        return nullptr;
+    }
+    const fl::uptr start = fl::reinterpret_cast_<fl::uptr>(raw) + sizeof(void *);
+    const fl::uptr aligned = (start + alignment - 1) & ~(fl::uptr(alignment) - 1);
+    void **slot = fl::reinterpret_cast_<void **>(aligned);
+    slot[-1] = raw;
+    return slot;
+}
+
+void aligned_free_via_malloc(void *ptr) FL_NO_EXCEPT {
+    if (ptr != nullptr) {
+        ::free(static_cast<void **>(ptr)[-1]);  // original malloc block
+    }
+}
+
+}  // namespace detail
+
 // ============================================================================
 // fl::aligned_alloc / fl::aligned_free
 // ============================================================================
 
-void *aligned_alloc(fl::size_t alignment, fl::size_t size) {
+void *libc_impl::aligned_alloc(fl::size_t alignment, fl::size_t size) FL_NO_EXCEPT {
 #if defined(FL_IS_AVR) || defined(FL_IS_ESP8266) || defined(FL_IS_ARM) || \
     defined(FL_IS_APOLLO3) || defined(FL_IS_CI13XX)
     // Many bare-metal toolchains (newlib-nano on STM32, nRF52, SAMD, RP2040,
     // Teensy, etc.) ship an aligned_alloc that internally calls
     // posix_memalign, which doesn't exist on bare-metal and causes an
     // "undefined reference to `posix_memalign'" link error.
-    // Fall back to plain malloc — sufficient for the alignments FastLED
-    // actually requests on these constrained targets.
-    (void)alignment;
-    return ::malloc(size);
+    return detail::aligned_alloc_via_malloc(alignment, size);
 #elif defined(FL_IS_WIN)
     return ::_aligned_malloc(size, alignment);
 #elif defined(FL_IS_ESP32) && !ESP_IDF_VERSION_4_OR_HIGHER
@@ -42,10 +79,10 @@ void *aligned_alloc(fl::size_t alignment, fl::size_t size) {
 #endif
 }
 
-void aligned_free(void *ptr) {
+void aligned_free(void *ptr) FL_NO_EXCEPT {
 #if defined(FL_IS_AVR) || defined(FL_IS_ESP8266) || defined(FL_IS_ARM) || \
     defined(FL_IS_APOLLO3) || defined(FL_IS_CI13XX)
-    ::free(ptr);
+    detail::aligned_free_via_malloc(ptr);
 #elif defined(FL_IS_WIN)
     ::_aligned_free(ptr);
 #else
@@ -54,7 +91,7 @@ void aligned_free(void *ptr) {
 }
 
 // Helper function to check if a character is a digit in the given base
-static bool isDigitInBase(char c, int base) {
+static bool isDigitInBase(char c, int base) FL_NO_EXCEPT {
     if (base <= 10) {
         return c >= '0' && c < ('0' + base);
     }
@@ -71,7 +108,7 @@ static bool isDigitInBase(char c, int base) {
 }
 
 // Helper function to convert character to digit value
-static int charToDigit(char c) {
+static int charToDigit(char c) FL_NO_EXCEPT {
     if (c >= '0' && c <= '9') {
         return c - '0';
     }
@@ -84,7 +121,7 @@ static int charToDigit(char c) {
     return 0;
 }
 
-long strtol(const char* str, char** endptr, int base) {
+long libc_impl::strtol(const char* str, char** endptr, int base) FL_NO_EXCEPT {
     if (!str) {
         if (endptr) {
             *endptr = const_cast<char*>(str);
@@ -157,7 +194,7 @@ long strtol(const char* str, char** endptr, int base) {
     return negative ? -result : result;
 }
 
-unsigned long strtoul(const char* str, char** endptr, int base) {
+unsigned long libc_impl::strtoul(const char* str, char** endptr, int base) FL_NO_EXCEPT {
     if (!str) {
         if (endptr) {
             *endptr = const_cast<char*>(str);
@@ -229,15 +266,15 @@ unsigned long strtoul(const char* str, char** endptr, int base) {
     return result;
 }
 
-int atoi(const char* str) {
+int libc_impl::atoi(const char* str) FL_NO_EXCEPT {
     return static_cast<int>(strtol(str, nullptr, 10));
 }
 
-long atol(const char* str) {
+long libc_impl::atol(const char* str) FL_NO_EXCEPT {
     return strtol(str, nullptr, 10);
 }
 
-double strtod(const char* str, char** endptr) {
+double libc_impl::strtod(const char* str, char** endptr) FL_NO_EXCEPT {
     if (!str) {
         if (endptr) {
             *endptr = const_cast<char*>(str);
@@ -324,12 +361,12 @@ double strtod(const char* str, char** endptr) {
 
 // Forward declarations for qsort helpers
 namespace detail {
-    void qsort_swap(char* a, char* b, size_t size);
-    void qsort_impl(char* base, size_t nmemb, size_t size, qsort_compare_fn compar);
+    void qsort_swap(char* a, char* b, size_t size) FL_NO_EXCEPT;
+    void qsort_impl(char* base, size_t nmemb, size_t size, qsort_compare_fn compar) FL_NO_EXCEPT;
 }
 
 // Swap two elements of given size
-void detail::qsort_swap(char* a, char* b, size_t size) {
+void detail::qsort_swap(char* a, char* b, size_t size) FL_NO_EXCEPT {
     if (a == b) return;
     constexpr size_t STACK_BUF_SIZE = 64;
     if (size <= STACK_BUF_SIZE) {
@@ -347,7 +384,7 @@ void detail::qsort_swap(char* a, char* b, size_t size) {
 }
 
 // Insertion sort for small arrays (stable and efficient for small n)
-static void qsort_insertion_sort(char* base, size_t nmemb, size_t size, qsort_compare_fn compar) {
+static void qsort_insertion_sort(char* base, size_t nmemb, size_t size, qsort_compare_fn compar) FL_NO_EXCEPT {
     for (size_t i = 1; i < nmemb; ++i) {
         // Save current element in temp buffer
         char temp[256]; // Stack buffer for elements up to 256 bytes
@@ -375,7 +412,7 @@ static void qsort_insertion_sort(char* base, size_t nmemb, size_t size, qsort_co
 }
 
 // Partition function for quicksort
-static size_t qsort_partition(char* base, size_t nmemb, size_t size, qsort_compare_fn compar) {
+static size_t qsort_partition(char* base, size_t nmemb, size_t size, qsort_compare_fn compar) FL_NO_EXCEPT {
     // Use median-of-three for pivot selection
     size_t mid = nmemb / 2;
     size_t last = nmemb - 1;
@@ -416,7 +453,7 @@ static size_t qsort_partition(char* base, size_t nmemb, size_t size, qsort_compa
 }
 
 // Recursive quicksort implementation
-void detail::qsort_impl(char* base, size_t nmemb, size_t size, qsort_compare_fn compar) {
+void detail::qsort_impl(char* base, size_t nmemb, size_t size, qsort_compare_fn compar) FL_NO_EXCEPT {
     if (nmemb <= 1) {
         return;
     }
@@ -439,7 +476,7 @@ void detail::qsort_impl(char* base, size_t nmemb, size_t size, qsort_compare_fn 
 }
 
 // qsort - Direct implementation without using fl::sort to avoid proxy iterator issues
-void qsort(void* base, size_t nmemb, size_t size, qsort_compare_fn compar) {
+void libc_impl::qsort(void* base, size_t nmemb, size_t size, qsort_compare_fn compar) FL_NO_EXCEPT {
     if (!base || nmemb <= 1 || size == 0 || !compar) {
         return;
     }
@@ -448,13 +485,13 @@ void qsort(void* base, size_t nmemb, size_t size, qsort_compare_fn compar) {
     detail::qsort_impl(arr, nmemb, size, compar);
 }
 
-u32 rand() {
+u32 libc_impl::rand() FL_NO_EXCEPT {
     return static_cast<u32>(::rand());
 }
 
 // Get the value of an environment variable
 // Only functional on FL_IS_STUB (stub platform), returns nullptr otherwise
-const char* getenv(const char* name) {
+const char* libc_impl::getenv(const char* name) FL_NO_EXCEPT {
 #ifdef FL_IS_STUB
     return ::getenv(name);
 #else

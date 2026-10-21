@@ -62,11 +62,11 @@ public:
     /// @param clock_speed_hz Clock speed in Hz (0xffffffff = as fast as possible)
     Spi(int clock_pin, fl::span<const int> data_pins,
         spi_output_mode_t output_mode = spi_output_mode_t::SPI_HW,
-        u32 clock_speed_hz = 0xffffffff);
+        u32 clock_speed_hz = 0xffffffff) FL_NO_EXCEPT;
 
     /// @brief Construct from SpiConfig
     /// @param config SPI configuration
-    explicit Spi(const SpiConfig& config);
+    explicit Spi(const SpiConfig& config) FL_NO_EXCEPT;
 
     /// @brief Move constructor
     Spi(Spi&& other) FL_NO_EXCEPT;
@@ -79,13 +79,13 @@ public:
     ~Spi() FL_NO_EXCEPT;
 
     /// @brief Check if device was created and initialized successfully
-    bool ok() const { return is_ok; }
+    bool ok() const FL_NO_EXCEPT { return is_ok; }
 
     /// @brief Get error code (only meaningful if !ok())
-    SPIError error() const { return error_code; }
+    SPIError error() const FL_NO_EXCEPT { return error_code; }
 
     /// @brief Explicit conversion to bool for contextual evaluation
-    explicit operator bool() const { return ok(); }
+    explicit operator bool() const FL_NO_EXCEPT { return ok(); }
 
     /// @brief Write multiple lanes in parallel (variadic template)
     /// @tparam Spans Variadic template parameter pack (all must be convertible to fl::span<const uint8_t>)
@@ -116,7 +116,7 @@ public:
     /// spi.wait();  // Block until transmission completes
     /// @endcode
     template<typename... Spans>
-    WriteResult write(Spans&&... lanes) {
+    WriteResult write(Spans&&... lanes) FL_NO_EXCEPT {
         if (!device) {
             return WriteResult("SPI device not initialized");
         }
@@ -131,12 +131,12 @@ public:
     /// spi.write(lane0, lane1, lane2, lane3);
     /// spi.wait();  // Block until transmission completes
     /// @endcode
-    bool wait(u32 timeout_ms = 0xFFFFFFFF);
+    bool wait(u32 timeout_ms = 0xFFFFFFFF) FL_NO_EXCEPT;
 
     /// @brief Get access to underlying device (for advanced operations)
     /// @returns Pointer to device (nullptr if !ok())
-    spi::MultiLaneDevice* get() { return device.get(); }
-    const spi::MultiLaneDevice* get() const { return device.get(); }
+    spi::MultiLaneDevice* get() FL_NO_EXCEPT { return device.get(); }
+    const spi::MultiLaneDevice* get() const FL_NO_EXCEPT { return device.get(); }
 
 private:
     fl::unique_ptr<spi::MultiLaneDevice> device;

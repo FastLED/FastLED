@@ -5,6 +5,7 @@
 
 #include "fl/font/ttf_covenant5x5.h"
 #include "fl/stl/align.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace ttf {
@@ -649,7 +650,7 @@ FL_ALIGNAS(4) const u8 COVENANT_5X5_TTF_DATA[] = {
 constexpr size_t COVENANT_5X5_TTF_SIZE = 10100;
 } // anonymous namespace
 
-fl::span<const u8> covenant5x5() {
+fl::span<const u8> covenant5x5() FL_NO_EXCEPT {
     return fl::span<const u8>(COVENANT_5X5_TTF_DATA, COVENANT_5X5_TTF_SIZE);
 }
 

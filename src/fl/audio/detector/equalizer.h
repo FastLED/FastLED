@@ -88,39 +88,39 @@ public:
     ~EqualizerDetector() FL_NO_EXCEPT override;
 
     /// Reconfigure equalizer tuning parameters at runtime.
-    void configure(const EqualizerConfig& config);
+    void configure(const EqualizerConfig& config) FL_NO_EXCEPT;
 
     // Detector interface
-    void update(shared_ptr<Context> context) override;
-    void fireCallbacks() override;
-    bool needsFFT() const override { return true; }
-    const char* getName() const override { return "EqualizerDetector"; }
-    void reset() override;
-    void setSampleRate(int rate) override { mSampleRate = rate; }
+    void update(shared_ptr<Context> context) FL_NO_EXCEPT override;
+    void fireCallbacks() FL_NO_EXCEPT override;
+    bool needsFFT() const FL_NO_EXCEPT override { return true; }
+    const char* getName() const FL_NO_EXCEPT override { return "EqualizerDetector"; }
+    void reset() FL_NO_EXCEPT override;
+    void setSampleRate(int rate) FL_NO_EXCEPT override { mSampleRate = rate; }
 
     // WLED-compatible getters (all return 0.0-1.0)
-    float getBass() const { return mBass; }
-    float getMid() const { return mMid; }
-    float getTreble() const { return mTreble; }
-    float getVolume() const { return mVolume; }
-    float getZcf() const { return mZcf; }
-    float getVolumeNormFactor() const { return mVolumeNormFactor; }
+    float getBass() const FL_NO_EXCEPT { return mBass; }
+    float getMid() const FL_NO_EXCEPT { return mMid; }
+    float getTreble() const FL_NO_EXCEPT { return mTreble; }
+    float getVolume() const FL_NO_EXCEPT { return mVolume; }
+    float getZcf() const FL_NO_EXCEPT { return mZcf; }
+    float getVolumeNormFactor() const FL_NO_EXCEPT { return mVolumeNormFactor; }
     /// @deprecated Use getVolumeNormFactor() instead
-    float getAutoGain() const { return mVolumeNormFactor; }
-    bool getIsSilence() const { return mIsSilence; }
-    float getBin(int index) const;
-    const float* getBins() const { return mBins; }
+    float getAutoGain() const FL_NO_EXCEPT { return mVolumeNormFactor; }
+    bool getIsSilence() const FL_NO_EXCEPT { return mIsSilence; }
+    float getBin(int index) const FL_NO_EXCEPT;
+    const float* getBins() const FL_NO_EXCEPT { return mBins; }
 
     /// Set microphone correction profile (propagated from Processor).
-    void setMicProfile(MicProfile profile);
+    void setMicProfile(MicProfile profile) FL_NO_EXCEPT;
 
     // Callback — single struct with everything
     function_list<void(const Equalizer&)> onEqualizer;
 
     // P2 getters
-    float getDominantFreqHz() const { return mDominantFreqHz; }
-    float getDominantMagnitude() const { return mDominantMagnitude; }
-    float getVolumeDb() const { return mVolumeDb; }
+    float getDominantFreqHz() const FL_NO_EXCEPT { return mDominantFreqHz; }
+    float getDominantMagnitude() const FL_NO_EXCEPT { return mDominantMagnitude; }
+    float getVolumeDb() const FL_NO_EXCEPT { return mVolumeDb; }
 
 private:
     EqualizerConfig mConfig;
@@ -155,10 +155,10 @@ private:
 
     // Pink noise spectral tilt compensation (always active)
     float mPinkNoiseGains[kNumBins] = {};
-    void recomputePinkNoiseGains();
+    void recomputePinkNoiseGains() FL_NO_EXCEPT;
 
     // Compute log-spaced bin center frequencies from current config
-    void computeBinCenters(float* out) const;
+    void computeBinCenters(float* out) const FL_NO_EXCEPT;
 
     // Cached FFT from Context (shared across detector)
     shared_ptr<const fft::Bins> mRetainedFFT;

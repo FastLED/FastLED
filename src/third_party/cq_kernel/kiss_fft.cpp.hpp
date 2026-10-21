@@ -360,8 +360,8 @@ void kf_factor(int n,int * facbuf) FL_NO_EXCEPT
  * The remainder is scratchpad memory, safe to ignore or overwrite.
  *
  */
-kiss_fft_cfg kiss_fft_alloc(int nfft,int inverse_fft,void * mem,size_t * lenmem ) FL_NO_EXCEPT
-{
+kiss_fft_cfg kiss_fft_alloc(int nfft,int inverse_fft,void * mem,size_t * lenmem )
+{ // ok no noexcept: preserve vendor C declaration (#4773)
     kiss_fft_cfg st=NULL;
     size_t memneeded = sizeof(struct kiss_fft_state)
         + sizeof(kiss_fft_cpx)*(nfft-1); /* twiddle factors*/
@@ -392,8 +392,8 @@ kiss_fft_cfg kiss_fft_alloc(int nfft,int inverse_fft,void * mem,size_t * lenmem 
 }
 
 
-void kiss_fft_stride(kiss_fft_cfg st,const kiss_fft_cpx *fin,kiss_fft_cpx *fout,int in_stride) FL_NO_EXCEPT
-{
+void kiss_fft_stride(kiss_fft_cfg st,const kiss_fft_cpx *fin,kiss_fft_cpx *fout,int in_stride)
+{ // ok no noexcept: preserve vendor C declaration (#4773)
     if (fin == fout) {
         //NOTE: this is not really an in-place FFT algorithm.
         //It just performs an out-of-place FFT into a temp buffer
@@ -406,19 +406,19 @@ void kiss_fft_stride(kiss_fft_cfg st,const kiss_fft_cpx *fin,kiss_fft_cpx *fout,
     }
 }
 
-void kiss_fft(kiss_fft_cfg cfg,const kiss_fft_cpx *fin,kiss_fft_cpx *fout) FL_NO_EXCEPT
-{
+void kiss_fft(kiss_fft_cfg cfg,const kiss_fft_cpx *fin,kiss_fft_cpx *fout)
+{ // ok no noexcept: preserve vendor C declaration (#4773)
     kiss_fft_stride(cfg,fin,fout,1);
 }
 
 
-void kiss_fft_cleanup(void) FL_NO_EXCEPT
-{
+void kiss_fft_cleanup(void)
+{ // ok no noexcept: preserve vendor C declaration (#4773)
     // nothing needed any more
 }
 
-int kiss_fft_next_fast_size(int n) FL_NO_EXCEPT
-{
+int kiss_fft_next_fast_size(int n)
+{ // ok no noexcept: preserve vendor C declaration (#4773)
     while(1) {
         int m=n;
         while ( (m%2) == 0 ) m/=2;

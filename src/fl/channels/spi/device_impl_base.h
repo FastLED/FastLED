@@ -29,18 +29,18 @@ struct DeviceImplBase {
 
     /// @brief Check if device is ready
     /// @returns true if initialized and backend is valid
-    bool isReady() const {
+    bool isReady() const FL_NO_EXCEPT {
         return initialized && backend != nullptr;
     }
 
     /// @brief Validate backend pointer
     /// @returns true if backend is valid
-    bool hasBackend() const {
+    bool hasBackend() const FL_NO_EXCEPT {
         return backend != nullptr;
     }
 
     /// @brief Clear backend state
-    void clearBackend() {
+    void clearBackend() FL_NO_EXCEPT {
         backend = nullptr;
         initialized = false;
     }

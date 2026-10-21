@@ -165,6 +165,21 @@ FL_TEST_CASE("poll propagates worst state across multiple drivers") {
     mgr.removeDriver(driverB);
 }
 
+FL_TEST_CASE("isDriverEnabled(driver) matches by instance, falls back to name (#4799)") {
+    ChannelManager mgr;
+    auto a = fl::make_shared<StatefulMockDriver>("BY_PTR_A");
+    auto b = fl::make_shared<StatefulMockDriver>("BY_PTR_B");
+    mgr.addDriver(10, a);
+    mgr.addDriver(20, b);
+    FL_CHECK(mgr.isDriverEnabled(*a));
+    mgr.setDriverEnabled("BY_PTR_A", false);
+    FL_CHECK_FALSE(mgr.isDriverEnabled(*a));
+    FL_CHECK(mgr.isDriverEnabled(*b));
+    // An unregistered instance with a registered name uses that name's state.
+    StatefulMockDriver lookalike("BY_PTR_A");
+    FL_CHECK_FALSE(mgr.isDriverEnabled(lookalike));
+}
+
 } // namespace draining_state_test
 
 } // FL_TEST_FILE

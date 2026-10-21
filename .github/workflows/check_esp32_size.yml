@@ -64,5 +64,6 @@ jobs:
       # `.github/workflows/check_*_size.yml` flags any raise as HIGH severity
       # and requires an explicit issue reference + maintainer sign-off.
       # ==========================================================================
-      max_size: 340000
+      # #4738: RMT/HTTP/SPI storage reductions, measured text+data.
+      max_size: 313231
       max_size_apa102: 330000

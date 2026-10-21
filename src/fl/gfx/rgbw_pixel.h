@@ -8,6 +8,7 @@
 /// dependencies.
 
 #include "fl/stl/stdint.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -17,8 +18,8 @@ namespace fl {
 struct RGBWPixel {
     u8 r, g, b, w;
 
-    RGBWPixel() : r(0), g(0), b(0), w(0) {}
-    RGBWPixel(u8 _r, u8 _g, u8 _b, u8 _w) : r(_r), g(_g), b(_b), w(_w) {}
+    RGBWPixel() FL_NO_EXCEPT : r(0), g(0), b(0), w(0) {}
+    RGBWPixel(u8 _r, u8 _g, u8 _b, u8 _w) FL_NO_EXCEPT : r(_r), g(_g), b(_b), w(_w) {}
 };
 
 }  // namespace fl

@@ -4,6 +4,7 @@
 /// @brief 2D grid sampling with bilinear and nearest-neighbor interpolation
 
 #include "fl/gfx/crgb.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -22,12 +23,12 @@ enum class SampleMode {
 /// @param y Floating-point y coordinate
 /// @param mode Interpolation mode (default: SAMPLE_BILINEAR)
 CRGB sample(const CRGB *grid, const XYMap &xyMap, float x, float y,
-            SampleMode mode = SampleMode::SAMPLE_BILINEAR);
+            SampleMode mode = SampleMode::SAMPLE_BILINEAR) FL_NO_EXCEPT;
 
 /// @brief Bilinear interpolation sample from a 2D CRGB grid.
-CRGB sampleBilinear(const CRGB *grid, const XYMap &xyMap, float x, float y);
+CRGB sampleBilinear(const CRGB *grid, const XYMap &xyMap, float x, float y) FL_NO_EXCEPT;
 
 /// @brief Nearest-neighbor sample from a 2D CRGB grid.
-CRGB sampleNearest(const CRGB *grid, const XYMap &xyMap, float x, float y);
+CRGB sampleNearest(const CRGB *grid, const XYMap &xyMap, float x, float y) FL_NO_EXCEPT;
 
 } // namespace fl

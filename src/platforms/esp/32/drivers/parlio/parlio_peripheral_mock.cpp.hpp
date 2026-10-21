@@ -32,7 +32,7 @@ fl::vector<fl::vector<fl::u8>> untransposeParlioBitstreamInternal(
     size_t num_pins,
     fl::detail::ParlioBitPackOrder packing) FL_NO_EXCEPT {
 
-    fl::vector<fl::vector<fl::u8>> per_pin_data(num_pins);
+    auto per_pin_data = fl::vector<fl::vector<fl::u8>>(num_pins);
 
     size_t bits_per_pin = bit_count / num_pins;
     size_t bytes_per_pin = (bits_per_pin + 7) / 8;
@@ -199,7 +199,7 @@ ParlioPeripheralMockImpl::~ParlioPeripheralMockImpl() {
 
 bool ParlioPeripheralMockImpl::initialize(const ParlioPeripheralConfig& config) FL_NO_EXCEPT {
     if (config.data_width == 0 || config.data_width > 16) {
-        FL_WARN("ParlioPeripheralMock: Invalid data width: %s", config.data_width);
+        FL_WARN("ParlioPeripheralMock: Invalid data width: " << config.data_width);
         return false;
     }
     mConfig = config;
@@ -389,7 +389,7 @@ u8* ParlioPeripheralMockImpl::allocateDmaBuffer(size_t size) FL_NO_EXCEPT {
 #endif
 
     if (buffer == nullptr) {
-        FL_WARN("ParlioPeripheralMock: Failed to allocate buffer (%s bytes)", aligned_size);
+        FL_WARN("ParlioPeripheralMock: Failed to allocate buffer (" << aligned_size << " bytes)");
     }
     return static_cast<u8*>(buffer);
 }
@@ -484,7 +484,7 @@ fl::span<const u8> ParlioPeripheralMockImpl::getTransmissionDataForPin(int gpio_
     }
     auto it = mPerPinData.find(gpio_pin);
     if (it == mPerPinData.end()) {
-        FL_WARN("ParlioPeripheralMock: GPIO pin %s not found in transmission data", gpio_pin);
+        FL_WARN("ParlioPeripheralMock: GPIO pin " << gpio_pin << " not found in transmission data");
         return fl::span<const u8>();
     }
     return fl::span<const u8>(it->second);

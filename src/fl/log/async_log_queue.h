@@ -40,40 +40,40 @@ public:
     AsyncLogQueue() FL_NO_EXCEPT;
 
     /// @brief Push a message from fl::string (ISR-safe)
-    bool push(const fl::string& msg);
+    bool push(const fl::string& msg) FL_NO_EXCEPT;
 
     /// @brief Push a C-string message (ISR-safe)
-    bool push(const char* str);
+    bool push(const char* str) FL_NO_EXCEPT;
 
     /// @brief Consumer: Try to pop one message (main thread only)
-    bool tryPop(const char** outPtr, fl::u16* outLen);
+    bool tryPop(const char** outPtr, fl::u16* outLen) FL_NO_EXCEPT;
 
     /// @brief Consumer: Commit the popped message to free space (main thread only)
-    void commit();
+    void commit() FL_NO_EXCEPT;
 
     /// @brief Get number of messages dropped due to overflow
-    fl::u32 droppedCount() const;
+    fl::u32 droppedCount() const FL_NO_EXCEPT;
 
     /// @brief Get current number of messages in queue
-    fl::size size() const;
+    fl::size size() const FL_NO_EXCEPT;
 
     /// @brief Check if queue is empty
-    bool empty() const;
+    bool empty() const FL_NO_EXCEPT;
 
     /// @brief Get maximum descriptor capacity
-    constexpr fl::size capacity() const {
+    constexpr fl::size capacity() const FL_NO_EXCEPT {
         return DescriptorCount - 1;  // One slot reserved for full/empty distinction
     }
 
 private:
     /// Implementation details
-    bool push(const char* str, fl::u16 len);
-    static fl::u16 boundedStrlen(const char* str, fl::u16 maxLen);
-    bool arenaHasSpace(fl::u32 aHead, fl::u32 aTail, fl::u16 len) const;
-    fl::u32 loadHead() const;
-    fl::u32 loadTail() const;
-    fl::u32 loadArenaTail() const;
-    void atomicIncDropped();
+    bool push(const char* str, fl::u16 len) FL_NO_EXCEPT;
+    static fl::u16 boundedStrlen(const char* str, fl::u16 maxLen) FL_NO_EXCEPT;
+    bool arenaHasSpace(fl::u32 aHead, fl::u32 aTail, fl::u16 len) const FL_NO_EXCEPT;
+    fl::u32 loadHead() const FL_NO_EXCEPT;
+    fl::u32 loadTail() const FL_NO_EXCEPT;
+    fl::u32 loadArenaTail() const FL_NO_EXCEPT;
+    void atomicIncDropped() FL_NO_EXCEPT;
 
     // Member variables
     Descriptor mDescriptors[DescriptorCount];  ///< Ring of message descriptors

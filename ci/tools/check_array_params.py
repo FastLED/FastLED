@@ -26,6 +26,8 @@ from pathlib import Path
 
 from running_process import PIPE, RunningProcess
 
+from ci.tools.check_noexcept import _compiler_args
+
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 DEFAULT_BASELINE = PROJECT_ROOT / "ci" / "tools" / "array_param_baseline.txt"
@@ -236,13 +238,13 @@ def _find_clang_query() -> list[str]:
     if found:
         return [found]
 
-    wrapper = shutil.which("clang-tool-chain-query")
+    wrapper = shutil.which("clang-tool-chain-clang-query")
     if wrapper:
         return [wrapper]
 
     uv = shutil.which("uv")
     if uv:
-        return [uv, "run", "clang-tool-chain-query"]
+        return [uv, "run", "clang-tool-chain-clang-query"]
 
     return []
 
@@ -373,7 +375,7 @@ def _run_clang_query(
 ) -> list[ArrayParamHit]:
     """Run clang-query and return source-filtered array parameter hits."""
     result = RunningProcess.run(
-        [*clang_query, tu, "--", *_COMPILER_ARGS],
+        [*clang_query, tu, "--", *_compiler_args(_COMPILER_ARGS)],
         input=build_query(file_regex),
         stdout=PIPE,
         stderr=PIPE,

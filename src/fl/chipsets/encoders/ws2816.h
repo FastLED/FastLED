@@ -16,6 +16,7 @@
 /// @note This encoder produces 2x CRGB output for each input pixel
 
 #include "fl/stl/stdint.h"
+#include "fl/stl/noexcept.h"
 #include "fl/stl/array.h"
 #include "fl/stl/pair.h"
 
@@ -33,7 +34,7 @@ namespace fl {
 /// @param s2 Third 16-bit channel value (B)
 /// @return Pair of CRGB pixels encoding the 16-bit values
 /// @note Channel layout: [R_hi, R_lo, G_hi] and [G_lo, B_hi, B_lo]
-inline pair<CRGB, CRGB> packWS2816Pixel(u16 s0, u16 s1, u16 s2) {
+inline pair<CRGB, CRGB> packWS2816Pixel(u16 s0, u16 s1, u16 s2) FL_NO_EXCEPT {
     // Split each 16-bit channel into high/low bytes
     u8 b0_hi = s0 >> 8;
     u8 b0_lo = s0 & 0xFF;
@@ -58,7 +59,7 @@ inline pair<CRGB, CRGB> packWS2816Pixel(u16 s0, u16 s1, u16 s2) {
 /// @note Each input pixel yields 2 CRGB output pixels (48 bits → 2×24 bits)
 /// @note Input iterator yields wire-ordered 16-bit RGB (reordering already done upstream)
 template <typename InputIterator, typename OutputIterator>
-void encodeWS2816(InputIterator first, InputIterator last, OutputIterator out) {
+void encodeWS2816(InputIterator first, InputIterator last, OutputIterator out) FL_NO_EXCEPT {
     while (first != last) {
         // Get 16-bit RGB in wire order (already scaled, color-corrected, brightness-adjusted)
         const array<u16, 3>& rgb16 = *first;

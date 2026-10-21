@@ -11,7 +11,7 @@ import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
-from ci.compile_pch import hash_compile_flags
+from ci.compile_pch import hash_compile_flags, is_stale_pch_error
 from ci.meson.path_normalization import find_ninja_strict_path_violations
 
 
@@ -24,6 +24,10 @@ BASE_ARGS = [
     "-o",
     "tests/test_pch.h.pch",
     "-IC:/x/src",
+    # Strict validation, as on the real PCH build (ci/lint/pch_strict_flags.py).
+    "-Werror=invalid-pch",
+    "-verify-pch",
+    "-fpch-validate-input-files-content",
 ]
 
 
@@ -55,6 +59,39 @@ class TestCompileFlagsHash(unittest.TestCase):
             hash_compile_flags(["-IC:/a", "-IC:/b"]),
             hash_compile_flags(["-IC:/a-IC:/b"]),
         )
+
+
+class TestStalePchDiagnostics(unittest.TestCase):
+    def test_zccache_refusal_must_name_a_pch_in_this_build(self) -> None:
+        with TemporaryDirectory() as tmp:
+            build = Path(tmp)
+            pch = build / "test.h.pch"
+            pch.write_bytes(b"pch")
+            prefix = (
+                "zccache[err][R]: daemon response failure (daemon-error): "
+                "PCH input validation failed; rebuild the PCH: "
+            )
+            self.assertTrue(
+                is_stale_pch_error(prefix + str(pch) + ": unreadable", build)
+            )
+            self.assertFalse(
+                is_stale_pch_error(
+                    prefix + str(build / "other.pch") + ": unreadable", build
+                )
+            )
+            self.assertFalse(
+                is_stale_pch_error(prefix + str(pch) + ".other: error", build)
+            )
+            self.assertFalse(
+                is_stale_pch_error(
+                    'source.cpp:1: error: "' + prefix + str(pch) + ':"', build
+                )
+            )
+            self.assertFalse(
+                is_stale_pch_error(
+                    "zccache[err][R]: compiler failed: syntax error", build
+                )
+            )
 
 
 class TestNinjaStrictPathViolations(unittest.TestCase):

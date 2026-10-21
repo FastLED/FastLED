@@ -31,14 +31,14 @@
 namespace fl {
 namespace platforms {
 
-void delay(fl::u32 ms) {
+void delay(fl::u32 ms) FL_NO_EXCEPT {
     if (ms == 0) {
         return;
     }
     vTaskDelay(pdMS_TO_TICKS(ms));
 }
 
-void delayMicroseconds(fl::u32 us) {
+void delayMicroseconds(fl::u32 us) FL_NO_EXCEPT {
     // Split into ms (yielding via vTaskDelay) and remainder us (busy-wait)
     fl::u32 ms = us / 1000;
     fl::u32 remainder_us = us % 1000;
@@ -54,11 +54,11 @@ void delayMicroseconds(fl::u32 us) {
     }
 }
 
-fl::u32 millis() {
+fl::u32 millis() FL_NO_EXCEPT {
     return static_cast<fl::u32>(esp_timer_get_time() / 1000);
 }
 
-fl::u32 micros() {
+fl::u32 micros() FL_NO_EXCEPT {
     return static_cast<fl::u32>(esp_timer_get_time());
 }
 

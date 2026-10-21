@@ -115,7 +115,7 @@ public:
     }
 
     void add_handler(stub_isr_handle_data* handler) FL_NO_EXCEPT {
-        fl::unique_lock<fl::mutex> lock(mMutex) FL_NO_EXCEPT;
+        fl::unique_lock<fl::mutex> lock(mMutex);
 
         // Assign unique ID
         handler->mHandleId = mNextHandleId++;
@@ -138,7 +138,7 @@ public:
     }
 
     void reschedule_handler(stub_isr_handle_data* handler) FL_NO_EXCEPT {
-        fl::unique_lock<fl::mutex> lock(mMutex) FL_NO_EXCEPT;
+        fl::unique_lock<fl::mutex> lock(mMutex);
         u64 now = get_time_us();
         u64 period_us = handler->mFrequencyHz > 0 ? (1000000ULL / handler->mFrequencyHz) : 0;
         handler->mNextTickUs = now + period_us;
@@ -147,7 +147,7 @@ public:
     }
 
     void remove_handler(stub_isr_handle_data* handler) FL_NO_EXCEPT {
-        fl::unique_lock<fl::mutex> lock(mMutex) FL_NO_EXCEPT;
+        fl::unique_lock<fl::mutex> lock(mMutex);
 
         // Remove from vector
         for (size_t i = 0; i < mHandlers.size(); ++i) {
@@ -172,7 +172,7 @@ public:
     ~TimerThreadManager() {
         if (mTimerThread) {
             {
-                fl::unique_lock<fl::mutex> lock(mMutex) FL_NO_EXCEPT;
+                fl::unique_lock<fl::mutex> lock(mMutex);
                 mShouldStop = true;
                 mCondVar.notify_one();  // Wake the thread so it can exit
             }
@@ -194,7 +194,7 @@ private:
     }
 
     void timer_thread_func() FL_NO_EXCEPT {
-        fl::unique_lock<fl::mutex> lock(mMutex) FL_NO_EXCEPT;
+        fl::unique_lock<fl::mutex> lock(mMutex);
 
         while (!mShouldStop) {
             u64 now = get_time_us();

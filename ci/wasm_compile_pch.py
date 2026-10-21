@@ -41,6 +41,7 @@ from pathlib import Path
 
 from running_process import PIPE, RunningProcess
 
+from ci.compile_pch import hash_input_files
 from ci.wasm_flags import get_lib_compile_flags_dict
 from ci.wasm_tools import get_emcc
 
@@ -93,8 +94,11 @@ def compute_content_hash(file_path: Path) -> str:
 def compute_flags_hash(flags: dict[str, list[str]]) -> str:
     """Compute hash of compilation flags for change detection."""
     # Combine all flags into a single sorted string for consistent hashing
-    all_flags = sorted(flags["defines"] + flags["compiler_flags"])
-    flags_str = " ".join(all_flags)
+    # Order matters (later -D / -I win) and so do the include roots, which
+    # embed PROJECT_ROOT: a PCH built under another checkout path must not
+    # be reused. NUL-separated so argument boundaries stay unambiguous.
+    all_flags = [*flags["defines"], *flags["compiler_flags"], str(PROJECT_ROOT)]
+    flags_str = "\0".join(all_flags)
     return hashlib.sha256(flags_str.encode()).hexdigest()
 
 
@@ -190,7 +194,7 @@ def parse_dependency_file(depfile: Path) -> list[Path]:
             try:
                 dep_path = Path(dep).resolve()
                 # Filter out the target itself (shouldn't be in deps, but be safe)
-                if dep_path != target and dep_path.exists():
+                if dep_path != target:
                     dep_paths.append(dep_path)
             except (ValueError, OSError):
                 # Skip invalid paths
@@ -208,7 +212,7 @@ def parse_dependency_file(depfile: Path) -> list[Path]:
 
 def check_dependencies_changed(depfile: Path, pch_output: Path) -> tuple[bool, str]:
     """
-    Check if any PCH dependencies are newer than the PCH output.
+    Compare dependency contents without modifying shared source timestamps.
 
     Args:
         depfile: Path to .d dependency file
@@ -218,24 +222,15 @@ def check_dependencies_changed(depfile: Path, pch_output: Path) -> tuple[bool, s
         (changed, reason) tuple
     """
     if not depfile.exists():
-        return False, ""  # No depfile, can't check dependencies
+        return True, "PCH dependency tracking missing"
 
     if not pch_output.exists():
         return True, "PCH output does not exist"
 
-    # Get PCH output modification time
-    pch_mtime = pch_output.stat().st_mtime
-    depfile_mtime = depfile.stat().st_mtime
-
-    # If depfile is older than PCH, it's stale - ignore it
-    # (This can happen after PCH is rebuilt but before depfile is regenerated)
-    if depfile_mtime < pch_mtime:
-        return False, ""  # Stale depfile, rely on other checks
-
     # Parse dependencies
     deps = parse_dependency_file(depfile)
     if not deps:
-        return False, ""  # Empty or unparseable depfile
+        return True, "PCH dependency tracking empty or invalid"
 
     # Check each dependency
     for dep in deps:
@@ -244,11 +239,15 @@ def check_dependencies_changed(depfile: Path, pch_output: Path) -> tuple[bool, s
             # Note: This is expected during initial builds or after clean
             return True, f"dependency missing: {dep.name}"
 
-        dep_mtime = dep.stat().st_mtime
-        if dep_mtime > pch_mtime:
-            # Dependency is newer than PCH - rebuild needed
-            return True, f"dependency changed: {dep.name}"
-
+    # Compare content without changing shared source timestamps. Consumers
+    # receive the PCH's recorded timestamps through zccache's private overlay.
+    hash_file = Path(str(pch_output) + ".input_hash")
+    try:
+        stored = hash_file.read_text(encoding="utf-8").strip()
+    except OSError:
+        return True, "PCH input hash missing"
+    if hash_input_files(deps) != stored:
+        return True, "PCH input content changed"
     return False, ""
 
 

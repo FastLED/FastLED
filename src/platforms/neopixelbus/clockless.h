@@ -126,7 +126,7 @@ private:
 
 public:
     /// Constructor - creates uninitialized controller
-    NeoPixelBusLikeClocklessT() : mPixelBus(nullptr), mInitialized(false) {}
+    NeoPixelBusLikeClocklessT() FL_NO_EXCEPT : mPixelBus(nullptr), mInitialized(false) {}
     
     /// Destructor - automatic cleanup via unique_ptr
     virtual ~NeoPixelBusLikeClocklessT() = default;
@@ -135,24 +135,19 @@ public:
     /// Creates the NeoPixelBus instance with appropriate color feature and method
     virtual void init() FL_NO_EXCEPT override {
         if (!mInitialized) {
-            try {
-                // Create NeoPixelBus instance
-                // Note: numPixels will be set when FastLED calls setLeds()
-                mPixelBus = createPixelBus();
-                if (!mPixelBus) {
-                    FL_WARN("Failed to create NeoPixelBus instance");
-                    return;
-                }
-                
-                mPixelBus->Begin();
-                mInitialized = true;
-                
-                // Allow derived classes to perform additional initialization
-                onInitialized();
-            } catch (...) {
-                FL_WARN("NeoPixelBus initialization failed");
-                mInitialized = false;
+            // Create NeoPixelBus instance
+            // Note: numPixels will be set when FastLED calls setLeds()
+            mPixelBus = createPixelBus();
+            if (!mPixelBus) {
+                FL_WARN("Failed to create NeoPixelBus instance");
+                return;
             }
+
+            mPixelBus->Begin();
+            mInitialized = true;
+
+            // Allow derived classes to perform additional initialization
+            onInitialized();
         }
     }
 
@@ -237,7 +232,7 @@ protected:
             iterator.loadAndScaleRGB(&r, &g, &b);
             
             // Convert to NeoPixelBus color type
-            RgbColor color(r, g, b) FL_NO_EXCEPT;
+            RgbColor color(r, g, b);
             mPixelBus->SetPixelColor(i, color);
             
             iterator.advanceData();
@@ -312,7 +307,7 @@ private:
 
 public:
     /// Constructor - creates uninitialized controller
-    NeoPixelBusRGBWController() : mPixelBus(nullptr), mInitialized(false) {}
+    NeoPixelBusRGBWController() FL_NO_EXCEPT : mPixelBus(nullptr), mInitialized(false) {}
     
     /// Destructor - automatic cleanup via unique_ptr
     virtual ~NeoPixelBusRGBWController() = default;
@@ -320,21 +315,16 @@ public:
     /// Initialize the controller
     virtual void init() FL_NO_EXCEPT override {
         if (!mInitialized) {
-            try {
-                mPixelBus = fl::make_unique<BusType>(0, DATA_PIN);
-                if (!mPixelBus) {
-                    FL_WARN("Failed to create RGBW NeoPixelBus instance");
-                    return;
-                }
-                
-                mPixelBus->Begin();
-                mInitialized = true;
-                
-                onInitialized();
-            } catch (...) {
-                FL_WARN("RGBW NeoPixelBus initialization failed");
-                mInitialized = false;
+            mPixelBus = fl::make_unique<BusType>(0, DATA_PIN);
+            if (!mPixelBus) {
+                FL_WARN("Failed to create RGBW NeoPixelBus instance");
+                return;
             }
+
+            mPixelBus->Begin();
+            mInitialized = true;
+
+            onInitialized();
         }
     }
 
@@ -401,7 +391,7 @@ protected:
             b -= white;
             
             // Convert to NeoPixelBus RGBW color type
-            RgbwColor color(r, g, b, white) FL_NO_EXCEPT;
+            RgbwColor color(r, g, b, white);
             mPixelBus->SetPixelColor(i, color);
             
             iterator.advanceData();

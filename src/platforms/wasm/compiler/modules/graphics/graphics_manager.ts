@@ -547,9 +547,8 @@ export class GraphicsManager {
       const stripData = screenMap.strips[strip_id];
       const pixelCount = data.length / 3;
       const { map } = stripData;
-      const bounds = screenMap._cachedBounds || computeScreenMapBounds(screenMap);
-      const min_x = bounds.absMin[0];
-      const min_y = bounds.absMin[1];
+      const min_x = this._cachedGlobalBounds.minX;
+      const min_y = this._cachedGlobalBounds.minY;
       const x_array = map.x;
       const y_array = map.y;
       const len = Math.min(x_array.length, y_array.length);
@@ -579,7 +578,9 @@ export class GraphicsManager {
           continue;
         }
         // log(x, y);
-        const diameter = stripData.diameter || 1.0;
+        // ScreenMap serializes -1 when no diameter was set.
+        const diameter = Number.isFinite(stripData.diameter) && stripData.diameter > 0
+          ? stripData.diameter : 1.0;
         const radius = Math.floor(diameter / 2);
 
         // Draw a filled square for each LED

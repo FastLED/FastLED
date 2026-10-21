@@ -56,10 +56,10 @@ inline fl::u32 __cpu_hal_get_cycle_count() FL_NO_EXCEPT {
 
 
 
-__attribute__ ((always_inline)) inline static fl::u32 __clock_cycles() {
+__attribute__ ((always_inline)) inline static fl::u32 __clock_cycles() FL_NO_EXCEPT {
   fl::u32 cyc;
 #ifdef FASTLED_XTENSA
-  __asm__ __volatile__ ("rsr %0,ccount":"=a" (cyc)) FL_NO_EXCEPT;
+  __asm__ __volatile__ ("rsr %0,ccount":"=a" (cyc));
 #else
   cyc = __cpu_hal_get_cycle_count();
 #endif

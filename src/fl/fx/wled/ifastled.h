@@ -31,13 +31,13 @@ public:
      * @brief Get the LED array as a span
      * @return Span over the LED array (may be full array or current segment)
      */
-    virtual fl::span<CRGB> getLEDs() = 0;
+    virtual fl::span<CRGB> getLEDs() FL_NO_EXCEPT = 0;
 
     /**
      * @brief Get the number of LEDs
      * @return Number of LEDs in the current context (full array or segment)
      */
-    virtual size_t getNumLEDs() const = 0;
+    virtual size_t getNumLEDs() const FL_NO_EXCEPT = 0;
 
     // Output control
 
@@ -45,19 +45,19 @@ public:
      * @brief Send the LED data to the strip
      * Uses the current brightness setting
      */
-    virtual void show() = 0;
+    virtual void show() FL_NO_EXCEPT = 0;
 
     /**
      * @brief Send the LED data to the strip with a specific brightness
      * @param brightness Brightness level (0-255)
      */
-    virtual void show(u8 brightness) = 0;
+    virtual void show(u8 brightness) FL_NO_EXCEPT = 0;
 
     /**
      * @brief Clear all LEDs (set to black)
      * @param writeToStrip If true, immediately write to strip (call show())
      */
-    virtual void clear(bool writeToStrip = false) = 0;
+    virtual void clear(bool writeToStrip = false) FL_NO_EXCEPT = 0;
 
     // Brightness
 
@@ -65,13 +65,13 @@ public:
      * @brief Set the global brightness
      * @param brightness Brightness level (0-255)
      */
-    virtual void setBrightness(u8 brightness) = 0;
+    virtual void setBrightness(u8 brightness) FL_NO_EXCEPT = 0;
 
     /**
      * @brief Get the current global brightness
      * @return Brightness level (0-255)
      */
-    virtual u8 getBrightness() const = 0;
+    virtual u8 getBrightness() const FL_NO_EXCEPT = 0;
 
     // Color correction
 
@@ -79,13 +79,13 @@ public:
      * @brief Set color correction
      * @param correction Color correction RGB values
      */
-    virtual void setCorrection(CRGB correction) = 0;
+    virtual void setCorrection(CRGB correction) FL_NO_EXCEPT = 0;
 
     /**
      * @brief Set color temperature
      * @param temperature Color temperature RGB values
      */
-    virtual void setTemperature(CRGB temperature) = 0;
+    virtual void setTemperature(CRGB temperature) FL_NO_EXCEPT = 0;
 
     // Timing
 
@@ -93,19 +93,19 @@ public:
      * @brief Delay for a specified number of milliseconds
      * @param ms Delay duration in milliseconds
      */
-    virtual void delay(unsigned long ms) = 0;
+    virtual void delay(unsigned long ms) FL_NO_EXCEPT = 0;
 
     /**
      * @brief Set the maximum refresh rate
      * @param fps Maximum frames per second (0 = no limit)
      */
-    virtual void setMaxRefreshRate(u16 fps) = 0;
+    virtual void setMaxRefreshRate(u16 fps) FL_NO_EXCEPT = 0;
 
     /**
      * @brief Get the maximum refresh rate
      * @return Maximum frames per second (0 = no limit)
      */
-    virtual u16 getMaxRefreshRate() const = 0;
+    virtual u16 getMaxRefreshRate() const FL_NO_EXCEPT = 0;
 
     // Advanced features (segment support for WLED)
 
@@ -117,12 +117,12 @@ public:
      * After calling this, getLEDs() and getNumLEDs() will operate on the
      * specified segment only.
      */
-    virtual void setSegment(size_t start, size_t end) = 0;
+    virtual void setSegment(size_t start, size_t end) FL_NO_EXCEPT = 0;
 
     /**
      * @brief Clear the segment range (operate on full LED array)
      */
-    virtual void clearSegment() = 0;
+    virtual void clearSegment() FL_NO_EXCEPT = 0;
 };
 
 } // namespace fl

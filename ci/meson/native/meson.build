@@ -564,6 +564,14 @@ fastled_pch_abs_include_args = [
   path_norm_I_stub,
 ]
 
+# Share the cache launcher with test_pch; custom targets bypass Meson's
+# ordinary compiler rules, where zccache wrapping is injected separately.
+native_pch_compiler = cpp_compiler.cmd_array()
+pch_cache = find_program('zccache', required: false)
+if pch_cache.found()
+  native_pch_compiler = [pch_cache] + native_pch_compiler
+endif
+
 fastled_pch = custom_target('fastled_pch',
   input: meson.project_source_root() / 'src' / 'FastLED.h',
   output: 'FastLED.h.pch',
@@ -571,7 +579,7 @@ fastled_pch = custom_target('fastled_pch',
   command: [
     uv_prog, 'run', 'python',
     meson.project_source_root() / 'ci/compile_pch.py',
-    cpp_compiler.cmd_array(),
+    native_pch_compiler,
     '-c',                            # Suppress linker step (MinGW driver adds link job without -c)
     '-Wno-unused-command-line-argument',  # ...so drivers that add no link job report -c as unused
     '-x', 'c++-header',

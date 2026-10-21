@@ -23,6 +23,7 @@
     #endif
 
     #include "fl/stl/stdint.h"
+#include "fl/stl/noexcept.h"
 
     namespace fl {
 
@@ -34,16 +35,16 @@
     namespace platforms {
 
     // Stub implementations - all operations are no-ops
-    inline void pinMode(int, PinMode) {}
-    inline void digitalWrite(int, PinValue) {}
-    inline PinValue digitalRead(int) { return static_cast<PinValue>(0); }
-    inline u16 analogRead(int) { return 0; }
-    inline void analogWrite(int, u16) {}
-    inline void setPwm16(int, u16) {}
-    inline void setAdcRange(AdcRange) {}
-    inline bool needsPwmIsrFallback(int, u32) { return true; }
-    inline int setPwmFrequencyNative(int, u32) { return -1; }
-    inline u32 getPwmFrequencyNative(int) { return 0; }
+    inline void pinMode(int, PinMode) FL_NO_EXCEPT {}
+    inline void digitalWrite(int, PinValue) FL_NO_EXCEPT {}
+    inline PinValue digitalRead(int) FL_NO_EXCEPT { return static_cast<PinValue>(0); }
+    inline u16 analogRead(int) FL_NO_EXCEPT { return 0; }
+    inline void analogWrite(int, u16) FL_NO_EXCEPT {}
+    inline void setPwm16(int, u16) FL_NO_EXCEPT {}
+    inline void setAdcRange(AdcRange) FL_NO_EXCEPT {}
+    inline bool needsPwmIsrFallback(int, u32) FL_NO_EXCEPT { return true; }
+    inline int setPwmFrequencyNative(int, u32) FL_NO_EXCEPT { return -1; }
+    inline u32 getPwmFrequencyNative(int) FL_NO_EXCEPT { return 0; }
 
     }  // namespace platforms
     }  // namespace fl

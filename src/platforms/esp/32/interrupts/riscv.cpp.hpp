@@ -11,6 +11,8 @@
 // Only compile this file for ESP32-C3/C6 RISC-V platforms
 
 // ok no namespace fl
+#include "fl/stl/noexcept.h"
+#include "fl/stl/charconv.h"  // fl::to_hex
 #include "platforms/esp/is_esp.h"
 
 #if defined(FL_IS_ESP32) && (defined(FL_IS_ESP_32C3) || defined(FL_IS_ESP_32C6))
@@ -42,14 +44,14 @@ esp_err_t fastled_riscv_install_interrupt(
     void (*handler)(void *),
     void *arg,
     intr_handle_t *handle
-) {
+) FL_NO_EXCEPT {
     if (priority < 1 || priority > FASTLED_RISCV_MAX_PRIORITY) {
-        FL_LOG_INTERRUPT("Invalid priority level: %s (must be 1-%s)", priority, FASTLED_RISCV_MAX_PRIORITY);
+        FL_LOG_INTERRUPT("Invalid priority level: " << priority << " (must be 1-" << FASTLED_RISCV_MAX_PRIORITY << ")");
         return ESP_ERR_INVALID_ARG;
     }
 
     if (handler == nullptr || handle == nullptr) {
-        FL_LOG_INTERRUPT("Invalid arguments: handler=%s handle=%s", (void*)handler, (void*)handle);
+        FL_LOG_INTERRUPT("Invalid arguments: handler=" << ((void*)handler) << " handle=" << ((void*)handle));
         return ESP_ERR_INVALID_ARG;
     }
 
@@ -70,16 +72,16 @@ esp_err_t fastled_riscv_install_interrupt(
         case 6: flags |= ESP_INTR_FLAG_LEVEL6; break;
         case 7: flags |= ESP_INTR_FLAG_NMI; break; // Level 7 may be NMI
         default:
-            FL_LOG_INTERRUPT("Unsupported priority level: %s", priority);
+            FL_LOG_INTERRUPT("Unsupported priority level: " << priority);
             return ESP_ERR_NOT_SUPPORTED;
     }
 
-    FL_LOG_INTERRUPT("Installing interrupt source=%s priority=%s flags=0x%s", source, priority, flags);
+    FL_LOG_INTERRUPT("Installing interrupt source=" << source << " priority=" << priority << " flags=0x" << fl::to_hex(static_cast<fl::u32>(flags)));
 
     esp_err_t err = esp_intr_alloc(source, flags, handler, arg, handle);
 
     if (err != ESP_OK) {
-        FL_LOG_RMT("Failed to allocate interrupt: %s", esp_err_to_name(err));
+        FL_LOG_RMT("Failed to allocate interrupt: " << esp_err_to_name(err));
         return err;
     }
 
@@ -92,8 +94,8 @@ esp_err_t fastled_riscv_install_official_interrupt(
     void (*handler)(void *),
     void *arg,
     intr_handle_t *handle
-) {
-    FL_LOG_INTERRUPT("Installing official FastLED interrupt (priority %s)", FASTLED_RISCV_PRIORITY_RECOMMENDED);
+) FL_NO_EXCEPT {
+    FL_LOG_INTERRUPT("Installing official FastLED interrupt (priority " << FASTLED_RISCV_PRIORITY_RECOMMENDED << ")");
     return fastled_riscv_install_interrupt(
         source,
         FASTLED_RISCV_PRIORITY_RECOMMENDED,
@@ -109,9 +111,9 @@ esp_err_t fastled_riscv_install_experimental_interrupt(
     void (*handler)(void *),
     void *arg,
     intr_handle_t *handle
-) {
+) FL_NO_EXCEPT {
     if (priority < 4 || priority > 7) {
-        FL_LOG_RMT("Experimental priority must be 4-7, got %s", priority);
+        FL_LOG_RMT("Experimental priority must be 4-7, got " << priority);
         return ESP_ERR_INVALID_ARG;
     }
 
@@ -138,7 +140,7 @@ esp_err_t fastled_riscv_install_experimental_interrupt(
 // INTERRUPT HANDLER IMPLEMENTATIONS
 //=============================================================================
 
-void FL_IRAM fastled_riscv_official_handler(void *arg) {
+void FL_IRAM fastled_riscv_official_handler(void *arg) FL_NO_EXCEPT {
     // Official handler implementation (priority 1-3)
     // This is a placeholder - actual RMT handling would go here
     (void)arg;
@@ -147,7 +149,7 @@ void FL_IRAM fastled_riscv_official_handler(void *arg) {
     // For now, this is just a stub to verify interrupt installation works
 }
 
-void FL_IRAM fastled_riscv_experimental_handler(void *arg) {
+void FL_IRAM fastled_riscv_experimental_handler(void *arg) FL_NO_EXCEPT {
     // CRITICAL: This C handler CANNOT be used for priority 4-7 interrupts.
     // According to ESP-IDF docs, priority >3 requires ASSEMBLY handlers.
     // This function exists only for API completeness but will never be called
@@ -167,13 +169,13 @@ esp_err_t fastled_riscv_rmt_init_official(
     fl::u32 resolution_hz,
     size_t mem_block_symbols,
     int priority_level
-) {
+) FL_NO_EXCEPT {
     if (priority_level < 1 || priority_level > FASTLED_RISCV_PRIORITY_OFFICIAL_MAX) {
-        FL_LOG_RMT("Official RMT priority must be 1-%s, got %s", FASTLED_RISCV_PRIORITY_OFFICIAL_MAX, priority_level);
+        FL_LOG_RMT("Official RMT priority must be 1-" << FASTLED_RISCV_PRIORITY_OFFICIAL_MAX << ", got " << priority_level);
         return ESP_ERR_INVALID_ARG;
     }
 
-    FL_LOG_INTERRUPT("Initializing RMT channel %s on GPIO %s with priority %s", channel, gpio_num, priority_level);
+    FL_LOG_INTERRUPT("Initializing RMT channel " << channel << " on GPIO " << gpio_num << " with priority " << priority_level);
 
     // TODO: Implement RMT initialization using official driver API
     // This would use rmt_tx_channel_config_t with intr_priority field
@@ -189,9 +191,9 @@ esp_err_t fastled_riscv_rmt_init_experimental(
     fl::u32 resolution_hz,
     size_t mem_block_symbols,
     int priority_level
-) {
+) FL_NO_EXCEPT {
     if (priority_level < 4 || priority_level > 7) {
-        FL_LOG_RMT("Experimental RMT priority must be 4-7, got %s", priority_level);
+        FL_LOG_RMT("Experimental RMT priority must be 4-7, got " << priority_level);
         return ESP_ERR_INVALID_ARG;
     }
 
@@ -213,7 +215,7 @@ esp_err_t fastled_riscv_rmt_init_experimental(
     return ESP_ERR_NOT_SUPPORTED;
 }
 
-void FL_IRAM fastled_riscv_rmt_official_handler(void *arg) {
+void FL_IRAM fastled_riscv_rmt_official_handler(void *arg) FL_NO_EXCEPT {
     // RMT official handler (priority 1-3)
     (void)arg;
 
@@ -221,7 +223,7 @@ void FL_IRAM fastled_riscv_rmt_official_handler(void *arg) {
     // This would handle RMT peripheral interrupts for LED timing
 }
 
-void FL_IRAM fastled_riscv_rmt_experimental_handler(void *arg) {
+void FL_IRAM fastled_riscv_rmt_experimental_handler(void *arg) FL_NO_EXCEPT {
     // CRITICAL: This C handler CANNOT be used for priority 4-7 interrupts.
     // Priority >3 requires ASSEMBLY handlers per ESP-IDF documentation.
     // This function exists only for API completeness but will never be called.

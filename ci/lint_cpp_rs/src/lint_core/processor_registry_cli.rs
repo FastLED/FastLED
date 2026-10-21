@@ -239,6 +239,7 @@ impl Default for MultiCheckerFileProcessor {
 
 pub fn supported_checker_names() -> &'static [&'static str] {
     &[
+        "esp_noexcept",
         "arduino_macro_usage",
         "asm_js_location",
         "attribute",
@@ -256,6 +257,7 @@ pub fn supported_checker_names() -> &'static [&'static str] {
         "autoresearch_runtime_output",
         "fl_no_underscore",
         "legacy_log_macro",
+        "libc_mirror",
         "cpp_hpp_includes",
         "cpp_hpp_header_pair",
         "cpp_include",
@@ -323,6 +325,7 @@ pub fn supported_checker_names() -> &'static [&'static str] {
 
 pub fn supported_python_checker_names() -> &'static [&'static str] {
     &[
+        "EspNoexceptChecker",
         "ArduinoMacroUsageChecker",
         "AsmJsLocationChecker",
         "AttributeChecker",
@@ -377,9 +380,11 @@ pub fn supported_python_checker_names() -> &'static [&'static str] {
         "PlatformTrampolineChecker",
         "PublicSettingsPatternChecker",
         "UnityBuildChecker",
+        "RawAlignasChecker",
         "RawNoexceptChecker",
         "RawPragmaChecker",
         "R1CleanupChecker",
+        "LibcMirrorChecker",
         "ReinterpretCastChecker",
         "RelativeIncludeChecker",
         "SerialPrintfChecker",
@@ -408,6 +413,7 @@ pub fn create_checkers(
     selected: Option<&HashSet<String>>,
 ) -> Result<Vec<Box<dyn FileContentChecker>>, DynError> {
     let mut checkers: Vec<(&'static str, Box<dyn FileContentChecker>)> = vec![
+        ("esp_noexcept", Box::new(EspNoexceptChecker)),
         ("arduino_macro_usage", Box::new(ArduinoMacroUsageChecker)),
         ("asm_js_location", Box::new(AsmJsLocationChecker)),
         ("attribute", Box::new(AttributeChecker)),
@@ -540,9 +546,11 @@ pub fn create_checkers(
         ("platform_trampoline", Box::new(PlatformTrampolineChecker)),
         ("public_settings_pattern", Box::new(PublicSettingsPatternChecker)),
         ("unity_build", Box::new(UnityBuildChecker)),
+        ("raw_alignas", Box::new(RawAlignasChecker)),
         ("raw_noexcept", Box::new(RawNoexceptChecker)),
         ("raw_pragma", Box::new(RawPragmaChecker)),
         ("r1_cleanup", Box::new(R1CleanupChecker)),
+        ("libc_mirror", Box::new(LibcMirrorChecker)),
         ("reinterpret_cast", Box::new(ReinterpretCastChecker)),
         ("relative_include", Box::new(RelativeIncludeChecker)),
         ("serial_printf", Box::new(SerialPrintfChecker)),

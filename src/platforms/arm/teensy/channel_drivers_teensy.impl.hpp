@@ -15,12 +15,20 @@
 #include "platforms/arm/teensy/teensy4_common/drivers/flexio/bus_traits.h"      // ok platform headers // IWYU pragma: keep
 #include "platforms/arm/teensy/teensy4_common/drivers/lpuart/bus_traits.h"      // ok platform headers // IWYU pragma: keep
 #include "platforms/arm/teensy/teensy4_common/drivers/objectfled/bus_traits.h"  // ok platform headers // IWYU pragma: keep
+#include "platforms/arm/teensy/teensy4_common/init_channel_driver.h"  // ok platform headers // IWYU pragma: keep
 #endif
 
 namespace fl {
 namespace platforms {
 
 inline void enableAllChannelDrivers() FL_NO_EXCEPT {
+#if defined(FL_IS_TEENSY_4X)
+    // FlexIO (priority 8), ObjectFLED and the unified SPI adapter. These used
+    // to register on first ChannelManager::instance() access, i.e. before the
+    // enableDrivers<> calls below; keep that order so FlexIO keeps priority 8
+    // (#4708).
+    registerAllTeensyChannelDrivers();
+#endif
     fl::enableDrivers<
         fl::Bus::BIT_BANG
 #if defined(FL_IS_TEENSY_4X)

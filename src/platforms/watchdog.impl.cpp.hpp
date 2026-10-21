@@ -84,3 +84,10 @@
 // `src/fl/wdt/_build.cpp.hpp` — included from the regular fl/ unity build,
 // not from here. Including `.cpp.hpp` files outside the unity build is a
 // hard ban per agents/docs/cpp-standards.md.
+
+// Boot-guard counter storage (fl/wdt/boot_guard.h): platforms that keep it in
+// reset-persistent memory define FL_WATCHDOG_HAS_BOOT_GUARD_STORAGE and
+// supply it in their impl; everywhere else the counter is always 0.
+#if !defined(FL_WATCHDOG_HAS_BOOT_GUARD_STORAGE)
+    #include "platforms/shared/watchdog_boot_guard_noop.hpp"
+#endif

@@ -46,7 +46,7 @@ static void addSpiHardwareIfPossible(ChannelManager& manager) {
     // Collect SpiHw2 controllers (priority: 6)
     // ========================================================================
     const auto& hw2Controllers = SpiHw2::getAll();
-    FL_DBG("SAMD21: Found %s SpiHw2 controllers", hw2Controllers.size());
+    FL_DBG("SAMD21: Found " << hw2Controllers.size() << " SpiHw2 controllers");
 
     for (const auto& ctrl : hw2Controllers) {
         if (ctrl) {
@@ -78,7 +78,7 @@ static void addSpiHardwareIfPossible(ChannelManager& manager) {
 
             manager.addDriver(maxPriority, adapter);
 
-            FL_DBG("SAMD21: Registered unified SPI driver with %s controllers (priority %s)", controllers.size(), maxPriority);
+            FL_DBG("SAMD21: Registered unified SPI driver with " << controllers.size() << " controllers (priority " << maxPriority << ")");
         } else {
             FL_WARN("SAMD21: Failed to create unified SPI adapter");
         }

@@ -22,6 +22,49 @@ from ci.meson.sanitizer_env import setup_sanitizer_env
 
 
 class TestMesonNativeToolchain(unittest.TestCase):
+    def test_docker_selects_zccache_for_pch_consumers(self) -> None:
+        with (
+            TemporaryDirectory() as temp_dir,
+            patch.dict(os.environ, {"FASTLED_DOCKER": "1"}),
+        ):
+            detected = detect_compiler_and_cache(
+                MarkerPaths.for_build_dir(Path(temp_dir)),
+                verbose=False,
+                build_mode="quick",
+            )
+        self.assertIsNotNone(detected.cache_binary)
+        self.assertEqual(detected.cache_name, "zccache")
+
+    def test_missing_zccache_fails_during_setup(self) -> None:
+        with (
+            TemporaryDirectory() as temp_dir,
+            patch(
+                "ci.meson.meson_setup_execute._find_zccache_binary", return_value=None
+            ),
+        ):
+            with self.assertRaisesRegex(RuntimeError, "zccache.*required"):
+                detect_compiler_and_cache(
+                    MarkerPaths.for_build_dir(Path(temp_dir)),
+                    verbose=False,
+                    build_mode="quick",
+                )
+
+    def test_old_or_unknown_zccache_fails_during_setup(self) -> None:
+        for version in ("zccache 1.15.5", "", "unknown"):
+            with self.subTest(version=version), TemporaryDirectory() as temp_dir:
+                markers = MarkerPaths.for_build_dir(Path(temp_dir))
+                markers.zccache_version.write_text("zccache 1.15.6", encoding="utf-8")
+                with patch(
+                    "ci.meson.meson_setup_execute.get_zccache_version",
+                    return_value=version,
+                ):
+                    with self.assertRaisesRegex(RuntimeError, "1.15.6"):
+                        detect_compiler_and_cache(
+                            markers,
+                            verbose=False,
+                            build_mode="quick",
+                        )
+
     @staticmethod
     def _compiler() -> CompilerDetection:
         return CompilerDetection(
@@ -165,7 +208,11 @@ class TestMesonNativeToolchain(unittest.TestCase):
                 ),
                 patch(
                     "ci.meson.meson_setup_execute._find_zccache_binary",
-                    return_value=None,
+                    return_value="/venv/zccache",
+                ),
+                patch(
+                    "ci.meson.meson_setup_execute.get_zccache_version",
+                    return_value="1.15.6",
                 ),
                 patch(
                     "ci.meson.meson_setup_execute.get_compiler_version",

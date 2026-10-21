@@ -1,5 +1,7 @@
 #pragma once
 
+#include "fl/stl/noexcept.h"
+
 #include "fl/fx/fx1d.h"
 
 namespace fl {
@@ -11,10 +13,10 @@ FASTLED_SHARED_PTR(Cylon);
 class Cylon : public Fx1d {
   public:
     u8 delay_ms;
-    Cylon(u16 num_leds, u8 fade_amount = 250, u8 delay_ms = 10)
+    Cylon(u16 num_leds, u8 fade_amount = 250, u8 delay_ms = 10) FL_NO_EXCEPT
         : Fx1d(num_leds), delay_ms(delay_ms), fade_amount(fade_amount) {}
 
-    void draw(DrawContext context) override {
+    void draw(DrawContext context) FL_NO_EXCEPT override {
         if (context.leds.empty() || mNumLeds == 0) {
             return;
         }
@@ -45,7 +47,7 @@ class Cylon : public Fx1d {
         }
     }
 
-    fl::string fxName() const override { return "Cylon"; }
+    fl::string fxName() const FL_NO_EXCEPT override { return "Cylon"; }
 
   private:
     u8 hue = 0;

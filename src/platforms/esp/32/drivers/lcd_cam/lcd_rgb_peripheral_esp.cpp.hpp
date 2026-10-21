@@ -50,7 +50,7 @@ LcdRgbPeripheralEsp& LcdRgbPeripheralEsp::instance() FL_NO_EXCEPT {
 //=============================================================================
 
 LcdRgbPeripheralEsp::LcdRgbPeripheralEsp()
-    : mInitialized(false),
+    FL_NO_EXCEPT : mInitialized(false),
       mConfig(),
       mPanelHandle(nullptr),
       mCallback(nullptr),
@@ -76,7 +76,7 @@ bool LcdRgbPeripheralEsp::initialize(const LcdRgbPeripheralConfig& config) FL_NO
 
     // Validate configuration
     if (config.num_lanes < 1 || config.num_lanes > 16) {
-        FL_WARN("LcdRgbPeripheralEsp: Invalid num_lanes: %s", config.num_lanes);
+        FL_WARN("LcdRgbPeripheralEsp: Invalid num_lanes: " << config.num_lanes);
         return false;
     }
 
@@ -143,14 +143,14 @@ bool LcdRgbPeripheralEsp::initialize(const LcdRgbPeripheralConfig& config) FL_NO
     // Create RGB panel
     esp_err_t err = esp_lcd_new_rgb_panel(&panel_config, &mPanelHandle);
     if (err != ESP_OK) {
-        FL_WARN("LcdRgbPeripheralEsp: Failed to create RGB panel: %s", err);
+        FL_WARN("LcdRgbPeripheralEsp: Failed to create RGB panel: " << err);
         return false;
     }
 
     // Initialize panel
     err = esp_lcd_panel_init(mPanelHandle);
     if (err != ESP_OK) {
-        FL_WARN("LcdRgbPeripheralEsp: Failed to initialize panel: %s", err);
+        FL_WARN("LcdRgbPeripheralEsp: Failed to initialize panel: " << err);
         esp_lcd_panel_del(mPanelHandle);
         mPanelHandle = nullptr;
         return false;
@@ -270,7 +270,7 @@ bool LcdRgbPeripheralEsp::waitFrameDone(u32 timeout_ms) FL_NO_EXCEPT {
                 return false;  // Timeout
             }
         }
-        task::run(250, task::ExecFlags::SYSTEM);  // OS yield
+        task::yield_system(250);  // OS yield
     }
     return true;
 }
@@ -295,10 +295,10 @@ struct VsyncCallbackData {
 static VsyncCallbackData s_vsync_cb_data;
 
 // VSYNC ISR callback - must be in IRAM for ESP-IDF
-static bool IRAM_ATTR vsyncIsrCallback( // ok no noexcept
+static bool IRAM_ATTR vsyncIsrCallback(
         esp_lcd_panel_handle_t panel,
         const esp_lcd_rgb_panel_event_data_t* edata,
-        void* ctx) {
+        void* ctx) FL_NO_EXCEPT {
     VsyncCallbackData* data = static_cast<VsyncCallbackData*>(ctx);
     data->self->clearBusy();
 

@@ -17,6 +17,7 @@
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/cstring.h"
 #include "fl/math/math.h"
+#include "fl/stl/noexcept.h"
 // Compiler throws a warning about stack usage possibly being unbounded even
 // though bounds are checked, silence that so users don't see it
 FL_DISABLE_WARNING_PUSH
@@ -66,7 +67,7 @@ FL_PROGMEM static fl::u8 const p[] = {
 // inlined copy of avg15 for AVR with MUL instruction; cloned from math8.h
 // Forcing this inline in the 3-D 16bit noise produces a 12% speedup overall,
 // at a cost of just +8 bytes of net code size.
-static fl::i16 inline __attribute__((always_inline))  avg15_inline_avr_mul( fl::i16 i, fl::i16 j)
+static fl::i16 inline __attribute__((always_inline))  avg15_inline_avr_mul( fl::i16 i, fl::i16 j) FL_NO_EXCEPT
 {
     asm volatile(
                  /* first divide j by 2, throwing away lowest bit */
@@ -113,7 +114,7 @@ static fl::i16 inline __attribute__((always_inline))  avg15_inline_avr_mul( fl::
 
 } // namespace noise_detail
 
-static fl::i16 inline __attribute__((always_inline))  grad16(fl::u8 hash, fl::i16 x, fl::i16 y, fl::i16 z) {
+static fl::i16 inline __attribute__((always_inline)) grad16(fl::u8 hash, fl::i16 x, fl::i16 y, fl::i16 z) FL_NO_EXCEPT {
 #if 0
     switch(hash & 0xF) {
         case  0: return (( x) + ( y))>>1;
@@ -144,7 +145,7 @@ static fl::i16 inline __attribute__((always_inline))  grad16(fl::u8 hash, fl::i1
 #endif
 }
 
-static fl::i16 inline __attribute__((always_inline)) grad16(fl::u8 hash, fl::i16 x, fl::i16 y) {
+static fl::i16 inline __attribute__((always_inline)) grad16(fl::u8 hash, fl::i16 x, fl::i16 y) FL_NO_EXCEPT {
     hash = hash & 7;
     fl::i16 u,v;
     if(hash < 4) { u = x; v = y; } else { u = y; v = x; }
@@ -155,7 +156,7 @@ static fl::i16 inline __attribute__((always_inline)) grad16(fl::u8 hash, fl::i16
 }
 
 #if FASTLED_NOISE_FIXED == 0
-static fl::i16 inline __attribute__((always_inline)) grad16(fl::u8 hash, fl::i16 x) {
+static fl::i16 inline __attribute__((always_inline)) grad16(fl::u8 hash, fl::i16 x) FL_NO_EXCEPT {
     hash = hash & 15;
     fl::i16 u,v;
     if(hash > 8) { u=x;v=x; }
@@ -171,7 +172,7 @@ static fl::i16 inline __attribute__((always_inline)) grad16(fl::u8 hash, fl::i16
 /// the 8-bit overload above: `hash > 8` fed x to both terms and then flipped
 /// their signs independently, so hashes 9, 10, 13 and 14 had no gradient, and
 /// `inoise16` went flat across whole 65536-wide cubes on the same 21 cube pairs.
-static fl::i16 inline __attribute__((always_inline)) grad16(fl::u8 hash, fl::i16 x) {
+static fl::i16 inline __attribute__((always_inline)) grad16(fl::u8 hash, fl::i16 x) FL_NO_EXCEPT {
     return (hash & 1) ? static_cast<fl::i16>(-x) : x;
 }
 #endif
@@ -180,7 +181,7 @@ static fl::i16 inline __attribute__((always_inline)) grad16(fl::u8 hash, fl::i16
 //   result = (hash & (1<<bitnumber)) ? a : b
 // but with an AVR asm version that's smaller and quicker than C
 // (and probably not worth including in lib8tion)
-static fl::i8 inline __attribute__((always_inline)) __attribute__((unused)) selectBasedOnHashBit(fl::u8 hash, fl::u8 bitnumber, fl::i8 a, fl::i8 b) {
+static fl::i8 inline __attribute__((always_inline)) __attribute__((unused)) selectBasedOnHashBit(fl::u8 hash, fl::u8 bitnumber, fl::i8 a, fl::i8 b) FL_NO_EXCEPT {
 	fl::i8 result;
 #if !defined(FL_IS_AVR)
 	result = (hash & (1<<bitnumber)) ? a : b;
@@ -199,7 +200,7 @@ static fl::i8 inline __attribute__((always_inline)) __attribute__((unused)) sele
 	return result;
 }
 
-static fl::i8  inline __attribute__((always_inline)) grad8(fl::u8 hash, fl::i8 x, fl::i8 y, fl::i8 z) {
+static fl::i8  inline __attribute__((always_inline)) grad8(fl::u8 hash, fl::i8 x, fl::i8 y, fl::i8 z) FL_NO_EXCEPT {
     // Industry-standard 3D Perlin noise gradient implementation
     // Uses proper 12 edge vectors of a cube for maximum range coverage
     
@@ -225,7 +226,7 @@ static fl::i8  inline __attribute__((always_inline)) grad8(fl::u8 hash, fl::i8 x
     return 0; // Should never reach here
 }
 
-static fl::i8 inline __attribute__((always_inline)) grad8(fl::u8 hash, fl::i8 x, fl::i8 y)
+static fl::i8 inline __attribute__((always_inline)) grad8(fl::u8 hash, fl::i8 x, fl::i8 y) FL_NO_EXCEPT
 {
     // since the tests below can be done bit-wise on the bottom
     // three bits, there's no need to mask off the higher bits
@@ -245,7 +246,7 @@ static fl::i8 inline __attribute__((always_inline)) grad8(fl::u8 hash, fl::i8 x,
 }
 
 #if FASTLED_NOISE_FIXED == 0
-static fl::i8 inline __attribute__((always_inline)) grad8(fl::u8 hash, fl::i8 x)
+static fl::i8 inline __attribute__((always_inline)) grad8(fl::u8 hash, fl::i8 x) FL_NO_EXCEPT
 {
     // since the tests below can be done bit-wise on the bottom
     // four bits, there's no need to mask off the higher bits
@@ -288,7 +289,7 @@ static fl::i8 inline __attribute__((always_inline)) grad8(fl::u8 hash, fl::i8 x)
 /// `avg7(u, v)` with u == v would be the same number for every input -- avg7(x, x)
 /// is exactly x, including the wrap at x = -128 -- so the average is dropped
 /// rather than computed.
-static fl::i8 inline __attribute__((always_inline)) grad8(fl::u8 hash, fl::i8 x)
+static fl::i8 inline __attribute__((always_inline)) grad8(fl::u8 hash, fl::i8 x) FL_NO_EXCEPT
 {
     return (hash & 1) ? static_cast<fl::i8>(-x) : x;
 }
@@ -300,7 +301,7 @@ fl::u16 logfade12(fl::u16 val) {
     return scale16(val,val)>>4;
 }
 
-static fl::i16 inline __attribute__((always_inline)) lerp15by12( fl::i16 a, fl::i16 b, fract16 frac)
+static fl::i16 inline __attribute__((always_inline)) lerp15by12( fl::i16 a, fl::i16 b, fract16 frac) FL_NO_EXCEPT
 {
     //if(1) return (lerp(frac,a,b));
     fl::i16 result;
@@ -317,7 +318,7 @@ static fl::i16 inline __attribute__((always_inline)) lerp15by12( fl::i16 a, fl::
 }
 #endif
 
-static fl::i8 inline __attribute__((always_inline)) lerp7by8( fl::i8 a, fl::i8 b, fract8 frac)
+static fl::i8 inline __attribute__((always_inline)) lerp7by8( fl::i8 a, fl::i8 b, fract8 frac) FL_NO_EXCEPT
 {
     // int8_t delta = b - a;
     // int16_t prod = (uint16_t)delta * (uint16_t)frac;
@@ -338,7 +339,7 @@ static fl::i8 inline __attribute__((always_inline)) lerp7by8( fl::i8 a, fl::i8 b
 }
 
 fl::i16 inoise16_raw(fl::u32 x, fl::u32 y, fl::u32 z)
-{
+FL_NO_EXCEPT {
     // Find the unit cube containing the point
     fl::u8 X = (x>>16)&0xFF;
     fl::u8 Y = (y>>16)&0xFF;
@@ -380,7 +381,7 @@ fl::i16 inoise16_raw(fl::u32 x, fl::u32 y, fl::u32 z)
     return ans;
 }
 
-fl::i16 inoise16_raw(fl::u32 x, fl::u32 y, fl::u32 z, fl::u32 t) {
+fl::i16 inoise16_raw(fl::u32 x, fl::u32 y, fl::u32 z, fl::u32 t) FL_NO_EXCEPT {
     // 1. Extract the integer (grid) parts.
     fl::u8 X = (x >> 16) & 0xFF;
     fl::u8 Y = (y >> 16) & 0xFF;
@@ -459,7 +460,7 @@ fl::i16 inoise16_raw(fl::u32 x, fl::u32 y, fl::u32 z, fl::u32 t) {
     return noise4d;
 }
 
-fl::u16 inoise16(fl::u32 x, fl::u32 y, fl::u32 z, fl::u32 t) {
+fl::u16 inoise16(fl::u32 x, fl::u32 y, fl::u32 z, fl::u32 t) FL_NO_EXCEPT {
     fl::i32 ans = inoise16_raw(x,y,z,t);
     ans = ans + 19052L;
     fl::u32 pan = ans;
@@ -475,7 +476,7 @@ fl::u16 inoise16(fl::u32 x, fl::u32 y, fl::u32 z, fl::u32 t) {
     // return scale16by8(inoise16_raw(x,y,z)+19052,220)<<1;
 }
 
-fl::u16 inoise16(fl::u32 x, fl::u32 y, fl::u32 z) {
+fl::u16 inoise16(fl::u32 x, fl::u32 y, fl::u32 z) FL_NO_EXCEPT {
     fl::i32 ans = inoise16_raw(x,y,z);
     ans = ans + 19052L;
     fl::u32 pan = ans;
@@ -492,7 +493,7 @@ fl::u16 inoise16(fl::u32 x, fl::u32 y, fl::u32 z) {
 }
 
 fl::i16 inoise16_raw(fl::u32 x, fl::u32 y)
-{
+FL_NO_EXCEPT {
     // Find the unit cube containing the point
     fl::u8 X = x>>16;
     fl::u8 Y = y>>16;
@@ -524,7 +525,7 @@ fl::i16 inoise16_raw(fl::u32 x, fl::u32 y)
     return ans;
 }
 
-fl::u16 inoise16(fl::u32 x, fl::u32 y) {
+fl::u16 inoise16(fl::u32 x, fl::u32 y) FL_NO_EXCEPT {
     fl::i32 ans = inoise16_raw(x,y);
     ans = ans + 17308L;
     fl::u32 pan = ans;
@@ -540,7 +541,7 @@ fl::u16 inoise16(fl::u32 x, fl::u32 y) {
 }
 
 fl::i16 inoise16_raw(fl::u32 x)
-{
+FL_NO_EXCEPT {
     // Find the unit cube containing the point
     fl::u8 X = x>>16;
 
@@ -564,12 +565,12 @@ fl::i16 inoise16_raw(fl::u32 x)
     return ans;
 }
 
-fl::u16 inoise16(fl::u32 x) {
+fl::u16 inoise16(fl::u32 x) FL_NO_EXCEPT {
     return ((fl::u32)((fl::i32)inoise16_raw(x) + 17308L)) << 1;
 }
 
 fl::i8 inoise8_raw(fl::u16 x, fl::u16 y, fl::u16 z)
-{
+FL_NO_EXCEPT {
     // Find the unit cube containing the point
     fl::u8 X = x>>8;
     fl::u8 Y = y>>8;
@@ -609,7 +610,7 @@ fl::i8 inoise8_raw(fl::u16 x, fl::u16 y, fl::u16 z)
     return ans;
 }
 
-fl::u8 inoise8(fl::u16 x, fl::u16 y, fl::u16 z) {
+fl::u8 inoise8(fl::u16 x, fl::u16 y, fl::u16 z) FL_NO_EXCEPT {
     //return scale8(76+(inoise8_raw(x,y,z)),215)<<1;
     fl::i8 n = inoise8_raw( x, y, z);  // -64..+64
     n+= 64;                            //   0..128
@@ -618,7 +619,7 @@ fl::u8 inoise8(fl::u16 x, fl::u16 y, fl::u16 z) {
 }
 
 fl::i8 inoise8_raw(fl::u16 x, fl::u16 y)
-{
+FL_NO_EXCEPT {
     // Find the unit cube containing the point
     fl::u8 X = x>>8;
     fl::u8 Y = y>>8;
@@ -653,7 +654,7 @@ fl::i8 inoise8_raw(fl::u16 x, fl::u16 y)
 
 
 
-fl::u8 inoise8(fl::u16 x, fl::u16 y) {
+fl::u8 inoise8(fl::u16 x, fl::u16 y) FL_NO_EXCEPT {
   //return scale8(69+inoise8_raw(x,y),237)<<1;
     fl::i8 n = inoise8_raw( x, y);  // -64..+64
     n+= 64;                         //   0..128
@@ -663,7 +664,7 @@ fl::u8 inoise8(fl::u16 x, fl::u16 y) {
 
 // output range = -64 .. +64
 fl::i8 inoise8_raw(fl::u16 x)
-{
+FL_NO_EXCEPT {
   // Find the unit cube containing the point
   fl::u8 X = x>>8;
 
@@ -687,7 +688,7 @@ fl::i8 inoise8_raw(fl::u16 x)
   return ans;
 }
 
-fl::u8 inoise8(fl::u16 x) {
+fl::u8 inoise8(fl::u16 x) FL_NO_EXCEPT {
     fl::i8 n = inoise8_raw(x);    //-64..+64
     n += 64;                      // 0..128
     fl::u8 ans = qadd8(n,n);     // 0..255
@@ -709,7 +710,7 @@ fl::u8 inoise8(fl::u16 x) {
 //     return (v *mulby44.i)  + ((v * mulby44.f) >> 4);
 // }
 
-void fill_raw_noise8(fl::u8 *pData, fl::u8 num_points, fl::u8 octaves, fl::u16 x, int scale, fl::u16 time) {
+void fill_raw_noise8(fl::u8 *pData, fl::u8 num_points, fl::u8 octaves, fl::u16 x, int scale, fl::u16 time) FL_NO_EXCEPT {
   fl::u32 _xx = x;
   fl::u32 scx = scale;
   for(int o = 0; o < octaves; ++o) {
@@ -722,7 +723,7 @@ void fill_raw_noise8(fl::u8 *pData, fl::u8 num_points, fl::u8 octaves, fl::u16 x
   }
 }
 
-void fill_raw_noise16into8(fl::u8 *pData, fl::u8 num_points, fl::u8 octaves, fl::u32 x, int scale, fl::u32 time) {
+void fill_raw_noise16into8(fl::u8 *pData, fl::u8 num_points, fl::u8 octaves, fl::u32 x, int scale, fl::u32 time) FL_NO_EXCEPT {
   fl::u32 _xx = x;
   fl::u32 scx = scale;
   for(int o = 0; o < octaves; ++o) {
@@ -752,7 +753,7 @@ void fill_raw_noise16into8(fl::u8 *pData, fl::u8 num_points, fl::u8 octaves, fl:
 /// @param scaley the scale (distance) between y points when filling in noise
 /// @param time the time position for the noise field
 /// @todo Why isn't this declared in the header (noise.h)?
-void fill_raw_2dnoise8(fl::u8 *pData, int width, int height, fl::u8 octaves, fl::q44 freq44, fract8 amplitude, int skip, fl::u16 x, fl::i16 scalex, fl::u16 y, fl::i16 scaley, fl::u16 time) {
+void fill_raw_2dnoise8(fl::u8 *pData, int width, int height, fl::u8 octaves, fl::q44 freq44, fract8 amplitude, int skip, fl::u16 x, fl::i16 scalex, fl::u16 y, fl::i16 scaley, fl::u16 time) FL_NO_EXCEPT {
   if(octaves > 1) {
     fill_raw_2dnoise8(pData, width, height, octaves-1, freq44, amplitude, skip+1, x*freq44, freq44 * scalex, y*freq44, freq44 * scaley, time);
   } else {
@@ -786,11 +787,11 @@ void fill_raw_2dnoise8(fl::u8 *pData, int width, int height, fl::u8 octaves, fl:
   }
 }
 
-void fill_raw_2dnoise8(fl::u8 *pData, int width, int height, fl::u8 octaves, fl::u16 x, int scalex, fl::u16 y, int scaley, fl::u16 time) {
+void fill_raw_2dnoise8(fl::u8 *pData, int width, int height, fl::u8 octaves, fl::u16 x, int scalex, fl::u16 y, int scaley, fl::u16 time) FL_NO_EXCEPT {
   fill_raw_2dnoise8(pData, width, height, octaves, fl::q44(2,0), 128, 1, x, scalex, y, scaley, time);
 }
 
-void fill_raw_2dnoise16(fl::u16 *pData, int width, int height, fl::u8 octaves, fl::q88 freq88, fract16 amplitude, int skip, fl::u32 x, fl::i32 scalex, fl::u32 y, fl::i32 scaley, fl::u32 time) {
+void fill_raw_2dnoise16(fl::u16 *pData, int width, int height, fl::u8 octaves, fl::q88 freq88, fract16 amplitude, int skip, fl::u32 x, fl::i32 scalex, fl::u32 y, fl::i32 scaley, fl::u32 time) FL_NO_EXCEPT {
   if(octaves > 1) {
     fill_raw_2dnoise16(pData, width, height, octaves-1, freq88, amplitude, skip, x *freq88 , scalex *freq88, y * freq88, scaley * freq88, time);
   } else {
@@ -828,7 +829,7 @@ fl::i32 nmin=11111110;
 /// @todo Remove?
 fl::i32 nmax=0;
 
-void fill_raw_2dnoise16into8(fl::u8 *pData, int width, int height, fl::u8 octaves, fl::q44 freq44, fract8 amplitude, int skip, fl::u32 x, fl::i32 scalex, fl::u32 y, fl::i32 scaley, fl::u32 time) {
+void fill_raw_2dnoise16into8(fl::u8 *pData, int width, int height, fl::u8 octaves, fl::q44 freq44, fract8 amplitude, int skip, fl::u32 x, fl::i32 scalex, fl::u32 y, fl::i32 scaley, fl::u32 time) FL_NO_EXCEPT {
   if(octaves > 1) {
     fill_raw_2dnoise16into8(pData, width, height, octaves-1, freq44, amplitude, skip+1, x*freq44, scalex *freq44, y*freq44, scaley * freq44, time);
   } else {
@@ -861,14 +862,14 @@ void fill_raw_2dnoise16into8(fl::u8 *pData, int width, int height, fl::u8 octave
   }
 }
 
-void fill_raw_2dnoise16into8(fl::u8 *pData, int width, int height, fl::u8 octaves, fl::u32 x, int scalex, fl::u32 y, int scaley, fl::u32 time) {
+void fill_raw_2dnoise16into8(fl::u8 *pData, int width, int height, fl::u8 octaves, fl::u32 x, int scalex, fl::u32 y, int scaley, fl::u32 time) FL_NO_EXCEPT {
   fill_raw_2dnoise16into8(pData, width, height, octaves, fl::q44(2,0), 171, 1, x, scalex, y, scaley, time);
 }
 
 void fill_noise8(CRGB *leds, int num_leds,
             fl::u8 octaves, fl::u16 x, int scale,
             fl::u8 hue_octaves, fl::u16 hue_x, int hue_scale,
-            fl::u16 time) {
+            fl::u16 time) FL_NO_EXCEPT {
 
     if (num_leds <= 0) return;
 
@@ -895,7 +896,7 @@ void fill_noise8(CRGB *leds, int num_leds,
 void fill_noise16(CRGB *leds, int num_leds,
             fl::u8 octaves, fl::u16 x, int scale,
             fl::u8 hue_octaves, fl::u16 hue_x, int hue_scale,
-            fl::u16 time, fl::u8 hue_shift) {
+            fl::u16 time, fl::u8 hue_shift) FL_NO_EXCEPT {
 
     if (num_leds <= 0) return;
 
@@ -920,7 +921,7 @@ void fill_noise16(CRGB *leds, int num_leds,
 
 void fill_2dnoise8(CRGB *leds, int width, int height, bool serpentine,
             fl::u8 octaves, fl::u16 x, int xscale, fl::u16 y, int yscale, fl::u16 time,
-            fl::u8 hue_octaves, fl::u16 hue_x, int hue_xscale, fl::u16 hue_y, fl::u16 hue_yscale,fl::u16 hue_time,bool blend) {
+            fl::u8 hue_octaves, fl::u16 hue_x, int hue_xscale, fl::u16 hue_y, fl::u16 hue_yscale,fl::u16 hue_time,bool blend) FL_NO_EXCEPT {
   const size_t array_size = (size_t)height * width;
   if (array_size <= 0) return;
   FASTLED_STACK_ARRAY(fl::u8, V, array_size);
@@ -958,7 +959,7 @@ void fill_2dnoise8(CRGB *leds, int width, int height, bool serpentine,
 
 void fill_2dnoise16(CRGB *leds, int width, int height, bool serpentine,
             fl::u8 octaves, fl::u32 x, int xscale, fl::u32 y, int yscale, fl::u32 time,
-            fl::u8 hue_octaves, fl::u16 hue_x, int hue_xscale, fl::u16 hue_y, fl::u16 hue_yscale,fl::u16 hue_time, bool blend, fl::u16 hue_shift) {
+            fl::u8 hue_octaves, fl::u16 hue_x, int hue_xscale, fl::u16 hue_y, fl::u16 hue_yscale,fl::u16 hue_time, bool blend, fl::u16 hue_shift) FL_NO_EXCEPT {
 
   FASTLED_STACK_ARRAY(fl::u8, V, height*width);
   FASTLED_STACK_ARRAY(fl::u8, H, height*width);

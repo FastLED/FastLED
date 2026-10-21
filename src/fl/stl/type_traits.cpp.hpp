@@ -3,6 +3,7 @@
 #include "fl/stl/int.h"
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/static_assert.h"
+#include "fl/stl/noexcept.h"
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING(unused-function)
@@ -13,7 +14,7 @@ FL_DISABLE_WARNING(unused-function)
 
 // typetrait test
 namespace {
-FL_MAYBE_UNUSED void __compile_test() {
+FL_MAYBE_UNUSED void __compile_test() FL_NO_EXCEPT {
     FL_STATIC_ASSERT(fl::is_integral<int>::value, "int should be integral");
     FL_STATIC_ASSERT(fl::is_integral<float>::value == false,
                   "float should not be integral");

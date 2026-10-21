@@ -151,12 +151,11 @@ def looks_like_var_def(code: str) -> tuple[bool, str, str]:  # noqa: DCT002
     if "{" in code or "}" in code:
         return False, "", ""
 
-    # `(` before `;` → function decl / call / initializer, skip conservatively.
-    if "(" in code:
-        paren = code.find("(")
-        semi = code.rfind(";")
-        if paren < semi:
-            return False, "", ""
+    # Either parenthesis excludes a function declaration/call/initializer.
+    # A closing parenthesis can be on a multiline declaration's continuation
+    # before FL_NO_EXCEPT, matching the Rust scanner (#4773).
+    if "(" in code or ")" in code:
+        return False, "", ""
 
     # Opt-outs.
     if "[[gnu::used]]" in code or "__attribute__((used))" in code or "FL_KEEP" in code:

@@ -12,6 +12,7 @@
 #include "fl/channels/detail/wave3.h"
 #include "fl/chipsets/led_timing.h"
 #include "fl/stl/isr/memcpy.h"
+#include "fl/stl/noexcept.h"
 
 FL_OPTIMIZATION_LEVEL_O3_BEGIN
 
@@ -22,7 +23,7 @@ namespace fl {
 // ============================================================================
 
 FL_OPTIMIZE_FUNCTION
-bool canUseWave3(const ChipsetTiming& timing) {
+bool canUseWave3(const ChipsetTiming& timing) FL_NO_EXCEPT {
     const u32 period = timing.T1 + timing.T2 + timing.T3;
     if (period == 0) {
         return false;
@@ -51,7 +52,7 @@ bool canUseWave3(const ChipsetTiming& timing) {
 // ============================================================================
 
 FL_OPTIMIZE_FUNCTION
-u32 wave3ClockFrequencyHz(const ChipsetTiming& timing) {
+u32 wave3ClockFrequencyHz(const ChipsetTiming& timing) FL_NO_EXCEPT {
     const u32 period = timing.T1 + timing.T2 + timing.T3;
     if (period == 0) {
         return 0;
@@ -66,7 +67,7 @@ u32 wave3ClockFrequencyHz(const ChipsetTiming& timing) {
 // ============================================================================
 
 FL_OPTIMIZE_FUNCTION
-Wave3BitExpansionLut buildWave3ExpansionLUT(const ChipsetTiming& timing) {
+Wave3BitExpansionLut buildWave3ExpansionLUT(const ChipsetTiming& timing) FL_NO_EXCEPT {
     Wave3BitExpansionLut lut;
 
     const u32 period = timing.T1 + timing.T2 + timing.T3;
@@ -119,7 +120,7 @@ Wave3BitExpansionLut buildWave3ExpansionLUT(const ChipsetTiming& timing) {
 FL_OPTIMIZE_FUNCTION FL_IRAM
 void wave3Transpose_2(const u8 (&FL_RESTRICT_PARAM lanes)[2],
                       const Wave3BitExpansionLut& lut,
-                      u8 (&FL_RESTRICT_PARAM output)[2 * sizeof(Wave3Byte)]) {
+                      u8 (&FL_RESTRICT_PARAM output)[2 * sizeof(Wave3Byte)]) FL_NO_EXCEPT {
     Wave3Byte laneWaveforms[2];
     detail::wave3_convert_byte_to_wave3byte(lanes[0], lut, &laneWaveforms[0]);
     detail::wave3_convert_byte_to_wave3byte(lanes[1], lut, &laneWaveforms[1]);
@@ -129,7 +130,7 @@ void wave3Transpose_2(const u8 (&FL_RESTRICT_PARAM lanes)[2],
 FL_OPTIMIZE_FUNCTION FL_IRAM
 void wave3Transpose_4(const u8 (&FL_RESTRICT_PARAM lanes)[4],
                       const Wave3BitExpansionLut& lut,
-                      u8 (&FL_RESTRICT_PARAM output)[4 * sizeof(Wave3Byte)]) {
+                      u8 (&FL_RESTRICT_PARAM output)[4 * sizeof(Wave3Byte)]) FL_NO_EXCEPT {
     Wave3Byte laneWaveforms[4];
     for (int lane = 0; lane < 4; lane++) {
         detail::wave3_convert_byte_to_wave3byte(lanes[lane], lut, &laneWaveforms[lane]);
@@ -140,7 +141,7 @@ void wave3Transpose_4(const u8 (&FL_RESTRICT_PARAM lanes)[4],
 FL_OPTIMIZE_FUNCTION FL_IRAM
 void wave3Transpose_8(const u8 (&FL_RESTRICT_PARAM lanes)[8],
                       const Wave3BitExpansionLut& lut,
-                      u8 (&FL_RESTRICT_PARAM output)[8 * sizeof(Wave3Byte)]) {
+                      u8 (&FL_RESTRICT_PARAM output)[8 * sizeof(Wave3Byte)]) FL_NO_EXCEPT {
     Wave3Byte laneWaveforms[8];
     for (int lane = 0; lane < 8; lane++) {
         detail::wave3_convert_byte_to_wave3byte(lanes[lane], lut, &laneWaveforms[lane]);
@@ -151,7 +152,7 @@ void wave3Transpose_8(const u8 (&FL_RESTRICT_PARAM lanes)[8],
 FL_OPTIMIZE_FUNCTION FL_IRAM
 void wave3Transpose_16(const u8 (&FL_RESTRICT_PARAM lanes)[16],
                        const Wave3BitExpansionLut& lut,
-                       u8 (&FL_RESTRICT_PARAM output)[16 * sizeof(Wave3Byte)]) {
+                       u8 (&FL_RESTRICT_PARAM output)[16 * sizeof(Wave3Byte)]) FL_NO_EXCEPT {
     Wave3Byte laneWaveforms[16];
     for (int lane = 0; lane < 16; lane++) {
         detail::wave3_convert_byte_to_wave3byte(lanes[lane], lut, &laneWaveforms[lane]);
@@ -165,7 +166,7 @@ void wave3Transpose_16(const u8 (&FL_RESTRICT_PARAM lanes)[16],
 
 FL_OPTIMIZE_FUNCTION
 void wave3Untranspose_2(const u8 (&FL_RESTRICT_PARAM transposed)[2 * sizeof(Wave3Byte)],
-                        u8 (&FL_RESTRICT_PARAM output)[2 * sizeof(Wave3Byte)]) {
+                        u8 (&FL_RESTRICT_PARAM output)[2 * sizeof(Wave3Byte)]) FL_NO_EXCEPT {
     Wave3Byte lane_waves[2];
 
     for (int symbol_idx = 0; symbol_idx < 3; symbol_idx++) {
@@ -188,13 +189,13 @@ void wave3Untranspose_2(const u8 (&FL_RESTRICT_PARAM transposed)[2 * sizeof(Wave
         lane_waves[1].data[symbol_idx] = lane1_bits;
     }
 
-    fl::isr::memcpy(output, &lane_waves[0], sizeof(Wave3Byte));
-    fl::isr::memcpy(output + sizeof(Wave3Byte), &lane_waves[1], sizeof(Wave3Byte));
+    fl::isr::memcopy(output, &lane_waves[0], sizeof(Wave3Byte));
+    fl::isr::memcopy(output + sizeof(Wave3Byte), &lane_waves[1], sizeof(Wave3Byte));
 }
 
 FL_OPTIMIZE_FUNCTION
 void wave3Untranspose_4(const u8 (&FL_RESTRICT_PARAM transposed)[4 * sizeof(Wave3Byte)],
-                        u8 (&FL_RESTRICT_PARAM output)[4 * sizeof(Wave3Byte)]) {
+                        u8 (&FL_RESTRICT_PARAM output)[4 * sizeof(Wave3Byte)]) FL_NO_EXCEPT {
     Wave3Byte lane_waves[4];
 
     for (int symbol_idx = 0; symbol_idx < 3; symbol_idx++) {
@@ -220,13 +221,13 @@ void wave3Untranspose_4(const u8 (&FL_RESTRICT_PARAM transposed)[4 * sizeof(Wave
     }
 
     for (int lane = 0; lane < 4; lane++) {
-        fl::isr::memcpy(output + lane * sizeof(Wave3Byte), &lane_waves[lane], sizeof(Wave3Byte));
+        fl::isr::memcopy(output + lane * sizeof(Wave3Byte), &lane_waves[lane], sizeof(Wave3Byte));
     }
 }
 
 FL_OPTIMIZE_FUNCTION
 void wave3Untranspose_8(const u8 (&FL_RESTRICT_PARAM transposed)[8 * sizeof(Wave3Byte)],
-                        u8 (&FL_RESTRICT_PARAM output)[8 * sizeof(Wave3Byte)]) {
+                        u8 (&FL_RESTRICT_PARAM output)[8 * sizeof(Wave3Byte)]) FL_NO_EXCEPT {
     Wave3Byte lane_waves[8];
 
     for (int symbol_idx = 0; symbol_idx < 3; symbol_idx++) {
@@ -251,13 +252,13 @@ void wave3Untranspose_8(const u8 (&FL_RESTRICT_PARAM transposed)[8 * sizeof(Wave
     }
 
     for (int lane = 0; lane < 8; lane++) {
-        fl::isr::memcpy(output + lane * sizeof(Wave3Byte), &lane_waves[lane], sizeof(Wave3Byte));
+        fl::isr::memcopy(output + lane * sizeof(Wave3Byte), &lane_waves[lane], sizeof(Wave3Byte));
     }
 }
 
 FL_OPTIMIZE_FUNCTION
 void wave3Untranspose_16(const u8 (&FL_RESTRICT_PARAM transposed)[16 * sizeof(Wave3Byte)],
-                         u8 (&FL_RESTRICT_PARAM output)[16 * sizeof(Wave3Byte)]) {
+                         u8 (&FL_RESTRICT_PARAM output)[16 * sizeof(Wave3Byte)]) FL_NO_EXCEPT {
     Wave3Byte lane_waves[16];
 
     for (int symbol_idx = 0; symbol_idx < 3; symbol_idx++) {
@@ -281,7 +282,7 @@ void wave3Untranspose_16(const u8 (&FL_RESTRICT_PARAM transposed)[16 * sizeof(Wa
     }
 
     for (int lane = 0; lane < 16; lane++) {
-        fl::isr::memcpy(output + lane * sizeof(Wave3Byte), &lane_waves[lane], sizeof(Wave3Byte));
+        fl::isr::memcopy(output + lane * sizeof(Wave3Byte), &lane_waves[lane], sizeof(Wave3Byte));
     }
 }
 

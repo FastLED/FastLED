@@ -1,10 +1,12 @@
 #pragma once
 
+#include "fl/stl/adl_barrier.h"
 #include "fl/stl/stdint.h"
 #include "fl/stl/noexcept.h"
 
 namespace fl {
 
+namespace adl_barrier {  // see fl/stl/adl_barrier.h
 // fl::begin for arrays
 template <typename T, fl::size N>
 constexpr T* begin(T (&array)[N]) FL_NO_EXCEPT {
@@ -19,26 +21,28 @@ constexpr T* end(T (&array)[N]) FL_NO_EXCEPT {
 
 // fl::begin for containers with begin() member function
 template <typename Container>
-constexpr auto begin(Container& c) -> decltype(c.begin()) {
+constexpr auto begin(Container& c) FL_NO_EXCEPT -> decltype(c.begin()) {
     return c.begin();
 }
 
 // fl::begin for const containers with begin() member function
 template <typename Container>
-constexpr auto begin(const Container& c) -> decltype(c.begin()) {
+constexpr auto begin(const Container& c) FL_NO_EXCEPT -> decltype(c.begin()) {
     return c.begin();
 }
 
 // fl::end for containers with end() member function
 template <typename Container>
-constexpr auto end(Container& c) -> decltype(c.end()) {
+constexpr auto end(Container& c) FL_NO_EXCEPT -> decltype(c.end()) {
     return c.end();
 }
 
 // fl::end for const containers with end() member function
 template <typename Container>
-constexpr auto end(const Container& c) -> decltype(c.end()) {
+constexpr auto end(const Container& c) FL_NO_EXCEPT -> decltype(c.end()) {
     return c.end();
 }
+}  // namespace adl_barrier
+
 
 } // namespace fl

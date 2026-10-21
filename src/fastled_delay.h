@@ -7,6 +7,7 @@
 #include "fl/stl/compiler_control.h"
 #include "fl/system/delay.h"
 #include "platforms/cpu_frequency.h"
+#include "fl/stl/noexcept.h"
 
 // Note: micros() is used in inline templates below but not declared here.
 // It will be provided by platform headers (Arduino.h, etc.) included via led_sysdefs.h
@@ -29,10 +30,10 @@ template<int WAIT> class CMinWait {
 
 public:
 	/// Constructor
-	CMinWait() { mLastMicros = 0; }
+	CMinWait() FL_NO_EXCEPT { mLastMicros = 0; }
 
 	/// Blocking delay until WAIT time since mark() has passed
-	void wait() {
+	void wait() FL_NO_EXCEPT {
 		fl::u16 diff;
 		do {
 			diff = (fl::micros() & 0xFFFF) - mLastMicros;
@@ -40,7 +41,7 @@ public:
 	}
 
 	/// Reset the timestamp that marks the start of the wait period
-	void mark() { mLastMicros = fl::micros() & 0xFFFF; }
+	void mark() FL_NO_EXCEPT { mLastMicros = fl::micros() & 0xFFFF; }
 };
 
 #else

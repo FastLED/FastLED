@@ -3,12 +3,13 @@
 
 #include "fl/math/intmap.h"
 #include "fl/math/ease.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
 // Improved 8-bit to 16-bit scaling using the same technique as map8_to_16
 // but with proper rounding for the 0-255 to 0-65535 conversion
-static inline u16 scale8_to_16_accurate(u8 x) {
+static inline u16 scale8_to_16_accurate(u8 x) FL_NO_EXCEPT {
     if (x == 0) return 0;
     if (x == 255) return 65535;
     // Use 32-bit arithmetic with rounding: (x * 65535 + 127) / 255
@@ -16,7 +17,7 @@ static inline u16 scale8_to_16_accurate(u8 x) {
     return (u16)(((u32)x * 65535 + 127) / 255);
 }
 
-static HSV16 RGBtoHSV16(const CRGB &rgb) {
+static HSV16 RGBtoHSV16(const CRGB &rgb) FL_NO_EXCEPT {
     // Work with 8-bit values directly
     u8 r = rgb.r;
     u8 g = rgb.g;
@@ -118,7 +119,7 @@ static HSV16 RGBtoHSV16(const CRGB &rgb) {
     return HSV16{h, s, v};
 }
 
-static CRGB HSV16toRGB(const HSV16& hsv) {
+static CRGB HSV16toRGB(const HSV16& hsv) FL_NO_EXCEPT {
     // Convert 16-bit values to working range
     u32 h = hsv.h;
     u32 s = hsv.s; 
@@ -170,15 +171,15 @@ static CRGB HSV16toRGB(const HSV16& hsv) {
     return CRGB{R, G, B};
 }
 
-HSV16::HSV16(const CRGB& rgb) {
+HSV16::HSV16(const CRGB& rgb) FL_NO_EXCEPT {
     *this = RGBtoHSV16(rgb);
 }
 
-CRGB HSV16::ToRGB() const {
+CRGB HSV16::ToRGB() const FL_NO_EXCEPT {
     return HSV16toRGB(*this);
 }
 
-CRGB HSV16::colorBoost(EaseType saturation_function, EaseType luminance_function) const {
+CRGB HSV16::colorBoost(EaseType saturation_function, EaseType luminance_function) const FL_NO_EXCEPT {
     HSV16 hsv = *this;
     
     if (saturation_function != EaseType::EASE_NONE) {

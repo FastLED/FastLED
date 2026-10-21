@@ -17,6 +17,13 @@
 using namespace fl;
 
 
+FL_TEST_CASE("RGBW selectors use one byte each") {
+    FL_CHECK_EQ(sizeof(EOrderW), sizeof(u8));
+    FL_CHECK_EQ(sizeof(RGBW_MODE), sizeof(u8));
+    FL_CHECK_EQ(static_cast<int>(EOrderW::WDefault), 3);
+    FL_CHECK_EQ(static_cast<int>(RGBW_MODE::kRGBWUserFunction), 7);
+}
+
 FL_TEST_CASE("Rgbww: default-constructed has sane fields") {
     Rgbww cfg;
     FL_CHECK(cfg.warm_cct == kRGBWWDefaultWarmCct);

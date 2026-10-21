@@ -21,44 +21,44 @@ FASTLED_SHARED_PTR(XYPathGenerator);
 class XYPathRenderer {
   public:
     XYPathRenderer(XYPathGeneratorPtr path,
-                   TransformFloat transform = TransformFloat());
+                   TransformFloat transform = TransformFloat()) FL_NO_EXCEPT;
     virtual ~XYPathRenderer() FL_NO_EXCEPT = default; // Add virtual destructor for proper cleanup
-    vec2f at(float alpha);
+    vec2f at(float alpha) FL_NO_EXCEPT;
 
-    Tile2x2_u8 at_subpixel(float alpha);
+    Tile2x2_u8 at_subpixel(float alpha) FL_NO_EXCEPT;
 
     void rasterize(float from, float to, int steps, XYRasterU8Sparse &raster,
-                   fl::function<u8(float)> *optional_alpha_gen = nullptr);
+                   fl::function<u8(float)> *optional_alpha_gen = nullptr) FL_NO_EXCEPT;
 
     // Overloaded to allow transform to be passed in.
-    vec2f at(float alpha, const TransformFloat &tx);
+    vec2f at(float alpha, const TransformFloat &tx) FL_NO_EXCEPT;
 
     // Needed for drawing to the screen. When this called the rendering will
     // be centered on the width and height such that 0,0 -> maps to .5,.5,
     // which is convenient for drawing since each float pixel can be truncated
     // to an integer type.
-    void setDrawBounds(u16 width, u16 height);
-    bool hasDrawBounds() const { return mDrawBoundsSet; }
+    void setDrawBounds(u16 width, u16 height) FL_NO_EXCEPT;
+    bool hasDrawBounds() const FL_NO_EXCEPT { return mDrawBoundsSet; }
 
-    void onTransformFloatChanged();
+    void onTransformFloatChanged() FL_NO_EXCEPT;
 
-    TransformFloat &transform();
+    TransformFloat &transform() FL_NO_EXCEPT;
 
-    void setTransform(const TransformFloat &transform) {
+    void setTransform(const TransformFloat &transform) FL_NO_EXCEPT {
         mTransform = transform;
         onTransformFloatChanged();
     }
 
-    void setScale(float scale);
+    void setScale(float scale) FL_NO_EXCEPT;
 
-    vec2f compute(float alpha);
+    vec2f compute(float alpha) FL_NO_EXCEPT;
 
   private:
     XYPathGeneratorPtr mPath;
     TransformFloat mTransform;
     TransformFloat mGridTransform;
     bool mDrawBoundsSet = false;
-    vec2f compute_float(float alpha, const TransformFloat &tx);
+    vec2f compute_float(float alpha, const TransformFloat &tx) FL_NO_EXCEPT;
 };
 
 } // namespace fl

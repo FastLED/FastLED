@@ -16,6 +16,6 @@ IDecoderPtr H264::createDecoder(const H264Config& config,
     return fl::make_shared<NullDecoder>();
 }
 
-bool H264::isSupported() { return false; }
+bool H264::isSupported() FL_NO_EXCEPT { return false; }
 
 } // namespace fl

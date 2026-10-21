@@ -49,7 +49,7 @@ class Device {
 public:
     /// @brief Construct SPI device with configuration
     /// @param config Pin and speed configuration
-    explicit Device(const Config& config);
+    explicit Device(const Config& config) FL_NO_EXCEPT;
 
     /// @brief Destructor - releases hardware resources
     /// @note Waits for pending operations to complete
@@ -60,15 +60,15 @@ public:
     /// @brief Initialize the SPI hardware
     /// @returns Result indicating success or error
     /// @note Must be called before any communication methods
-    fl::optional<fl::task::Error> begin();
+    fl::optional<fl::task::Error> begin() FL_NO_EXCEPT;
 
     /// @brief Shutdown the SPI hardware and release resources
     /// @note Waits for pending operations to complete
-    void end();
+    void end() FL_NO_EXCEPT;
 
     /// @brief Check if device is initialized and ready for use
     /// @returns true if initialized, false otherwise
-    bool isReady() const;
+    bool isReady() const FL_NO_EXCEPT;
 
     // ========== Transaction API (Primary Interface) ==========
 
@@ -87,7 +87,7 @@ public:
     ///     result.value().wait();  // Wait for completion
     /// }
     /// @endcode
-    Result<Transaction> writeAsync(const u8* data, size_t size);
+    Result<Transaction> writeAsync(const u8* data, size_t size) FL_NO_EXCEPT;
 
     // ========== Zero-Copy DMA API (Expert) ==========
 
@@ -96,23 +96,23 @@ public:
     /// @returns DMABuffer (managed buffer) or error
     /// @note Buffer is backed by DMA-capable memory (PSRAM on ESP32)
     /// @note Buffer lifetime managed by shared_ptr
-    DMABuffer acquireBuffer(size_t size);
+    DMABuffer acquireBuffer(size_t size) FL_NO_EXCEPT;
 
     /// @brief Transmit from previously acquired DMA buffer
     /// @param buffer Buffer acquired via acquireBuffer()
     /// @param async If true, returns immediately; if false, waits for completion
     /// @returns Result indicating success or error
     /// @note Zero-copy: buffer is transmitted directly via DMA
-    fl::optional<fl::task::Error> transmit(DMABuffer& buffer, bool async = true);
+    fl::optional<fl::task::Error> transmit(DMABuffer& buffer, bool async = true) FL_NO_EXCEPT;
 
     /// @brief Wait for pending async operation to complete
     /// @param timeout_ms Maximum time to wait (default: forever)
     /// @returns true if completed, false on timeout
-    bool waitComplete(u32 timeout_ms = (fl::numeric_limits<u32>::max)());
+    bool waitComplete(u32 timeout_ms = (fl::numeric_limits<u32>::max)()) FL_NO_EXCEPT;
 
     /// @brief Check if async operation is in progress
     /// @returns true if busy, false if idle
-    bool isBusy() const;
+    bool isBusy() const FL_NO_EXCEPT;
 
     // ========== Configuration ==========
 
@@ -121,11 +121,11 @@ public:
     /// @returns Result indicating success or error
     /// @note Runtime updates not yet supported - new speed takes effect on next begin()
     /// @note To apply immediately: call end() then begin()
-    fl::optional<fl::task::Error> setClockSpeed(u32 speed_hz);
+    fl::optional<fl::task::Error> setClockSpeed(u32 speed_hz) FL_NO_EXCEPT;
 
     /// @brief Get current configuration
     /// @returns Reference to configuration structure
-    const Config& getConfig() const;
+    const Config& getConfig() const FL_NO_EXCEPT;
 
 private:
     friend class Transaction;  // Allow Transaction to access Device internals

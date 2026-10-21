@@ -28,29 +28,29 @@ class PixelIteratorAny {
     /// @param newOrder Desired color order (RGB, RBG, GRB, GBR, BRG, BGR)
     /// @param rgbw RGBW conversion settings
     PixelIteratorAny(PixelController<RGB> &controller, EOrder newOrder, Rgbw rgbw,
-                     Rgbww rgbww = RgbwwInvalid::value())
+                     Rgbww rgbww = RgbwwInvalid::value()) FL_NO_EXCEPT
         : mController(controller), mOrder(newOrder), mRgbw(rgbw), mRgbww(rgbww) {
         bindIterator();
     }
 
     template<typename PIXEL_CONTROLLER>
     PixelIteratorAny(PIXEL_CONTROLLER &controller, EOrder newOrder, Rgbw rgbw,
-                     Rgbww rgbww = RgbwwInvalid::value())
+                     Rgbww rgbww = RgbwwInvalid::value()) FL_NO_EXCEPT
         : mController(controller),  // Normalize to RGB order (#2558).
           mOrder(newOrder), mRgbw(rgbw), mRgbww(rgbww) {
         bindIterator();
     }
 
     /// @brief Get the type-erased PixelIterator
-    PixelIterator& get() { return *mPixelIterator; }
-    const PixelIterator& get() const { return *mPixelIterator; }
+    PixelIterator& get() FL_NO_EXCEPT { return *mPixelIterator; }
+    const PixelIterator& get() const FL_NO_EXCEPT { return *mPixelIterator; }
 
     /// @brief Implicit conversion to PixelIterator reference
-    operator PixelIterator&() { return *mPixelIterator; }
+    operator PixelIterator&() FL_NO_EXCEPT { return *mPixelIterator; }
 
     /// @brief Set XYMap for pixel addressing
     /// @param xymap XYMap with embedded width/height (nullptr to disable)
-    void setXYMap(const fl::shared_ptr<const XYMap>& xymap) {
+    void setXYMap(const fl::shared_ptr<const XYMap>& xymap) FL_NO_EXCEPT {
         mXyMap = xymap;
     }
 
@@ -112,7 +112,7 @@ class PixelIteratorAny {
     /// build. A colour order is a pure permutation of the three per-channel
     /// values, so the iterator applies it and the other five instantiations
     /// are never referenced (FastLED#4402).
-    void bindIterator() {
+    void bindIterator() FL_NO_EXCEPT {
         mPixelIterator.emplace(PixelIterator(&mController, mRgbw, mRgbww));
         mPixelIterator->setColorOrder(mOrder);
     }

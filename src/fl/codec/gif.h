@@ -21,7 +21,7 @@ struct GifInfo {
 
     // Constructor for easy initialization
     GifInfo(fl::u16 w, fl::u16 h, fl::u32 frames, fl::u32 loops = 0)
-        : width(w), height(h), frameCount(frames), loopCount(loops)
+        FL_NO_EXCEPT : width(w), height(h), frameCount(frames), loopCount(loops)
         , isAnimated(frames > 1), isValid(true) {}
 };
 
@@ -35,27 +35,27 @@ struct GifConfig {
 
     GifConfig() FL_NO_EXCEPT = default;
     GifConfig(FrameMode m, PixelFormat fmt = PixelFormat::RGB888)
-        : mode(m), format(fmt) {}
+        FL_NO_EXCEPT : mode(m), format(fmt) {}
 };
 
 // GIF decoder factory
 class Gif {
 public:
     // Create a GIF decoder for the current platform
-    static IDecoderPtr createDecoder(const GifConfig& config, fl::string* error_message = nullptr);
+    static IDecoderPtr createDecoder(const GifConfig& config, fl::string* error_message = nullptr) FL_NO_EXCEPT;
 
     // Create a GIF decoder with default config (Streaming, RGB888)
-    static IDecoderPtr createDecoder(fl::string* error_message = nullptr) {
+    static IDecoderPtr createDecoder(fl::string* error_message = nullptr) FL_NO_EXCEPT {
         GifConfig config; // Uses defaults
         return createDecoder(config, error_message);
     }
 
     // Check if GIF decoding is supported on this platform
-    static bool isSupported();
+    static bool isSupported() FL_NO_EXCEPT;
 
     // Parse GIF metadata from byte data without creating a decoder
     // This is a fast, lightweight operation that only reads the GIF header
-    static GifInfo parseGifInfo(fl::span<const fl::u8> data, fl::string* error_message = nullptr);
+    static GifInfo parseGifInfo(fl::span<const fl::u8> data, fl::string* error_message = nullptr) FL_NO_EXCEPT;
 };
 
 } // namespace fl

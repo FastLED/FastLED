@@ -25,11 +25,11 @@ FASTLED_SHARED_PTR(TransformFloatImpl);
 struct Transform16 {
     // Make a transform that maps a rectangle to the given bounds from
     // (0,0) to (max_value,max_value), inclusive.
-    static Transform16 ToBounds(alpha16 max_value);
+    static Transform16 ToBounds(alpha16 max_value) FL_NO_EXCEPT;
     static Transform16 ToBounds(const vec2<alpha16> &min,
-                                const vec2<alpha16> &max, alpha16 rotation = 0);
+                                const vec2<alpha16> &max, alpha16 rotation = 0) FL_NO_EXCEPT;
 
-    static Transform16 From(u16 width, u16 height) {
+    static Transform16 From(u16 width, u16 height) FL_NO_EXCEPT {
         vec2<alpha16> min = vec2<alpha16>(0, 0);
         vec2<alpha16> max = vec2<alpha16>(width, height);
         return Transform16::ToBounds(min, max);
@@ -50,13 +50,13 @@ struct Transform16 {
     alpha16 offset_y = 0;
     alpha16 rotation = 0;
 
-    vec2<alpha16> transform(const vec2<alpha16> &xy) const;
+    vec2<alpha16> transform(const vec2<alpha16> &xy) const FL_NO_EXCEPT;
 };
 
 // This transform assumes the coordinates are in the range [0,1].
 class TransformFloatImpl {
   public:
-    static TransformFloatImplPtr Identity() {
+    static TransformFloatImplPtr Identity() FL_NO_EXCEPT {
         TransformFloatImplPtr tx = fl::make_shared<TransformFloatImpl>();
         return tx;
     }
@@ -67,10 +67,10 @@ class TransformFloatImpl {
     float offset_x = 0.0f;
     float offset_y = 0.0f;
     float rotation = 0.0f; // rotation range is [0,1], not [0,2*FL_PI]!
-    float scale() const;
-    void set_scale(float scale);
-    vec2f transform(const vec2f &xy) const;
-    bool is_identity() const;
+    float scale() const FL_NO_EXCEPT;
+    void set_scale(float scale) FL_NO_EXCEPT;
+    vec2f transform(const vec2f &xy) const FL_NO_EXCEPT;
+    bool is_identity() const FL_NO_EXCEPT;
 };
 
 // Future usage.
@@ -81,12 +81,12 @@ struct Matrix3x3f {
     Matrix3x3f(Matrix3x3f &&) FL_NO_EXCEPT = default;
     Matrix3x3f &operator=(Matrix3x3f &&) FL_NO_EXCEPT = default;
     
-    static Matrix3x3f Identity() {
+    static Matrix3x3f Identity() FL_NO_EXCEPT {
         Matrix3x3f m;
         return m;
     }
     
-    vec2<float> transform(const vec2<float> &xy) const {
+    vec2<float> transform(const vec2<float> &xy) const FL_NO_EXCEPT {
         vec2<float> out;
         out.x = m[0][0] * xy.x + m[0][1] * xy.y + m[0][2];
         out.y = m[1][0] * xy.x + m[1][1] * xy.y + m[1][2];
@@ -102,31 +102,31 @@ struct Matrix3x3f {
 // TransformFloat is a wrapper around the smart ptr. This version allows for
 // easy use and fast / well behaved copy.
 struct TransformFloat {
-    TransformFloat() FL_NO_EXCEPT = default;
-    float scale_x() const { return mImpl->scale_x; }
-    float scale_y() const { return mImpl->scale_y; }
-    float offset_x() const { return mImpl->offset_x; }
-    float offset_y() const { return mImpl->offset_y; }
+    TransformFloat() = default; // ok no noexcept: infer member exception contracts (#4773)
+    float scale_x() const FL_NO_EXCEPT { return mImpl->scale_x; }
+    float scale_y() const FL_NO_EXCEPT { return mImpl->scale_y; }
+    float offset_x() const FL_NO_EXCEPT { return mImpl->offset_x; }
+    float offset_y() const FL_NO_EXCEPT { return mImpl->offset_y; }
     // rotation range is [0,1], not [0,2*FL_PI]!
-    float rotation() const { return mImpl->rotation; }
-    float scale() const { return fl::min(scale_x(), scale_y()); }
-    void set_scale(float scale) { mImpl->set_scale(scale); }
-    void set_scale_x(float scale) { mImpl->scale_x = scale; }
-    void set_scale_y(float scale) { mImpl->scale_y = scale; }
-    void set_offset_x(float offset) { mImpl->offset_x = offset; }
-    void set_offset_y(float offset) { mImpl->offset_y = offset; }
-    void set_rotation(float rotation) { mImpl->rotation = rotation; }
+    float rotation() const FL_NO_EXCEPT { return mImpl->rotation; }
+    float scale() const FL_NO_EXCEPT { return fl::min(scale_x(), scale_y()); }
+    void set_scale(float scale) FL_NO_EXCEPT { mImpl->set_scale(scale); }
+    void set_scale_x(float scale) FL_NO_EXCEPT { mImpl->scale_x = scale; }
+    void set_scale_y(float scale) FL_NO_EXCEPT { mImpl->scale_y = scale; }
+    void set_offset_x(float offset) FL_NO_EXCEPT { mImpl->offset_x = offset; }
+    void set_offset_y(float offset) FL_NO_EXCEPT { mImpl->offset_y = offset; }
+    void set_rotation(float rotation) FL_NO_EXCEPT { mImpl->rotation = rotation; }
 
-    vec2f transform(const vec2f &xy) const {
+    vec2f transform(const vec2f &xy) const FL_NO_EXCEPT {
         // mDirty = true; // always recompile.
         // compileIfNecessary();
         // return mCompiled.transform(xy);
         return mImpl->transform(xy);
     }
-    bool is_identity() const { return mImpl->is_identity(); }
+    bool is_identity() const FL_NO_EXCEPT { return mImpl->is_identity(); }
 
-    Matrix3x3f compile() const;
-    void compileIfNecessary() const {
+    Matrix3x3f compile() const FL_NO_EXCEPT;
+    void compileIfNecessary() const FL_NO_EXCEPT {
         // if (mDirty) {
         //     mCompiled = compile();
         //     mDirty = false;

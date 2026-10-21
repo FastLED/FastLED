@@ -19,11 +19,11 @@ struct ConstCharPtrWrapper {
     fl::string value;
 
     ConstCharPtrWrapper() FL_NO_EXCEPT = default;
-    ConstCharPtrWrapper(const fl::string& s) : value(s) {}
-    ConstCharPtrWrapper(fl::string&& s) : value(fl::move(s)) {}
+    ConstCharPtrWrapper(const fl::string& s) FL_NO_EXCEPT : value(s) {}
+    ConstCharPtrWrapper(fl::string&& s) FL_NO_EXCEPT : value(fl::move(s)) {}
 
-    operator const char*() const { return value.c_str(); }
-    const char* c_str() const { return value.c_str(); }
+    operator const char*() const FL_NO_EXCEPT { return value.c_str(); }
+    const char* c_str() const FL_NO_EXCEPT { return value.c_str(); }
 };
 
 // Helper wrapper for span<const T> parameters in RPC
@@ -33,14 +33,14 @@ struct ConstSpanWrapper {
     fl::vector<T> value;
 
     ConstSpanWrapper() FL_NO_EXCEPT = default;
-    ConstSpanWrapper(fl::vector<T>&& v) : value(fl::move(v)) {}
-    ConstSpanWrapper(const fl::vector<T>& v) : value(v) {}
+    ConstSpanWrapper(fl::vector<T>&& v) FL_NO_EXCEPT : value(fl::move(v)) {}
+    ConstSpanWrapper(const fl::vector<T>& v) FL_NO_EXCEPT : value(v) {}
 
-    operator fl::span<const T>() const {
+    operator fl::span<const T>() const FL_NO_EXCEPT {
         return value;
     }
 
-    fl::span<const T> get() const {
+    fl::span<const T> get() const FL_NO_EXCEPT {
         return value;
     }
 };
@@ -54,7 +54,7 @@ namespace detail {
 // Primary template declaration for JsonToType (with two template parameters for SFINAE)
 template <typename T, typename Enable = void>
 struct JsonToType {
-    static fl::tuple<T, TypeConversionResult> convert(const json& j) {
+    static fl::tuple<T, TypeConversionResult> convert(const json& j) FL_NO_EXCEPT {
         (void)j;
         TypeConversionResult result;
         result.setError("unsupported type for JSON conversion");
@@ -68,7 +68,7 @@ struct JsonToType {
 // in the core.
 template <typename T>
 struct JsonToType<T, typename fl::enable_if<fl::is_integral<T>::value && !fl::is_same<T, bool>::value>::type> {
-    static fl::tuple<T, TypeConversionResult> convert(const json& j) {
+    static fl::tuple<T, TypeConversionResult> convert(const json& j) FL_NO_EXCEPT {
         const json_value* val = j.internal_value();
         if (!val) {
             TypeConversionResult result;
@@ -90,7 +90,7 @@ struct JsonToType<T, typename fl::enable_if<fl::is_integral<T>::value && !fl::is
 // Boolean conversion - dispatches through `json_convert_to_bool_core`.
 template <>
 struct JsonToType<bool, void> {
-    static fl::tuple<bool, TypeConversionResult> convert(const json& j) {
+    static fl::tuple<bool, TypeConversionResult> convert(const json& j) FL_NO_EXCEPT {
         const json_value* val = j.internal_value();
         if (!val) {
             TypeConversionResult result;
@@ -108,7 +108,7 @@ struct JsonToType<bool, void> {
 // the per-T narrowing here lifts to double for `T == double` if requested.
 template <typename T>
 struct JsonToType<T, typename fl::enable_if<fl::is_floating_point<T>::value>::type> {
-    static fl::tuple<T, TypeConversionResult> convert(const json& j) {
+    static fl::tuple<T, TypeConversionResult> convert(const json& j) FL_NO_EXCEPT {
         const json_value* val = j.internal_value();
         if (!val) {
             TypeConversionResult result;
@@ -124,7 +124,7 @@ struct JsonToType<T, typename fl::enable_if<fl::is_floating_point<T>::value>::ty
 // String conversion - dispatches through `json_convert_to_string_core`.
 template <>
 struct JsonToType<fl::string, void> {
-    static fl::tuple<fl::string, TypeConversionResult> convert(const json& j) {
+    static fl::tuple<fl::string, TypeConversionResult> convert(const json& j) FL_NO_EXCEPT {
         const json_value* val = j.internal_value();
         if (!val) {
             TypeConversionResult result;
@@ -141,7 +141,7 @@ struct JsonToType<fl::string, void> {
 // This enables RPC methods to accept fl::json parameters for dynamic typing
 template <>
 struct JsonToType<fl::json, void> {
-    static fl::tuple<fl::json, TypeConversionResult> convert(const json& j) {
+    static fl::tuple<fl::json, TypeConversionResult> convert(const json& j) FL_NO_EXCEPT {
         TypeConversionResult result;  // Success by default
         return fl::make_tuple(j, result);
     }
@@ -151,7 +151,7 @@ struct JsonToType<fl::json, void> {
 // The wrapper stores fl::string and converts to const char* on access
 template <>
 struct JsonToType<fl::ConstCharPtrWrapper, void> {
-    static fl::tuple<fl::ConstCharPtrWrapper, TypeConversionResult> convert(const json& j) {
+    static fl::tuple<fl::ConstCharPtrWrapper, TypeConversionResult> convert(const json& j) FL_NO_EXCEPT {
         // Reuse the string converter
         auto stringResult = JsonToType<fl::string>::convert(j);
         fl::string str = fl::get<0>(stringResult);
@@ -164,7 +164,7 @@ struct JsonToType<fl::ConstCharPtrWrapper, void> {
 // ConstSpanWrapper conversion - converts JSON array to vector wrapper
 template <typename T>
 struct JsonToType<fl::ConstSpanWrapper<T>, void> {
-    static fl::tuple<fl::ConstSpanWrapper<T>, TypeConversionResult> convert(const json& j) {
+    static fl::tuple<fl::ConstSpanWrapper<T>, TypeConversionResult> convert(const json& j) FL_NO_EXCEPT {
         TypeConversionResult result;
 
         if (!j.is_array()) {
@@ -194,7 +194,7 @@ struct JsonToType<fl::ConstSpanWrapper<T>, void> {
 // Works for any T that has a JsonToType specialization
 template <typename T>
 struct JsonToType<fl::vector<T>, void> {
-    static fl::tuple<fl::vector<T>, TypeConversionResult> convert(const json& j) {
+    static fl::tuple<fl::vector<T>, TypeConversionResult> convert(const json& j) FL_NO_EXCEPT {
         TypeConversionResult result;
 
         if (!j.is_array()) {
@@ -224,7 +224,7 @@ struct JsonToType<fl::vector<T>, void> {
 // Base64 strings provide compact binary transport for JSON-RPC.
 template <>
 struct JsonToType<fl::vector<fl::u8>, void> {
-    static fl::tuple<fl::vector<fl::u8>, TypeConversionResult> convert(const json& j) {
+    static fl::tuple<fl::vector<fl::u8>, TypeConversionResult> convert(const json& j) FL_NO_EXCEPT {
         TypeConversionResult result;
 
         if (j.is_string()) {

@@ -27,10 +27,10 @@ class Frame {
     // PSRAM available. You should see allocator.h ->
     // SetPSRamAllocator(...) on setting a custom allocator for these large
     // blocks.
-    explicit Frame(int pixels_per_frame);
+    explicit Frame(int pixels_per_frame) FL_NO_EXCEPT;
 
     // Constructor for codec-sourced frames
-    Frame(fl::u8* pixels, fl::u16 width, fl::u16 height, PixelFormat format, fl::u32 timestamp = 0);
+    Frame(fl::u8* pixels, fl::u16 width, fl::u16 height, PixelFormat format, fl::u32 timestamp = 0) FL_NO_EXCEPT;
 
     // Copy constructor
     Frame(const Frame& other) FL_NO_EXCEPT;
@@ -39,26 +39,26 @@ class Frame {
     Frame& operator=(const Frame& other) FL_NO_EXCEPT = delete;
 
     ~Frame() FL_NO_EXCEPT;
-    fl::span<CRGB> rgb() { return fl::span<CRGB>(mRgb.data(), mPixelsCount); }
-    fl::span<const CRGB> rgb() const { return fl::span<const CRGB>(mRgb.data(), mPixelsCount); }
-    size_t size() const { return mPixelsCount; }
-    void copy(const Frame &other);
+    fl::span<CRGB> rgb() FL_NO_EXCEPT { return fl::span<CRGB>(mRgb.data(), mPixelsCount); }
+    fl::span<const CRGB> rgb() const FL_NO_EXCEPT { return fl::span<const CRGB>(mRgb.data(), mPixelsCount); }
+    size_t size() const FL_NO_EXCEPT { return mPixelsCount; }
+    void copy(const Frame &other) FL_NO_EXCEPT;
     void interpolate(const Frame &frame1, const Frame &frame2,
-                     u8 amountOfFrame2);
+                     u8 amountOfFrame2) FL_NO_EXCEPT;
     static void interpolate(const Frame &frame1, const Frame &frame2,
-                            u8 amountofFrame2, fl::span<CRGB> pixels);
-    void draw(fl::span<CRGB> leds, DrawMode draw_mode = DrawMode::DRAW_MODE_OVERWRITE) const;
+                            u8 amountofFrame2, fl::span<CRGB> pixels) FL_NO_EXCEPT;
+    void draw(fl::span<CRGB> leds, DrawMode draw_mode = DrawMode::DRAW_MODE_OVERWRITE) const FL_NO_EXCEPT;
     void drawXY(fl::span<CRGB> leds, const XYMap &xyMap,
-                DrawMode draw_mode = DrawMode::DRAW_MODE_OVERWRITE) const;
-    void clear();
+                DrawMode draw_mode = DrawMode::DRAW_MODE_OVERWRITE) const FL_NO_EXCEPT;
+    void clear() FL_NO_EXCEPT;
 
     // Codec functionality methods
-    bool isValid() const;
-    fl::u32 getTimestamp() const { return mTimestamp; }
-    PixelFormat getFormat() const { return mFormat; }
-    fl::u16 getWidth() const { return mWidth; }
-    fl::u16 getHeight() const { return mHeight; }
-    bool isFromCodec() const { return mIsFromCodec; }
+    bool isValid() const FL_NO_EXCEPT;
+    fl::u32 getTimestamp() const FL_NO_EXCEPT { return mTimestamp; }
+    PixelFormat getFormat() const FL_NO_EXCEPT { return mFormat; }
+    fl::u16 getWidth() const FL_NO_EXCEPT { return mWidth; }
+    fl::u16 getHeight() const FL_NO_EXCEPT { return mHeight; }
+    bool isFromCodec() const FL_NO_EXCEPT { return mIsFromCodec; }
 
   private:
     const size_t mPixelsCount;
@@ -72,10 +72,10 @@ class Frame {
     bool mIsFromCodec = false;
 
     // Helper method for pixel format conversion
-    void convertPixelsToRgb(fl::u8* pixels, PixelFormat format);
+    void convertPixelsToRgb(fl::u8* pixels, PixelFormat format) FL_NO_EXCEPT;
 };
 
-inline void Frame::copy(const Frame &other) {
+inline void Frame::copy(const Frame &other) FL_NO_EXCEPT {
     fl::memcpy(mRgb.data(), other.mRgb.data(), other.mPixelsCount * sizeof(CRGB));
 }
 

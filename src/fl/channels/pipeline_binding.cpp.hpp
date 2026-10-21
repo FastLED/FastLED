@@ -5,7 +5,7 @@
 #include "fl/channels/channel_events.h"
 #include "fl/channels/color_managed_source.h"
 #include "fl/channels/five_bit_semantics.h"
-#include "fl/channels/cled_controller.h"
+#include "fl/channels/channel.h"
 #include "fl/stl/new.h"
 
 namespace fl {
@@ -239,7 +239,7 @@ u32 colorPipelineUnscaledPowerMilliwatts(
 
 bool encodeColorPipelineManagedSpi(PixelIterator& pixels,
                                    vector_psram<u8>* out, SpiChipset chip,
-                                   const CLEDController& controller) FL_NO_EXCEPT {
+                                   const Channel& controller) FL_NO_EXCEPT {
 #if !FL_PLATFORM_HAS_TINY_MEMORY
     switch (chip) {
         case SpiChipset::LPD8806:

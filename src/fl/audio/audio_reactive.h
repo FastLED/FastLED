@@ -94,149 +94,149 @@ public:
     ~Reactive() FL_NO_EXCEPT;
     
     // Setup
-    void begin(const ReactiveConfig& config = ReactiveConfig{});
-    void setConfig(const ReactiveConfig& config);
+    void begin(const ReactiveConfig& config = ReactiveConfig{}) FL_NO_EXCEPT;
+    void setConfig(const ReactiveConfig& config) FL_NO_EXCEPT;
     
     // Process audio sample - this does all the work immediately
-    void processSample(const Sample& sample);
+    void processSample(const Sample& sample) FL_NO_EXCEPT;
     
     // Optional: update smoothing without new sample data  
-    void update(fl::u32 currentTimeMs);
+    void update(fl::u32 currentTimeMs) FL_NO_EXCEPT;
     
     // Data access
-    const Data& getData() const;
-    const Data& getSmoothedData() const;
+    const Data& getData() const FL_NO_EXCEPT;
+    const Data& getSmoothedData() const FL_NO_EXCEPT;
     
     // Convenience accessors
-    float getVolume() const;
-    float getBass() const;    // Average of bins 0-1
-    float getMid() const;     // Average of bins 6-7 
-    float getTreble() const;  // Average of bins 14-15
-    bool isBeat() const;
+    float getVolume() const FL_NO_EXCEPT;
+    float getBass() const FL_NO_EXCEPT;    // Average of bins 0-1
+    float getMid() const FL_NO_EXCEPT;     // Average of bins 6-7
+    float getTreble() const FL_NO_EXCEPT;  // Average of bins 14-15
+    bool isBeat() const FL_NO_EXCEPT;
     
     // Enhanced beat detection accessors
-    bool isBassBeat() const;
-    bool isMidBeat() const;
-    bool isTrebleBeat() const;
-    float getSpectralFlux() const;
-    float getBassEnergy() const;
-    float getMidEnergy() const;
-    float getTrebleEnergy() const;
+    bool isBassBeat() const FL_NO_EXCEPT;
+    bool isMidBeat() const FL_NO_EXCEPT;
+    bool isTrebleBeat() const FL_NO_EXCEPT;
+    float getSpectralFlux() const FL_NO_EXCEPT;
+    float getBassEnergy() const FL_NO_EXCEPT;
+    float getMidEnergy() const FL_NO_EXCEPT;
+    float getTrebleEnergy() const FL_NO_EXCEPT;
     
     // ----- Polling Getters (float 0.0-1.0, bool, or integer) -----
     // These forward to an internal Processor for detector-based analysis.
 
     // Vocal Detection
-    float getVocalConfidence();
+    float getVocalConfidence() FL_NO_EXCEPT;
 
     // Beat Detection (detector-based)
-    float getBeatConfidence();
-    float getBPM();
+    float getBeatConfidence() FL_NO_EXCEPT;
+    float getBPM() FL_NO_EXCEPT;
 
     // Energy Analysis
-    float getEnergyLevel();
-    float getPeakLevel();
+    float getEnergyLevel() FL_NO_EXCEPT;
+    float getPeakLevel() FL_NO_EXCEPT;
 
     // Frequency Bands
-    float getBassLevel();
-    float getMidLevel();
-    float getTrebleLevel();
+    float getBassLevel() FL_NO_EXCEPT;
+    float getMidLevel() FL_NO_EXCEPT;
+    float getTrebleLevel() FL_NO_EXCEPT;
 
     // Silence Detection
-    bool isSilent();
-    u32 getSilenceDuration();
+    bool isSilent() FL_NO_EXCEPT;
+    u32 getSilenceDuration() FL_NO_EXCEPT;
 
     // Transient Detection
-    float getTransientStrength();
+    float getTransientStrength() FL_NO_EXCEPT;
 
     // Dynamics Analysis
-    float getDynamicTrend();  // -1.0 to 1.0
-    bool isCrescendo();
-    bool isDiminuendo();
+    float getDynamicTrend() FL_NO_EXCEPT;  // -1.0 to 1.0
+    bool isCrescendo() FL_NO_EXCEPT;
+    bool isDiminuendo() FL_NO_EXCEPT;
 
     // Pitch Detection
-    float getPitchConfidence();
-    float getPitchHz();
+    float getPitchConfidence() FL_NO_EXCEPT;
+    float getPitchHz() FL_NO_EXCEPT;
 
     // Tempo Analysis
-    float getTempoConfidence();
-    float getTempoBPM();
+    float getTempoConfidence() FL_NO_EXCEPT;
+    float getTempoBPM() FL_NO_EXCEPT;
 
     // Buildup Detection
-    float getBuildupIntensity();
-    float getBuildupProgress();
+    float getBuildupIntensity() FL_NO_EXCEPT;
+    float getBuildupProgress() FL_NO_EXCEPT;
 
     // Drop Detection
-    float getDropImpact();
+    float getDropImpact() FL_NO_EXCEPT;
 
     // Percussion Detection
-    bool isKick();
-    bool isSnare();
-    bool isHiHat();
-    bool isTom();
+    bool isKick() FL_NO_EXCEPT;
+    bool isSnare() FL_NO_EXCEPT;
+    bool isHiHat() FL_NO_EXCEPT;
+    bool isTom() FL_NO_EXCEPT;
 
     // Note Detection
-    u8 getCurrentNote();
-    float getNoteVelocity();
-    float getNoteConfidence();
+    u8 getCurrentNote() FL_NO_EXCEPT;
+    float getNoteVelocity() FL_NO_EXCEPT;
+    float getNoteConfidence() FL_NO_EXCEPT;
 
     // Downbeat Detection
-    float getDownbeatConfidence();
-    float getMeasurePhase();
-    u8 getCurrentBeatNumber();
+    float getDownbeatConfidence() FL_NO_EXCEPT;
+    float getMeasurePhase() FL_NO_EXCEPT;
+    u8 getCurrentBeatNumber() FL_NO_EXCEPT;
 
     // Backbeat Detection
-    float getBackbeatConfidence();
-    float getBackbeatStrength();
+    float getBackbeatConfidence() FL_NO_EXCEPT;
+    float getBackbeatStrength() FL_NO_EXCEPT;
 
     // Chord Detection
-    float getChordConfidence();
+    float getChordConfidence() FL_NO_EXCEPT;
 
     // Key Detection
-    float getKeyConfidence();
+    float getKeyConfidence() FL_NO_EXCEPT;
 
     // Mood Analysis
-    float getMoodArousal();
-    float getMoodValence();  // -1.0 to 1.0
+    float getMoodArousal() FL_NO_EXCEPT;
+    float getMoodValence() FL_NO_EXCEPT;  // -1.0 to 1.0
 
     // Gain control - delegates to internal Processor
-    void setGain(float gain);
-    float getGain() const;
+    void setGain(float gain) FL_NO_EXCEPT;
+    float getGain() const FL_NO_EXCEPT;
 
     // Effect helpers
-    fl::u8 volumeToScale255() const;
-    CRGB volumeToColor(const CRGBPalette16& palette) const;
-    fl::u8 frequencyToScale255(fl::u8 binIndex) const;
+    fl::u8 volumeToScale255() const FL_NO_EXCEPT;
+    CRGB volumeToColor(const CRGBPalette16& palette) const FL_NO_EXCEPT;
+    fl::u8 frequencyToScale255(fl::u8 binIndex) const FL_NO_EXCEPT;
 
     // Signal conditioning stats
-    const SignalConditioner::Stats& getSignalConditionerStats() const;
-    const NoiseFloorTracker::Stats& getNoiseFloorStats() const;
+    const SignalConditioner::Stats& getSignalConditionerStats() const FL_NO_EXCEPT;
+    const NoiseFloorTracker::Stats& getNoiseFloorStats() const FL_NO_EXCEPT;
 
     // Spectral equalizer stats (optional middleware - must be enabled first)
-    bool isSpectralEqualizerEnabled() const;
-    const SpectralEqualizer::Stats& getSpectralEqualizerStats() const;
+    bool isSpectralEqualizerEnabled() const FL_NO_EXCEPT;
+    const SpectralEqualizer::Stats& getSpectralEqualizerStats() const FL_NO_EXCEPT;
 
 private:
     // Internal processing methods
-    void processFFT(const Sample& sample);
-    void mapFFTBinsToFrequencyChannels();
-    void updateVolumeAndPeak(const Sample& sample);
-    void detectBeat(fl::u32 currentTimeMs);
-    void smoothResults();
-    void applyScaling();
-    void applyGain();
+    void processFFT(const Sample& sample) FL_NO_EXCEPT;
+    void mapFFTBinsToFrequencyChannels() FL_NO_EXCEPT;
+    void updateVolumeAndPeak(const Sample& sample) FL_NO_EXCEPT;
+    void detectBeat(fl::u32 currentTimeMs) FL_NO_EXCEPT;
+    void smoothResults() FL_NO_EXCEPT;
+    void applyScaling() FL_NO_EXCEPT;
+    void applyGain() FL_NO_EXCEPT;
     
     // Enhanced beat detection methods
-    void detectEnhancedBeats(fl::u32 currentTimeMs);
-    void calculateBandEnergies();
-    void updateSpectralFlux();
-    void applyAWeighting();
-    void applyLoudnessCompensation();
-    void applySpectralEqualization();
+    void detectEnhancedBeats(fl::u32 currentTimeMs) FL_NO_EXCEPT;
+    void calculateBandEnergies() FL_NO_EXCEPT;
+    void updateSpectralFlux() FL_NO_EXCEPT;
+    void applyAWeighting() FL_NO_EXCEPT;
+    void applyLoudnessCompensation() FL_NO_EXCEPT;
+    void applySpectralEqualization() FL_NO_EXCEPT;
     
     // Helper methods
-    float mapFrequencyBin(int fromBin, int toBin);
-    float computeRMS(const fl::vector<fl::i16>& samples);
+    float mapFrequencyBin(int fromBin, int toBin) FL_NO_EXCEPT;
+    float computeRMS(const fl::vector<fl::i16>& samples) FL_NO_EXCEPT;
     
     // Configuration
     ReactiveConfig mConfig;
@@ -292,7 +292,7 @@ private:
 
     // Internal Processor for detector-based polling getters
     fl::unique_ptr<Processor> mAudioProcessor;
-    Processor& ensureAudioProcessor();
+    Processor& ensureAudioProcessor() FL_NO_EXCEPT;
 };
 
 // Spectral flux-based onset detection for enhanced beat detection
@@ -301,11 +301,11 @@ public:
     SpectralFluxDetector() FL_NO_EXCEPT;
     ~SpectralFluxDetector() FL_NO_EXCEPT;
     
-    void reset();
-    bool detectOnset(span<const float, 16> currentBins);
-    float calculateSpectralFlux(span<const float, 16> currentBins, span<const float, 16> previousBins);
-    void setThreshold(float threshold);
-    float getThreshold() const;
+    void reset() FL_NO_EXCEPT;
+    bool detectOnset(span<const float, 16> currentBins) FL_NO_EXCEPT;
+    float calculateSpectralFlux(span<const float, 16> currentBins, span<const float, 16> previousBins) FL_NO_EXCEPT;
+    void setThreshold(float threshold) FL_NO_EXCEPT;
+    float getThreshold() const FL_NO_EXCEPT;
     
 private:
     float mFluxThreshold;
@@ -314,7 +314,7 @@ private:
 #if SKETCH_HAS_LARGE_MEMORY
     fl::array<float, 32> mFluxHistory;      // For advanced smoothing
     fl::size mHistoryIndex;
-    float calculateAdaptiveThreshold();
+    float calculateAdaptiveThreshold() FL_NO_EXCEPT;
 #endif
 };
 
@@ -323,9 +323,9 @@ struct BeatDetectors {
     BeatDetectors() FL_NO_EXCEPT;
     ~BeatDetectors() FL_NO_EXCEPT;
     
-    void reset();
-    void detectBeats(span<const float, 16> frequencyBins, Data& audioData);
-    void setThresholds(float bassThresh, float midThresh, float trebleThresh);
+    void reset() FL_NO_EXCEPT;
+    void detectBeats(span<const float, 16> frequencyBins, Data& audioData) FL_NO_EXCEPT;
+    void setThresholds(float bassThresh, float midThresh, float trebleThresh) FL_NO_EXCEPT;
     
 private:
 #if SKETCH_HAS_LARGE_MEMORY
@@ -351,8 +351,8 @@ public:
     PerceptualWeighting() FL_NO_EXCEPT;
     ~PerceptualWeighting() FL_NO_EXCEPT;
     
-    void applyAWeighting(Data& data) const;
-    void applyLoudnessCompensation(Data& data, float referenceLevel) const;
+    void applyAWeighting(Data& data) const FL_NO_EXCEPT;
+    void applyLoudnessCompensation(Data& data, float referenceLevel) const FL_NO_EXCEPT;
     
 private:
     // A-weighting coefficients for 16-bin frequency analysis

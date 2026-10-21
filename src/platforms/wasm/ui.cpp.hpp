@@ -65,8 +65,8 @@ static bool& getUiSystemInitialized() {
 
 // Add a periodic check function that can be called from JavaScript
 extern "C" void checkUpdateEngineState() {
-    FL_WARN("*** ASYNC PERIODIC CHECK: g_updateEngineState=%s", (getUpdateEngineState() ? "VALID" : "nullptr"));
-    FL_WARN("*** ASYNC PERIODIC CHECK: g_uiSystemInitialized=%s", (getUiSystemInitialized() ? "true" : "false"));
+    FL_WARN("*** ASYNC PERIODIC CHECK: g_updateEngineState=" << ((getUpdateEngineState() ? "VALID" : "nullptr")));
+    FL_WARN("*** ASYNC PERIODIC CHECK: g_uiSystemInitialized=" << ((getUiSystemInitialized() ? "true" : "false")));
 }
 
 /**
@@ -106,7 +106,7 @@ void jsUpdateUiComponents(const char* jsonStr) {
         getUiSystemInitialized() = false;  // Force reinitialization
         ensureWasmUiSystemInitialized();
         
-        FL_WARN("*** ASYNC AFTER EMERGENCY REINIT: g_updateEngineState=%s", (getUpdateEngineState() ? "VALID" : "nullptr"));
+        FL_WARN("*** ASYNC AFTER EMERGENCY REINIT: g_updateEngineState=" << ((getUpdateEngineState() ? "VALID" : "nullptr")));
         
         if (getUpdateEngineState()) {
             FL_WARN("*** ASYNC EMERGENCY REINIT SUCCESSFUL - retrying JSON processing");

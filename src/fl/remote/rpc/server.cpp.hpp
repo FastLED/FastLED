@@ -4,28 +4,29 @@
 #include "fl/stl/move.h"
 #include "fl/stl/optional.h"
 #include "fl/stl/vector.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
-Server::Server()
+Server::Server() FL_NO_EXCEPT
     : mRequestSource([]() { return fl::nullopt; })
     , mResponseSink([](const fl::json&) {})
 {}
 
 Server::Server(RequestSource source, ResponseSink sink)
-    : mRequestSource(fl::move(source))
+    FL_NO_EXCEPT : mRequestSource(fl::move(source))
     , mResponseSink(fl::move(sink))
 {}
 
-void Server::setRequestHandler(RequestHandler handler) {
+void Server::setRequestHandler(RequestHandler handler) FL_NO_EXCEPT {
     mRequestHandler = fl::move(handler);
 }
 
-void Server::setRequestSource(RequestSource source) {
+void Server::setRequestSource(RequestSource source) FL_NO_EXCEPT {
     mRequestSource = fl::move(source);
 }
 
-void Server::setResponseSink(ResponseSink sink) {
+void Server::setResponseSink(ResponseSink sink) FL_NO_EXCEPT {
     mResponseSink = fl::move(sink);
 }
 
@@ -37,13 +38,13 @@ void Server::setResponseStreamSink(ResponseStreamSink sink) FL_NO_EXCEPT {
 #endif
 }
 
-size_t Server::update() {
+size_t Server::update() FL_NO_EXCEPT {
     size_t processed = pull();
     size_t sent = push();
     return processed + sent;
 }
 
-size_t Server::pull() {
+size_t Server::pull() FL_NO_EXCEPT {
     if (!mRequestSource || !mRequestHandler) {
         return 0;
     }
@@ -73,7 +74,7 @@ size_t Server::pull() {
     return processed;
 }
 
-size_t Server::push() {
+size_t Server::push() FL_NO_EXCEPT {
     if (!mResponseSink) {
         return 0;
     }

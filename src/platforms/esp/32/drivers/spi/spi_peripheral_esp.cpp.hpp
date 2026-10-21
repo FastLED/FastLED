@@ -145,12 +145,12 @@ bool SpiPeripheralESPImpl::initializeBus(const SpiBusConfig& config) FL_NO_EXCEP
     // Initialize bus with auto DMA channel selection (delegate to ESP-IDF)
     esp_err_t err = ::spi_bus_initialize(mHost, &bus_config, SPI_DMA_CH_AUTO);
     if (err != ESP_OK) {
-        FL_WARN("SpiPeripheralESP: Failed to initialize bus: %s", err);
+        FL_WARN("SpiPeripheralESP: Failed to initialize bus: " << err);
         return false;
     }
 
     mBusInitialized = true;
-    FL_DBG("SpiPeripheralESP: Bus initialized (MOSI=%s, SCLK=%s)", config.mosi_pin, config.sclk_pin);
+    FL_DBG("SpiPeripheralESP: Bus initialized (MOSI=" << config.mosi_pin << ", SCLK=" << config.sclk_pin << ")");
 
     return true;
 }
@@ -182,12 +182,12 @@ bool SpiPeripheralESPImpl::addDevice(const SpiDeviceConfig& config) FL_NO_EXCEPT
     // Add device to bus (delegate to ESP-IDF)
     esp_err_t err = ::spi_bus_add_device(mHost, &dev_config, &mDeviceHandle);
     if (err != ESP_OK) {
-        FL_WARN("SpiPeripheralESP: Failed to add device: %s", err);
+        FL_WARN("SpiPeripheralESP: Failed to add device: " << err);
         return false;
     }
 
     mDeviceAdded = true;
-    FL_DBG("SpiPeripheralESP: Device added (clock=%s Hz, queue=%s)", config.clock_speed_hz, config.queue_size);
+    FL_DBG("SpiPeripheralESP: Device added (clock=" << config.clock_speed_hz << " Hz, queue=" << config.queue_size << ")");
 
     return true;
 }
@@ -209,7 +209,7 @@ bool SpiPeripheralESPImpl::removeDevice() FL_NO_EXCEPT {
         // Remove device (delegate to ESP-IDF)
         esp_err_t err = ::spi_bus_remove_device(mDeviceHandle);
         if (err != ESP_OK) {
-            FL_WARN("SpiPeripheralESP: Failed to remove device: %s", err);
+            FL_WARN("SpiPeripheralESP: Failed to remove device: " << err);
             return false;
         }
 
@@ -236,7 +236,7 @@ bool SpiPeripheralESPImpl::freeBus() FL_NO_EXCEPT {
     // Free bus resources (delegate to ESP-IDF)
     esp_err_t err = ::spi_bus_free(mHost);
     if (err != ESP_OK) {
-        FL_WARN("SpiPeripheralESP: Failed to free bus: %s", err);
+        FL_WARN("SpiPeripheralESP: Failed to free bus: " << err);
         return false;
     }
 
@@ -271,7 +271,7 @@ bool SpiPeripheralESPImpl::queueTransaction(const SpiTransaction& trans) FL_NO_E
     // portMAX_DELAY = block until queue has space
     esp_err_t err = ::spi_device_queue_trans(mDeviceHandle, &esp_trans, portMAX_DELAY);
     if (err != ESP_OK) {
-        FL_WARN("SpiPeripheralESP: Failed to queue transaction: %s", err);
+        FL_WARN("SpiPeripheralESP: Failed to queue transaction: " << err);
         return false;
     }
 
@@ -295,7 +295,7 @@ bool SpiPeripheralESPImpl::pollTransaction(u32 timeout_ms) FL_NO_EXCEPT {
     }
 
     if (err != ESP_OK) {
-        FL_WARN("SpiPeripheralESP: Failed to get transaction result: %s", err);
+        FL_WARN("SpiPeripheralESP: Failed to get transaction result: " << err);
         return false;
     }
 
@@ -328,7 +328,7 @@ u8* SpiPeripheralESPImpl::allocateDma(size_t size) FL_NO_EXCEPT {
     );
 
     if (buffer == nullptr) {
-        FL_WARN("SpiPeripheralESP: Failed to allocate DMA buffer (%s bytes)", size);
+        FL_WARN("SpiPeripheralESP: Failed to allocate DMA buffer (" << size << " bytes)");
     }
 
     return buffer;

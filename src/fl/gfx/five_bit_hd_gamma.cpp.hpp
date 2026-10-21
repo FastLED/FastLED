@@ -2,6 +2,7 @@
 #include "fl/stl/align.h"
 #include "fl/math/ease.h"
 #include "fl/system/fastled.h"
+#include "fl/stl/noexcept.h"
 
 FL_OPTIMIZATION_LEVEL_O3_BEGIN
 
@@ -20,14 +21,14 @@ FL_ALIGN_PROGMEM(4) static constexpr u32 BRIGHT_SCALE[32] FL_PROGMEM = {
 
 // Inlined gamma lookup with alignment enforced by aligned_ptr type.
 // Avoids cross-TU function call overhead of gamma_2_8() in hot span loops.
-FL_ALWAYS_INLINE u16 gamma_lut_read(aligned_ptr<const u16, 64> lut, u8 idx) {
+FL_ALWAYS_INLINE u16 gamma_lut_read(aligned_ptr<const u16, 64> lut, u8 idx) FL_NO_EXCEPT {
     return FL_PGM_READ_WORD_ALIGNED(&lut[idx]);
 }
 
 // Branchless scale16by8: (i * (1 + scale)) >> 8.
 // Eliminates the if(scale==0) branch from the standard scale16by8.
 // The caller is responsible for skipping the call when scale==0.
-FL_ALWAYS_INLINE u16 scale16by8_nozero(u16 i, u16 scale_plus_one) {
+FL_ALWAYS_INLINE u16 scale16by8_nozero(u16 i, u16 scale_plus_one) FL_NO_EXCEPT {
     return static_cast<u16>((static_cast<u32>(i) * scale_plus_one) >> 8);
 }
 
@@ -37,7 +38,7 @@ FL_ALWAYS_INLINE void five_bit_pixel(
     u16 r16, u16 g16, u16 b16, u8 brightness,
     // Precomputed: (1 + brightness), or 0 if brightness==0xff (skip scaling)
     u16 bright_p1, bool apply_brightness,
-    CRGB *out, u8 *out_power_5bit) {
+    CRGB *out, u8 *out_power_5bit) FL_NO_EXCEPT {
 
     // All-zero fast path (rare but worth checking — writes are cheap).
     if ((r16 | g16 | b16) == 0) {
@@ -82,7 +83,7 @@ FL_ALWAYS_INLINE void five_bit_pixel(
 FL_OPTIMIZE_FUNCTION
 void five_bit_hd_gamma_bitshift(
     fl::span<const CRGB> colors, CRGB colors_scale, u8 global_brightness,
-    fl::span<CRGB> out_colors, fl::span<u8> out_power_5bit) {
+    fl::span<CRGB> out_colors, fl::span<u8> out_power_5bit) FL_NO_EXCEPT {
 
     u16 n = static_cast<u16>(colors.size());
     if (out_colors.size() < n) n = static_cast<u16>(out_colors.size());
@@ -132,7 +133,7 @@ void five_bit_hd_gamma_bitshift(
 FL_OPTIMIZE_FUNCTION
 void five_bit_hd_gamma_bitshift(
     fl::span<const CRGB> colors, CRGB colors_scale, u8 global_brightness,
-    fl::span<CRGBA5> out) {
+    fl::span<CRGBA5> out) FL_NO_EXCEPT {
 
     u16 n = static_cast<u16>(colors.size());
     if (out.size() < n) n = static_cast<u16>(out.size());

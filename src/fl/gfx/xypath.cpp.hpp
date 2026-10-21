@@ -27,14 +27,14 @@ namespace fl {
 
 namespace { // anonymous namespace
 
-XYRasterU8Sparse &get_tls_raster() {
+XYRasterU8Sparse &get_tls_raster() FL_NO_EXCEPT {
     return SingletonThreadLocal<XYRasterU8Sparse>::instance();
 }
 
 } // namespace
 
 namespace xypath_detail {
-fl::string unique_missing_name(const char *prefix) {
+fl::string unique_missing_name(const char *prefix) FL_NO_EXCEPT {
     static fl::atomic<u32> sUniqueName(0); // okay static in header
     u32 id = ++sUniqueName;
     string name = prefix;
@@ -43,34 +43,34 @@ fl::string unique_missing_name(const char *prefix) {
 }
 } // namespace xypath_detail
 
-vec2f XYPath::at(float alpha, const TransformFloat &tx) {
+vec2f XYPath::at(float alpha, const TransformFloat &tx) FL_NO_EXCEPT {
     // return compute_float(alpha, tx);
     return mPathRenderer->at(alpha, tx);
 }
 
-void XYPath::setDrawBounds(u16 width, u16 height) {
+void XYPath::setDrawBounds(u16 width, u16 height) FL_NO_EXCEPT {
     mPathRenderer->setDrawBounds(width, height);
 }
 
-void XYPath::setScale(float scale) { mPathRenderer->setScale(scale); }
+void XYPath::setScale(float scale) FL_NO_EXCEPT { mPathRenderer->setScale(scale); }
 
-string XYPath::name() const { return mPath->name(); }
-Tile2x2_u8 XYPath::at_subpixel(float alpha) {
+string XYPath::name() const FL_NO_EXCEPT { return mPath->name(); }
+Tile2x2_u8 XYPath::at_subpixel(float alpha) FL_NO_EXCEPT {
     return mPathRenderer->at_subpixel(alpha);
 }
 
 void XYPath::rasterize(float from, float to, int steps,
                        XYRasterU8Sparse &raster,
-                       XYPath::AlphaFunction *optional_alpha_gen) {
+                       XYPath::AlphaFunction *optional_alpha_gen) FL_NO_EXCEPT {
     mPathRenderer->rasterize(from, to, steps, raster, optional_alpha_gen);
 }
 
-vec2f XYPath::at(float alpha) { return mPathRenderer->at(alpha); }
+vec2f XYPath::at(float alpha) FL_NO_EXCEPT { return mPathRenderer->at(alpha); }
 
-TransformFloat &XYPath::transform() { return mPathRenderer->transform(); }
+TransformFloat &XYPath::transform() FL_NO_EXCEPT { return mPathRenderer->transform(); }
 
 XYPath::XYPath(XYPathGeneratorPtr path, TransformFloat transform)
-    : mPath(path) {
+    FL_NO_EXCEPT : mPath(path) {
     mPathRenderer = fl::make_shared<XYPathRenderer>(path, transform);
 }
 
@@ -78,7 +78,7 @@ XYPath::~XYPath() FL_NO_EXCEPT {}
 
 void XYPathRenderer::rasterize(
     float from, float to, int steps, XYRaster &raster,
-    fl::function<u8(float)> *optional_alpha_gen) {
+    fl::function<u8(float)> *optional_alpha_gen) FL_NO_EXCEPT {
     for (int i = 0; i < steps; ++i) {
         float alpha = fl::map_range<int, float>(i, 0, steps - 1, from, to);
         Tile2x2_u8 tile = at_subpixel(alpha);
@@ -91,7 +91,7 @@ void XYPathRenderer::rasterize(
     }
 }
 
-void XYPathRenderer::setDrawBounds(u16 width, u16 height) {
+void XYPathRenderer::setDrawBounds(u16 width, u16 height) FL_NO_EXCEPT {
     // auto &tx = *(mGridTransform.mImpl);
     auto &tx = mGridTransform;
 
@@ -117,35 +117,35 @@ void XYPathRenderer::setDrawBounds(u16 width, u16 height) {
     mDrawBoundsSet = true;
 }
 
-void XYPathRenderer::onTransformFloatChanged() {
+void XYPathRenderer::onTransformFloatChanged() FL_NO_EXCEPT {
     // Future use to allow recomputing the LUT.
 }
 
-TransformFloat &XYPathRenderer::transform() { return mTransform; }
+TransformFloat &XYPathRenderer::transform() FL_NO_EXCEPT { return mTransform; }
 
-void XYPathRenderer::setScale(float scale) {
+void XYPathRenderer::setScale(float scale) FL_NO_EXCEPT {
     // mTransform.scale_x = scale;
     // mTransform.scale_y = scale;
     mTransform.set_scale(scale);
     onTransformFloatChanged();
 }
 
-vec2f XYPathRenderer::compute(float alpha) {
+vec2f XYPathRenderer::compute(float alpha) FL_NO_EXCEPT {
     return compute_float(alpha, mTransform);
 }
 
-vec2f XYPathRenderer::at(float alpha) { return at(alpha, mTransform); }
+vec2f XYPathRenderer::at(float alpha) FL_NO_EXCEPT { return at(alpha, mTransform); }
 
-vec2f XYPathRenderer::at(float alpha, const TransformFloat &tx) {
+vec2f XYPathRenderer::at(float alpha, const TransformFloat &tx) FL_NO_EXCEPT {
     return compute_float(alpha, tx);
 }
 
-XYPathPtr XYPath::NewPointPath(float x, float y) {
+XYPathPtr XYPath::NewPointPath(float x, float y) FL_NO_EXCEPT {
     auto path = fl::make_shared<PointPath>(x, y);
     return fl::make_shared<XYPath>(path);
 }
 
-XYPathPtr XYPath::NewLinePath(float x0, float y0, float x1, float y1) {
+XYPathPtr XYPath::NewLinePath(float x0, float y0, float x1, float y1) FL_NO_EXCEPT {
     LinePathParamsPtr p = fl::make_shared<LinePathParams>();
     auto &params = *p;
     params.x0 = x0;
@@ -156,50 +156,50 @@ XYPathPtr XYPath::NewLinePath(float x0, float y0, float x1, float y1) {
     return fl::make_shared<XYPath>(path);
 }
 
-XYPathPtr XYPath::NewLinePath(const fl::shared_ptr<LinePathParams> &params) {
+XYPathPtr XYPath::NewLinePath(const fl::shared_ptr<LinePathParams> &params) FL_NO_EXCEPT {
     auto path = fl::make_shared<LinePath>(params);
     return fl::make_shared<XYPath>(path);
 }
 
-XYPathPtr XYPath::NewCirclePath() {
+XYPathPtr XYPath::NewCirclePath() FL_NO_EXCEPT {
     auto path = fl::make_shared<CirclePath>();
     return fl::make_shared<XYPath>(path);
 }
 
-XYPathPtr XYPath::NewCirclePath(u16 width, u16 height) {
+XYPathPtr XYPath::NewCirclePath(u16 width, u16 height) FL_NO_EXCEPT {
     CirclePathPtr path = fl::make_shared<CirclePath>();
     XYPathPtr out = fl::make_shared<XYPath>(path);
     out->setDrawBounds(width, height);
     return out;
 }
 
-XYPathPtr XYPath::NewHeartPath() {
+XYPathPtr XYPath::NewHeartPath() FL_NO_EXCEPT {
     HeartPathPtr path = fl::make_shared<HeartPath>();
     return fl::make_shared<XYPath>(path);
 }
 
-XYPathPtr XYPath::NewHeartPath(u16 width, u16 height) {
+XYPathPtr XYPath::NewHeartPath(u16 width, u16 height) FL_NO_EXCEPT {
     HeartPathPtr path = fl::make_shared<HeartPath>();
     XYPathPtr out = fl::make_shared<XYPath>(path);
     out->setDrawBounds(width, height);
     return out;
 }
 
-XYPathPtr XYPath::NewArchimedeanSpiralPath(u16 width, u16 height) {
+XYPathPtr XYPath::NewArchimedeanSpiralPath(u16 width, u16 height) FL_NO_EXCEPT {
     ArchimedeanSpiralPathPtr path = fl::make_shared<ArchimedeanSpiralPath>();
     XYPathPtr out = fl::make_shared<XYPath>(path);
     out->setDrawBounds(width, height);
     return out;
 }
 
-XYPathPtr XYPath::NewArchimedeanSpiralPath() {
+XYPathPtr XYPath::NewArchimedeanSpiralPath() FL_NO_EXCEPT {
     ArchimedeanSpiralPathPtr path = fl::make_shared<ArchimedeanSpiralPath>();
     XYPathPtr out = fl::make_shared<XYPath>(path);
     return out;
 }
 
 XYPathPtr XYPath::NewRosePath(u16 width, u16 height,
-                              const fl::shared_ptr<RosePathParams> &params) {
+                              const fl::shared_ptr<RosePathParams> &params) FL_NO_EXCEPT {
     RosePathPtr path = fl::make_shared<RosePath>(params);
     XYPathPtr out = fl::make_shared<XYPath>(path);
     if (width > 0 && height > 0) {
@@ -209,7 +209,7 @@ XYPathPtr XYPath::NewRosePath(u16 width, u16 height,
 }
 
 XYPathPtr XYPath::NewPhyllotaxisPath(u16 width, u16 height,
-                                     const fl::shared_ptr<PhyllotaxisParams> &args) {
+                                     const fl::shared_ptr<PhyllotaxisParams> &args) FL_NO_EXCEPT {
     PhyllotaxisPathPtr path = fl::make_shared<PhyllotaxisPath>(args);
     XYPathPtr out = fl::make_shared<XYPath>(path);
     if (width > 0 && height > 0) {
@@ -219,7 +219,7 @@ XYPathPtr XYPath::NewPhyllotaxisPath(u16 width, u16 height,
 }
 
 XYPathPtr XYPath::NewGielisCurvePath(u16 width, u16 height,
-                                     const fl::shared_ptr<GielisCurveParams> &params) {
+                                     const fl::shared_ptr<GielisCurveParams> &params) FL_NO_EXCEPT {
     GielisCurvePathPtr path = fl::make_shared<GielisCurvePath>(params);
     XYPathPtr out = fl::make_shared<XYPath>(path);
     if (width > 0 && height > 0) {
@@ -229,7 +229,7 @@ XYPathPtr XYPath::NewGielisCurvePath(u16 width, u16 height,
 }
 
 XYPathPtr XYPath::NewCatmullRomPath(u16 width, u16 height,
-                                    const fl::shared_ptr<CatmullRomParams> &params) {
+                                    const fl::shared_ptr<CatmullRomParams> &params) FL_NO_EXCEPT {
     CatmullRomPathPtr path = fl::make_shared<CatmullRomPath>(params);
     XYPathPtr out = fl::make_shared<XYPath>(path);
     if (width > 0 && height > 0) {
@@ -241,7 +241,7 @@ XYPathPtr XYPath::NewCatmullRomPath(u16 width, u16 height,
 XYPathPtr XYPath::NewCustomPath(const fl::function<vec2f(float)> &f,
                                 const rect<i16> &drawbounds,
                                 const TransformFloat &transform,
-                                const char *name) {
+                                const char *name) FL_NO_EXCEPT {
 
     XYPathFunctionPtr path = fl::make_shared<XYPathFunction>(f);
     path->setName(name);
@@ -265,12 +265,12 @@ XYPathPtr XYPath::NewCustomPath(const fl::function<vec2f(float)> &f,
     return out;
 }
 
-void XYPath::setTransform(const TransformFloat &transform) {
+void XYPath::setTransform(const TransformFloat &transform) FL_NO_EXCEPT {
     mPathRenderer->setTransform(transform);
 }
 
 void XYPath::drawColor(const CRGB &color, float from, float to, Leds *leds,
-                       int steps) {
+                       int steps) FL_NO_EXCEPT {
     XYRasterU8Sparse &raster = get_tls_raster();
     raster.clear();
     steps = steps > 0 ? steps : calculateSteps(from, to);
@@ -279,7 +279,7 @@ void XYPath::drawColor(const CRGB &color, float from, float to, Leds *leds,
 }
 
 void XYPath::drawGradient(const Gradient &gradient, float from, float to,
-                          Leds *leds, int steps) {
+                          Leds *leds, int steps) FL_NO_EXCEPT {
     XYRasterU8Sparse &raster = get_tls_raster();
     raster.clear();
     steps = steps > 0 ? steps : calculateSteps(from, to);
@@ -287,12 +287,12 @@ void XYPath::drawGradient(const Gradient &gradient, float from, float to,
     raster.drawGradient(gradient, leds);
 }
 
-int XYPath::calculateSteps(float from, float to) {
+int XYPath::calculateSteps(float from, float to) FL_NO_EXCEPT {
     float diff = fl::clamp(fl::abs(to - from), 0.0f, 1.0f);
     return fl::max(1, 200 * diff);
 }
 
-bool XYPath::hasDrawBounds() const { return mPathRenderer->hasDrawBounds(); }
+bool XYPath::hasDrawBounds() const FL_NO_EXCEPT { return mPathRenderer->hasDrawBounds(); }
 
 } // namespace fl
 

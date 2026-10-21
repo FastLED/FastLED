@@ -17,7 +17,7 @@ namespace net {
 namespace http {
 
 HttpStreamClient::HttpStreamClient(const fl::string& host, u16 port, u32 heartbeatIntervalMs)
-    : HttpStreamTransport(host, port, heartbeatIntervalMs)
+    FL_NO_EXCEPT : HttpStreamTransport(host, port, heartbeatIntervalMs)
     , mHttpHeaderSent(false)
     , mHttpHeaderReceived(false)
     , mHost(host)
@@ -31,7 +31,7 @@ HttpStreamClient::~HttpStreamClient() FL_NO_EXCEPT {
     disconnect();
 }
 
-bool HttpStreamClient::connect() {
+bool HttpStreamClient::connect() FL_NO_EXCEPT {
     // If already connected, return true
     if (isConnected()) {
         return true;
@@ -64,7 +64,7 @@ bool HttpStreamClient::connect() {
     return true;
 }
 
-void HttpStreamClient::disconnect() {
+void HttpStreamClient::disconnect() FL_NO_EXCEPT {
     if (mNativeClient) {
         mNativeClient->disconnect();
     }
@@ -73,30 +73,30 @@ void HttpStreamClient::disconnect() {
     mConnection.onDisconnected();
 }
 
-bool HttpStreamClient::isConnected() const {
+bool HttpStreamClient::isConnected() const FL_NO_EXCEPT {
     return mNativeClient && mNativeClient->isConnected() && mHttpHeaderSent && mHttpHeaderReceived;
 }
 
-int HttpStreamClient::sendData(fl::span<const u8> data) {
+int HttpStreamClient::sendData(fl::span<const u8> data) FL_NO_EXCEPT {
     if (!isConnected()) {
         return -1;
     }
     return mNativeClient->send(data);
 }
 
-int HttpStreamClient::recvData(fl::span<u8> buffer) {
+int HttpStreamClient::recvData(fl::span<u8> buffer) FL_NO_EXCEPT {
     if (!isConnected()) {
         return -1;
     }
     return mNativeClient->recv(buffer);
 }
 
-void HttpStreamClient::triggerReconnect() {
+void HttpStreamClient::triggerReconnect() FL_NO_EXCEPT {
     // Disconnect and let the base class reconnection logic handle it
     disconnect();
 }
 
-bool HttpStreamClient::sendHttpRequestHeader() {
+bool HttpStreamClient::sendHttpRequestHeader() FL_NO_EXCEPT {
     // Build HTTP POST request header
     // Format:
     // POST /rpc HTTP/1.1
@@ -132,7 +132,7 @@ bool HttpStreamClient::sendHttpRequestHeader() {
     return true;
 }
 
-bool HttpStreamClient::readHttpResponseHeader() {
+bool HttpStreamClient::readHttpResponseHeader() FL_NO_EXCEPT {
     // Read HTTP response header
     // Expected format:
     // HTTP/1.1 200 OK

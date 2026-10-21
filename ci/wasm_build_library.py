@@ -260,6 +260,7 @@ def compile_object(
                 "-include-pch",
                 str(pch_path),
                 "-Werror=invalid-pch",  # Error if PCH is invalid
+                "-fpch-validate-input-files-content",  # Strict PCH validation (pch_strict_flags lint)
             ]
 
         # Build command using compile_pch.py wrapper (fixes depfile)

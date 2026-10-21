@@ -1,5 +1,7 @@
 #pragma once
 
+#include "fl/stl/noexcept.h"
+
 #include "fl/fx/fx1d.h"
 
 namespace fl {
@@ -16,10 +18,10 @@ FASTLED_SHARED_PTR(Pride2015);
 
 class Pride2015 : public Fx1d {
   public:
-    Pride2015(u16 num_leds) : Fx1d(num_leds) {}
+    Pride2015(u16 num_leds) FL_NO_EXCEPT : Fx1d(num_leds) {}
 
-    void draw(Fx::DrawContext context) override;
-    fl::string fxName() const override { return "Pride2015"; }
+    void draw(Fx::DrawContext context) FL_NO_EXCEPT override;
+    fl::string fxName() const FL_NO_EXCEPT override { return "Pride2015"; }
 
   private:
     u16 mPseudotime = 0;
@@ -29,7 +31,7 @@ class Pride2015 : public Fx1d {
 
 // This function draws rainbows with an ever-changing,
 // widely-varying set of parameters.
-void Pride2015::draw(Fx::DrawContext ctx) {
+void Pride2015::draw(Fx::DrawContext ctx) FL_NO_EXCEPT {
     if (ctx.leds.empty() || mNumLeds == 0) {
         return;
     }

@@ -22,7 +22,7 @@ constexpr int kTrebleStart = 11;
 constexpr int kTrebleEnd = 15;
 
 /// Apply fft::FFT scaling mode to a single bin value
-inline float applyScaling(float value, FFTScalingMode mode) {
+inline float applyScaling(float value, FFTScalingMode mode) FL_NO_EXCEPT {
     switch (mode) {
     case FFTScalingMode::SquareRoot:
         return fl::sqrtf(value);
@@ -38,7 +38,7 @@ inline float applyScaling(float value, FFTScalingMode mode) {
 } // namespace
 
 EqualizerDetector::EqualizerDetector()
-{
+FL_NO_EXCEPT {
     mBinMaxFilters.reserve(kNumBins);
     mBinSmoothers.reserve(kNumBins);
     for (int i = 0; i < kNumBins; ++i) {
@@ -55,7 +55,7 @@ EqualizerDetector::EqualizerDetector()
 
 EqualizerDetector::~EqualizerDetector() FL_NO_EXCEPT = default;
 
-void EqualizerDetector::configure(const EqualizerConfig& config) {
+void EqualizerDetector::configure(const EqualizerConfig& config) FL_NO_EXCEPT {
     mConfig = config;
     // Rebuild normalization filters
     mBinMaxFilters.clear();
@@ -96,7 +96,7 @@ void EqualizerDetector::configure(const EqualizerConfig& config) {
     recomputePinkNoiseGains();
 }
 
-void EqualizerDetector::setMicProfile(MicProfile profile) {
+void EqualizerDetector::setMicProfile(MicProfile profile) FL_NO_EXCEPT {
     mCurrentMicProfile = profile;
     MicResponseCurve curve = getMicResponseCurve(profile);
     mHasMicCorrection = (curve.count > 0);
@@ -111,7 +111,7 @@ void EqualizerDetector::setMicProfile(MicProfile profile) {
     }
 }
 
-void EqualizerDetector::computeBinCenters(float* out) const {
+void EqualizerDetector::computeBinCenters(float* out) const FL_NO_EXCEPT {
     // Log-spaced bin centers matching Bins::binToFreq formula
     float fmin = mConfig.minFreq;
     float fmax = mConfig.maxFreq;
@@ -122,13 +122,13 @@ void EqualizerDetector::computeBinCenters(float* out) const {
     }
 }
 
-void EqualizerDetector::recomputePinkNoiseGains() {
+void EqualizerDetector::recomputePinkNoiseGains() FL_NO_EXCEPT {
     float binCenters[kNumBins];
     computeBinCenters(binCenters);
     computePinkNoiseGains(binCenters, kNumBins, mPinkNoiseGains);
 }
 
-void EqualizerDetector::update(shared_ptr<Context> context) {
+void EqualizerDetector::update(shared_ptr<Context> context) FL_NO_EXCEPT {
     mSampleRate = context->getSampleRate();
 
     span<const i16> pcm = context->getPCM();
@@ -266,7 +266,7 @@ void EqualizerDetector::update(shared_ptr<Context> context) {
     }
 }
 
-void EqualizerDetector::fireCallbacks() {
+void EqualizerDetector::fireCallbacks() FL_NO_EXCEPT {
     if (onEqualizer) {
         Equalizer eq;
         eq.bass = mBass;
@@ -285,7 +285,7 @@ void EqualizerDetector::fireCallbacks() {
     }
 }
 
-void EqualizerDetector::reset() {
+void EqualizerDetector::reset() FL_NO_EXCEPT {
     for (int i = 0; i < kNumBins; ++i) {
         mBins[i] = 0.0f;
         mBinMaxFilters[i].reset(0.0f);
@@ -312,7 +312,7 @@ void EqualizerDetector::reset() {
     mVolumeMax.reset(0.0f);
 }
 
-float EqualizerDetector::getBin(int index) const {
+float EqualizerDetector::getBin(int index) const FL_NO_EXCEPT {
     if (index < 0 || index >= kNumBins) return 0.0f;
     return mBins[index];
 }

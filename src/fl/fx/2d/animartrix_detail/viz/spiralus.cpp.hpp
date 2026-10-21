@@ -2,13 +2,14 @@
 #include "fl/fx/2d/animartrix_detail/viz/spiralus.h"
 #include "fl/fx/2d/animartrix_detail/render_value_fp.h"
 #include "fl/fx/2d/animartrix_detail/perlin_float.h"
+#include "fl/stl/noexcept.h"
 
 FL_FAST_MATH_BEGIN
 FL_OPTIMIZATION_LEVEL_O3_BEGIN
 
 namespace fl {
 
-void Spiralus::draw(Context &ctx) {
+void Spiralus::draw(Context &ctx) FL_NO_EXCEPT {
     auto *e = ctx.mEngine.get();
     e->get_ready();
 
@@ -78,7 +79,7 @@ void Spiralus::draw(Context &ctx) {
 // Fixed-Point Implementation of Spiralus
 // ============================================================================
 
-void Spiralus_FP::draw(Context &ctx) {
+void Spiralus_FP::draw(Context &ctx) FL_NO_EXCEPT {
     auto *e = ctx.mEngine.get();
     e->get_ready();
     mState.ensureCache(e);

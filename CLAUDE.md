@@ -33,6 +33,7 @@
 | Hardware autoresearch / `bash autoresearch` | `agents/docs/hardware-autoresearch.md` |
 | Hardware driver bring-up evidence or postmortems | `agents/docs/driver-bringup-postmortems.md` |
 | Debugging a C++ crash | `agents/docs/debugging.md` |
+| PCH failures: `redefinition of` / `redefines default argument` in a PCH header, stale `test_pch.h.pch`, tests that only pass after `--clean` | `/pch-debug` skill (probe before cleaning; never add include guards to hide it) |
 | Investigating binary size / flash bloat | `agents/docs/binary-size-analysis.md` |
 | Checking or ingesting colour-profile artifacts | `agents/docs/color-profile-artifacts.md` (freshness findings are **status, not errors** — exempt from the fix-immediately policy; ingest only on explicit maintainer request) |
 | Changing the MP3 decoder, or profiling it | `agents/docs/mp3-decoder-performance.md` (one command measures a change: `bash mp3measure`. Edit `src/third_party/minimp3/minimp3_synth_fixed.h` for the synthesis back-end and `src/third_party/minimp3/minimp3.h` for the IMDCT and the shared arithmetic helpers; profile scalar with `-DMINIMP3_NO_SIMD`; minimp3-fixed is 1.13x Helix on an ESP32-C6, and host and device have disagreed in both direction and magnitude -- quote the device number) |
@@ -118,6 +119,7 @@ See `agents/docs/build-system.md` for full command execution rules and forbidden
 
 ### Code Standards
 - **C++**: See `agents/docs/cpp-standards.md` (span convention, DMA patterns, naming, macros)
+- **Compile-time platform behavior**: Keep `#if` selection at the dispatch boundary, select a concrete backend type, and use shared C++ templates only where they remove duplication. See "Select Types at the Preprocessor Boundary" in `agents/docs/cpp-standards.md`.
 - **C++ public settings**: New global setters MUST go on `CFastLED` (`FastLED.setX()`), not as bare `fl::set_*` free functions — see `agents/docs/cpp-standards.md` → "Public Settings Pattern"
 - **C++ pointer lifetime**: Long-lived pointers (stored, returned from an accessor, or held across async/reconfiguration) MUST be `fl::shared_ptr`; a raw pointer is OK only in sync code where the target provably outlives the use. Compile it out on small-memory tiers (`!FL_PLATFORM_HAS_LARGE_MEMORY`) — see `agents/docs/cpp-standards.md` → "Long-Lived Pointers Are `fl::shared_ptr`"
 - **JavaScript**: Run `bash lint --js` after modifying JS files

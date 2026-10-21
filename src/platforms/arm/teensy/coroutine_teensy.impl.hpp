@@ -288,7 +288,7 @@ TaskCoroutinePtr TaskCoroutineTeensy::create(
         u8 /*priority*/) FL_NO_EXCEPT {
     auto* ctx = CoroutineContext::create(fl::move(function), stack_size);
     if (!ctx) {
-        FL_WARN("TaskCoroutineTeensy: Failed to create context for '%s'", name);
+        FL_WARN("TaskCoroutineTeensy: Failed to create context for '" << name << "'");
         return nullptr;
     }
 

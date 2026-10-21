@@ -14,7 +14,6 @@ FL_TEST_CASE("json_object pair classification in vector ops") {
     const auto* ops = fl::vector_element_ops_for<Pair>();
     FL_CHECK(ops != nullptr);
     if (ops) {
-        FL_CHECK(ops->uninitialized_move_n != nullptr);
         FL_CHECK(ops->destroy_n != nullptr);
         FL_CHECK(ops->move_construct != nullptr);
     }

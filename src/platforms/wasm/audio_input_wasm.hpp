@@ -23,7 +23,7 @@ public:
     static constexpr int RING_BUFFER_SLOTS = 16;
 
     WasmAudioInput() FL_NO_EXCEPT;
-    ~WasmAudioInput() override;
+    ~WasmAudioInput() FL_NO_EXCEPT override;
 
     // audio::IInput interface
     void start() FL_NO_EXCEPT override;
@@ -40,7 +40,7 @@ private:
         fl::u32 timestamp;
         bool valid;
 
-        AudioBlock() : timestamp(0), valid(false) {}
+        AudioBlock() FL_NO_EXCEPT : timestamp(0), valid(false) {}
     };
 
     AudioBlock mRingBuffer[RING_BUFFER_SLOTS];

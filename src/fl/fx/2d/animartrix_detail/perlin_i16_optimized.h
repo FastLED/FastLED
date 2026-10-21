@@ -8,6 +8,7 @@
 
 #include "fl/math/fixed_point/s16x16.h"
 #include "fl/stl/compiler_control.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -16,17 +17,17 @@ struct perlin_i16_optimized {
     static constexpr fl::i32 HP_ONE = static_cast<fl::i32>(1) << HP_BITS;
 
     // Build fade LUT - still i32 for API compatibility
-    static void init_fade_lut(fl::i32 *table);
+    static void init_fade_lut(fl::i32 *table) FL_NO_EXCEPT;
 
     // Public API: accepts s16x16 raw values
     static fl::s16x16 pnoise2d(fl::s16x16 fx, fl::s16x16 fy,
                                       const fl::i32 *fade_lut,
-                                      const fl::u8 *perm);
+                                      const fl::u8 *perm) FL_NO_EXCEPT;
 
     // Hot path: uses i16 arithmetic for lerp/grad after extracting fractional part
     static fl::i32 pnoise2d_raw(fl::i32 fx_raw, fl::i32 fy_raw,
                                         const fl::i32 *fade_lut,
-                                        const fl::u8 *perm);
+                                        const fl::u8 *perm) FL_NO_EXCEPT;
 
   private:
     static constexpr int FP_BITS = fl::s16x16::FRAC_BITS;
@@ -36,16 +37,16 @@ struct perlin_i16_optimized {
     static constexpr fl::i32 HP_ONE_I16 = HP_ONE;
 
     // Extract fractional part as i16 (range 0-65535)
-    static FASTLED_FORCE_INLINE void floor_frac_i16(fl::i32 fp16, int &ifloor, fl::i16 &frac16);
+    static FASTLED_FORCE_INLINE void floor_frac_i16(fl::i32 fp16, int &ifloor, fl::i16 &frac16) FL_NO_EXCEPT;
 
     // Fade optimized for i16 input (coordinates), returns i32 (can be 0-65536)
-    static FASTLED_FORCE_INLINE fl::i32 fade(fl::i16 t, const fl::i32 *table);
+    static FASTLED_FORCE_INLINE fl::i32 fade(fl::i16 t, const fl::i32 *table) FL_NO_EXCEPT;
 
     // Standard lerp (i32), but benefits from smaller grad results
-    static FASTLED_FORCE_INLINE fl::i32 lerp(fl::i32 t, fl::i32 a, fl::i32 b);
+    static FASTLED_FORCE_INLINE fl::i32 lerp(fl::i32 t, fl::i32 a, fl::i32 b) FL_NO_EXCEPT;
 
     // i16 grad: Takes i16 coordinates (faster than i32), returns i32
-    static FASTLED_FORCE_INLINE fl::i32 grad_i16(int hash, fl::i16 x, fl::i16 y);
+    static FASTLED_FORCE_INLINE fl::i32 grad_i16(int hash, fl::i16 x, fl::i16 y) FL_NO_EXCEPT;
 };
 
 }  // namespace fl

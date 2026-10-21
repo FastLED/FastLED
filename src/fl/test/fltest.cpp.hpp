@@ -91,7 +91,7 @@ void DefaultReporter::assertResult(const AssertResult& result) FL_NO_EXCEPT {
 // TestContext implementation
 // =============================================================================
 
-TestContext::TestContext() {
+TestContext::TestContext() FL_NO_EXCEPT {
     mReporter = &mDefaultReporter;
 }
 

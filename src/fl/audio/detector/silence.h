@@ -14,11 +14,11 @@ public:
     Silence() FL_NO_EXCEPT;
     ~Silence() FL_NO_EXCEPT override;
 
-    void update(shared_ptr<Context> context) override;
-    void fireCallbacks() override;
-    bool needsFFT() const override { return false; }  // Uses RMS from Sample
-    const char* getName() const override { return "Silence"; }
-    void reset() override;
+    void update(shared_ptr<Context> context) FL_NO_EXCEPT override;
+    void fireCallbacks() FL_NO_EXCEPT override;
+    bool needsFFT() const FL_NO_EXCEPT override { return false; }  // Uses RMS from Sample
+    const char* getName() const FL_NO_EXCEPT override { return "Silence"; }
+    void reset() FL_NO_EXCEPT override;
 
     // Callbacks (multiple listeners supported)
     function_list<void(u8 silent)> onSilence;
@@ -27,16 +27,16 @@ public:
     function_list<void(u32 durationMs)> onSilenceDuration;
 
     // State access
-    bool isSilent() const { return mIsSilent; }
-    u32 getSilenceDuration() const;
-    float getSilenceThreshold() const { return mSilenceThreshold; }
-    float getCurrentRMS() const { return mCurrentRMS; }
+    bool isSilent() const FL_NO_EXCEPT { return mIsSilent; }
+    u32 getSilenceDuration() const FL_NO_EXCEPT;
+    float getSilenceThreshold() const FL_NO_EXCEPT { return mSilenceThreshold; }
+    float getCurrentRMS() const FL_NO_EXCEPT { return mCurrentRMS; }
 
     // Configuration
-    void setSilenceThreshold(float threshold) { mSilenceThreshold = threshold; }
-    void setMinSilenceDuration(u32 durationMs) { mMinSilenceDuration = durationMs; }
-    void setMaxSilenceDuration(u32 durationMs) { mMaxSilenceDuration = durationMs; }
-    void setHysteresis(float hysteresis) { mHysteresis = hysteresis; }
+    void setSilenceThreshold(float threshold) FL_NO_EXCEPT { mSilenceThreshold = threshold; }
+    void setMinSilenceDuration(u32 durationMs) FL_NO_EXCEPT { mMinSilenceDuration = durationMs; }
+    void setMaxSilenceDuration(u32 durationMs) FL_NO_EXCEPT { mMaxSilenceDuration = durationMs; }
+    void setHysteresis(float hysteresis) FL_NO_EXCEPT { mHysteresis = hysteresis; }
 
 private:
     bool mIsSilent;
@@ -66,8 +66,8 @@ private:
     static constexpr float DEFAULT_HYSTERESIS = 0.2f;
     static constexpr int DEFAULT_HISTORY_SIZE = 5;
 
-    float getSmoothedRMS();
-    bool checkSilenceCondition(float smoothedRMS);
+    float getSmoothedRMS() FL_NO_EXCEPT;
+    bool checkSilenceCondition(float smoothedRMS) FL_NO_EXCEPT;
 };
 
 } // namespace detector

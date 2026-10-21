@@ -286,6 +286,13 @@ def run_emcc(args: list[str], cwd: Optional[str] = None) -> int:
     Returns:
         Process return code (0 = success).
     """
+    if "-include-pch" in args:
+        from ci.meson.native_launchers import wrap_compiler_with_zccache
+
+        # In-process emcc would bypass zccache's private PCH snapshots.
+        command = wrap_compiler_with_zccache([get_emcc(), *args])
+        return RunningProcess.run(command, cwd=cwd).returncode
+
     # Verify the EMCC_WASM_LD patch is applied to the bundled emscripten
     # install. This was previously in _render_wasm_cross_file (called on every
     # warm build) — moved here in 2026-05 so the cost is paid only when emcc.py

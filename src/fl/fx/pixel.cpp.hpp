@@ -1,6 +1,7 @@
 // ok no header
 #include "fl/codec/pixel.h"
 #include "fastled_progmem.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -20,7 +21,7 @@ const fl::u8 rgb565_6to8_table[64] FL_PROGMEM = {
 };
 
 // Convert RGB565 to RGB888 with proper scaling to full 8-bit range using lookup tables
-void rgb565ToRgb888(fl::u16 rgb565, fl::u8& r, fl::u8& g, fl::u8& b) {
+void rgb565ToRgb888(fl::u16 rgb565, fl::u8& r, fl::u8& g, fl::u8& b) FL_NO_EXCEPT {
     // Extract RGB components from RGB565
     fl::u8 r5 = (rgb565 >> 11) & 0x1F;  // 5-bit red
     fl::u8 g6 = (rgb565 >> 5) & 0x3F;   // 6-bit green

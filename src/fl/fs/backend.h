@@ -30,24 +30,24 @@ class FsImpl {
   public:
     struct Visitor {
         virtual ~Visitor() FL_NO_EXCEPT {}
-        virtual void accept(const char *path) = 0;
+        virtual void accept(const char *path) FL_NO_EXCEPT = 0;
     };
 
     FsImpl() FL_NO_EXCEPT = default;
     virtual ~FsImpl() FL_NO_EXCEPT {}
 
     /// Mount. False if the medium is absent, unformatted, or unreadable.
-    virtual bool begin() = 0;
+    virtual bool begin() FL_NO_EXCEPT = 0;
 
     /// Unmount. Must be safe to call on a backend that never mounted.
-    virtual void end() = 0;
+    virtual void end() FL_NO_EXCEPT = 0;
 
     /// Null handle if the file does not exist or cannot be opened.
-    virtual filebuf_ptr openRead(const char *path) = 0;
+    virtual filebuf_ptr openRead(const char *path) FL_NO_EXCEPT = 0;
 
     /// Optional directory listing. Backends that cannot enumerate return
     /// false rather than pretending the medium is empty.
-    virtual bool ls(Visitor &visitor) {
+    virtual bool ls(Visitor &visitor) FL_NO_EXCEPT {
         (void)visitor;
         return false;
     }

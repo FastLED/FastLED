@@ -1,5 +1,6 @@
 #pragma once
 
+#include "fl/stl/adl_barrier.h"
 #include "fl/stl/cstddef.h"
 #include "fl/stl/type_traits.h"
 #include "fl/stl/noexcept.h"
@@ -98,12 +99,14 @@ get(tuple<Head, Tail...>&& t) FL_NO_EXCEPT {
     return get<I-1>(fl::move(t.tail));
 }
 
+namespace adl_barrier {  // see fl/stl/adl_barrier.h
 // make_tuple
 template<typename... Ts>
 tuple<typename fl::decay<Ts>::type...>
 make_tuple(Ts&&... args) FL_NO_EXCEPT {
     return tuple<typename fl::decay<Ts>::type...>(fl::forward<Ts>(args)...);
 }
+}  // namespace adl_barrier
 
 // C++11 requires out-of-class definitions for static constexpr members that are ODR-used
 // tuple_size<tuple<Ts...>>::value is inherited from integral_constant<size_t, sizeof...(Ts)>

@@ -5,6 +5,7 @@
 
 #ifdef FASTLED_TESTING
     #include "fl/stl/mutex.h"
+#include "fl/stl/noexcept.h"
 #endif
 
 namespace fl {
@@ -39,36 +40,36 @@ namespace {
     }
 }
 
-void inject_time_provider(const time_provider_t& provider) {
+void inject_time_provider(const time_provider_t& provider) FL_NO_EXCEPT {
     TimeProviderState& state = get_time_provider_state();
     fl::unique_lock<fl::mutex> lock(state.mutex);
     state.provider = provider;
 }
 
-void clear_time_provider() {
+void clear_time_provider() FL_NO_EXCEPT {
     TimeProviderState& state = get_time_provider_state();
     fl::unique_lock<fl::mutex> lock(state.mutex);
     state.provider = time_provider_t{}; // Clear the function
 }
 
 // MockTimeProvider implementation
-MockTimeProvider::MockTimeProvider(fl::u32 initial_time)
+MockTimeProvider::MockTimeProvider(fl::u32 initial_time) FL_NO_EXCEPT
     : mCurrentTime(initial_time) {
 }
 
-void MockTimeProvider::advance(fl::u32 milliseconds) {
+void MockTimeProvider::advance(fl::u32 milliseconds) FL_NO_EXCEPT {
     mCurrentTime += milliseconds;
 }
 
-void MockTimeProvider::set_time(fl::u32 milliseconds) {
+void MockTimeProvider::set_time(fl::u32 milliseconds) FL_NO_EXCEPT {
     mCurrentTime = milliseconds;
 }
 
-fl::u32 MockTimeProvider::current_time() const {
+fl::u32 MockTimeProvider::current_time() const FL_NO_EXCEPT {
     return mCurrentTime;
 }
 
-fl::u32 MockTimeProvider::operator()() const {
+fl::u32 MockTimeProvider::operator()() const FL_NO_EXCEPT {
     return mCurrentTime;
 }
 
@@ -76,7 +77,7 @@ fl::u32 MockTimeProvider::operator()() const {
 
 ///////////////////// PUBLIC API //////////////////////////////////////
 
-fl::u32 millis() {
+fl::u32 millis() FL_NO_EXCEPT {
 #if FL_CHRONO_HAS_TEST_TIME_PROVIDER
     fl::u32 injected_millis = 0;
     if (get_injected_millis(&injected_millis)) {
@@ -88,7 +89,7 @@ fl::u32 millis() {
     return fl::platforms::millis();
 }
 
-fl::u32 micros() {
+fl::u32 micros() FL_NO_EXCEPT {
 #if FL_CHRONO_HAS_TEST_TIME_PROVIDER
     fl::u32 injected_millis = 0;
     if (get_injected_millis(&injected_millis)) {
@@ -155,13 +156,13 @@ namespace {
         fl::mutex mutex;
     };
 
-    Millis64State& get_millis64_state() {
+    Millis64State& get_millis64_state() FL_NO_EXCEPT {
         static Millis64State state;
         return state;
     }
 }
 
-void millis64_reset() {
+void millis64_reset() FL_NO_EXCEPT {
     Millis64State& state = get_millis64_state();
     fl::unique_lock<fl::mutex> lock(state.mutex);
     state.accumulated = 0;
@@ -169,7 +170,7 @@ void millis64_reset() {
     state.initialized = false;
 }
 
-fl::u64 millis64() {
+fl::u64 millis64() FL_NO_EXCEPT {
     Millis64State& state = get_millis64_state();
     fl::u32 current_millis = fl::millis();
     fl::unique_lock<fl::mutex> lock(state.mutex);

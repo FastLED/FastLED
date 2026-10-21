@@ -64,6 +64,7 @@
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/isr.h"
 #include "fl/stl/singleton.h"
+#include "fl/stl/static_assert.h"
 
 #include "fl/channels/wave3.h"
 #include "fl/channels/wave8.h"
@@ -297,14 +298,14 @@ private:
     u32 mTimingT3Ns;
     u32 mResetUs;  // Reset time in microseconds
 
-    // Wave8 lookup table (used for clockless encoding)
-    fl::Wave8BitExpansionLut mWave8Lut;
-    // Byte-indexed expansion LUT (#2526): 2 KB, 1 lookup per byte → ~1.7x
-    // faster expansion on ESP32-P4 vs the nibble path; built from mWave8Lut.
-    fl::Wave8ByteExpansionLut mWave8ByteLut;
-
-    // Wave3 lookup table and state (used when chipset timing is wave3-eligible)
-    fl::Wave3BitExpansionLut mWave3Lut;
+    // Only the selected encoding table is live between initializations.
+    union WaveLookupStorage {
+        fl::Wave8ByteExpansionLut wave8;
+        fl::Wave3BitExpansionLut wave3;
+    };
+    WaveLookupStorage mWaveLookup;
+    FL_STATIC_ASSERT(sizeof(WaveLookupStorage) <= 2048,
+                     "PARLIO lookup storage exceeds one active encoding table");
     bool mUseWave3;
     u32 mClockFreqHz;  // Dynamic clock frequency (wave3: per-chipset, wave8: 8MHz)
 

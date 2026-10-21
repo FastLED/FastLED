@@ -75,7 +75,7 @@
 // ODR hazard between the bitdata[] array size and any consumer that
 // arithmetic-references BYTES_PER_DMA). The definition itself now
 // lives in ObjectFLEDDmaManager.h next to the static_assert and the
-// bitdata array declaration that depends on it.
+// bitdata buffer that depends on it.
 #include "ObjectFLEDDmaManager.h"
 
 #define CORDER_RGB	0	//* WS2811, YF923

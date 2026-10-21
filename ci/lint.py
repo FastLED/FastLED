@@ -17,6 +17,7 @@ from ci.lint.banned_linkers import run_banned_linkers_lint
 from ci.lint.check_size_thresholds import run as run_size_thresholds_check
 from ci.lint.duration_tracker import DurationTracker
 from ci.lint.orchestrator import LintOrchestrator
+from ci.lint.pch_strict_flags import run_pch_strict_flags_lint
 from ci.lint.root_project_ini_lockdown import (
     _warn_only_from_env as _root_ini_warn_only_from_env,
 )
@@ -163,8 +164,8 @@ def print_ai_hints() -> None:
     print("  - Python linting includes: ruff (lint + format) + KBI checker + ty")
     print("  - Use --strict to also run pyright (strict type checking)")
     print(
-        "  - C++ linting includes: clang-format, custom checkers, and default AST ratchets"
-        " for FL_NO_EXCEPT and decayed array parameters"
+        "  - C++ linting includes: clang-format, custom checkers, strict FL_NO_EXCEPT"
+        " AST enforcement, and a decayed-array-parameter AST ratchet"
     )
     print("  - IWYU runs with --full, --iwyu, or --strict flags")
     print("  - clang-tidy runs with --tidy flag")
@@ -272,6 +273,17 @@ def create_stages(args: LintArgs) -> list[LintStage]:
                 name="banned_linkers",
                 display_name="BANNED LINKERS (RELD ONLY)",
                 run_fn=lambda: run_banned_linkers_lint(),
+                timeout=60.0,
+            )
+        )
+        # Strict PCH validation: every PCH producer keeps -Werror=invalid-pch,
+        # -verify-pch and -fpch-validate-input-files-content, every consumer the
+        # first and last, and PCH timestamps are never disabled (/pch-debug skill).
+        stages.append(
+            LintStage(
+                name="pch_strict_flags",
+                display_name="PCH STRICT FLAGS",
+                run_fn=lambda: run_pch_strict_flags_lint(),
                 timeout=60.0,
             )
         )

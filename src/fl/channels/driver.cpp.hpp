@@ -10,7 +10,7 @@
 namespace fl {
 
 template<typename Condition>
-bool IChannelDriver::waitForCondition(Condition condition, u32 timeoutMs) {
+bool IChannelDriver::waitForCondition(Condition condition, u32 timeoutMs) FL_NO_EXCEPT {
     const u32 startTime = timeoutMs > 0 ? millis() : 0;
 
     // Tier 1: instant non-blocking check.
@@ -50,17 +50,17 @@ bool IChannelDriver::waitForCondition(Condition condition, u32 timeoutMs) {
         // actually up; otherwise the FreeRTOS tick floor is pure timing drift.
         if (fl::NetworkDetector::isAnyNetworkActive()) {
             // Radio active: keep WiFi/lwIP/BT alive with the deep yield.
-            task::run(250, task::ExecFlags::SYSTEM);
+            task::yield_system(250);
         } else {
             // No radio: fast yield, no FreeRTOS tick floor.
-            task::run(0, task::ExecFlags::SYSTEM);
+            task::yield_system(0);
         }
     }
 
     return true;  // Condition met
 }
 
-bool IChannelDriver::waitForReady(u32 timeoutMs) {
+bool IChannelDriver::waitForReady(u32 timeoutMs) FL_NO_EXCEPT {
     // wait until the driver is in a READY state.
     bool ok = waitForCondition([this]() {
         auto state = poll();
@@ -69,7 +69,7 @@ bool IChannelDriver::waitForReady(u32 timeoutMs) {
     return ok;
 }
 
-bool IChannelDriver::waitForReadyOrDraining(u32 timeoutMs) {
+bool IChannelDriver::waitForReadyOrDraining(u32 timeoutMs) FL_NO_EXCEPT {
     // wait until the driver is in a READY or DRAINING state.
     bool ok = waitForCondition([this]() {
         auto state = poll();

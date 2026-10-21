@@ -2,21 +2,22 @@
 #include "fl/fx/wled/client.h"
 #include "fl/log/log.h"
 #include "fl/log/log.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
 // WLEDClient implementation
 
 WLEDClient::WLEDClient(fl::shared_ptr<IFastLED> controller)
-    : mController(controller), mBrightness(255), mOn(false) {
+    FL_NO_EXCEPT : mController(controller), mBrightness(255), mOn(false) {
     if (!mController) {
         FL_WARN("WLEDClient: constructed with null controller");
     }
 }
 
-void WLEDClient::setBrightness(u8 brightness) {
+void WLEDClient::setBrightness(u8 brightness) FL_NO_EXCEPT {
     mBrightness = brightness;
-    FL_DBG("WLEDClient: setBrightness(%s)", static_cast<int>(mBrightness));
+    FL_DBG("WLEDClient: setBrightness(" << (static_cast<int>(mBrightness)) << ")");
 
     // Apply brightness to controller if we're on
     if (mOn && mController) {
@@ -24,9 +25,9 @@ void WLEDClient::setBrightness(u8 brightness) {
     }
 }
 
-void WLEDClient::setOn(bool on) {
+void WLEDClient::setOn(bool on) FL_NO_EXCEPT {
     mOn = on;
-    FL_DBG("WLEDClient: setOn(%s)", (mOn ? "true" : "false"));
+    FL_DBG("WLEDClient: setOn(" << ((mOn ? "true" : "false")) << ")");
 
     if (!mController) {
         return;
@@ -41,8 +42,8 @@ void WLEDClient::setOn(bool on) {
     }
 }
 
-void WLEDClient::clear(bool writeToStrip) {
-    FL_DBG("WLEDClient: clear(writeToStrip=%s)", (writeToStrip ? "true" : "false"));
+void WLEDClient::clear(bool writeToStrip) FL_NO_EXCEPT {
+    FL_DBG("WLEDClient: clear(writeToStrip=" << ((writeToStrip ? "true" : "false")) << ")");
 
     if (!mController) {
         return;
@@ -51,7 +52,7 @@ void WLEDClient::clear(bool writeToStrip) {
     mController->clear(writeToStrip);
 }
 
-void WLEDClient::update() {
+void WLEDClient::update() FL_NO_EXCEPT {
     FL_DBG("WLEDClient: update()");
 
     if (!mController) {
@@ -61,7 +62,7 @@ void WLEDClient::update() {
     mController->show();
 }
 
-fl::span<CRGB> WLEDClient::getLEDs() {
+fl::span<CRGB> WLEDClient::getLEDs() FL_NO_EXCEPT {
     if (!mController) {
         return fl::span<CRGB>();
     }
@@ -69,7 +70,7 @@ fl::span<CRGB> WLEDClient::getLEDs() {
     return mController->getLEDs();
 }
 
-size_t WLEDClient::getNumLEDs() const {
+size_t WLEDClient::getNumLEDs() const FL_NO_EXCEPT {
     if (!mController) {
         return 0;
     }
@@ -77,8 +78,8 @@ size_t WLEDClient::getNumLEDs() const {
     return mController->getNumLEDs();
 }
 
-void WLEDClient::setSegment(size_t start, size_t end) {
-    FL_DBG("WLEDClient: setSegment(%s, %s)", start, end);
+void WLEDClient::setSegment(size_t start, size_t end) FL_NO_EXCEPT {
+    FL_DBG("WLEDClient: setSegment(" << start << ", " << end << ")");
 
     if (!mController) {
         return;
@@ -87,7 +88,7 @@ void WLEDClient::setSegment(size_t start, size_t end) {
     mController->setSegment(start, end);
 }
 
-void WLEDClient::clearSegment() {
+void WLEDClient::clearSegment() FL_NO_EXCEPT {
     FL_DBG("WLEDClient: clearSegment()");
 
     if (!mController) {
@@ -97,8 +98,8 @@ void WLEDClient::clearSegment() {
     mController->clearSegment();
 }
 
-void WLEDClient::setCorrection(CRGB correction) {
-    FL_DBG("WLEDClient: setCorrection(r=%s, g=%s, b=%s)", static_cast<int>(correction.r), static_cast<int>(correction.g), static_cast<int>(correction.b));
+void WLEDClient::setCorrection(CRGB correction) FL_NO_EXCEPT {
+    FL_DBG("WLEDClient: setCorrection(r=" << (static_cast<int>(correction.r)) << ", g=" << (static_cast<int>(correction.g)) << ", b=" << (static_cast<int>(correction.b)) << ")");
 
     if (!mController) {
         return;
@@ -107,8 +108,8 @@ void WLEDClient::setCorrection(CRGB correction) {
     mController->setCorrection(correction);
 }
 
-void WLEDClient::setTemperature(CRGB temperature) {
-    FL_DBG("WLEDClient: setTemperature(r=%s, g=%s, b=%s)", static_cast<int>(temperature.r), static_cast<int>(temperature.g), static_cast<int>(temperature.b));
+void WLEDClient::setTemperature(CRGB temperature) FL_NO_EXCEPT {
+    FL_DBG("WLEDClient: setTemperature(r=" << (static_cast<int>(temperature.r)) << ", g=" << (static_cast<int>(temperature.g)) << ", b=" << (static_cast<int>(temperature.b)) << ")");
 
     if (!mController) {
         return;
@@ -117,8 +118,8 @@ void WLEDClient::setTemperature(CRGB temperature) {
     mController->setTemperature(temperature);
 }
 
-void WLEDClient::setMaxRefreshRate(u16 fps) {
-    FL_DBG("WLEDClient: setMaxRefreshRate(%s)", fps);
+void WLEDClient::setMaxRefreshRate(u16 fps) FL_NO_EXCEPT {
+    FL_DBG("WLEDClient: setMaxRefreshRate(" << fps << ")");
 
     if (!mController) {
         return;
@@ -127,7 +128,7 @@ void WLEDClient::setMaxRefreshRate(u16 fps) {
     mController->setMaxRefreshRate(fps);
 }
 
-u16 WLEDClient::getMaxRefreshRate() const {
+u16 WLEDClient::getMaxRefreshRate() const FL_NO_EXCEPT {
     if (!mController) {
         return 0;
     }

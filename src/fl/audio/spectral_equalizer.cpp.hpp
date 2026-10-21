@@ -14,17 +14,17 @@ namespace audio {
 constexpr float SpectralEqualizer::A_WEIGHTING_16BAND[16];
 constexpr float SpectralEqualizer::A_WEIGHTING_32BAND[32];
 
-SpectralEqualizer::SpectralEqualizer() {
+SpectralEqualizer::SpectralEqualizer() FL_NO_EXCEPT {
     configure(SpectralEqualizerConfig());
 }
 
-SpectralEqualizer::SpectralEqualizer(const SpectralEqualizerConfig& config) {
+SpectralEqualizer::SpectralEqualizer(const SpectralEqualizerConfig& config) FL_NO_EXCEPT {
     configure(config);
 }
 
 SpectralEqualizer::~SpectralEqualizer() FL_NO_EXCEPT = default;
 
-void SpectralEqualizer::configure(const SpectralEqualizerConfig& config) {
+void SpectralEqualizer::configure(const SpectralEqualizerConfig& config) FL_NO_EXCEPT {
     mConfig = config;
 
     // Reset stats
@@ -38,7 +38,7 @@ void SpectralEqualizer::configure(const SpectralEqualizerConfig& config) {
     calculateGains();
 }
 
-void SpectralEqualizer::calculateGains() {
+void SpectralEqualizer::calculateGains() FL_NO_EXCEPT {
     switch (mConfig.curve) {
         case EqualizationCurve::Flat:
             calculateFlatGains();
@@ -55,7 +55,7 @@ void SpectralEqualizer::calculateGains() {
                     mGains[i] = mConfig.customGains[i];
                 }
             } else {
-                FL_WARN("SpectralEqualizer: custom gains size mismatch (%s != %s), using flat gains", mConfig.customGains.size(), mConfig.numBands);
+                FL_WARN("SpectralEqualizer: custom gains size mismatch (" << mConfig.customGains.size() << " != " << mConfig.numBands << "), using flat gains");
                 calculateFlatGains();
             }
             break;
@@ -66,14 +66,14 @@ void SpectralEqualizer::calculateGains() {
     }
 }
 
-void SpectralEqualizer::calculateFlatGains() {
+void SpectralEqualizer::calculateFlatGains() FL_NO_EXCEPT {
     // All gains = 1.0 (no equalization)
     for (size i = 0; i < mConfig.numBands; ++i) {
         mGains[i] = 1.0f;
     }
 }
 
-void SpectralEqualizer::calculateAWeightingGains() {
+void SpectralEqualizer::calculateAWeightingGains() FL_NO_EXCEPT {
     // Use appropriate A-weighting curve based on number of bands
     const float* curve = nullptr;
     size curveSize = 0;
@@ -86,7 +86,7 @@ void SpectralEqualizer::calculateAWeightingGains() {
         curveSize = 32;
     } else {
         // Unsupported band count - use flat gains
-        FL_WARN("SpectralEqualizer: A-weighting not defined for %s bands, using flat gains", mConfig.numBands);
+        FL_WARN("SpectralEqualizer: A-weighting not defined for " << mConfig.numBands << " bands, using flat gains");
         calculateFlatGains();
         return;
     }
@@ -97,9 +97,9 @@ void SpectralEqualizer::calculateAWeightingGains() {
     }
 }
 
-void SpectralEqualizer::setCustomGains(span<const float> gains) {
+void SpectralEqualizer::setCustomGains(span<const float> gains) FL_NO_EXCEPT {
     if (gains.size() != mConfig.numBands) {
-        FL_WARN("SpectralEqualizer: custom gains size mismatch (%s != %s)", gains.size(), mConfig.numBands);
+        FL_WARN("SpectralEqualizer: custom gains size mismatch (" << gains.size() << " != " << mConfig.numBands << ")");
         return;
     }
 
@@ -115,14 +115,14 @@ void SpectralEqualizer::setCustomGains(span<const float> gains) {
     mConfig.curve = EqualizationCurve::Custom;
 }
 
-void SpectralEqualizer::apply(span<const float> inputBins, span<float> outputBins) const {
+void SpectralEqualizer::apply(span<const float> inputBins, span<float> outputBins) const FL_NO_EXCEPT {
     if (inputBins.size() != mConfig.numBands) {
-        FL_WARN("SpectralEqualizer: input size mismatch (%s != %s)", inputBins.size(), mConfig.numBands);
+        FL_WARN("SpectralEqualizer: input size mismatch (" << inputBins.size() << " != " << mConfig.numBands << ")");
         return;
     }
 
     if (outputBins.size() < mConfig.numBands) {
-        FL_WARN("SpectralEqualizer: output buffer too small (%s < %s)", outputBins.size(), mConfig.numBands);
+        FL_WARN("SpectralEqualizer: output buffer too small (" << outputBins.size() << " < " << mConfig.numBands << ")");
         return;
     }
 
@@ -180,7 +180,7 @@ void SpectralEqualizer::apply(span<const float> inputBins, span<float> outputBin
     mStats.avgOutputLevel = outputSum / static_cast<float>(mConfig.numBands);
 }
 
-float SpectralEqualizer::calculateMakeupGain(span<const float> inputBins, span<const float> outputBins) const {
+float SpectralEqualizer::calculateMakeupGain(span<const float> inputBins, span<const float> outputBins) const FL_NO_EXCEPT {
     // Calculate average levels
     float inputAvg = 0.0f;
     float outputAvg = 0.0f;
@@ -214,7 +214,7 @@ float SpectralEqualizer::calculateMakeupGain(span<const float> inputBins, span<c
     return makeupGain;
 }
 
-float SpectralEqualizer::applyCompression(float value) const {
+float SpectralEqualizer::applyCompression(float value) const FL_NO_EXCEPT {
     // Simple soft-knee compression
     if (value <= mConfig.compressionThreshold) {
         // Below threshold - no compression
@@ -227,7 +227,7 @@ float SpectralEqualizer::applyCompression(float value) const {
     return mConfig.compressionThreshold + compressed;
 }
 
-void SpectralEqualizer::resetStats() {
+void SpectralEqualizer::resetStats() FL_NO_EXCEPT {
     mStats = Stats();
 }
 

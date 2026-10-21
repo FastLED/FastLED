@@ -16,10 +16,10 @@ class TimeFunction {
   public:
     virtual ~TimeFunction() FL_NO_EXCEPT {}
     virtual fl::u32
-    update(fl::u32 timeNow) = 0; // Inputs the real clock time and outputs the
+    update(fl::u32 timeNow) FL_NO_EXCEPT = 0; // Inputs the real clock time and outputs the
                                   // virtual time.
-    virtual fl::u32 time() const = 0;
-    virtual void reset(fl::u32 realTimeNow) = 0;
+    virtual fl::u32 time() const FL_NO_EXCEPT = 0;
+    virtual void reset(fl::u32 realTimeNow) FL_NO_EXCEPT = 0;
 };
 
 // Time clock. Use this to gracefully handle time manipulation. You can input a
@@ -30,20 +30,20 @@ class TimeFunction {
 // go below 0.
 class TimeWarp : public TimeFunction {
   public:
-    TimeWarp(fl::u32 realTimeNow = 0, float initialTimeScale = 1.0f);
+    TimeWarp(fl::u32 realTimeNow = 0, float initialTimeScale = 1.0f) FL_NO_EXCEPT;
     ~TimeWarp() FL_NO_EXCEPT;
-    void setSpeed(float speedScale);
+    void setSpeed(float speedScale) FL_NO_EXCEPT;
     void setScale(float speed)
-        FASTLED_DEPRECATED("Use setSpeed(...) instead."); // Deprecated
-    float scale() const;
-    fl::u32 update(fl::u32 timeNow) override;
-    fl::u32 time() const override;
-    void reset(fl::u32 realTimeNow) override;
-    void pause(fl::u32 now);
-    void resume(fl::u32 now);
+        FL_NO_EXCEPT FASTLED_DEPRECATED("Use setSpeed(...) instead."); // Deprecated
+    float scale() const FL_NO_EXCEPT;
+    fl::u32 update(fl::u32 timeNow) FL_NO_EXCEPT override;
+    fl::u32 time() const FL_NO_EXCEPT override;
+    void reset(fl::u32 realTimeNow) FL_NO_EXCEPT override;
+    void pause(fl::u32 now) FL_NO_EXCEPT;
+    void resume(fl::u32 now) FL_NO_EXCEPT;
 
   private:
-    void applyExact(fl::u32 timeNow);
+    void applyExact(fl::u32 timeNow) FL_NO_EXCEPT;
     fl::u32 mLastRealTime = 0;
     fl::u32 mStartTime = 0;
     fl::u32 mRelativeTime = 0;

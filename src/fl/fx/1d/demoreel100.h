@@ -1,5 +1,7 @@
 #pragma once
 
+#include "fl/stl/noexcept.h"
+
 #include "fl/fx/fx1d.h"
 
 namespace fl {
@@ -17,9 +19,9 @@ FASTLED_SHARED_PTR(DemoReel100);
 
 class DemoReel100 : public Fx1d {
   public:
-    DemoReel100(u16 num_leds) : Fx1d(num_leds) {}
+    DemoReel100(u16 num_leds) FL_NO_EXCEPT : Fx1d(num_leds) {}
 
-    void draw(DrawContext context) override {
+    void draw(DrawContext context) FL_NO_EXCEPT override {
         fl::span<CRGB> leds = context.leds;
         if (leds.empty() || mNumLeds == 0) {
             return;
@@ -38,20 +40,20 @@ class DemoReel100 : public Fx1d {
         EVERY_N_SECONDS(10) { nextPattern(); } // change patterns periodically
     }
 
-    fl::string fxName() const override { return "DemoReel100"; }
+    fl::string fxName() const FL_NO_EXCEPT override { return "DemoReel100"; }
 
   private:
     u8 current_pattern_number = 0;
     u8 hue = 0;
     unsigned long start_time = 0;
 
-    void nextPattern() {
+    void nextPattern() FL_NO_EXCEPT {
         // add one to the current pattern number, and wrap around at the end
         current_pattern_number =
             (current_pattern_number + 1) % 6; // 6 is the number of patterns
     }
 
-    void runPattern(fl::span<CRGB> leds) {
+    void runPattern(fl::span<CRGB> leds) FL_NO_EXCEPT {
         switch (current_pattern_number) {
         case 0:
             rainbow(leds);
@@ -74,38 +76,38 @@ class DemoReel100 : public Fx1d {
         }
     }
 
-    void rainbow(fl::span<CRGB> leds) {
+    void rainbow(fl::span<CRGB> leds) FL_NO_EXCEPT {
         // FastLED's built-in rainbow generator
         fill_rainbow(leds, hue, 7);
     }
 
-    void rainbowWithGlitter(fl::span<CRGB> leds) {
+    void rainbowWithGlitter(fl::span<CRGB> leds) FL_NO_EXCEPT {
         // built-in FastLED rainbow, plus some random sparkly glitter
         rainbow(leds);
         addGlitter(80, leds);
     }
 
-    void addGlitter(fract8 chanceOfGlitter, fl::span<CRGB> leds) {
+    void addGlitter(fract8 chanceOfGlitter, fl::span<CRGB> leds) FL_NO_EXCEPT {
         if (random8() < chanceOfGlitter) {
             leds[random16(mNumLeds)] += CRGB::White;
         }
     }
 
-    void confetti(fl::span<CRGB> leds) {
+    void confetti(fl::span<CRGB> leds) FL_NO_EXCEPT {
         // random colored speckles that blink in and fade smoothly
         fadeToBlackBy(leds, 10);
         int pos = random16(mNumLeds);
         leds[pos] += CHSV(hue + random8(64), 200, 255);
     }
 
-    void sinelon(fl::span<CRGB> leds) {
+    void sinelon(fl::span<CRGB> leds) FL_NO_EXCEPT {
         // a colored dot sweeping back and forth, with fading trails
         fadeToBlackBy(leds, 20);
         int pos = beatsin16(13, 0, mNumLeds - 1);
         leds[pos] += CHSV(hue, 255, 192);
     }
 
-    void bpm(fl::span<CRGB> leds) {
+    void bpm(fl::span<CRGB> leds) FL_NO_EXCEPT {
         // colored stripes pulsing at a defined Beats-Per-Minute (BPM)
         u8 BeatsPerMinute = 62;
         CRGBPalette16 palette = PartyColors_p;
@@ -116,7 +118,7 @@ class DemoReel100 : public Fx1d {
         }
     }
 
-    void juggle(fl::span<CRGB> leds) {
+    void juggle(fl::span<CRGB> leds) FL_NO_EXCEPT {
         // eight colored dots, weaving in and out of sync with each other
         fadeToBlackBy(leds, 20);
         u8 dothue = 0;

@@ -37,3 +37,4 @@ jobs:
     uses: ./.github/workflows/build_template.yml
     with:
       args: rp2040 all
+      bloat_budget: tests/data/rp2040_bloat_budget.json

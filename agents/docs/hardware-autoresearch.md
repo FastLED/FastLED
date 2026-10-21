@@ -273,6 +273,43 @@ BOOTSEL but not in application mode has a firmware problem; one that fails even
 in BOOTSEL has a cable/power/hardware problem, and no software recovery will
 help.
 
+### Teensy 4.x: boot guard for wedges before USB starts
+
+A Teensy 4.x firmware that hangs or faults **before `usb_init()`** never
+enumerates. The kernel log shows `USB disconnect` after the HalfKay flash and
+then nothing, and on another port you may see `Cannot enable. Maybe the USB
+cable is bad?`. The host cannot reach a board in this state. Neither
+`fbuild deploy`'s soft reboot nor any other host-side tool can reach it, on Linux or Windows.
+The core's fault handler (`unused_interrupt_vector`) records CrashReport,
+serves `usb_isr()` for 8 s and reboots. Before `usb_init()` that does not
+enumerate, so a crash in that window loops forever.
+
+AutoResearch recovers from this on the chip through the core's early-boot
+loop guard, `FL_WATCHDOG_BOOT_GUARD(3, 30000)` in
+`AutoResearchStartupHook.cpp` (API: `src/fl/wdt/boot_guard.h`). On Teensy 4.x
+the platform (`src/platforms/arm/mxrt1062/watchdog_boot_guard_mxrt1062.h`)
+expands it to `startup_early_hook`, which runs before USB and:
+
+- counts boots in a reset-surviving OCRAM record at `0x2027FF60`, the cache
+  line just below the core's CrashReport (`0x2027FF80`);
+- arms WDOG3 for 30 s, so a pre-USB hang becomes a reset;
+- on the third boot that never became healthy, zeroes the count and calls
+  `_reboot_Teensyduino_()`. The board then enumerates as **16c0:0478**
+  (HalfKay) and the next `fbuild deploy` flashes it.
+
+The end of `setup()` calls `FastLED.watchdog().markBootHealthy()`, which zeroes the count,
+so watchdog resets after that (e.g. `--watchdog-soak`) never escape. Recovery
+takes about 16 s for a crash loop (2 x 8 s fault handler; the third boot
+escapes at once) and about 60 s for a hang (2 x 30 s). The `fbuild deploy` that flashed the bad firmware still times out, but
+the board is waiting in HalfKay for the next one. Build with
+`-DFL_WATCHDOG_DEBUG_EARLY_HANG` to test the guard: the firmware hangs before
+USB on every boot and must come back as 16c0:0478 with no button press. On
+platforms without an early-boot hook the macro is a no-op.
+
+**Limitation:** only firmware that contains this hook can escape. Firmware
+without it (other sketches, or AutoResearch before this guard) still needs the
+program button if it wedges before USB.
+
 ### Validation Levels
 
 Pick the narrowest validation level that proves the claim:
@@ -295,6 +332,39 @@ Closeout evidence must include the command, board, port, wiring, decisive
 output, commit/PR URL, and issue URL. Stale chat comments, CI compile-only
 results, and old serial buffers do not close hardware issues when a board can
 be tested locally.
+
+### ESP32 two-host APA102 check with one jumper
+
+For a registration-order bug involving explicit `Esp32SpiBus::HOST2` and
+`HOST3`, a second LED strip is unnecessary on ESP32 boards with both hosts.
+Choose pins appropriate for the board. On the tested ESP32-S3 board, connect
+GPIO 1 (measured APA102 data) to GPIO 2 (AutoResearch RX). GPIO 3 is its SPI clock. The unmeasured
+channel uses GPIO 4 for data and GPIO 5 for clock; leave those pins unconnected.
+Run GPIO-only AutoResearch on the S3 first to build, deploy, and verify the
+jumper. Then call the firmware's `dualSpiHostLoopback` RPC method with
+`activeHost` set to 2 or 3 and `dummyFirst` set to true or false. Run all four
+combinations, resetting the board between calls because the public `addLeds`
+controllers remain registered for the lifetime of a firmware boot. The method
+registers both explicit hosts, sends APA102 frames, and reconstructs the first
+eight measured LED frames from raw RX edges. It compares the APA102 brightness
+headers and RGB bytes with the sent pattern. Use `ci.rpc_client.RpcClient`
+with `create_serial_interface`; never open the serial port with raw pyserial.
+The measured channel must pass in both registration orders for each host. After
+flashing with `bash autoresearch <environment> --upload-port <port>`, run all four
+cases with:
+
+```bash
+uv run python ci/autoresearch/dual_spi_hosts.py --port <port> --environment <environment>
+```
+
+The runner resets the board between cases through `fbuild reset` and exits
+nonzero if any measured frame fails.
+
+`--spi` tests clockless output over SPI, and `--lcd-spi` tests the LCD_CAM
+APA102 backend. Neither exercises explicit `HOST2`/`HOST3` selection, so neither
+is evidence for this particular regression. If a generic AutoResearch mode
+panics, decode its backtrace against the freshly built firmware ELF and keep
+that failure separate from the explicit-host result.
 
 ### Driver Development and New Modes
 
@@ -746,6 +816,7 @@ configuration, baud, encoding, or DMA-start cause.
 | `wave8ExpandBenchmark` | `[]` | Wave8 expansion ns/byte micro-bench (#2526) |
 | `parlioEncodeBenchmark` | `[]` | Full PARLIO encode_us bench (#2539) |
 | `parlioStreamValidate` | `[...]` | PARLIO stream validation against reference |
+| `dualSpiHostLoopback` | `[{activeHost:2 or 3, dummyFirst:bool}]` | On ESP32 boards with two SPI hosts, register a measured APA102 output and a dummy output, then verify eight measured frames |
 | `testAsync` | `[]` | Async framework smoke test |
 | `testNoSerial` | `[]` | Minimal RPC plumbing check (no Serial writes) |
 

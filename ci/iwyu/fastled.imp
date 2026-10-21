@@ -101,6 +101,7 @@
   # fl/net/net.h umbrella
   { include: ['"fl/net/ble.h"', 'private', '"fl/net/net.h"', 'public'] },
   { include: ['"fl/net/ota.h"', 'private', '"fl/net/net.h"', 'public'] },
+  { include: ['"fl/net/ota/ota.h"', 'private', '"fl/net/net.h"', 'public'] },
   { include: ['"fl/net/rpc.h"', 'private', '"fl/net/net.h"', 'public'] },
 
   # fl/net/http.h umbrella

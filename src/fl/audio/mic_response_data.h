@@ -12,6 +12,7 @@
 #include "fl/stl/compiler_control.h"
 #include "fl/math/math.h"
 #include "fastled_progmem.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace audio {
@@ -22,7 +23,7 @@ namespace audio {
 
 /// Read a float from PROGMEM. On AVR this reads flash via pgm_read_dword;
 /// on other platforms it's a plain memory read via memcpy (no aliasing issues).
-inline float fl_progmem_read_float(const float* addr) {
+inline float fl_progmem_read_float(const float* addr) FL_NO_EXCEPT {
     u32 raw = FL_PGM_READ_DWORD_ALIGNED(addr);
     float result;
     FL_BUILTIN_MEMCPY(&result, &raw, sizeof(float));
@@ -194,7 +195,7 @@ struct MicResponseCurve {
 
 /// Get the high-resolution response curve for a given mic profile.
 /// Returns a curve with count=0 for MicProfile::None.
-inline MicResponseCurve getMicResponseCurve(MicProfile profile) {
+inline MicResponseCurve getMicResponseCurve(MicProfile profile) FL_NO_EXCEPT {
     MicResponseCurve curve = {nullptr, nullptr, 0};
     switch (profile) {
     case MicProfile::INMP441:
@@ -226,7 +227,7 @@ inline MicResponseCurve getMicResponseCurve(MicProfile profile) {
 /// Interpolate mic response at an arbitrary frequency (Hz).
 /// Uses log-frequency linear interpolation with binary search.
 /// Clamps to endpoint values outside the data range.
-inline float interpolateMicResponse(const MicResponseCurve& curve, float freq_hz) {
+inline float interpolateMicResponse(const MicResponseCurve& curve, float freq_hz) FL_NO_EXCEPT {
     if (curve.count <= 0 || !curve.freqs || !curve.gains) return 1.0f;
 
     float f0 = fl_progmem_read_float(&curve.freqs[0]);
@@ -265,7 +266,7 @@ inline float interpolateMicResponse(const MicResponseCurve& curve, float freq_hz
 /// @param out  Output array of gains, length numBins
 inline void downsampleMicResponse(const MicResponseCurve& curve,
                                   const float* binCenters, int numBins,
-                                  float* out) {
+                                  float* out) FL_NO_EXCEPT {
     for (int i = 0; i < numBins; ++i) {
         out[i] = interpolateMicResponse(curve, binCenters[i]);
     }
@@ -281,7 +282,7 @@ inline void downsampleMicResponse(const MicResponseCurve& curve,
 /// @param freq_hz  Bin center frequency in Hz
 /// @param f_ref    Reference frequency (typically geometric mean of all bins)
 /// @return  Compensation gain factor
-inline float computePinkNoiseGain(float freq_hz, float f_ref) {
+inline float computePinkNoiseGain(float freq_hz, float f_ref) FL_NO_EXCEPT {
     if (freq_hz <= 0.0f || f_ref <= 0.0f) return 1.0f;
     return fl::sqrtf(freq_hz / f_ref);
 }
@@ -291,7 +292,7 @@ inline float computePinkNoiseGain(float freq_hz, float f_ref) {
 /// @param binCenters  Array of bin center frequencies (Hz)
 /// @param numBins     Number of bins
 /// @param out         Output array of gains (length numBins)
-inline void computePinkNoiseGains(const float* binCenters, int numBins, float* out) {
+inline void computePinkNoiseGains(const float* binCenters, int numBins, float* out) FL_NO_EXCEPT {
     if (numBins <= 0) return;
 
     // Compute geometric mean of bin centers for f_ref

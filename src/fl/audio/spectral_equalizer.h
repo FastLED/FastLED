@@ -76,28 +76,28 @@ struct SpectralEqualizerConfig {
 class SpectralEqualizer {
 public:
     SpectralEqualizer() FL_NO_EXCEPT;
-    explicit SpectralEqualizer(const SpectralEqualizerConfig& config);
+    explicit SpectralEqualizer(const SpectralEqualizerConfig& config) FL_NO_EXCEPT;
     ~SpectralEqualizer() FL_NO_EXCEPT;
 
     /// Configure the spectral equalizer
     /// This calculates per-band gain multipliers based on the selected curve
-    void configure(const SpectralEqualizerConfig& config);
+    void configure(const SpectralEqualizerConfig& config) FL_NO_EXCEPT;
 
     /// Apply equalization to frequency bins
     /// @param inputBins Input frequency bins (from FrequencyBinMapper)
     /// @param outputBins Output equalized frequency bins
-    void apply(span<const float> inputBins, span<float> outputBins) const;
+    void apply(span<const float> inputBins, span<float> outputBins) const FL_NO_EXCEPT;
 
     /// Set custom per-band gains (switches to Custom curve)
     /// @param gains Per-band gain multipliers (size must match numBands)
-    void setCustomGains(span<const float> gains);
+    void setCustomGains(span<const float> gains) FL_NO_EXCEPT;
 
     /// Get current per-band gains
     /// @return Span of gain multipliers for each band
-    span<const float> getGains() const { return mGains; }
+    span<const float> getGains() const FL_NO_EXCEPT { return mGains; }
 
     /// Get current configuration
-    const SpectralEqualizerConfig& getConfig() const { return mConfig; }
+    const SpectralEqualizerConfig& getConfig() const FL_NO_EXCEPT { return mConfig; }
 
     /// Get statistics (for debugging/monitoring)
     struct Stats {
@@ -109,31 +109,31 @@ public:
         float avgOutputLevel = 0.0f;    // Average output level (last call)
     };
 
-    const Stats& getStats() const { return mStats; }
+    const Stats& getStats() const FL_NO_EXCEPT { return mStats; }
 
     /// Reset statistics
-    void resetStats();
+    void resetStats() FL_NO_EXCEPT;
 
 private:
     /// Calculate gains based on current curve
-    void calculateGains();
+    void calculateGains() FL_NO_EXCEPT;
 
     /// Calculate A-weighting gains
-    void calculateAWeightingGains();
+    void calculateAWeightingGains() FL_NO_EXCEPT;
 
     /// Calculate flat gains (all 1.0)
-    void calculateFlatGains();
+    void calculateFlatGains() FL_NO_EXCEPT;
 
     /// Calculate makeup gain to maintain target level
     /// @param inputBins Input frequency bins
     /// @param outputBins Output frequency bins (after EQ)
     /// @return Makeup gain multiplier
-    float calculateMakeupGain(span<const float> inputBins, span<const float> outputBins) const;
+    float calculateMakeupGain(span<const float> inputBins, span<const float> outputBins) const FL_NO_EXCEPT;
 
     /// Apply dynamic range compression per band
     /// @param value Input value
     /// @return Compressed value
-    float applyCompression(float value) const;
+    float applyCompression(float value) const FL_NO_EXCEPT;
 
     SpectralEqualizerConfig mConfig;
     mutable Stats mStats;

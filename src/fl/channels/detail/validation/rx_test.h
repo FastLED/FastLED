@@ -6,6 +6,7 @@
 #pragma once
 
 #include "fl/stl/int.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -28,7 +29,7 @@ bool testRxChannel(
     int pin_tx,
     int pin_rx,
     u32 hz,
-    size_t buffer_size);
+    size_t buffer_size) FL_NO_EXCEPT;
 
 }  // namespace validation
 }  // namespace fl

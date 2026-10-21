@@ -304,7 +304,12 @@ constexpr int DEFAULT_PIN_RX = autoresearch::defaultRxPin();
 // RX buffer sized for maximum expected strip size
 // Each LED = 24 bits = 24 symbols, plus headroom for RESET pulses
 // Maximum: 3000 LEDs (hardcoded for ESP32/S3 with PSRAM support)
-#if defined(FL_IS_TEENSY_4X) || defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2) || \
+#if defined(FL_IS_TEENSY_4X)
+// Teensy 4.x: the FlexPWM RX streams through a small DMA ring and FlexIO /
+// ObjectFLED TX stream from ISRs, so the 1000-LED loopback fits. This
+// shared buffer sets the per-lane cap (size / 32 = 1003 LEDs).
+constexpr int RX_BUFFER_SIZE = 1000 * 32 + 100;
+#elif defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2) || \
     defined(FL_IS_ESP_32C5) || defined(FL_IS_RP)
 constexpr int RX_BUFFER_SIZE = 100 * 32 + 100;  // Memory-constrained: 100 LEDs max for autoresearch
 #elif defined(FL_IS_ESP_32DEV)
@@ -366,9 +371,8 @@ using RemoteControlSingleton = fl::Singleton<AutoResearchRemoteControl>;
 uint32_t frame_counter = 0;
 
 
-// Teensy 4 WDOG3 startup recovery lives in AutoResearchStartupHook.cpp.
-// Keeping the extern "C" hook out of this .ino avoids Arduino prototype
-// generation with C++ linkage during fbuild deploy.
+// The early-boot loop guard (FL_WATCHDOG_BOOT_GUARD) lives in
+// AutoResearchStartupHook.cpp.
 
 // Consecutive watchdog resets before AutoResearch gives up and drops into the
 // bootloader (#3713). Three tolerates a one-off glitch or a deliberate
@@ -593,6 +597,10 @@ void setup() {
     printStreamRaw("ready", readyData);
 
     delay(2000);
+
+    // Early-boot guard (AutoResearchStartupHook.cpp): this boot got through
+    // setup(), so reset the count of boots that never got this far.
+    FastLED.watchdog().markBootHealthy();
 }
 
 // ============================================================================
@@ -615,6 +623,7 @@ void loop() {
     // prior-boot reset/crash info, pauses 3 s on a crash. Every iteration:
     // feeds on construction (now) and again on destruction (end of scope).
     FL_WATCHDOG_AUTO(AUTORESEARCH_WATCHDOG_TIMEOUT_MS);
+
 
     // Aggressively pump async tasks (including JSON-RPC task)
     // This ensures RPC commands are processed frequently even without delay() calls

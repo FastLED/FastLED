@@ -8,7 +8,7 @@ namespace audio {
 namespace detector {
 
 Pitch::Pitch()
-    : mCurrentPitch(0.0f)
+    FL_NO_EXCEPT : mCurrentPitch(0.0f)
     , mSmoothedPitch(0.0f)
     , mConfidence(0.0f)
     , mIsVoiced(false)
@@ -29,7 +29,7 @@ Pitch::Pitch()
 
 Pitch::~Pitch() FL_NO_EXCEPT = default;
 
-void Pitch::update(shared_ptr<Context> context) {
+void Pitch::update(shared_ptr<Context> context) FL_NO_EXCEPT {
     // Get PCM data from context
     span<const i16> pcm = context->getPCM();
     size numSamples = pcm.size();
@@ -70,7 +70,7 @@ void Pitch::update(shared_ptr<Context> context) {
     mVoicedStateChanged = (mIsVoiced != mPreviousVoiced);
 }
 
-void Pitch::fireCallbacks() {
+void Pitch::fireCallbacks() FL_NO_EXCEPT {
     if (mFirePitch) {
         if (onPitch) onPitch(mSmoothedPitch);
         if (onPitchWithConfidence) onPitchWithConfidence(mSmoothedPitch, mConfidence);
@@ -87,7 +87,7 @@ void Pitch::fireCallbacks() {
     }
 }
 
-void Pitch::reset() {
+void Pitch::reset() FL_NO_EXCEPT {
     mCurrentPitch = 0.0f;
     mSmoothedPitch = 0.0f;
     mConfidence = 0.0f;
@@ -98,14 +98,14 @@ void Pitch::reset() {
     mPitchSmoother.reset();
 }
 
-void Pitch::updatePeriodRange() {
+void Pitch::updatePeriodRange() FL_NO_EXCEPT {
     // Convert frequency range to period range (in samples)
     // Period (samples) = SampleRate / Frequency
     mMinPeriod = frequencyToPeriod(mMaxFrequency);
     mMaxPeriod = frequencyToPeriod(mMinFrequency);
 }
 
-float Pitch::calculateAutocorrelation(const i16* pcm, size numSamples) {
+float Pitch::calculateAutocorrelation(const i16* pcm, size numSamples) FL_NO_EXCEPT {
     // Clear and resize autocorrelation buffer
     mAutocorrelation.clear();
     mAutocorrelation.resize(static_cast<size>(mMaxPeriod + 1), 0.0f);
@@ -148,7 +148,7 @@ float Pitch::calculateAutocorrelation(const i16* pcm, size numSamples) {
     return 0.0f;
 }
 
-int Pitch::findBestPeakLag(const vector<float>& autocorr) const {
+int Pitch::findBestPeakLag(const vector<float>& autocorr) const FL_NO_EXCEPT {
     // Find the lag with maximum autocorrelation value
     // (excluding lag 0, which is always maximum by definition)
 
@@ -168,7 +168,7 @@ int Pitch::findBestPeakLag(const vector<float>& autocorr) const {
     return bestLag;
 }
 
-float Pitch::calculateConfidence(const vector<float>& autocorr, int peakLag) const {
+float Pitch::calculateConfidence(const vector<float>& autocorr, int peakLag) const FL_NO_EXCEPT {
     // Confidence based on:
     // 1. Strength of the autocorrelation peak
     // 2. Ratio of peak to nearby values (peak clarity)
@@ -213,26 +213,26 @@ float Pitch::calculateConfidence(const vector<float>& autocorr, int peakLag) con
     return confidence;
 }
 
-float Pitch::periodToFrequency(int period) const {
+float Pitch::periodToFrequency(int period) const FL_NO_EXCEPT {
     if (period <= 0) {
         return 0.0f;
     }
     return mSampleRate / static_cast<float>(period);
 }
 
-int Pitch::frequencyToPeriod(float frequency) const {
+int Pitch::frequencyToPeriod(float frequency) const FL_NO_EXCEPT {
     if (frequency <= 0.0f) {
         return 0;
     }
     return static_cast<int>(mSampleRate / frequency);
 }
 
-void Pitch::updatePitchSmoothing(float newPitch) {
+void Pitch::updatePitchSmoothing(float newPitch) FL_NO_EXCEPT {
     // OneEuroFilter: adaptive — low jitter when pitch stable, low lag on changes
     mSmoothedPitch = mPitchSmoother.update(newPitch, mLastDt);
 }
 
-bool Pitch::shouldReportPitchChange(float newPitch) const {
+bool Pitch::shouldReportPitchChange(float newPitch) const FL_NO_EXCEPT {
     // Check if pitch has changed significantly from previous detection
     if (mPreviousPitch == 0.0f) {
         // First pitch detection

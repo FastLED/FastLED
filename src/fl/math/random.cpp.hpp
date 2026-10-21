@@ -1,6 +1,7 @@
 #include "fl/math/random.h"
 #include "fl/stl/singleton.h"
 #include "fl/stl/mutex.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -13,7 +14,7 @@ struct LockedRandom {
 
 } // namespace
 
-math::random& default_random() {
+math::random& default_random() FL_NO_EXCEPT {
     return Singleton<LockedRandom>::instance().rng;
 }
 

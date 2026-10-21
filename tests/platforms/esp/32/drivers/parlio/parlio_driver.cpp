@@ -2672,6 +2672,51 @@ FL_TEST_CASE("Wave3 integration - transmit produces correct output size") {
 // Wave3/Wave8 Mode Switch Corner Cases
 //=============================================================================
 
+FL_TEST_CASE("PARLIO mode switches preserve the encoded waveform") {
+    resetMockHistory();
+    auto& driver = ParlioEngine::getInstance();
+    auto& mock = ParlioPeripheralMock::instance();
+    fl::vector<int> pins = {1};
+    u8 source[] = {0x00, 0x96, 0xff};
+
+    for (unsigned pass = 0; pass < 4; ++pass) {
+        const bool wave3 = (pass % 2) == 0;
+        ChipsetTimingConfig timing = wave3 ? getWS2812Timing()
+            : ChipsetTimingConfig(225, 355, 645, 280, "WS2812B_V5");
+        FL_REQUIRE(driver.initialize(1, pins, timing, 1));
+        mock.clearTransmissionHistory();
+        FL_REQUIRE(driver.beginTransmission(source, sizeof(source), 1, sizeof(source)));
+
+        ChipsetTiming reference = {};
+        reference.T1 = timing.t1_ns;
+        reference.T2 = timing.t2_ns;
+        reference.T3 = timing.t3_ns;
+        reference.RESET = timing.reset_us;
+        fl::vector<u8> expected;
+        for (u8 byte : source) {
+            if (wave3) {
+                const auto lut = buildWave3ExpansionLUT(reference);
+                Wave3Byte encoded;
+                wave3_convert_byte_to_wave3byte(byte, lut, &encoded);
+                for (u8 value : encoded.data) expected.push_back(value);
+            } else {
+                const auto lut = buildWave8ByteExpansionLUT(buildWave8ExpansionLUT(reference));
+                Wave8Byte encoded;
+                wave8_expand_byte(byte, lut, &encoded);
+                for (const auto& symbol : encoded.symbols) expected.push_back(symbol.data);
+            }
+        }
+        const auto& history = mock.getTransmissionHistory();
+        FL_REQUIRE_FALSE(history.empty());
+        const auto& bytes = history.front().buffer_copy;
+        FL_REQUIRE_GE(bytes.size(), expected.size());
+        for (fl::size i = 0; i < expected.size(); ++i) {
+            FL_CHECK_EQ(bytes[i], expected[i]);
+        }
+        FL_CHECK_EQ(driver.poll(), ParlioEngineState::READY);
+    }
+}
+
 FL_TEST_CASE("Wave3 corner case - mode switch wave3 to wave8") {
     resetMockHistory();
     auto& driver = ParlioEngine::getInstance();

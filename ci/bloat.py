@@ -39,10 +39,10 @@ Lessons baked in (see agents/docs/binary-size-analysis.md):
       it, the biggest single-symbol contributor on ESP32-S3 Blink (the
       NEOPIXEL chipset ctor's FL_WARN/FL_LOG string pool, ~58 KB) shows
       up as anonymous bytes against main.cpp.o.
-    - The dominant flash-bloat lever on ESP32-S3 is `FASTLED_LOG_VERBOSITY=0`
-      (FastLED PR #2791). That single define recovers ~43-58 KB of FL_WARN
-      string pool with no behavioural change for users who only need release-
-      mode logging.
+    - The dominant flash-bloat lever on ESP32-S3 is the log level
+      (`FL_LOG_LEVEL`, src/fl/log/log.h). The FL_WARN string pool is
+      ~43-58 KB; since #4712 it is compiled out by default (level 1, errors
+      only) and `FASTLED_LOG_VERBOSITY=0` (level 0) also drops FL_ERROR.
     - Over-budget builds: `bash bloat <board>` will retry the build with
       `fbuild build --bloat-analysis` (which sets `-Wl,--noinhibit-exec`)
       so the ELF survives even when the linker reports a region overflow.
@@ -187,7 +187,45 @@ def assert_fbuild_has_symbols() -> None:
         )
 
 
-def run_fbuild_symbols(location: ElfLocation, out_dir: Path, top: int) -> None:
+def explicit_symbol_tools(elf: Path, example: str | None = None) -> list[str]:
+    """`--nm/--cppfilt` from the nearest single-env `build_info.json`.
+
+    fbuild >= 2.5.38 matches the ELF to a `build_info` environment by
+    `prog_path`; boards whose `prog_path` names the flashed image (Teensy:
+    `firmware.hex`) then fail with "no unambiguous environment matches the
+    ELF". Passing the cross tools explicitly, as the dashboard benchmark
+    does, skips that lookup (FastLED#4813).
+    """
+    names = ([f"build_info_{example}.json"] if example else []) + ["build_info.json"]
+    for directory in [elf.parent, *elf.parents]:
+        info = next(
+            (directory / name for name in names if (directory / name).is_file()), None
+        )
+        if info is None:
+            continue
+        try:
+            data = json.loads(info.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            return []
+        envs = [v for v in data.values() if isinstance(v, dict)]
+        if len(envs) != 1:
+            return []
+        aliases = envs[0].get("aliases") or {}
+        nm, cppfilt = aliases.get("nm"), aliases.get("c++filt")
+        if (
+            isinstance(nm, str)
+            and isinstance(cppfilt, str)
+            and Path(nm).is_file()
+            and Path(cppfilt).is_file()
+        ):
+            return ["--nm", nm, "--cppfilt", cppfilt]
+        return []
+    return []
+
+
+def run_fbuild_symbols(
+    location: ElfLocation, out_dir: Path, top: int, example: str | None = None
+) -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
     cmd = [
         "fbuild",
@@ -197,6 +235,7 @@ def run_fbuild_symbols(location: ElfLocation, out_dir: Path, top: int) -> None:
         str(out_dir),
         "--top",
         str(top),
+        *explicit_symbol_tools(location.elf, example),
     ]
     print(f"$ {' '.join(cmd)}")
     try:
@@ -501,6 +540,23 @@ def symbols_dir(build_root: Path, board: str, profile: str) -> Path:
     return build_root / "symbols" / name
 
 
+def verify_budget(report: dict[str, Any], budget: dict[str, Any]) -> list[str]:
+    """Check image flash and attributed RAM ceilings without mixing metrics."""
+    failures: list[str] = []
+    for metric in ("image_flash", "total_ram"):
+        ceiling = budget.get(metric)
+        measured = report.get(metric)
+        if type(ceiling) is not int or ceiling < 0:
+            failures.append(f"Invalid {metric} budget: {ceiling!r}")
+        elif type(measured) is not int or measured < 0:
+            failures.append(f"Missing or invalid {metric} measurement: {measured!r}")
+        elif measured > ceiling:
+            failures.append(
+                f"{metric}: {measured} B exceeds {ceiling} B by {measured - ceiling} B"
+            )
+    return failures
+
+
 def run_profile(args: argparse.Namespace, profile: str) -> dict[str, Any]:
     """Build (optionally), analyse, and verify one profile; return provenance."""
     build_root = Path(args.build_root)
@@ -553,10 +609,28 @@ def run_profile(args: argparse.Namespace, profile: str) -> dict[str, Any]:
     print(f"Toolchain: {toolchain}")
     print()
 
-    run_fbuild_symbols(location=location, out_dir=out_dir, top=args.top)
+    run_fbuild_symbols(
+        location=location, out_dir=out_dir, top=args.top, example=args.example
+    )
 
     report_json = out_dir / "report.json"
     report = cast(dict[str, Any], json.loads(report_json.read_text(encoding="utf-8")))
+    budget_path = getattr(args, "budget", None)
+    if budget_path is not None:
+        budget = json.loads(Path(budget_path).read_text(encoding="utf-8"))
+        if not isinstance(budget, dict):
+            raise SystemExit("Bloat: budget must be a JSON object")
+        for name, expected in (
+            ("board", args.board),
+            ("example", args.example),
+            ("profile", profile),
+        ):
+            if budget.get(name) != expected:
+                raise SystemExit(f"Bloat: budget {name} must match {expected!r}")
+        failures = verify_budget(report, budget)
+        if failures:
+            raise SystemExit("Bloat: budget FAILED:\n  " + "\n  ".join(failures))
+        print(f"Bloat: budget passed ({budget_path})")
     provenance: dict[str, Any] = {
         "profile": profile,
         "board": args.board,
@@ -647,6 +721,11 @@ def main() -> int:
         help="Skip the stdout summary; just write the JSON + MD artifacts.",
     )
     parser.add_argument(
+        "--budget",
+        type=Path,
+        help="JSON ceilings for image_flash and attributed total_ram, scoped to board/example/profile.",
+    )
+    parser.add_argument(
         "--build",
         action="store_true",
         help="Run `bash compile <board> --examples <example>` first to "
@@ -691,6 +770,10 @@ def main() -> int:
         )
     if args.compare and not args.build:
         raise SystemExit("Bloat: --compare requires --build.")
+    if args.compare and args.budget is not None:
+        raise SystemExit(
+            "Bloat: --compare cannot be used with --budget; check each profile separately."
+        )
 
     assert_fbuild_has_symbols()
 

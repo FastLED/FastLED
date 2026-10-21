@@ -60,7 +60,7 @@ namespace ucs7604 {
     /// @param current Current control settings for RGBW channels
     /// @note This is SECONDARY to FastLED::setBrightness() - use that as primary control
     /// @note Affects current control which may impact color accuracy
-    void set_brightness(CurrentControl current);
+    void set_brightness(CurrentControl current) FL_NO_EXCEPT;
 
     /// @brief Set global UCS7604 brightness with individual channel values (EXPERIMENTAL)
     /// @param r Red channel current (0x0-0xF)
@@ -69,13 +69,13 @@ namespace ucs7604 {
     /// @param w White channel current (0x0-0xF)
     /// @note This is SECONDARY to FastLED::setBrightness() - use that as primary control
     /// @note Affects current control which may impact color accuracy
-    inline void set_brightness(u8 r, u8 g, u8 b, u8 w) {
+    inline void set_brightness(u8 r, u8 g, u8 b, u8 w) FL_NO_EXCEPT {
         set_brightness(CurrentControl(r, g, b, w));
     }
 
     /// @brief Get current global UCS7604 brightness value
     /// @return Current control settings
-    CurrentControl brightness();
+    CurrentControl brightness() FL_NO_EXCEPT;
 
 }  // namespace ucs7604
 
@@ -95,7 +95,7 @@ private:
     // Helper class to access protected methods of the delegate controller
     class DelegateController : public DelegateControllerBase {
         friend class UCS7604ControllerT<DATA_PIN, RGB_ORDER, MODE, CHIPSET_TIMING, CLOCKLESS_CONTROLLER>;
-        void callShowPixels(PixelController<RGB> & pixels) {
+        void callShowPixels(PixelController<RGB> & pixels) FL_NO_EXCEPT {
             DelegateControllerBase::showPixels(pixels);
         }
     };
@@ -104,33 +104,37 @@ private:
 
     // Reusable byte buffer (uses PSRAM on ESP32, regular heap elsewhere)
     // Cleared each frame but memory is reused (no reallocation after first use)
+    float mGamma = 2.8f;
     fl::vector_psram<u8> mByteBuffer;
 
 public:
     UCS7604ControllerT() FL_NO_EXCEPT {}
 
-    virtual void init() override {
+    void setGamma(float gamma) FL_NO_EXCEPT { mGamma = gamma; }
+    void clearGamma() FL_NO_EXCEPT { mGamma = 2.8f; }
+
+    virtual void init() FL_NO_EXCEPT override {
         mDelegate.init();
         // UCS7604 is always RGBW — override any user setting.
         this->setRgbw(RgbwDefault::value());
     }
 
     // Access delegate controller (for testing)
-    const DelegateController& getDelegate() const {
+    const DelegateController& getDelegate() const FL_NO_EXCEPT {
         return mDelegate;
     }
 
-    DelegateController& getDelegate() {
+    DelegateController& getDelegate() FL_NO_EXCEPT {
         return mDelegate;
     }
 
 protected:
 
-    fl::span<const u8> bytes() const {
+    fl::span<const u8> bytes() const FL_NO_EXCEPT {
         return mByteBuffer;
     }
 
-    virtual void showPixels(PixelController<RGB_ORDER> &pixels) override {
+    virtual void showPixels(PixelController<RGB_ORDER> &pixels) FL_NO_EXCEPT override {
         if (pixels.size() == 0) {
             return;
         }
@@ -161,7 +165,7 @@ protected:
         fl::UCS7604CurrentControl wire_current(r_current, g_current, b_current, w_current);
 
         // Get gamma LUT: per-controller override or default 2.8
-        float gamma = this->mSettings.mGamma.value_or(2.8f);
+        float gamma = mGamma;
         fl::shared_ptr<const Gamma8> gamma8 = Gamma8::getOrCreate(gamma);
 
         // UCS7604 is always RGBW — override any user setting.

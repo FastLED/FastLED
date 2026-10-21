@@ -3,6 +3,7 @@
 
 // IWYU pragma: private
 
+#include "fl/stl/noexcept.h"
 #include "platforms/esp/is_esp.h"
 
 #include "fl/audio/audio_input.h"
@@ -45,7 +46,7 @@ class PDM_Audio : public audio::IInput {
   public:
     using PDMContext = esp_pdm::PDMContext;
 
-    PDM_Audio(const audio::ConfigPdm &config)
+    PDM_Audio(const audio::ConfigPdm &config) FL_NO_EXCEPT
         : mPdmConfig(config), mHasError(false), mTotalSamplesRead(0) {}
 
     ~PDM_Audio() { stop(); }
@@ -107,7 +108,7 @@ class PDM_Audio : public audio::IInput {
                                             mPdmConfig.mSampleRate);
         mTotalSamplesRead += samples_read;
 
-        fl::span<const i16> data(buf, samples_read);
+        fl::span<const i16> data{buf, static_cast<fl::size>(samples_read)};
         return audio::Sample(data, timestamp_ms);
     }
 

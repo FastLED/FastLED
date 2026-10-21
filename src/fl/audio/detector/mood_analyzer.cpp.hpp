@@ -11,7 +11,7 @@ namespace audio {
 namespace detector {
 
 MoodAnalyzer::MoodAnalyzer()
-    : mConfidenceThreshold(0.5f)
+    FL_NO_EXCEPT : mConfidenceThreshold(0.5f)
     , mMinDuration(1500)  // 1.5 seconds minimum
     , mAveragingFrames(10)
     , mSpectralCentroid(0.0f)
@@ -27,7 +27,7 @@ MoodAnalyzer::MoodAnalyzer()
 
 MoodAnalyzer::~MoodAnalyzer() FL_NO_EXCEPT = default;
 
-void MoodAnalyzer::update(shared_ptr<Context> context) {
+void MoodAnalyzer::update(shared_ptr<Context> context) FL_NO_EXCEPT {
     mRetainedFFT = context->getFFT(32);  // Higher resolution for mood analysis
     const fft::Bins& fft = *mRetainedFFT;
     const fft::Bins* prevFFT = context->getHistoricalFFT(1);
@@ -83,7 +83,7 @@ void MoodAnalyzer::update(shared_ptr<Context> context) {
     mMoodChanged = shouldChangeMood(mCurrentMood);
 }
 
-void MoodAnalyzer::fireCallbacks() {
+void MoodAnalyzer::fireCallbacks() FL_NO_EXCEPT {
     if (onMood) {
         onMood(mCurrentMood);
     }
@@ -97,7 +97,7 @@ void MoodAnalyzer::fireCallbacks() {
     }
 }
 
-void MoodAnalyzer::reset() {
+void MoodAnalyzer::reset() FL_NO_EXCEPT {
     mCurrentMood = Mood();
     mPreviousMood = Mood();
     mSpectralCentroid = 0.0f;
@@ -110,7 +110,7 @@ void MoodAnalyzer::reset() {
     mHistoryIndex = 0;
 }
 
-float MoodAnalyzer::calculateSpectralCentroid(const fft::Bins& fft) {
+float MoodAnalyzer::calculateSpectralCentroid(const fft::Bins& fft) FL_NO_EXCEPT {
     float weightedSum = 0.0f;
     float magnitudeSum = 0.0f;
 
@@ -123,7 +123,7 @@ float MoodAnalyzer::calculateSpectralCentroid(const fft::Bins& fft) {
     return (magnitudeSum < 1e-6f) ? 0.0f : weightedSum / magnitudeSum;
 }
 
-float MoodAnalyzer::calculateSpectralRolloff(const fft::Bins& fft, float threshold) {
+float MoodAnalyzer::calculateSpectralRolloff(const fft::Bins& fft, float threshold) FL_NO_EXCEPT {
     float totalEnergy = 0.0f;
 
     for (size_t i = 0; i < fft.raw().size(); i++) {
@@ -145,7 +145,7 @@ float MoodAnalyzer::calculateSpectralRolloff(const fft::Bins& fft, float thresho
     return 1.0f;
 }
 
-float MoodAnalyzer::calculateSpectralFlux(const fft::Bins& fft, const fft::Bins* prevFFT) {
+float MoodAnalyzer::calculateSpectralFlux(const fft::Bins& fft, const fft::Bins* prevFFT) FL_NO_EXCEPT {
     if (!prevFFT || prevFFT->raw().size() != fft.raw().size()) {
         return 0.0f;
     }
@@ -159,7 +159,7 @@ float MoodAnalyzer::calculateSpectralFlux(const fft::Bins& fft, const fft::Bins*
     return fl::sqrt(flux);
 }
 
-float MoodAnalyzer::calculateValence(float centroid, float rolloff, float flux) {
+float MoodAnalyzer::calculateValence(float centroid, float rolloff, float flux) FL_NO_EXCEPT {
     // Valence estimation based on spectral characteristics
     // Higher frequencies and brighter timbre = more positive
     // Lower frequencies and darker timbre = more negative
@@ -180,7 +180,7 @@ float MoodAnalyzer::calculateValence(float centroid, float rolloff, float flux) 
     return fl::max(-1.0f, fl::min(1.0f, valence));
 }
 
-float MoodAnalyzer::calculateArousal(float rms, float zcr, float flux) {
+float MoodAnalyzer::calculateArousal(float rms, float zcr, float flux) FL_NO_EXCEPT {
     // Arousal estimation based on energy and dynamics
     // Higher energy and more change = higher arousal
     // Lower energy and less change = lower arousal
@@ -201,7 +201,7 @@ float MoodAnalyzer::calculateArousal(float rms, float zcr, float flux) {
     return fl::max(0.0f, fl::min(1.0f, arousal));
 }
 
-float MoodAnalyzer::calculateConfidence(float valence, float arousal) {
+float MoodAnalyzer::calculateConfidence(float valence, float arousal) FL_NO_EXCEPT {
     // Confidence based on distance from neutral (center)
     // Further from neutral = higher confidence
 
@@ -216,7 +216,7 @@ float MoodAnalyzer::calculateConfidence(float valence, float arousal) {
     return fl::max(0.0f, fl::min(1.0f, normalizedDistance));
 }
 
-bool MoodAnalyzer::shouldChangeMood(const Mood& newMood) {
+bool MoodAnalyzer::shouldChangeMood(const Mood& newMood) FL_NO_EXCEPT {
     // Check if mood category has changed
     if (mPreviousMood.getCategory() == newMood.getCategory()) {
         return false;

@@ -5,6 +5,7 @@
 #include "fl/stl/string.h"
 #include "fl/stl/type_traits.h"
 #include "fl/stl/vector.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace detail {
@@ -16,7 +17,7 @@ namespace detail {
 // Primary template - unknown types
 template <typename T, typename Enable = void>
 struct TypeSchema {
-    static const char* typeName() {
+    static const char* typeName() FL_NO_EXCEPT {
         return "unknown";
     }
 };
@@ -26,7 +27,7 @@ template <typename T>
 struct TypeSchema<T, typename fl::enable_if<
     fl::is_integral<T>::value && !fl::is_same<T, bool>::value
 >::type> {
-    static const char* typeName() {
+    static const char* typeName() FL_NO_EXCEPT {
         return "integer";
     }
 };
@@ -34,7 +35,7 @@ struct TypeSchema<T, typename fl::enable_if<
 // Boolean type
 template <>
 struct TypeSchema<bool, void> {
-    static const char* typeName() {
+    static const char* typeName() FL_NO_EXCEPT {
         return "boolean";
     }
 };
@@ -42,7 +43,7 @@ struct TypeSchema<bool, void> {
 // Floating point types
 template <typename T>
 struct TypeSchema<T, typename fl::enable_if<fl::is_floating_point<T>::value>::type> {
-    static const char* typeName() {
+    static const char* typeName() FL_NO_EXCEPT {
         return "number";
     }
 };
@@ -50,7 +51,7 @@ struct TypeSchema<T, typename fl::enable_if<fl::is_floating_point<T>::value>::ty
 // String type
 template <>
 struct TypeSchema<fl::string, void> {
-    static const char* typeName() {
+    static const char* typeName() FL_NO_EXCEPT {
         return "string";
     }
 };
@@ -58,7 +59,7 @@ struct TypeSchema<fl::string, void> {
 // Void type (for return types)
 template <>
 struct TypeSchema<void, void> {
-    static const char* typeName() {
+    static const char* typeName() FL_NO_EXCEPT {
         return "void";
     }
 };
@@ -74,26 +75,26 @@ struct MethodSchema;
 template <typename R, typename... Args>
 struct MethodSchema<R(Args...)> {
     // Flat params: [["name", "type"], ...] optimized for low-memory devices
-    static json params(const fl::vector<fl::string>& names) {
+    static json params(const fl::vector<fl::string>& names) FL_NO_EXCEPT {
         json arr = json::array();
         addParams<0, Args...>(arr, names);
         return arr;
     }
 
-    static const char* resultTypeName() {
+    static const char* resultTypeName() FL_NO_EXCEPT {
         return TypeSchema<R>::typeName();
     }
 
 private:
     template <fl::size Index>
-    static void addParams(json& arr, const fl::vector<fl::string>& names) {
+    static void addParams(json& arr, const fl::vector<fl::string>& names) FL_NO_EXCEPT {
         // Base case: no more parameters
         (void)arr;
         (void)names;
     }
 
     template <fl::size Index, typename First, typename... Rest>
-    static void addParams(json& arr, const fl::vector<fl::string>& names) {
+    static void addParams(json& arr, const fl::vector<fl::string>& names) FL_NO_EXCEPT {
         json param = json::array();
         // Name
         if (Index < names.size() && !names[Index].empty()) {
@@ -112,26 +113,26 @@ private:
 template <typename... Args>
 struct MethodSchema<void(Args...)> {
     // Flat params: [["name", "type"], ...] optimized for low-memory devices
-    static json params(const fl::vector<fl::string>& names) {
+    static json params(const fl::vector<fl::string>& names) FL_NO_EXCEPT {
         json arr = json::array();
         addParams<0, Args...>(arr, names);
         return arr;
     }
 
-    static const char* resultTypeName() {
+    static const char* resultTypeName() FL_NO_EXCEPT {
         return TypeSchema<void>::typeName();
     }
 
 private:
     template <fl::size Index>
-    static void addParams(json& arr, const fl::vector<fl::string>& names) {
+    static void addParams(json& arr, const fl::vector<fl::string>& names) FL_NO_EXCEPT {
         // Base case: no more parameters
         (void)arr;
         (void)names;
     }
 
     template <fl::size Index, typename First, typename... Rest>
-    static void addParams(json& arr, const fl::vector<fl::string>& names) {
+    static void addParams(json& arr, const fl::vector<fl::string>& names) FL_NO_EXCEPT {
         json param = json::array();
         // Name
         if (Index < names.size() && !names[Index].empty()) {

@@ -1,7 +1,7 @@
 /// @file channel_driver_spi.h
 /// @brief Clockless-over-SPI implementation of ChannelEngine for ESP32
 ///
-/// ⚠️ ARCHITECTURE NOTE: This is NOT a general SPI LED driver (e.g., APA102, SK9822)!
+/// WARNING: ARCHITECTURE NOTE: This is NOT a general SPI LED driver (e.g., APA102, SK9822)!
 ///
 /// This driver implements CLOCKLESS protocols (WS2812, SK6812, etc.) using SPI hardware
 /// as a bit-banging driver. The SPI clock pin is specified for internal timing generation
@@ -11,8 +11,8 @@
 /// 1. The SPI peripheral generates a clock signal internally
 /// 2. This clock controls the precise timing of MOSI bit transitions
 /// 3. Each LED bit (0 or 1) expands to 8 SPI bits using wave8 encoding:
-///    - LED bit '0' → wave8 pattern with ~2 HIGH pulses (short high, long low)
-///    - LED bit '1' → wave8 pattern with ~5 HIGH pulses (long high, short low)
+///    - LED bit '0' -> wave8 pattern with ~2 HIGH pulses (short high, long low)
+///    - LED bit '1' -> wave8 pattern with ~5 HIGH pulses (long high, short low)
 /// 4. The LEDs decode these patterns based on pulse width (T0H/T0L vs T1H/T1L)
 /// 5. The clock signal itself is ignored by the LEDs (never leaves the ESP32)
 ///
@@ -44,6 +44,7 @@
 #include "fl/channels/wave8.h"
 #include "fl/chipsets/chipset_timing_config.h"
 #include "fl/system/engine_events.h"
+#include "fl/stl/array.h"
 #include "fl/stl/span.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/flat_map.h"
@@ -82,7 +83,7 @@ struct MultiLanePinConfig {
     gpio_num_t data3_pin;  ///< Data3/HD pin for quad mode (-1 if unused, ESP32/S2/S3 only)
 
     /// @brief Default constructor (single-lane mode)
-    constexpr MultiLanePinConfig()
+    constexpr MultiLanePinConfig() FL_NO_EXCEPT
         : data0_pin(static_cast<gpio_num_t>(-1))
         , data1_pin(static_cast<gpio_num_t>(-1))
         , data2_pin(static_cast<gpio_num_t>(-1))
@@ -90,7 +91,7 @@ struct MultiLanePinConfig {
     {}
 
     /// @brief Single-lane constructor
-    constexpr explicit MultiLanePinConfig(gpio_num_t data0)
+    constexpr explicit MultiLanePinConfig(gpio_num_t data0) FL_NO_EXCEPT
         : data0_pin(data0)
         , data1_pin(static_cast<gpio_num_t>(-1))
         , data2_pin(static_cast<gpio_num_t>(-1))
@@ -98,7 +99,7 @@ struct MultiLanePinConfig {
     {}
 
     /// @brief Dual-lane constructor
-    constexpr MultiLanePinConfig(gpio_num_t data0, gpio_num_t data1)
+    constexpr MultiLanePinConfig(gpio_num_t data0, gpio_num_t data1) FL_NO_EXCEPT
         : data0_pin(data0)
         , data1_pin(data1)
         , data2_pin(static_cast<gpio_num_t>(-1))
@@ -107,7 +108,7 @@ struct MultiLanePinConfig {
 
     /// @brief Quad-lane constructor (ESP32/S2/S3 only)
     constexpr MultiLanePinConfig(gpio_num_t data0, gpio_num_t data1,
-                                  gpio_num_t data2, gpio_num_t data3)
+                                  gpio_num_t data2, gpio_num_t data3) FL_NO_EXCEPT
         : data0_pin(data0)
         , data1_pin(data1)
         , data2_pin(data2)
@@ -166,7 +167,7 @@ struct SpiTimingConfig {
 
 /// @brief Clockless-over-SPI IChannelDriver implementation
 ///
-/// ⚠️ This is a CLOCKLESS LED driver using SPI hardware, NOT a true SPI chipset driver!
+/// WARNING: This is a CLOCKLESS LED driver using SPI hardware, NOT a true SPI chipset driver!
 ///
 /// Consolidates clockless LED strip functionality using SPI peripheral as bit-banger:
 /// - Implements clockless protocols (WS2812, SK6812, etc.) via SPI bit patterns
@@ -175,7 +176,7 @@ struct SpiTimingConfig {
 /// - Multi-lane SPI support (dual/quad modes for parallel strip transmission)
 /// - Channel persistence between frames (avoid recreation overhead)
 /// - On-demand SPI bus allocation with reference counting
-/// - DMA support with PSRAM→DRAM buffer copying
+/// - DMA support with PSRAM->DRAM buffer copying
 ///
 /// How clockless-over-SPI works:
 /// - SPI clock generates precise timing internally (e.g., 2.5MHz = 400ns/bit)
@@ -329,7 +330,7 @@ private:
         u32 mResetDelayStartUs;
         u32 mResetDelayDurationUs;
 
-        DmaPipelineState()
+        DmaPipelineState() FL_NO_EXCEPT
             : mPhase(IDLE)
             , mActiveChannel(nullptr)
             , mEncodeIdx(0)
@@ -352,10 +353,10 @@ private:
     void startFirstDma() FL_NO_EXCEPT;
 
     /// @brief SPI post-transaction callback (ISR context)
-    static void IRAM_ATTR spiPostTransactionCallback(spi_transaction_t *trans);
+    static void IRAM_ATTR spiPostTransactionCallback(spi_transaction_t *trans) FL_NO_EXCEPT;
 
     /// @brief Timer encoding ISR callback
-    static void IRAM_ATTR timerEncodingISR(void *user_data);
+    static void IRAM_ATTR timerEncodingISR(void *user_data) FL_NO_EXCEPT;
 
     /// @brief Poll channel states for cleanup
     DriverState pollChannels() FL_NO_EXCEPT;
@@ -370,7 +371,6 @@ private:
 
     /// @brief SPI host allocation tracking (global across all channels)
     struct SpiHostTracking {
-        spi_host_device_t host;
         int refCount;  ///< Reference counting (multiple channels can share a bus)
         bool initialized; ///< Bus has been initialized
         u8 activeLanes; ///< Number of lanes in use (0=unused, 1=single, 2=dual, 4=quad)
@@ -496,7 +496,7 @@ private:
     fl::vector_inlined<PendingChannel, 16> mPendingChannels;
 
     /// @brief SPI host usage tracking (static for global coordination)
-    static fl::vector_inlined<SpiHostTracking, 3> sSpiHostUsage;
+    static fl::array<SpiHostTracking, SPI_HOST_MAX> sSpiHostUsage;
 
     /// @brief Track allocation failures to avoid hammering the driver
     bool mAllocationFailed;

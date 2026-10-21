@@ -2,13 +2,14 @@
 #include "fl/fx/2d/animartrix_detail/viz/hot_blob.h"
 #include "fl/fx/2d/animartrix_detail/render_value_fp.h"
 #include "fl/fx/2d/animartrix_detail/perlin_float.h"
+#include "fl/stl/noexcept.h"
 
 FL_FAST_MATH_BEGIN
 FL_OPTIMIZATION_LEVEL_O3_BEGIN
 
 namespace fl {
 
-void Hot_Blob::draw(Context &ctx) {
+void Hot_Blob::draw(Context &ctx) FL_NO_EXCEPT {
     auto *e = ctx.mEngine.get();
     e->get_ready();
     e->run_default_oscillators(0.001);
@@ -62,7 +63,7 @@ void Hot_Blob::draw(Context &ctx) {
 // Fixed-Point Implementation of Hot_Blob
 // ============================================================================
 
-void Hot_Blob_FP::draw(Context &ctx) {
+void Hot_Blob_FP::draw(Context &ctx) FL_NO_EXCEPT {
     auto *e = ctx.mEngine.get();
     e->get_ready();
     mState.ensureCache(e);

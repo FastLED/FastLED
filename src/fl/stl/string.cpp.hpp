@@ -251,7 +251,7 @@ string& string::operator+=(const string& other) FL_NO_EXCEPT {
     return *this;
 }
 
-string &string::append(const audio::fft::Bins &str) {
+string &string::append(const audio::fft::Bins &str) FL_NO_EXCEPT {
     append("\n Impl Bins:\n  ");
     append(str.raw());
     append("\n");
@@ -261,7 +261,7 @@ string &string::append(const audio::fft::Bins &str) {
     return *this;
 }
 
-string &string::append(const XYMap &map) {
+string &string::append(const XYMap &map) FL_NO_EXCEPT {
     append("XYMap(");
     append(map.getWidth());
     append(",");
@@ -270,7 +270,7 @@ string &string::append(const XYMap &map) {
     return *this;
 }
 
-string &string::append(const Tile2x2_u8_wrap &tile) {
+string &string::append(const Tile2x2_u8_wrap &tile) FL_NO_EXCEPT {
     Tile2x2_u8_wrap::Entry data[4] = {
         tile.at(0, 0),
         tile.at(0, 1),
@@ -297,14 +297,14 @@ string &string::append(const Tile2x2_u8_wrap &tile) {
     return *this;
 }
 
-void string::swap(string &other) {
+void string::swap(string &other) FL_NO_EXCEPT {
     if (this == &other) return;
     string tmp(fl::move(*this));
     *this = fl::move(other);
     other = fl::move(tmp);
 }
 
-void string::compileTimeAssertions() {
+void string::compileTimeAssertions() FL_NO_EXCEPT {
     FL_STATIC_ASSERT(FASTLED_STR_INLINED_SIZE > 0,
                   "FASTLED_STR_INLINED_SIZE must be greater than 0");
     FL_STATIC_ASSERT(FASTLED_STR_INLINED_SIZE == kStrInlineSize,
@@ -312,7 +312,7 @@ void string::compileTimeAssertions() {
                   "must be through a build define and not an include define.");
 }
 
-string &string::append(const CRGB &rgb) {
+string &string::append(const CRGB &rgb) FL_NO_EXCEPT {
     append("CRGB(");
     append(rgb.r);
     append(",");
@@ -323,7 +323,7 @@ string &string::append(const CRGB &rgb) {
     return *this;
 }
 
-string &string::appendCRGB(const CRGB &rgb) {
+string &string::appendCRGB(const CRGB &rgb) FL_NO_EXCEPT {
     append("CRGB(");
     append(rgb.r);
     append(",");
@@ -338,7 +338,7 @@ string &string::appendCRGB(const CRGB &rgb) {
 
 // JSON type append implementations
 // NOTE: These use forward declarations to avoid circular dependency with json.h
-string &string::append(const json_value& val) {
+string &string::append(const json_value& val) FL_NO_EXCEPT {
     // Use the json_value's to_string method if available
     // For now, just append a placeholder to avoid compilation errors
     FL_UNUSED(val);
@@ -346,7 +346,7 @@ string &string::append(const json_value& val) {
     return *this;
 }
 
-string &string::append(const json& val) {
+string &string::append(const json& val) FL_NO_EXCEPT {
     // Use the json's to_string method if available
     // For now, just append a placeholder to avoid compilation errors
     //append("<json>");
@@ -374,7 +374,7 @@ string &string::append(const ::String &str) {
 #endif
 
 // String interning method implementation
-string& string::intern() {
+string& string::intern() FL_NO_EXCEPT {
     // Skip interning if using inline storage (SSO) - already efficient, no heap allocation
     if (isInline()) {
         return *this;

@@ -50,7 +50,7 @@ struct WaitingTask {
 // ConditionVariableESP32 Implementation
 //=============================================================================
 
-ConditionVariableESP32::ConditionVariableESP32()
+ConditionVariableESP32::ConditionVariableESP32() FL_NO_EXCEPT
     : mMutex(nullptr), mWaitQueue(nullptr) {
 
     // Create internal mutex for protecting the wait queue
@@ -133,7 +133,7 @@ void ConditionVariableESP32::notify_all() FL_NO_EXCEPT {
 //=============================================================================
 
 template<typename Mutex>
-void ConditionVariableESP32::wait(unique_lock<Mutex>& lock) {
+void ConditionVariableESP32::wait(unique_lock<Mutex>& lock) FL_NO_EXCEPT {
     FL_ASSERT(lock.owns_lock(), "ConditionVariableESP32::wait() called on unlocked lock");
 
     // Get the mutex from the lock
@@ -174,7 +174,7 @@ void ConditionVariableESP32::wait(unique_lock<Mutex>& lock) {
 }
 
 template<typename Mutex, typename Predicate>
-void ConditionVariableESP32::wait(unique_lock<Mutex>& lock, Predicate pred) {
+void ConditionVariableESP32::wait(unique_lock<Mutex>& lock, Predicate pred) FL_NO_EXCEPT {
     while (!pred()) {
         wait(lock);
     }
@@ -183,7 +183,7 @@ void ConditionVariableESP32::wait(unique_lock<Mutex>& lock, Predicate pred) {
 template<typename Mutex, typename Rep, typename Period>
 cv_status ConditionVariableESP32::wait_for(
     unique_lock<Mutex>& lock,
-    const std::chrono::duration<Rep, Period>& rel_time) {  // okay std namespace
+    const std::chrono::duration<Rep, Period>& rel_time) FL_NO_EXCEPT {  // okay std namespace
 
     FL_ASSERT(lock.owns_lock(), "ConditionVariableESP32::wait_for() called on unlocked lock");
 
@@ -235,7 +235,7 @@ template<typename Mutex, typename Rep, typename Period, typename Predicate>
 bool ConditionVariableESP32::wait_for(
     unique_lock<Mutex>& lock,
     const std::chrono::duration<Rep, Period>& rel_time,  // okay std namespace
-    Predicate pred) {
+    Predicate pred) FL_NO_EXCEPT {
 
     auto start = std::chrono::steady_clock::now();  // okay std namespace
     auto deadline = start + rel_time;
@@ -258,7 +258,7 @@ bool ConditionVariableESP32::wait_for(
 template<typename Mutex, typename Clock, typename Duration>
 cv_status ConditionVariableESP32::wait_until(
     unique_lock<Mutex>& lock,
-    const std::chrono::time_point<Clock, Duration>& abs_time) {  // okay std namespace
+    const std::chrono::time_point<Clock, Duration>& abs_time) FL_NO_EXCEPT {  // okay std namespace
 
     // Convert absolute time to relative duration
     auto now = Clock::now();
@@ -274,7 +274,7 @@ template<typename Mutex, typename Clock, typename Duration, typename Predicate>
 bool ConditionVariableESP32::wait_until(
     unique_lock<Mutex>& lock,
     const std::chrono::time_point<Clock, Duration>& abs_time,  // okay std namespace
-    Predicate pred) {
+    Predicate pred) FL_NO_EXCEPT {
 
     while (!pred()) {
         auto now = Clock::now();

@@ -37,7 +37,7 @@ public:
      * @param controllerIndex Index of the LED controller to use (default: 0)
      *                        Use 0 for the first controller, 1 for second, etc.
      */
-    explicit FastLEDAdapter(u8 controllerIndex = 0);
+    explicit FastLEDAdapter(u8 controllerIndex = 0) FL_NO_EXCEPT;
 
     /**
      * @brief Destructor
@@ -46,25 +46,25 @@ public:
 
     // IFastLED interface implementation
 
-    fl::span<CRGB> getLEDs() override;
-    size_t getNumLEDs() const override;
+    fl::span<CRGB> getLEDs() FL_NO_EXCEPT override;
+    size_t getNumLEDs() const FL_NO_EXCEPT override;
 
-    void show() override;
-    void show(u8 brightness) override;
-    void clear(bool writeToStrip = false) override;
+    void show() FL_NO_EXCEPT override;
+    void show(u8 brightness) FL_NO_EXCEPT override;
+    void clear(bool writeToStrip = false) FL_NO_EXCEPT override;
 
-    void setBrightness(u8 brightness) override;
-    u8 getBrightness() const override;
+    void setBrightness(u8 brightness) FL_NO_EXCEPT override;
+    u8 getBrightness() const FL_NO_EXCEPT override;
 
-    void setCorrection(CRGB correction) override;
-    void setTemperature(CRGB temperature) override;
+    void setCorrection(CRGB correction) FL_NO_EXCEPT override;
+    void setTemperature(CRGB temperature) FL_NO_EXCEPT override;
 
-    void delay(unsigned long ms) override;
-    void setMaxRefreshRate(u16 fps) override;
-    u16 getMaxRefreshRate() const override;
+    void delay(unsigned long ms) FL_NO_EXCEPT override;
+    void setMaxRefreshRate(u16 fps) FL_NO_EXCEPT override;
+    u16 getMaxRefreshRate() const FL_NO_EXCEPT override;
 
-    void setSegment(size_t start, size_t end) override;
-    void clearSegment() override;
+    void setSegment(size_t start, size_t end) FL_NO_EXCEPT override;
+    void clearSegment() FL_NO_EXCEPT override;
 
 private:
     u8 mControllerIndex; // Index of the LED controller in FastLED
@@ -85,6 +85,6 @@ private:
  * auto controller = createFastLEDController();  // Uses controller index 0
  * @endcode
  */
-fl::shared_ptr<IFastLED> createFastLEDController(u8 controllerIndex = 0);
+fl::shared_ptr<IFastLED> createFastLEDController(u8 controllerIndex = 0) FL_NO_EXCEPT;
 
 } // namespace fl

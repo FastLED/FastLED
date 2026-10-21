@@ -76,7 +76,7 @@ public:
 
     /// @brief Construct parallel device
     /// @param config Configuration with 1-32 GPIO pins
-    explicit ParallelDevice(const Config& config);
+    explicit ParallelDevice(const Config& config) FL_NO_EXCEPT;
 
     /// @brief Destructor - releases hardware resources
     ~ParallelDevice() FL_NO_EXCEPT;
@@ -92,14 +92,14 @@ public:
     /// @brief Initialize hardware and setup LUT
     /// @returns Optional error (nullopt on success)
     /// @note Auto-selects backend based on pin count and mode
-    fl::optional<fl::task::Error> begin();
+    fl::optional<fl::task::Error> begin() FL_NO_EXCEPT;
 
     /// @brief Shutdown hardware and release resources
-    void end();
+    void end() FL_NO_EXCEPT;
 
     /// @brief Check if device is initialized
     /// @returns true if initialized and ready
-    bool isReady() const;
+    bool isReady() const FL_NO_EXCEPT;
 
     // ========== Transmission ==========
 
@@ -108,17 +108,17 @@ public:
     /// @param size Number of bytes
     /// @returns Result containing Transaction handle or error
     /// @note Each byte value is mapped via LUT to GPIO pin states
-    Result<Transaction> write(const u8* data, size_t size);
+    Result<Transaction> write(const u8* data, size_t size) FL_NO_EXCEPT;
 
     /// @brief Wait for pending transmission to complete
     /// @param timeout_ms Maximum time to wait (default: forever)
     /// @returns true if completed, false on timeout
     // Use (max)() to prevent macro expansion by Arduino.h's max macro
-    bool waitComplete(u32 timeout_ms = (fl::numeric_limits<u32>::max)());
+    bool waitComplete(u32 timeout_ms = (fl::numeric_limits<u32>::max)()) FL_NO_EXCEPT;
 
     /// @brief Check if transmission is in progress
     /// @returns true if busy, false if idle
-    bool isBusy() const;
+    bool isBusy() const FL_NO_EXCEPT;
 
     // ========== Configuration ==========
 
@@ -127,11 +127,11 @@ public:
     /// @param clear_masks Array of 256 clear masks (GPIO pins to clear low for each byte value)
     /// @note Default LUT maps byte bits directly to GPIO pins
     /// @note Must be called before begin() or after begin() but before write()
-    void configureLUT(const u32* set_masks, const u32* clear_masks);
+    void configureLUT(const u32* set_masks, const u32* clear_masks) FL_NO_EXCEPT;
 
     /// @brief Get current configuration
     /// @returns Reference to config
-    const Config& getConfig() const;
+    const Config& getConfig() const FL_NO_EXCEPT;
 
 private:
     struct Impl;

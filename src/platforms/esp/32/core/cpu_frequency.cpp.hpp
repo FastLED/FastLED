@@ -20,7 +20,7 @@ namespace fl {
 /// Get the current ESP32 CPU frequency at runtime
 /// Wraps the ESP-IDF C function esp_clk_cpu_freq()
 /// @return CPU frequency in Hz
-fl::u32 esp_clk_cpu_freq_impl() {
+fl::u32 esp_clk_cpu_freq_impl() FL_NO_EXCEPT {
   return ::esp_clk_cpu_freq();
 }
 

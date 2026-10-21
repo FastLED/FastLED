@@ -1,7 +1,7 @@
 name: esp32dev_idf6
 
 # Compile-smoke of the classic-ESP32 I2S clockless driver against ESP-IDF v6.0+
-# via pioarduino's prep_IDF6 branch (arduino-esp32 master with IDF v6.0.1+).
+# via the pioarduino 61.04.00-RC1 release (Arduino 4 on IDF v6).
 #
 # This job exercises the `i2s_ll_enable_bus_clock` + `PERIPH_RCC_ATOMIC()` path
 # in `src/platforms/esp/32/drivers/i2s/i2s_periph_compat.h` (landed in #3511 /
@@ -50,4 +50,4 @@ jobs:
         contains(github.event.pull_request.labels.*.name, 'ci-platform:esp*')))
     uses: ./.github/workflows/build_template.yml
     with:
-      args: esp32dev_idf6 --examples Blink,SpecialDrivers/ESP/DriverTest
+      args: esp32dev_idf6 --examples Blink,Test,SpecialDrivers/ESP/DriverTest

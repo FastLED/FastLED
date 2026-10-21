@@ -2,13 +2,14 @@
 #include "fl/fx/2d/animartrix_detail/viz/module_experiment3.h"
 #include "fl/fx/2d/animartrix_detail/render_value_fp.h"
 #include "fl/fx/2d/animartrix_detail/perlin_float.h"
+#include "fl/stl/noexcept.h"
 
 FL_FAST_MATH_BEGIN
 FL_OPTIMIZATION_LEVEL_O3_BEGIN
 
 namespace fl {
 
-void Module_Experiment3::draw(Context &ctx) {
+void Module_Experiment3::draw(Context &ctx) FL_NO_EXCEPT {
     auto *e = ctx.mEngine.get();
     e->get_ready();
 
@@ -52,7 +53,7 @@ void Module_Experiment3::draw(Context &ctx) {
 // Fixed-Point Implementation of Module_Experiment3
 // ============================================================================
 
-void Module_Experiment3_FP::draw(Context &ctx) {
+void Module_Experiment3_FP::draw(Context &ctx) FL_NO_EXCEPT {
     using FP = fl::s16x16;
 
     auto *e = ctx.mEngine.get();

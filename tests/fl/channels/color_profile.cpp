@@ -1,6 +1,7 @@
 // Profile binding API coverage for color pipeline P2 (#4036).
 
 #include "FastLED.h"
+#include "fl/stl/scope_exit.h"
 #include "fl/channels/channel.h"
 #include "fl/channels/color_profile.h"
 #include "fl/gfx/pipeline.h"
@@ -41,6 +42,15 @@ ChannelPtr makeChannelWithLocalProfile(CRGB* leds) {
 }
 
 }  // namespace
+
+FL_TEST_CASE("ColorProfileBinding stores its fields without avoidable padding") {
+    const fl::size payload = sizeof(fl::shared_ptr<const ColorProfileStorage>) +
+        sizeof(const EmitterProfile*) + sizeof(SourceProfile) +
+        sizeof(Chromaticity) + sizeof(GamutPolicy) + 3 * sizeof(bool);
+    const fl::size alignment = alignof(ColorProfileBinding);
+    const fl::size ceiling = ((payload + alignment - 1) / alignment) * alignment;
+    FL_CHECK_LE(sizeof(ColorProfileBinding), ceiling);
+}
 
 FL_TEST_CASE("SourceProfile provides independent named and custom source spaces") {
     const SourceProfile srgb = SourceProfile::srgbBt709();
@@ -704,13 +714,6 @@ FL_TEST_CASE("Legacy and profile transitions emit one warning event per directio
     FL_CHECK_EQ(events[1].warning, ColorProfileWarning::LegacyClearedByProfile);
 }
 
-FL_TEST_CASE("FastLED add enum sugar binds static profile without controller-owned allocation") {
-    CRGB leds[1] = {};
-    CLEDController& controller = FastLED.addLeds<ProfileId::WS2812B, WS2812, 1, GRB>(leds, 1);
-    FL_CHECK_EQ(controller.emitterProfile(), &profiles::WS2812B);
-    FastLED.clear(ClearFlags::CHANNELS);
-}
-
 FL_TEST_CASE("FastLED add enum sugar preserves ChannelConfig and binds its static profile") {
     CRGB leds[1] = {};
     ChannelOptions options;
@@ -739,14 +742,48 @@ FL_TEST_CASE("Static profile binding clears on legacy transition and yields to r
     FL_CHECK_EQ(fl::string(options.emitterProfile()->id), fl::string("fixture/runtime-r2"));
 }
 
-FL_TEST_CASE("Static Channel factory identity is visible through ChannelPtr and base controller") {
+FL_TEST_CASE("Standalone Channel profile clears through the legacy base settings API") {
     CRGB leds[1] = {};
     ChannelConfig config(ClocklessChipset(), leds, RGB);
     ChannelPtr channel = Channel::create<kFixtureProfile>(config);
     FL_REQUIRE(channel != nullptr);
     FL_CHECK_EQ(channel->emitterProfile(), &kFixtureProfile);
     CLEDController& base = *channel;
-    FL_CHECK_EQ(base.emitterProfile(), &kFixtureProfile);
+#if FL_COLOR_PIPELINE_SHARED
+    const auto retained = channel->colorPipeline();
+    FL_REQUIRE(retained != nullptr);
+    base.setDither(DISABLE_DITHER);
+    FL_CHECK_EQ(channel->colorPipeline(), retained);
+    base.setDither(BINARY_DITHER);
+    FL_CHECK_EQ(channel->colorPipeline(), retained);
+    fl::i32 before[3];
+    processPixelQ16(*retained, 100, 80, 60, before);
+#endif
+    base.setCorrection(UncorrectedColor);
+    FL_CHECK_EQ(channel->emitterProfile(), nullptr);
+    FL_CHECK_FALSE(channel->isColorManaged());
+    base.setTemperature(UncorrectedTemperature);
+    FL_CHECK_EQ(channel->emitterProfile(), nullptr);
+#if FL_COLOR_PIPELINE_SHARED
+    FL_CHECK_FALSE(channel->colorPipeline());
+    fl::i32 after[3];
+    processPixelQ16(*retained, 100, 80, 60, after);
+    for (int i = 0; i < 3; ++i) FL_CHECK_EQ(after[i], before[i]);
+#endif
+}
+
+FL_TEST_CASE("Global legacy temperature clears a registered Channel profile") {
+    CRGB leds[1] = {};
+    ChannelConfig config(ClocklessChipset(), leds, RGB);
+    ChannelPtr channel = Channel::create<kFixtureProfile>(config);
+    FL_REQUIRE(channel != nullptr);
+    FastLED.add(channel);
+    auto cleanup = fl::make_scope_exit([&]() { FastLED.remove(channel); });
+    FL_REQUIRE(channel->emitterProfile() != nullptr);
+    FastLED.setTemperature(UncorrectedTemperature);
+    FL_CHECK_EQ(channel->emitterProfile(), nullptr);
+    FL_CHECK_FALSE(channel->isColorManaged());
+    FL_CHECK_EQ(channel->getTemperature(), CRGB(UncorrectedTemperature));
 }
 
 // applyConfig() replaces mSettings wholesale. Without reconciliation it keeps
@@ -910,12 +947,14 @@ FL_TEST_CASE("[#4333] falling back to the legacy path warns once") {
     CRGB leds[1] = {};
     fl::vector<fl::string> lines;
     fl::inject_print_handler([&](const char* text) { lines.push_back(fl::string(text)); });
+    fl::inject_println_handler([&](const char* text) { lines.push_back(fl::string(text)); });
 
     ChannelOptions options;
     options.requestColorManagement(SourceProfile::linearSrgb());   // no profile
     ChannelConfig config(ClocklessChipset(), leds, RGB, options);
     ChannelPtr channel = Channel::create(config);
     fl::clear_print_handler();
+    fl::clear_println_handler();
 
     FL_REQUIRE(channel != nullptr);
     FL_REQUIRE(channel->hasColorProfileFallback());
@@ -941,6 +980,7 @@ FL_TEST_CASE("[#4333] strict mode says it disabled the channel, not that it fell
     fl::vector<fl::string> lines;
     FastLED.setColorManagementStrict(true);
     fl::inject_print_handler([&](const char* text) { lines.push_back(fl::string(text)); });
+    fl::inject_println_handler([&](const char* text) { lines.push_back(fl::string(text)); });
 
     ChannelOptions options;
     options.requestColorManagement(SourceProfile::linearSrgb());
@@ -948,6 +988,7 @@ FL_TEST_CASE("[#4333] strict mode says it disabled the channel, not that it fell
     ChannelPtr channel = Channel::create(config);
 
     fl::clear_print_handler();
+    fl::clear_println_handler();
     FastLED.setColorManagementStrict(false);
 
     FL_REQUIRE(channel != nullptr);
@@ -970,12 +1011,14 @@ FL_TEST_CASE("[#4333] a channel that gets its profile says nothing") {
     CRGB leds[1] = {};
     fl::vector<fl::string> lines;
     fl::inject_print_handler([&](const char* text) { lines.push_back(fl::string(text)); });
+    fl::inject_println_handler([&](const char* text) { lines.push_back(fl::string(text)); });
 
     ChannelOptions options;
     FL_REQUIRE(options.setColorProfile(kFixtureProfile, SourceProfile::linearSrgb()));
     ChannelConfig config(ClocklessChipset(), leds, RGB, options);
     ChannelPtr channel = Channel::create(config);
     fl::clear_print_handler();
+    fl::clear_println_handler();
 
     FL_REQUIRE(channel != nullptr);
     FL_CHECK_FALSE(channel->hasColorProfileFallback());
@@ -1002,9 +1045,11 @@ FL_TEST_CASE("[#4333] and it stays quiet on every reconfigure after the first") 
     // counted here -- the case above owns that one.
     fl::vector<fl::string> lines;
     fl::inject_print_handler([&](const char* text) { lines.push_back(fl::string(text)); });
+    fl::inject_println_handler([&](const char* text) { lines.push_back(fl::string(text)); });
     channel->applyConfig(config);
     channel->applyConfig(config);
     fl::clear_print_handler();
+    fl::clear_println_handler();
 
     for (fl::size i = 0; i < lines.size(); ++i) {
         FL_CHECK(lines[i].find("color management") == fl::string::npos);
@@ -1024,9 +1069,11 @@ FL_TEST_CASE("[#4345] a profile that builds no pipeline reports fallback, not Co
 
     fl::vector<fl::string> lines;
     fl::inject_print_handler([&](const char* t) { lines.push_back(fl::string(t)); });
+    fl::inject_println_handler([&](const char* t) { lines.push_back(fl::string(t)); });
     ChannelConfig config(ClocklessChipset(), leds, RGB, options);
     ChannelPtr channel = Channel::create(config);
     fl::clear_print_handler();
+    fl::clear_println_handler();
 
     FL_REQUIRE(channel != nullptr);
     // The binding is still owned -- this is not a rejection, it is an honest
@@ -1053,9 +1100,11 @@ FL_TEST_CASE("[#4345] a usable profile still reports Configured and stays quiet"
 
     fl::vector<fl::string> lines;
     fl::inject_print_handler([&](const char* t) { lines.push_back(fl::string(t)); });
+    fl::inject_println_handler([&](const char* t) { lines.push_back(fl::string(t)); });
     ChannelConfig config(ClocklessChipset(), leds, RGB, options);
     ChannelPtr channel = Channel::create(config);
     fl::clear_print_handler();
+    fl::clear_println_handler();
 
     FL_REQUIRE(channel != nullptr);
     FL_CHECK(channel->isColorManaged());

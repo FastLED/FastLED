@@ -3,12 +3,13 @@
 // IWYU pragma: private
 
 #define FASTLED_INTERNAL  
+#include "fl/stl/noexcept.h"
 #include "FastLED.h"
 
 namespace fl {
 
 #ifdef ESP8266
-void esp8266_compile_tests() {
+void esp8266_compile_tests() FL_NO_EXCEPT {
 // Pinned to 0, but note the flag is inert on ESP8266: fastled_progmem.h
 // selects progmem_esp8266.h from its `#elif defined(ESP8266)` arm, before
 // the `#if (FASTLED_USE_PROGMEM == 1)` test is ever reached. Tables are
@@ -67,7 +68,7 @@ void esp8266_compile_tests() {
 #endif // FL_IS_ESP8266
 
 #ifdef ESP32
-void esp32_compile_tests() {
+void esp32_compile_tests() FL_NO_EXCEPT {
 #ifndef ESP32
 #error "ESP32 should be defined for ESP32 platforms"
 #endif

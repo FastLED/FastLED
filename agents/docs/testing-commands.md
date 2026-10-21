@@ -76,6 +76,71 @@ rm -rf .build && bash test                 # WRONG - use bash test --clean
 
 **The build system is self-healing and revalidates automatically. Manual cache deletion is highly discouraged.** See `agents/docs/build-system.md` for details.
 
+## Precompiled Header Invariant
+
+Debugging a PCH failure? Use the `/pch-debug` skill
+(`.claude/skills/pch-debug/`). Its `pch_probe.py` shows which header was
+ingested twice and why, before anything is cleaned.
+
+**Rule: shared source headers keep their timestamps.** zccache supplies
+private, content-verified header snapshots with the timestamps recorded by
+the PCH. Every PCH producer and consumer must run through zccache. Rebuild
+on real content or compiler flag changes; identical content can reuse the PCH
+without changing the source tree.
+
+**Never disable PCH timestamps: `-fno-pch-timestamp` is banned, permanently.**
+It makes clang stop checking input mtimes, so a stale PCH stops failing. That
+is unsafe and it masks the real problem, the staleness guard that missed a
+change. FastLED keeps strict PCH settings (`-Werror=invalid-pch`,
+`-verify-pch`, timestamps on). Fix the guard; never relax the validation.
+
+Why: FastLED builds and uses PCHs with `-fpch-validate-input-files-content`.
+With that flag, clang (seen on 21.1.x) accepts a PCH whose input header is
+byte-identical but has a newer mtime. It then fails to match that header to
+the copy inside the PCH, so `#pragma once` lets it be parsed a second time.
+Every TU that recompiles fails with `redefinition of ...` or `template
+parameter redefines default argument`. Touching a header (`git checkout`,
+editing a line and then reverting it, or a formatter) is enough to trigger it.
+
+Minimal repro, no FastLED needed:
+
+```bash
+printf '#pragma once\ntemplate<class T=int> T f(T x){return x;}\n' > a.h
+echo '#include "a.h"' > pch.h
+printf '#include "a.h"\nint main(){return f(0);}\n' > t.cpp
+F="-Werror=invalid-pch -fpch-validate-input-files-content"
+clang++ -x c++-header pch.h -o pch.h.pch $F
+clang++ -include-pch pch.h.pch $F -c t.cpp   # OK
+touch a.h
+clang++ -include-pch pch.h.pch $F -c t.cpp   # error: redefinition of 'f'
+```
+
+The earlier upstream report was retracted. Do not file upstream bugs without
+the maintainer's approval; diagnose the actual build plumbing first.
+
+Where it is enforced:
+- `ci/compile_pch.py`: content and compiler flag hashes control PCH reuse.
+  `invalidate_stale_pch()` runs before every native compile and rejects real
+  input changes. Native and WASM producers and consumers run through zccache,
+  which supplies private input snapshots rather than restoring source mtimes.
+  A compiler version change wipes the build in `ci/meson/build_config.py`.
+- WASM: `ci/wasm_compile_pch.py` compares dependency content hashes;
+  `compute_flags_hash` tracks flag order and project root.
+  `ci/wasm_compile_native.py` recompiles an object older than its PCH.
+- Fail-safe: Clang redefinitions in a recorded PCH header and zccache
+  rebuild refusals naming a PCH in this build trigger `purge_pch_artifacts`.
+  Both native runners retry once within the original deadline and print
+  `STALE PCH DETECTED`. This also migrates legacy chained PCHs that lack
+  zccache import provenance; repeated refusals remain visible failures.
+- Regression tests: `ci/tests/test_pch_e2e.py`, which uses the real
+  toolchain, also covers WASM, and is in the routine CI Python smoke list.
+
+Source timestamps are never replayed, so ordinary Ninja dependencies remain
+valid across build directories. The native input guard still invalidates objects
+after real content changes hidden by preserved timestamps; it never changes source mtimes.
+Early test-result, fingerprint and Ninja skip caches still verify source
+content, including `src/fl/build/`, to detect edits that preserve timestamps.
+
 ## Performance: Never Disable Fingerprint Caching
 
 **DO NOT use `--no-fingerprint`. This flag disables critical performance optimizations and makes builds 10-100x slower.**

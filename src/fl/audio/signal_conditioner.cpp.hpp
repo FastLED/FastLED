@@ -8,21 +8,21 @@
 namespace fl {
 namespace audio {
 
-SignalConditioner::SignalConditioner() {
+SignalConditioner::SignalConditioner() FL_NO_EXCEPT {
     configure(SignalConditionerConfig{});
 }
 
-SignalConditioner::SignalConditioner(const SignalConditionerConfig& config) {
+SignalConditioner::SignalConditioner(const SignalConditionerConfig& config) FL_NO_EXCEPT {
     configure(config);
 }
 
 SignalConditioner::~SignalConditioner() FL_NO_EXCEPT = default;
 
-void SignalConditioner::configure(const SignalConditionerConfig& config) {
+void SignalConditioner::configure(const SignalConditionerConfig& config) FL_NO_EXCEPT {
     mConfig = config;
 }
 
-void SignalConditioner::reset() {
+void SignalConditioner::reset() FL_NO_EXCEPT {
     mNoiseGateOpen = false;
     mStats.dcOffset = 0;
     mStats.noiseGateOpen = false;
@@ -30,7 +30,7 @@ void SignalConditioner::reset() {
     mStats.samplesProcessed = 0;
 }
 
-Sample SignalConditioner::processSample(const Sample& sample) {
+Sample SignalConditioner::processSample(const Sample& sample) FL_NO_EXCEPT {
     if (!sample.isValid() || sample.size() == 0) {
         return Sample();  // Return empty sample
     }
@@ -85,7 +85,7 @@ Sample SignalConditioner::processSample(const Sample& sample) {
     return Sample(impl);
 }
 
-size SignalConditioner::filterSpikes(span<const i16> pcm, vector<bool>& validMask) {
+size SignalConditioner::filterSpikes(span<const i16> pcm, vector<bool>& validMask) FL_NO_EXCEPT {
     const size count = pcm.size();
     validMask.clear();
     validMask.reserve(count);
@@ -109,7 +109,7 @@ size SignalConditioner::filterSpikes(span<const i16> pcm, vector<bool>& validMas
     return validCount;
 }
 
-i32 SignalConditioner::calculateDCOffset(span<const i16> pcm, const vector<bool>& validMask) {
+i32 SignalConditioner::calculateDCOffset(span<const i16> pcm, const vector<bool>& validMask) FL_NO_EXCEPT {
     const size count = pcm.size();
     i64 sum = 0;
     size validCount = 0;
@@ -132,7 +132,7 @@ i32 SignalConditioner::calculateDCOffset(span<const i16> pcm, const vector<bool>
     return instantDC;
 }
 
-void SignalConditioner::removeDCOffset(span<const i16> pcm, i32 dcOffset, vector<i16>& output) {
+void SignalConditioner::removeDCOffset(span<const i16> pcm, i32 dcOffset, vector<i16>& output) FL_NO_EXCEPT {
     const size count = pcm.size();
     output.clear();
     output.reserve(count);
@@ -154,7 +154,7 @@ void SignalConditioner::removeDCOffset(span<const i16> pcm, i32 dcOffset, vector
     }
 }
 
-void SignalConditioner::applyNoiseGate(span<const i16> pcm, vector<i16>& output) {
+void SignalConditioner::applyNoiseGate(span<const i16> pcm, vector<i16>& output) FL_NO_EXCEPT {
     const size count = pcm.size();
     output.clear();
     output.reserve(count);

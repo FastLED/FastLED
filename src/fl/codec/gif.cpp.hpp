@@ -3,10 +3,11 @@
 #include "third_party/libnsgif/software_decoder.h"
 // IWYU pragma: end_keep
 #include "fl/stl/detail/memory_file_handle.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
-IDecoderPtr Gif::createDecoder(const GifConfig& config, fl::string* error_message) {
+IDecoderPtr Gif::createDecoder(const GifConfig& config, fl::string* error_message) FL_NO_EXCEPT {
     // Create the software GIF decoder
     auto decoder = fl::make_shared<fl::third_party::SoftwareGifDecoder>(config.format);
 
@@ -20,12 +21,12 @@ IDecoderPtr Gif::createDecoder(const GifConfig& config, fl::string* error_messag
     return decoder;
 }
 
-bool Gif::isSupported() {
+bool Gif::isSupported() FL_NO_EXCEPT {
     // libnsgif is always available since it's included directly
     return true;
 }
 
-GifInfo Gif::parseGifInfo(fl::span<const fl::u8> data, fl::string* error_message) {
+GifInfo Gif::parseGifInfo(fl::span<const fl::u8> data, fl::string* error_message) FL_NO_EXCEPT {
     GifInfo info;
 
     // Validate input data

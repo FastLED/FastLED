@@ -35,7 +35,7 @@ jobs:
     uses: ./.github/workflows/build_template_binary_size.yml
     with:
       board: attiny85
-      max_size: 9500
+      max_size: 2628
       max_size_apa102: 12000
 
   build_no_forced_inline:

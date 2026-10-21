@@ -9,23 +9,23 @@
 namespace fl {
 
 TimeWarp::TimeWarp(fl::u32 realTimeNow, float initialTimeScale)
-    : mLastRealTime(realTimeNow), mStartTime(realTimeNow),
+    FL_NO_EXCEPT : mLastRealTime(realTimeNow), mStartTime(realTimeNow),
       mTimeScale(initialTimeScale) {}
 
 TimeWarp::~TimeWarp() FL_NO_EXCEPT {}
 
-void TimeWarp::setSpeed(float timeScale) { mTimeScale = timeScale; }
+void TimeWarp::setSpeed(float timeScale) FL_NO_EXCEPT { mTimeScale = timeScale; }
 
-float TimeWarp::scale() const { return mTimeScale; }
+float TimeWarp::scale() const FL_NO_EXCEPT { return mTimeScale; }
 
-void TimeWarp::pause(fl::u32 now) {
+void TimeWarp::pause(fl::u32 now) FL_NO_EXCEPT {
     if (mPauseTime) {
         FL_WARN("TimeWarp::pause: already paused");
         return;
     }
     mPauseTime = now;
 }
-void TimeWarp::resume(fl::u32 now) {
+void TimeWarp::resume(fl::u32 now) FL_NO_EXCEPT {
     if (mLastRealTime == 0) {
         reset(now);
         return;
@@ -36,20 +36,20 @@ void TimeWarp::resume(fl::u32 now) {
     mPauseTime = 0;
 }
 
-fl::u32 TimeWarp::update(fl::u32 timeNow) {
+fl::u32 TimeWarp::update(fl::u32 timeNow) FL_NO_EXCEPT {
     applyExact(timeNow);
     return time();
 }
 
-fl::u32 TimeWarp::time() const { return mRelativeTime; }
+fl::u32 TimeWarp::time() const FL_NO_EXCEPT { return mRelativeTime; }
 
-void TimeWarp::reset(fl::u32 realTimeNow) {
+void TimeWarp::reset(fl::u32 realTimeNow) FL_NO_EXCEPT {
     mLastRealTime = realTimeNow;
     mStartTime = realTimeNow;
     mRelativeTime = 0;
 }
 
-void TimeWarp::applyExact(fl::u32 timeNow) {
+void TimeWarp::applyExact(fl::u32 timeNow) FL_NO_EXCEPT {
     // Handle time going backwards - reset if this happens
     if (timeNow < mLastRealTime) {
         FL_WARN("TimeWarp::applyExact: time went backwards, resetting");
@@ -92,6 +92,6 @@ void TimeWarp::applyExact(fl::u32 timeNow) {
     mRelativeTime -= abs_diff;
 }
 
-void TimeWarp::setScale(float speed) { mTimeScale = speed; }
+void TimeWarp::setScale(float speed) FL_NO_EXCEPT { mTimeScale = speed; }
 
 } // namespace fl

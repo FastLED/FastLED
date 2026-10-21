@@ -10,7 +10,7 @@
 #include "fl/system/sketch_macros.h"
 
 
-CLEDController::~CLEDController() {
+CLEDController::~CLEDController() FL_NO_EXCEPT {
 #if SKETCH_HAS_LARGE_MEMORY
     // Remove from draw list on destruction to prevent dangling pointers
     // Note: Not enabled on memory-constrained platforms (AVR, ESP8266, etc.)
@@ -21,17 +21,19 @@ CLEDController::~CLEDController() {
 }
 
 /// Create an led controller object, add it to the chain of controllers
-CLEDController::CLEDController() : mLeds(), mSettings() {
+CLEDController::CLEDController() FL_NO_EXCEPT : mLeds(), mLegacySettings(),
+      mEnabled(true), mFixedWhiteChannel(false) {
     addToList();
 }
 
-CLEDController::CLEDController(RegistrationMode mode) : mLeds(), mSettings() {
+CLEDController::CLEDController(RegistrationMode mode) FL_NO_EXCEPT : mLeds(), mLegacySettings(),
+      mEnabled(true), mFixedWhiteChannel(false) {
     if (mode == RegistrationMode::AutoRegister) {
         addToList();
     }
 }
 
-void CLEDController::addToList() {
+void CLEDController::addToList() FL_NO_EXCEPT {
     // Don't add if already in list
     #if SKETCH_HAS_LARGE_MEMORY // Mostly for AVR, the isInList() check adds memory overhead on these tight platforms.
     if (isInList()) {
@@ -39,13 +41,28 @@ void CLEDController::addToList() {
     }
     #endif
 
-    // Add to linked list
-    if(mPHead==nullptr) { mPHead = this; }
-    if(mPTail != nullptr) { mPTail->mPNext = this; }
-    mPTail = this;
+    // Append by walking from the head: registration is rare and lists are
+    // short, so no tail pointer is stored (#4788).
+    if (mPHead == nullptr) {
+        mPHead = this;
+        return;
+    }
+    // The walk also catches a repeat registration, which would otherwise
+    // create a cycle (AVR skips the isInList() check above).
+    CLEDController* last = mPHead;
+    while (true) {
+        if (last == this) {
+            return;
+        }
+        if (last->mPNext == nullptr) {
+            break;
+        }
+        last = last->mPNext;
+    }
+    last->mPNext = this;
 }
 
-bool CLEDController::isInList() const {
+bool CLEDController::isInList() const FL_NO_EXCEPT {
     CLEDController* curr = mPHead;
     while (curr != nullptr) {
         if (curr == this) {
@@ -56,7 +73,7 @@ bool CLEDController::isInList() const {
     return false;
 }
 
-void CLEDController::clearLedDataInternal(int nLeds) {
+void CLEDController::clearLedDataInternal(int nLeds) FL_NO_EXCEPT {
     // On common code that runs on avr, every byte counts.
     //
     // mLeds spans one lane, not the whole buffer. A parallel controller is
@@ -77,7 +94,7 @@ void CLEDController::clearLedDataInternal(int nLeds) {
 
 }
 
-void CLEDController::removeFromList(CLEDController* controller) {
+void CLEDController::removeFromList(CLEDController* controller) FL_NO_EXCEPT {
     if (controller == nullptr) {
         return;
     }
@@ -93,17 +110,9 @@ void CLEDController::removeFromList(CLEDController* controller) {
             if (prev == nullptr) {
                 // Removing head
                 mPHead = controller->mPNext;
-                if (mPHead == nullptr) {
-                    // List is now empty
-                    mPTail = nullptr;
-                }
             } else {
                 // Removing from middle or end
                 prev->mPNext = controller->mPNext;
-                if (controller->mPNext == nullptr) {
-                    // Removing tail
-                    mPTail = prev;
-                }
             }
 
             // Clear the controller's next pointer
@@ -115,13 +124,7 @@ void CLEDController::removeFromList(CLEDController* controller) {
     }
 }
 
-#if FL_COLOR_PIPELINE_SHARED
-fl::shared_ptr<fl::StreamingPipelineQ16> CLEDController::colorPipeline() const FL_NO_EXCEPT {
-    return fl::shared_ptr<fl::StreamingPipelineQ16>();
-}
-#endif
-
-ColorAdjustment CLEDController::getAdjustmentData(fl::u8 brightness) {
+ColorAdjustment CLEDController::getAdjustmentData(fl::u8 brightness) FL_NO_EXCEPT {
     // *premixed = getAdjustment(brightness);
     // if (color_correction) {
     //     *color_correction = getAdjustment(255);

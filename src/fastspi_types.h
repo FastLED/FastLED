@@ -9,6 +9,7 @@
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/stdint.h"
+#include "fl/stl/noexcept.h"
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_DEPRECATED_REGISTER
@@ -45,7 +46,7 @@ class DATA_NOP {
 public:
     /// Hook called to adjust a byte of data before writing it to the output.
     /// In this dummy version, no adjustment is made.
-    static FASTLED_FORCE_INLINE fl::u8 adjust(FASTLED_REGISTER fl::u8 data) { return data; }
+    static FASTLED_FORCE_INLINE fl::u8 adjust(FASTLED_REGISTER fl::u8 data) FL_NO_EXCEPT { return data; }
 
     // Two-parameter version commented out due to circular dependency issues
     // (would need fl::scale8 which requires crgb.h, creating circular dependency).
@@ -56,7 +57,7 @@ public:
 
     /// Hook called after a block of data is written to the output.
     /// In this dummy version, no action is performed.
-    static FASTLED_FORCE_INLINE void postBlock(int /* len */, void* context = nullptr) {
+    static FASTLED_FORCE_INLINE void postBlock(int /* len */, void* context = nullptr) FL_NO_EXCEPT {
         FASTLED_UNUSED(context);
     }
 };

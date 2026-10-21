@@ -8,6 +8,7 @@
 #include "fl/remote/rpc/type_conversion_result.h"
 #include "fl/remote/rpc/type_to_json.h"
 #include "fl/remote/rpc/json_arg_converter.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -26,9 +27,9 @@ public:
     using Converter = JsonArgConverter<void(Args...)>;
     using StorageTuple = typename Converter::args_tuple;  // Stripped types for storage
 
-    TypedRpcBinding(FunctionType fn) : mFunction(fn) {}
+    TypedRpcBinding(FunctionType fn) FL_NO_EXCEPT : mFunction(fn) {}
 
-    TypeConversionResult invoke(const json& jsonArgs) {
+    TypeConversionResult invoke(const json& jsonArgs) FL_NO_EXCEPT {
         // C++11 compatible: avoid structured bindings
         fl::tuple<StorageTuple, TypeConversionResult> convTuple = Converter::convert(jsonArgs);
         StorageTuple tuple = fl::get<0>(convTuple);
@@ -42,7 +43,7 @@ public:
 
 private:
     template <fl::size... Is>
-    void invokeImpl(StorageTuple& args, index_sequence<Is...>) {
+    void invokeImpl(StorageTuple& args, index_sequence<Is...>) FL_NO_EXCEPT {
         // fl::get returns T& from tuple<T>, which converts to const T& for const ref parameters
         mFunction(fl::get<Is>(args)...);
     }
@@ -58,9 +59,9 @@ public:
     using Converter = JsonArgConverter<R(Args...)>;
     using StorageTuple = typename Converter::args_tuple;  // Stripped types for storage
 
-    TypedRpcBinding(FunctionType fn) : mFunction(fn) {}
+    TypedRpcBinding(FunctionType fn) FL_NO_EXCEPT : mFunction(fn) {}
 
-    TypeConversionResult invoke(const json& jsonArgs) {
+    TypeConversionResult invoke(const json& jsonArgs) FL_NO_EXCEPT {
         // C++11 compatible: avoid structured bindings
         fl::tuple<StorageTuple, TypeConversionResult> convTuple = Converter::convert(jsonArgs);
         StorageTuple tuple = fl::get<0>(convTuple);
@@ -72,7 +73,7 @@ public:
         return result;
     }
 
-    fl::tuple<TypeConversionResult, json> invokeWithReturn(const json& jsonArgs) {
+    fl::tuple<TypeConversionResult, json> invokeWithReturn(const json& jsonArgs) FL_NO_EXCEPT {
         // C++11 compatible: avoid structured bindings
         fl::tuple<StorageTuple, TypeConversionResult> convTuple = Converter::convert(jsonArgs);
         StorageTuple tuple = fl::get<0>(convTuple);
@@ -87,13 +88,13 @@ public:
 
 private:
     template <fl::size... Is>
-    void invokeImpl(StorageTuple& args, index_sequence<Is...>) {
+    void invokeImpl(StorageTuple& args, index_sequence<Is...>) FL_NO_EXCEPT {
         // fl::get returns T& from tuple<T>, which converts to const T& for const ref parameters
         mFunction(fl::get<Is>(args)...);
     }
 
     template <fl::size... Is>
-    R invokeImplWithReturn(StorageTuple& args, index_sequence<Is...>) {
+    R invokeImplWithReturn(StorageTuple& args, index_sequence<Is...>) FL_NO_EXCEPT {
         // fl::get returns T& from tuple<T>, which converts to const T& for const ref parameters
         return mFunction(fl::get<Is>(args)...);
     }

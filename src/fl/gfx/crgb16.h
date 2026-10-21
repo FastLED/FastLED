@@ -10,20 +10,20 @@ struct CRGB16 {
     typedef u8x8 fp;
     u8x8 r, g, b;
     CRGB16() FL_NO_EXCEPT = default;
-    CRGB16(u8x8 rv, u8x8 gv, u8x8 bv) : r(rv), g(gv), b(bv) {}
-    CRGB16& nscale8(u8 scale) {
+    CRGB16(u8x8 rv, u8x8 gv, u8x8 bv) FL_NO_EXCEPT : r(rv), g(gv), b(bv) {}
+    CRGB16& nscale8(u8 scale) FL_NO_EXCEPT {
         r = u8x8::from_raw(static_cast<u16>((static_cast<u32>(r.raw()) * scale) >> 8));
         g = u8x8::from_raw(static_cast<u16>((static_cast<u32>(g.raw()) * scale) >> 8));
         b = u8x8::from_raw(static_cast<u16>((static_cast<u32>(b.raw()) * scale) >> 8));
         return *this;
     }
-    CRGB16& nscale(u8x8 scale) {
+    CRGB16& nscale(u8x8 scale) FL_NO_EXCEPT {
         r = r * scale;
         g = g * scale;
         b = b * scale;
         return *this;
     }
-    CRGB16& operator+=(const CRGB16& rhs) {
+    CRGB16& operator+=(const CRGB16& rhs) FL_NO_EXCEPT {
         u32 nr = static_cast<u32>(r.raw()) + rhs.r.raw();
         u32 ng = static_cast<u32>(g.raw()) + rhs.g.raw();
         u32 nb = static_cast<u32>(b.raw()) + rhs.b.raw();

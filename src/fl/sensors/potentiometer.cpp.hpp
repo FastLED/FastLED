@@ -14,12 +14,12 @@ namespace fl {
 // ============================================================================
 
 PotentiometerLowLevel::PotentiometerLowLevel(int pin)
-    : mPin(pin) {
+    FL_NO_EXCEPT : mPin(pin) {
 }
 
 PotentiometerLowLevel::~PotentiometerLowLevel() FL_NO_EXCEPT {}
 
-u16 PotentiometerLowLevel::read() {
+u16 PotentiometerLowLevel::read() FL_NO_EXCEPT {
     return fl::analogRead(mPin);
 }
 
@@ -28,7 +28,7 @@ u16 PotentiometerLowLevel::read() {
 // ============================================================================
 
 Potentiometer::Potentiometer(int pin, u16 hysteresis)
-    : mPot(pin), mListener(this), mHysteresis(hysteresis) {
+    FL_NO_EXCEPT : mPot(pin), mListener(this), mHysteresis(hysteresis) {
     // Initialize calibration range to full ADC range
     mMinValue = 0;
     mMaxValue = getAdcMaxValue();
@@ -43,7 +43,7 @@ Potentiometer::Potentiometer(int pin, u16 hysteresis)
     }
 }
 
-float Potentiometer::normalized() const {
+float Potentiometer::normalized() const FL_NO_EXCEPT {
     // Handle invalid range
     if (mMaxValue <= mMinValue) {
         return 0.0f;
@@ -65,7 +65,7 @@ float Potentiometer::normalized() const {
     return static_cast<float>(offset) / static_cast<float>(range);
 }
 
-u16 Potentiometer::fractional16() const {
+u16 Potentiometer::fractional16() const FL_NO_EXCEPT {
     // Handle invalid range
     if (mMaxValue <= mMinValue) {
         return 0;
@@ -89,7 +89,7 @@ u16 Potentiometer::fractional16() const {
     return static_cast<u16>(scaled);
 }
 
-void Potentiometer::setHysteresisPercent(float percent) {
+void Potentiometer::setHysteresisPercent(float percent) FL_NO_EXCEPT {
     // Clamp percent to valid range
     if (percent < 0.0f) percent = 0.0f;
     if (percent > 100.0f) percent = 100.0f;
@@ -99,7 +99,7 @@ void Potentiometer::setHysteresisPercent(float percent) {
     mHysteresis = static_cast<u16>((percent / 100.0f) * range);
 }
 
-void Potentiometer::setRange(u16 min, u16 max) {
+void Potentiometer::setRange(u16 min, u16 max) FL_NO_EXCEPT {
     // Ensure min < max
     if (min >= max) {
         return;  // Invalid range, do nothing
@@ -108,7 +108,7 @@ void Potentiometer::setRange(u16 min, u16 max) {
     mMaxValue = max;
 }
 
-u16 Potentiometer::getAdcMaxValue() const {
+u16 Potentiometer::getAdcMaxValue() const FL_NO_EXCEPT {
     // Platform detection for ADC resolution
     // Stub and AVR platforms use 10-bit (0-1023), modern platforms use 12-bit (0-4095)
 #if defined(FL_IS_AVR) || defined(STUB_PLATFORM) || defined(FASTLED_USE_STUB_ARDUINO)
@@ -118,14 +118,14 @@ u16 Potentiometer::getAdcMaxValue() const {
 #endif
 }
 
-u16 Potentiometer::calculateDefaultHysteresis() const {
+u16 Potentiometer::calculateDefaultHysteresis() const FL_NO_EXCEPT {
     // Default: 1% of calibrated range or minimum of 10 counts (whichever is larger)
     u16 range = (mMaxValue > mMinValue) ? (mMaxValue - mMinValue) : getAdcMaxValue();
     u16 one_percent = range / 100;
     return (one_percent > 10) ? one_percent : 10;
 }
 
-void Potentiometer::Listener::onEndFrame() {
+void Potentiometer::Listener::onEndFrame() FL_NO_EXCEPT {
     // Read current value
     u16 new_value = mOwner->mPot.read();
     mOwner->mCurrentValue = new_value;
@@ -158,7 +158,7 @@ void Potentiometer::Listener::onEndFrame() {
     }
 }
 
-Potentiometer::Listener::Listener(Potentiometer *owner) : mOwner(owner) {
+Potentiometer::Listener::Listener(Potentiometer *owner) FL_NO_EXCEPT : mOwner(owner) {
     addToEngineEventsOnce();
 }
 
@@ -168,7 +168,7 @@ Potentiometer::Listener::~Listener() FL_NO_EXCEPT {
     }
 }
 
-void Potentiometer::Listener::addToEngineEventsOnce() {
+void Potentiometer::Listener::addToEngineEventsOnce() FL_NO_EXCEPT {
     if (added) {
         return;
     }
@@ -176,12 +176,12 @@ void Potentiometer::Listener::addToEngineEventsOnce() {
     added = true;
 }
 
-int Potentiometer::onChange(fl::function<void(Potentiometer &)> callback) {
+int Potentiometer::onChange(fl::function<void(Potentiometer &)> callback) FL_NO_EXCEPT {
     int id = mOnChangeCallbacks.add(callback);
     return id;
 }
 
-int Potentiometer::onChange(fl::function<void(float)> callback) {
+int Potentiometer::onChange(fl::function<void(float)> callback) FL_NO_EXCEPT {
     int id = mOnChangeNormalizedCallbacks.add(callback);
     return id;
 }

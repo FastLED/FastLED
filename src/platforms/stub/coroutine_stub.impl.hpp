@@ -73,7 +73,7 @@ public:
     }
 
     void enqueue(fl::shared_ptr<CoroutineContext> ctx) FL_NO_EXCEPT override {
-        fl::unique_lock<fl::mutex> lock(mQueueMutex) FL_NO_EXCEPT;
+        fl::unique_lock<fl::mutex> lock(mQueueMutex);
         mQueue.push(fl::weak_ptr<CoroutineContext>(ctx));
     }
 
@@ -91,7 +91,7 @@ public:
         fl::shared_ptr<CoroutineContext> ctx;
 
         {
-            fl::unique_lock<fl::mutex> lock(mQueueMutex) FL_NO_EXCEPT;
+            fl::unique_lock<fl::mutex> lock(mQueueMutex);
 
             // Remove expired/completed coroutines from front
             while (!mQueue.empty()) {
@@ -147,7 +147,7 @@ public:
 
     void remove(fl::shared_ptr<CoroutineContext> ctx) FL_NO_EXCEPT override {
         fl::queue<fl::weak_ptr<CoroutineContext>> temp;
-        fl::unique_lock<fl::mutex> lock(mQueueMutex) FL_NO_EXCEPT;
+        fl::unique_lock<fl::mutex> lock(mQueueMutex);
         while (!mQueue.empty()) {
             fl::weak_ptr<CoroutineContext> weak_front = mQueue.front();
             mQueue.pop();
@@ -160,7 +160,7 @@ public:
     }
 
     void stop_all() FL_NO_EXCEPT override {
-        fl::unique_lock<fl::mutex> lock(mQueueMutex) FL_NO_EXCEPT;
+        fl::unique_lock<fl::mutex> lock(mQueueMutex);
         fl::queue<fl::weak_ptr<CoroutineContext>> temp = mQueue;
         while (!temp.empty()) {
             fl::weak_ptr<CoroutineContext> weak_ctx = temp.front();
@@ -221,7 +221,7 @@ struct CoroutineThreadRegistry {
     }
 
     void add(fl::thread&& t) FL_NO_EXCEPT {
-        fl::unique_lock<fl::mutex> lock(mtx) FL_NO_EXCEPT;
+        fl::unique_lock<fl::mutex> lock(mtx);
         threads.push_back(fl::move(t));
     }
 };
@@ -234,7 +234,7 @@ void cleanup_coroutine_threads() FL_NO_EXCEPT {
 #ifdef TEST_DLL_MODE
     {
         auto& creg = CoroutineThreadRegistry::instance();
-        fl::unique_lock<fl::mutex> lock(creg.mtx) FL_NO_EXCEPT;
+        fl::unique_lock<fl::mutex> lock(creg.mtx);
         for (auto& t : creg.threads) {
             if (t.joinable()) t.join();
         }
@@ -246,7 +246,7 @@ void cleanup_coroutine_threads() FL_NO_EXCEPT {
     auto& bg = ICoroutineRuntime::instance();
     bg.requestShutdown();
     auto& reg = BackgroundThreadRegistry::instance();
-    fl::unique_lock<fl::mutex> lock(reg.mtx) FL_NO_EXCEPT;
+    fl::unique_lock<fl::mutex> lock(reg.mtx);
     for (auto& t : reg.threads) {
         if (t.joinable()) t.join();
     }
@@ -256,7 +256,7 @@ void cleanup_coroutine_threads() FL_NO_EXCEPT {
 
 void register_background_thread(fl::thread&& t) FL_NO_EXCEPT {
     auto& reg = BackgroundThreadRegistry::instance();
-    fl::unique_lock<fl::mutex> lock(reg.mtx) FL_NO_EXCEPT;
+    fl::unique_lock<fl::mutex> lock(reg.mtx);
     reg.threads.push_back(fl::move(t));
 }
 
@@ -264,7 +264,7 @@ void cleanup_background_threads() FL_NO_EXCEPT {
     auto& bg = ICoroutineRuntime::instance();
     bg.requestShutdown();
     auto& reg = BackgroundThreadRegistry::instance();
-    fl::unique_lock<fl::mutex> lock(reg.mtx) FL_NO_EXCEPT;
+    fl::unique_lock<fl::mutex> lock(reg.mtx);
     for (auto& t : reg.threads) {
         if (t.joinable()) t.join();
     }

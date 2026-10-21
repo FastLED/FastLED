@@ -31,7 +31,7 @@ public:
      * @brief Construct WLEDClient with FastLED controller
      * @param controller Shared pointer to IFastLED implementation
      */
-    explicit WLEDClient(fl::shared_ptr<IFastLED> controller);
+    explicit WLEDClient(fl::shared_ptr<IFastLED> controller) FL_NO_EXCEPT;
 
     /**
      * @brief Set brightness level
@@ -39,13 +39,13 @@ public:
      *
      * Updates the brightness and applies to controller if client is on.
      */
-    void setBrightness(u8 brightness);
+    void setBrightness(u8 brightness) FL_NO_EXCEPT;
 
     /**
      * @brief Get current brightness level
      * @return Brightness value (0-255)
      */
-    u8 getBrightness() const { return mBrightness; }
+    u8 getBrightness() const FL_NO_EXCEPT { return mBrightness; }
 
     /**
      * @brief Set on/off state
@@ -54,13 +54,13 @@ public:
      * When turning on, applies current brightness to controller.
      * When turning off, sets controller brightness to 0 but preserves internal brightness.
      */
-    void setOn(bool on);
+    void setOn(bool on) FL_NO_EXCEPT;
 
     /**
      * @brief Get on/off state
      * @return True if on, false if off
      */
-    bool getOn() const { return mOn; }
+    bool getOn() const FL_NO_EXCEPT { return mOn; }
 
     /**
      * @brief Clear all LEDs
@@ -69,7 +69,7 @@ public:
      * Sets all LEDs to black/off. If writeToStrip is true, also calls
      * controller->show() to update the physical strip.
      */
-    void clear(bool writeToStrip = false);
+    void clear(bool writeToStrip = false) FL_NO_EXCEPT;
 
     /**
      * @brief Update physical LED strip
@@ -77,7 +77,7 @@ public:
      * Calls controller->show() to write LED data to the physical strip.
      * Typically called after making changes to LED colors.
      */
-    void update();
+    void update() FL_NO_EXCEPT;
 
     /**
      * @brief Get access to LED array
@@ -85,13 +85,13 @@ public:
      *
      * Allows direct manipulation of LED colors through the controller.
      */
-    fl::span<CRGB> getLEDs();
+    fl::span<CRGB> getLEDs() FL_NO_EXCEPT;
 
     /**
      * @brief Get number of LEDs
      * @return LED count
      */
-    size_t getNumLEDs() const;
+    size_t getNumLEDs() const FL_NO_EXCEPT;
 
     /**
      * @brief Set a segment range for subsequent operations
@@ -101,7 +101,7 @@ public:
      * After calling this, operations will affect only the specified segment.
      * Delegates to controller's setSegment method.
      */
-    void setSegment(size_t start, size_t end);
+    void setSegment(size_t start, size_t end) FL_NO_EXCEPT;
 
     /**
      * @brief Clear the segment range (operate on full LED array)
@@ -109,7 +109,7 @@ public:
      * Restores operations to affect the entire LED array.
      * Delegates to controller's clearSegment method.
      */
-    void clearSegment();
+    void clearSegment() FL_NO_EXCEPT;
 
     /**
      * @brief Set color correction
@@ -118,7 +118,7 @@ public:
      * Adjusts color output to compensate for LED characteristics.
      * Delegates to controller's setCorrection method.
      */
-    void setCorrection(CRGB correction);
+    void setCorrection(CRGB correction) FL_NO_EXCEPT;
 
     /**
      * @brief Set color temperature
@@ -127,7 +127,7 @@ public:
      * Adjusts color output for perceived color temperature.
      * Delegates to controller's setTemperature method.
      */
-    void setTemperature(CRGB temperature);
+    void setTemperature(CRGB temperature) FL_NO_EXCEPT;
 
     /**
      * @brief Set maximum refresh rate
@@ -136,13 +136,13 @@ public:
      * Limits how often the LED strip can be updated.
      * Delegates to controller's setMaxRefreshRate method.
      */
-    void setMaxRefreshRate(u16 fps);
+    void setMaxRefreshRate(u16 fps) FL_NO_EXCEPT;
 
     /**
      * @brief Get maximum refresh rate
      * @return Maximum frames per second (0 = no limit)
      */
-    u16 getMaxRefreshRate() const;
+    u16 getMaxRefreshRate() const FL_NO_EXCEPT;
 
 private:
     fl::shared_ptr<IFastLED> mController;  // FastLED controller interface

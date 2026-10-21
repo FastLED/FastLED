@@ -9,6 +9,7 @@
 // The z=0 specialization halves work vs full 3D noise.
 
 #include "fl/math/fixed_point/s16x16.h"
+#include "fl/stl/noexcept.h"
 
 
 namespace fl {
@@ -18,47 +19,47 @@ struct perlin_s16x16 {
     static constexpr fl::i32 HP_ONE = static_cast<fl::i32>(1) << HP_BITS; // 16777216 = 1.0
 
     // Build 257-entry Perlin fade LUT in Q8.24 format.
-    static void init_fade_lut(fl::i32 *table);
+    static void init_fade_lut(fl::i32 *table) FL_NO_EXCEPT;
 
     // 2D Perlin noise. Input s16x16, output s16x16 approx [-1, 1].
     // perm: 256-byte Perlin permutation table (indexed with & 255).
     static fl::s16x16 pnoise2d(fl::s16x16 fx, fl::s16x16 fy,
                                       const fl::i32 *fade_lut,
-                                      const fl::u8 *perm);
+                                      const fl::u8 *perm) FL_NO_EXCEPT;
 
     // Raw i32 version: takes s16x16 raw values, returns s16x16 raw value.
     // Avoids from_raw/raw() round-trips when caller already has raw values.
     static fl::i32 pnoise2d_raw(fl::i32 fx_raw, fl::i32 fy_raw,
                                         const fl::i32 *fade_lut,
-                                        const fl::u8 *perm);
+                                        const fl::u8 *perm) FL_NO_EXCEPT;
 
     static constexpr int FP_BITS = fl::s16x16::FRAC_BITS;
     static constexpr fl::i32 FP_ONE = static_cast<fl::i32>(1) << FP_BITS;
 
     // Decompose s16x16 raw value into integer floor and Q8.24 fractional part.
     static void floor_frac(fl::i32 fp16, int &ifloor,
-                                                fl::i32 &frac24);
+                                                fl::i32 &frac24) FL_NO_EXCEPT;
 
     // LUT fade: 1 lookup + 1 lerp replaces 5 multiplies.
-    static fl::i32 fade(fl::i32 t, const fl::i32 *table);
+    static fl::i32 fade(fl::i32 t, const fl::i32 *table) FL_NO_EXCEPT;
 
-    static fl::i32 lerp(fl::i32 t, fl::i32 a, fl::i32 b);
+    static fl::i32 lerp(fl::i32 t, fl::i32 a, fl::i32 b) FL_NO_EXCEPT;
 
     // z=0 gradient via branchless coefficient LUT.
-    static fl::i32 grad(int hash, fl::i32 x, fl::i32 y);
+    static fl::i32 grad(int hash, fl::i32 x, fl::i32 y) FL_NO_EXCEPT;
 
     // 3D Perlin noise. Input s16x16, output s16x16 approx [-1, 1].
     static fl::s16x16 pnoise3d(fl::s16x16 fx, fl::s16x16 fy, fl::s16x16 fz,
                                       const fl::i32 *fade_lut,
-                                      const fl::u8 *perm);
+                                      const fl::u8 *perm) FL_NO_EXCEPT;
 
     // Raw i32 version of 3D Perlin noise.
     static fl::i32 pnoise3d_raw(fl::i32 fx_raw, fl::i32 fy_raw, fl::i32 fz_raw,
                                         const fl::i32 *fade_lut,
-                                        const fl::u8 *perm);
+                                        const fl::u8 *perm) FL_NO_EXCEPT;
 
     // 3D gradient: 12-direction gradient matching float grad().
-    static fl::i32 grad3d(int hash, fl::i32 x, fl::i32 y, fl::i32 z);
+    static fl::i32 grad3d(int hash, fl::i32 x, fl::i32 y, fl::i32 z) FL_NO_EXCEPT;
 };
 
 }  // namespace fl

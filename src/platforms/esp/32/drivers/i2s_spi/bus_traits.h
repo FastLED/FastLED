@@ -59,6 +59,11 @@ template<> struct BusTraits<Bus::FLEX_IO, 0> {
     static void registerWithManager() FL_NO_EXCEPT {
         ChannelManager::registry().addDriver(default_bus_priority(Bus::FLEX_IO, 0), instancePtr());
     }
+
+    /// Clockless channels may route here: link the wave8 pipeline (#4793).
+    static void enableClockless() FL_NO_EXCEPT {
+        ChannelEngineI2sEsp32Dev::enableClockless();
+    }
 };
 
 // The unified engine handles both clockless AND SPI on the same slot —
@@ -85,6 +90,11 @@ template<> struct BusTraits<Bus::FLEX_IO, 1> {
 
     static void registerWithManager() FL_NO_EXCEPT {
         ChannelManager::registry().addDriver(default_bus_priority(Bus::FLEX_IO, 1), instancePtr());
+    }
+
+    /// Clockless channels may route here: link the wave8 pipeline (#4793).
+    static void enableClockless() FL_NO_EXCEPT {
+        ChannelEngineI2sEsp32Dev::enableClockless();
     }
 };
 

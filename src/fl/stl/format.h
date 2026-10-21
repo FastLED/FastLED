@@ -63,7 +63,7 @@ struct FormatSpec {
 
 // Parse a format specification from the string after ':'
 // Returns pointer past the parsed spec (should be at '}')
-inline const char* parse_format_spec(const char* p, FormatSpec& spec) {
+inline const char* parse_format_spec(const char* p, FormatSpec& spec) FL_NO_EXCEPT {
     if (!p || *p == '}') return p;
 
     // Check for fill and align (fill char followed by align char)
@@ -118,7 +118,7 @@ inline const char* parse_format_spec(const char* p, FormatSpec& spec) {
 }
 
 // Apply width/alignment to a formatted string
-inline void apply_width_align(fl::string& result, const fl::string& value, const FormatSpec& spec) {
+inline void apply_width_align(fl::string& result, const fl::string& value, const FormatSpec& spec) FL_NO_EXCEPT {
     fl::size value_len = value.size();
 
     if (spec.width <= 0 || static_cast<fl::size>(spec.width) <= value_len) {
@@ -162,7 +162,7 @@ inline void apply_width_align(fl::string& result, const fl::string& value, const
 
 // Format an integer value
 template <typename T>
-fl::string format_integer(T value, const FormatSpec& spec) {
+fl::string format_integer(T value, const FormatSpec& spec) FL_NO_EXCEPT {
     char buf[68]; // Enough for 64-bit binary + prefix
     char* p = buf + sizeof(buf);
     *--p = '\0';
@@ -246,7 +246,7 @@ fl::string format_integer(T value, const FormatSpec& spec) {
 }
 
 // Format a floating point value
-inline fl::string format_float(double value, const FormatSpec& spec) {
+inline fl::string format_float(double value, const FormatSpec& spec) FL_NO_EXCEPT {
     int precision = spec.precision >= 0 ? spec.precision : 6;
 
     fl::string result;
@@ -270,7 +270,7 @@ inline fl::string format_float(double value, const FormatSpec& spec) {
 }
 
 // Format a pointer
-inline fl::string format_pointer(const void* ptr, const FormatSpec& spec) {
+inline fl::string format_pointer(const void* ptr, const FormatSpec& spec) FL_NO_EXCEPT {
     fl::uptr addr = fl::ptr_to_int(const_cast<void*>(ptr));
 
     FormatSpec hex_spec = spec;
@@ -281,7 +281,7 @@ inline fl::string format_pointer(const void* ptr, const FormatSpec& spec) {
 }
 
 // Format a string value
-inline fl::string format_string(const char* value, const FormatSpec& spec) {
+inline fl::string format_string(const char* value, const FormatSpec& spec) FL_NO_EXCEPT {
     if (!value) value = "(null)";
 
     fl::string str(value);
@@ -301,26 +301,26 @@ public:
                       Double, Char, CString, String, Pointer };
 
     FormatArg() FL_NO_EXCEPT : mType(Type::None) {}
-    FormatArg(int v) : mType(Type::Int) { mData.i = v; }
-    FormatArg(unsigned int v) : mType(Type::UInt) { mData.u = v; }
-    FormatArg(long v) : mType(Type::Long) { mData.l = v; }
-    FormatArg(unsigned long v) : mType(Type::ULong) { mData.ul = v; }
-    FormatArg(long long v) : mType(Type::LongLong) { mData.ll = v; }
-    FormatArg(unsigned long long v) : mType(Type::ULongLong) { mData.ull = v; }
-    FormatArg(double v) : mType(Type::Double) { mData.d = v; }
-    FormatArg(float v) : mType(Type::Double) { mData.d = v; }
-    FormatArg(char v) : mType(Type::Char) { mData.c = v; }
-    FormatArg(const char* v) : mType(Type::CString) { mData.s = v; }
-    FormatArg(const fl::string& v) : mType(Type::String) { mData.str = &v; }
-    FormatArg(const void* v) : mType(Type::Pointer) { mData.p = v; }
+    FormatArg(int v) FL_NO_EXCEPT : mType(Type::Int) { mData.i = v; }
+    FormatArg(unsigned int v) FL_NO_EXCEPT : mType(Type::UInt) { mData.u = v; }
+    FormatArg(long v) FL_NO_EXCEPT : mType(Type::Long) { mData.l = v; }
+    FormatArg(unsigned long v) FL_NO_EXCEPT : mType(Type::ULong) { mData.ul = v; }
+    FormatArg(long long v) FL_NO_EXCEPT : mType(Type::LongLong) { mData.ll = v; }
+    FormatArg(unsigned long long v) FL_NO_EXCEPT : mType(Type::ULongLong) { mData.ull = v; }
+    FormatArg(double v) FL_NO_EXCEPT : mType(Type::Double) { mData.d = v; }
+    FormatArg(float v) FL_NO_EXCEPT : mType(Type::Double) { mData.d = v; }
+    FormatArg(char v) FL_NO_EXCEPT : mType(Type::Char) { mData.c = v; }
+    FormatArg(const char* v) FL_NO_EXCEPT : mType(Type::CString) { mData.s = v; }
+    FormatArg(const fl::string& v) FL_NO_EXCEPT : mType(Type::String) { mData.str = &v; }
+    FormatArg(const void* v) FL_NO_EXCEPT : mType(Type::Pointer) { mData.p = v; }
 
     // Short/byte types promote to int
-    FormatArg(short v) : mType(Type::Int) { mData.i = v; }
-    FormatArg(unsigned short v) : mType(Type::UInt) { mData.u = v; }
-    FormatArg(signed char v) : mType(Type::Int) { mData.i = v; }
-    FormatArg(unsigned char v) : mType(Type::UInt) { mData.u = v; }
+    FormatArg(short v) FL_NO_EXCEPT : mType(Type::Int) { mData.i = v; }
+    FormatArg(unsigned short v) FL_NO_EXCEPT : mType(Type::UInt) { mData.u = v; }
+    FormatArg(signed char v) FL_NO_EXCEPT : mType(Type::Int) { mData.i = v; }
+    FormatArg(unsigned char v) FL_NO_EXCEPT : mType(Type::UInt) { mData.u = v; }
 
-    fl::string format(const FormatSpec& spec) const {
+    fl::string format(const FormatSpec& spec) const FL_NO_EXCEPT {
         switch (mType) {
             case Type::Int:       return format_integer(mData.i, spec);
             case Type::UInt:      return format_integer(mData.u, spec);
@@ -345,7 +345,7 @@ public:
         }
     }
 
-    bool valid() const { return mType != Type::None; }
+    bool valid() const FL_NO_EXCEPT { return mType != Type::None; }
 
 private:
     Type mType;
@@ -365,7 +365,7 @@ private:
 };
 
 // Core formatting implementation
-inline fl::string format_impl(const char* fmt, const FormatArg* args, int num_args) {
+inline fl::string format_impl(const char* fmt, const FormatArg* args, int num_args) FL_NO_EXCEPT {
     fl::string result;
     const char* p = fmt;
     int auto_index = 0;
@@ -436,13 +436,13 @@ inline fl::string format_impl(const char* fmt, const FormatArg* args, int num_ar
 } // namespace format_detail
 
 /// Format with no arguments
-inline fl::string format(const char* fmt) {
+inline fl::string format(const char* fmt) FL_NO_EXCEPT {
     return format_detail::format_impl(fmt, nullptr, 0);
 }
 
 /// Format with variadic arguments
 template <typename... Args>
-fl::string format(const char* fmt, const Args&... args) {
+fl::string format(const char* fmt, const Args&... args) FL_NO_EXCEPT {
     format_detail::FormatArg arg_array[] = { format_detail::FormatArg(args)... };
     return format_detail::format_impl(fmt, arg_array, static_cast<int>(sizeof...(Args)));
 }

@@ -21,7 +21,7 @@ namespace fl {
 // (mData=null, mLength=0, mCapacity=0) and grow() keeps the old
 // buffer.
 
-StringHolder::StringHolder(const char *str)
+StringHolder::StringHolder(const char *str) FL_NO_EXCEPT
     : mData((char*)fl::malloc(strlen(str) + 1))
     , mLength(strlen(str))
     , mCapacity(mLength + 1) {
@@ -34,7 +34,7 @@ StringHolder::StringHolder(const char *str)
     mData[mLength] = '\0';
 }
 
-StringHolder::StringHolder(size length)
+StringHolder::StringHolder(size length) FL_NO_EXCEPT
     : mData((char*)fl::malloc(length + 1))
     , mLength(length)
     , mCapacity(length + 1) {
@@ -46,7 +46,7 @@ StringHolder::StringHolder(size length)
     mData[mLength] = '\0';
 }
 
-StringHolder::StringHolder(const char *str, size length)
+StringHolder::StringHolder(const char *str, size length) FL_NO_EXCEPT
     : mData((char*)fl::malloc(length + 1))
     , mLength(length)
     , mCapacity(length + 1) {
@@ -63,7 +63,7 @@ StringHolder::~StringHolder() FL_DTOR_NOEXCEPT {
     fl::free(mData); // Release the memory
 }
 
-void StringHolder::grow(size newLength) {
+void StringHolder::grow(size newLength) FL_NO_EXCEPT {
     if (newLength + 1 <= mCapacity) {
         // We have enough capacity for newLength + null terminator
         mLength = newLength;

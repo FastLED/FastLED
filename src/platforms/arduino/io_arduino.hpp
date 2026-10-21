@@ -9,10 +9,48 @@
 #include "platforms/avr/is_avr.h"
 // IWYU pragma: end_keep
 
+// AVR: reference Arduino's `Serial` weakly (#4725).
+//
+// Everything here lands in the `platforms+` unity object, which every sketch
+// links. A strong reference to `Serial` (or to a non-virtual member defined
+// next to it, such as TinySoftwareSerial::available) pulls the core's
+// HardwareSerial0 / TinySoftwareSerial archive member -- the Serial object,
+// its ring buffers and the USART ISRs, ~175 B RAM and ~1 KB flash on an Uno --
+// into sketches that never print.
+//
+// So on AVR this file touches `Serial` only through a weak reference and
+// virtual Stream/Print calls. The core member then links only when something
+// references `Serial` strongly: the sketch (`Serial.begin()`), or
+// fl::serial_begin() / fl::Serial.begin(), which are header-inline on AVR
+// (fl/stl/cstdio.h) so the reference lands in the caller's object. With no
+// such reference `&Serial` is 0 and these shims are no-ops: there is no UART
+// driver, and nothing could have configured one.
+#if defined(FL_IS_AVR)
+#pragma weak Serial
+#define FL_ARDUINO_SERIAL_LINKED() (reinterpret_cast<fl::uptr>(&Serial) != 0)  // ok reinterpret cast
+#define FL_ARDUINO_SERIAL_STREAM() (fl::platforms::arduino_serial_stream())
+#else
+#define FL_ARDUINO_SERIAL_LINKED() true
+#define FL_ARDUINO_SERIAL_STREAM() Serial
+#endif
+
 namespace fl {
 namespace platforms {
 
-// Serial initialization
+#if defined(FL_IS_AVR)
+// `Serial` as an opaque Stream&. The empty asm hides the object's dynamic
+// type, so GCC cannot devirtualize the calls into direct references to
+// methods that live next to `Serial` in the core (TinySoftwareSerial).
+inline Stream& arduino_serial_stream() FL_NO_EXCEPT {
+    Stream* stream = &Serial;
+    __asm__ __volatile__("" : "+r"(stream));
+    return *stream;
+}
+#endif
+
+// Serial initialization. On AVR fl::serial_begin() is header-inline and
+// calls Serial.begin() itself (see the note above), so no definition here.
+#if !defined(FL_IS_AVR)
 void begin(u32 baudRate) FL_NO_EXCEPT {
     Serial.begin(baudRate);
 #if defined(ARDUINO_USB_CDC_ON_BOOT) && ARDUINO_USB_CDC_ON_BOOT
@@ -23,6 +61,7 @@ void begin(u32 baudRate) FL_NO_EXCEPT {
     Serial.setTxTimeoutMs(0);
 #endif
 }
+#endif  // !FL_IS_AVR
 
 // Ride out the Teensy 4 USB-CDC DTR debounce window before deciding
 // "host absent". Teensy 4's `Serial.operator bool()` returns false
@@ -43,6 +82,15 @@ void begin(u32 baudRate) FL_NO_EXCEPT {
 // enough on ESP32 to fall through to the existing setTxTimeoutMs(0)
 // drop path applied by begin().
 inline bool waitForSerialReady_DtrSettle() FL_NO_EXCEPT {
+#if defined(FL_IS_AVR)
+    if (!FL_ARDUINO_SERIAL_LINKED()) return false;
+#if !defined(USBCON)
+    // AVR UART cores (HardwareSerial, TinySoftwareSerial, megaavr UartClass)
+    // always report ready. Skip the call: ATTinyCore defines it out of line
+    // next to `Serial`, so calling it would link the object.
+    return true;
+#endif
+#endif
     if (Serial) return true;  // Common-case fast path: 1 check, no wait.
     constexpr u32 kDtrSettleDeadlineMs = 30;  // 2× Teensy 4 debounce
     const u32 t0 = millis();
@@ -58,25 +106,28 @@ inline bool waitForSerialReady_DtrSettle() FL_NO_EXCEPT {
 // Print functions
 void print(const char* str) FL_NO_EXCEPT {
     if (!waitForSerialReady_DtrSettle()) return;  // Non-blocking: skip if USB disconnected (after DTR settle wait)
-    Serial.print(str);
+    FL_ARDUINO_SERIAL_STREAM().print(str);
 }
 
 void println(const char* str) FL_NO_EXCEPT {
     if (!waitForSerialReady_DtrSettle()) return;  // Non-blocking: skip if USB disconnected (after DTR settle wait)
-    Serial.println(str);
+    FL_ARDUINO_SERIAL_STREAM().println(str);
 }
 
 // Input functions
 int available() FL_NO_EXCEPT {
-    return Serial.available();
+    if (!FL_ARDUINO_SERIAL_LINKED()) return 0;
+    return FL_ARDUINO_SERIAL_STREAM().available();
 }
 
 int peek() FL_NO_EXCEPT {
-    return Serial.peek();
+    if (!FL_ARDUINO_SERIAL_LINKED()) return -1;
+    return FL_ARDUINO_SERIAL_STREAM().peek();
 }
 
 int read() FL_NO_EXCEPT {
-    return Serial.read();
+    if (!FL_ARDUINO_SERIAL_LINKED()) return -1;
+    return FL_ARDUINO_SERIAL_STREAM().read();
 }
 
 // High-level line reading using Arduino's Serial.readStringUntil()
@@ -86,6 +137,10 @@ int readLineNative(char delimiter, char* out, int outLen) FL_NO_EXCEPT {
     if (outLen <= 0) {
         return 0;
     }
+    if (!FL_ARDUINO_SERIAL_LINKED()) {
+        out[0] = '\0';
+        return 0;
+    }
 #if defined(FL_IS_AVR_ATTINY)
     // TinyDebugSerial lacks readStringUntil(), so keep Stream's blocking
     // line-read behavior without allocating Arduino String.
@@ -93,14 +148,14 @@ int readLineNative(char delimiter, char* out, int outLen) FL_NO_EXCEPT {
     unsigned long start = millis();
     int len = 0;
     while (true) {
-        if (!Serial.available()) {
+        if (!FL_ARDUINO_SERIAL_STREAM().available()) {
             if (millis() - start >= timeoutMs) {
                 break;
             }
             yield();
             continue;
         }
-        const int value = Serial.read();
+        const int value = FL_ARDUINO_SERIAL_STREAM().read();
         if (value < 0) {
             break;
         }
@@ -116,7 +171,7 @@ int readLineNative(char delimiter, char* out, int outLen) FL_NO_EXCEPT {
     out[len] = '\0';
     return len;
 #else
-    String line = Serial.readStringUntil(delimiter);
+    String line = FL_ARDUINO_SERIAL_STREAM().readStringUntil(delimiter);
     int len = line.length();
     if (len > outLen - 1) len = outLen - 1;
     memcpy(out, line.c_str(), len);
@@ -135,7 +190,7 @@ bool flush(u32 timeoutMs) FL_NO_EXCEPT {
     // Ride out Teensy 4 DTR debounce so a flush right after host re-open
     // doesn't return early (same race as fl::print/fl::println above).
     if (!waitForSerialReady_DtrSettle()) return true;
-    Serial.flush();
+    FL_ARDUINO_SERIAL_STREAM().flush();
     return true;
 }
 
@@ -150,7 +205,8 @@ bool serial_ready() FL_NO_EXCEPT {
 
 // Binary write function
 size_t write_bytes(const u8* buffer, size_t size) FL_NO_EXCEPT {
-    return Serial.write(buffer, size);
+    if (!FL_ARDUINO_SERIAL_LINKED()) return 0;
+    return FL_ARDUINO_SERIAL_STREAM().write(buffer, size);
     //return 0;
 }
 
@@ -161,3 +217,6 @@ bool serial_is_buffered() FL_NO_EXCEPT {
 
 } // namespace platforms
 } // namespace fl
+
+#undef FL_ARDUINO_SERIAL_LINKED
+#undef FL_ARDUINO_SERIAL_STREAM

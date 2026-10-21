@@ -18,7 +18,7 @@ namespace detail {
 
 template<typename Sig>
 struct TypeTag {
-    static const void* id() {
+    static const void* id() FL_NO_EXCEPT {
         static const char tag = 0;
         return &tag;
     }
@@ -31,7 +31,7 @@ struct TypeTag {
 class ErasedInvoker {
 public:
     virtual ~ErasedInvoker() FL_NO_EXCEPT = default;
-    virtual fl::tuple<TypeConversionResult, json> invoke(const json& args) = 0;
+    virtual fl::tuple<TypeConversionResult, json> invoke(const json& args) FL_NO_EXCEPT = 0;
 };
 
 // =============================================================================
@@ -41,11 +41,11 @@ public:
 class ErasedSchemaGenerator {
 public:
     virtual ~ErasedSchemaGenerator() FL_NO_EXCEPT = default;
-    virtual void setParamNames(const fl::vector<fl::string>& names) = 0;
+    virtual void setParamNames(const fl::vector<fl::string>& names) FL_NO_EXCEPT = 0;
 
     // Flat tuple format: [["name", "type"], ...] optimized for low-memory devices
-    virtual json params() const = 0;
-    virtual const char* resultTypeName() const = 0;
+    virtual json params() const FL_NO_EXCEPT = 0;
+    virtual const char* resultTypeName() const FL_NO_EXCEPT = 0;
 };
 
 // =============================================================================
@@ -55,16 +55,16 @@ public:
 template<typename Sig>
 class TypedSchemaGenerator : public ErasedSchemaGenerator {
 public:
-    void setParamNames(const fl::vector<fl::string>& names) override {
+    void setParamNames(const fl::vector<fl::string>& names) FL_NO_EXCEPT override {
         mParamNames = names;
     }
 
     // Flat tuple format: [["name", "type"], ...] optimized for low-memory devices
-    json params() const override {
+    json params() const FL_NO_EXCEPT override {
         return MethodSchema<Sig>::params(mParamNames);
     }
 
-    const char* resultTypeName() const override {
+    const char* resultTypeName() const FL_NO_EXCEPT override {
         return MethodSchema<Sig>::resultTypeName();
     }
 
@@ -83,9 +83,9 @@ class TypedInvoker;
 template<typename R, typename... Args>
 class TypedInvoker<R(Args...)> : public ErasedInvoker {
 public:
-    TypedInvoker(fl::function<R(Args...)> fn) : mBinding(fn) {}
+    TypedInvoker(fl::function<R(Args...)> fn) FL_NO_EXCEPT : mBinding(fn) {}
 
-    fl::tuple<TypeConversionResult, json> invoke(const json& args) override {
+    fl::tuple<TypeConversionResult, json> invoke(const json& args) FL_NO_EXCEPT override {
         return mBinding.invokeWithReturn(args);
     }
 
@@ -97,9 +97,9 @@ private:
 template<typename... Args>
 class TypedInvoker<void(Args...)> : public ErasedInvoker {
 public:
-    TypedInvoker(fl::function<void(Args...)> fn) : mBinding(fn) {}
+    TypedInvoker(fl::function<void(Args...)> fn) FL_NO_EXCEPT : mBinding(fn) {}
 
-    fl::tuple<TypeConversionResult, json> invoke(const json& args) override {
+    fl::tuple<TypeConversionResult, json> invoke(const json& args) FL_NO_EXCEPT override {
         TypeConversionResult result = mBinding.invoke(args);
         return fl::make_tuple(result, json(nullptr));
     }

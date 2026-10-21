@@ -65,7 +65,7 @@ struct esp32_isr_handle_data {
     void* user_data;                 // User context
     u8 gpio_pin;                // GPIO pin number (0xFF if not GPIO)
 
-    esp32_isr_handle_data()
+    esp32_isr_handle_data() FL_NO_EXCEPT
         : timer_handle(nullptr)
         , intr_handle(nullptr)
         , is_timer(false)
@@ -92,7 +92,7 @@ constexpr u8 ESP32_PLATFORM_ID = 1;
 static bool FL_IRAM timer_alarm_callback(
     gptimer_handle_t timer,
     const gptimer_alarm_event_data_t* edata,
-    void* user_ctx)
+    void* user_ctx) FL_NO_EXCEPT
 {
     (void)timer;
     (void)edata;
@@ -113,7 +113,7 @@ static bool FL_IRAM timer_alarm_callback(
  * GPIO interrupt handler - calls user handler
  * This runs in ISR context
  */
-static void FL_IRAM gpio_isr_wrapper(void* arg)
+static void FL_IRAM gpio_isr_wrapper(void* arg) FL_NO_EXCEPT
 {
     esp32_isr_handle_data* handle_data = static_cast<esp32_isr_handle_data*>(arg);
     if (handle_data && handle_data->user_handler) {

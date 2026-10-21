@@ -19,6 +19,10 @@ grouped by related policy area:
   checks plus attribute, `FL_IS_*`, and numeric limit macro checks.
 - `style.rs`: platform/raw pragma, raw noexcept, singleton, `std::`,
   example serial, namespace-after-include, and namespace declaration checks.
+- `esp_noexcept.rs`: parse ESP source and SD adapters with tree-sitter C++ and require
+  `FL_NO_EXCEPT` on function declarations and definitions, including inactive
+  conditional branches and signature-generating macro bodies. Unparsed syntax
+  fails rather than silently skipping a function.
 - `platform_trampoline.rs`: namespace, platform include, trampoline, SIMD,
   `.cpp.hpp` header-pair, `_is_` header, IWYU pragma, and member-style checks.
 - `types_and_tests.rs`: bare using, ctype, stdint, subdir namespace, unit test,
@@ -29,3 +33,23 @@ grouped by related policy area:
   enum-class, platform namespace, and logging-in-IRAM checks.
 - `container_ptr.rs`: raw pointers into `fl::` containers (FastLED#3287) --
   hard-fail on non-contiguous containers, warn-only on contiguous ones.
+- `libc_mirror.rs`: any function in `namespace fl` (or a sub-namespace) with a
+  libc name must be a `template <typename FlLibcTag = void>` +
+  `FASTLED_FORCE_INLINE` wrapper, so unqualified libc calls on fl types stay
+  unambiguous (FastLED#4834). Hidden friends count; arithmetic-only libc
+  names (`abs`, `div`, ...) only need to be templates; variables, types and
+  unscoped enumerators directly in `fl` may not use a libc name; only
+  `fl::libc_impl` is exempt and it may not define types (FastLED#4838). A
+  function-like macro that starts a declaration in `fl` may not take a libc
+  name as an argument, since its expansion is invisible to the scan
+  (FastLED#4850). The
+  name tables live in `lint_core/libc_reserved_names.rs`.
+- `libc_backstop.rs`: structural pass. Every `FlLibcTag` wrapper under `src/`
+  must be called unqualified in `tests/fl/stl/adl_barrier.cpp`'s
+  `libc_every_using_fl` block, and every wrapper with a `void*` parameter also
+  in `libc_every_adl`; calls to names that are no longer wrappers fail
+  (FastLED#4838).
+- `adl_barrier.rs`: structural pass. No function may be declared directly in
+  `fl` with the name of a function in `fl::adl_barrier`, and every barrier
+  function must be called as `fl::name` in the "every adl_barrier name is
+  reachable as fl::name" case of `tests/fl/stl/adl_barrier.cpp` (FastLED#4851).

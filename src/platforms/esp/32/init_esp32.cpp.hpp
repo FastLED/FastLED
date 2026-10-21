@@ -22,7 +22,7 @@ namespace platforms {
 ///
 /// Performs one-time initialization of ESP32-specific subsystems.
 /// This function uses a static flag to ensure initialization happens only once.
-void init() {
+void init() FL_NO_EXCEPT {
     static bool initialized = false;
 
     if (initialized) {

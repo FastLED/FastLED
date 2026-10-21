@@ -48,19 +48,18 @@ namespace fl {
 // NOTE: pinMode() is defined later, after PWM state management, because it
 // needs to release PWM channels.
 
-void digitalWrite(int pin, PinValue val) {
+void digitalWrite(int pin, PinValue val) FL_NO_EXCEPT {
     platforms::digitalWrite(pin, val);
 }
 
-PinValue digitalRead(int pin) {
+PinValue digitalRead(int pin) FL_NO_EXCEPT {
     return platforms::digitalRead(pin);
 }
 
-u16 analogRead(int pin) {
-    return platforms::analogRead(pin);
-}
+// analogRead() lives in fl/system/analog/analog_read.cpp.hpp, its own unity
+// object, so the platform ADC driver links only when it is used (#4796).
 
-void setAdcRange(AdcRange range) {
+void setAdcRange(AdcRange range) FL_NO_EXCEPT {
     platforms::setAdcRange(range);
 }
 
@@ -105,15 +104,29 @@ struct PwmStateData {
     PwmStateData() FL_NO_EXCEPT : isr_active(false) {}
 };
 
-// Access singleton state
-inline PwmStateData& state() {
-    return fl::Singleton<PwmStateData>::instance();
+// Set the first time state() runs, which happens only on the paths that
+// allocate a channel (setPwmFrequency) or service one (the ISR). The
+// lookup paths taken by every sketch -- pinMode(), analogWrite(),
+// setPwm16() -- read this pointer instead of calling state(), so a sketch
+// that never calls setPwmFrequency() does not link the singleton storage.
+// A null pointer means no channel has ever been allocated. The target is
+// static storage, so the raw pointer can never dangle.
+// FL_LINT_ALLOW_GLOBAL(constant-initialized null pointer; see above)
+PwmStateData* g_state = nullptr;
+
+// Access singleton state (creates it on first use)
+inline PwmStateData& state() FL_NO_EXCEPT {
+    PwmStateData& st = fl::Singleton<PwmStateData>::instance();
+    g_state = &st;
+    return st;
 }
 
 // ISR handler — services only ISR-backend entries
-void FL_IRAM pwm_isr_handler(void* user_data) {
+void FL_IRAM pwm_isr_handler(void* user_data) FL_NO_EXCEPT {
     (void)user_data;
-    PwmStateData& st = state();
+    // The ISR is attached only after setPwmFrequency() has created the
+    // state, so read the singleton directly instead of republishing g_state.
+    PwmStateData& st = fl::Singleton<PwmStateData>::instance();
 
     for (u8 i = 0; i < MAX_PWM_CHANNELS; i++) {
         PwmPinState& ch = st.channels[i];
@@ -138,8 +151,9 @@ void FL_IRAM pwm_isr_handler(void* user_data) {
 }
 
 // Find channel by pin number
-PwmPinState* findByPin(int pin) {
-    PwmStateData& st = state();
+PwmPinState* findByPin(int pin) FL_NO_EXCEPT {
+    if (!g_state) return nullptr;  // No channel ever allocated.
+    PwmStateData& st = *g_state;
     for (u8 i = 0; i < MAX_PWM_CHANNELS; i++) {
         if (st.channels[i].pin == pin) {
             return &st.channels[i];
@@ -149,7 +163,7 @@ PwmPinState* findByPin(int pin) {
 }
 
 // Allocate a free channel
-PwmPinState* allocate() {
+PwmPinState* allocate() FL_NO_EXCEPT {
     PwmStateData& st = state();
     for (u8 i = 0; i < MAX_PWM_CHANNELS; i++) {
         if (st.channels[i].pin < 0) {
@@ -160,8 +174,9 @@ PwmPinState* allocate() {
 }
 
 // Count active ISR-backend channels
-u8 countIsrChannels() {
-    PwmStateData& st = state();
+u8 countIsrChannels() FL_NO_EXCEPT {
+    if (!g_state) return 0;
+    PwmStateData& st = *g_state;
     u8 count = 0;
     for (u8 i = 0; i < MAX_PWM_CHANNELS; i++) {
         if (st.channels[i].pin >= 0 && st.channels[i].backend == PwmBackend::IsrSoftware) {
@@ -172,7 +187,7 @@ u8 countIsrChannels() {
 }
 
 // Ensure ISR timer is running (lazy init)
-int ensureIsrActive() {
+int ensureIsrActive() FL_NO_EXCEPT {
     PwmStateData& st = state();
     if (st.isr_active) return 0;
 
@@ -184,7 +199,7 @@ int ensureIsrActive() {
 
     int result = fl::isr::attach_timer_handler(cfg, &st.isr_handle);
     if (result != 0) {
-        FL_WARN("PWM: ISR attach failed: %s", fl::isr::get_error_string(result));
+        FL_WARN("PWM: ISR attach failed: " << (fl::isr::get_error_string(result)));
         return result;
     }
     st.isr_active = true;
@@ -192,8 +207,9 @@ int ensureIsrActive() {
 }
 
 // Shutdown ISR if no ISR-backend channels remain
-void maybeShutdownIsr() {
-    PwmStateData& st = state();
+void maybeShutdownIsr() FL_NO_EXCEPT {
+    if (!g_state) return;  // ISR can only be active once state exists.
+    PwmStateData& st = *g_state;
     if (!st.isr_active) return;
     if (countIsrChannels() > 0) return;
 
@@ -202,7 +218,7 @@ void maybeShutdownIsr() {
 }
 
 // Release a channel and cleanup
-void releaseChannel(PwmPinState* ch) {
+void releaseChannel(PwmPinState* ch) FL_NO_EXCEPT {
     if (!ch || ch->pin < 0) return;
 
     fl::digitalWrite(ch->pin, fl::PinValue::Low);
@@ -224,7 +240,7 @@ void releaseChannel(PwmPinState* ch) {
 // analogWrite / setPwm16 — route through PWM state when configured
 // ============================================================================
 
-void analogWrite(int pin, u16 val) {
+void analogWrite(int pin, u16 val) FL_NO_EXCEPT {
     pwm_state::PwmPinState* ch = pwm_state::findByPin(pin);
 
     if (ch && ch->backend == pwm_state::PwmBackend::IsrSoftware) {
@@ -246,7 +262,7 @@ void analogWrite(int pin, u16 val) {
     platforms::analogWrite(pin, val);
 }
 
-void setPwm16(int pin, u16 val) {
+void setPwm16(int pin, u16 val) FL_NO_EXCEPT {
     pwm_state::PwmPinState* ch = pwm_state::findByPin(pin);
 
     if (ch && ch->backend == pwm_state::PwmBackend::IsrSoftware) {
@@ -271,7 +287,7 @@ void setPwm16(int pin, u16 val) {
 // PWM Frequency API
 // ============================================================================
 
-int setPwmFrequency(int pin, u32 frequency_hz) {
+int setPwmFrequency(int pin, u32 frequency_hz) FL_NO_EXCEPT {
     // Check if pin already has a channel
     pwm_state::PwmPinState* ch = pwm_state::findByPin(pin);
 
@@ -294,14 +310,14 @@ int setPwmFrequency(int pin, u32 frequency_hz) {
         // Native path
         int result = platforms::setPwmFrequencyNative(pin, frequency_hz);
         if (result != 0) {
-            FL_WARN("setPwmFrequency: Native backend failed: %s", result);
+            FL_WARN("setPwmFrequency: Native backend failed: " << result);
             return result;
         }
 
         // Allocate tracking slot
         ch = pwm_state::allocate();
         if (!ch) {
-            FL_WARN("setPwmFrequency: All %s channels in use", static_cast<int>(pwm_state::MAX_PWM_CHANNELS));
+            FL_WARN("setPwmFrequency: All " << (static_cast<int>(pwm_state::MAX_PWM_CHANNELS)) << " channels in use");
             return -2;
         }
 
@@ -314,14 +330,14 @@ int setPwmFrequency(int pin, u32 frequency_hz) {
 
     // ISR software fallback path
     if (frequency_hz > pwm_state::MAX_ISR_PWM_FREQUENCY) {
-        FL_WARN("setPwmFrequency: ISR fallback max %s Hz, requested %s", pwm_state::MAX_ISR_PWM_FREQUENCY, frequency_hz);
+        FL_WARN("setPwmFrequency: ISR fallback max " << (pwm_state::MAX_ISR_PWM_FREQUENCY) << " Hz, requested " << frequency_hz);
         return -1;
     }
 
     // Allocate channel
     ch = pwm_state::allocate();
     if (!ch) {
-        FL_WARN("setPwmFrequency: All %s channels in use", static_cast<int>(pwm_state::MAX_PWM_CHANNELS));
+        FL_WARN("setPwmFrequency: All " << (static_cast<int>(pwm_state::MAX_PWM_CHANNELS)) << " channels in use");
         return -2;
     }
 
@@ -351,7 +367,7 @@ int setPwmFrequency(int pin, u32 frequency_hz) {
     return 0;
 }
 
-u32 getPwmFrequency(int pin) {
+u32 getPwmFrequency(int pin) FL_NO_EXCEPT {
     pwm_state::PwmPinState* ch = pwm_state::findByPin(pin);
     if (ch) {
         return ch->frequency_hz;
@@ -361,7 +377,7 @@ u32 getPwmFrequency(int pin) {
     return platforms::getPwmFrequencyNative(pin);
 }
 
-int pwmEnd(int pin) {
+int pwmEnd(int pin) FL_NO_EXCEPT {
     pwm_state::PwmPinState* ch = pwm_state::findByPin(pin);
     if (!ch) {
         return -1;
@@ -375,7 +391,7 @@ int pwmEnd(int pin) {
 // pinMode - releases PWM when pin mode changes
 // ============================================================================
 
-void pinMode(int pin, PinMode mode) {
+void pinMode(int pin, PinMode mode) FL_NO_EXCEPT {
     // Release any active PWM channel on this pin
     // When pinMode is called, the pin's function is being changed,
     // so any existing PWM configuration should be cleared

@@ -5,6 +5,7 @@
 #include "fl/sensors/digital_pin.h"
 #include "fl/ui/ui.h"
 #include "fl/math/time_alpha.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -14,9 +15,9 @@ namespace fl {
 // compiling using the FastLED web compiler.
 class PirLowLevel {
   public:
-    PirLowLevel(int pin);
-    bool detect();
-    operator bool() { return detect(); }
+    PirLowLevel(int pin) FL_NO_EXCEPT;
+    bool detect() FL_NO_EXCEPT;
+    operator bool() FL_NO_EXCEPT { return detect(); }
 
   private:
 
@@ -45,20 +46,20 @@ public:
                 u32 latchMs     = 5000,
                 u32 risingTime  = 1000,
                 u32 fallingTime = 1000,
-                const char* button_name = nullptr);
+                const char* button_name = nullptr) FL_NO_EXCEPT;
 
     /// Returns true if the PIR is “latched on” (within latchMs of last trigger).
-    bool detect(u32 now);
+    bool detect(u32 now) FL_NO_EXCEPT;
 
     /// Returns a 0–255 ramp value:
     ///  • ramps 0→255 over risingTime
     ///  • holds 255 until latchMs–fallingTime
     ///  • ramps 255→0 over fallingTime
     /// Outside latch period returns 0.
-    u8 transition(u32 now);
+    u8 transition(u32 now) FL_NO_EXCEPT;
 
     /// Manually start the latch cycle (e.g. on startup)
-    void activate(u32 now) { mRamp.trigger(now); }
+    void activate(u32 now) FL_NO_EXCEPT { mRamp.trigger(now); }
 
 private:
     PirLowLevel        mPir;

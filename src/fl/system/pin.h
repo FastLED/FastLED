@@ -30,6 +30,7 @@
 /// - Better compile times and reduced header pollution
 
 #include "fl/stl/stdint.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -71,37 +72,37 @@ enum class AdcRange {
 /// Set pin mode (input, output, pull-up, pull-down)
 /// @param pin Pin number (platform-specific numbering)
 /// @param mode Pin mode configuration
-void pinMode(int pin, PinMode mode);
+void pinMode(int pin, PinMode mode) FL_NO_EXCEPT;
 
 /// Write digital value to pin
 /// @param pin Pin number (platform-specific numbering)
 /// @param val Pin value (Low or High)
-void digitalWrite(int pin, PinValue val);
+void digitalWrite(int pin, PinValue val) FL_NO_EXCEPT;
 
 /// Read digital value from pin
 /// @param pin Pin number (platform-specific numbering)
 /// @return Pin value (Low or High)
-PinValue digitalRead(int pin);
+PinValue digitalRead(int pin) FL_NO_EXCEPT;
 
 /// Read analog value from pin
 /// @param pin Pin number (platform-specific numbering)
 /// @return Analog value (0-1023 for 10-bit ADC, 0-4095 for 12-bit ADC)
-u16 analogRead(int pin);
+u16 analogRead(int pin) FL_NO_EXCEPT;
 
 /// Write analog value to pin (PWM)
 /// @param pin Pin number (platform-specific numbering)
 /// @param val PWM duty cycle (0-255 typical, platform-specific maximum)
-void analogWrite(int pin, u16 val);
+void analogWrite(int pin, u16 val) FL_NO_EXCEPT;
 
 /// Set PWM duty cycle with 16-bit resolution
 /// @param pin Pin number (platform-specific numbering)
 /// @param val PWM duty cycle (0-65535, platform-specific maximum)
-void setPwm16(int pin, u16 val);
+void setPwm16(int pin, u16 val) FL_NO_EXCEPT;
 
 /// Alias for setPwm16 - Set PWM duty cycle with 16-bit resolution
 /// @param pin Pin number (platform-specific numbering)
 /// @param val PWM duty cycle (0-65535, platform-specific maximum)
-inline void analogWrite16(int pin, u16 val) {
+inline void analogWrite16(int pin, u16 val) FL_NO_EXCEPT {
     setPwm16(pin, val);
 }
 
@@ -109,7 +110,7 @@ inline void analogWrite16(int pin, u16 val) {
 /// @param range Voltage range for analog readings
 /// @note Implementation varies by platform (reference voltage vs attenuation)
 /// @note Not all ranges supported on all platforms (no-op for unsupported values)
-void setAdcRange(AdcRange range);
+void setAdcRange(AdcRange range) FL_NO_EXCEPT;
 
 // ============================================================================
 // PWM Frequency Control
@@ -120,16 +121,16 @@ void setAdcRange(AdcRange range);
 /// @param pin Pin number (platform-specific numbering)
 /// @param frequency_hz Desired PWM frequency in Hz (1-500 Hz for ISR, platform-dependent for native HW)
 /// @return 0 on success, negative error code on failure (-1: invalid freq, -2: all channels in use, -3: ISR setup failed, -4: native HW failed)
-int setPwmFrequency(int pin, u32 frequency_hz);
+int setPwmFrequency(int pin, u32 frequency_hz) FL_NO_EXCEPT;
 
 /// Query the configured PWM frequency for a pin.
 /// @param pin Pin number (platform-specific numbering)
 /// @return Frequency in Hz, or 0 if not configured
-u32 getPwmFrequency(int pin);
+u32 getPwmFrequency(int pin) FL_NO_EXCEPT;
 
 /// Release PWM channel and stop output on a pin.
 /// @param pin Pin number (platform-specific numbering)
 /// @return 0 on success, -1 if not initialized
-int pwmEnd(int pin);
+int pwmEnd(int pin) FL_NO_EXCEPT;
 
 }  // namespace fl

@@ -9,7 +9,7 @@ namespace audio {
 namespace detector {
 
 Beat::Beat()
-    : mBeatDetected(false)
+    FL_NO_EXCEPT : mBeatDetected(false)
     , mBPM(120.0f)
     , mPhase(0.0f)
     , mConfidence(0.0f)
@@ -25,7 +25,7 @@ Beat::Beat()
 
 Beat::~Beat() FL_NO_EXCEPT = default;
 
-void Beat::update(shared_ptr<Context> context) {
+void Beat::update(shared_ptr<Context> context) FL_NO_EXCEPT {
     // Use 30 Hz min frequency so bass bins actually cover sub-bass (20-60 Hz).
     // Default fmin (90 Hz) covers most bass but misses the deepest sub-bass.
     // CQ_NAIVE provides bass/treble discrimination via CQ kernels
@@ -64,7 +64,7 @@ void Beat::update(shared_ptr<Context> context) {
     }
 }
 
-void Beat::reset() {
+void Beat::reset() FL_NO_EXCEPT {
     mBeatDetected = false;
     mBPM = 120.0f;
     mPhase = 0.0f;
@@ -77,7 +77,7 @@ void Beat::reset() {
     mFluxAvg.reset();
 }
 
-float Beat::calculateSpectralFlux(const fft::Bins& fft) {
+float Beat::calculateSpectralFlux(const fft::Bins& fft) FL_NO_EXCEPT {
     float flux = 0.0f;
     size numBins = fl::min(fft.raw().size(), mPreviousMagnitudes.size());
 
@@ -101,13 +101,13 @@ float Beat::calculateSpectralFlux(const fft::Bins& fft) {
     return flux / static_cast<float>(bassBins);
 }
 
-void Beat::updateAdaptiveThreshold() {
+void Beat::updateAdaptiveThreshold() FL_NO_EXCEPT {
     // O(1) running average via MovingAverage filter
     float mean = mFluxAvg.update(mSpectralFlux);
     mAdaptiveThreshold = mean * mThreshold * mSensitivity;
 }
 
-bool Beat::detectBeat(u32 timestamp) {
+bool Beat::detectBeat(u32 timestamp) FL_NO_EXCEPT {
     // Use adaptive threshold with an absolute floor. The floor handles
     // the silence-to-signal transition when adaptive threshold is near zero,
     // and prevents CQ spectral leakage from triggering false beats.
@@ -135,7 +135,7 @@ bool Beat::detectBeat(u32 timestamp) {
     return true;
 }
 
-void Beat::updateTempo(u32 timestamp) {
+void Beat::updateTempo(u32 timestamp) FL_NO_EXCEPT {
     u32 interval = timestamp - mLastBeatTime;
 
     // Only update tempo if interval is reasonable
@@ -158,7 +158,7 @@ void Beat::updateTempo(u32 timestamp) {
     }
 }
 
-void Beat::updatePhase(u32 timestamp) {
+void Beat::updatePhase(u32 timestamp) FL_NO_EXCEPT {
     if (mBeatInterval == 0) {
         mPhase = 0.0f;
         return;
@@ -174,7 +174,7 @@ void Beat::updatePhase(u32 timestamp) {
     }
 }
 
-void Beat::fireCallbacks() {
+void Beat::fireCallbacks() FL_NO_EXCEPT {
     if (mBeatDetected) {
         onBeat();
         onOnset(mSpectralFlux);

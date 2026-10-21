@@ -36,7 +36,7 @@
 CONFIG_ESP_COREDUMP_ENABLE_TO_FLASH=n
 
 # Drop the ESP-IDF runtime log infrastructure. Independent of FastLED's
-# FL_WARN/FL_LOG path — that's governed separately by FASTLED_LOG_VERBOSITY
+# FL_WARN/FL_LOG path — that's governed separately by FL_LOG_LEVEL
 # (Stage 1 of #2886). Eliminates symbol #19 (diag_log_add, 1,604 B) and
 # ~1-2 KB of IDF log format strings scattered through
 # libespressif__esp_diagnostics, libesp_diagnostics, and libheap.

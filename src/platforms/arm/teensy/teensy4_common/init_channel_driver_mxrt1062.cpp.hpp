@@ -3,9 +3,9 @@
 /// @file init_channel_driver_mxrt1062.cpp.hpp
 /// @brief Teensy 4.x-specific channel driver initialization
 ///
-/// This file provides lazy initialization of Teensy 4.x-specific channel drivers
-/// (SPI hardware) in priority order. Engines are registered on first access
-/// to ChannelManager::instance().
+/// Lazy initialization (first ChannelManager::instance() access) registers
+/// only the platform-default ObjectFLED engine. The full set below is
+/// registered by registerAllTeensyChannelDrivers() from enableAllDrivers().
 ///
 /// Priority Order:
 /// - SPI_UNIFIED (6-7): True SPI hardware (quad/dual-lane)
@@ -49,7 +49,7 @@ static void addSpiHardwareIfPossible(ChannelManager& manager) {
     // Collect SpiHw4 controllers (higher priority: 7)
     // ========================================================================
     const auto& hw4Controllers = SpiHw4::getAll();
-    FL_DBG("Teensy 4.x: Found %s SpiHw4 controllers", hw4Controllers.size());
+    FL_DBG("Teensy 4.x: Found " << hw4Controllers.size() << " SpiHw4 controllers");
 
     for (const auto& ctrl : hw4Controllers) {
         if (ctrl) {
@@ -63,7 +63,7 @@ static void addSpiHardwareIfPossible(ChannelManager& manager) {
     // Collect SpiHw2 controllers (lower priority: 6)
     // ========================================================================
     const auto& hw2Controllers = SpiHw2::getAll();
-    FL_DBG("Teensy 4.x: Found %s SpiHw2 controllers", hw2Controllers.size());
+    FL_DBG("Teensy 4.x: Found " << hw2Controllers.size() << " SpiHw2 controllers");
 
     for (const auto& ctrl : hw2Controllers) {
         if (ctrl) {
@@ -95,7 +95,7 @@ static void addSpiHardwareIfPossible(ChannelManager& manager) {
 
             manager.addDriver(maxPriority, adapter);
 
-            FL_DBG("Teensy 4.x: Registered unified SPI driver with %s controllers (priority %s)", controllers.size(), maxPriority);
+            FL_DBG("Teensy 4.x: Registered unified SPI driver with " << controllers.size() << " controllers (priority " << maxPriority << ")");
         } else {
             FL_WARN("Teensy 4.x: Failed to create unified SPI adapter");
         }
@@ -145,13 +145,21 @@ static void addObjectFLEDIfPossible(ChannelManager& manager) {
 
 namespace platforms {
 
-/// @brief Initialize channel drivers for Teensy 4.x
+/// @brief Initialize channel drivers for Teensy 4.x (#4708).
 ///
-/// Called lazily on first access to ChannelManager::instance().
-/// Registers platform-specific drivers (SPI hardware, ObjectFLED DMA) with the bus manager.
-void initChannelDrivers() {
-    FL_DBG("Teensy 4.x: Lazy initialization of channel drivers");
+/// Called lazily on first access to ChannelManager::instance(). Registers
+/// only the platform-default driver (ObjectFLED, `DefaultBus<>` ==
+/// `Bus::FLEX_IO` instance 0 for clockless and SPI chipsets), so
+/// `Channel::create(cfg)` with `Bus::AUTO` keeps working. FlexIO and the
+/// unified SPI adapter are opt-in via `FastLED.enableAllDrivers()` /
+/// `FastLED.add(cfg)`: registering them here linked every engine into ITCM
+/// (RAM1) for every Channel-API sketch.
+void initChannelDrivers() FL_NO_EXCEPT {
+    detail::addObjectFLEDIfPossible(channelManager());
+}
 
+/// @brief Register every Teensy 4.x channel driver (enableAllDrivers path).
+void registerAllTeensyChannelDrivers() FL_NO_EXCEPT {
     auto& manager = channelManager();
 
     // Register FlexIO engine for clockless strips on FlexIO-capable pins (priority 8)
@@ -162,8 +170,6 @@ void initChannelDrivers() {
 
     // Register true SPI hardware (priority 6-7)
     detail::addSpiHardwareIfPossible(manager);
-
-    FL_DBG("Teensy 4.x: Channel drivers initialized");
 }
 
 } // namespace platforms

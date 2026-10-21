@@ -31,22 +31,22 @@ public:
     RpcHandle() FL_NO_EXCEPT : mValid(false) {}
 
     // Constructor from function (internal use by RpcFactory)
-    explicit RpcHandle(function_type fn) : mFn(fn), mValid(true) {}
+    explicit RpcHandle(function_type fn) FL_NO_EXCEPT : mFn(fn), mValid(true) {}
 
     // Call operator - invoke the underlying function
     template<typename... CallArgs>
-    R operator()(CallArgs&&... args) const {
+    R operator()(CallArgs&&... args) const FL_NO_EXCEPT {
         return mFn(fl::forward<CallArgs>(args)...);
     }
 
     // Validity check
-    explicit operator bool() const { return mValid && static_cast<bool>(mFn); }
+    explicit operator bool() const FL_NO_EXCEPT { return mValid && static_cast<bool>(mFn); }
 
     // Get underlying function
-    function_type get() const { return mFn; }
+    function_type get() const FL_NO_EXCEPT { return mFn; }
 
     // Implicit conversion to fl::function
-    operator function_type() const { return mFn; }
+    operator function_type() const FL_NO_EXCEPT { return mFn; }
 
 private:
     function_type mFn;

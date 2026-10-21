@@ -30,7 +30,7 @@ int Vibe::getPrivateFFTCount() FL_NO_EXCEPT { return sVibeFFTCount; }
 void Vibe::resetPrivateFFTCount() FL_NO_EXCEPT { sVibeFFTCount = 0; }
 
 
-Vibe::Vibe() {
+Vibe::Vibe() FL_NO_EXCEPT {
     // Tau chosen for LED visualizer feel: ~0.3s gives ~1 second of silence
     // to fully gate, matching user expectation that beats decay quickly when
     // music stops. The envelope targets 0.0 — full silence on the metric.
@@ -51,7 +51,7 @@ Vibe::Vibe() {
 
 Vibe::~Vibe() FL_NO_EXCEPT = default;
 
-void Vibe::update(shared_ptr<Context> context) {
+void Vibe::update(shared_ptr<Context> context) FL_NO_EXCEPT {
     if (!context) {
         return;
     }
@@ -141,7 +141,7 @@ void Vibe::update(shared_ptr<Context> context) {
     mTrebSpike = mImmRel[2] > mAvgRel[2];
 }
 
-void Vibe::fireCallbacks() {
+void Vibe::fireCallbacks() FL_NO_EXCEPT {
     if (onVibeLevels) {
         VibeLevels levels;
         levels.bass = mImmRel[0];
@@ -175,7 +175,7 @@ void Vibe::fireCallbacks() {
     }
 }
 
-void Vibe::reset() {
+void Vibe::reset() FL_NO_EXCEPT {
     mFrameCount = 0;
     for (int i = 0; i < 3; i++) {
         mImm[i] = 0.0f;
@@ -203,7 +203,7 @@ void Vibe::reset() {
 // At 30fps with rate=0.5: per-second retention = 0.5^30 ≈ 9.3e-10
 // At 60fps the per-frame rate adjusts to ~0.707 so 0.707^60 ≈ 9.3e-10 (same)
 float Vibe::adjustRateToFPS(float rateAtFps1, float fps1,
-                                     float actualFps) {
+                                     float actualFps) FL_NO_EXCEPT {
     if (actualFps <= 0.0f) {
         return rateAtFps1;
     }

@@ -14,14 +14,14 @@ namespace detail {
 
 template <typename T>
 struct TypeToJson {
-    static json convert(const T& value) {
+    static json convert(const T& value) FL_NO_EXCEPT {
         return json(value);
     }
 };
 
 template <>
 struct TypeToJson<fl::string> {
-    static json convert(const fl::string& value) {
+    static json convert(const fl::string& value) FL_NO_EXCEPT {
         return json(value.c_str());
     }
 };
@@ -52,7 +52,7 @@ struct TypeToJson<fl::u16> {
 // json identity conversion - pass json through unchanged
 template <>
 struct TypeToJson<fl::json> {
-    static json convert(const json& value) {
+    static json convert(const json& value) FL_NO_EXCEPT {
         return value;
     }
 };
@@ -60,7 +60,7 @@ struct TypeToJson<fl::json> {
 // fl::vector<fl::u8> specialization - encodes binary data as base64 string.
 template <>
 struct TypeToJson<fl::vector<fl::u8>> {
-    static json convert(const fl::vector<fl::u8>& value) {
+    static json convert(const fl::vector<fl::u8>& value) FL_NO_EXCEPT {
         fl::string encoded = fl::base64_encode(value);
         return json(encoded.c_str());
     }
@@ -69,7 +69,7 @@ struct TypeToJson<fl::vector<fl::u8>> {
 // fl::vector<T> conversion - converts vector to JSON array
 template <typename T>
 struct TypeToJson<fl::vector<T>> {
-    static json convert(const fl::vector<T>& value) {
+    static json convert(const fl::vector<T>& value) FL_NO_EXCEPT {
         json arr = json::array();
         for (fl::size i = 0; i < value.size(); i++) {
             arr.push_back(TypeToJson<T>::convert(value[i]));
@@ -80,7 +80,7 @@ struct TypeToJson<fl::vector<T>> {
 
 template <>
 struct TypeToJson<void> {
-    static json convert() {
+    static json convert() FL_NO_EXCEPT {
         return json(nullptr);
     }
 };

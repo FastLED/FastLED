@@ -15,18 +15,19 @@
 #include "fl/stl/string.h"
 #include "fl/stl/strstream.h"
 #include "fl/stl/vector.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
-bool Remote::unbind(const fl::string& name) {
+bool Remote::unbind(const fl::string& name) FL_NO_EXCEPT {
     bool removed = mRpc.unbind(name.c_str());
     if (removed) {
-        FL_DBG("Unregistered RPC function: %s", name);
+        FL_DBG("Unregistered RPC function: " << name);
     }
     return removed;
 }
 
-bool Remote::has(const fl::string& name) const {
+bool Remote::has(const fl::string& name) const FL_NO_EXCEPT {
     return mRpc.has(name.c_str());
 }
 
@@ -37,11 +38,11 @@ bool Remote::has(const fl::string& name) const {
 // callers don't break, but they're link-DCE-friendly if no caller exists.
 
 #if FL_PLATFORM_HAS_LARGE_MEMORY
-void Remote::sendAsyncResponse(const char* method, const fl::json& result) {
+void Remote::sendAsyncResponse(const char* method, const fl::json& result) FL_NO_EXCEPT {
     fl::string methodName(method);
     auto it = mAsyncRequests.find(methodName);
     if (it == mAsyncRequests.end()) {
-        FL_WARN("No pending async request for method: %s", method);
+        FL_WARN("No pending async request for method: " << method);
         return;
     }
 
@@ -57,15 +58,15 @@ void Remote::sendAsyncResponse(const char* method, const fl::json& result) {
     // Send via response sink
     if (mResponseSink) {
         mResponseSink(response);
-        FL_DBG("Sent async response for %s (id=%s)", method, requestId);
+        FL_DBG("Sent async response for " << method << " (id=" << requestId << ")");
     }
 }
 
-void Remote::sendStreamUpdate(const char* method, const fl::json& update) {
+void Remote::sendStreamUpdate(const char* method, const fl::json& update) FL_NO_EXCEPT {
     fl::string methodName(method);
     auto it = mAsyncRequests.find(methodName);
     if (it == mAsyncRequests.end()) {
-        FL_WARN("No pending async request for method: %s", method);
+        FL_WARN("No pending async request for method: " << method);
         return;
     }
 
@@ -84,15 +85,15 @@ void Remote::sendStreamUpdate(const char* method, const fl::json& update) {
     // Send via response sink
     if (mResponseSink) {
         mResponseSink(response);
-        FL_DBG("Sent stream update for %s (id=%s)", method, requestId);
+        FL_DBG("Sent stream update for " << method << " (id=" << requestId << ")");
     }
 }
 
-void Remote::sendStreamFinal(const char* method, const fl::json& result) {
+void Remote::sendStreamFinal(const char* method, const fl::json& result) FL_NO_EXCEPT {
     fl::string methodName(method);
     auto it = mAsyncRequests.find(methodName);
     if (it == mAsyncRequests.end()) {
-        FL_WARN("No pending async request for method: %s", method);
+        FL_WARN("No pending async request for method: " << method);
         return;
     }
 
@@ -112,7 +113,7 @@ void Remote::sendStreamFinal(const char* method, const fl::json& result) {
     // Send via response sink
     if (mResponseSink) {
         mResponseSink(response);
-        FL_DBG("Sent stream final for %s (id=%s)", method, requestId);
+        FL_DBG("Sent stream final for " << method << " (id=" << requestId << ")");
     }
 }
 #else  // !FL_PLATFORM_HAS_LARGE_MEMORY
@@ -131,13 +132,13 @@ void Remote::sendStreamFinal(const char* /*method*/, const fl::json& /*result*/)
 
 // Error Reporting
 
-void Remote::reportError(const fl::string& message) {
+void Remote::reportError(const fl::string& message) FL_NO_EXCEPT {
     fl::json params = fl::json::object();
     params.set("message", message);
     reportError(params);
 }
 
-void Remote::reportError(const fl::json& data) {
+void Remote::reportError(const fl::json& data) FL_NO_EXCEPT {
     if (!mResponseSink) {
         return;
     }
@@ -150,7 +151,7 @@ void Remote::reportError(const fl::json& data) {
 
 // RPC Processing
 
-fl::json Remote::processRpc(const fl::json& request) {
+fl::json Remote::processRpc(const fl::json& request) FL_NO_EXCEPT {
 #if FL_PLATFORM_HAS_LARGE_MEMORY
     // Extract optional timestamp field (0 = immediate, >0 = scheduled).
     // Low-memory builds drop the scheduling path entirely (see #3224 Tier 1B):
@@ -193,7 +194,7 @@ fl::json Remote::processRpc(const fl::json& request) {
         fl::string methodName = request["method"].as_string().value_or("");
         int requestId = request["id"].as_int().value_or(0);
         mAsyncRequests[methodName] = {requestId, receivedAt};
-        FL_DBG("Stored request ID for %s (id=%s)", methodName.c_str(), requestId);
+        FL_DBG("Stored request ID for " << methodName.c_str() << " (id=" << requestId << ")");
     }
 #endif
 
@@ -237,7 +238,7 @@ fl::json Remote::processRpc(const fl::json& request) {
 }
 
 #if FL_PLATFORM_HAS_LARGE_MEMORY
-void Remote::scheduleFunction(u32 timestamp, u32 receivedAt, const fl::json& jsonRpcRequest) {
+void Remote::scheduleFunction(u32 timestamp, u32 receivedAt, const fl::json& jsonRpcRequest) FL_NO_EXCEPT {
     // Make explicit copy for capture (avoid reference issues)
     fl::json requestCopy = jsonRpcRequest;
     fl::string funcName = requestCopy["method"].as_string().value_or("unknown");
@@ -255,17 +256,17 @@ void Remote::scheduleFunction(u32 timestamp, u32 receivedAt, const fl::json& jso
         }
     });
 
-    FL_DBG("Scheduled RPC: %s at %s", funcName, timestamp);
+    FL_DBG("Scheduled RPC: " << funcName << " at " << timestamp);
 }
 
-void Remote::recordResult(const fl::string& funcName, const fl::json& result, u32 scheduledAt, u32 receivedAt, u32 executedAt, bool wasScheduled) {
+void Remote::recordResult(const fl::string& funcName, const fl::json& result, u32 scheduledAt, u32 receivedAt, u32 executedAt, bool wasScheduled) FL_NO_EXCEPT {
     mResults.push_back({funcName, result, scheduledAt, receivedAt, executedAt, wasScheduled});
 }
 #endif
 
 // Update Loop
 
-size_t Remote::tick(u32 currentTimeMs) {
+size_t Remote::tick(u32 currentTimeMs) FL_NO_EXCEPT {
 #if FL_PLATFORM_HAS_LARGE_MEMORY
     // Clear previous results
     mResults.clear();
@@ -280,7 +281,7 @@ size_t Remote::tick(u32 currentTimeMs) {
 
 // Utility Methods
 
-size_t Remote::pendingCount() const {
+size_t Remote::pendingCount() const FL_NO_EXCEPT {
 #if FL_PLATFORM_HAS_LARGE_MEMORY
     return mScheduler.pendingCount();
 #else
@@ -288,7 +289,7 @@ size_t Remote::pendingCount() const {
 #endif
 }
 
-void Remote::clear(ClearFlags flags) {
+void Remote::clear(ClearFlags flags) FL_NO_EXCEPT {
 #if FL_PLATFORM_HAS_LARGE_MEMORY
     if ((flags & ClearFlags::Results) != ClearFlags::None) {
         mResults.clear();
@@ -344,7 +345,7 @@ Remote::Remote(RequestSource source, ResponseSink sink, ResponseStreamSink strea
 
 // Server Coordination
 
-size_t Remote::update(u32 currentTimeMs) {
+size_t Remote::update(u32 currentTimeMs) FL_NO_EXCEPT {
     size_t processed = Server::pull();   // Pull requests from Server
     size_t executed = tick(currentTimeMs);  // Process scheduled tasks
 
@@ -366,7 +367,7 @@ size_t Remote::update(u32 currentTimeMs) {
 
 // Schema Methods
 
-fl::vector<Remote::MethodInfo> Remote::methods() const {
+fl::vector<Remote::MethodInfo> Remote::methods() const FL_NO_EXCEPT {
     fl::vector<MethodInfo> result;
 
     // Get flat JSON schema from underlying RPC

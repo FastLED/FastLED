@@ -46,7 +46,7 @@ static void addSpiHardwareIfPossible(ChannelManager& manager) {
     // Collect SpiHw4 controllers (higher priority: 7)
     // ========================================================================
     const auto& hw4Controllers = SpiHw4::getAll();
-    FL_DBG("NRF52: Found %s SpiHw4 controllers", hw4Controllers.size());
+    FL_DBG("NRF52: Found " << hw4Controllers.size() << " SpiHw4 controllers");
 
     for (const auto& ctrl : hw4Controllers) {
         if (ctrl) {
@@ -60,7 +60,7 @@ static void addSpiHardwareIfPossible(ChannelManager& manager) {
     // Collect SpiHw2 controllers (lower priority: 6)
     // ========================================================================
     const auto& hw2Controllers = SpiHw2::getAll();
-    FL_DBG("NRF52: Found %s SpiHw2 controllers", hw2Controllers.size());
+    FL_DBG("NRF52: Found " << hw2Controllers.size() << " SpiHw2 controllers");
 
     for (const auto& ctrl : hw2Controllers) {
         if (ctrl) {
@@ -92,7 +92,7 @@ static void addSpiHardwareIfPossible(ChannelManager& manager) {
 
             manager.addDriver(maxPriority, adapter);
 
-            FL_DBG("NRF52: Registered unified SPI driver with %s controllers (priority %s)", controllers.size(), maxPriority);
+            FL_DBG("NRF52: Registered unified SPI driver with " << controllers.size() << " controllers (priority " << maxPriority << ")");
         } else {
             FL_WARN("NRF52: Failed to create unified SPI adapter");
         }

@@ -72,9 +72,9 @@ void memcpy_byte(u8* FL_RESTRICT_PARAM dst,
 /// @note Automatically uses 32-bit, 16-bit, or byte copy based on alignment
 /// @note Uses switch for dispatch (compiler may optimize to jump table)
 FL_OPTIMIZE_FUNCTION FL_IRAM FASTLED_FORCE_INLINE
-void memcpy(void* FL_RESTRICT_PARAM dst,
-            const void* FL_RESTRICT_PARAM src,
-            size_t num_bytes) {
+void memcopy(void* FL_RESTRICT_PARAM dst,
+             const void* FL_RESTRICT_PARAM src,
+             size_t num_bytes) {
     uintptr_t dst_addr = fl::ptr_to_int(dst);
     uintptr_t src_addr = fl::ptr_to_int(src);
 

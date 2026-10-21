@@ -10,6 +10,7 @@
 #include "fl/fx/2d/animartrix_detail/core_types.h"
 #include "fl/fx/2d/animartrix_detail/perlin_s16x16.h"
 #include "fl/math/sin32.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -35,7 +36,7 @@ struct render_parameters_fp {
 // A24: 0 to 16777216 is a full circle (2*PI radians).
 // Conversion: angle_a24 = angle_rad * (16777216 / (2*PI))
 // = angle_rad * 2670177 (approximately)
-FASTLED_FORCE_INLINE fl::u32 radiansToA24_fp(fl::i32 angle_s16x16_raw) {
+FASTLED_FORCE_INLINE fl::u32 radiansToA24_fp(fl::i32 angle_s16x16_raw) FL_NO_EXCEPT {
     constexpr fl::i32 RAD_TO_A24 = 2670177; // 16777216 / (2*PI) in s16x16 sense
     return static_cast<fl::u32>(
         (static_cast<fl::i64>(angle_s16x16_raw) * RAD_TO_A24) >> fl::s16x16::FRAC_BITS);
@@ -53,7 +54,7 @@ FASTLED_FORCE_INLINE fl::u32 radiansToA24_fp(fl::i32 angle_s16x16_raw) {
 FASTLED_FORCE_INLINE fl::i32 render_value_fp(
         const render_parameters_fp &p,
         const fl::i32 *fade_lut,
-        const fl::u8 *perm) {
+        const fl::u8 *perm) FL_NO_EXCEPT {
 
     using FP = fl::s16x16;
     constexpr fl::i32 FP_ONE = static_cast<fl::i32>(1) << FP::FRAC_BITS;
@@ -132,38 +133,38 @@ FASTLED_FORCE_INLINE fl::i32 render_value_fp(
 // Color blend functions operating on [0, 255] integer values.
 // These mirror the float versions in engine_core.h.
 
-FASTLED_FORCE_INLINE fl::i32 multiply_fp(fl::i32 a, fl::i32 b) {
+FASTLED_FORCE_INLINE fl::i32 multiply_fp(fl::i32 a, fl::i32 b) FL_NO_EXCEPT {
     return (a * b) / 255;
 }
 
-FASTLED_FORCE_INLINE fl::i32 screen_fp(fl::i32 a, fl::i32 b) {
+FASTLED_FORCE_INLINE fl::i32 screen_fp(fl::i32 a, fl::i32 b) FL_NO_EXCEPT {
     // screen(a,b) = 1 - (1-a/255)*(1-b/255) * 255
     // = 255 - (255-a)*(255-b)/255
     return 255 - ((255 - a) * (255 - b)) / 255;
 }
 
-FASTLED_FORCE_INLINE fl::i32 colordodge_fp(fl::i32 a, fl::i32 b) {
+FASTLED_FORCE_INLINE fl::i32 colordodge_fp(fl::i32 a, fl::i32 b) FL_NO_EXCEPT {
     if (b >= 255) return 255;
     fl::i32 result = (a * 255) / (255 - b);
     return result > 255 ? 255 : result;
 }
 
-FASTLED_FORCE_INLINE fl::i32 colorburn_fp(fl::i32 a, fl::i32 b) {
+FASTLED_FORCE_INLINE fl::i32 colorburn_fp(fl::i32 a, fl::i32 b) FL_NO_EXCEPT {
     if (b <= 0) return 0;
     fl::i32 result = 255 - ((255 - a) * 255) / b;
     return result < 0 ? 0 : result;
 }
 
-FASTLED_FORCE_INLINE fl::i32 subtract_fp(fl::i32 a, fl::i32 b) {
+FASTLED_FORCE_INLINE fl::i32 subtract_fp(fl::i32 a, fl::i32 b) FL_NO_EXCEPT {
     return a - b;
 }
 
-FASTLED_FORCE_INLINE fl::i32 add_fp(fl::i32 a, fl::i32 b) {
+FASTLED_FORCE_INLINE fl::i32 add_fp(fl::i32 a, fl::i32 b) FL_NO_EXCEPT {
     return a + b;
 }
 
 // Clamp RGB triple to [0, 255]
-FASTLED_FORCE_INLINE void rgb_sanity_check_fp(fl::i32 &r, fl::i32 &g, fl::i32 &b) {
+FASTLED_FORCE_INLINE void rgb_sanity_check_fp(fl::i32 &r, fl::i32 &g, fl::i32 &b) FL_NO_EXCEPT {
     if (r < 0) r = 0;
     if (r > 255) r = 255;
     if (g < 0) g = 0;
@@ -180,7 +181,7 @@ FASTLED_FORCE_INLINE void rgb_sanity_check_fp(fl::i32 &r, fl::i32 &g, fl::i32 &b
 FASTLED_FORCE_INLINE fl::i32 render_value_fp_from_float(
         const render_parameters &anim,
         const fl::i32 *fade_lut,
-        const fl::u8 *perm) {
+        const fl::u8 *perm) FL_NO_EXCEPT {
     using FP = fl::s16x16;
     render_parameters_fp p;
     p.angle_raw = FP(anim.angle).raw();

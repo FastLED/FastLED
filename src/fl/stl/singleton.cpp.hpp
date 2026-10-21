@@ -16,7 +16,7 @@ namespace {
     static int registry_count = 0;
 } // anonymous namespace
 
-void* singleton_registry_get(const char* key) {
+void* singleton_registry_get(const char* key) FL_NO_EXCEPT {
     for (int i = 0; i < registry_count; i++) {
         if (fl::strcmp(registry[i].key, key) == 0) {
             return registry[i].value;
@@ -25,7 +25,7 @@ void* singleton_registry_get(const char* key) {
     return nullptr;
 }
 
-void singleton_registry_set(const char* key, void* value) {
+void singleton_registry_set(const char* key, void* value) FL_NO_EXCEPT {
     // Check if already registered (update)
     for (int i = 0; i < registry_count; i++) {
         if (fl::strcmp(registry[i].key, key) == 0) {

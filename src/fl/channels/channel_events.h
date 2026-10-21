@@ -99,7 +99,7 @@ struct ChannelEvents {
 #else
 
 struct ChannelEvents {
-    static ChannelEvents& instance();
+    static ChannelEvents& instance() FL_NO_EXCEPT;
 
     // -- Lifecycle events --
 

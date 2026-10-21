@@ -28,13 +28,13 @@ namespace vb = third_party::vorbis;
 // for portability across platforms where int size may vary.
 
 // StbVorbisDecoder implementation
-StbVorbisDecoder::StbVorbisDecoder() : mVorbis(nullptr) {}
+StbVorbisDecoder::StbVorbisDecoder() FL_NO_EXCEPT : mVorbis(nullptr) {}
 
 StbVorbisDecoder::~StbVorbisDecoder() FL_NO_EXCEPT {
     close();
 }
 
-bool StbVorbisDecoder::openMemory(fl::span<const fl::u8> data) {
+bool StbVorbisDecoder::openMemory(fl::span<const fl::u8> data) FL_NO_EXCEPT {
     close();  // Close any existing stream
 
     fl::i32 error = 0;
@@ -42,18 +42,18 @@ bool StbVorbisDecoder::openMemory(fl::span<const fl::u8> data) {
     return mVorbis != nullptr;
 }
 
-void StbVorbisDecoder::close() {
+void StbVorbisDecoder::close() FL_NO_EXCEPT {
     if (mVorbis) {
         vb::stb_vorbis_close(static_cast<vb::stb_vorbis*>(mVorbis));
         mVorbis = nullptr;
     }
 }
 
-bool StbVorbisDecoder::isOpen() const {
+bool StbVorbisDecoder::isOpen() const FL_NO_EXCEPT {
     return mVorbis != nullptr;
 }
 
-VorbisInfo StbVorbisDecoder::getInfo() const {
+VorbisInfo StbVorbisDecoder::getInfo() const FL_NO_EXCEPT {
     VorbisInfo info;
     if (mVorbis) {
         vb::stb_vorbis_info vi = vb::stb_vorbis_get_info(static_cast<vb::stb_vorbis*>(mVorbis));
@@ -66,7 +66,7 @@ VorbisInfo StbVorbisDecoder::getInfo() const {
     return info;
 }
 
-fl::i32 StbVorbisDecoder::getSamplesShortInterleaved(fl::i32 channels, fl::i16* buffer, fl::i32 numShorts) {
+fl::i32 StbVorbisDecoder::getSamplesShortInterleaved(fl::i32 channels, fl::i16* buffer, fl::i32 numShorts) FL_NO_EXCEPT {
     if (!mVorbis) return 0;
     // Cast to short* for AVR compatibility where fl::i16 is int but stb_vorbis expects short
     return static_cast<fl::i32>(vb::stb_vorbis_get_samples_short_interleaved(
@@ -77,7 +77,7 @@ fl::i32 StbVorbisDecoder::getSamplesShortInterleaved(fl::i32 channels, fl::i16* 
     ));
 }
 
-fl::i32 StbVorbisDecoder::getSamplesFloat(fl::i32 channels, float** buffer, fl::i32 numSamples) {
+fl::i32 StbVorbisDecoder::getSamplesFloat(fl::i32 channels, float** buffer, fl::i32 numSamples) FL_NO_EXCEPT {
     if (!mVorbis) return 0;
     return static_cast<fl::i32>(vb::stb_vorbis_get_samples_float(
         static_cast<vb::stb_vorbis*>(mVorbis),
@@ -87,17 +87,17 @@ fl::i32 StbVorbisDecoder::getSamplesFloat(fl::i32 channels, float** buffer, fl::
     ));
 }
 
-bool StbVorbisDecoder::seek(fl::u32 sampleNumber) {
+bool StbVorbisDecoder::seek(fl::u32 sampleNumber) FL_NO_EXCEPT {
     if (!mVorbis) return false;
     return vb::stb_vorbis_seek(static_cast<vb::stb_vorbis*>(mVorbis), sampleNumber) != 0;
 }
 
-fl::u32 StbVorbisDecoder::getSampleOffset() const {
+fl::u32 StbVorbisDecoder::getSampleOffset() const FL_NO_EXCEPT {
     if (!mVorbis) return 0;
     return static_cast<fl::u32>(vb::stb_vorbis_get_sample_offset(static_cast<vb::stb_vorbis*>(mVorbis)));
 }
 
-fl::u32 StbVorbisDecoder::getTotalSamples() const {
+fl::u32 StbVorbisDecoder::getTotalSamples() const FL_NO_EXCEPT {
     if (!mVorbis) return 0;
     return vb::stb_vorbis_stream_length_in_samples(static_cast<vb::stb_vorbis*>(mVorbis));
 }
@@ -108,14 +108,14 @@ public:
     VorbisDecoderImpl() FL_NO_EXCEPT;
     ~VorbisDecoderImpl() FL_NO_EXCEPT;
 
-    bool begin(fl::filebuf_ptr stream);
-    void end();
-    bool isReady() const { return mDecoder.isOpen(); }
-    bool hasError(fl::string* msg = nullptr) const;
-    bool decodeNextFrame(audio::Sample* outSample);
-    fl::size getPosition() const { return mPosition; }
-    void reset();
-    VorbisInfo getInfo() const { return mDecoder.getInfo(); }
+    bool begin(fl::filebuf_ptr stream) FL_NO_EXCEPT;
+    void end() FL_NO_EXCEPT;
+    bool isReady() const FL_NO_EXCEPT { return mDecoder.isOpen(); }
+    bool hasError(fl::string* msg = nullptr) const FL_NO_EXCEPT;
+    bool decodeNextFrame(audio::Sample* outSample) FL_NO_EXCEPT;
+    fl::size getPosition() const FL_NO_EXCEPT { return mPosition; }
+    void reset() FL_NO_EXCEPT;
+    VorbisInfo getInfo() const FL_NO_EXCEPT { return mDecoder.getInfo(); }
 
 private:
     static constexpr fl::size FRAME_SIZE = 1024;  // Samples per frame
@@ -128,7 +128,7 @@ private:
     bool mEndOfStream;
 };
 
-VorbisDecoderImpl::VorbisDecoderImpl() : mPosition(0), mEndOfStream(false) {
+VorbisDecoderImpl::VorbisDecoderImpl() FL_NO_EXCEPT : mPosition(0), mEndOfStream(false) {
     mPcmBuffer.resize(FRAME_SIZE * 2);  // Stereo
 }
 
@@ -136,7 +136,7 @@ VorbisDecoderImpl::~VorbisDecoderImpl() FL_NO_EXCEPT {
     end();
 }
 
-bool VorbisDecoderImpl::begin(fl::filebuf_ptr stream) {
+bool VorbisDecoderImpl::begin(fl::filebuf_ptr stream) FL_NO_EXCEPT {
     end();  // Clean up any previous state
 
     if (!stream) {
@@ -172,7 +172,7 @@ bool VorbisDecoderImpl::begin(fl::filebuf_ptr stream) {
     return true;
 }
 
-void VorbisDecoderImpl::end() {
+void VorbisDecoderImpl::end() FL_NO_EXCEPT {
     mDecoder.close();
     mFileData.clear();
     mPosition = 0;
@@ -180,7 +180,7 @@ void VorbisDecoderImpl::end() {
     mError.clear();
 }
 
-bool VorbisDecoderImpl::hasError(fl::string* msg) const {
+bool VorbisDecoderImpl::hasError(fl::string* msg) const FL_NO_EXCEPT {
     if (!mError.empty()) {
         if (msg) *msg = mError;
         return true;
@@ -188,7 +188,7 @@ bool VorbisDecoderImpl::hasError(fl::string* msg) const {
     return false;
 }
 
-bool VorbisDecoderImpl::decodeNextFrame(audio::Sample* outSample) {
+bool VorbisDecoderImpl::decodeNextFrame(audio::Sample* outSample) FL_NO_EXCEPT {
     if (!mDecoder.isOpen() || mEndOfStream) {
         return false;
     }
@@ -233,7 +233,7 @@ bool VorbisDecoderImpl::decodeNextFrame(audio::Sample* outSample) {
     return true;
 }
 
-void VorbisDecoderImpl::reset() {
+void VorbisDecoderImpl::reset() FL_NO_EXCEPT {
     if (mDecoder.isOpen()) {
         mDecoder.seek(0);
         mPosition = 0;
@@ -242,29 +242,29 @@ void VorbisDecoderImpl::reset() {
 }
 
 // VorbisDecoder public implementation
-VorbisDecoder::VorbisDecoder() : mImpl(fl::make_unique<VorbisDecoderImpl>()) {}
+VorbisDecoder::VorbisDecoder() FL_NO_EXCEPT : mImpl(fl::make_unique<VorbisDecoderImpl>()) {}
 VorbisDecoder::~VorbisDecoder() FL_NO_EXCEPT = default;
 
-bool VorbisDecoder::begin(fl::filebuf_ptr stream) { return mImpl->begin(stream); }
-void VorbisDecoder::end() { mImpl->end(); }
-bool VorbisDecoder::isReady() const { return mImpl->isReady(); }
-bool VorbisDecoder::hasError(fl::string* msg) const { return mImpl->hasError(msg); }
-bool VorbisDecoder::decodeNextFrame(audio::Sample* outSample) { return mImpl->decodeNextFrame(outSample); }
-fl::size VorbisDecoder::getPosition() const { return mImpl->getPosition(); }
-void VorbisDecoder::reset() { mImpl->reset(); }
-VorbisInfo VorbisDecoder::getInfo() const { return mImpl->getInfo(); }
+bool VorbisDecoder::begin(fl::filebuf_ptr stream) FL_NO_EXCEPT { return mImpl->begin(stream); }
+void VorbisDecoder::end() FL_NO_EXCEPT { mImpl->end(); }
+bool VorbisDecoder::isReady() const FL_NO_EXCEPT { return mImpl->isReady(); }
+bool VorbisDecoder::hasError(fl::string* msg) const FL_NO_EXCEPT { return mImpl->hasError(msg); }
+bool VorbisDecoder::decodeNextFrame(audio::Sample* outSample) FL_NO_EXCEPT { return mImpl->decodeNextFrame(outSample); }
+fl::size VorbisDecoder::getPosition() const FL_NO_EXCEPT { return mImpl->getPosition(); }
+void VorbisDecoder::reset() FL_NO_EXCEPT { mImpl->reset(); }
+VorbisInfo VorbisDecoder::getInfo() const FL_NO_EXCEPT { return mImpl->getInfo(); }
 
 // Vorbis factory implementation
-VorbisDecoderPtr Vorbis::createDecoder(fl::string* errorMessage) {
+VorbisDecoderPtr Vorbis::createDecoder(fl::string* errorMessage) FL_NO_EXCEPT {
     FL_UNUSED(errorMessage);
     return fl::make_shared<VorbisDecoder>();
 }
 
-bool Vorbis::isSupported() {
+bool Vorbis::isSupported() FL_NO_EXCEPT {
     return true;  // stb_vorbis is always available
 }
 
-VorbisInfo Vorbis::parseVorbisInfo(fl::span<const fl::u8> data, fl::string* errorMessage) {
+VorbisInfo Vorbis::parseVorbisInfo(fl::span<const fl::u8> data, fl::string* errorMessage) FL_NO_EXCEPT {
     StbVorbisDecoder decoder;
     if (!decoder.openMemory(data)) {
         if (errorMessage) *errorMessage = "Failed to parse Vorbis header";
@@ -273,7 +273,7 @@ VorbisInfo Vorbis::parseVorbisInfo(fl::span<const fl::u8> data, fl::string* erro
     return decoder.getInfo();
 }
 
-fl::vector<audio::Sample> Vorbis::decodeAll(fl::span<const fl::u8> data, fl::string* errorMessage) {
+fl::vector<audio::Sample> Vorbis::decodeAll(fl::span<const fl::u8> data, fl::string* errorMessage) FL_NO_EXCEPT {
     fl::vector<audio::Sample> samples;
 
     StbVorbisDecoder decoder;

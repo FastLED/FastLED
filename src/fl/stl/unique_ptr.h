@@ -1,5 +1,6 @@
 #pragma once
 
+#include "fl/stl/adl_barrier.h"
 #include "fl/stl/type_traits.h"
 #include "fl/stl/utility.h"       // for fl::move, fl::forward, fl::swap  // IWYU pragma: keep
 #include "fl/stl/stdint.h"        // for fl::size_t  // IWYU pragma: keep
@@ -255,6 +256,7 @@ bool operator!=(fl::nullptr_t, const unique_ptr<T, Deleter>& ptr) FL_NO_EXCEPT {
     return static_cast<bool>(ptr);
 }
 
+namespace adl_barrier {  // see fl/stl/adl_barrier.h
 // make_unique function for consistency with std::make_unique
 template<typename T, typename... Args>
 typename fl::enable_if<!fl::is_array<T>::value, unique_ptr<T>>::type
@@ -269,5 +271,6 @@ make_unique(fl::size_t size) FL_NO_EXCEPT {
     typedef typename fl::remove_extent<T>::type U;
     return unique_ptr<T>(new U[size]());
 }
+}  // namespace adl_barrier
 
 } // namespace fl

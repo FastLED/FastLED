@@ -1,9 +1,10 @@
 #include "fl/audio/audio_batch.h"
 #include "fl/audio/audio_processor.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
-void AudioBatch::ensurePeaks() const {
+void AudioBatch::ensurePeaks() const FL_NO_EXCEPT {
     fl::lock_guard<fl::mutex> lock(mMutex);
     if (mPeaksComputed) {
         return;
@@ -22,7 +23,7 @@ void AudioBatch::ensurePeaks() const {
     mPeaksComputed = true;
 }
 
-const VibeLevels &AudioBatch::vibe() const {
+const VibeLevels &AudioBatch::vibe() const FL_NO_EXCEPT {
     fl::lock_guard<fl::mutex> lock(mMutex);
     if (!mVibeComputed) {
         if (mProc) {
@@ -39,7 +40,7 @@ const VibeLevels &AudioBatch::vibe() const {
     return mVibe;
 }
 
-const EqLevels &AudioBatch::equalizer() const {
+const EqLevels &AudioBatch::equalizer() const FL_NO_EXCEPT {
     fl::lock_guard<fl::mutex> lock(mMutex);
     if (!mEqComputed) {
         if (mProc) {
@@ -58,7 +59,7 @@ const EqLevels &AudioBatch::equalizer() const {
     return mEq;
 }
 
-const PercussionState &AudioBatch::percussion() const {
+const PercussionState &AudioBatch::percussion() const FL_NO_EXCEPT {
     fl::lock_guard<fl::mutex> lock(mMutex);
     if (!mPercComputed) {
         if (mProc) {

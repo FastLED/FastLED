@@ -8,11 +8,11 @@
 /// @brief ESP32 FreeRTOS mutex implementation
 ///
 /// This header provides ESP32-specific mutex implementations using FreeRTOS mutexes.
-/// For ESP32, we use std::unique_lock for full compatibility with condition variables.
+/// Locks are the non-throwing fl versions (platforms/shared/nothrow_lock.h).
 
 #include "fl/stl/assert.h"
 // IWYU pragma: begin_keep
-#include <mutex>  // ok include - needed for std::unique_lock
+#include <mutex>  // ok include - needed for std lock tag types
 #include "fl/stl/noexcept.h"
 // IWYU pragma: end_keep
 
@@ -27,13 +27,11 @@ class RecursiveMutexESP32;
 using mutex = MutexESP32;
 using recursive_mutex = RecursiveMutexESP32;
 
-// Use std::unique_lock/lock_guard for full compatibility with std::condition_variable
-template<typename Mutex>
-using unique_lock = std::unique_lock<Mutex>;  // okay std namespace
-template<typename Mutex>
-using lock_guard = std::lock_guard<Mutex>;  // okay std namespace
+// unique_lock / lock_guard come from platforms/shared/nothrow_lock.h (end of
+// file), not std: std::unique_lock's __throw_system_error reference pulled
+// libstdc++'s locale/iostream objects into every ESP32 sketch (#4798).
 
-// Lock constructor tag types (re-export from std)
+// Lock constructor tag types (re-export from std; header-only, no objects)
 using std::defer_lock_t;  // okay std namespace
 using std::try_to_lock_t;  // okay std namespace
 using std::adopt_lock_t;  // okay std namespace
@@ -88,3 +86,5 @@ public:
 
 } // namespace platforms
 } // namespace fl
+
+#include "platforms/shared/nothrow_lock.h"

@@ -33,7 +33,7 @@ namespace fl {
 // You need to define this for your platform.
 // Otherwise a null filesystem will be used that will do nothing but spew
 // warnings, but otherwise won't crash the system.
-FsImplPtr make_sdcard_filesystem(int cs_pin);
+FsImplPtr make_sdcard_filesystem(int cs_pin) FL_NO_EXCEPT;
 
 /// Removable SD card on the given chip-select pin.
 ///
@@ -71,31 +71,31 @@ class FileSystem {
     static FileSystem sd(int cs_pin) FL_NO_EXCEPT;
 
     bool beginSd(int cs_pin) FL_NO_EXCEPT; // Signal to begin using the filesystem resource.
-    bool begin(FsImplPtr platform_filesystem); // Signal to begin using the
+    bool begin(FsImplPtr platform_filesystem) FL_NO_EXCEPT; // Signal to begin using the
                                                // filesystem resource.
-    void end(); // Signal to end use of the file system.
+    void end() FL_NO_EXCEPT; // Signal to end use of the file system.
 
     fl::ifstream
-    openRead(const char *path); // Returns closed ifstream if file could not be opened.
+    openRead(const char *path) FL_NO_EXCEPT; // Returns closed ifstream if file could not be opened.
     Video
     openVideo(const char *path, fl::size pixelsPerFrame, float fps = 30.0f,
-              fl::size nFrameHistory = 0); // Null if video could not be opened.
+              fl::size nFrameHistory = 0) FL_NO_EXCEPT; // Null if video could not be opened.
     Video
     openMpeg1Video(const char *path, fl::size pixelsPerFrame, float fps = 30.0f,
-                   fl::size nFrameHistory = 0); // Open MPEG1 video file
-    bool readText(const char *path, string *out);
-    bool readJson(const char *path, json *doc);
+                   fl::size nFrameHistory = 0) FL_NO_EXCEPT; // Open MPEG1 video file
+    bool readText(const char *path, string *out) FL_NO_EXCEPT;
+    bool readJson(const char *path, json *doc) FL_NO_EXCEPT;
     bool readScreenMaps(const char *path, fl::flat_map<string, ScreenMap> *out,
-                        string *error = nullptr);
+                        string *error = nullptr) FL_NO_EXCEPT;
     bool readScreenMap(const char *path, const char *name, ScreenMap *out,
-                       string *error = nullptr);
+                       string *error = nullptr) FL_NO_EXCEPT;
     // Load JPEG image from file path directly to Frame
     FramePtr loadJpeg(const char *path, const JpegConfig &config = JpegConfig(),
-                      fl::string *error_message = nullptr);
+                      fl::string *error_message = nullptr) FL_NO_EXCEPT;
 
     // Open MP3 audio file and return streaming decoder
     fl::Mp3DecoderPtr openMp3(const char *path,
-                              fl::string *error_message = nullptr);
+                              fl::string *error_message = nullptr) FL_NO_EXCEPT;
 
     // One-line sugar for fl::Fled::load(*this, path). Returns a null
     // Fled if the file could not be opened or is malformed - the Fled

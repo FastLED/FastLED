@@ -30,20 +30,20 @@ class DigitalMultiWrite8 {
     DigitalMultiWrite8() FL_NO_EXCEPT = default;
 
     /// Initialize from 8 pin numbers. -1 means "skip this bit position".
-    void init(const Pins8& pins);
+    void init(const Pins8& pins) FL_NO_EXCEPT;
 
     /// Write pre-transposed byte data to the 8 pins.
     ///
     /// Each byte in @p pin_data is a bitmask where bit N → pin N.
     /// 1 = HIGH, 0 = LOW. Pins set to -1 during init() are skipped.
-    void write(fl::span<const u8> pin_data) const;
+    void write(fl::span<const u8> pin_data) const FL_NO_EXCEPT;
 
     /// Write a single bitmask byte to the 8 pins.
     ///
     /// Same as write() but optimized for the single-byte case in
     /// timing-critical hot loops (clockless bit-banging). Avoids span
     /// iteration overhead — inlines directly to two nibble LUT lookups.
-    void writeByte(u8 byte) const {
+    void writeByte(u8 byte) const FL_NO_EXCEPT {
         const u8 lo_nib = byte & 0x0F;
         const u8 hi_nib = (byte >> 4) & 0x0F;
         applyNibble(mSetLo[lo_nib], mClrLo[lo_nib]);
@@ -52,7 +52,7 @@ class DigitalMultiWrite8 {
 
     /// Check whether all active pins (non -1) share the same GPIO port.
     /// Returns true if fewer than 2 active pins exist (trivially same port).
-    bool allSamePort() const;
+    bool allSamePort() const FL_NO_EXCEPT;
 
   private:
     // Each LUT entry stores up to 4 pin indices to set or clear.
@@ -62,9 +62,9 @@ class DigitalMultiWrite8 {
     };
 
     void buildNibbleLut(u8 bit_offset, PinList (&set_lut)[16],
-                        PinList (&clr_lut)[16]);
+                        PinList (&clr_lut)[16]) FL_NO_EXCEPT;
 
-    static void applyNibble(const PinList &set, const PinList &clr);
+    static void applyNibble(const PinList &set, const PinList &clr) FL_NO_EXCEPT;
 
     int mPins[8] = {-1, -1, -1, -1, -1, -1, -1, -1};
     PinList mSetLo[16] = {};
@@ -76,7 +76,7 @@ class DigitalMultiWrite8 {
 /// Convenience free function — creates a temporary DigitalMultiWrite8,
 /// initializes it, and writes. For repeated writes, prefer the class
 /// directly to amortize the LUT build cost.
-void digitalMultiWrite8(const Pins8& pins, fl::span<const u8> pin_data);
+void digitalMultiWrite8(const Pins8& pins, fl::span<const u8> pin_data) FL_NO_EXCEPT;
 
 /// POD struct holding 16 pin numbers for bulk pin writes.
 /// Use -1 for any pin position you want to skip.
@@ -95,17 +95,17 @@ class DigitalMultiWrite16 {
     DigitalMultiWrite16() FL_NO_EXCEPT = default;
 
     /// Initialize from 16 pin numbers. -1 means "skip this bit position".
-    void init(const Pins16& pins);
+    void init(const Pins16& pins) FL_NO_EXCEPT;
 
     /// Write pre-transposed 16-bit data to the 16 pins.
     ///
     /// Each u16 in @p pin_data is a bitmask where bit N → pin N.
     /// 1 = HIGH, 0 = LOW. Pins set to -1 during init() are skipped.
-    void write(fl::span<const u16> pin_data) const;
+    void write(fl::span<const u16> pin_data) const FL_NO_EXCEPT;
 
     /// Check whether all active pins (non -1) share the same GPIO port.
     /// Returns true if fewer than 2 active pins exist (trivially same port).
-    bool allSamePort() const;
+    bool allSamePort() const FL_NO_EXCEPT;
 
   private:
     // Each LUT entry stores up to 4 pin indices to set or clear.
@@ -115,9 +115,9 @@ class DigitalMultiWrite16 {
     };
 
     void buildNibbleLut(u8 bit_offset, PinList (&set_lut)[16],
-                        PinList (&clr_lut)[16]);
+                        PinList (&clr_lut)[16]) FL_NO_EXCEPT;
 
-    static void applyNibble(const PinList &set, const PinList &clr);
+    static void applyNibble(const PinList &set, const PinList &clr) FL_NO_EXCEPT;
 
     int mPins[16] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
     PinList mSetNib[4][16] = {};  // nibbles 0-3 (bits 0-3, 4-7, 8-11, 12-15)
@@ -127,7 +127,7 @@ class DigitalMultiWrite16 {
 /// Convenience free function — creates a temporary DigitalMultiWrite16,
 /// initializes it, and writes. For repeated writes, prefer the class
 /// directly to amortize the LUT build cost.
-void digitalMultiWrite16(const Pins16& pins, fl::span<const u16> pin_data);
+void digitalMultiWrite16(const Pins16& pins, fl::span<const u16> pin_data) FL_NO_EXCEPT;
 
 /// Pin number with its resolved port ID.
 struct PinInfo {
@@ -139,10 +139,10 @@ struct PinInfo {
 /// Pins that share the same GPIO port register return the same ID.
 /// @param pin Pin number (0-63)
 /// @return Integer port ID (0-based), or -1 for out-of-range pins
-int pinToPort(int pin);
+int pinToPort(int pin) FL_NO_EXCEPT;
 
 /// Resolve port IDs for an array of PinInfo in-place.
 /// For each entry, sets port = pinToPort(pin). Skips entries where pin < 0.
-void pinMap(fl::span<PinInfo> pins);
+void pinMap(fl::span<PinInfo> pins) FL_NO_EXCEPT;
 
 } // namespace fl

@@ -62,6 +62,29 @@ FL_TEST_FILE(FL_FILEPATH) {
 #define DATA_PIN 2
 #define CLOCK_PIN 3
 
+FL_TEST_CASE("Color adjustment preserves exact correction and temperature rounding") {
+    const fl::u8 scales[] = {0, 1, 127, 254, 255};
+    for (unsigned correction = 0; correction < 256; ++correction) {
+        for (unsigned temperature = 0; temperature < 256; ++temperature) {
+            for (fl::u8 scale : scales) {
+                const CRGB actual = CRGB::computeAdjustment(scale,
+                    CRGB(correction, 0, 255), CRGB(temperature, 255, 0));
+#if defined(NO_CORRECTION) && (NO_CORRECTION == 1)
+                FL_CHECK_EQ(actual, CRGB(scale, scale, scale));
+#else
+                const fl::u64 numerator = (fl::u64(correction) + 1) *
+                    (fl::u64(temperature) + 1) * scale;
+                const unsigned expected = correction && temperature
+                    ? unsigned(numerator / 65536) : 0;
+                FL_CHECK_EQ(unsigned(actual.r), expected);
+                FL_CHECK_EQ(actual.g, 0);
+                FL_CHECK_EQ(actual.b, 0);
+#endif
+            }
+        }
+    }
+}
+
 FL_TEST_CASE("Simple") {
     static CRGB leds[NUM_LEDS];  // Use static to avoid global constructor warning
     FastLED.addLeds<APA102, DATA_PIN, CLOCK_PIN, BGR>(leds, NUM_LEDS);
@@ -739,8 +762,22 @@ FL_TEST_CASE("FastLED.clear() with REFRESH_RATE flag resets refresh rate") {
     // Reset only refresh rate
     FastLED.clear(ClearFlags::REFRESH_RATE);
 
-    // Refresh rate should be unlimited (0 microseconds minimum)
-    // Can't directly test mNMinMicros, but reset should work without error
+    // Refresh rate should be unlimited; mMaxRefreshHz is private, so this
+    // only checks that the reset runs.
+}
+
+FL_TEST_CASE("setMaxRefreshRate constrain keeps the lower cap") {
+    // 100 Hz cap, then a constrained request for 1000 Hz must not raise it.
+    FastLED.setMaxRefreshRate(100, false);
+    FastLED.setMaxRefreshRate(1000, true);
+    // show() records lastshow during the first call, so timing from before
+    // it bounds the throttled second call from below.
+    const fl::u32 start = fl::micros();
+    FastLED.show();
+    FastLED.show();  // throttled to >= 10 ms after the previous show
+    const fl::u32 elapsed = fl::micros() - start;
+    FastLED.setMaxRefreshRate(0, false);
+    FL_CHECK_GE(elapsed, 9000u);
 }
 
 FL_TEST_CASE("FastLED.clear() with FPS_COUNTER flag resets FPS tracking") {

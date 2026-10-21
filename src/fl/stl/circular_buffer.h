@@ -116,10 +116,10 @@ class circular_buffer_core {
     T& back() { return mData[decrement(mHead)]; }
     const T& back() const { return mData[decrement(mHead)]; }
 
-    T& operator[](fl::size index) {
+    T& operator[](fl::size index) FL_NO_EXCEPT {
         return mData[(mTail + index) % mCapacity];
     }
-    const T& operator[](fl::size index) const {
+    const T& operator[](fl::size index) const FL_NO_EXCEPT {
         return mData[(mTail + index) % mCapacity];
     }
 
@@ -250,8 +250,8 @@ class circular_buffer {
     T& back() { return mCore.back(); }
     const T& back() const { return mCore.back(); }
 
-    T& operator[](fl::size index) { return mCore[index]; }
-    const T& operator[](fl::size index) const { return mCore[index]; }
+    T& operator[](fl::size index) FL_NO_EXCEPT { return mCore[index]; }
+    const T& operator[](fl::size index) const FL_NO_EXCEPT { return mCore[index]; }
 
     fl::size size() const { return mCore.size(); }
     fl::size capacity() const { return mCore.capacity(); }

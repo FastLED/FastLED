@@ -22,7 +22,7 @@ struct VorbisInfo {
 
     VorbisInfo() FL_NO_EXCEPT = default;
     VorbisInfo(fl::u32 rate, fl::u8 ch)
-        : sampleRate(rate), channels(ch), isValid(true) {}
+        FL_NO_EXCEPT : sampleRate(rate), channels(ch), isValid(true) {}
 };
 
 // Forward declaration of internal implementation
@@ -43,32 +43,32 @@ public:
     ~StbVorbisDecoder() FL_NO_EXCEPT;
 
     // Open from memory buffer (entire file must be in memory)
-    bool openMemory(fl::span<const fl::u8> data);
+    bool openMemory(fl::span<const fl::u8> data) FL_NO_EXCEPT;
 
     // Close and release resources
-    void close();
+    void close() FL_NO_EXCEPT;
 
     // Check if decoder is open
-    bool isOpen() const;
+    bool isOpen() const FL_NO_EXCEPT;
 
     // Get stream info
-    VorbisInfo getInfo() const;
+    VorbisInfo getInfo() const FL_NO_EXCEPT;
 
     // Decode samples into buffer
     // Returns number of samples decoded per channel (0 = end of stream)
-    fl::i32 getSamplesShortInterleaved(fl::i32 channels, fl::i16* buffer, fl::i32 numShorts);
+    fl::i32 getSamplesShortInterleaved(fl::i32 channels, fl::i16* buffer, fl::i32 numShorts) FL_NO_EXCEPT;
 
     // Decode float samples
-    fl::i32 getSamplesFloat(fl::i32 channels, float** buffer, fl::i32 numSamples);
+    fl::i32 getSamplesFloat(fl::i32 channels, float** buffer, fl::i32 numSamples) FL_NO_EXCEPT;
 
     // Seek to sample position
-    bool seek(fl::u32 sampleNumber);
+    bool seek(fl::u32 sampleNumber) FL_NO_EXCEPT;
 
     // Get current sample offset
-    fl::u32 getSampleOffset() const;
+    fl::u32 getSampleOffset() const FL_NO_EXCEPT;
 
     // Get total samples in stream
-    fl::u32 getTotalSamples() const;
+    fl::u32 getTotalSamples() const FL_NO_EXCEPT;
 
 private:
     void* mVorbis;  // stb_vorbis* handle
@@ -84,29 +84,29 @@ public:
     // Initialize the decoder with a byte stream
     // Note: stb_vorbis requires the entire stream in memory for pulldata API
     // Returns true on success, false on failure
-    bool begin(fl::filebuf_ptr stream);
+    bool begin(fl::filebuf_ptr stream) FL_NO_EXCEPT;
 
     // Clean up decoder resources
-    void end();
+    void end() FL_NO_EXCEPT;
 
     // Check if decoder is ready to use
-    bool isReady() const;
+    bool isReady() const FL_NO_EXCEPT;
 
     // Check for errors
-    bool hasError(fl::string* msg = nullptr) const;
+    bool hasError(fl::string* msg = nullptr) const FL_NO_EXCEPT;
 
     // Decode the next audio frame from the stream
     // Returns true if a frame was decoded, false if end of stream or error
-    bool decodeNextFrame(audio::Sample* outSample);
+    bool decodeNextFrame(audio::Sample* outSample) FL_NO_EXCEPT;
 
     // Get current stream position in bytes
-    fl::size getPosition() const;
+    fl::size getPosition() const FL_NO_EXCEPT;
 
     // Reset decoder state (but keep stream)
-    void reset();
+    void reset() FL_NO_EXCEPT;
 
     // Get Vorbis stream information
-    VorbisInfo getInfo() const;
+    VorbisInfo getInfo() const FL_NO_EXCEPT;
 
 private:
     fl::unique_ptr<VorbisDecoderImpl> mImpl;
@@ -140,18 +140,18 @@ FASTLED_SHARED_PTR(VorbisDecoder);
 class Vorbis {
 public:
     // Create a Vorbis decoder for streaming playback
-    static VorbisDecoderPtr createDecoder(fl::string* errorMessage = nullptr);
+    static VorbisDecoderPtr createDecoder(fl::string* errorMessage = nullptr) FL_NO_EXCEPT;
 
     // Check if Vorbis decoding is supported on this platform
-    static bool isSupported();
+    static bool isSupported() FL_NO_EXCEPT;
 
     // Parse Vorbis metadata from byte data without full decoding
     static VorbisInfo parseVorbisInfo(fl::span<const fl::u8> data,
-                                       fl::string* errorMessage = nullptr);
+                                       fl::string* errorMessage = nullptr) FL_NO_EXCEPT;
 
     // Decode entire file to audio::Sample vector (convenience function)
     static fl::vector<audio::Sample> decodeAll(fl::span<const fl::u8> data,
-                                              fl::string* errorMessage = nullptr);
+                                              fl::string* errorMessage = nullptr) FL_NO_EXCEPT;
 };
 
 } // namespace fl

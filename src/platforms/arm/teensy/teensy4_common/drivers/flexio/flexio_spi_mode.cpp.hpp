@@ -195,19 +195,14 @@ bool flexio_spi_init(const FlexIOSPIPinInfo& pin_info,
 
     // Clock-rate clamp.
     if (clock_hz < kSpiClockMinHz) {
-        FL_LOG_FLEXIO("FlexIO_SPI: clock %u Hz below floor; clamping to %u Hz",
-                        (unsigned)clock_hz, (unsigned)kSpiClockMinHz);
+        FL_LOG_FLEXIO("FlexIO_SPI: clock " << ((unsigned)clock_hz) << " Hz below floor; clamping to " << ((unsigned)kSpiClockMinHz) << " Hz");
         clock_hz = kSpiClockMinHz;
     } else if (clock_hz > kSpiClockMaxHz) {
-        FL_LOG_FLEXIO("FlexIO_SPI: clock %u Hz above ceiling; clamping to %u Hz",
-                        (unsigned)clock_hz, (unsigned)kSpiClockMaxHz);
+        FL_LOG_FLEXIO("FlexIO_SPI: clock " << ((unsigned)clock_hz) << " Hz above ceiling; clamping to " << ((unsigned)kSpiClockMaxHz) << " Hz");
         clock_hz = kSpiClockMaxHz;
     }
 
-    FL_LOG_FLEXIO("FlexIO_SPI: init MOSI=%d(flex %d) SCLK=%d(flex %d) @ %u Hz",
-                    (int)pin_info.mosi_pin, (int)pin_info.mosi_flexio_pin,
-                    (int)pin_info.sclk_pin, (int)pin_info.sclk_flexio_pin,
-                    (unsigned)clock_hz);
+    FL_LOG_FLEXIO("FlexIO_SPI: init MOSI=" << ((int)pin_info.mosi_pin) << "(flex " << ((int)pin_info.mosi_flexio_pin) << ") SCLK=" << ((int)pin_info.sclk_pin) << "(flex " << ((int)pin_info.sclk_flexio_pin) << ") @ " << ((unsigned)clock_hz) << " Hz");
 
     // Bring the CCM gate up if the clockless mode hasn't already done so.
     // flexio_ensure_clock() is idempotent and matches the exact pred/podf
@@ -270,8 +265,7 @@ bool flexio_spi_init(const FlexIOSPIPinInfo& pin_info,
         // instead of failing.
         // TODO(#3428): expose a CCM tweak path if a real <234 kHz target
         // shows up.
-        FL_LOG_FLEXIO("FlexIO_SPI: baud div overflow (%u); clamping to 255 -> effective ~234 kHz",
-                        (unsigned)baud_div_field);
+        FL_LOG_FLEXIO("FlexIO_SPI: baud div overflow (" << ((unsigned)baud_div_field) << "); clamping to 255 -> effective ~234 kHz");
         baud_div_field = 0xFFu;
     }
 
@@ -489,8 +483,7 @@ void flexio_spi_wait() FL_NO_EXCEPT {
             }
             SPI_FLEXIO2_SHIFTSDEN = 0;
             sSpiDmaComplete = true;
-            FL_LOG_FLEXIO("FlexIO_SPI: wait timed out after %u ms -- recovering",
-                            (unsigned)timeout_ms);
+            FL_LOG_FLEXIO("FlexIO_SPI: wait timed out after " << ((unsigned)timeout_ms) << " ms -- recovering");
             return;
         }
     }
@@ -504,8 +497,7 @@ void flexio_spi_wait() FL_NO_EXCEPT {
     const u32 drain_timeout_ms = 5;
     while (!(SPI_FLEXIO2_TIMSTAT & 0x1u)) {
         if ((u32)(millis() - drain_start) >= drain_timeout_ms) {
-            FL_LOG_FLEXIO("FlexIO_SPI: shifter drain timeout after %u ms",
-                            (unsigned)drain_timeout_ms);
+            FL_LOG_FLEXIO("FlexIO_SPI: shifter drain timeout after " << ((unsigned)drain_timeout_ms) << " ms");
             break;
         }
     }

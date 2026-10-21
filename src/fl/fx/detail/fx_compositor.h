@@ -9,6 +9,7 @@
 #include "fl/stl/vector.h"  // IWYU pragma: keep
 #include "fl/fx/detail/fx_layer.h"
 #include "fl/fx/fx.h"  // IWYU pragma: keep
+#include "fl/stl/noexcept.h"
 
 #ifndef FASTLED_FX_ENGINE_MAX_FX
 #define FASTLED_FX_ENGINE_MAX_FX 64
@@ -19,12 +20,12 @@ namespace fl {
 // Takes two fx layers and composites them together to a final output buffer.
 class FxCompositor {
   public:
-    FxCompositor(fl::u32 numLeds) : mNumLeds(numLeds) {
+    FxCompositor(fl::u32 numLeds) FL_NO_EXCEPT : mNumLeds(numLeds) {
         mLayers[0] = fl::make_shared<FxLayer>();
         mLayers[1] = fl::make_shared<FxLayer>();
     }
 
-    void startTransition(fl::u32 now, fl::u32 duration, fl::shared_ptr<Fx> nextFx) {
+    void startTransition(fl::u32 now, fl::u32 duration, fl::shared_ptr<Fx> nextFx) FL_NO_EXCEPT {
         completeTransition();
         if (duration == 0) {
             mLayers[0]->setFx(nextFx);
@@ -34,7 +35,7 @@ class FxCompositor {
         mTransition.start(now, duration);
     }
 
-    void completeTransition() {
+    void completeTransition() FL_NO_EXCEPT {
         if (mLayers[1]->getFx()) {
             swapLayers();
             mLayers[1]->release();
@@ -43,10 +44,10 @@ class FxCompositor {
     }
 
     void draw(fl::u32 now, fl::u32 warpedTime, fl::span<CRGB> finalBuffer,
-              float speed = 1.0f, const AudioBatch *audio = nullptr);
+              float speed = 1.0f, const AudioBatch *audio = nullptr) FL_NO_EXCEPT;
 
   private:
-    void swapLayers() {
+    void swapLayers() FL_NO_EXCEPT {
         FxLayerPtr tmp = mLayers[0];
         mLayers[0] = mLayers[1];
         mLayers[1] = tmp;
@@ -59,7 +60,7 @@ class FxCompositor {
 
 inline void FxCompositor::draw(fl::u32 now, fl::u32 warpedTime,
                                fl::span<CRGB> finalBuffer,
-                               float speed, const AudioBatch *audio) {
+                               float speed, const AudioBatch *audio) FL_NO_EXCEPT {
     if (!mLayers[0]->getFx()) {
         return;
     }

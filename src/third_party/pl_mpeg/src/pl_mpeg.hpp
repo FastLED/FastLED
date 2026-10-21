@@ -2953,7 +2953,7 @@ void plm_video_idct(int *block) FL_NO_EXCEPT {
 	dest[d_index + DEST_OFFSET + BI] = plm_clamp(y + b);
 
 #define PLM_DEFINE_FRAME_CONVERT_FUNCTION(NAME, BYTES_PER_PIXEL, RI, GI, BI) \
-	void NAME(plm_frame_t *frame, uint8_t *dest, int stride) { \
+	void NAME(plm_frame_t *frame, uint8_t *dest, int stride) FL_NO_EXCEPT { \
 		int cols = frame->width >> 1; \
 		int rows = frame->height >> 1; \
 		int yw = frame->y.width; \

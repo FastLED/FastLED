@@ -56,6 +56,9 @@
         "examples/**/*.cpp",
         "examples/**/*.h",
         "examples/**/*.hpp",
+        "tests/**/*.cpp",
+        "tests/**/*.h",
+        "tests/**/*.hpp",
         "ci/lint_cpp/*.py",
         "ci/lint_cpp_rs/file_legal_policy.yaml",
         "ci/lint_cpp_rs/legacy_macro_amnesty.txt"
@@ -63,10 +66,10 @@
       "tools": [
         "clang-format",
         "ci/lint_cpp_rs/ (Rust fastled-lint crate — primary checker fleet; all single-file and cross-file structural checks)",
-        "ci/lint_cpp/run_all_checkers.py (Python orchestrator: invokes Rust, then runs AST ratchets)",
+        "ci/lint_cpp/run_all_checkers.py (Python orchestrator: invokes Rust, then runs AST checks)",
         "ci/lint_cpp/rust_binary_cache.py (build-on-change cache for fastled-lint)",
         "ci/lint_cpp/rust_bridge.py (Rust to Python result bridge)",
-        "ci/lint_cpp/noexcept_checker.py (AST ratchet — clang-query)"
+        "ci/tools/check_noexcept.py (strict AST enforcement — clang-query)"
       ],
       "script": "ci/cpp_lint_cache.py",
       "lint_command": "bash lint --cpp (default-on Rust path; --no-rust falls back to Python-only)"

@@ -38,11 +38,13 @@ const UNITY_EXPECTED_BUILD_FILES: &[&str] = &[
     "fl/build/fl.log+.cpp",
     "fl/build/fl.math+.cpp",
     "fl/build/fl.net+.cpp",
+    "fl/build/fl.net.ota+.cpp",
     "fl/build/fl.control+.cpp",
     "fl/build/fl.remote+.cpp",
     "fl/build/fl.sensors+.cpp",
     "fl/build/fl.stl+.cpp",
     "fl/build/fl.system+.cpp",
+    "fl/build/fl.system.analog+.cpp",
     "fl/build/fl.fs+.cpp",
     "fl/build/fl.fs.sd+.cpp",
     "fl/build/fl.fs.embedded+.cpp",
@@ -52,9 +54,25 @@ const UNITY_EXPECTED_BUILD_FILES: &[&str] = &[
     "fl/build/fl.video+.cpp",
     "fl/build/fl.wdt+.cpp",
     "fl/build/platforms+.cpp",
+    "fl/build/platforms.esp.32.net+.cpp",
+    "fl/build/platforms.esp.32.ota+.cpp",
     "fl/build/third_party+.cpp",
     "fl/build/extras+.cpp",
 ];
+
+// Empty files kept under the name of a renamed/removed build unit so that a
+// release unpacked over an older one overwrites the stale unit (FastLED
+// #4704). They compile to nothing and are exempt from the build-file checks.
+// `ci/check_released_sources.py` requires them at release time.
+const UNITY_TOMBSTONE_BUILD_FILES: &[&str] = &["fl.system.sd+.cpp"];
+
+fn unity_is_build_unit(path: &Path) -> bool {
+    path.extension().and_then(|ext| ext.to_str()) == Some("cpp")
+        && !path
+            .file_name()
+            .and_then(|name| name.to_str())
+            .is_some_and(|name| UNITY_TOMBSTONE_BUILD_FILES.contains(&name))
+}
 
 const UNITY_DANGEROUS_WILDCARDS: &[&str] = &[
     "+<*.cpp>",

@@ -85,7 +85,7 @@ public:
 
 /// @brief Custom deleter for heap_caps_malloc'd memory (internal RAM)
 struct HeapCapsDeleter {
-    void operator()(void* ptr) const {
+    void operator()(void* ptr) const FL_NO_EXCEPT {
         if (ptr) heap_caps_free(ptr);
     }
 };
@@ -171,7 +171,7 @@ TaskCoroutinePtr TaskCoroutineESP32::create(
         affinity = static_cast<BaseType_t>(core_id);
     }
 
-    TaskCoroutinePtr task(new TaskCoroutineESP32()) FL_NO_EXCEPT;  // ok bare allocation
+    TaskCoroutinePtr task(new TaskCoroutineESP32());  // ok bare allocation
     auto* impl = static_cast<TaskCoroutineESP32*>(task.get());
     impl->mName = fl::move(name);
     impl->mFunction = fl::move(function);
@@ -185,7 +185,7 @@ TaskCoroutinePtr TaskCoroutineESP32::create(
         heap_caps_malloc(sizeof(StaticTask_t),
                          MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT)));
     if (!impl->mStackBuf || !impl->mTaskTcb) {
-        FL_WARN("TaskCoroutineESP32: Failed to allocate stack/TCB for '%s'", impl->mName);
+        FL_WARN("TaskCoroutineESP32: Failed to allocate stack/TCB for '" << impl->mName << "'");
         task.reset();
         return nullptr;
     }
@@ -217,7 +217,7 @@ TaskCoroutinePtr TaskCoroutineESP32::create(
 #endif
 
     if (!impl->mTask) {
-        FL_WARN("TaskCoroutineESP32: Failed to create FreeRTOS task for '%s'", impl->mName);
+        FL_WARN("TaskCoroutineESP32: Failed to create FreeRTOS task for '" << impl->mName << "'");
         task.reset();
         return nullptr;
     }

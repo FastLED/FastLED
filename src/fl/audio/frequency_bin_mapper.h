@@ -71,32 +71,32 @@ struct FrequencyBinMapperConfig {
 class FrequencyBinMapper {
 public:
     FrequencyBinMapper() FL_NO_EXCEPT;
-    explicit FrequencyBinMapper(const FrequencyBinMapperConfig& config);
+    explicit FrequencyBinMapper(const FrequencyBinMapperConfig& config) FL_NO_EXCEPT;
     ~FrequencyBinMapper() FL_NO_EXCEPT;
 
     /// Configure the frequency bin mapper
     /// This calculates bin boundaries and FFT-to-frequency bin mappings
-    void configure(const FrequencyBinMapperConfig& config);
+    void configure(const FrequencyBinMapperConfig& config) FL_NO_EXCEPT;
 
     /// Map FFT bins to frequency channels
     /// @param fftBins Input FFT bins (magnitude spectrum)
     /// @param outputBins Output frequency bins (16 or 32 bins depending on mode)
-    void mapBins(span<const float> fftBins, span<float> outputBins) const;
+    void mapBins(span<const float> fftBins, span<float> outputBins) const FL_NO_EXCEPT;
 
     /// Get bass energy (average of bins 0-1 in 16-bin mode)
     /// @param frequencyBins Frequency bins from mapBins()
     /// @return Average bass energy (0.0-1.0 normalized)
-    float getBassEnergy(span<const float> frequencyBins) const;
+    float getBassEnergy(span<const float> frequencyBins) const FL_NO_EXCEPT;
 
     /// Get mid energy (average of bins 6-7 in 16-bin mode)
     /// @param frequencyBins Frequency bins from mapBins()
     /// @return Average mid energy (0.0-1.0 normalized)
-    float getMidEnergy(span<const float> frequencyBins) const;
+    float getMidEnergy(span<const float> frequencyBins) const FL_NO_EXCEPT;
 
     /// Get treble energy (average of bins 14-15 in 16-bin mode)
     /// @param frequencyBins Frequency bins from mapBins()
     /// @return Average treble energy (0.0-1.0 normalized)
-    float getTrebleEnergy(span<const float> frequencyBins) const;
+    float getTrebleEnergy(span<const float> frequencyBins) const FL_NO_EXCEPT;
 
     /// Get frequency boundaries for a specific output bin
     /// @param binIndex Output bin index (0 to numBins-1)
@@ -105,13 +105,13 @@ public:
         float minFreq;
         float maxFreq;
     };
-    FrequencyRange getBinFrequencyRange(size binIndex) const;
+    FrequencyRange getBinFrequencyRange(size binIndex) const FL_NO_EXCEPT;
 
     /// Get current configuration
-    const FrequencyBinMapperConfig& getConfig() const { return mConfig; }
+    const FrequencyBinMapperConfig& getConfig() const FL_NO_EXCEPT { return mConfig; }
 
     /// Get number of output bins (16 or 32)
-    size getNumBins() const { return static_cast<size>(mConfig.mode); }
+    size getNumBins() const FL_NO_EXCEPT { return static_cast<size>(mConfig.mode); }
 
     /// Get statistics (for debugging/monitoring)
     struct Stats {
@@ -120,26 +120,26 @@ public:
         float maxMagnitude = 0.0f;  // Maximum magnitude in last mapping
     };
 
-    const Stats& getStats() const { return mStats; }
+    const Stats& getStats() const FL_NO_EXCEPT { return mStats; }
 
 private:
     /// Calculate frequency bin boundaries (linear or logarithmic spacing)
-    void calculateBinBoundaries();
+    void calculateBinBoundaries() FL_NO_EXCEPT;
 
     /// Calculate FFT bin to frequency bin mappings
     /// Pre-calculates which FFT bins contribute to each frequency bin
-    void calculateBinMappings();
+    void calculateBinMappings() FL_NO_EXCEPT;
 
     /// Convert frequency (Hz) to FFT bin index
     /// @param frequency Frequency in Hz
     /// @return FFT bin index (may be fractional)
-    float frequencyToFFTBin(float frequency) const;
+    float frequencyToFFTBin(float frequency) const FL_NO_EXCEPT;
 
     /// Calculate logarithmically-spaced frequency boundaries
-    void calculateLogFrequencies();
+    void calculateLogFrequencies() FL_NO_EXCEPT;
 
     /// Calculate linearly-spaced frequency boundaries
-    void calculateLinearFrequencies();
+    void calculateLinearFrequencies() FL_NO_EXCEPT;
 
     FrequencyBinMapperConfig mConfig;
     Stats mStats;

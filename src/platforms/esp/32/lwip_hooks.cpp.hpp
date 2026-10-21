@@ -27,6 +27,7 @@
 
 #include "fl/stl/compiler_control.h"
 #include "platforms/esp/32/feature_flags/enabled.h"
+#include "fl/stl/noexcept.h"
 
 #if FL_HAS_NETWORK
 
@@ -52,7 +53,7 @@ extern "C" {
 ///
 /// FL_LINK_WEAK allows user code or a real network stack component to
 /// override this default pass-through implementation.
-FL_LINK_WEAK int lwip_hook_ip6_input(void *p, void *inp) {
+FL_LINK_WEAK int lwip_hook_ip6_input(void *p, void *inp) FL_NO_EXCEPT {
     (void)p;
     (void)inp;
     return 0;

@@ -44,16 +44,16 @@ public:
     ~HttpRequestParser() FL_NO_EXCEPT;
 
     // Feed raw bytes received from a socket into the parser (incremental/streaming)
-    void feed(fl::span<const u8> data);
+    void feed(fl::span<const u8> data) FL_NO_EXCEPT;
 
     // Check if request is complete
-    bool isComplete() const;
+    bool isComplete() const FL_NO_EXCEPT;
 
     // Get parsed request as shared_ptr (zero-copy handoff, returns null if not complete)
-    HttpRequestPtrConst getRequest();
+    HttpRequestPtrConst getRequest() FL_NO_EXCEPT;
 
     // Reset state
-    void reset();
+    void reset() FL_NO_EXCEPT;
 
     // State enum (public for debug access)
     enum State {
@@ -64,10 +64,10 @@ public:
     };
 
     // Debug getters (public for testing)
-    State getState() const { return mState; }
-    size_t getBufferSize() const { return mBuffer.size(); }
-    size_t getContentLength() const { return mContentLength; }
-    bool getIsChunked() const { return mIsChunked; }
+    State getState() const FL_NO_EXCEPT { return mState; }
+    size_t getBufferSize() const FL_NO_EXCEPT { return mBuffer.size(); }
+    size_t getContentLength() const FL_NO_EXCEPT { return mContentLength; }
+    bool getIsChunked() const FL_NO_EXCEPT { return mIsChunked; }
 
 private:
 
@@ -78,26 +78,26 @@ private:
     size_t mContentLength;
     bool mIsChunked;
 
-    HttpRequest& req() { return *mRequest; }
-    const HttpRequest& req() const { return *mRequest; }
+    HttpRequest& req() FL_NO_EXCEPT { return *mRequest; }
+    const HttpRequest& req() const FL_NO_EXCEPT { return *mRequest; }
 
     // Parse request line: "POST /rpc HTTP/1.1\r\n"
-    bool parseRequestLine();
+    bool parseRequestLine() FL_NO_EXCEPT;
 
     // Parse headers: "Header: Value\r\n" ... "\r\n"
-    bool parseHeaders();
+    bool parseHeaders() FL_NO_EXCEPT;
 
     // Parse body (chunked or Content-Length)
-    void parseBody();
+    void parseBody() FL_NO_EXCEPT;
 
     // Find CRLF in buffer
-    fl::optional<size_t> findCRLF() const;
+    fl::optional<size_t> findCRLF() const FL_NO_EXCEPT;
 
     // Consume n bytes from buffer
-    void consume(size_t n);
+    void consume(size_t n) FL_NO_EXCEPT;
 
     // Get header value (case-insensitive)
-    fl::optional<fl::string> getHeader(const char* name) const;
+    fl::optional<fl::string> getHeader(const char* name) const FL_NO_EXCEPT;
 };
 
 // HttpResponseParser: Parse HTTP/1.1 responses
@@ -107,16 +107,16 @@ public:
     ~HttpResponseParser() FL_NO_EXCEPT;
 
     // Feed raw bytes received from a socket into the parser (incremental/streaming)
-    void feed(fl::span<const u8> data);
+    void feed(fl::span<const u8> data) FL_NO_EXCEPT;
 
     // Check if response is complete
-    bool isComplete() const;
+    bool isComplete() const FL_NO_EXCEPT;
 
     // Get parsed response as shared_ptr (zero-copy handoff, returns null if not complete)
-    HttpResponsePtrConst getResponse();
+    HttpResponsePtrConst getResponse() FL_NO_EXCEPT;
 
     // Reset state
-    void reset();
+    void reset() FL_NO_EXCEPT;
 
     // State enum (public for debug access)
     enum State {
@@ -127,10 +127,10 @@ public:
     };
 
     // Debug getters (public for testing)
-    State getState() const { return mState; }
-    size_t getBufferSize() const { return mBuffer.size(); }
-    size_t getContentLength() const { return mContentLength; }
-    bool getIsChunked() const { return mIsChunked; }
+    State getState() const FL_NO_EXCEPT { return mState; }
+    size_t getBufferSize() const FL_NO_EXCEPT { return mBuffer.size(); }
+    size_t getContentLength() const FL_NO_EXCEPT { return mContentLength; }
+    bool getIsChunked() const FL_NO_EXCEPT { return mIsChunked; }
 
 private:
 
@@ -141,26 +141,26 @@ private:
     size_t mContentLength;
     bool mIsChunked;
 
-    HttpResponse& resp() { return *mResponse; }
-    const HttpResponse& resp() const { return *mResponse; }
+    HttpResponse& resp() FL_NO_EXCEPT { return *mResponse; }
+    const HttpResponse& resp() const FL_NO_EXCEPT { return *mResponse; }
 
     // Parse status line: "HTTP/1.1 200 OK\r\n"
-    bool parseStatusLine();
+    bool parseStatusLine() FL_NO_EXCEPT;
 
     // Parse headers: "Header: Value\r\n" ... "\r\n"
-    bool parseHeaders();
+    bool parseHeaders() FL_NO_EXCEPT;
 
     // Parse body (chunked or Content-Length)
-    void parseBody();
+    void parseBody() FL_NO_EXCEPT;
 
     // Find CRLF in buffer
-    fl::optional<size_t> findCRLF() const;
+    fl::optional<size_t> findCRLF() const FL_NO_EXCEPT;
 
     // Consume n bytes from buffer
-    void consume(size_t n);
+    void consume(size_t n) FL_NO_EXCEPT;
 
     // Get header value (case-insensitive)
-    fl::optional<fl::string> getHeader(const char* name) const;
+    fl::optional<fl::string> getHeader(const char* name) const FL_NO_EXCEPT;
 };
 
 } // namespace fl

@@ -28,7 +28,12 @@
 
 namespace fl {
 
-class CLEDController;  // fl/channels/cled_controller.h; only a reference is named here
+class CLEDController;
+class Channel;
+
+#if FL_COLOR_PIPELINE_SHARED
+shared_ptr<StreamingPipelineQ16> channelColorPipeline(const CLEDController& controller) FL_NO_EXCEPT;
+#endif
 
 /// Build the streaming pipeline a binding describes.
 ///
@@ -138,7 +143,7 @@ struct ColorPipelineHooks {
     /// as before. Through the hook so none of it links into a sketch that
     /// binds no profile.
     bool (*encodeManagedSpi)(PixelIterator& pixels, vector_psram<u8>* out,
-                             SpiChipset chip, const CLEDController& controller);
+                             SpiChipset chip, const Channel& controller);
 };
 
 #if FL_COLOR_PIPELINE_SHARED

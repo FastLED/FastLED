@@ -15,9 +15,9 @@ template <typename T> class Grid {
   public:
     Grid() FL_NO_EXCEPT = default;
 
-    Grid(u32 width, u32 height) { reset(width, height); }
+    Grid(u32 width, u32 height) FL_NO_EXCEPT { reset(width, height); }
 
-    void reset(u32 width, u32 height) {
+    void reset(u32 width, u32 height) FL_NO_EXCEPT {
         clear();
         if (width != mWidth || height != mHeight) {
             mWidth = width;
@@ -29,13 +29,13 @@ template <typename T> class Grid {
                                     width, height);
     }
 
-    void clear() {
+    void clear() FL_NO_EXCEPT {
         for (u32 i = 0; i < mWidth * mHeight; ++i) {
             mData[i] = T();
         }
     }
 
-    vec2<T> minMax() const {
+    vec2<T> minMax() const FL_NO_EXCEPT {
         T minValue = mData[0];
         T maxValue = mData[0];
         for (u32 i = 1; i < mWidth * mHeight; ++i) {
@@ -52,33 +52,33 @@ template <typename T> class Grid {
         return out;
     }
 
-    T &at(u32 x, u32 y) { return access(x, y); }
-    const T &at(u32 x, u32 y) const { return access(x, y); }
+    T &at(u32 x, u32 y) FL_NO_EXCEPT { return access(x, y); }
+    const T &at(u32 x, u32 y) const FL_NO_EXCEPT { return access(x, y); }
 
-    T &operator()(u32 x, u32 y) { return at(x, y); }
-    const T &operator()(u32 x, u32 y) const { return at(x, y); }
+    T &operator()(u32 x, u32 y) FL_NO_EXCEPT { return at(x, y); }
+    const T &operator()(u32 x, u32 y) const FL_NO_EXCEPT { return at(x, y); }
 
-    u32 width() const { return mWidth; }
-    u32 height() const { return mHeight; }
+    u32 width() const FL_NO_EXCEPT { return mWidth; }
+    u32 height() const FL_NO_EXCEPT { return mHeight; }
 
-    fl::span<T> span() { return fl::span<T>(mData); }
-    fl::span<const T> span() const { return fl::span<const T>(mData); }
+    fl::span<T> span() FL_NO_EXCEPT { return fl::span<T>(mData); }
+    fl::span<const T> span() const FL_NO_EXCEPT { return fl::span<const T>(mData); }
 
-    fl::size size() const { return mData.size(); }
+    fl::size size() const FL_NO_EXCEPT { return mData.size(); }
 
   private:
-    static T &NullValue() {
+    static T &NullValue() FL_NO_EXCEPT {
         static T gNull;
         return gNull;
     }
-    T &access(u32 x, u32 y) {
+    T &access(u32 x, u32 y) FL_NO_EXCEPT {
         if (x < mWidth && y < mHeight) {
             return mSlice.at(x, y);
         } else {
             return NullValue(); // safe.
         }
     }
-    const T &access(u32 x, u32 y) const {
+    const T &access(u32 x, u32 y) const FL_NO_EXCEPT {
         if (x < mWidth && y < mHeight) {
             return mSlice.at(x, y);
         } else {

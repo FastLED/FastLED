@@ -8,6 +8,7 @@
 
 #include "fl/math/noise/perlin_s16x16.h"
 #include "fl/math/simd.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -22,7 +23,7 @@ struct perlin_s16x16_simd {
     // Takes SIMD registers directly — the caller loads/stores as needed.
     static fl::simd::simd_u32x4 pnoise2d_raw_simd4_vec(
         fl::simd::simd_u32x4 nx_vec, fl::simd::simd_u32x4 ny_vec,
-        const fl::i32 *fade_lut, const fl::u8 *perm);
+        const fl::i32 *fade_lut, const fl::u8 *perm) FL_NO_EXCEPT;
 };
 
 }  // namespace fl

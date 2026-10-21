@@ -2,10 +2,11 @@
 
 #include "fl/stl/asio/http/connection.h"
 #include "fl/stl/algorithm.h"
+#include "fl/stl/noexcept.h"
 namespace fl {
 
 HttpConnection::HttpConnection(const ConnectionConfig& config)
-    : mConfig(config)
+    FL_NO_EXCEPT : mConfig(config)
     , mState(ConnectionState::DISCONNECTED)
     , mReconnectAttempts(0)
     , mReconnectDelayMs(0)
@@ -16,23 +17,23 @@ HttpConnection::HttpConnection(const ConnectionConfig& config)
 {
 }
 
-ConnectionState HttpConnection::getState() const {
+ConnectionState HttpConnection::getState() const FL_NO_EXCEPT {
     return mState;
 }
 
-bool HttpConnection::isConnected() const {
+bool HttpConnection::isConnected() const FL_NO_EXCEPT {
     return mState == ConnectionState::CONNECTED;
 }
 
-bool HttpConnection::isDisconnected() const {
+bool HttpConnection::isDisconnected() const FL_NO_EXCEPT {
     return mState == ConnectionState::DISCONNECTED;
 }
 
-bool HttpConnection::shouldReconnect() const {
+bool HttpConnection::shouldReconnect() const FL_NO_EXCEPT {
     return mState == ConnectionState::RECONNECTING;
 }
 
-void HttpConnection::connect() {
+void HttpConnection::connect() FL_NO_EXCEPT {
     if (mState == ConnectionState::CLOSED) {
         return;  // Permanently closed, no connect allowed
     }
@@ -42,18 +43,18 @@ void HttpConnection::connect() {
     transitionTo(ConnectionState::CONNECTING, 0);
 }
 
-void HttpConnection::disconnect() {
+void HttpConnection::disconnect() FL_NO_EXCEPT {
     if (mState == ConnectionState::CONNECTED || mState == ConnectionState::CONNECTING ||
         mState == ConnectionState::RECONNECTING) {
         transitionTo(ConnectionState::DISCONNECTED, 0);
     }
 }
 
-void HttpConnection::close() {
+void HttpConnection::close() FL_NO_EXCEPT {
     transitionTo(ConnectionState::CLOSED, 0);
 }
 
-void HttpConnection::onConnected(u32 currentTimeMs) {
+void HttpConnection::onConnected(u32 currentTimeMs) FL_NO_EXCEPT {
     if (mState == ConnectionState::CONNECTING || mState == ConnectionState::RECONNECTING) {
         // Reset attempts if we were in RECONNECTING state before entering CONNECTING
         // This detects successful reconnection after disconnect
@@ -71,7 +72,7 @@ void HttpConnection::onConnected(u32 currentTimeMs) {
     }
 }
 
-void HttpConnection::onDisconnected() {
+void HttpConnection::onDisconnected() FL_NO_EXCEPT {
     if (mState == ConnectionState::CONNECTED || mState == ConnectionState::CONNECTING) {
         // Check if we should attempt reconnection
         // Use <= to handle the exact limit correctly (0-indexed attempts vs 1-indexed limit)
@@ -84,12 +85,12 @@ void HttpConnection::onDisconnected() {
     }
 }
 
-void HttpConnection::onError() {
+void HttpConnection::onError() FL_NO_EXCEPT {
     // Treat errors the same as disconnection
     onDisconnected();
 }
 
-void HttpConnection::onEvent(const asio::error_code& ec, u32 currentTimeMs) {
+void HttpConnection::onEvent(const asio::error_code& ec, u32 currentTimeMs) FL_NO_EXCEPT {
     if (ec.ok()) {
         onConnected(currentTimeMs);
     } else if (ec.code == asio::errc::eof || ec.code == asio::errc::connection_reset) {
@@ -99,17 +100,17 @@ void HttpConnection::onEvent(const asio::error_code& ec, u32 currentTimeMs) {
     }
 }
 
-void HttpConnection::onHeartbeatSent() {
+void HttpConnection::onHeartbeatSent() FL_NO_EXCEPT {
     // Note: currentTimeMs should be passed, but for simplicity we don't update timestamp here
     // The caller should update mLastHeartbeatSentMs via update()
 }
 
-void HttpConnection::onHeartbeatReceived() {
+void HttpConnection::onHeartbeatReceived() FL_NO_EXCEPT {
     // Note: currentTimeMs should be passed, but for simplicity we don't update timestamp here
     // The caller should update mLastDataReceivedMs via update()
 }
 
-bool HttpConnection::shouldSendHeartbeat(u32 currentTimeMs) const {
+bool HttpConnection::shouldSendHeartbeat(u32 currentTimeMs) const FL_NO_EXCEPT {
     if (mState != ConnectionState::CONNECTED) {
         return false;  // Only send heartbeats when connected
     }
@@ -119,7 +120,7 @@ bool HttpConnection::shouldSendHeartbeat(u32 currentTimeMs) const {
     return timeSinceLastHeartbeat >= mConfig.heartbeatIntervalMs;
 }
 
-void HttpConnection::update(u32 currentTimeMs) {
+void HttpConnection::update(u32 currentTimeMs) FL_NO_EXCEPT {
     // Check for timeout first (before updating timestamps)
     if (isTimedOut(currentTimeMs)) {
         onDisconnected();
@@ -140,15 +141,15 @@ void HttpConnection::update(u32 currentTimeMs) {
     }
 }
 
-u32 HttpConnection::getReconnectDelayMs() const {
+u32 HttpConnection::getReconnectDelayMs() const FL_NO_EXCEPT {
     return mReconnectDelayMs;
 }
 
-u32 HttpConnection::getReconnectAttempts() const {
+u32 HttpConnection::getReconnectAttempts() const FL_NO_EXCEPT {
     return mReconnectAttempts;
 }
 
-bool HttpConnection::isTimedOut(u32 currentTimeMs) const {
+bool HttpConnection::isTimedOut(u32 currentTimeMs) const FL_NO_EXCEPT {
     if (mState != ConnectionState::CONNECTED) {
         return false;  // Only check timeout when connected
     }
@@ -158,7 +159,7 @@ bool HttpConnection::isTimedOut(u32 currentTimeMs) const {
     return timeSinceLastData >= mConfig.connectionTimeoutMs;
 }
 
-void HttpConnection::transitionTo(ConnectionState newState, u32 currentTimeMs) {
+void HttpConnection::transitionTo(ConnectionState newState, u32 currentTimeMs) FL_NO_EXCEPT {
     mState = newState;
 
     // Handle state-specific initialization
@@ -198,19 +199,19 @@ void HttpConnection::transitionTo(ConnectionState newState, u32 currentTimeMs) {
     }
 }
 
-void HttpConnection::resetReconnectState() {
+void HttpConnection::resetReconnectState() FL_NO_EXCEPT {
     // Reset reconnection timing state, but keep attempts counter
     mReconnectDelayMs = 0;
     mNextReconnectTimeMs = 0;
 }
 
-void HttpConnection::resetReconnectAttempts() {
+void HttpConnection::resetReconnectAttempts() FL_NO_EXCEPT {
     // Fully reset all reconnection state including attempts counter
     mReconnectAttempts = 0;
     resetReconnectState();
 }
 
-u32 HttpConnection::calculateBackoffDelay() const {
+u32 HttpConnection::calculateBackoffDelay() const FL_NO_EXCEPT {
     // Exponential backoff: delay = initial * (multiplier ^ attempts)
     u32 delay = mConfig.reconnectInitialDelayMs;
     for (u32 i = 0; i < mReconnectAttempts; i++) {

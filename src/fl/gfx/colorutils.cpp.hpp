@@ -16,6 +16,7 @@
 #include "fl/gfx/colorutils.h"
 #include "fl/stl/compiler_control.h"
 #include "fl/math/xymap.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -84,7 +85,7 @@ CRGB oklabToRgb(const Oklab &lab) FL_NO_EXCEPT {
 
 } // namespace
 
-CRGB &nblend(CRGB &existing, const CRGB &overlay, fract8 amountOfOverlay) {
+CRGB &nblend(CRGB &existing, const CRGB &overlay, fract8 amountOfOverlay) FL_NO_EXCEPT {
     if (amountOfOverlay == 0) {
         return existing;
     }
@@ -117,7 +118,7 @@ CRGB &nblend(CRGB &existing, const CRGB &overlay, fract8 amountOfOverlay) {
 }
 
 void nblend(CRGB *existing, const CRGB *overlay, fl::u16 count,
-            fract8 amountOfOverlay) {
+            fract8 amountOfOverlay) FL_NO_EXCEPT {
     for (fl::u16 i = count; i; --i) {
         nblend(*existing, *overlay, amountOfOverlay);
         ++existing;
@@ -125,7 +126,7 @@ void nblend(CRGB *existing, const CRGB *overlay, fl::u16 count,
     }
 }
 
-CRGB blend(const CRGB &p1, const CRGB &p2, fract8 amountOfP2) {
+CRGB blend(const CRGB &p1, const CRGB &p2, fract8 amountOfP2) FL_NO_EXCEPT {
     CRGB nu(p1);
     nblend(nu, p2, amountOfP2);
     return nu;
@@ -147,7 +148,7 @@ CRGB blend_oklab(const CRGB &p1, const CRGB &p2, fract8 amountOfP2) FL_NO_EXCEPT
 }
 
 CRGB *blend(const CRGB *src1, const CRGB *src2, CRGB *dest, fl::u16 count,
-            fract8 amountOfsrc2) {
+            fract8 amountOfsrc2) FL_NO_EXCEPT {
     for (fl::u16 i = 0; i < count; ++i) {
         dest[i] = blend(src1[i], src2[i], amountOfsrc2);
     }
@@ -155,7 +156,7 @@ CRGB *blend(const CRGB *src1, const CRGB *src2, CRGB *dest, fl::u16 count,
 }
 
 CHSV &nblend(CHSV &existing, const CHSV &overlay, fract8 amountOfOverlay,
-             TGradientDirectionCode directionCode) {
+             TGradientDirectionCode directionCode) FL_NO_EXCEPT {
     if (amountOfOverlay == 0) {
         return existing;
     }
@@ -202,7 +203,7 @@ CHSV &nblend(CHSV &existing, const CHSV &overlay, fract8 amountOfOverlay,
 }
 
 void nblend(CHSV *existing, const CHSV *overlay, fl::u16 count,
-            fract8 amountOfOverlay, TGradientDirectionCode directionCode) {
+            fract8 amountOfOverlay, TGradientDirectionCode directionCode) FL_NO_EXCEPT {
     if (existing == overlay)
         return;
     for (fl::u16 i = count; i; --i) {
@@ -213,49 +214,49 @@ void nblend(CHSV *existing, const CHSV *overlay, fl::u16 count,
 }
 
 CHSV blend(const CHSV &p1, const CHSV &p2, fract8 amountOfP2,
-           TGradientDirectionCode directionCode) {
+           TGradientDirectionCode directionCode) FL_NO_EXCEPT {
     CHSV nu(p1);
     nblend(nu, p2, amountOfP2, directionCode);
     return nu;
 }
 
 CHSV *blend(const CHSV *src1, const CHSV *src2, CHSV *dest, fl::u16 count,
-            fract8 amountOfsrc2, TGradientDirectionCode directionCode) {
+            fract8 amountOfsrc2, TGradientDirectionCode directionCode) FL_NO_EXCEPT {
     for (fl::u16 i = 0; i < count; ++i) {
         dest[i] = blend(src1[i], src2[i], amountOfsrc2, directionCode);
     }
     return dest;
 }
 
-void nscale8_video(CRGB *leds, fl::u16 num_leds, fl::u8 scale) {
+void nscale8_video(CRGB *leds, fl::u16 num_leds, fl::u8 scale) FL_NO_EXCEPT {
     for (fl::u16 i = 0; i < num_leds; ++i) {
         leds[i].nscale8_video(scale);
     }
 }
 
-void fade_video(CRGB *leds, fl::u16 num_leds, fl::u8 fadeBy) {
+void fade_video(CRGB *leds, fl::u16 num_leds, fl::u8 fadeBy) FL_NO_EXCEPT {
     nscale8_video(leds, num_leds, 255 - fadeBy);
 }
 
-void fadeLightBy(CRGB *leds, fl::u16 num_leds, fl::u8 fadeBy) {
+void fadeLightBy(CRGB *leds, fl::u16 num_leds, fl::u8 fadeBy) FL_NO_EXCEPT {
     nscale8_video(leds, num_leds, 255 - fadeBy);
 }
 
-void fadeToBlackBy(CRGB *leds, fl::u16 num_leds, fl::u8 fadeBy) {
+void fadeToBlackBy(CRGB *leds, fl::u16 num_leds, fl::u8 fadeBy) FL_NO_EXCEPT {
     nscale8(leds, num_leds, 255 - fadeBy);
 }
 
-void fade_raw(CRGB *leds, fl::u16 num_leds, fl::u8 fadeBy) {
+void fade_raw(CRGB *leds, fl::u16 num_leds, fl::u8 fadeBy) FL_NO_EXCEPT {
     nscale8(leds, num_leds, 255 - fadeBy);
 }
 
-void nscale8(CRGB *leds, fl::u16 num_leds, fl::u8 scale) {
+void nscale8(CRGB *leds, fl::u16 num_leds, fl::u8 scale) FL_NO_EXCEPT {
     for (fl::u16 i = 0; i < num_leds; ++i) {
         leds[i].nscale8(scale);
     }
 }
 
-void fadeUsingColor(CRGB *leds, fl::u16 numLeds, const CRGB &colormask) {
+void fadeUsingColor(CRGB *leds, fl::u16 numLeds, const CRGB &colormask) FL_NO_EXCEPT {
     fl::u8 fr, fg, fb;
     fr = colormask.r;
     fg = colormask.g;
@@ -280,7 +281,7 @@ void fadeUsingColor(CRGB *leds, fl::u16 numLeds, const CRGB &colormask) {
 // On AVR/Arduino, this typically takes around 70 bytes of program memory,
 // versus 768 bytes for a full 256-entry RGB lookup table.
 
-CRGB HeatColor(fl::u8 temperature) {
+CRGB HeatColor(fl::u8 temperature) FL_NO_EXCEPT {
     CRGB heatcolor;
 
     // Scale 'heat' down from 0-255 to 0-191,
@@ -320,8 +321,8 @@ CRGB HeatColor(fl::u8 temperature) {
 /// (LSR)'s. On avr-gcc, "u8 >> 4" generates a loop, which is big, and slow.
 /// merely forcing it to be four /=2's causes avr-gcc to emit
 /// a SWAP instruction followed by an AND 0x0F, which is faster, and smaller.
-inline fl::u8 lsrX4(fl::u8 dividend) __attribute__((always_inline));
-inline fl::u8 lsrX4(fl::u8 dividend) {
+inline fl::u8 lsrX4(fl::u8 dividend) FL_NO_EXCEPT __attribute__((always_inline));
+inline fl::u8 lsrX4(fl::u8 dividend) FL_NO_EXCEPT {
 #if defined(FL_IS_AVR)
     dividend /= 2;
     dividend /= 2;
@@ -338,42 +339,42 @@ namespace {
 template <fl::size Size> struct RuntimeRGBPaletteReader {
     fl::span<const CRGB, Size> entries;
 
-    CRGB read(fl::u8 index) const { return entries[index]; }
+    CRGB read(fl::u8 index) const FL_NO_EXCEPT { return entries[index]; }
 };
 
 template <fl::size Size> struct ProgmemRGBPaletteReader {
     fl::span<const fl::u32, Size> entries;
 
-    CRGB read(fl::u8 index) const {
+    CRGB read(fl::u8 index) const FL_NO_EXCEPT {
         return CRGB(FL_PGM_READ_DWORD_NEAR(entries.data() + index));
     }
 };
 
-inline fl::u16 promote_channel_to_hd(fl::u8 channel) {
+inline fl::u16 promote_channel_to_hd(fl::u8 channel) FL_NO_EXCEPT {
     return static_cast<fl::u16>(channel) << 8;
 }
 
 inline fl::u16 lerp_channel_to_hd(fl::u8 a, fl::u8 b, fl::u16 frac,
-                                  fl::u32 segment_size) {
+                                  fl::u32 segment_size) FL_NO_EXCEPT {
     const fl::u32 a_raw = static_cast<fl::u32>(a) << 8;
     const fl::u32 b_raw = static_cast<fl::u32>(b) << 8;
     return static_cast<fl::u16>(
         (a_raw * (segment_size - frac) + b_raw * frac) / segment_size);
 }
 
-inline CRGB16 promote_rgb_to_hd(const CRGB &rgb) {
+inline CRGB16 promote_rgb_to_hd(const CRGB &rgb) FL_NO_EXCEPT {
     return CRGB16(u8x8::from_raw(promote_channel_to_hd(rgb.red)),
                   u8x8::from_raw(promote_channel_to_hd(rgb.green)),
                   u8x8::from_raw(promote_channel_to_hd(rgb.blue)));
 }
 
-inline fl::u16 scale_hd_channel(fl::u16 channel, fl::u8x8 scale) {
+inline fl::u16 scale_hd_channel(fl::u16 channel, fl::u8x8 scale) FL_NO_EXCEPT {
     const fl::u32 scaled =
         (static_cast<fl::u32>(channel) * scale.raw()) >> 8;
     return scaled > 0xFFFFu ? fl::u16(0xFFFF) : static_cast<fl::u16>(scaled);
 }
 
-inline void scale_rgb_hd(CRGB16 &rgb, fl::u8x8 brightness) {
+inline void scale_rgb_hd(CRGB16 &rgb, fl::u8x8 brightness) FL_NO_EXCEPT {
     if (brightness.raw() == 256) {
         return;
     }
@@ -385,7 +386,7 @@ inline void scale_rgb_hd(CRGB16 &rgb, fl::u8x8 brightness) {
 template <fl::u8 PaletteBits, typename Reader>
 CRGB16 ColorFromPaletteHDImpl(const Reader &reader, fl::u16 index,
                               fl::u8x8 brightness,
-                              TBlendType blendType) {
+                              TBlendType blendType) FL_NO_EXCEPT {
     const fl::u8 frac_bits = 16 - PaletteBits;
     const fl::u8 palette_last = (fl::u8(1) << PaletteBits) - 1;
     const fl::u32 segment_size = fl::u32(1) << frac_bits;
@@ -419,7 +420,7 @@ CRGB16 ColorFromPaletteHDImpl(const Reader &reader, fl::u16 index,
 } // namespace
 
 CRGB ColorFromPaletteExtended(const CRGBPalette32 &pal, fl::u16 index,
-                              fl::u8 brightness, TBlendType blendType) {
+                              fl::u8 brightness, TBlendType blendType) FL_NO_EXCEPT {
     // Extract the five most significant bits of the index as a palette index.
     fl::u8 index_5bit = (index >> 11);
     // Calculate the 8-bit offset from the palette index.
@@ -467,14 +468,14 @@ CRGB ColorFromPaletteExtended(const CRGBPalette32 &pal, fl::u16 index,
 }
 
 CRGB16 ColorFromPaletteHD(const CRGBPalette32 &pal, fl::u16 index,
-                          fl::u8x8 brightness, TBlendType blendType) {
+                          fl::u8x8 brightness, TBlendType blendType) FL_NO_EXCEPT {
     return ColorFromPaletteHDImpl<5>(
         RuntimeRGBPaletteReader<32>{fl::span<const CRGB, 32>(&pal.entries[0], 32)},
         index, brightness, blendType);
 }
 
 CRGB ColorFromPalette(const CRGBPalette16 &pal, fl::u8 index,
-                      fl::u8 brightness, TBlendType blendType) {
+                      fl::u8 brightness, TBlendType blendType) FL_NO_EXCEPT {
     if (blendType == LINEARBLEND_NOWRAP) {
         index = map8(index, 0, 239); // Blend range is affected by lo4 blend of
                                      // values, remap to avoid wrapping
@@ -564,7 +565,7 @@ CRGB ColorFromPalette(const CRGBPalette16 &pal, fl::u8 index,
 }
 
 CRGB ColorFromPaletteExtended(const CRGBPalette16 &pal, fl::u16 index,
-                              fl::u8 brightness, TBlendType blendType) {
+                              fl::u8 brightness, TBlendType blendType) FL_NO_EXCEPT {
     // Extract the four most significant bits of the index as a palette index.
     fl::u8 index_4bit = index >> 12;
     // Calculate the 8-bit offset from the palette index.
@@ -612,14 +613,14 @@ CRGB ColorFromPaletteExtended(const CRGBPalette16 &pal, fl::u16 index,
 }
 
 CRGB16 ColorFromPaletteHD(const CRGBPalette16 &pal, fl::u16 index,
-                          fl::u8x8 brightness, TBlendType blendType) {
+                          fl::u8x8 brightness, TBlendType blendType) FL_NO_EXCEPT {
     return ColorFromPaletteHDImpl<4>(
         RuntimeRGBPaletteReader<16>{fl::span<const CRGB, 16>(&pal.entries[0], 16)},
         index, brightness, blendType);
 }
 
 CRGB ColorFromPaletteExtended(const TProgmemRGBPalette16 &pal, fl::u16 index,
-                              fl::u8 brightness, TBlendType blendType) {
+                              fl::u8 brightness, TBlendType blendType) FL_NO_EXCEPT {
     // Extract the four most significant bits of the index as a palette index.
     fl::u8 index_4bit = index >> 12;
     // Calculate the 8-bit offset from the palette index.
@@ -667,14 +668,14 @@ CRGB ColorFromPaletteExtended(const TProgmemRGBPalette16 &pal, fl::u16 index,
 }
 
 CRGB16 ColorFromPaletteHD(const TProgmemRGBPalette16 &pal, fl::u16 index,
-                          fl::u8x8 brightness, TBlendType blendType) {
+                          fl::u8x8 brightness, TBlendType blendType) FL_NO_EXCEPT {
     return ColorFromPaletteHDImpl<4>(
         ProgmemRGBPaletteReader<16>{fl::span<const fl::u32, 16>(&pal[0], 16)},
         index, brightness, blendType);
 }
 
 CRGB ColorFromPaletteExtended(const TProgmemRGBPalette32 &pal, fl::u16 index,
-                              fl::u8 brightness, TBlendType blendType) {
+                              fl::u8 brightness, TBlendType blendType) FL_NO_EXCEPT {
     // Extract the five most significant bits of the index as a palette index.
     fl::u8 index_5bit = (index >> 11);
     // Calculate the 8-bit offset from the palette index.
@@ -722,14 +723,14 @@ CRGB ColorFromPaletteExtended(const TProgmemRGBPalette32 &pal, fl::u16 index,
 }
 
 CRGB16 ColorFromPaletteHD(const TProgmemRGBPalette32 &pal, fl::u16 index,
-                          fl::u8x8 brightness, TBlendType blendType) {
+                          fl::u8x8 brightness, TBlendType blendType) FL_NO_EXCEPT {
     return ColorFromPaletteHDImpl<5>(
         ProgmemRGBPaletteReader<32>{fl::span<const fl::u32, 32>(&pal[0], 32)},
         index, brightness, blendType);
 }
 
 CRGB ColorFromPalette(const TProgmemRGBPalette16 &pal, fl::u8 index,
-                      fl::u8 brightness, TBlendType blendType) {
+                      fl::u8 brightness, TBlendType blendType) FL_NO_EXCEPT {
     if (blendType == LINEARBLEND_NOWRAP) {
         index = map8(index, 0, 239); // Blend range is affected by lo4 blend of
                                      // values, remap to avoid wrapping
@@ -812,7 +813,7 @@ CRGB ColorFromPalette(const TProgmemRGBPalette16 &pal, fl::u8 index,
 }
 
 CRGB ColorFromPalette(const CRGBPalette32 &pal, fl::u8 index,
-                      fl::u8 brightness, TBlendType blendType) {
+                      fl::u8 brightness, TBlendType blendType) FL_NO_EXCEPT {
     if (blendType == LINEARBLEND_NOWRAP) {
         index = map8(index, 0, 247); // Blend range is affected by lo3 blend of
                                      // values, remap to avoid wrapping
@@ -907,7 +908,7 @@ CRGB ColorFromPalette(const CRGBPalette32 &pal, fl::u8 index,
 }
 
 CRGB ColorFromPalette(const TProgmemRGBPalette32 &pal, fl::u8 index,
-                      fl::u8 brightness, TBlendType blendType) {
+                      fl::u8 brightness, TBlendType blendType) FL_NO_EXCEPT {
     if (blendType == LINEARBLEND_NOWRAP) {
         index = map8(index, 0, 247); // Blend range is affected by lo3 blend of
                                      // values, remap to avoid wrapping
@@ -996,7 +997,7 @@ CRGB ColorFromPalette(const TProgmemRGBPalette32 &pal, fl::u8 index,
 }
 
 CRGB ColorFromPalette(const CRGBPalette256 &pal, fl::u8 index,
-                      fl::u8 brightness, TBlendType) {
+                      fl::u8 brightness, TBlendType) FL_NO_EXCEPT {
     const CRGB *entry = &(pal[0]) + index;
 
     fl::u8 red = entry->red;
@@ -1015,7 +1016,7 @@ CRGB ColorFromPalette(const CRGBPalette256 &pal, fl::u8 index,
 }
 
 CRGB ColorFromPaletteExtended(const CRGBPalette256 &pal, fl::u16 index,
-                              fl::u8 brightness, TBlendType blendType) {
+                              fl::u8 brightness, TBlendType blendType) FL_NO_EXCEPT {
     // Extract the eight most significant bits of the index as a palette index.
     fl::u8 index_8bit = index >> 8;
     // Calculate the 8-bit offset from the palette index.
@@ -1063,14 +1064,14 @@ CRGB ColorFromPaletteExtended(const CRGBPalette256 &pal, fl::u16 index,
 }
 
 CRGB16 ColorFromPaletteHD(const CRGBPalette256 &pal, fl::u16 index,
-                          fl::u8x8 brightness, TBlendType blendType) {
+                          fl::u8x8 brightness, TBlendType blendType) FL_NO_EXCEPT {
     return ColorFromPaletteHDImpl<8>(
         RuntimeRGBPaletteReader<256>{fl::span<const CRGB, 256>(&pal.entries[0], 256)},
         index, brightness, blendType);
 }
 
 CHSV ColorFromPalette(const CHSVPalette16 &pal, fl::u8 index,
-                      fl::u8 brightness, TBlendType blendType) {
+                      fl::u8 brightness, TBlendType blendType) FL_NO_EXCEPT {
     if (blendType == LINEARBLEND_NOWRAP) {
         index = map8(index, 0, 239); // Blend range is affected by lo4 blend of
                                      // values, remap to avoid wrapping
@@ -1157,7 +1158,7 @@ CHSV ColorFromPalette(const CHSVPalette16 &pal, fl::u8 index,
 }
 
 CHSV ColorFromPalette(const CHSVPalette32 &pal, fl::u8 index,
-                      fl::u8 brightness, TBlendType blendType) {
+                      fl::u8 brightness, TBlendType blendType) FL_NO_EXCEPT {
     if (blendType == LINEARBLEND_NOWRAP) {
         index = map8(index, 0, 247); // Blend range is affected by lo3 blend of
                                      // values, remap to avoid wrapping
@@ -1250,7 +1251,7 @@ CHSV ColorFromPalette(const CHSVPalette32 &pal, fl::u8 index,
 }
 
 CHSV ColorFromPalette(const CHSVPalette256 &pal, fl::u8 index,
-                      fl::u8 brightness, TBlendType) {
+                      fl::u8 brightness, TBlendType) FL_NO_EXCEPT {
     CHSV hsv = *(&(pal[0]) + index);
 
     if (brightness != 255) {
@@ -1264,7 +1265,7 @@ namespace detail {
 
 template <typename TSrcPalette, typename TDestPalette>
 void UpscalePaletteRepeat(const TSrcPalette &srcpal,
-                          TDestPalette &destpal) {
+                          TDestPalette &destpal) FL_NO_EXCEPT {
     const fl::u16 src_size = sizeof(srcpal.entries) / sizeof(srcpal.entries[0]);
     const fl::u16 dest_size =
         sizeof(destpal.entries) / sizeof(destpal.entries[0]);
@@ -1279,7 +1280,7 @@ void UpscalePaletteRepeat(const TSrcPalette &srcpal,
 
 template <typename TSrcPalette, typename TDestPalette>
 void UpscalePaletteInterpolated(const TSrcPalette &srcpal,
-                                TDestPalette &destpal) {
+                                TDestPalette &destpal) FL_NO_EXCEPT {
     const fl::u16 dest_size =
         sizeof(destpal.entries) / sizeof(destpal.entries[0]);
     for (fl::u16 i = 0; i < dest_size; ++i) {
@@ -1291,32 +1292,32 @@ void UpscalePaletteInterpolated(const TSrcPalette &srcpal,
 } // namespace detail
 
 void UpscalePalette(const class CRGBPalette16 &srcpal16,
-                    class CRGBPalette256 &destpal256) {
+                    class CRGBPalette256 &destpal256) FL_NO_EXCEPT {
     detail::UpscalePaletteInterpolated(srcpal16, destpal256);
 }
 
 void UpscalePalette(const class CHSVPalette16 &srcpal16,
-                    class CHSVPalette256 &destpal256) {
+                    class CHSVPalette256 &destpal256) FL_NO_EXCEPT {
     detail::UpscalePaletteInterpolated(srcpal16, destpal256);
 }
 
 void UpscalePalette(const class CRGBPalette16 &srcpal16,
-                    class CRGBPalette32 &destpal32) {
+                    class CRGBPalette32 &destpal32) FL_NO_EXCEPT {
     detail::UpscalePaletteRepeat(srcpal16, destpal32);
 }
 
 void UpscalePalette(const class CHSVPalette16 &srcpal16,
-                    class CHSVPalette32 &destpal32) {
+                    class CHSVPalette32 &destpal32) FL_NO_EXCEPT {
     detail::UpscalePaletteRepeat(srcpal16, destpal32);
 }
 
 void UpscalePalette(const class CRGBPalette32 &srcpal32,
-                    class CRGBPalette256 &destpal256) {
+                    class CRGBPalette256 &destpal256) FL_NO_EXCEPT {
     detail::UpscalePaletteInterpolated(srcpal32, destpal256);
 }
 
 void UpscalePalette(const class CHSVPalette32 &srcpal32,
-                    class CHSVPalette256 &destpal256) {
+                    class CHSVPalette256 &destpal256) FL_NO_EXCEPT {
     detail::UpscalePaletteInterpolated(srcpal32, destpal256);
 }
 
@@ -1330,7 +1331,7 @@ void SetupPartyColors(CRGBPalette16& pal)
 #endif
 
 void nblendPaletteTowardPalette(CRGBPalette16 &current, CRGBPalette16 &target,
-                                fl::u8 maxChanges) {
+                                fl::u8 maxChanges) FL_NO_EXCEPT {
     if (maxChanges == 0) {
         return;
     }
@@ -1372,7 +1373,7 @@ void nblendPaletteTowardPalette(CRGBPalette16 &current, CRGBPalette16 &target,
     }
 }
 
-fl::u8 applyGamma_video(fl::u8 brightness, float gamma) {
+fl::u8 applyGamma_video(fl::u8 brightness, float gamma) FL_NO_EXCEPT {
     // Fixed-point path (s16x16) avoids pulling `__ieee754_pow` (libm,
     // ~2.7 KB) into release builds — see #2886 / #2910. Matches the
     // gamma8 LUT generator's approach in src/fl/math/ease.cpp.hpp.
@@ -1394,7 +1395,7 @@ fl::u8 applyGamma_video(fl::u8 brightness, float gamma) {
     return result;
 }
 
-CRGB applyGamma_video(const CRGB &orig, float gamma) {
+CRGB applyGamma_video(const CRGB &orig, float gamma) FL_NO_EXCEPT {
     CRGB adj;
     adj.r = applyGamma_video(orig.r, gamma);
     adj.g = applyGamma_video(orig.g, gamma);
@@ -1403,7 +1404,7 @@ CRGB applyGamma_video(const CRGB &orig, float gamma) {
 }
 
 CRGB applyGamma_video(const CRGB &orig, float gammaR, float gammaG,
-                      float gammaB) {
+                      float gammaB) FL_NO_EXCEPT {
     CRGB adj;
     adj.r = applyGamma_video(orig.r, gammaR);
     adj.g = applyGamma_video(orig.g, gammaG);
@@ -1411,24 +1412,24 @@ CRGB applyGamma_video(const CRGB &orig, float gammaR, float gammaG,
     return adj;
 }
 
-CRGB &napplyGamma_video(CRGB &rgb, float gamma) {
+CRGB &napplyGamma_video(CRGB &rgb, float gamma) FL_NO_EXCEPT {
     rgb = applyGamma_video(rgb, gamma);
     return rgb;
 }
 
-CRGB &napplyGamma_video(CRGB &rgb, float gammaR, float gammaG, float gammaB) {
+CRGB &napplyGamma_video(CRGB &rgb, float gammaR, float gammaG, float gammaB) FL_NO_EXCEPT {
     rgb = applyGamma_video(rgb, gammaR, gammaG, gammaB);
     return rgb;
 }
 
-void napplyGamma_video(CRGB *rgbarray, fl::u16 count, float gamma) {
+void napplyGamma_video(CRGB *rgbarray, fl::u16 count, float gamma) FL_NO_EXCEPT {
     for (fl::u16 i = 0; i < count; ++i) {
         rgbarray[i] = applyGamma_video(rgbarray[i], gamma);
     }
 }
 
 void napplyGamma_video(CRGB *rgbarray, fl::u16 count, float gammaR,
-                       float gammaG, float gammaB) {
+                       float gammaG, float gammaB) FL_NO_EXCEPT {
     for (fl::u16 i = 0; i < count; ++i) {
         rgbarray[i] = applyGamma_video(rgbarray[i], gammaR, gammaG, gammaB);
     }

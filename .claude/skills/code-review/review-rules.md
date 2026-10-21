@@ -60,6 +60,23 @@ had no built-in producer or dither consumer, so the PR was withdrawn.
    - If questionable quality: Ask user
    - If acceptable: Keep and note it passed
 
+## examples/AutoResearch/** changes - PLATFORM NEUTRALITY
+AutoResearch must stay platform neutral. Any added or changed line under
+`examples/AutoResearch/` with platform-specific code is a **blocking** finding:
+1. Platform branches: `#if`/`#ifdef`/`#elif` on `FL_IS_*`, `ARDUINO_*`,
+   `FASTLED_ESP*`, `ESP32`, `__IMXRT1062__`, `__AVR__`, `PICO_*`, `CONFIG_IDF_*`, etc.
+2. Register names or address literals (`WDOG3_CS`, `CCM_*`, `IMXRT_*`, `0x2027FF60`, ...).
+3. Vendor SDK/core calls (`esp_*()`, `_reboot_Teensyduino_()`, Pico SDK, nRF/STM32 HAL)
+   or weak startup hooks such as `startup_early_hook`.
+4. Direct `#include` of `platforms/...` or vendor SDK headers.
+
+Fix: add a platform-neutral API in the core (`src/fl/...`), delegate it to
+`src/platforms/...` with a no-op fallback, and call only the neutral API from
+AutoResearch (e.g. `FL_WATCHDOG_BOOT_GUARD()` in `src/fl/wdt/boot_guard.h` and
+`FastLED.watchdog().markBootHealthy()`). Exception: the line carries
+`// ok platform specific - <reason>` with a concrete reason no core API can
+serve. Pre-existing code is tracked in FastLED/FastLED#4720; don't flag untouched lines.
+
 ## ci/**.py changes - TYPE SAFETY & INTERRUPT HANDLING
 1. **KeyboardInterrupt Handling**:
    - ANY try-except catching general exceptions MUST also handle `KeyboardInterrupt`
@@ -152,23 +169,22 @@ Remove variables that are no longer referenced after refactoring.
 Available macros: `FL_OPTIMIZE_FUNCTION`, `FL_NO_INLINE_IF_AVR`, `FL_BUILTIN_MEMCPY`
 Flag new functions in hot-path files missing appropriate optimization attributes.
 
-## src/** changes - FL_WARN / FL_ERROR DEFAULT-VISIBILITY INVARIANT
-`FL_WARN` and `FL_ERROR` MUST remain active by default on NON-release
-builds. Flag any change that:
+## src/** changes - FL_ERROR DEFAULT-VISIBILITY INVARIANT
+`FL_ERROR` MUST remain active by default on NON-release builds. Flag any
+change that:
 
-1. Adds an outer guard around `FL_WARN(...)` / `FL_ERROR(...)` that
-   requires an opt-in macro to fire on debug/non-release builds.
-2. Changes the unset default of `FASTLED_LOG_VERBOSITY` so that
-   non-release builds (no `NDEBUG`) default below `1`. Release builds
-   (`NDEBUG` defined) default to `0` — that is intentional and not
-   a violation.
-3. Adds a new logging knob whose default suppresses FL_WARN/FL_ERROR
-   on non-release builds without explicit user opt-in.
+1. Adds an outer guard around `FL_ERROR(...)` that requires an opt-in
+   macro to fire on debug/non-release builds.
+2. Changes the unset default of `FL_LOG_LEVEL` so that non-release builds
+   (no `NDEBUG`) default below `1` (errors only). Release builds (`NDEBUG`
+   defined) default to `0` — intentional, not a violation.
+3. Changes the legacy `FASTLED_LOG_VERBOSITY` mapping (0 → off, >= 1 →
+   full) so that an existing `-DFASTLED_LOG_VERBOSITY=1` no longer
+   restores full logs.
 
-Rationale: developers depend on warnings/errors firing during
-development. The bloat-reduction work in #2886 is scoped to release
-builds via `NDEBUG`; it explicitly preserves the debug-build default
-at verbosity 1.
+`FL_WARN` / `FL_INFO` / `FL_DBG` compiling out by default (level 1) is the
+intended contract since #4712; `-DFL_LOG_LEVEL=2` restores them.
 
-**See:** `src/fl/log/log.h` (resolution order: `FASTLED_TESTING` → 1,
-`NDEBUG` → 0, otherwise → 1) and #2886 Stage 1.
+**See:** `src/fl/log/log.h` (resolution order: `FASTLED_TESTING` → 2,
+explicit `FL_LOG_LEVEL`, legacy `FASTLED_LOG_VERBOSITY`, `NDEBUG` → 0,
+otherwise → 1), #2886 Stage 1 and #4712.

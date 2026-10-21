@@ -47,13 +47,13 @@ public:
     /**
      * @brief Construct with shared Beat
      */
-    explicit Backbeat(shared_ptr<Beat> beatDetector);
+    explicit Backbeat(shared_ptr<Beat> beatDetector) FL_NO_EXCEPT;
 
     /**
      * @brief Construct with shared Beat and Downbeat
      */
     explicit Backbeat(shared_ptr<Beat> beatDetector,
-                              shared_ptr<Downbeat> downbeatDetector);
+                              shared_ptr<Downbeat> downbeatDetector) FL_NO_EXCEPT;
 
     /**
      * @brief Construct with standalone Beat
@@ -62,12 +62,12 @@ public:
 
     ~Backbeat() FL_NO_EXCEPT override;
 
-    void update(shared_ptr<Context> context) override;
-    void fireCallbacks() override;
-    bool needsFFT() const override { return true; }
-    bool needsFFTHistory() const override { return false; }
-    const char* getName() const override { return "Backbeat"; }
-    void reset() override;
+    void update(shared_ptr<Context> context) FL_NO_EXCEPT override;
+    void fireCallbacks() FL_NO_EXCEPT override;
+    bool needsFFT() const FL_NO_EXCEPT override { return true; }
+    bool needsFFTHistory() const FL_NO_EXCEPT override { return false; }
+    const char* getName() const FL_NO_EXCEPT override { return "Backbeat"; }
+    void reset() FL_NO_EXCEPT override;
 
     // ----- Callbacks (multiple listeners supported) -----
 
@@ -77,45 +77,45 @@ public:
     // ----- State Access -----
 
     /** Returns true if backbeat was detected this frame */
-    bool isBackbeat() const { return mBackbeatDetected; }
+    bool isBackbeat() const FL_NO_EXCEPT { return mBackbeatDetected; }
 
     /** Returns the beat number of the last detected backbeat (1-based) */
-    u8 getLastBackbeatNumber() const { return mLastBackbeatNumber; }
+    u8 getLastBackbeatNumber() const FL_NO_EXCEPT { return mLastBackbeatNumber; }
 
     /** Returns backbeat detection confidence (0-1) */
-    float getConfidence() const { return mConfidence; }
+    float getConfidence() const FL_NO_EXCEPT { return mConfidence; }
 
     /** Returns current backbeat accent strength (0-1+) */
-    float getStrength() const { return mCurrentStrength; }
+    float getStrength() const FL_NO_EXCEPT { return mCurrentStrength; }
 
     /** Returns ratio of backbeat to downbeat energy (0-2+) */
-    float getBackbeatRatio() const { return mBackbeatRatio; }
+    float getBackbeatRatio() const FL_NO_EXCEPT { return mBackbeatRatio; }
 
     // ----- Configuration -----
 
     /** Set minimum confidence for backbeat detection (default: 0.6) */
-    void setConfidenceThreshold(float threshold) { mConfidenceThreshold = threshold; }
+    void setConfidenceThreshold(float threshold) FL_NO_EXCEPT { mConfidenceThreshold = threshold; }
 
     /** Set bass accent threshold (default: 1.2) */
-    void setBassThreshold(float threshold) { mBassThreshold = threshold; }
+    void setBassThreshold(float threshold) FL_NO_EXCEPT { mBassThreshold = threshold; }
 
     /** Set mid accent threshold (default: 1.3) - critical for snare */
-    void setMidThreshold(float threshold) { mMidThreshold = threshold; }
+    void setMidThreshold(float threshold) FL_NO_EXCEPT { mMidThreshold = threshold; }
 
     /** Set high accent threshold (default: 1.1) */
-    void setHighThreshold(float threshold) { mHighThreshold = threshold; }
+    void setHighThreshold(float threshold) FL_NO_EXCEPT { mHighThreshold = threshold; }
 
     /** Set which beats are backbeats using bitmask (bit 0=beat 1, bit 1=beat 2, etc.) */
-    void setBackbeatExpectedBeats(u8 beatMask) { mBackbeatMask = beatMask; }
+    void setBackbeatExpectedBeats(u8 beatMask) FL_NO_EXCEPT { mBackbeatMask = beatMask; }
 
     /** Enable/disable adaptive threshold learning (default: true) */
-    void setAdaptive(bool enable) { mAdaptive = enable; }
+    void setAdaptive(bool enable) FL_NO_EXCEPT { mAdaptive = enable; }
 
     /** Share an external Beat instance */
-    void setBeatDetector(shared_ptr<Beat> beatDetector);
+    void setBeatDetector(shared_ptr<Beat> beatDetector) FL_NO_EXCEPT;
 
     /** Share an external Downbeat instance */
-    void setDownbeatDetector(shared_ptr<Downbeat> downbeatDetector);
+    void setDownbeatDetector(shared_ptr<Downbeat> downbeatDetector) FL_NO_EXCEPT;
 
 private:
     // ----- Detector Dependencies -----
@@ -163,15 +163,15 @@ private:
     shared_ptr<const fft::Bins> mRetainedFFT;
 
     // ----- Helper Methods -----
-    void updateBeatDetector(shared_ptr<Context> context);
-    void updateBeatPosition();
-    MultibandAccent calculateMultibandAccent(const fft::Bins& fft);
-    float detectBackbeatAccent(const MultibandAccent& accent);
-    bool isBackbeatPosition() const;
-    bool detectBackbeat(float accentStrength, const fft::Bins& fft);
-    void updateAdaptiveThresholds();
-    void updateBackbeatProfile(const fft::Bins& fft);
-    float calculatePatternConfidence(const fft::Bins& fft);
+    void updateBeatDetector(shared_ptr<Context> context) FL_NO_EXCEPT;
+    void updateBeatPosition() FL_NO_EXCEPT;
+    MultibandAccent calculateMultibandAccent(const fft::Bins& fft) FL_NO_EXCEPT;
+    float detectBackbeatAccent(const MultibandAccent& accent) FL_NO_EXCEPT;
+    bool isBackbeatPosition() const FL_NO_EXCEPT;
+    bool detectBackbeat(float accentStrength, const fft::Bins& fft) FL_NO_EXCEPT;
+    void updateAdaptiveThresholds() FL_NO_EXCEPT;
+    void updateBackbeatProfile(const fft::Bins& fft) FL_NO_EXCEPT;
+    float calculatePatternConfidence(const fft::Bins& fft) FL_NO_EXCEPT;
 };
 
 } // namespace detector

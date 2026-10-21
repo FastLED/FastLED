@@ -17,72 +17,72 @@ FASTLED_SHARED_PTR(PerlinParticlePunch);
 
 class PerlinParticlePunch : public Fx1d {
   public:
-    PerlinParticlePunch(u16 num_leds);
+    PerlinParticlePunch(u16 num_leds) FL_NO_EXCEPT;
     ~PerlinParticlePunch() FL_NO_EXCEPT;
 
-    void draw(DrawContext context) override;
-    fl::string fxName() const override;
+    void draw(DrawContext context) FL_NO_EXCEPT override;
+    fl::string fxName() const FL_NO_EXCEPT override;
 
     // --- Particle spawning (called from sketch via detector callbacks) ---
 
     /// Spawn an ambient particle at a random position.
     /// @param intensity 0.0-1.0, controls brightness and trail length.
-    void spawnAmbient(float intensity = 0.5f);
+    void spawnAmbient(float intensity = 0.5f) FL_NO_EXCEPT;
 
     /// Spawn a BEAT meteor at position 0, traveling toward end of strip.
     /// @param intensity 0.0-1.0, controls speed, head brightness, debris.
-    void spawnMeteor(float intensity = 1.0f);
+    void spawnMeteor(float intensity = 1.0f) FL_NO_EXCEPT;
 
     // --- Perlin noise layer control ---
 
     /// Set time multiplier for noise evolution (1.0 = normal, >1 = warp).
-    void setTimeMultiplier(float mult);
+    void setTimeMultiplier(float mult) FL_NO_EXCEPT;
 
     /// Set palette for Perlin noise background.
-    void setNoisePalette(const CRGBPalette16 &palette);
+    void setNoisePalette(const CRGBPalette16 &palette) FL_NO_EXCEPT;
 
     // --- Ambient control ---
 
     /// Set palette for ambient particles.
-    void setAmbientPalette(const CRGBPalette16 &palette);
+    void setAmbientPalette(const CRGBPalette16 &palette) FL_NO_EXCEPT;
 
     // --- Meteor control ---
 
     /// Set the meteor color gradient: head → mid → tail.
-    void setMeteorGradient(CRGB headColor, CRGB midColor, CRGB tailColor);
+    void setMeteorGradient(CRGB headColor, CRGB midColor, CRGB tailColor) FL_NO_EXCEPT;
 
     // --- Physics tuning ---
 
     /// Set per-frame drag for ambient particles (0.0 = instant stop, 1.0 = no
     /// drag). Meteor drag is derived from this at a heavier ratio.
-    void setDrag(float drag);
+    void setDrag(float drag) FL_NO_EXCEPT;
 
     /// Set velocity multiplier. Default 1.0.
-    void setSpeed(float speed);
+    void setSpeed(float speed) FL_NO_EXCEPT;
 
     // --- Trail control ---
 
     /// Ambient trail intensity: 0 = no trail, 255 = long persistent trail.
-    void setAmbientTrailIntensity(u8 intensity);
+    void setAmbientTrailIntensity(u8 intensity) FL_NO_EXCEPT;
 
     /// Meteor trail intensity: controls how long meteor/debris trails linger.
-    void setMeteorTrailIntensity(u8 intensity);
+    void setMeteorTrailIntensity(u8 intensity) FL_NO_EXCEPT;
 
     // --- Particle lifetime tuning ---
 
     /// Per-frame brightness decay for ambient particles. 1.0 = no decay,
     /// 0.90 = fast decay. Default 0.97.
-    void setAmbientBrightnessDecay(float decay);
+    void setAmbientBrightnessDecay(float decay) FL_NO_EXCEPT;
 
     /// Minimum velocity before a particle dies. Lower = longer life.
     /// Default 0.05.
-    void setMinVelocity(float minVel);
+    void setMinVelocity(float minVel) FL_NO_EXCEPT;
 
     /// Per-frame brightness decay for debris particles. Default 0.90.
-    void setDebrisBrightnessDecay(float decay);
+    void setDebrisBrightnessDecay(float decay) FL_NO_EXCEPT;
 
     /// Per-frame velocity decay for debris particles. Default 0.95.
-    void setDebrisVelocityDecay(float decay);
+    void setDebrisVelocityDecay(float decay) FL_NO_EXCEPT;
 
   private:
     struct AmbientParticle;
@@ -122,20 +122,20 @@ class PerlinParticlePunch : public Fx1d {
 
     // Noise helpers (kept from original, using s16x16)
     static s16x16 mapf(s16x16 x, s16x16 in_min, s16x16 in_max, s16x16 out_min,
-                        s16x16 out_max);
-    s16x16 circleNoiseGen(u32 now, s16x16 theta) const;
-    void noiseCircleDraw(u32 now, fl::span<CRGB> dst);
+                        s16x16 out_max) FL_NO_EXCEPT;
+    s16x16 circleNoiseGen(u32 now, s16x16 theta) const FL_NO_EXCEPT;
+    void noiseCircleDraw(u32 now, fl::span<CRGB> dst) FL_NO_EXCEPT;
 
     // Particle helpers
-    AmbientParticle *tryAllocateAmbient();
-    MeteorParticle *tryAllocateMeteor();
-    DebrisParticle *tryAllocateDebris();
-    void renderAmbient(const AmbientParticle &p);
-    void renderMeteor(const MeteorParticle &m);
-    void renderDebris(const DebrisParticle &d);
-    void spawnDebrisFromMeteor(MeteorParticle &m, u32 now);
+    AmbientParticle *tryAllocateAmbient() FL_NO_EXCEPT;
+    MeteorParticle *tryAllocateMeteor() FL_NO_EXCEPT;
+    DebrisParticle *tryAllocateDebris() FL_NO_EXCEPT;
+    void renderAmbient(const AmbientParticle &p) FL_NO_EXCEPT;
+    void renderMeteor(const MeteorParticle &m) FL_NO_EXCEPT;
+    void renderDebris(const DebrisParticle &d) FL_NO_EXCEPT;
+    void spawnDebrisFromMeteor(MeteorParticle &m, u32 now) FL_NO_EXCEPT;
 
-    static void writeMax(CRGB &dst, const CRGB &src);
+    static void writeMax(CRGB &dst, const CRGB &src) FL_NO_EXCEPT;
 };
 
 } // namespace fl

@@ -144,8 +144,8 @@ void ChannelEngineObjectFLED::enqueue(ChannelDataPtr channelData) FL_NO_EXCEPT {
         auto validation = mPeripheral->validatePin(static_cast<u8>(pin));
         if (!validation.valid) {
             FL_WARN("================================================================================");
-            FL_WARN("FASTLED ERROR: Strip on pin %s is INVALID and has been disabled", pin);
-            FL_WARN("%s", validation.error_message ? validation.error_message : "");
+            FL_WARN("FASTLED ERROR: Strip on pin " << pin << " is INVALID and has been disabled");
+            FL_WARN(validation.error_message);
             FL_WARN("================================================================================");
         }
     }
@@ -160,7 +160,7 @@ void ChannelEngineObjectFLED::enqueue(ChannelDataPtr channelData) FL_NO_EXCEPT {
         if (queued->getPin() == pin) {
             if (!pinFlagTestAndSet(mWarnedDuplicatePins, pin)) {
                 FL_WARN("================================================================================");
-                FL_WARN("FASTLED ERROR: Pin %s is already in use - strip disabled", pin);
+                FL_WARN("FASTLED ERROR: Pin " << pin << " is already in use - strip disabled");
                 FL_WARN("================================================================================");
             }
             return;
@@ -255,7 +255,7 @@ bool ChannelEngineObjectFLED::startTimingGroup(TimingGroup& group) FL_NO_EXCEPT 
         // Validate pin
         auto validation = mPeripheral->validatePin(pin);
         if (!validation.valid) {
-            FL_LOG_OBJECTFLED("ChannelEngineObjectFLED: Pin %s invalid: %s", (int)pin, validation.error_message);
+            FL_LOG_OBJECTFLED("ChannelEngineObjectFLED: Pin " << ((int)pin) << " invalid: " << validation.error_message);
             continue;
         }
 

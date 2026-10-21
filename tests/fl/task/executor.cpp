@@ -1250,3 +1250,18 @@ FL_TEST_CASE("fl::task::run SYSTEM yield paths") {
         FL_CHECK_LT(fl::micros() - t0, 100000u);
     }
 }
+
+FL_TEST_CASE("yield_system matches run(us, SYSTEM) budget semantics (#4797)") {
+    FL_SUBCASE("zero budget returns immediately") {
+        const fl::u32 t0 = fl::micros();
+        fl::task::yield_system(0);
+        FL_CHECK_LT(fl::micros() - t0, 100000u);
+    }
+    FL_SUBCASE("non-zero budget is spent, then returns") {
+        const fl::u32 t0 = fl::micros();
+        fl::task::yield_system(200);
+        const fl::u32 dt = fl::micros() - t0;
+        FL_CHECK_GE(dt, 200u);
+        FL_CHECK_LT(dt, 100000u);
+    }
+}

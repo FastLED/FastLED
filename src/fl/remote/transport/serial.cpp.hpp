@@ -6,10 +6,11 @@
 #include "fl/remote/transport/serial.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/strstream.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
-fl::string formatJsonResponse(const fl::json& response, const char* prefix) {
+fl::string formatJsonResponse(const fl::json& response, const char* prefix) FL_NO_EXCEPT {
     // Use sstream to minimize allocations
     fl::sstream ss;
 

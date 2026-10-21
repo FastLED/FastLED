@@ -60,8 +60,7 @@ namespace {
 
 FL_NO_INLINE FL_COLD void emitRmt5EncoderCreateFailure(
     const char* encoder_kind, esp_err_t error) FL_NO_EXCEPT {
-    FL_WARN("[RMT5_ENCODER] Failed to create %s encoder: %s",
-              encoder_kind, esp_err_to_name(error));
+    FL_WARN("[RMT5_ENCODER] Failed to create " << encoder_kind << " encoder: " << esp_err_to_name(error));
 }
 
 } // namespace
@@ -180,16 +179,16 @@ bool Rmt5PeripheralESPImpl::createTxChannel(const Rmt5ChannelConfig& config,
     // gpio_reset_pin() was interfering with GPIO matrix routing when both TX and RX are active
 
     // Delegate to ESP-IDF
-    FL_LOG_RMT("RMT5_PERIPH: Creating TX channel on GPIO %s", config.gpio_num);
+    FL_LOG_RMT("RMT5_PERIPH: Creating TX channel on GPIO " << config.gpio_num);
 
     rmt_channel_handle_t channel;
     esp_err_t err = rmt_new_tx_channel(&esp_config, &channel);
     if (err != ESP_OK) {
-        FL_WARN("[RMT5_PERIPH] Failed to create TX channel: %s (err=%s)", esp_err_to_name(err), static_cast<int>(err));
+        FL_WARN("[RMT5_PERIPH] Failed to create TX channel: " << esp_err_to_name(err) << " (err=" << (static_cast<int>(err)) << ")");
         return false;
     }
 
-    FL_LOG_RMT("RMT5_PERIPH: TX channel created successfully on GPIO %s", config.gpio_num);
+    FL_LOG_RMT("RMT5_PERIPH: TX channel created successfully on GPIO " << config.gpio_num);
 
     // NOTE: Previous workaround for ESP32-S3 TX+RX GPIO conflict has been removed.
     // The workaround was routing RMT_SIG_OUT0_IDX to the GPIO, but this was wrong:
@@ -217,7 +216,7 @@ bool Rmt5PeripheralESPImpl::deleteChannel(void* channel_handle) FL_NO_EXCEPT {
     rmt_channel_handle_t channel = static_cast<rmt_channel_handle_t>(channel_handle);
     esp_err_t err = rmt_del_channel(channel);
     if (err != ESP_OK) {
-        FL_LOG_RMT("RMT5_PERIPH: Failed to delete channel: %s", esp_err_to_name(err));
+        FL_LOG_RMT("RMT5_PERIPH: Failed to delete channel: " << esp_err_to_name(err));
         return false;
     }
 
@@ -236,7 +235,7 @@ bool Rmt5PeripheralESPImpl::enableChannel(void* channel_handle) FL_NO_EXCEPT {
 
     esp_err_t err = rmt_enable(channel);
     if (err != ESP_OK) {
-        FL_LOG_RMT("RMT5_PERIPH: Failed to enable channel: %s", esp_err_to_name(err));
+        FL_LOG_RMT("RMT5_PERIPH: Failed to enable channel: " << esp_err_to_name(err));
         return false;
     }
 
@@ -255,7 +254,7 @@ bool Rmt5PeripheralESPImpl::disableChannel(void* channel_handle) FL_NO_EXCEPT {
     rmt_channel_handle_t channel = static_cast<rmt_channel_handle_t>(channel_handle);
     esp_err_t err = rmt_disable(channel);
     if (err != ESP_OK) {
-        FL_LOG_RMT("RMT5_PERIPH: Failed to disable channel: %s", esp_err_to_name(err));
+        FL_LOG_RMT("RMT5_PERIPH: Failed to disable channel: " << esp_err_to_name(err));
         return false;
     }
 
@@ -285,7 +284,7 @@ bool Rmt5PeripheralESPImpl::transmit(void* channel_handle, void* encoder_handle,
 
     esp_err_t err = rmt_transmit(channel, encoder, buffer, buffer_size, &tx_config);
     if (err != ESP_OK) {
-        FL_WARN("RMT5_PERIPH: rmt_transmit() FAILED: %s", esp_err_to_name(err));
+        FL_WARN("RMT5_PERIPH: rmt_transmit() FAILED: " << esp_err_to_name(err));
         return false;
     }
 
@@ -310,9 +309,9 @@ bool Rmt5PeripheralESPImpl::waitAllDone(void* channel_handle, u32 timeout_ms) FL
 
     if (err != ESP_OK) {
         if (err == ESP_ERR_TIMEOUT) {
-            FL_WARN("RMT5_PERIPH: TX wait TIMEOUT after %s ms", timeout_ms);
+            FL_WARN("RMT5_PERIPH: TX wait TIMEOUT after " << timeout_ms << " ms");
         } else {
-            FL_WARN("RMT5_PERIPH: TX wait FAILED: %s", esp_err_to_name(err));
+            FL_WARN("RMT5_PERIPH: TX wait FAILED: " << esp_err_to_name(err));
         }
         return false;
     }
@@ -385,7 +384,7 @@ bool Rmt5PeripheralESPImpl::registerTxCallback(void* channel_handle,
     rmt_channel_handle_t channel = static_cast<rmt_channel_handle_t>(channel_handle);
     esp_err_t err = rmt_tx_register_event_callbacks(channel, &cbs, ctx);
     if (err != ESP_OK) {
-        FL_LOG_RMT("RMT5_PERIPH: Failed to register callback: %s", esp_err_to_name(err));
+        FL_LOG_RMT("RMT5_PERIPH: Failed to register callback: " << esp_err_to_name(err));
         delete ctx;  // ok bare allocation
         return false;
     }
@@ -459,7 +458,7 @@ bool Rmt5PeripheralESPImpl::syncCache(void* buffer, size_t size) FL_NO_EXCEPT {
                    "Memory barriers will ensure ordering.");
         } else {
             // Other errors are logged but non-fatal
-            FL_LOG_RMT("RMT5_PERIPH: Cache sync returned error: %s (non-fatal, memory barriers ensure ordering)", esp_err_to_name(err));
+            FL_LOG_RMT("RMT5_PERIPH: Cache sync returned error: " << esp_err_to_name(err) << " (non-fatal, memory barriers ensure ordering)");
         }
     }
 
@@ -485,11 +484,11 @@ u8* Rmt5PeripheralESPImpl::allocateDmaBuffer(size_t size) FL_NO_EXCEPT {
         heap_caps_aligned_alloc(alignment, aligned_size, MALLOC_CAP_DMA));
 
     if (buffer == nullptr) {
-        FL_WARN("Rmt5PeripheralESP: Failed to allocate DMA buffer (%s bytes)", aligned_size);
+        FL_WARN("Rmt5PeripheralESP: Failed to allocate DMA buffer (" << aligned_size << " bytes)");
         return nullptr;
     }
 
-    FL_LOG_RMT("RMT5_PERIPH: Allocated DMA buffer (%s bytes)", aligned_size);
+    FL_LOG_RMT("RMT5_PERIPH: Allocated DMA buffer (" << aligned_size << " bytes)");
     return buffer;
 }
 
@@ -586,7 +585,7 @@ private:
 
         esp_err_t ret = initialize(timing, resolution_hz);
         if (ret != ESP_OK) {
-            FL_WARN("Rmt5EncoderImpl: Initialization failed: %s", esp_err_to_name(ret));
+            FL_WARN("Rmt5EncoderImpl: Initialization failed: " << esp_err_to_name(ret));
         }
     }
 
@@ -674,10 +673,10 @@ private:
         mBit1LowTicks = static_cast<u32>((timing.T3 + half_ns_per_tick) / ns_per_tick);
         mResetTicks = static_cast<u32>((timing.RESET * 1000ULL + half_ns_per_tick) / ns_per_tick);
 
-        FL_DBG("[RMT5_ENCODER] Timing config: resolution=%sHz, ns_per_tick=%s", resolution_hz, ns_per_tick);
-        FL_DBG("[RMT5_ENCODER] Bit0: high=%s ticks, low=%s ticks", mBit0HighTicks, mBit0LowTicks);
-        FL_DBG("[RMT5_ENCODER] Bit1: high=%s ticks, low=%s ticks", mBit1HighTicks, mBit1LowTicks);
-        FL_DBG("[RMT5_ENCODER] Reset: %s ticks", mResetTicks);
+        FL_DBG("[RMT5_ENCODER] Timing config: resolution=" << resolution_hz << "Hz, ns_per_tick=" << ns_per_tick);
+        FL_DBG("[RMT5_ENCODER] Bit0: high=" << mBit0HighTicks << " ticks, low=" << mBit0LowTicks << " ticks");
+        FL_DBG("[RMT5_ENCODER] Bit1: high=" << mBit1HighTicks << " ticks, low=" << mBit1LowTicks << " ticks");
+        FL_DBG("[RMT5_ENCODER] Reset: " << mResetTicks << " ticks");
 
         rmt_bytes_encoder_config_t bytes_config = {};
         bytes_config.bit0.level0 = 1;
@@ -793,7 +792,7 @@ bool Rmt5PeripheralESPImpl::resetEncoder(void* encoder_handle) FL_NO_EXCEPT {
 
     esp_err_t err = encoder->reset(encoder);
     if (err != ESP_OK) {
-        FL_LOG_RMT("RMT5_PERIPH: Failed to reset encoder: %s", esp_err_to_name(err));
+        FL_LOG_RMT("RMT5_PERIPH: Failed to reset encoder: " << esp_err_to_name(err));
         return false;
     }
 

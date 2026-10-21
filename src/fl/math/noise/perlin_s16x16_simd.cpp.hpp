@@ -8,6 +8,7 @@
 #include "fl/math/noise/perlin_s16x16_simd.h"
 #include "fl/math/simd.h"
 #include "fl/fx/2d/animartrix_detail/perlin_s16x16.h"
+#include "fl/stl/noexcept.h"
 
 FL_OPTIMIZATION_LEVEL_O3_BEGIN
 
@@ -19,7 +20,7 @@ namespace fl {
 fl::simd::simd_u32x4 perlin_s16x16_simd::pnoise2d_raw_simd4_vec(
     fl::simd::simd_u32x4 nx_vec, fl::simd::simd_u32x4 ny_vec,
     const fl::i32 *fade_lut, const fl::u8 *perm)
-{
+FL_NO_EXCEPT {
     // SIMD: Extract integer floor (shift right by FP_BITS)
     fl::simd::simd_u32x4 X_vec = fl::simd::srl_u32_4(nx_vec, FP_BITS);
     fl::simd::simd_u32x4 Y_vec = fl::simd::srl_u32_4(ny_vec, FP_BITS);

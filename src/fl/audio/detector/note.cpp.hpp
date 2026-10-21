@@ -8,7 +8,7 @@ namespace audio {
 namespace detector {
 
 Note::Note()
-    : mPitchDetector(fl::make_shared<Pitch>())
+    FL_NO_EXCEPT : mPitchDetector(fl::make_shared<Pitch>())
     , mOwnsPitchDetector(true)
     , mCurrentNote(NO_NOTE)
     , mLastVelocity(0)
@@ -26,7 +26,7 @@ Note::Note()
 {}
 
 Note::Note(shared_ptr<Pitch> pitchDetector)
-    : mPitchDetector(pitchDetector)
+    FL_NO_EXCEPT : mPitchDetector(pitchDetector)
     , mOwnsPitchDetector(false)
     , mCurrentNote(NO_NOTE)
     , mLastVelocity(0)
@@ -45,7 +45,7 @@ Note::Note(shared_ptr<Pitch> pitchDetector)
 
 Note::~Note() FL_NO_EXCEPT = default;
 
-void Note::update(shared_ptr<Context> context) {
+void Note::update(shared_ptr<Context> context) FL_NO_EXCEPT {
     // Update pitch detector if we own it
     if (mOwnsPitchDetector && mPitchDetector) {
         mPitchDetector->update(context);
@@ -125,7 +125,7 @@ void Note::update(shared_ptr<Context> context) {
     }
 }
 
-void Note::fireCallbacks() {
+void Note::fireCallbacks() FL_NO_EXCEPT {
     if (mFireNoteOff) {
         if (onNoteOff) onNoteOff(mPendingOffNote);
         mFireNoteOff = false;
@@ -140,7 +140,7 @@ void Note::fireCallbacks() {
     }
 }
 
-void Note::reset() {
+void Note::reset() FL_NO_EXCEPT {
     mCurrentNote = NO_NOTE;
     mLastVelocity = 0;
     mNoteActive = false;
@@ -155,7 +155,7 @@ void Note::reset() {
     }
 }
 
-u8 Note::frequencyToMidiNote(float hz) const {
+u8 Note::frequencyToMidiNote(float hz) const FL_NO_EXCEPT {
     if (hz <= 0.0f) {
         return NO_NOTE;
     }
@@ -175,7 +175,7 @@ u8 Note::frequencyToMidiNote(float hz) const {
     return static_cast<u8>(midiNote);
 }
 
-float Note::midiNoteToFrequency(u8 note) const {
+float Note::midiNoteToFrequency(u8 note) const FL_NO_EXCEPT {
     if (note == NO_NOTE) {
         return 0.0f;
     }
@@ -185,7 +185,7 @@ float Note::midiNoteToFrequency(u8 note) const {
     return A4_FREQUENCY * fl::powf(2.0f, semitones / 12.0f);
 }
 
-float Note::calculatePitchBend(float hz, u8 note) const {
+float Note::calculatePitchBend(float hz, u8 note) const FL_NO_EXCEPT {
     if (note == NO_NOTE || hz <= 0.0f) {
         return 0.0f;
     }
@@ -203,7 +203,7 @@ float Note::calculatePitchBend(float hz, u8 note) const {
     return fl::clamp(cents, -50.0f, 50.0f);
 }
 
-u8 Note::calculateVelocity(float energy, float confidence) const {
+u8 Note::calculateVelocity(float energy, float confidence) const FL_NO_EXCEPT {
     // Velocity calculation based on RMS energy and pitch confidence
     // Higher energy = higher velocity
     // Higher confidence = more reliable velocity
@@ -220,21 +220,21 @@ u8 Note::calculateVelocity(float energy, float confidence) const {
     return static_cast<u8>(fl::clamp(velocity, 1, 127));
 }
 
-bool Note::shouldTriggerNoteOn(float confidence, float pitch) const {
+bool Note::shouldTriggerNoteOn(float confidence, float pitch) const FL_NO_EXCEPT {
     // Trigger note-on when:
     // 1. Confidence exceeds threshold
     // 2. Pitch is valid (non-zero)
     return (confidence >= mNoteOnThreshold) && (pitch > 0.0f);
 }
 
-bool Note::shouldTriggerNoteOff(float confidence, bool voiced) const {
+bool Note::shouldTriggerNoteOff(float confidence, bool voiced) const FL_NO_EXCEPT {
     // Trigger note-off when:
     // 1. Confidence drops below off threshold (hysteresis)
     // 2. OR voice becomes unvoiced (silence or percussion)
     return (confidence < mNoteOffThreshold) || !voiced;
 }
 
-bool Note::shouldTriggerNoteChange(u8 newNote, u8 currentNote) const {
+bool Note::shouldTriggerNoteChange(u8 newNote, u8 currentNote) const FL_NO_EXCEPT {
     if (newNote == NO_NOTE || currentNote == NO_NOTE) {
         return false;
     }

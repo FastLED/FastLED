@@ -11,7 +11,7 @@ namespace audio {
 namespace detector {
 
 Percussion::Percussion()
-    : mKickDetected(false)
+    FL_NO_EXCEPT : mKickDetected(false)
     , mSnareDetected(false)
     , mHiHatDetected(false)
     , mTomDetected(false)
@@ -39,7 +39,7 @@ Percussion::Percussion()
 
 Percussion::~Percussion() FL_NO_EXCEPT = default;
 
-void Percussion::update(shared_ptr<Context> context) {
+void Percussion::update(shared_ptr<Context> context) FL_NO_EXCEPT {
     mRetainedFFT = context->getFFT16(fft::Mode::CQ_NAIVE);
     const fft::Bins& fft = *mRetainedFFT;
     u32 timestamp = context->getTimestamp();
@@ -97,7 +97,7 @@ void Percussion::update(shared_ptr<Context> context) {
     if (mTomDetected) mLastTomTime = timestamp;
 }
 
-void Percussion::fireCallbacks() {
+void Percussion::fireCallbacks() FL_NO_EXCEPT {
     if (mKickDetected) {
         if (onKick) onKick();
         if (onPercussionHit) onPercussionHit(PercussionType::Kick);
@@ -119,7 +119,7 @@ void Percussion::fireCallbacks() {
     }
 }
 
-void Percussion::reset() {
+void Percussion::reset() FL_NO_EXCEPT {
     mKickDetected = false;
     mSnareDetected = false;
     mHiHatDetected = false;
@@ -143,7 +143,7 @@ void Percussion::reset() {
     mLastTomTime = 0;
 }
 
-void Percussion::computeFeatures(const fft::Bins& fft) {
+void Percussion::computeFeatures(const fft::Bins& fft) FL_NO_EXCEPT {
     auto bins = fft.raw();
     int n = static_cast<int>(bins.size());
     if (n < 16) {
@@ -225,7 +225,7 @@ void Percussion::computeFeatures(const fft::Bins& fft) {
     }
 }
 
-void Percussion::computeConfidences() {
+void Percussion::computeConfidences() FL_NO_EXCEPT {
     // Feature distributions with frequency-based bands (90-14080 Hz, 16 CQ bins):
     //
     // Type     | bassToTotal | trebleToTotal | clickRatio | trebleFlatness | midToTreble | subBassProxy
@@ -311,7 +311,7 @@ void Percussion::computeConfidences() {
     mTomConfidence = fl::clamp(mTomConfidence, 0.0f, 1.0f);
 }
 
-void Percussion::applyCrossBandRejection() {
+void Percussion::applyCrossBandRejection() FL_NO_EXCEPT {
     // Winner-takes-all among competing types.
     // With frequency-based bands (90-14080 Hz), kick and tom have similar
     // bass/treble ratios. Use sub-bass proxy as primary discriminant.

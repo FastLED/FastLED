@@ -76,10 +76,10 @@ struct SynthParams {
 
     /// Full parameter constructor
     SynthParams(i32 reflect, float peakTime, float halfHeight, float zeroWait)
-        : reflect(reflect), peakTime(peakTime), halfHeight(halfHeight), zeroWait(zeroWait) {}
+        FL_NO_EXCEPT : reflect(reflect), peakTime(peakTime), halfHeight(halfHeight), zeroWait(zeroWait) {}
 
     /// Create parameters for a predefined shape
-    static SynthParams fromShape(SynthShape shape);
+    static SynthParams fromShape(SynthShape shape) FL_NO_EXCEPT;
 };
 
 /// Interface for synth engine that holds BLEP/BLAMP tables
@@ -93,18 +93,18 @@ public:
     /// @param width BLEP width (4..64), larger = better quality, more CPU
     /// @param oversample Oversampling factor (2+), larger = less noise
     /// @return Shared pointer to the engine
-    static ISynthEnginePtr create(i32 width = 32, i32 oversample = 16);
+    static ISynthEnginePtr create(i32 width = 32, i32 oversample = 16) FL_NO_EXCEPT;
 
     virtual ~ISynthEngine() FL_NO_EXCEPT = default;
 
     /// Check if engine was initialized successfully
-    virtual bool isValid() const = 0;
+    virtual bool isValid() const FL_NO_EXCEPT = 0;
 
     /// Get the width setting
-    virtual i32 getWidth() const = 0;
+    virtual i32 getWidth() const FL_NO_EXCEPT = 0;
 
     /// Get the oversample setting
-    virtual i32 getOversample() const = 0;
+    virtual i32 getOversample() const FL_NO_EXCEPT = 0;
 };
 
 /// Interface class for synth oscillator
@@ -120,13 +120,13 @@ public:
     /// @param engine Shared pointer to the engine to use (keeps engine alive)
     /// @param params Waveform parameters
     /// @return Shared pointer to the oscillator
-    static ISynthOscillatorPtr create(ISynthEnginePtr engine, const SynthParams& params);
+    static ISynthOscillatorPtr create(ISynthEnginePtr engine, const SynthParams& params) FL_NO_EXCEPT;
 
     /// Factory function to create an oscillator with specified engine and shape
     /// @param engine Shared pointer to the engine to use (keeps engine alive)
     /// @param shape Predefined waveform shape
     /// @return Shared pointer to the oscillator
-    static ISynthOscillatorPtr create(ISynthEnginePtr engine, SynthShape shape = SynthShape::Sawtooth);
+    static ISynthOscillatorPtr create(ISynthEnginePtr engine, SynthShape shape = SynthShape::Sawtooth) FL_NO_EXCEPT;
 
     virtual ~ISynthOscillator() FL_NO_EXCEPT = default;
 
@@ -134,29 +134,29 @@ public:
     /// @param output Buffer to fill with samples
     /// @param numSamples Number of samples to generate
     /// @param freq Frequency divided by sample rate (e.g., 440/44100 for 440 Hz at 44.1 kHz)
-    virtual void generateSamples(float* output, i32 numSamples, float freq) = 0;
+    virtual void generateSamples(float* output, i32 numSamples, float freq) FL_NO_EXCEPT = 0;
 
     /// Generate audio samples (span version)
     /// @param output Span to fill with samples
     /// @param freq Frequency divided by sample rate
-    virtual void generateSamples(fl::span<float> output, float freq) = 0;
+    virtual void generateSamples(fl::span<float> output, float freq) FL_NO_EXCEPT = 0;
 
     /// Change waveform shape (takes effect at next cycle boundary)
     /// @param shape Predefined waveform shape
-    virtual void setShape(SynthShape shape) = 0;
+    virtual void setShape(SynthShape shape) FL_NO_EXCEPT = 0;
 
     /// Change waveform parameters (takes effect at next cycle boundary)
     /// @param params Custom waveform parameters
-    virtual void setParams(const SynthParams& params) = 0;
+    virtual void setParams(const SynthParams& params) FL_NO_EXCEPT = 0;
 
     /// Get current waveform parameters
-    virtual SynthParams getParams() const = 0;
+    virtual SynthParams getParams() const FL_NO_EXCEPT = 0;
 
     /// Reset oscillator to beginning of cycle
-    virtual void reset() = 0;
+    virtual void reset() FL_NO_EXCEPT = 0;
 
     /// Get the engine this oscillator uses
-    virtual ISynthEnginePtr getEngine() const = 0;
+    virtual ISynthEnginePtr getEngine() const FL_NO_EXCEPT = 0;
 };
 
 } // namespace audio

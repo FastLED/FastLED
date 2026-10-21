@@ -16,6 +16,7 @@
 #include "fl/stl/flat_map.h"
 #include "fl/stl/align.h"
 #include "fl/math/fixed_point.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -50,18 +51,18 @@ FL_ALIGN_PROGMEM(64) const u16 GAMMA_2_8_LUT[256] FL_PROGMEM = {
     55303, 55951, 56604, 57261, 57923, 58590, 59262, 59939, 60621, 61308,
     62000, 62697, 63399, 64106, 64818, 65535};
 
-u16 gamma_2_8(u8 value) {
+u16 gamma_2_8(u8 value) FL_NO_EXCEPT {
     return FL_PGM_READ_WORD_ALIGNED(&GAMMA_2_8_LUT[value]);
 }
 
 // 8-bit easing functions
-u8 easeInQuad8(u8 i) {
+u8 easeInQuad8(u8 i) FL_NO_EXCEPT {
     // Simple quadratic ease-in: i^2 scaled to 8-bit range
     // Using scale8(i, i) which computes (i * i) / 255
     return scale8(i, i);
 }
 
-u8 easeInOutQuad8(u8 i) {
+u8 easeInOutQuad8(u8 i) FL_NO_EXCEPT {
     constexpr u16 MAX = 0xFF;            // 255
     constexpr u16 HALF = (MAX + 1) >> 1; // 128
     constexpr u16 DENOM = MAX;           // divisor for scaling
@@ -81,7 +82,7 @@ u8 easeInOutQuad8(u8 i) {
     }
 }
 
-u8 easeInOutCubic8(u8 i) {
+u8 easeInOutCubic8(u8 i) FL_NO_EXCEPT {
     constexpr u16 MAX = 0xFF;                  // 255
     constexpr u16 HALF = (MAX + 1) >> 1;       // 128
     constexpr u32 DENOM = (u32)MAX * MAX; // 255*255 = 65025
@@ -104,7 +105,7 @@ u8 easeInOutCubic8(u8 i) {
     }
 }
 
-u8 easeOutQuad8(u8 i) {
+u8 easeOutQuad8(u8 i) FL_NO_EXCEPT {
     // ease-out is the inverse of ease-in: 1 - (1-t)²
     // For 8-bit: y = MAX - (MAX-i)² / MAX
     constexpr u16 MAX = 0xFF;
@@ -113,7 +114,7 @@ u8 easeOutQuad8(u8 i) {
     return u8(MAX - (num / MAX));
 }
 
-u8 easeInCubic8(u8 i) {
+u8 easeInCubic8(u8 i) FL_NO_EXCEPT {
     // Simple cubic ease-in: i³ scaled to 8-bit range
     // y = i³ / MAX²
     constexpr u16 MAX = 0xFF;
@@ -126,7 +127,7 @@ u8 easeInCubic8(u8 i) {
     return u8(num / DENOM);
 }
 
-u8 easeOutCubic8(u8 i) {
+u8 easeOutCubic8(u8 i) FL_NO_EXCEPT {
     // ease-out cubic: 1 - (1-t)³
     // For 8-bit: y = MAX - (MAX-i)³ / MAX²
     constexpr u16 MAX = 0xFF;
@@ -139,7 +140,7 @@ u8 easeOutCubic8(u8 i) {
     return u8(MAX - (num / DENOM));
 }
 
-u8 easeInSine8(u8 i) {
+u8 easeInSine8(u8 i) FL_NO_EXCEPT {
 
     static const u8 easeInSineTable[256] FL_PROGMEM = {
         0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   1,   1,   1,
@@ -167,7 +168,7 @@ u8 easeInSine8(u8 i) {
     return FL_PGM_READ_BYTE_NEAR(&easeInSineTable[i]);
 }
 
-u8 easeOutSine8(u8 i) {
+u8 easeOutSine8(u8 i) FL_NO_EXCEPT {
     // ease-out sine: sin(t * π/2)
     // Delegate to 16-bit version for consistency and accuracy
     // Scale 8-bit input to 16-bit range, call 16-bit function, scale result back
@@ -176,7 +177,7 @@ u8 easeOutSine8(u8 i) {
     return map16_to_8(result16);
 }
 
-u8 easeInOutSine8(u8 i) {
+u8 easeInOutSine8(u8 i) FL_NO_EXCEPT {
     // ease-in-out sine: -(cos(π*t) - 1) / 2
     // Delegate to 16-bit version for consistency and accuracy
     // Scale 8-bit input to 16-bit range, call 16-bit function, scale result back
@@ -186,13 +187,13 @@ u8 easeInOutSine8(u8 i) {
 }
 
 // 16-bit easing functions
-u16 easeInQuad16(u16 i) {
+u16 easeInQuad16(u16 i) FL_NO_EXCEPT {
     // Simple quadratic ease-in: i^2 scaled to 16-bit range
     // Using scale16(i, i) which computes (i * i) / 65535
     return scale16(i, i);
 }
 
-u16 easeInOutQuad16(u16 x) {
+u16 easeInOutQuad16(u16 x) FL_NO_EXCEPT {
     // 16-bit quadratic ease-in / ease-out function
     constexpr u32 MAX = 0xFFFF;          // 65535
     constexpr u32 HALF = (MAX + 1) >> 1; // 32768
@@ -212,7 +213,7 @@ u16 easeInOutQuad16(u16 x) {
     }
 }
 
-u16 easeInOutCubic16(u16 x) {
+u16 easeInOutCubic16(u16 x) FL_NO_EXCEPT {
     const u32 MAX = 0xFFFF;             // 65535
     const u32 HALF = (MAX + 1) >> 1;    // 32768
     const fl::u64 M2 = (fl::u64)MAX * MAX; // 65535² = 4 294 836 225
@@ -234,7 +235,7 @@ u16 easeInOutCubic16(u16 x) {
     }
 }
 
-u16 easeOutQuad16(u16 i) {
+u16 easeOutQuad16(u16 i) FL_NO_EXCEPT {
     // ease-out quadratic: 1 - (1-t)²
     // For 16-bit: y = MAX - (MAX-i)² / MAX
     constexpr u32 MAX = 0xFFFF;     // 65535
@@ -245,7 +246,7 @@ u16 easeOutQuad16(u16 i) {
     return u16(MAX - (num / MAX));
 }
 
-u16 easeInCubic16(u16 i) {
+u16 easeInCubic16(u16 i) FL_NO_EXCEPT {
     // Simple cubic ease-in: i³ scaled to 16-bit range
     // y = i³ / MAX²
     constexpr u32 MAX = 0xFFFF;                // 65535
@@ -258,7 +259,7 @@ u16 easeInCubic16(u16 i) {
     return u16(num / DENOM);
 }
 
-u16 easeOutCubic16(u16 i) {
+u16 easeOutCubic16(u16 i) FL_NO_EXCEPT {
     // ease-out cubic: 1 - (1-t)³
     // For 16-bit: y = MAX - (MAX-i)³ / MAX²
     constexpr u32 MAX = 0xFFFF;                // 65535
@@ -271,7 +272,7 @@ u16 easeOutCubic16(u16 i) {
     return u16(MAX - (num / DENOM));
 }
 
-u16 easeInSine16(u16 i) {
+u16 easeInSine16(u16 i) FL_NO_EXCEPT {
     // ease-in sine: 1 - cos(t * π/2)
     // Handle boundary conditions explicitly
     if (i == 0)
@@ -302,7 +303,7 @@ u16 easeInSine16(u16 i) {
     return final_result;
 }
 
-u16 easeOutSine16(u16 i) {
+u16 easeOutSine16(u16 i) FL_NO_EXCEPT {
     // ease-out sine: sin(t * π/2)
     // Handle boundary conditions explicitly
     if (i == 0)
@@ -323,7 +324,7 @@ u16 easeOutSine16(u16 i) {
     return (u16)((fl::u64)sin_result * 65535ULL / 2147418112ULL);
 }
 
-u16 easeInOutSine16(u16 i) {
+u16 easeInOutSine16(u16 i) FL_NO_EXCEPT {
     // ease-in-out sine: -(cos(π*t) - 1) / 2
     // Handle boundary conditions explicitly
     if (i == 0)
@@ -352,7 +353,7 @@ using GammaKey = fl::ufixed_point<4, 12>;
 
 class Gamma8Impl : public Gamma8 {
 public:
-    explicit Gamma8Impl(float gamma) {
+    explicit Gamma8Impl(float gamma) FL_NO_EXCEPT {
         // i=0 is mathematically exact regardless of gamma: pow(0, any) = 0.
         // The s8x24::pow short-circuit covers exact 0 input, but we set it
         // here directly anyway because (a) the loop below avoids the
@@ -408,14 +409,14 @@ public:
     // `const u16*` because that would silently bind to integer-literal
     // gammas (`Gamma8::getOrCreate(2)` would be a footgun).
     struct from_progmem_lut_tag {};
-    Gamma8Impl(from_progmem_lut_tag, const u16* progmem_lut) {
+    Gamma8Impl(from_progmem_lut_tag, const u16* progmem_lut) FL_NO_EXCEPT {
         for (int i = 0; i < 256; ++i) {
             mLut[i] = FL_PGM_READ_WORD_ALIGNED(&progmem_lut[i]);
         }
     }
 
     void convert(fl::span<const u8> input,
-                  fl::span<u16> output) const override {
+                  fl::span<u16> output) const FL_NO_EXCEPT override {
         const int n =
             input.size() < output.size() ? input.size() : output.size();
         for (int i = 0; i < n; ++i) {
@@ -424,7 +425,7 @@ public:
     }
 
     void convert(fl::span<const fl::ufixed_point<8, 8>> input,
-                  fl::span<u16> output) const override {
+                  fl::span<u16> output) const FL_NO_EXCEPT override {
         const int n =
             input.size() < output.size() ? input.size() : output.size();
         for (int i = 0; i < n; ++i) {
@@ -433,7 +434,7 @@ public:
     }
 
     void convert(fl::span<const fl::ufixed_point<8, 8>> input,
-                  fl::span<fl::ufixed_point<8, 8>> output) const override {
+                  fl::span<fl::ufixed_point<8, 8>> output) const FL_NO_EXCEPT override {
         using FP = fl::ufixed_point<8, 8>;
         const int n =
             input.size() < output.size() ? input.size() : output.size();
@@ -443,7 +444,7 @@ public:
     }
 
 private:
-    u16 lerpLut(const fl::ufixed_point<8, 8>& fp) const {
+    u16 lerpLut(const fl::ufixed_point<8, 8>& fp) const FL_NO_EXCEPT {
         u16 raw = fp.raw();
         u8 idx = static_cast<u8>(raw >> 8);    // integer part (LUT index)
         u8 frac = static_cast<u8>(raw & 0xFF); // fractional part (0-255)
@@ -456,7 +457,7 @@ private:
     FL_ALIGNAS(64) u16 mLut[256];
 };
 
-fl::shared_ptr<const Gamma8> Gamma8::getOrCreate(float gamma) {
+fl::shared_ptr<const Gamma8> Gamma8::getOrCreate(float gamma) FL_NO_EXCEPT {
     // Clamp gamma to the cache-key domain BEFORE deriving the key and
     // before feeding it to s8x24. `GammaKey` is `ufixed_point<4, 12>`,
     // so its representable range is [0, ~16). A negative input would

@@ -276,7 +276,9 @@ _ZCCACHE_TARGET_RULES: tuple[str, ...] = (
     "c_LINKER",
 )
 
-_ZCCACHE_WINDOWS_TARGET_RULES: tuple[str, ...] = ()
+# Windows parallel DLL links remain unwrapped after daemon IPC failures (#3126).
+# Compile commands need zccache for its private PCH input view on every host.
+_ZCCACHE_WINDOWS_TARGET_RULES: tuple[str, ...] = ("cpp_COMPILER", "c_COMPILER")
 
 
 def inject_zccache_wrapping(build_dir: Path, zccache_path: Optional[str]) -> bool:

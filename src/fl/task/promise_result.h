@@ -9,6 +9,7 @@
 
 #include "fl/stl/variant.h"
 #include "fl/task/promise.h"  // For Error type
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace task {
@@ -41,23 +42,23 @@ class PromiseResult {
 public:
     /// @brief Construct a successful PromiseResult
     /// @param value The success value
-    PromiseResult(const T& value) : mResult(value) {}
+    PromiseResult(const T& value) FL_NO_EXCEPT : mResult(value) {}
 
     /// @brief Construct a successful PromiseResult (move)
     /// @param value The success value (moved)
-    PromiseResult(T&& value) : mResult(fl::move(value)) {}
+    PromiseResult(T&& value) FL_NO_EXCEPT : mResult(fl::move(value)) {}
 
     /// @brief Construct an error PromiseResult
     /// @param error The error value
-    PromiseResult(const Error& error) : mResult(error) {}
+    PromiseResult(const Error& error) FL_NO_EXCEPT : mResult(error) {}
 
     /// @brief Construct an error PromiseResult (move)
     /// @param error The error value (moved)
-    PromiseResult(Error&& error) : mResult(fl::move(error)) {}
+    PromiseResult(Error&& error) FL_NO_EXCEPT : mResult(fl::move(error)) {}
 
     /// @brief Check if the result is successful
     /// @return True if the result contains a value, false if it contains an error
-    bool ok() const {
+    bool ok() const FL_NO_EXCEPT {
         return mResult.template is<T>();
     }
 
@@ -65,7 +66,7 @@ public:
     /// @return True if the result is successful
     ///
     /// Allows usage like: if (result) { ... }
-    explicit operator bool() const {
+    explicit operator bool() const FL_NO_EXCEPT {
         return ok();
     }
 
@@ -73,7 +74,7 @@ public:
     /// @return Reference to the success value
     /// @warning Returns static empty object if called on an error result
     /// @note Use ok() to check before calling for proper error handling
-    const T& value() const {
+    const T& value() const FL_NO_EXCEPT {
         if (!ok()) {
             // Return static empty object instead of crashing
             static const T empty{};
@@ -86,7 +87,7 @@ public:
     /// @return Reference to the success value
     /// @warning Returns static empty object if called on an error result
     /// @note Use ok() to check before calling for proper error handling
-    T& value() {
+    T& value() FL_NO_EXCEPT {
         if (!ok()) {
             // Return static empty object instead of crashing
             static T empty{};  // okay static in header
@@ -99,7 +100,7 @@ public:
     /// @return Reference to the error
     /// @warning Returns static descriptive error if called on a success result
     /// @note Use !ok() to check before calling for proper error handling
-    const Error& error() const {
+    const Error& error() const FL_NO_EXCEPT {
         if (ok()) {
             // Return descriptive error for misuse detection
             static const Error empty_error("No error - result contains success value");
@@ -111,13 +112,13 @@ public:
     /// @brief Get the error message as a convenience
     /// @return Error message string, or empty string if successful
     /// @note Safe to call on success results (returns empty string)
-    fl::string error_message() const {
+    fl::string error_message() const FL_NO_EXCEPT {
         return ok() ? fl::string() : error().message;
     }
 
     /// @brief Access the underlying variant (for advanced usage)
     /// @return Reference to the internal variant
-    const fl::variant<T, Error>& variant() const {
+    const fl::variant<T, Error>& variant() const FL_NO_EXCEPT {
         return mResult;
     }
 
@@ -130,7 +131,7 @@ private:
 /// @param value The success value
 /// @return result containing the value
 template<typename T>
-PromiseResult<T> make_success(const T& value) {
+PromiseResult<T> make_success(const T& value) FL_NO_EXCEPT {
     return PromiseResult<T>(value);
 }
 
@@ -139,7 +140,7 @@ PromiseResult<T> make_success(const T& value) {
 /// @param value The success value (moved)
 /// @return result containing the value
 template<typename T>
-PromiseResult<T> make_success(T&& value) {
+PromiseResult<T> make_success(T&& value) FL_NO_EXCEPT {
     return PromiseResult<T>(fl::move(value));
 }
 
@@ -148,7 +149,7 @@ PromiseResult<T> make_success(T&& value) {
 /// @param error The error
 /// @return result containing the error
 template<typename T>
-PromiseResult<T> make_error(const Error& error) {
+PromiseResult<T> make_error(const Error& error) FL_NO_EXCEPT {
     return PromiseResult<T>(error);
 }
 
@@ -157,7 +158,7 @@ PromiseResult<T> make_error(const Error& error) {
 /// @param error The error (moved)
 /// @return result containing the error
 template<typename T>
-PromiseResult<T> make_error(Error&& error) {
+PromiseResult<T> make_error(Error&& error) FL_NO_EXCEPT {
     return PromiseResult<T>(fl::move(error));
 }
 
@@ -166,7 +167,7 @@ PromiseResult<T> make_error(Error&& error) {
 /// @param message The error message
 /// @return result containing the error
 template<typename T>
-PromiseResult<T> make_error(const fl::string& message) {
+PromiseResult<T> make_error(const fl::string& message) FL_NO_EXCEPT {
     return PromiseResult<T>(Error(message));
 }
 
@@ -175,7 +176,7 @@ PromiseResult<T> make_error(const fl::string& message) {
 /// @param message The error message
 /// @return result containing the error
 template<typename T>
-PromiseResult<T> make_error(const char* message) {
+PromiseResult<T> make_error(const char* message) FL_NO_EXCEPT {
     return PromiseResult<T>(Error(message));
 }
 

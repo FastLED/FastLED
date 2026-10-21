@@ -10,6 +10,7 @@
 #include "fl/stl/assert.h"
 #include "fl/math/math.h"
 #include "fl/math/xymap.h"
+#include "fl/stl/noexcept.h"
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING(shift-count-overflow)
@@ -17,7 +18,7 @@ FL_DISABLE_WARNING(shift-count-overflow)
 namespace fl {
 
 void downscaleHalf(const CRGB *src, fl::u16 srcWidth, fl::u16 srcHeight,
-                   CRGB *dst) {
+                   CRGB *dst) FL_NO_EXCEPT {
     fl::u16 dstWidth = srcWidth / 2;
     fl::u16 dstHeight = srcHeight / 2;
 
@@ -46,7 +47,7 @@ void downscaleHalf(const CRGB *src, fl::u16 srcWidth, fl::u16 srcHeight,
 }
 
 void downscaleHalf(const CRGB *src, const XYMap &srcXY, CRGB *dst,
-                   const XYMap &dstXY) {
+                   const XYMap &dstXY) FL_NO_EXCEPT {
     fl::u16 dstWidth = dstXY.getWidth();
     fl::u16 dstHeight = dstXY.getHeight();
 
@@ -81,7 +82,7 @@ void downscaleHalf(const CRGB *src, const XYMap &srcXY, CRGB *dst,
 }
 
 void downscaleArbitrary(const CRGB *src, const XYMap &srcXY, CRGB *dst,
-                        const XYMap &dstXY) {
+                        const XYMap &dstXY) FL_NO_EXCEPT {
     const fl::u16 srcWidth = srcXY.getWidth();
     const fl::u16 srcHeight = srcXY.getHeight();
     const fl::u16 dstWidth = dstXY.getWidth();
@@ -153,7 +154,7 @@ void downscaleArbitrary(const CRGB *src, const XYMap &srcXY, CRGB *dst,
 }
 
 void downscale(const CRGB *src, const XYMap &srcXY, CRGB *dst,
-               const XYMap &dstXY) {
+               const XYMap &dstXY) FL_NO_EXCEPT {
     fl::u16 srcWidth = srcXY.getWidth();
     fl::u16 srcHeight = srcXY.getHeight();
     fl::u16 dstWidth = dstXY.getWidth();

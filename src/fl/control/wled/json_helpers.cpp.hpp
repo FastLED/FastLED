@@ -2,12 +2,13 @@
 #include "fl/fx/wled/json_helpers.h"
 #include "fl/log/log.h"
 #include "fl/stl/cstdlib.h"  // For strtol
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace wled {
 
 // Helper function to parse hex color string to RGB
-bool parseHexColor(const fl::string& hexStr, u8& r, u8& g, u8& b) {
+bool parseHexColor(const fl::string& hexStr, u8& r, u8& g, u8& b) FL_NO_EXCEPT {
     fl::string hex = hexStr;
 
     // Strip leading '#' if present
@@ -44,7 +45,7 @@ bool parseHexColor(const fl::string& hexStr, u8& r, u8& g, u8& b) {
 }
 
 // Helper function to convert RGB to hex string
-fl::string rgbToHex(u8 r, u8 g, u8 b) {
+fl::string rgbToHex(u8 r, u8 g, u8 b) FL_NO_EXCEPT {
     fl::string hex;
     hex.reserve(6);
 
@@ -64,7 +65,7 @@ fl::string rgbToHex(u8 r, u8 g, u8 b) {
 }
 
 // Helper function to parse segment fields
-void parseSegmentFields(const fl::json& segJson, WLEDSegment& seg) {
+void parseSegmentFields(const fl::json& segJson, WLEDSegment& seg) FL_NO_EXCEPT {
     // Extract basic properties
     if (segJson.contains("start") && segJson["start"].is_int()) {
         i64 startInt = segJson["start"] | 0;
@@ -254,7 +255,7 @@ void parseSegmentFields(const fl::json& segJson, WLEDSegment& seg) {
                     color.push_back(b);
                     seg.mColors.push_back(color);
                 } else {
-                    FL_WARN("WLED: invalid hex color string: %s", hexStr);
+                    FL_WARN("WLED: invalid hex color string: " << hexStr);
                 }
             }
         }
@@ -297,13 +298,13 @@ void parseSegmentFields(const fl::json& segJson, WLEDSegment& seg) {
                     char* endptr;
                     long startVal = fl::strtol(startStr.c_str(), &endptr, 10);
                     if (endptr == startStr.c_str() || startVal < 0) {
-                        FL_WARN("WLED: invalid range start index: %s", startStr);
+                        FL_WARN("WLED: invalid range start index: " << startStr);
                         continue;
                     }
 
                     long endVal = fl::strtol(endStr.c_str(), &endptr, 10);
                     if (endptr == endStr.c_str() || endVal < 0) {
-                        FL_WARN("WLED: invalid range end index: %s", endStr);
+                        FL_WARN("WLED: invalid range end index: " << endStr);
                         continue;
                     }
 
@@ -314,7 +315,7 @@ void parseSegmentFields(const fl::json& segJson, WLEDSegment& seg) {
                     char* endptr;
                     long idxVal = fl::strtol(indexStr.c_str(), &endptr, 10);
                     if (endptr == indexStr.c_str() || idxVal < 0) {
-                        FL_WARN("WLED: invalid LED index: %s", indexStr);
+                        FL_WARN("WLED: invalid LED index: " << indexStr);
                         continue;
                     }
                     startIdx = endIdx = static_cast<size_t>(idxVal);
@@ -328,7 +329,7 @@ void parseSegmentFields(const fl::json& segJson, WLEDSegment& seg) {
             // Parse hex color
             u8 r, g, b;
             if (!parseHexColor(hexStr, r, g, b)) {
-                FL_WARN("WLED: invalid hex color in individual LED: %s", hexStr);
+                FL_WARN("WLED: invalid hex color in individual LED: " << hexStr);
                 continue;
             }
 

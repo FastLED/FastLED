@@ -308,7 +308,7 @@ bool SPIDualSAMD21::begin(const SpiHw2::Config& config) {
     mSercom->SPI.CTRLA.bit.ENABLE = 1;
     while (mSercom->SPI.SYNCBUSY.bit.ENABLE);
 
-    FL_WARN("SPIDualSAMD21: Initialized on SERCOM%s at %s MHz (polling mode, single-lane - true dual-lane TBD)", sercom_num, (f_cpu / (2 * (baud_div + 1)) / 1000000.0));
+    FL_WARN("SPIDualSAMD21: Initialized on SERCOM" << sercom_num << " at " << ((f_cpu / (2 * (baud_div + 1)) / 1000000.0)) << " MHz (polling mode, single-lane - true dual-lane TBD)");
 
     // Note: This is a single-lane implementation like SAMD51
     // True dual-lane requires:

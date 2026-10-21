@@ -87,14 +87,14 @@ void invoke_user_callback() FL_NO_EXCEPT {
 void handle_system_reset(const char* handler_name) FL_NO_EXCEPT {
     invoke_user_callback();
 
-    FL_DBG("\n[%s] System reset detected - performing safe USB disconnect", handler_name);
+    FL_DBG("\n[" << handler_name << "] System reset detected - performing safe USB disconnect");
 
     disconnect_usb_hardware();
 
 #if HAS_USB_SERIAL_JTAG
-    FL_DBG("[%s] ✓ USB disconnected - proceeding with reset", handler_name);
+    FL_DBG("[" << handler_name << "] ✓ USB disconnected - proceeding with reset");
 #else
-    FL_DBG("[%s] No USB Serial JTAG hardware - using default reset behavior", handler_name);
+    FL_DBG("[" << handler_name << "] No USB Serial JTAG hardware - using default reset behavior");
 #endif
 }
 
@@ -144,7 +144,7 @@ bool init_task_watchdog(u32 timeout_ms) FL_NO_EXCEPT {
         err = esp_task_wdt_reconfigure(&config);
     }
     if (err != ESP_OK) {
-        FL_DBG("[WATCHDOG] Failed to initialize (error: %s)", err);
+        FL_DBG("[WATCHDOG] Failed to initialize (error: " << err << ")");
         return false;
     }
 
@@ -153,7 +153,7 @@ bool init_task_watchdog(u32 timeout_ms) FL_NO_EXCEPT {
 
 // Logs watchdog configuration status
 void log_watchdog_status(u32 timeout_ms, watchdog_callback_t callback) FL_NO_EXCEPT {
-    FL_DBG("[WATCHDOG] ✓ %sms watchdog active with reset on timeout", timeout_ms);
+    FL_DBG("[WATCHDOG] ✓ " << timeout_ms << "ms watchdog active with reset on timeout");
     if (callback != nullptr) {
         FL_DBG("[WATCHDOG] ℹ️  User callback registered");
     }
@@ -166,7 +166,7 @@ void log_watchdog_status(u32 timeout_ms, watchdog_callback_t callback) FL_NO_EXC
 void watchdog_setup(u32 timeout_ms,
                     watchdog_callback_t callback,
                     void* user_data) FL_NO_EXCEPT {
-    FL_DBG("\n[WATCHDOG] Configuring ESP32 custom %sms watchdog (IDF v5.x)", timeout_ms);
+    FL_DBG("\n[WATCHDOG] Configuring ESP32 custom " << timeout_ms << "ms watchdog (IDF v5.x)");
 
     // Store callback for reset handlers
     detail::s_user_callback = callback;

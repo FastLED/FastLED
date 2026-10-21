@@ -26,7 +26,7 @@ extern "C" {
 #include "fl/stl/noexcept.h"
     // IWYU pragma: end_keep
     // ADC function from ESP8266 SDK (user_interface.h)
-    fl::u16 system_adc_read(void) FL_NO_EXCEPT;
+    fl::u16 system_adc_read(void);
 }
 FL_EXTERN_C_END
 
@@ -365,15 +365,15 @@ inline void setAdcRange(AdcRange range) FL_NO_EXCEPT {
 // PWM Frequency Control
 // ============================================================================
 
-inline bool needsPwmIsrFallback(int /*pin*/, u32 /*frequency_hz*/) {
+inline bool needsPwmIsrFallback(int /*pin*/, u32 /*frequency_hz*/) FL_NO_EXCEPT {
     return true;
 }
 
-inline int setPwmFrequencyNative(int /*pin*/, u32 /*frequency_hz*/) {
+inline int setPwmFrequencyNative(int /*pin*/, u32 /*frequency_hz*/) FL_NO_EXCEPT {
     return -4;
 }
 
-inline u32 getPwmFrequencyNative(int /*pin*/) {
+inline u32 getPwmFrequencyNative(int /*pin*/) FL_NO_EXCEPT {
     return 0;
 }
 

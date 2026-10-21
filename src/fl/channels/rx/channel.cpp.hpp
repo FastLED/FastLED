@@ -18,6 +18,7 @@ static RxConfig toRxConfig(const RxChannelConfig& config) FL_NO_EXCEPT {
     out.start_low = config.start_low;
     out.io_loop_back = config.io_loop_back;
     out.use_dma = config.use_dma;
+    out.stream_timing = config.stream_timing;
     return out;
 }
 

@@ -403,6 +403,11 @@ def display_objectfled_diagnostics(result: dict[str, Any]) -> None:
             for line in snapshot.splitlines():
                 print(f"      {line}")
 
+    stream = result.get("teensyStream")
+    if isinstance(stream, dict):
+        fields = " ".join(f"{key}={value}" for key, value in stream.items())
+        print(f"  Teensy streaming RX/TX: {fields}")
+
     flex_diag = result.get("flexPwmRxDiagnostics")
     if isinstance(flex_diag, dict):
         print()
@@ -420,9 +425,27 @@ def display_objectfled_diagnostics(result: dict[str, Any]) -> None:
             "activePinMatches",
             "configured",
             "receiveDone",
-            "edgesValid",
-            "edgeCount",
-            "captureBufferSize",
+            "ringPairs",
+            "ringBytes",
+            "decodedCapacity",
+            "pairs",
+            "bits",
+            "bitErrors",
+            "fullBytes",
+            "halvesDone",
+            "tailPairs",
+            "overruns",
+            "isrCount",
+            "isrMaxCycles",
+            "isrTotalCycles",
+            "cpuHz",
+            "isrPeakCyclesSinceBoot",
+            "overrunsSinceBoot",
+            "framesSinceBoot",
+            "calibratedMidpointNs",
+            "frameMidpointNs",
+            "nearThresholdBits",
+            "inexact",
             "activeSubmodule",
             "activeChannelB",
             "activeDmaSource",

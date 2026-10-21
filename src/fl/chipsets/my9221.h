@@ -53,7 +53,7 @@ class MY9221Controller : public CPixelLEDController<RGB_ORDER> {
 	/// Datasheet latch: hold DCKI low for >220 us after last data, then pulse DI 4x.
 	static constexpr fl::u32 kLatchDelayUs = 230;
 
-	FASTLED_FORCE_INLINE void writeBit(fl::u8 bit) {
+	FASTLED_FORCE_INLINE void writeBit(fl::u8 bit) FL_NO_EXCEPT {
 		if (bit) {
 			DataPin::hi();
 		} else {
@@ -64,20 +64,20 @@ class MY9221Controller : public CPixelLEDController<RGB_ORDER> {
 	}
 
 	/// Shift out one 16-bit word MSB-first, one clock edge per bit.
-	void sendWord(fl::u16 data) {
+	void sendWord(fl::u16 data) FL_NO_EXCEPT {
 		for (int i = 0; i < 16; ++i) {
 			writeBit((data & 0x8000) ? 1 : 0);
 			data = static_cast<fl::u16>(data << 1);
 		}
 	}
 
-	void sendLed(fl::u8 c0, fl::u8 c1, fl::u8 c2) {
+	void sendLed(fl::u8 c0, fl::u8 c1, fl::u8 c2) FL_NO_EXCEPT {
 		sendWord(c0);
 		sendWord(c1);
 		sendWord(c2);
 	}
 
-	void latch() {
+	void latch() FL_NO_EXCEPT {
 		ClockPin::lo();
 		DataPin::lo();
 		fl::delayMicroseconds(kLatchDelayUs);
@@ -92,7 +92,7 @@ class MY9221Controller : public CPixelLEDController<RGB_ORDER> {
 public:
 	MY9221Controller() FL_NO_EXCEPT {}
 
-	virtual void init() {
+	virtual void init() FL_NO_EXCEPT {
 		DataPin::setOutput();
 		ClockPin::setOutput();
 		DataPin::lo();
@@ -102,7 +102,7 @@ public:
 
 protected:
 	/// @copydoc CPixelLEDController::showPixels()
-	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
+	virtual void showPixels(PixelController<RGB_ORDER> & pixels) FL_NO_EXCEPT {
 		// Ensure known idle levels before the first edge.
 		DataPin::lo();
 		ClockPin::lo();

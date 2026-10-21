@@ -24,7 +24,7 @@ public:
     /// Constructor
     /// @param port Server port (default: 8080)
     /// @param heartbeatIntervalMs Heartbeat interval in milliseconds (default: 30000ms = 30s)
-    HttpStreamServer(u16 port = 8080, u32 heartbeatIntervalMs = 30000);
+    HttpStreamServer(u16 port = 8080, u32 heartbeatIntervalMs = 30000) FL_NO_EXCEPT;
 
     /// Virtual destructor
     ~HttpStreamServer() FL_NO_EXCEPT override;
@@ -33,36 +33,36 @@ public:
 
     /// Start HTTP server (listen for connections)
     /// @return true if server started successfully, false otherwise
-    bool connect() override;
+    bool connect() FL_NO_EXCEPT override;
 
     /// Stop HTTP server (disconnect all clients)
-    void disconnect() override;
+    void disconnect() FL_NO_EXCEPT override;
 
     /// Check if server is listening
     /// @return true if listening, false otherwise
-    bool isConnected() const override;
+    bool isConnected() const FL_NO_EXCEPT override;
 
     // Server-specific methods
 
     /// Get actual listening port (useful when constructed with port 0)
     /// @return Actual port number
-    u16 port() const;
+    u16 port() const FL_NO_EXCEPT;
 
     /// Accept new client connections (non-blocking)
     /// Call this in update loop to accept new clients
-    void acceptClients();
+    void acceptClients() FL_NO_EXCEPT;
 
     /// Get number of connected clients
     /// @return Number of connected clients
-    size_t getClientCount() const;
+    size_t getClientCount() const FL_NO_EXCEPT;
 
     /// Disconnect specific client
     /// @param clientId Client ID
-    void disconnectClient(u32 clientId);
+    void disconnectClient(u32 clientId) FL_NO_EXCEPT;
 
     /// Get list of connected client IDs
     /// @return Vector of client IDs
-    fl::vector<u32> getClientIds() const;
+    fl::vector<u32> getClientIds() const FL_NO_EXCEPT;
 
 protected:
     // Abstract methods implementation (from HttpStreamTransport)
@@ -70,16 +70,16 @@ protected:
     /// Send raw data to all connected clients (broadcast)
     /// @param data Data to send
     /// @return Number of bytes sent, or -1 on error
-    int sendData(fl::span<const u8> data) override;
+    int sendData(fl::span<const u8> data) FL_NO_EXCEPT override;
 
     /// Receive raw data from any client
     /// Processes data from all clients, returns first available
     /// @param buffer Buffer to receive data into
     /// @return Number of bytes received, or -1 on error
-    int recvData(fl::span<u8> buffer) override;
+    int recvData(fl::span<u8> buffer) FL_NO_EXCEPT override;
 
     /// Trigger reconnection (for server: disconnect all and restart)
-    void triggerReconnect() override;
+    void triggerReconnect() FL_NO_EXCEPT override;
 
 private:
     /// Client connection state
@@ -102,7 +102,7 @@ private:
         }
 
         ClientState(u32 id)
-            : clientId(id)
+            FL_NO_EXCEPT : clientId(id)
             , httpHeaderReceived(false)
             , httpHeaderSent(false)
             , requestParser()
@@ -114,26 +114,26 @@ private:
     /// Read and validate HTTP request header from client
     /// @param clientId Client ID
     /// @return true if valid request header received, false otherwise
-    bool readHttpRequestHeader(u32 clientId);
+    bool readHttpRequestHeader(u32 clientId) FL_NO_EXCEPT;
 
     /// Send HTTP response header to client
     /// @param clientId Client ID
     /// @return true if sent successfully, false otherwise
-    bool sendHttpResponseHeader(u32 clientId);
+    bool sendHttpResponseHeader(u32 clientId) FL_NO_EXCEPT;
 
     /// Process incoming data from client
     /// @param clientId Client ID
     /// @return true if data processed successfully, false otherwise
-    bool processClientData(u32 clientId);
+    bool processClientData(u32 clientId) FL_NO_EXCEPT;
 
     /// Get or create client state
     /// @param clientId Client ID
     /// @return Pointer to client state, or nullptr on error
-    ClientState* getOrCreateClientState(u32 clientId);
+    ClientState* getOrCreateClientState(u32 clientId) FL_NO_EXCEPT;
 
     /// Remove client state
     /// @param clientId Client ID
-    void removeClientState(u32 clientId);
+    void removeClientState(u32 clientId) FL_NO_EXCEPT;
 
     /// Native socket server
     fl::unique_ptr<NativeHttpServer> mNativeServer;

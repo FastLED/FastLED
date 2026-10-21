@@ -61,6 +61,43 @@ src/fl/stl/fixed_point/          ← implementation directory
     - `header.cpp`: Has platform guards (e.g., `#ifdef ESP32 ... #endif`)
   - Avoid: Adding `#ifdef ESP32` to both header and implementation files (degrades IDE experience)
 
+## Select Types at the Preprocessor Boundary (REQUIRED)
+
+When behavior is selected at compile time, keep platform/capability `#if`
+branches at the dispatch boundary. Select a concrete backend type or template
+specialization there, then express shared behavior in ordinary C++ using that
+type. Avoid repeating the same platform conditions throughout constructors,
+methods and call sites.
+
+Illustrative shape (use the component's actual capability macros and backends):
+
+```cpp
+#if defined(FL_COMPONENT_HAS_BACKEND_A)
+#include "backend_a.h"
+using SelectedBackend = BackendA;
+#else
+#include "backend_b.h"
+using SelectedBackend = BackendB;
+#endif
+
+using PlatformComponent = Component<SelectedBackend>;
+```
+
+- Use a backend template when it shares meaningful implementation across
+  backends. If no shared algorithm needs a template, a selected type alias alone
+  is sufficient. Do not introduce a template solely to wrap an existing type.
+- Keep guards for unavailable SDK headers, types and symbols at the boundary;
+  templates and `if constexpr` do not make unavailable non-dependent names valid.
+  Follow the capability-detection rules above and sparse-dispatch rules below.
+- Make fixed configuration visible to the compiler through concrete types,
+  template parameters or small inline helpers so unused branches can be removed.
+  Keep runtime configuration when callers require it; this rule does not replace
+  runtime driver selection such as `Bus::FLEX_IO`.
+- Preserve public behavior, defaults and diagnostics when refactoring. For a
+  footprint claim, measure matched before/after images and check that template
+  instantiations have not duplicated code. This pattern alone does not guarantee
+  a smaller binary.
+
 ## Sparse Platform Dispatch Pattern (`.cpp.hpp` files)
 
 A `.cpp.hpp` file is a **compile-time component router** that assembles a complete feature from sparse, per-platform fragments with null/no-op fallbacks.
@@ -298,7 +335,7 @@ Tracking issue for the per-platform audit: **#4018**.
 - **Use `FL_DBG("message" << var)`** for debug prints (easily stripped in release builds)
 - **Use `FL_WARN("message" << var)`** for warnings (persist into release builds)
 - **Avoid `fl::printf`, `fl::print`, `fl::println`** - prefer FL_DBG/FL_WARN macros instead
-- Note: FL_DBG and FL_WARN use stream-style `<<` operator, NOT printf-style formatting
+- **printf-style log formatting is a compile error** (#4709): every log macro (`FL_WARN`, `FL_ERROR`, `FL_INFO`, `FL_DBG`, `FL_PRINT`, `FL_LOG_*`, `FASTLED_*`, `FL_LOG_ASYNC`) takes one literal or one `<<` stream chain. `FL_WARN("x=%d", x)` fails with a static_assert because it links the whole `fl::printf` engine (RAM1 on Teensy 4). Write `FL_WARN("x=" << x)`; use `fl::to_hex(v)` for `%x`.
 
 ## Teensy 3.x `__cxa_guard` Conflicts
 - **Problem**: Function-local statics with non-trivial constructors generate implicit `__cxa_guard_*` function calls. If Teensy's `<new.h>` is included after the compiler sees the static, the signatures conflict.
@@ -393,9 +430,9 @@ Tracking issue for the per-platform audit: **#4018**.
 
 ## Channel Engine DMA Wait Pattern
 - **`onBeginFrame()` / `show()` must wait for `poll() == READY` before starting a new frame** — use a simple `while (poll() != READY)` loop
-- **Yield in wait loops with `fl::task::run()`** — never busy-spin without yielding. Use `fl::task::run(250, fl::task::ExecFlags::SYSTEM)` inside wait loops to yield to the OS scheduler (FreeRTOS `vTaskDelay(0)` on ESP32, `std::this_thread::yield()` on host). This prevents watchdog timeouts and starvation of WiFi/BT/system tasks. Include `fl/task/executor.h`.
-  - **Do NOT use** bare `fl::yield()`, `vTaskDelay()`, or `taskYIELD()` — `fl::task::run()` is the unified API
-  - For tight DMA polling use `ExecFlags::SYSTEM` (OS yield only, minimal overhead)
+- **Yield in wait loops with `fl::task::yield_system()`** — never busy-spin without yielding. Use `fl::task::yield_system(250)` inside wait loops to yield to the OS scheduler (at least one FreeRTOS tick on ESP32; on host it only pumps the stub coroutine runner and spins out the budget when idle, exactly like `run(us, SYSTEM)`). This prevents watchdog timeouts and starvation of WiFi/BT/system tasks. Include `fl/task/executor.h`.
+  - **Do NOT use** bare `fl::yield()`, `vTaskDelay()`, or `taskYIELD()` — the `fl::task` entry points are the unified API
+  - For tight DMA polling use `fl::task::yield_system(us)` (OS yield only). It behaves exactly like `fl::task::run(us, ExecFlags::SYSTEM)`, but `run()` dispatches on its flags at runtime, so even a SYSTEM-only call links the task Scheduler and Executor into every sketch (~1.8 KB flash, ~200 B RAM on ESP32, #4797)
   - For longer waits use `ExecFlags::ALL` (also pumps coroutines and scheduled tasks)
 - **Do NOT branch on DRAINING or other intermediate states** inside the wait loop in `show()` or `onBeginFrame()`. The `poll()` method drives the state machine to READY; callers just wait for it.
 - **`onEndFrame()` may wait for READY *or* DRAINING** — after `show()` kicks off DMA, it's fine to return once DMA is running (DRAINING). `onBeginFrame()` will ensure READY before the next frame.

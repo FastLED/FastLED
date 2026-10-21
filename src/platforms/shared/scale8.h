@@ -113,20 +113,22 @@ LIB8STATIC u16 scale16(u16 i, fract16 scale) FL_NO_EXCEPT {
 }
 
 /// Scale a 32-bit unsigned value by an 8-bit value (C implementation)
-/// Promotes to 64-bit to prevent overflow during multiplication
+/// Exact in 32-bit arithmetic (no 64-bit promotion)
 FL_ALWAYS_INLINE u32 scale32by8(u32 i, fract8 scale) FL_NO_EXCEPT {
     if (scale == 0) {
         return 0;
     }
+    // (i * m) >> 8 without a 64-bit product: split i = 256 * hi + lo, so
+    // the result is hi * m + ((lo * m) >> 8) exactly. With m <= 256 the
+    // first term is at most 2^32 - 256 and the second at most 255, so the
+    // sum cannot wrap; the 64-bit form linked libgcc's __muldi3 on AVR.
 #if FASTLED_SCALE8_FIXED == 1
-    u32 result;
-    result = (((u64)(i) * (1 + ((u64)scale))) >> 8);
-    return result;
+    const u32 m = 1 + static_cast<u32>(scale);
 #else
-    u32 result;
-    result = (((u64)i * (u64)scale) >> 8);
-    return result;
+    const u32 m = scale;
 #endif
+    return (i >> 8) * m +
+           ((static_cast<unsigned>(i & 0xFFu) * static_cast<unsigned>(m)) >> 8);
 }
 
 /// @} Scaling_C

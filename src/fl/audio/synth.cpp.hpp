@@ -25,7 +25,7 @@ namespace hw = third_party::hexwave;
 
 class SynthEngineImpl : public ISynthEngine {
 public:
-    SynthEngineImpl(i32 width, i32 oversample);
+    SynthEngineImpl(i32 width, i32 oversample) FL_NO_EXCEPT;
     ~SynthEngineImpl() FL_NO_EXCEPT override;
 
     // Non-copyable
@@ -33,12 +33,12 @@ public:
     SynthEngineImpl& operator=(const SynthEngineImpl&) FL_NO_EXCEPT = delete;
 
     // ISynthEngine interface
-    bool isValid() const override;
-    i32 getWidth() const override { return mWidth; }
-    i32 getOversample() const override { return mOversample; }
+    bool isValid() const FL_NO_EXCEPT override;
+    i32 getWidth() const FL_NO_EXCEPT override { return mWidth; }
+    i32 getOversample() const FL_NO_EXCEPT override { return mOversample; }
 
     // Internal access for SynthOscillatorImpl (same compilation unit)
-    hw::HexWaveEngine* getEngineInternal() const { return mEngine; }
+    hw::HexWaveEngine* getEngineInternal() const FL_NO_EXCEPT { return mEngine; }
 
 private:
     hw::HexWaveEngine* mEngine = nullptr;
@@ -52,7 +52,7 @@ private:
 
 class SynthOscillatorImpl : public ISynthOscillator {
 public:
-    SynthOscillatorImpl(fl::shared_ptr<SynthEngineImpl> engine, const SynthParams& params);
+    SynthOscillatorImpl(fl::shared_ptr<SynthEngineImpl> engine, const SynthParams& params) FL_NO_EXCEPT;
     ~SynthOscillatorImpl() FL_NO_EXCEPT override;
 
     // Non-copyable
@@ -60,13 +60,13 @@ public:
     SynthOscillatorImpl& operator=(const SynthOscillatorImpl&) FL_NO_EXCEPT = delete;
 
     // ISynthOscillator interface
-    void generateSamples(float* output, i32 numSamples, float freq) override;
-    void generateSamples(fl::span<float> output, float freq) override;
-    void setShape(SynthShape shape) override;
-    void setParams(const SynthParams& params) override;
-    SynthParams getParams() const override;
-    void reset() override;
-    ISynthEnginePtr getEngine() const override { return mEngine; }
+    void generateSamples(float* output, i32 numSamples, float freq) FL_NO_EXCEPT override;
+    void generateSamples(fl::span<float> output, float freq) FL_NO_EXCEPT override;
+    void setShape(SynthShape shape) FL_NO_EXCEPT override;
+    void setParams(const SynthParams& params) FL_NO_EXCEPT override;
+    SynthParams getParams() const FL_NO_EXCEPT override;
+    void reset() FL_NO_EXCEPT override;
+    ISynthEnginePtr getEngine() const FL_NO_EXCEPT override { return mEngine; }
 
 private:
     fl::shared_ptr<SynthEngineImpl> mEngine;  // Shared pointer to engine (keeps it alive)
@@ -75,7 +75,7 @@ private:
 };
 
 // SynthParams implementation
-SynthParams SynthParams::fromShape(SynthShape shape) {
+SynthParams SynthParams::fromShape(SynthShape shape) FL_NO_EXCEPT {
     switch (shape) {
         case SynthShape::Sawtooth:
             return SynthParams(1, 0.0f, 0.0f, 0.0f);
@@ -95,7 +95,7 @@ SynthParams SynthParams::fromShape(SynthShape shape) {
 // ISynthEngine static factory method
 //////////////////////////////////////////////////////////////////////////////
 
-ISynthEnginePtr ISynthEngine::create(i32 width, i32 oversample) {
+ISynthEnginePtr ISynthEngine::create(i32 width, i32 oversample) FL_NO_EXCEPT {
     return fl::make_shared<SynthEngineImpl>(width, oversample);
 }
 
@@ -104,7 +104,7 @@ ISynthEnginePtr ISynthEngine::create(i32 width, i32 oversample) {
 //////////////////////////////////////////////////////////////////////////////
 
 SynthEngineImpl::SynthEngineImpl(i32 width, i32 oversample)
-    : mWidth(width), mOversample(oversample) {
+    FL_NO_EXCEPT : mWidth(width), mOversample(oversample) {
     // Clamp width to valid range
     if (mWidth < 4) mWidth = 4;
     if (mWidth > FL_STB_HEXWAVE_MAX_BLEP_LENGTH) mWidth = FL_STB_HEXWAVE_MAX_BLEP_LENGTH;
@@ -122,7 +122,7 @@ SynthEngineImpl::~SynthEngineImpl() FL_NO_EXCEPT {
     }
 }
 
-bool SynthEngineImpl::isValid() const {
+bool SynthEngineImpl::isValid() const FL_NO_EXCEPT {
     return mEngine != nullptr;
 }
 
@@ -130,11 +130,11 @@ bool SynthEngineImpl::isValid() const {
 // ISynthOscillator static factory methods
 //////////////////////////////////////////////////////////////////////////////
 
-ISynthOscillatorPtr ISynthOscillator::create(ISynthEnginePtr engine, SynthShape shape) {
+ISynthOscillatorPtr ISynthOscillator::create(ISynthEnginePtr engine, SynthShape shape) FL_NO_EXCEPT {
     return create(engine, SynthParams::fromShape(shape));
 }
 
-ISynthOscillatorPtr ISynthOscillator::create(ISynthEnginePtr engine, const SynthParams& params) {
+ISynthOscillatorPtr ISynthOscillator::create(ISynthEnginePtr engine, const SynthParams& params) FL_NO_EXCEPT {
     if (!engine || !engine->isValid()) {
         return nullptr;
     }
@@ -148,7 +148,7 @@ ISynthOscillatorPtr ISynthOscillator::create(ISynthEnginePtr engine, const Synth
 //////////////////////////////////////////////////////////////////////////////
 
 SynthOscillatorImpl::SynthOscillatorImpl(fl::shared_ptr<SynthEngineImpl> engine, const SynthParams& params)
-    : mEngine(engine), mCurrentParams(params) {
+    FL_NO_EXCEPT : mEngine(engine), mCurrentParams(params) {
     // Allocate HexWave structure
     mHexWave = static_cast<hw::HexWave*>(fl::malloc(sizeof(hw::HexWave)));
     fl::memset(mHexWave, 0, sizeof(hw::HexWave));
@@ -171,21 +171,21 @@ SynthOscillatorImpl::~SynthOscillatorImpl() FL_NO_EXCEPT {
     }
 }
 
-void SynthOscillatorImpl::generateSamples(float* output, i32 numSamples, float freq) {
+void SynthOscillatorImpl::generateSamples(float* output, i32 numSamples, float freq) FL_NO_EXCEPT {
     if (mHexWave && output && numSamples > 0) {
         hw::hexwave_generate_samples(output, numSamples, mHexWave, freq);
     }
 }
 
-void SynthOscillatorImpl::generateSamples(fl::span<float> output, float freq) {
+void SynthOscillatorImpl::generateSamples(fl::span<float> output, float freq) FL_NO_EXCEPT {
     generateSamples(output.data(), static_cast<i32>(output.size()), freq);
 }
 
-void SynthOscillatorImpl::setShape(SynthShape shape) {
+void SynthOscillatorImpl::setShape(SynthShape shape) FL_NO_EXCEPT {
     setParams(SynthParams::fromShape(shape));
 }
 
-void SynthOscillatorImpl::setParams(const SynthParams& params) {
+void SynthOscillatorImpl::setParams(const SynthParams& params) FL_NO_EXCEPT {
     if (mHexWave) {
         mCurrentParams = params;
         hw::hexwave_change(
@@ -198,11 +198,11 @@ void SynthOscillatorImpl::setParams(const SynthParams& params) {
     }
 }
 
-SynthParams SynthOscillatorImpl::getParams() const {
+SynthParams SynthOscillatorImpl::getParams() const FL_NO_EXCEPT {
     return mCurrentParams;
 }
 
-void SynthOscillatorImpl::reset() {
+void SynthOscillatorImpl::reset() FL_NO_EXCEPT {
     if (mHexWave && mEngine) {
         // Re-create the oscillator with current parameters
         hw::hexwave_create(

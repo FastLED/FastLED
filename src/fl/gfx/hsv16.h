@@ -12,8 +12,8 @@ struct HSV16 {
     u16 v = 0;
 
     HSV16() FL_NO_EXCEPT = default;
-    HSV16(u16 h, u16 s, u16 v) : h(h), s(s), v(v) {}
-    HSV16(const CRGB& rgb);
+    HSV16(u16 h, u16 s, u16 v) FL_NO_EXCEPT : h(h), s(s), v(v) {}
+    HSV16(const CRGB& rgb) FL_NO_EXCEPT;
     
     // Rule of 5 for POD data
     HSV16(const HSV16 &other) FL_NO_EXCEPT = default;
@@ -21,17 +21,17 @@ struct HSV16 {
     HSV16(HSV16 &&other) FL_NO_EXCEPT = default;
     HSV16 &operator=(HSV16 &&other) FL_NO_EXCEPT = default;
     
-    CRGB ToRGB() const;
+    CRGB ToRGB() const FL_NO_EXCEPT;
     
     /// Automatic conversion operator to CRGB
     /// Allows HSV16 to be automatically converted to CRGB
-    operator CRGB() const { return ToRGB(); }
+    operator CRGB() const FL_NO_EXCEPT { return ToRGB(); }
 
     // Are you using WS2812 (or other RGB8 LEDS) to display video?
     // decimate the color? Use colorBoost() to boost the saturation.
     // This works great for WS2812 and any other RGB8 LEDs.
     // Default saturation function is similar to gamma correction.
-    CRGB colorBoost(EaseType saturation_function = EaseType::EASE_IN_QUAD, EaseType luminance_function = EaseType::EASE_NONE) const;
+    CRGB colorBoost(EaseType saturation_function = EaseType::EASE_IN_QUAD, EaseType luminance_function = EaseType::EASE_NONE) const FL_NO_EXCEPT;
 };
 
 }  // namespace fl

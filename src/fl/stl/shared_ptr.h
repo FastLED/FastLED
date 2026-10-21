@@ -1,5 +1,6 @@
 #pragma once
 
+#include "fl/stl/adl_barrier.h"
 #include "fl/stl/type_traits.h"
 #include "fl/stl/cstddef.h"
 #include "fl/stl/bit_cast.h"
@@ -15,6 +16,13 @@ namespace fl {
 // Forward declarations
 template<typename T> class shared_ptr;  // IWYU pragma: keep
 template<typename T> class weak_ptr;
+
+namespace adl_barrier {  // see fl/stl/adl_barrier.h
+template<typename T, typename... Args>
+shared_ptr<T> make_shared(Args&&... args) FL_NO_EXCEPT;
+template<typename T, typename A, typename... Args>
+shared_ptr<T> allocate_shared(const A& alloc, Args&&... args) FL_NO_EXCEPT;
+}  // namespace adl_barrier
 
 namespace detail {
 
@@ -392,13 +400,13 @@ private:
     template<typename Y> friend class weak_ptr;
     
     template<typename Y, typename... Args>
-    friend shared_ptr<Y> make_shared(Args&&... args) FL_NO_EXCEPT;
+    friend shared_ptr<Y> adl_barrier::make_shared(Args&&... args) FL_NO_EXCEPT;
 
     template<typename Y, typename Deleter, typename... Args>
     friend shared_ptr<Y> make_shared_with_deleter(Deleter d, Args&&... args) FL_NO_EXCEPT;
 
     template<typename Y, typename A, typename... Args>
-    friend shared_ptr<Y> allocate_shared(const A& alloc, Args&&... args) FL_NO_EXCEPT;
+    friend shared_ptr<Y> adl_barrier::allocate_shared(const A& alloc, Args&&... args) FL_NO_EXCEPT;
 
     template<typename Y>
     friend shared_ptr<Y> make_shared_no_tracking(Y& obj) FL_NO_EXCEPT;
@@ -409,6 +417,7 @@ private:
 
 // Factory functions
 
+namespace adl_barrier {  // see fl/stl/adl_barrier.h
 // make_shared with optimized inlined storage (single allocation)
 template<typename T, typename... Args>
 shared_ptr<T> make_shared(Args&&... args) FL_NO_EXCEPT {
@@ -434,6 +443,7 @@ shared_ptr<T> make_shared(Args&&... args) FL_NO_EXCEPT {
     control->object_constructed = true;
     return shared_ptr<T>(obj, control, detail::make_shared_tag{});
 }
+}  // namespace adl_barrier
 
 template<typename T, typename Deleter, typename... Args>
 shared_ptr<T> make_shared_with_deleter(Deleter d, Args&&... args) FL_NO_EXCEPT {
@@ -474,6 +484,7 @@ shared_ptr<T> make_shared_array(size_t n) FL_NO_EXCEPT {
     return shared_ptr<T>(arr, control, detail::make_shared_tag{});
 }
 
+namespace adl_barrier {  // see fl/stl/adl_barrier.h
 // allocate_shared (simplified version without full allocator support for now)
 template<typename T, typename A, typename... Args>
 shared_ptr<T> allocate_shared(const A& /* alloc */, Args&&... args) FL_NO_EXCEPT {
@@ -481,6 +492,7 @@ shared_ptr<T> allocate_shared(const A& /* alloc */, Args&&... args) FL_NO_EXCEPT
     // Full allocator support would require more complex control block management
     return make_shared<T>(fl::forward<Args>(args)...);
 }
+}  // namespace adl_barrier
 
 // Non-member comparison operators
 template<typename T, typename Y>

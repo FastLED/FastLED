@@ -25,24 +25,24 @@ public:
     StreamHandle() FL_NO_EXCEPT = default;
 
     /// Register callback for intermediate stream data
-    StreamHandle& onData(fl::function<void(const fl::json&)> cb);
+    StreamHandle& onData(fl::function<void(const fl::json&)> cb) FL_NO_EXCEPT;
 
     /// Register callback for final result
-    StreamHandle& then(fl::function<void(const fl::json&)> cb);
+    StreamHandle& then(fl::function<void(const fl::json&)> cb) FL_NO_EXCEPT;
 
     /// Register callback for errors
-    StreamHandle& catch_(fl::function<void(const fl::task::Error&)> cb);
+    StreamHandle& catch_(fl::function<void(const fl::task::Error&)> cb) FL_NO_EXCEPT;
 
     /// Access the underlying promise
-    fl::task::Promise<fl::json>& promise();
+    fl::task::Promise<fl::json>& promise() FL_NO_EXCEPT;
 
     /// Check if handle is valid
-    bool valid() const;
+    bool valid() const FL_NO_EXCEPT;
 
 private:
     friend class HttpStreamTransport;
     StreamHandle(fl::task::Promise<fl::json> p,
-                 fl::shared_ptr<fl::function<void(const fl::json&)>> updateCb);
+                 fl::shared_ptr<fl::function<void(const fl::json&)>> updateCb) FL_NO_EXCEPT;
 
     fl::task::Promise<fl::json> mPromise;
     fl::shared_ptr<fl::function<void(const fl::json&)>> mUpdateCallback;
@@ -60,7 +60,7 @@ public:
     /// @param host Server hostname or IP address
     /// @param port Server port
     /// @param heartbeatIntervalMs Heartbeat interval in milliseconds (default: 30000ms = 30s)
-    HttpStreamTransport(const fl::string& host, u16 port, u32 heartbeatIntervalMs = 30000);
+    HttpStreamTransport(const fl::string& host, u16 port, u32 heartbeatIntervalMs = 30000) FL_NO_EXCEPT;
 
     /// Virtual destructor
     virtual ~HttpStreamTransport() FL_NO_EXCEPT;
@@ -69,76 +69,76 @@ public:
 
     /// Connect to server
     /// @return true if connected successfully, false otherwise
-    virtual bool connect() = 0;
+    virtual bool connect() FL_NO_EXCEPT = 0;
 
     /// Disconnect from server
-    virtual void disconnect() = 0;
+    virtual void disconnect() FL_NO_EXCEPT = 0;
 
     /// Check if connected
     /// @return true if connected, false otherwise
-    virtual bool isConnected() const = 0;
+    virtual bool isConnected() const FL_NO_EXCEPT = 0;
 
     // RequestSource Implementation (for Remote)
 
     /// Read next JSON-RPC request from stream
     /// Non-blocking, returns nullopt if no complete request available
     /// @return JSON-RPC request object or nullopt
-    fl::optional<fl::json> readRequest();
+    fl::optional<fl::json> readRequest() FL_NO_EXCEPT;
 
     // ResponseSink Implementation (for Remote)
 
     /// Write JSON-RPC response to stream
     /// @param response JSON-RPC response object
-    void writeResponse(const fl::json& response);
+    void writeResponse(const fl::json& response) FL_NO_EXCEPT;
 
     // Promise-based RPC API
 
     /// Send a JSON-RPC request, returns promise that resolves with the final response.
     /// For ASYNC methods, the ACK is automatically filtered out.
-    fl::task::Promise<fl::json> rpc(const fl::string& method, const fl::json& params);
+    fl::task::Promise<fl::json> rpc(const fl::string& method, const fl::json& params) FL_NO_EXCEPT;
 
     /// Send a pre-built JSON-RPC request
-    fl::task::Promise<fl::json> rpc(const fl::json& fullRequest);
+    fl::task::Promise<fl::json> rpc(const fl::json& fullRequest) FL_NO_EXCEPT;
 
     /// Send a streaming JSON-RPC request, returns StreamHandle for intermediate data.
     /// Use onData() for intermediate chunks, then()/catch_() for final result.
-    StreamHandle rpcStream(const fl::string& method, const fl::json& params);
+    StreamHandle rpcStream(const fl::string& method, const fl::json& params) FL_NO_EXCEPT;
 
     /// Send a streaming pre-built JSON-RPC request
-    StreamHandle rpcStream(const fl::json& fullRequest);
+    StreamHandle rpcStream(const fl::json& fullRequest) FL_NO_EXCEPT;
 
     // Update Loop
 
     /// Update connection state (handles reconnection, heartbeat)
     /// Call this in main loop
     /// @param currentTimeMs Current time in milliseconds
-    void update(u32 currentTimeMs);
+    void update(u32 currentTimeMs) FL_NO_EXCEPT;
 
     // Callbacks
 
     /// Set callback for connection established
-    void setOnConnect(StateCallback callback);
+    void setOnConnect(StateCallback callback) FL_NO_EXCEPT;
 
     /// Set callback for connection lost
-    void setOnDisconnect(StateCallback callback);
+    void setOnDisconnect(StateCallback callback) FL_NO_EXCEPT;
 
     // Configuration
 
     /// Set heartbeat interval
     /// @param intervalMs Heartbeat interval in milliseconds
-    void setHeartbeatInterval(u32 intervalMs);
+    void setHeartbeatInterval(u32 intervalMs) FL_NO_EXCEPT;
 
     /// Get heartbeat interval
     /// @return Heartbeat interval in milliseconds
-    u32 getHeartbeatInterval() const;
+    u32 getHeartbeatInterval() const FL_NO_EXCEPT;
 
     /// Set connection timeout
     /// @param timeoutMs Connection timeout in milliseconds
-    void setTimeout(u32 timeoutMs);
+    void setTimeout(u32 timeoutMs) FL_NO_EXCEPT;
 
     /// Get connection timeout
     /// @return Connection timeout in milliseconds
-    u32 getTimeout() const;
+    u32 getTimeout() const FL_NO_EXCEPT;
 
 protected:
     // Abstract methods for subclasses
@@ -146,19 +146,19 @@ protected:
     /// Send raw data over connection
     /// @param data Data to send
     /// @return Number of bytes sent, or -1 on error
-    virtual int sendData(fl::span<const u8> data) = 0;
+    virtual int sendData(fl::span<const u8> data) FL_NO_EXCEPT = 0;
 
     /// Receive raw data from connection
     /// @param buffer Buffer to receive data into
     /// @return Number of bytes received, or -1 on error
-    virtual int recvData(fl::span<u8> buffer) = 0;
+    virtual int recvData(fl::span<u8> buffer) FL_NO_EXCEPT = 0;
 
     /// Get current time in milliseconds
     /// @return Current time in milliseconds
-    virtual u32 getCurrentTimeMs() const;
+    virtual u32 getCurrentTimeMs() const FL_NO_EXCEPT;
 
     /// Trigger reconnection (for subclasses to override)
-    virtual void triggerReconnect();
+    virtual void triggerReconnect() FL_NO_EXCEPT;
 
     // Connection management
     HttpConnection mConnection;
@@ -201,14 +201,14 @@ private:
     int mNextCallId = 1;
 
     // Internal methods
-    void sendHeartbeat();
-    void checkHeartbeatTimeout(u32 currentTimeMs);
-    bool processIncomingData();
-    void handleConnectionStateChange(u32 currentTimeMs);
-    void parseChunkedMessages();
-    bool resolveRpc(const fl::json& msg, const fl::string& idKey);
-    bool resolveRpcStream(const fl::json& msg, const fl::string& idKey);
-    static fl::string idToString(const fl::json& id);
+    void sendHeartbeat() FL_NO_EXCEPT;
+    void checkHeartbeatTimeout(u32 currentTimeMs) FL_NO_EXCEPT;
+    bool processIncomingData() FL_NO_EXCEPT;
+    void handleConnectionStateChange(u32 currentTimeMs) FL_NO_EXCEPT;
+    void parseChunkedMessages() FL_NO_EXCEPT;
+    bool resolveRpc(const fl::json& msg, const fl::string& idKey) FL_NO_EXCEPT;
+    bool resolveRpcStream(const fl::json& msg, const fl::string& idKey) FL_NO_EXCEPT;
+    static fl::string idToString(const fl::json& id) FL_NO_EXCEPT;
 };
 
 }  // namespace http

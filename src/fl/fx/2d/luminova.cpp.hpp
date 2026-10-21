@@ -13,11 +13,12 @@
 #include "fl/stl/vector.h"
 #include "crgb.h"
 #include "noise.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
 Luminova::Luminova(const XYMap &xyMap, const Params &params)
-    : Fx2d(xyMap), mParams(params) {
+    FL_NO_EXCEPT : Fx2d(xyMap), mParams(params) {
     int cap = params.max_particles;
     if (cap <= 0) {
         cap = 1;
@@ -29,7 +30,7 @@ Luminova::Luminova(const XYMap &xyMap, const Params &params)
     }
 }
 
-void Luminova::setMaxParticles(int max_particles) {
+void Luminova::setMaxParticles(int max_particles) FL_NO_EXCEPT {
     if (max_particles <= 0) {
         max_particles = 1;
     }
@@ -43,7 +44,7 @@ void Luminova::setMaxParticles(int max_particles) {
     }
 }
 
-void Luminova::resetParticle(Particle &p, fl::u32 tt) {
+void Luminova::resetParticle(Particle &p, fl::u32 tt) FL_NO_EXCEPT {
     // Position at center
     const float cx = static_cast<float>(getWidth() - 1) * 0.5f;
     const float cy = static_cast<float>(getHeight() - 1) * 0.5f;
@@ -62,7 +63,7 @@ void Luminova::resetParticle(Particle &p, fl::u32 tt) {
     p.alive = true;
 }
 
-void Luminova::plotDot(fl::span<CRGB> leds, int x, int y, u8 v) const {
+void Luminova::plotDot(fl::span<CRGB> leds, int x, int y, u8 v) const FL_NO_EXCEPT {
     if (!mXyMap.has(x, y)) {
         return;
     }
@@ -70,7 +71,7 @@ void Luminova::plotDot(fl::span<CRGB> leds, int x, int y, u8 v) const {
     leds[idx] += CHSV(0, 0, scale8(v, mParams.point_gain));
 }
 
-void Luminova::plotSoftDot(fl::span<CRGB> leds, float fx, float fy, float s) const {
+void Luminova::plotSoftDot(fl::span<CRGB> leds, float fx, float fy, float s) const FL_NO_EXCEPT {
     // Map s (decays from ~3) to a pixel radius 1..3
     float r = fl::clamp<float>(s * 0.5f, 1.0f, 3.0f);
     int R = static_cast<int>(fl::ceil(r));
@@ -93,7 +94,7 @@ void Luminova::plotSoftDot(fl::span<CRGB> leds, float fx, float fy, float s) con
     }
 }
 
-void Luminova::draw(DrawContext context) {
+void Luminova::draw(DrawContext context) FL_NO_EXCEPT {
     // Fade + blur trails each frame
     fadeToBlackBy(context.leds, mParams.fade_amount);
     blur2d(context.leds, static_cast<fl::u8>(getWidth()), static_cast<fl::u8>(getHeight()),

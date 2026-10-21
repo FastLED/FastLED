@@ -31,7 +31,7 @@ namespace {
 // On Windows: delegates to fl:: wrappers from socket_win.h
 // On POSIX: delegates to :: system calls from socket_posix.h
 
-int plat_socket(int domain, int type, int protocol) {
+int plat_socket(int domain, int type, int protocol) FL_NO_EXCEPT {
 #ifdef FL_IS_WIN
     return fl::socket(domain, type, protocol);
 #else
@@ -39,7 +39,7 @@ int plat_socket(int domain, int type, int protocol) {
 #endif
 }
 
-int plat_connect(int fd, const struct sockaddr *addr, socklen_t addrlen) {
+int plat_connect(int fd, const struct sockaddr *addr, socklen_t addrlen) FL_NO_EXCEPT {
 #ifdef FL_IS_WIN
     return fl::connect(fd, addr, addrlen);
 #else
@@ -47,7 +47,7 @@ int plat_connect(int fd, const struct sockaddr *addr, socklen_t addrlen) {
 #endif
 }
 
-ssize_t plat_send(int fd, const void *buf, size_t len, int flags) {
+ssize_t plat_send(int fd, const void *buf, size_t len, int flags) FL_NO_EXCEPT {
 #ifdef FL_IS_WIN
     return fl::send(fd, buf, len, flags);
 #else
@@ -55,7 +55,7 @@ ssize_t plat_send(int fd, const void *buf, size_t len, int flags) {
 #endif
 }
 
-ssize_t plat_recv(int fd, void *buf, size_t len, int flags) {
+ssize_t plat_recv(int fd, void *buf, size_t len, int flags) FL_NO_EXCEPT {
 #ifdef FL_IS_WIN
     return fl::recv(fd, buf, len, flags);
 #else
@@ -63,7 +63,7 @@ ssize_t plat_recv(int fd, void *buf, size_t len, int flags) {
 #endif
 }
 
-int plat_close(int fd) {
+int plat_close(int fd) FL_NO_EXCEPT {
 #ifdef FL_IS_WIN
     return fl::close(fd);
 #else
@@ -71,7 +71,7 @@ int plat_close(int fd) {
 #endif
 }
 
-int plat_shutdown(int fd, int how) {
+int plat_shutdown(int fd, int how) FL_NO_EXCEPT {
 #ifdef FL_IS_WIN
     return fl::shutdown(fd, how);
 #else
@@ -80,7 +80,7 @@ int plat_shutdown(int fd, int how) {
 }
 
 int plat_setsockopt(int fd, int level, int optname, const void *optval,
-                    socklen_t optlen) {
+                    socklen_t optlen) FL_NO_EXCEPT {
 #ifdef FL_IS_WIN
     return fl::setsockopt(fd, level, optname, optval, optlen);
 #else
@@ -88,7 +88,7 @@ int plat_setsockopt(int fd, int level, int optname, const void *optval,
 #endif
 }
 
-int plat_bind(int fd, const struct sockaddr *addr, socklen_t addrlen) {
+int plat_bind(int fd, const struct sockaddr *addr, socklen_t addrlen) FL_NO_EXCEPT {
 #ifdef FL_IS_WIN
     return fl::bind(fd, addr, addrlen);
 #else
@@ -96,7 +96,7 @@ int plat_bind(int fd, const struct sockaddr *addr, socklen_t addrlen) {
 #endif
 }
 
-int plat_listen(int fd, int backlog) {
+int plat_listen(int fd, int backlog) FL_NO_EXCEPT {
 #ifdef FL_IS_WIN
     return fl::listen(fd, backlog);
 #else
@@ -104,7 +104,7 @@ int plat_listen(int fd, int backlog) {
 #endif
 }
 
-int plat_accept(int fd, struct sockaddr *addr, socklen_t *addrlen) {
+int plat_accept(int fd, struct sockaddr *addr, socklen_t *addrlen) FL_NO_EXCEPT {
 #ifdef FL_IS_WIN
     return fl::accept(fd, addr, addrlen);
 #else
@@ -112,7 +112,7 @@ int plat_accept(int fd, struct sockaddr *addr, socklen_t *addrlen) {
 #endif
 }
 
-bool set_nonblocking(int fd, bool enabled) {
+bool set_nonblocking(int fd, bool enabled) FL_NO_EXCEPT {
 #ifdef FL_IS_WIN
     u_long mode = enabled ? 1 : 0;
     return ioctlsocket(fd, FIONBIO, &mode) == 0;
@@ -128,7 +128,7 @@ bool set_nonblocking(int fd, bool enabled) {
 #endif
 }
 
-bool is_would_block() {
+bool is_would_block() FL_NO_EXCEPT {
 #ifdef FL_IS_WIN
     int err = WSAGetLastError();
     return err == WSAEWOULDBLOCK;
@@ -138,7 +138,7 @@ bool is_would_block() {
 }
 
 
-int plat_getsockname(int fd, struct sockaddr *addr, socklen_t *addrlen) {
+int plat_getsockname(int fd, struct sockaddr *addr, socklen_t *addrlen) FL_NO_EXCEPT {
 #ifdef FL_IS_WIN
     return fl::getsockname(fd, addr, addrlen);
 #else
@@ -152,11 +152,11 @@ int plat_getsockname(int fd, struct sockaddr *addr, socklen_t *addrlen) {
 // socket implementation
 // ============================================================================
 
-socket::socket() : mFd(-1), mNonBlocking(false) {}
+socket::socket() FL_NO_EXCEPT : mFd(-1), mNonBlocking(false) {}
 
 socket::~socket() FL_NO_EXCEPT { close_fd(); }
 
-socket::socket(socket &&other) : mFd(other.mFd), mNonBlocking(other.mNonBlocking) {
+socket::socket(socket &&other) FL_NO_EXCEPT : mFd(other.mFd), mNonBlocking(other.mNonBlocking) {
     other.mFd = -1;
     other.mNonBlocking = false;
 }
@@ -172,9 +172,9 @@ socket &socket::operator=(socket &&other) FL_NO_EXCEPT {
     return *this;
 }
 
-bool socket::is_open() const { return mFd != -1; }
+bool socket::is_open() const FL_NO_EXCEPT { return mFd != -1; }
 
-error_code socket::connect(const endpoint &ep) {
+error_code socket::connect(const endpoint &ep) FL_NO_EXCEPT {
     // Clean up existing
     close_fd();
 
@@ -237,15 +237,15 @@ error_code socket::connect(const endpoint &ep) {
     return ec;
 }
 
-void socket::close() { close_fd(); }
+void socket::close() FL_NO_EXCEPT { close_fd(); }
 
-void socket::shutdown() {
+void socket::shutdown() FL_NO_EXCEPT {
     if (mFd != -1) {
         plat_shutdown(mFd, SHUT_RDWR);
     }
 }
 
-size_t socket::read_some(fl::span<u8> buffer, error_code &ec) {
+size_t socket::read_some(fl::span<u8> buffer, error_code &ec) FL_NO_EXCEPT {
     ec = error_code();
     if (mFd == -1) {
         ec = error_code(errc::operation_aborted, "socket not open");
@@ -276,7 +276,7 @@ size_t socket::read_some(fl::span<u8> buffer, error_code &ec) {
     return static_cast<size_t>(result);
 }
 
-size_t socket::write_some(fl::span<const u8> buffer, error_code &ec) {
+size_t socket::write_some(fl::span<const u8> buffer, error_code &ec) FL_NO_EXCEPT {
     ec = error_code();
     if (mFd == -1) {
         ec = error_code(errc::operation_aborted, "socket not open");
@@ -302,7 +302,7 @@ size_t socket::write_some(fl::span<const u8> buffer, error_code &ec) {
     return static_cast<size_t>(result);
 }
 
-void socket::async_read_some(fl::span<u8> buffer, io_handler handler) {
+void socket::async_read_some(fl::span<u8> buffer, io_handler handler) FL_NO_EXCEPT {
     error_code ec;
     size_t n = read_some(buffer, ec);
     if (handler) {
@@ -310,7 +310,7 @@ void socket::async_read_some(fl::span<u8> buffer, io_handler handler) {
     }
 }
 
-void socket::async_write_some(fl::span<const u8> buffer, io_handler handler) {
+void socket::async_write_some(fl::span<const u8> buffer, io_handler handler) FL_NO_EXCEPT {
     error_code ec;
     size_t n = write_some(buffer, ec);
     if (handler) {
@@ -318,30 +318,30 @@ void socket::async_write_some(fl::span<const u8> buffer, io_handler handler) {
     }
 }
 
-void socket::async_connect(const endpoint &ep, connect_handler handler) {
+void socket::async_connect(const endpoint &ep, connect_handler handler) FL_NO_EXCEPT {
     error_code ec = connect(ep);
     if (handler) {
         handler(ec);
     }
 }
 
-void socket::set_non_blocking(bool mode) {
+void socket::set_non_blocking(bool mode) FL_NO_EXCEPT {
     if (mFd != -1) {
         set_nonblocking(mFd, mode);
     }
     mNonBlocking = mode;
 }
 
-bool socket::is_non_blocking() const { return mNonBlocking; }
+bool socket::is_non_blocking() const FL_NO_EXCEPT { return mNonBlocking; }
 
-int socket::native_handle() const { return mFd; }
+int socket::native_handle() const FL_NO_EXCEPT { return mFd; }
 
-void socket::assign(int fd) {
+void socket::assign(int fd) FL_NO_EXCEPT {
     close_fd();
     mFd = fd;
 }
 
-void socket::close_fd() {
+void socket::close_fd() FL_NO_EXCEPT {
     if (mFd != -1) {
         plat_close(mFd);
         mFd = -1;
@@ -353,11 +353,11 @@ void socket::close_fd() {
 // acceptor implementation
 // ============================================================================
 
-acceptor::acceptor() : mFd(-1), mPort(0) {}
+acceptor::acceptor() FL_NO_EXCEPT : mFd(-1), mPort(0) {}
 
 acceptor::~acceptor() FL_NO_EXCEPT { close(); }
 
-error_code acceptor::open(u16 port) {
+error_code acceptor::open(u16 port) FL_NO_EXCEPT {
     close();
 
 #ifdef FL_IS_WIN
@@ -411,7 +411,7 @@ error_code acceptor::open(u16 port) {
     return error_code();
 }
 
-error_code acceptor::listen(int backlog) {
+error_code acceptor::listen(int backlog) FL_NO_EXCEPT {
     if (mFd == -1) {
         return error_code(errc::operation_aborted, "acceptor not open");
     }
@@ -424,7 +424,7 @@ error_code acceptor::listen(int backlog) {
     return error_code();
 }
 
-error_code acceptor::accept(socket &peer) {
+error_code acceptor::accept(socket &peer) FL_NO_EXCEPT {
     if (mFd == -1) {
         return error_code(errc::operation_aborted, "acceptor not open");
     }
@@ -452,14 +452,14 @@ error_code acceptor::accept(socket &peer) {
     return error_code();
 }
 
-void acceptor::async_accept(socket &peer, connect_handler handler) {
+void acceptor::async_accept(socket &peer, connect_handler handler) FL_NO_EXCEPT {
     error_code ec = accept(peer);
     if (handler) {
         handler(ec);
     }
 }
 
-void acceptor::close() {
+void acceptor::close() FL_NO_EXCEPT {
     if (mFd != -1) {
         plat_close(mFd);
         mFd = -1;
@@ -467,11 +467,11 @@ void acceptor::close() {
     mPort = 0;
 }
 
-bool acceptor::is_open() const { return mFd != -1; }
+bool acceptor::is_open() const FL_NO_EXCEPT { return mFd != -1; }
 
-int acceptor::native_handle() const { return mFd; }
+int acceptor::native_handle() const FL_NO_EXCEPT { return mFd; }
 
-u16 acceptor::port() const { return mPort; }
+u16 acceptor::port() const FL_NO_EXCEPT { return mPort; }
 
 } // namespace tcp
 } // namespace ip

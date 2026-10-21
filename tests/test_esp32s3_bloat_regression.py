@@ -3,7 +3,9 @@
 Asserts `bash bloat esp32s3 --build` produces a `report.json` whose
 `image_flash` (the firmware image size from ELF section headers; #4468)
 is at most the pinned baseline in
-`tests/data/esp32s3_bloat_baseline.txt`.
+`tests/data/esp32s3_bloat_baseline.txt`. The same bloat invocation additionally
+enforces default image-flash and attributed-RAM ceilings from
+`tests/data/esp32s3_bloat_budget.json` (attributed RAM differs from board RAM).
 
 THE BASELINE IS A RATCHET, AND IT MOVES IN BOTH DIRECTIONS
 
@@ -293,7 +295,7 @@ def run_bloat(skip_build: bool) -> None:
     cmd: list[str] = ["bash", "bloat", "esp32s3"]
     if not skip_build:
         cmd.append("--build")
-    cmd += ["--no-summary"]
+    cmd += ["--no-summary", "--budget", "tests/data/esp32s3_bloat_budget.json"]
     print(f"esp32s3-bloat-regression: invoking `{' '.join(cmd)}` ...", flush=True)
     result = RunningProcess.run(cmd, cwd=PROJECT_ROOT)
     if result.returncode != 0:

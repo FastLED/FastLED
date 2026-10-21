@@ -1,5 +1,6 @@
 #include "fl/channels/channel_events.h"
 #include "fl/stl/singleton.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -10,7 +11,7 @@ namespace fl {
 // `--gc-sections` drop both that template's machinery and the singleton
 // itself. See #2931 / #2886.
 #if !defined(FASTLED_DISABLE_CHANNEL_EVENTS) || !FASTLED_DISABLE_CHANNEL_EVENTS
-ChannelEvents& ChannelEvents::instance() {
+ChannelEvents& ChannelEvents::instance() FL_NO_EXCEPT {
     return fl::Singleton<ChannelEvents>::instance();
 }
 #endif

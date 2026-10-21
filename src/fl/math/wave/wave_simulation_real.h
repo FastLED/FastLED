@@ -16,10 +16,10 @@ Based on works and code by Shawn Silverman.
 namespace fl {
 
 namespace wave_detail {
-i16 float_to_fixed(float f);
+i16 float_to_fixed(float f) FL_NO_EXCEPT;
 
 // Convert fixed Q15 to float.
-float fixed_to_float(i16 f);
+float fixed_to_float(i16 f) FL_NO_EXCEPT;
 
 // Compute the Q15 damping decay factor for a power-of-two damping
 // exponent. Equivalent (modulo 1-LSB rounding) to the arithmetic-shift
@@ -43,33 +43,33 @@ class WaveSimulation1D_Real {
 
     // Set simulation speed (Courant squared). Clamped to [0.0, 1.0] — see
     // constructor for rationale.
-    void setSpeed(float something);
+    void setSpeed(float something) FL_NO_EXCEPT;
 
     // Set the dampening exponent (effective damping factor is 2^(dampening)).
     void setDampening(int damp) FL_NO_EXCEPT;
 
     // Get the current dampening exponent.
-    int getDampenening() const;
+    int getDampenening() const FL_NO_EXCEPT;
 
     // Get the simulation speed as a float.
-    float getSpeed() const;
+    float getSpeed() const FL_NO_EXCEPT;
 
-    void setHalfDuplex(bool on) { mHalfDuplex = on; }
+    void setHalfDuplex(bool on) FL_NO_EXCEPT { mHalfDuplex = on; }
 
-    bool getHalfDuplex() const { return mHalfDuplex; }
+    bool getHalfDuplex() const FL_NO_EXCEPT { return mHalfDuplex; }
 
     // Get the simulation value at the inner grid cell x (converted to float in
     // the range [-1.0, 1.0]).
-    float getf(fl::size x) const;
+    float getf(fl::size x) const FL_NO_EXCEPT;
 
-    i16 geti16(fl::size x) const;
-    i16 geti16Previous(fl::size x) const;
+    i16 geti16(fl::size x) const FL_NO_EXCEPT;
+    i16 geti16Previous(fl::size x) const FL_NO_EXCEPT;
 
-    i8 geti8(fl::size x) const { return static_cast<i8>(geti16(x) >> 8); }
+    i8 geti8(fl::size x) const FL_NO_EXCEPT { return static_cast<i8>(geti16(x) >> 8); }
 
     // If mHalfDuplex is set then the the values are adjusted so that negative
     // values will instead be represented by zero.
-    u8 getu8(fl::size x) const {
+    u8 getu8(fl::size x) const FL_NO_EXCEPT {
         i16 value = geti16(x);
         // Rebase the range from [-32768, 32767] to [0, 65535] then extract the
         // upper 8 bits.
@@ -87,14 +87,14 @@ class WaveSimulation1D_Real {
     }
 
     // Returns whether x is within the inner grid bounds.
-    bool has(fl::size x) const;
+    bool has(fl::size x) const FL_NO_EXCEPT;
 
     // Set the value at grid cell x (expected range: [-1.0, 1.0]); the value is
     // stored in Q15.
-    void set(fl::size x, float value);
+    void set(fl::size x, float value) FL_NO_EXCEPT;
 
     // Advance the simulation one time step.
-    void update();
+    void update() FL_NO_EXCEPT;
 
   private:
     u32 length; // Length of the inner simulation grid.
@@ -163,32 +163,32 @@ class WaveSimulation2D_Real {
 
     // Set the simulation speed (Courant squared). Clamped to [0.0, 0.5] — see
     // constructor for rationale.
-    void setSpeed(float something);
+    void setSpeed(float something) FL_NO_EXCEPT;
 
     // Set the dampening factor exponent.
     // The dampening factor used is 2^(dampening).
     void setDampening(int damp) FL_NO_EXCEPT;
 
     // Get the current dampening exponent.
-    int getDampenening() const;
+    int getDampenening() const FL_NO_EXCEPT;
 
     // Get the simulation speed as a float (converted from fixed Q15).
-    float getSpeed() const;
+    float getSpeed() const FL_NO_EXCEPT;
 
     // Return the value at an inner grid cell (x,y), converted to float.
     // The value returned is in the range [-1.0, 1.0].
-    float getf(fl::size x, fl::size y) const;
+    float getf(fl::size x, fl::size y) const FL_NO_EXCEPT;
 
     // Return the value at an inner grid cell (x,y) as a fixed Q15 integer
     // in the range [-32768, 32767].
-    i16 geti16(fl::size x, fl::size y) const;
-    i16 geti16Previous(fl::size x, fl::size y) const;
+    i16 geti16(fl::size x, fl::size y) const FL_NO_EXCEPT;
+    i16 geti16Previous(fl::size x, fl::size y) const FL_NO_EXCEPT;
 
-    i8 geti8(fl::size x, fl::size y) const {
+    i8 geti8(fl::size x, fl::size y) const FL_NO_EXCEPT {
         return static_cast<i8>(geti16(x, y) >> 8);
     }
 
-    u8 getu8(fl::size x, fl::size y) const {
+    u8 getu8(fl::size x, fl::size y) const FL_NO_EXCEPT {
         i16 value = geti16(x, y);
         // Rebase the range from [-32768, 32767] to [0, 65535] then extract the
         // upper 8 bits.
@@ -212,27 +212,27 @@ class WaveSimulation2D_Real {
     void setStencil(LaplacianStencil s) FL_NO_EXCEPT { mStencil = s; }
     LaplacianStencil getStencil() const FL_NO_EXCEPT { return mStencil; }
 
-    void setXCylindrical(bool on) { mXCylindrical = on; }
+    void setXCylindrical(bool on) FL_NO_EXCEPT { mXCylindrical = on; }
 
     // Check if (x,y) is within the inner grid.
-    bool has(fl::size x, fl::size y) const;
+    bool has(fl::size x, fl::size y) const FL_NO_EXCEPT;
 
     // Set the value at an inner grid cell using a float;
     // the value is stored in fixed Q15 format.
     // value shoudl be between -1.0 and 1.0.
-    void setf(fl::size x, fl::size y, float value);
+    void setf(fl::size x, fl::size y, float value) FL_NO_EXCEPT;
 
-    void seti16(fl::size x, fl::size y, i16 value);
+    void seti16(fl::size x, fl::size y, i16 value) FL_NO_EXCEPT;
 
-    void setHalfDuplex(bool on) { mHalfDuplex = on; }
+    void setHalfDuplex(bool on) FL_NO_EXCEPT { mHalfDuplex = on; }
 
-    bool getHalfDuplex() const { return mHalfDuplex; }
+    bool getHalfDuplex() const FL_NO_EXCEPT { return mHalfDuplex; }
 
     // Advance the simulation one time step using fixed-point arithmetic.
-    void update();
+    void update() FL_NO_EXCEPT;
 
-    u32 getWidth() const { return width; }
-    u32 getHeight() const { return height; }
+    u32 getWidth() const FL_NO_EXCEPT { return width; }
+    u32 getHeight() const FL_NO_EXCEPT { return height; }
 
   private:
     u32 width;  // Width of the inner grid.

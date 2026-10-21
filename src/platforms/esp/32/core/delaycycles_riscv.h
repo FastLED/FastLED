@@ -16,7 +16,7 @@
 /// ESP32-C3/C6: RISC-V architecture uses mcycle CSR (Machine Cycle Counter)
 FASTLED_FORCE_INLINE fl::u64 get_mcycle() FL_NO_EXCEPT {
   fl::u64 c;
-  asm volatile("rdcycle %0" : "=r"(c)) FL_NO_EXCEPT;
+  asm volatile("rdcycle %0" : "=r"(c));
   return c;
 }
 

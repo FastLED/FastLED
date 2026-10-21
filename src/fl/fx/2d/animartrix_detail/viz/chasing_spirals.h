@@ -5,6 +5,7 @@
 
 #include "fl/fx/2d/animartrix_detail/chasing_spiral_state.h"
 #include "fl/fx/2d/animartrix_detail/viz/viz_base.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -12,14 +13,14 @@ namespace fl {
 // No cached state — all computation is per-frame.
 class Chasing_Spirals_Float : public IAnimartrix2Viz {
 public:
-    void draw(Context &ctx) override;
+    void draw(Context &ctx) FL_NO_EXCEPT override;
 };
 
 // Fixed-point Q31 scalar implementation (~78 µs/frame, 2.7× speedup).
 // Owns the SoA geometry cache; rebuilt only when grid dimensions change.
 class Chasing_Spirals_Q31 : public IAnimartrix2Viz {
 public:
-    void draw(Context &ctx) override;
+    void draw(Context &ctx) FL_NO_EXCEPT override;
 private:
     ChasingSpiralState mState;
 };
@@ -28,7 +29,7 @@ private:
 // Owns the SoA geometry cache; rebuilt only when grid dimensions change.
 class Chasing_Spirals_Q31_SIMD : public IAnimartrix2Viz {
 public:
-    void draw(Context &ctx) override;
+    void draw(Context &ctx) FL_NO_EXCEPT override;
 private:
     ChasingSpiralState mState;
 };

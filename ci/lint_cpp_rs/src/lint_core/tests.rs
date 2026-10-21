@@ -10,6 +10,42 @@ mod tests {
         }
     }
 
+    #[test]
+    fn raw_alignas_flags_code_but_not_macros_or_comments() {
+        let checker = RawAlignasChecker;
+        let src = file(
+            "src/fl/x.cpp.hpp",
+            "alignas(16) fl::u8 buf[64];\n\
+             FL_ALIGN_MAX fl::u8 ok[64];\n\
+             // alignas(8) in a comment\n\
+             /* alignas(4) */\n\
+             struct alignas (8) S {};\n\
+             alignas(4) int k; // ok alignas: test fixture\n\
+             alignas(16) char dma[64]; /* dma */\n\
+             alignas(8) int x; /* start of block\n\
+             alignas(2) still in comment */ int y;\n\
+             const char* s = \"alignas(2)\";\n\
+             alignas(16) int v; /* // ok alignas */\n\
+             alignas(16) int w; const char* t = \"// ok alignas\";\n\
+             /* x */ alignas(16) char b[8];\n",
+        );
+        let lines: Vec<usize> = checker
+            .check_file_content(&src)
+            .into_iter()
+            .map(|(line, _)| line)
+            .collect();
+        assert_eq!(lines, vec![1, 5, 7, 8, 11, 12, 13]);
+    }
+
+    #[test]
+    fn raw_alignas_skips_align_header_and_non_src() {
+        let checker = RawAlignasChecker;
+        let root = Path::new("/repo");
+        assert!(!checker.should_process_file("/repo/src/fl/stl/align.h", root));
+        assert!(!checker.should_process_file("/repo/tests/fl/x.cpp", root));
+        assert!(checker.should_process_file("/repo/src/fl/stl/vector.h", root));
+    }
+
     fn legal_header(last_updated: &str, holders: &[&str]) -> String {
         let holders_yaml = if holders.is_empty() {
             "//   holders: []".to_string()
@@ -637,6 +673,21 @@ FL_WARN(\"still checked because remote files are always guarded\");\n",
 
     fn singleton_elision_violations(src: &str) -> Vec<(usize, String)> {
         SingletonElisionChecker.check_file_content(&file("src/fl/probe.cpp.hpp", src))
+    }
+
+    #[test]
+    fn singleton_elision_ignores_annotated_multiline_function_declarations() {
+        let src = "namespace fl {\n\
+                   u8 bilinearInterpolate(u8 v00, u8 v10,\n\
+                       u16 dx, u16 dy) FL_NO_EXCEPT;\n\
+                   u8 otherInterpolate(u8 v00,\n\
+                       u8 dy) noexcept;\n\
+                   static Table global_state;\n\
+                   }\n";
+        let hits = singleton_elision_violations(src);
+        assert_eq!(hits.len(), 1, "function declarations must not become storage");
+        assert_eq!(hits[0].0, 6);
+        assert!(hits[0].1.contains("global_state"));
     }
 
     #[test]

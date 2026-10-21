@@ -8,6 +8,7 @@
 #include "fl/log/log.h"
 #include "fl/system/delay.h"
 #include "fl/stl/vector.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace validation {
@@ -17,9 +18,9 @@ bool testRxChannel(
     int pin_tx,
     int pin_rx,
     u32 hz,
-    size_t buffer_size) {
+    size_t buffer_size) FL_NO_EXCEPT {
 
-    FL_WARN("[RX TEST] Testing RX channel with manual GPIO toggle on PIN %s", pin_tx);
+    FL_WARN("[RX TEST] Testing RX channel with manual GPIO toggle on PIN " << pin_tx);
 
     // Configure PIN_TX as output using fl::pin functions (temporarily take ownership from FastLED)
     fl::pinMode(pin_tx, fl::PinMode::Output);
@@ -64,9 +65,9 @@ bool testRxChannel(
 
     // Check if we successfully captured data
     if (wait_result != fl::RxWaitResult::SUCCESS) {
-        FL_ERROR("[RX TEST]: RX channel wait failed (result: %s)", static_cast<int>(wait_result));
-        FL_ERROR("[RX TEST]: RX may not be working - check PIN_RX (%s) and RMT peripheral", pin_rx);
-        FL_ERROR("[RX TEST]: If using non-RMT TX, ensure physical jumper from PIN %s to PIN %s", pin_tx, pin_rx);
+        FL_ERROR("[RX TEST]: RX channel wait failed (result: " << (static_cast<int>(wait_result)) << ")");
+        FL_ERROR("[RX TEST]: RX may not be working - check PIN_RX (" << pin_rx << ") and RMT peripheral");
+        FL_ERROR("[RX TEST]: If using non-RMT TX, ensure physical jumper from PIN " << pin_tx << " to PIN " << pin_rx);
         return false;
     }
 
@@ -76,11 +77,11 @@ bool testRxChannel(
     size_t edge_count = rx_channel->getRawEdgeTimes(check_edges, 0);
     if (edge_count == 0) {
         FL_ERROR("[RX TEST]: wait() succeeded but 0 edges captured - DMA trigger may be misconfigured");
-        FL_ERROR("[RX TEST]: Check DMAMUX source number for PIN_RX (%s)", pin_rx);
+        FL_ERROR("[RX TEST]: Check DMAMUX source number for PIN_RX (" << pin_rx << ")");
         return false;
     }
 
-    FL_WARN("[RX TEST] ✓ RX channel captured %s edges from %s toggles", edge_count, num_toggles);
+    FL_WARN("[RX TEST] ✓ RX channel captured " << edge_count << " edges from " << num_toggles << " toggles");
     FL_WARN("[RX TEST] ✓ RX channel is functioning correctly");
 
     return true;

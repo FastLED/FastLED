@@ -31,9 +31,9 @@ struct Mood {
 
     Mood() FL_NO_EXCEPT : valence(0.0f), arousal(0.0f), confidence(0.0f), timestamp(0), duration(0) {}
 
-    bool isValid() const { return confidence > 0.0f; }
+    bool isValid() const FL_NO_EXCEPT { return confidence > 0.0f; }
 
-    Category getCategory() const {
+    Category getCategory() const FL_NO_EXCEPT {
         const float NEUTRAL_THRESHOLD = 0.3f;
 
         // Near center = neutral
@@ -49,7 +49,7 @@ struct Mood {
         }
     }
 
-    const char* getCategoryName() const {
+    const char* getCategoryName() const FL_NO_EXCEPT {
         switch (getCategory()) {
             case CALM_NEGATIVE:      return "calm_negative";
             case CALM_POSITIVE:      return "calm_positive";
@@ -67,12 +67,12 @@ public:
     ~MoodAnalyzer() FL_NO_EXCEPT override;
 
     // Detector interface
-    void update(shared_ptr<Context> context) override;
-    void fireCallbacks() override;
-    bool needsFFT() const override { return true; }
-    bool needsFFTHistory() const override { return true; }
-    const char* getName() const override { return "MoodAnalyzer"; }
-    void reset() override;
+    void update(shared_ptr<Context> context) FL_NO_EXCEPT override;
+    void fireCallbacks() FL_NO_EXCEPT override;
+    bool needsFFT() const FL_NO_EXCEPT override { return true; }
+    bool needsFFTHistory() const FL_NO_EXCEPT override { return true; }
+    const char* getName() const FL_NO_EXCEPT override { return "MoodAnalyzer"; }
+    void reset() FL_NO_EXCEPT override;
 
     // Event callbacks (multiple listeners supported)
     function_list<void(const Mood& mood)> onMood;              // Every frame
@@ -80,15 +80,15 @@ public:
     function_list<void(float valence, float arousal)> onValenceArousal;   // Raw values
 
     // State access
-    const Mood& getCurrentMood() const { return mCurrentMood; }
-    float getValence() const { return mCurrentMood.valence; }
-    float getArousal() const { return mCurrentMood.arousal; }
-    Mood::Category getMoodCategory() const { return mCurrentMood.getCategory(); }
+    const Mood& getCurrentMood() const FL_NO_EXCEPT { return mCurrentMood; }
+    float getValence() const FL_NO_EXCEPT { return mCurrentMood.valence; }
+    float getArousal() const FL_NO_EXCEPT { return mCurrentMood.arousal; }
+    Mood::Category getMoodCategory() const FL_NO_EXCEPT { return mCurrentMood.getCategory(); }
 
     // Configuration
-    void setConfidenceThreshold(float threshold) { mConfidenceThreshold = threshold; }
-    void setMinDuration(u32 ms) { mMinDuration = ms; }
-    void setAveragingFrames(int frames) { mAveragingFrames = frames; }
+    void setConfidenceThreshold(float threshold) FL_NO_EXCEPT { mConfidenceThreshold = threshold; }
+    void setMinDuration(u32 ms) FL_NO_EXCEPT { mMinDuration = ms; }
+    void setAveragingFrames(int frames) FL_NO_EXCEPT { mAveragingFrames = frames; }
 
 private:
     Mood mCurrentMood;
@@ -113,13 +113,13 @@ private:
     shared_ptr<const fft::Bins> mRetainedFFT;
 
     // Analysis methods
-    float calculateSpectralCentroid(const fft::Bins& fft);
-    float calculateSpectralRolloff(const fft::Bins& fft, float threshold = 0.85f);
-    float calculateSpectralFlux(const fft::Bins& fft, const fft::Bins* prevFFT);
-    float calculateValence(float centroid, float rolloff, float flux);
-    float calculateArousal(float rms, float zcr, float flux);
-    float calculateConfidence(float valence, float arousal);
-    bool shouldChangeMood(const Mood& newMood);
+    float calculateSpectralCentroid(const fft::Bins& fft) FL_NO_EXCEPT;
+    float calculateSpectralRolloff(const fft::Bins& fft, float threshold = 0.85f) FL_NO_EXCEPT;
+    float calculateSpectralFlux(const fft::Bins& fft, const fft::Bins* prevFFT) FL_NO_EXCEPT;
+    float calculateValence(float centroid, float rolloff, float flux) FL_NO_EXCEPT;
+    float calculateArousal(float rms, float zcr, float flux) FL_NO_EXCEPT;
+    float calculateConfidence(float valence, float arousal) FL_NO_EXCEPT;
+    bool shouldChangeMood(const Mood& newMood) FL_NO_EXCEPT;
 };
 
 } // namespace detector

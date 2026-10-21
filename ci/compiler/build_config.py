@@ -25,6 +25,7 @@ import shutil
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, NamedTuple, Optional, Sequence
 
+from ci.compiler.project_ini import ProjectIni
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
@@ -452,6 +453,29 @@ def generate_build_info_json_from_existing_build(
 # ---------------------------------------------------------------------------
 
 
+def _apply_esp_release_exception_policy(
+    board: "Board", project_ini: ProjectIni
+) -> None:
+    """#4773: release staging disables C++ EH; debug/system policy stays external."""
+    if board.platform_family not in {"esp32", "esp8266"}:
+        return
+    section = f"env:{board.board_name}"
+    default_mode = project_ini.get_option("env", "build_type", "release")
+    build_type = project_ini.get_option(section, "build_type", default_mode)
+    if build_type != "release":
+        return
+    # Append after inherited/user flags. Do not remove SDK unwind or panic flags.
+    if project_ini.has_option(section, "build_flags"):
+        flags = project_ini.get_build_flags(board.board_name)
+    else:
+        # A local option overrides [env]; materialize inherited diagnostics
+        # before adding the release flag instead of hiding them with a new option.
+        inherited = project_ini.get_option("env", "build_flags", "") or ""
+        flags = [line.strip() for line in inherited.splitlines() if line.strip()]
+    flags.append("-fno-exceptions")
+    project_ini.set_build_flags(board.board_name, flags)
+
+
 def apply_board_specific_config(
     board: "Board",
     project_ini_path: Path,
@@ -478,7 +502,9 @@ def apply_board_specific_config(
         project_root=str(project_root),
     )
 
-    project_ini_path.write_text(config_content)
+    project_ini = ProjectIni.parseString(config_content)
+    _apply_esp_release_exception_policy(board, project_ini)
+    project_ini.dump(project_ini_path)
 
     # Log applied configurations for debugging
     if board.build_flags:

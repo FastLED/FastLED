@@ -18,13 +18,13 @@
 namespace fl {
 
 NativeHttpClient::NativeHttpClient(const asio::ip::tcp::endpoint& ep, const ConnectionConfig& config)
-    : mEndpoint(ep)
+    FL_NO_EXCEPT : mEndpoint(ep)
     , mConnection(config)
 {
 }
 
 NativeHttpClient::NativeHttpClient(const string& host, u16 port, const ConnectionConfig& config)
-    : mEndpoint(host, port)
+    FL_NO_EXCEPT : mEndpoint(host, port)
     , mConnection(config)
 {
 }
@@ -33,7 +33,7 @@ NativeHttpClient::~NativeHttpClient() FL_NO_EXCEPT {
     disconnect();
 }
 
-bool NativeHttpClient::connect() {
+bool NativeHttpClient::connect() FL_NO_EXCEPT {
     if (mConnection.getState() == ConnectionState::CLOSED) {
         return false;  // Permanently closed
     }
@@ -57,27 +57,27 @@ bool NativeHttpClient::connect() {
     return false;
 }
 
-void NativeHttpClient::disconnect() {
+void NativeHttpClient::disconnect() FL_NO_EXCEPT {
     if (mSocket.is_open()) {
         platformDisconnect();
         mConnection.disconnect();
     }
 }
 
-void NativeHttpClient::close() {
+void NativeHttpClient::close() FL_NO_EXCEPT {
     disconnect();
     mConnection.close();
 }
 
-bool NativeHttpClient::isConnected() const {
+bool NativeHttpClient::isConnected() const FL_NO_EXCEPT {
     return mConnection.isConnected() && isSocketConnected();
 }
 
-ConnectionState NativeHttpClient::getState() const {
+ConnectionState NativeHttpClient::getState() const FL_NO_EXCEPT {
     return mConnection.getState();
 }
 
-int NativeHttpClient::send(fl::span<const u8> data) {
+int NativeHttpClient::send(fl::span<const u8> data) FL_NO_EXCEPT {
     if (!isConnected() || !mSocket.is_open()) {
         return -1;
     }
@@ -96,7 +96,7 @@ int NativeHttpClient::send(fl::span<const u8> data) {
     return static_cast<int>(n);
 }
 
-int NativeHttpClient::recv(fl::span<u8> buffer) {
+int NativeHttpClient::recv(fl::span<u8> buffer) FL_NO_EXCEPT {
     if (!isConnected() || !mSocket.is_open()) {
         return -1;
     }
@@ -119,7 +119,7 @@ int NativeHttpClient::recv(fl::span<u8> buffer) {
     return static_cast<int>(n);
 }
 
-void NativeHttpClient::update(u32 currentTimeMs) {
+void NativeHttpClient::update(u32 currentTimeMs) FL_NO_EXCEPT {
     // Update connection state machine
     mConnection.update(currentTimeMs);
 
@@ -135,27 +135,27 @@ void NativeHttpClient::update(u32 currentTimeMs) {
     }
 }
 
-bool NativeHttpClient::shouldSendHeartbeat(u32 currentTimeMs) const {
+bool NativeHttpClient::shouldSendHeartbeat(u32 currentTimeMs) const FL_NO_EXCEPT {
     return mConnection.shouldSendHeartbeat(currentTimeMs);
 }
 
-void NativeHttpClient::onHeartbeatSent() {
+void NativeHttpClient::onHeartbeatSent() FL_NO_EXCEPT {
     mConnection.onHeartbeatSent();
 }
 
-void NativeHttpClient::onHeartbeatReceived() {
+void NativeHttpClient::onHeartbeatReceived() FL_NO_EXCEPT {
     mConnection.onHeartbeatReceived();
 }
 
-u32 NativeHttpClient::getReconnectDelayMs() const {
+u32 NativeHttpClient::getReconnectDelayMs() const FL_NO_EXCEPT {
     return mConnection.getReconnectDelayMs();
 }
 
-u32 NativeHttpClient::getReconnectAttempts() const {
+u32 NativeHttpClient::getReconnectAttempts() const FL_NO_EXCEPT {
     return mConnection.getReconnectAttempts();
 }
 
-bool NativeHttpClient::platformConnect() {
+bool NativeHttpClient::platformConnect() FL_NO_EXCEPT {
     // Delegate to tcp::socket::connect using the endpoint
     if (mSocket.is_open()) {
         platformDisconnect();
@@ -165,11 +165,11 @@ bool NativeHttpClient::platformConnect() {
     return ec.ok();
 }
 
-void NativeHttpClient::platformDisconnect() {
+void NativeHttpClient::platformDisconnect() FL_NO_EXCEPT {
     mSocket.close();
 }
 
-bool NativeHttpClient::isSocketConnected() const {
+bool NativeHttpClient::isSocketConnected() const FL_NO_EXCEPT {
     if (!mSocket.is_open()) {
         return false;
     }

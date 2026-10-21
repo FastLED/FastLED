@@ -2,13 +2,14 @@
 #include "fl/fx/2d/animartrix_detail/viz/slow_fade.h"
 #include "fl/fx/2d/animartrix_detail/render_value_fp.h"
 #include "fl/fx/2d/animartrix_detail/perlin_float.h"
+#include "fl/stl/noexcept.h"
 
 FL_FAST_MATH_BEGIN
 FL_OPTIMIZATION_LEVEL_O3_BEGIN
 
 namespace fl {
 
-void Slow_Fade::draw(Context &ctx) {
+void Slow_Fade::draw(Context &ctx) FL_NO_EXCEPT {
     auto *e = ctx.mEngine.get();
     e->get_ready();
 
@@ -61,7 +62,7 @@ void Slow_Fade::draw(Context &ctx) {
 // Fixed-Point Implementation of Slow_Fade
 // ============================================================================
 
-void Slow_Fade_FP::draw(Context &ctx) {
+void Slow_Fade_FP::draw(Context &ctx) FL_NO_EXCEPT {
     auto *e = ctx.mEngine.get();
     e->get_ready();
     mState.ensureCache(e);

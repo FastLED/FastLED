@@ -101,7 +101,7 @@ public:
     /// @brief Update strip data with RGB pixel data
     /// @param pixel_data Span of RGB pixel data (3 bytes per pixel: R, G, B)
     void update(fl::span<const u8> pixel_data) FL_NO_EXCEPT {
-        fl::ActiveStripData::Instance() FL_NO_EXCEPT .update(mId, fl::millis(), pixel_data);
+        fl::ActiveStripData::Instance().update(mId, fl::millis(), pixel_data);
     }
 
     /// @brief Update strip data with CRGB pixel data
@@ -139,7 +139,7 @@ private:
 
     /// @brief Get the static ID counter (accessor for resetForTesting)
     static fl::atomic_int& getNextId() FL_NO_EXCEPT {
-        static fl::atomic_int sNextId(0) FL_NO_EXCEPT;  // okay static in header
+        static fl::atomic_int sNextId(0);  // okay static in header
         return sNextId;
     }
 

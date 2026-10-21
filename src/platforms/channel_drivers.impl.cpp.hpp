@@ -18,6 +18,7 @@
 /// convention - no "magic include" required at the call site.
 
 #include "fl/channels/all_drivers.h"
+#include "fl/channels/clockless_encoders.h"
 
 #include "platforms/is_platform.h"
 
@@ -36,6 +37,7 @@
 namespace fl {
 
 void enableAllDrivers() FL_NO_EXCEPT {
+    platforms::enableClocklessEncoders();  // #4793: every driver, every mode
     platforms::enableAllChannelDrivers();
 }
 

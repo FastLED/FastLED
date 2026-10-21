@@ -8,7 +8,7 @@ namespace audio {
 namespace detector {
 
 Backbeat::Backbeat(shared_ptr<Beat> beatDetector)
-    : mBeatDetector(beatDetector)
+    FL_NO_EXCEPT : mBeatDetector(beatDetector)
     , mDownbeatDetector(nullptr)
     , mOwnsBeatDetector(false)
     , mOwnsDownbeatDetector(false)
@@ -40,21 +40,21 @@ Backbeat::Backbeat(shared_ptr<Beat> beatDetector)
 
 Backbeat::Backbeat(shared_ptr<Beat> beatDetector,
                                     shared_ptr<Downbeat> downbeatDetector)
-    : Backbeat(beatDetector)
+    FL_NO_EXCEPT : Backbeat(beatDetector)
 {
     mDownbeatDetector = downbeatDetector;
     mOwnsDownbeatDetector = false;
 }
 
 Backbeat::Backbeat()
-    : Backbeat(make_shared<Beat>())
+    FL_NO_EXCEPT : Backbeat(make_shared<Beat>())
 {
     mOwnsBeatDetector = true;
 }
 
 Backbeat::~Backbeat() FL_NO_EXCEPT = default;
 
-void Backbeat::update(shared_ptr<Context> context) {
+void Backbeat::update(shared_ptr<Context> context) FL_NO_EXCEPT {
     // Update Beat if we own it
     if (mOwnsBeatDetector && mBeatDetector) {
         updateBeatDetector(context);
@@ -121,7 +121,7 @@ void Backbeat::update(shared_ptr<Context> context) {
     }
 }
 
-void Backbeat::fireCallbacks() {
+void Backbeat::fireCallbacks() FL_NO_EXCEPT {
     if (mBackbeatDetected) {
         if (onBackbeat) {
             onBackbeat(mCurrentBeat, mConfidence, mCurrentStrength);
@@ -129,7 +129,7 @@ void Backbeat::fireCallbacks() {
     }
 }
 
-void Backbeat::reset() {
+void Backbeat::reset() FL_NO_EXCEPT {
     mBackbeatDetected = false;
     mLastBackbeatNumber = 0;
     mConfidence = 0.0f;
@@ -159,27 +159,27 @@ void Backbeat::reset() {
     }
 }
 
-void Backbeat::setBeatDetector(shared_ptr<Beat> beatDetector) {
+void Backbeat::setBeatDetector(shared_ptr<Beat> beatDetector) FL_NO_EXCEPT {
     if (beatDetector) {
         mBeatDetector = beatDetector;
         mOwnsBeatDetector = false;
     }
 }
 
-void Backbeat::setDownbeatDetector(shared_ptr<Downbeat> downbeatDetector) {
+void Backbeat::setDownbeatDetector(shared_ptr<Downbeat> downbeatDetector) FL_NO_EXCEPT {
     if (downbeatDetector) {
         mDownbeatDetector = downbeatDetector;
         mOwnsDownbeatDetector = false;
     }
 }
 
-void Backbeat::updateBeatDetector(shared_ptr<Context> context) {
+void Backbeat::updateBeatDetector(shared_ptr<Context> context) FL_NO_EXCEPT {
     if (mBeatDetector) {
         mBeatDetector->update(context);
     }
 }
 
-void Backbeat::updateBeatPosition() {
+void Backbeat::updateBeatPosition() FL_NO_EXCEPT {
     if (!mBeatDetector) {
         return;
     }
@@ -205,7 +205,7 @@ void Backbeat::updateBeatPosition() {
     mPreviousWasBeat = currentlyBeat;
 }
 
-MultibandAccent Backbeat::calculateMultibandAccent(const fft::Bins& fft) {
+MultibandAccent Backbeat::calculateMultibandAccent(const fft::Bins& fft) FL_NO_EXCEPT {
     MultibandAccent accent;
 
     // Define band ranges for 16-bin CQ log-spaced fft::FFT
@@ -290,13 +290,13 @@ MultibandAccent Backbeat::calculateMultibandAccent(const fft::Bins& fft) {
     return {bassEnergy, midEnergy, highEnergy, accent.total};
 }
 
-float Backbeat::detectBackbeatAccent(const MultibandAccent& accent) {
+float Backbeat::detectBackbeatAccent(const MultibandAccent& accent) FL_NO_EXCEPT {
     // The accent strength is already calculated in calculateMultibandAccent
     // This method could apply additional processing if needed
     return accent.total;
 }
 
-bool Backbeat::isBackbeatPosition() const {
+bool Backbeat::isBackbeatPosition() const FL_NO_EXCEPT {
     // Check if current beat number matches backbeat mask
     // Beat numbers are 1-based, mask is 0-based
     if (mCurrentBeat == 0 || mCurrentBeat > 8) {
@@ -307,7 +307,7 @@ bool Backbeat::isBackbeatPosition() const {
     return (mBackbeatMask & (1 << bitIndex)) != 0;
 }
 
-bool Backbeat::detectBackbeat(float accentStrength, const fft::Bins& fft) {
+bool Backbeat::detectBackbeat(float accentStrength, const fft::Bins& fft) FL_NO_EXCEPT {
     // Check if we're at a backbeat position
     bool atBackbeatPosition = isBackbeatPosition();
 
@@ -346,7 +346,7 @@ bool Backbeat::detectBackbeat(float accentStrength, const fft::Bins& fft) {
     return (mConfidence >= mConfidenceThreshold);
 }
 
-void Backbeat::updateAdaptiveThresholds() {
+void Backbeat::updateAdaptiveThresholds() FL_NO_EXCEPT {
     // Update mean accent strengths for backbeat and non-backbeat positions
     if (!mBackbeatAccents.empty()) {
         float sum = 0.0f;
@@ -377,7 +377,7 @@ void Backbeat::updateAdaptiveThresholds() {
     }
 }
 
-void Backbeat::updateBackbeatProfile(const fft::Bins& fft) {
+void Backbeat::updateBackbeatProfile(const fft::Bins& fft) FL_NO_EXCEPT {
     // Update spectral profile using exponential moving average
     // This learns the typical frequency content of backbeats
 
@@ -391,7 +391,7 @@ void Backbeat::updateBackbeatProfile(const fft::Bins& fft) {
     }
 }
 
-float Backbeat::calculatePatternConfidence(const fft::Bins& fft) {
+float Backbeat::calculatePatternConfidence(const fft::Bins& fft) FL_NO_EXCEPT {
     // Calculate spectral correlation between current spectrum and learned profile
     // Returns 0-1 indicating how well current spectrum matches typical backbeat
 

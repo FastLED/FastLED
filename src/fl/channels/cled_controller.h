@@ -4,7 +4,6 @@
 /// base definitions used by led controllers for writing out led data
 
 #include "color.h"
-#include "fl/channels/color_profile.h"  // IWYU pragma: keep  (EmitterProfile)
 #include "pixel_controller.h"  // IWYU pragma: keep  (ColorAdjustment)
 
 #include "fl/stl/compiler_control.h"
@@ -13,12 +12,12 @@
 #include "fl/math/screenmap.h"
 #include "fl/stl/int.h"
 #include "fl/stl/bit_cast.h"
-#include "fl/channels/options.h"
+#include "fl/channels/legacy_settings.h"
 #include "fl/log/log.h"
+#include "platforms/is_platform.h"  // for FL_IS_ESP32, FL_IS_AVR
 #include "fl/stl/span.h"
 #include "fl/stl/noexcept.h"
 #include "fl/spi_bus.h"
-#include "fl/stl/shared_ptr.h"
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -34,24 +33,44 @@
 
 namespace fl {
 
-struct StreamingPipelineQ16;  // fl/gfx/pipeline.h; only a shared_ptr is named here
+class Channel;
+
+namespace detail {
+/// Lets the power limiter charge a controller's RGBW conversion. Called by
+/// CLEDController::applyRgbw -- the one path in-tree that stores an Rgbw into
+/// a controller -- and by Channel when its options carry one, so a sketch
+/// that never configures RGBW does not link the conversion into the limiter.
+/// Defined in power_mgt.cpp.hpp.
+void enable_rgbw_power_estimate() FL_NO_EXCEPT;
+}  // namespace detail
 
 class CLEDController {
 protected:
     friend class CFastLED;
     fl::span<CRGB> mLeds;     ///< span of LED data used by this controller
     CLEDController *mPNext = nullptr;   ///< pointer to the next LED controller in the linked list
-    ChannelOptions mSettings;  ///< Optional channel settings (correction, temperature, dither, rgbw, affinity)
-    // Reuse the legacy enabled byte for P2's TINY static-profile state. This
-    // keeps the base-controller ABI unchanged while allowing a legacy setter
-    // to clear an immutable compile-time binding exactly once.
-    enum StateFlags : u8 {
-        kEnabled = 1 << 0,
-        kStaticProfileCleared = 1 << 1,
-    };
-    u8 mStateFlags = kEnabled;
+    LegacySettings mLegacySettings;
+    // Bit-fields share one byte; a fixed-white flag costs no RAM and no
+    // vtable slot on AVR (#4788).
+    bool mEnabled : 1;
+    bool mFixedWhiteChannel : 1;  ///< chipset wire format owns the white policy
+
+    enum class SettingsChange : u8 { Correction, Temperature, Dither, White };
+#ifndef FL_IS_AVR
+    // Derived APIs can react to settings changed through a base reference.
+    // AVR has neither this slot nor a notification call.
+    virtual void onSettingsChanged(SettingsChange change) FL_NO_EXCEPT {
+        FL_UNUSED(change);
+    }
+#endif
+    void settingsChanged(SettingsChange change) FL_NO_EXCEPT {
+#ifndef FL_IS_AVR
+        onSettingsChanged(change);
+#else
+        FL_UNUSED(change);
+#endif
+    }
     static CLEDController *mPHead;  ///< pointer to the first LED controller in the linked list
-    static CLEDController *mPTail;  ///< pointer to the last LED controller in the linked list
 
     /// @brief Registration mode for constructor
     enum class RegistrationMode {
@@ -68,10 +87,11 @@ protected:
 
     void applyRgbw(const Rgbw& arg) FL_NO_EXCEPT {
         if (!arg.active()) {
-            mSettings.mWhiteCfg.reset();
+            mLegacySettings.mWhiteCfg.reset();
         } else {
             prepare_rgbw_colorimetric(arg);
-            mSettings.mWhiteCfg = arg;
+            detail::enable_rgbw_power_estimate();
+            mLegacySettings.mWhiteCfg = arg;
         }
     }
 
@@ -79,30 +99,31 @@ protected:
     /// setters cannot replace.
     void setFixedRgbw(const Rgbw& arg) FL_NO_EXCEPT {
         applyRgbw(arg);
-    }
-
-    /// Return the name of a chipset whose wire format owns its white-channel
-    /// policy. Overriding this virtual avoids per-controller policy storage.
-    virtual const char* fixedWhiteChannelChipset() const FL_NO_EXCEPT {
-        return nullptr;
+        mFixedWhiteChannel = true;
     }
 
     bool rejectFixedWhiteChannelChange(const char* operation) const FL_NO_EXCEPT {
         FL_UNUSED(operation);  // only consumed by FL_WARN, a no-op on small platforms
-        const char* chipset = fixedWhiteChannelChipset();
-        if (chipset == nullptr) {
+        if (!mFixedWhiteChannel) {
             return false;
         }
-        FL_WARN("%s has fixed R,G,B,W output; %s is unsupported and was "
-                  "ignored",
-                  chipset, operation);
+        FL_WARN("Chipset has fixed R,G,B,W output; " << operation << " is unsupported and was ignored");
         return true;
     }
 
 public:
+#ifndef FL_IS_AVR
+    // Identify Channels without retaining Channels configuration in this base.
+    // Standalone Channels need the same integration as registered Channels.
+    virtual const Channel* asChannel() const FL_NO_EXCEPT { return nullptr; }
+#endif
     /// Select an ESP-IDF SPI host for this clocked controller before init().
-    /// Non-ESP32 and non-SPI controllers ignore this setting.
-    virtual CLEDController &setSpiBus(Esp32SpiBus bus) FL_NO_EXCEPT {
+    /// Non-ESP32 and non-SPI controllers ignore this setting. Only ESP32 SPI
+    /// controllers override it, so other platforms carry no vtable slot (#4788).
+#if defined(FL_IS_ESP32)
+    virtual
+#endif
+    CLEDController &setSpiBus(Esp32SpiBus bus) FL_NO_EXCEPT {
         (void)bus;
         return *this;
     }
@@ -132,12 +153,17 @@ public:
         if (rejectFixedWhiteChannelChange("setRgbw()")) {
             return *this;
         }
-        // (#2558) mSettings.mWhiteCfg is now a fl::variant<Empty, Rgbw, Rgbww>;
+        // (#2558) mLegacySettings.mWhiteCfg is now a fl::variant<Empty, Rgbw, Rgbww>;
         // assigning Rgbw selects the 4-channel alternative. The legacy
         // "setRgbw(RgbwInvalid::value()) → disable" semantics are preserved
         // by translating an inactive Rgbw into Empty so observers see the
         // same "no white channel" state they did before the variant migration.
+        if (arg.active()) {
+            // Covers an Rgbw made active by assigning rgbw_mode (#4795).
+            detail::enable_rgbw_conversion();
+        }
         applyRgbw(arg);
+        settingsChanged(SettingsChange::White);
         return *this;  // builder pattern.
     }
 
@@ -151,10 +177,12 @@ public:
             return *this;
         }
         if (!arg.active()) {
-            mSettings.mWhiteCfg.reset();
+            mLegacySettings.mWhiteCfg.reset();
         } else {
-            mSettings.mWhiteCfg = arg;
+            detail::enable_rgbww_conversion();  // see setRgbw (#4795)
+            mLegacySettings.mWhiteCfg = arg;
         }
+        settingsChanged(SettingsChange::White);
         return *this;
     }
 
@@ -164,51 +192,13 @@ public:
         if (rejectFixedWhiteChannelChange("clearWhiteChannel()")) {
             return *this;
         }
-        mSettings.mWhiteCfg.reset();
+        mLegacySettings.mWhiteCfg.reset();
+        settingsChanged(SettingsChange::White);
         return *this;
     }
 
-    void setEnabled(bool enabled) FL_NO_EXCEPT {
-        if (enabled) {
-            mStateFlags |= kEnabled;
-        } else {
-            mStateFlags &= static_cast<u8>(~kEnabled);
-        }
-    }
-    bool getEnabled() FL_NO_EXCEPT { return (mStateFlags & kEnabled) != 0; }
-    const EmitterProfile* emitterProfile() const FL_NO_EXCEPT {
-        const EmitterProfile* static_profile = staticEmitterProfile();
-        return static_profile != nullptr && !staticProfileCleared()
-            ? static_profile
-            : mSettings.emitterProfile();
-    }
-    void bindStaticEmitterProfile(const EmitterProfile* profile) FL_NO_EXCEPT {
-#if FL_COLOR_PROFILE_RUNTIME
-        mSettings.clearColorProfile();
-        if (profile != nullptr) {
-            installColorPipelineHooks();
-        }
-        mSettings.mColorProfile.mStaticProfile = profile;
-        mSettings.mColorProfile.mRequested = profile != nullptr;
-#else
-        FL_UNUSED(profile);
-#endif
-    }
-
-protected:
-    /// Template-derived static-profile controllers override this hook. It
-    /// carries compile-time identity without an instance pointer field.
-    virtual const EmitterProfile* staticEmitterProfile() const FL_NO_EXCEPT { return nullptr; }
-    bool staticProfileCleared() const FL_NO_EXCEPT {
-        return (mStateFlags & kStaticProfileCleared) != 0;
-    }
-    void clearStaticProfileForLegacySettings() FL_NO_EXCEPT {
-        if (staticEmitterProfile() != nullptr) {
-            mStateFlags |= kStaticProfileCleared;
-        }
-    }
-
-public:
+    void setEnabled(bool enabled) FL_NO_EXCEPT { mEnabled = enabled; }
+    bool getEnabled() FL_NO_EXCEPT { return mEnabled; }
 
     CLEDController() FL_NO_EXCEPT;
     // If we added virtual to the AVR boards then we are going to add 600 bytes of memory to the binary
@@ -223,11 +213,20 @@ public:
     /// @return The Rgbw configuration if this channel is in 4-channel mode,
     /// otherwise RgbwInvalid::value(). Backward-compatible with the pre-#2558
     /// API: callers that don't know about Rgbww see the same shape as before.
-    Rgbw getRgbw() const FL_NO_EXCEPT { return mSettings.rgbw(); }
+    Rgbw getRgbw() const FL_NO_EXCEPT { return mLegacySettings.rgbw(); }
+
+    /// @return The stored Rgbw configuration, or nullptr when the channel
+    /// holds none. Unlike getRgbw() it does not copy the value, so a caller
+    /// on the show path does not take and drop a reference on its profile.
+    /// A subclass that writes mLegacySettings.mWhiteCfg itself must also call
+    /// detail::enable_rgbw_power_estimate(), or the limiter charges it as RGB.
+    const Rgbw* rgbwConfig() const FL_NO_EXCEPT {
+        return mLegacySettings.mWhiteCfg.ptr<Rgbw>();
+    }
 
     /// @return The Rgbww configuration if this channel is in 5-channel mode,
     /// otherwise RgbwwInvalid::value().
-    Rgbww getRgbww() const FL_NO_EXCEPT { return mSettings.rgbww(); }
+    Rgbww getRgbww() const FL_NO_EXCEPT { return mLegacySettings.rgbww(); }
 
     /// Initialize the LED controller
     virtual void init() FL_NO_EXCEPT = 0;
@@ -355,27 +354,12 @@ public:
 
     /// How many LEDs does this controller manage?
     /// @returns CLEDController::mLeds.size()
-    virtual int size() const FL_NO_EXCEPT { return mLeds.size(); }
+    // Not virtual on AVR: no AVR controller overrides it (#4788).
+    VIRTUAL_IF_NOT_AVR int size() const FL_NO_EXCEPT { return mLeds.size(); }
 
     /// How many Lanes does this controller manage?
     /// @returns 1 for a non-Parallel controller
     virtual int lanes() FL_NO_EXCEPT { return 1; }
-
-#if FL_COLOR_PIPELINE_SHARED
-    /// The streaming colour pipeline this controller's output runs through,
-    /// or null when its output is the legacy (unmanaged) path.
-    ///
-    /// Read by the power limiter, which must charge the drives a managed
-    /// controller actually emits rather than its source pixels (#4344). A
-    /// plain accessor, not the estimate itself: the estimate lives in the
-    /// power module and so links only into sketches that limit power.
-    ///
-    /// A shared reference, not a raw pointer (#4440): the caller holds the
-    /// pipeline alive for as long as it uses it, even if the controller is
-    /// reconfigured meanwhile. Compiled out below the large-memory tier
-    /// (FL_COLOR_PIPELINE_SHARED), so small parts carry no vtable slot.
-    virtual fl::shared_ptr<StreamingPipelineQ16> colorPipeline() const FL_NO_EXCEPT;
-#endif
 
     /// Pointer to the CRGB array for this controller
     /// @returns CLEDController::mLeds.data()
@@ -397,7 +381,7 @@ public:
     /// Set the dithering mode for this controller to use
     /// @param ditherMode the dithering mode to set
     /// @returns a reference to the controller
-    inline CLEDController & setDither(fl::u8 ditherMode = BINARY_DITHER) FL_NO_EXCEPT { mSettings.mDitherMode = ditherMode; return *this; }
+    inline CLEDController & setDither(fl::u8 ditherMode = BINARY_DITHER) FL_NO_EXCEPT { mLegacySettings.mDitherMode = ditherMode; settingsChanged(SettingsChange::Dither); return *this; }
 
     CLEDController& setScreenMap(const fl::XYMap& map, float diameter = -1.f) FL_NO_EXCEPT {
         // EngineEvents::onCanvasUiSet(this, map);
@@ -420,10 +404,14 @@ public:
     }
 
     /// Get the dithering option currently set for this controller
-    /// @return the currently set dithering option (CLEDController::mSettings.mDitherMode)
-    inline fl::u8 getDither() const FL_NO_EXCEPT { return mSettings.mDitherMode; }
+    /// @return the currently set dithering option (CLEDController::mLegacySettings.mDitherMode)
+    inline fl::u8 getDither() const FL_NO_EXCEPT { return mLegacySettings.mDitherMode; }
 
-    virtual void* beginShowLeds(int size) FL_NO_EXCEPT {
+    // Not virtual on AVR (#4788). Its only overrides are the RGBW/WS2816
+    // wrappers, which forward to a disabled inner controller; on AVR the base
+    // version saves and restores the wrapper's own dither instead. Custom AVR
+    // controllers cannot hook these, or size().
+    VIRTUAL_IF_NOT_AVR void* beginShowLeds(int size) FL_NO_EXCEPT {
         FASTLED_UNUSED(size);
         // By default, emit an integer. This integer will, by default, be passed back.
         // If you override beginShowLeds() then
@@ -442,7 +430,7 @@ public:
         return out;
     }
 
-    virtual void endShowLeds(void* data) FL_NO_EXCEPT {
+    VIRTUAL_IF_NOT_AVR void endShowLeds(void* data) FL_NO_EXCEPT {
         // By default recieves the integer that beginShowLeds() emitted.
         //For async controllers this should be used to signal the controller
         // to begin transmitting the current frame to the leds.
@@ -454,47 +442,47 @@ public:
     /// @param correction the color correction to set
     /// @returns a reference to the controller
     CLEDController & setCorrection(CRGB correction) FL_NO_EXCEPT {
-        clearStaticProfileForLegacySettings();
-        mSettings.setLegacyCorrection(correction);
+        mLegacySettings.mCorrection = correction;
+        settingsChanged(SettingsChange::Correction);
         return *this;
     }
 
     /// @copydoc setCorrection()
     CLEDController & setCorrection(LEDColorCorrection correction) FL_NO_EXCEPT {
-        clearStaticProfileForLegacySettings();
-        mSettings.setLegacyCorrection(correction);
+        mLegacySettings.mCorrection = correction;
+        settingsChanged(SettingsChange::Correction);
         return *this;
     }
 
     /// Get the correction value used by this controller
-    /// @returns the current color correction (CLEDController::mSettings.mCorrection)
-    CRGB getCorrection() FL_NO_EXCEPT { return mSettings.mCorrection; }
+    /// @returns the current color correction (CLEDController::mLegacySettings.mCorrection)
+    CRGB getCorrection() FL_NO_EXCEPT { return mLegacySettings.mCorrection; }
 
     /// Set the color temperature, aka white point, for this controller
     /// @param temperature the color temperature to set
     /// @returns a reference to the controller
     CLEDController & setTemperature(CRGB temperature) FL_NO_EXCEPT {
-        clearStaticProfileForLegacySettings();
-        mSettings.setLegacyTemperature(temperature);
+        mLegacySettings.mTemperature = temperature;
+        settingsChanged(SettingsChange::Temperature);
         return *this;
     }
 
     /// @copydoc setTemperature()
     CLEDController & setTemperature(ColorTemperature temperature) FL_NO_EXCEPT {
-        clearStaticProfileForLegacySettings();
-        mSettings.setLegacyTemperature(temperature);
+        mLegacySettings.mTemperature = temperature;
+        settingsChanged(SettingsChange::Temperature);
         return *this;
     }
 
     /// Get the color temperature, aka white point, for this controller
-    /// @returns the current color temperature (CLEDController::mSettings.mTemperature)
-    CRGB getTemperature() FL_NO_EXCEPT { return mSettings.mTemperature; }
+    /// @returns the current color temperature (CLEDController::mLegacySettings.mTemperature)
+    CRGB getTemperature() FL_NO_EXCEPT { return mLegacySettings.mTemperature; }
 
     /// Get the combined brightness/color adjustment for this controller
     /// @param scale the brightness scale to get the correction for
     /// @returns a CRGB object representing the total adjustment, including color correction and color temperature
     CRGB getAdjustment(fl::u8 scale) FL_NO_EXCEPT {
-        return CRGB::computeAdjustment(scale, mSettings.mCorrection, mSettings.mTemperature);
+        return CRGB::computeAdjustment(scale, mLegacySettings.mCorrection, mLegacySettings.mTemperature);
     }
 
     /// Gets the maximum possible refresh rate of the strip
@@ -502,17 +490,9 @@ public:
     virtual fl::u16 getMaxRefreshRate() const FL_NO_EXCEPT { return 0; }
 };
 
-/// A legacy-controller wrapper for a compile-time emitter profile. The
-/// override carries identity in the vtable; it intentionally has no members.
-template<const EmitterProfile& Profile,
-         template<u8, EOrder> class Chipset,
-         u8 DataPin,
-         EOrder RgbOrder>
-class StaticProfileClocklessController final : public Chipset<DataPin, RgbOrder> {
-protected:
-    const EmitterProfile* staticEmitterProfile() const FL_NO_EXCEPT override {
-        return &Profile;
-    }
-};
+#ifdef FL_IS_AVR
+// Legacy controllers must stay compact even when Channels gains new options.
+FL_STATIC_ASSERT(sizeof(CLEDController) <= 32, "Legacy AVR controller grew beyond its settings budget");
+#endif
 
 }  // namespace fl

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "fl/stl/noexcept.h"
+
 // IWYU pragma: begin_keep
 #include <errno.h>
 // IWYU pragma: end_keep  // okay banned header (STL wrapper requires standard header)
@@ -14,17 +16,17 @@ namespace fl {
 
 // Inline function to get current errno value
 // Use this instead of accessing ::errno directly for cleaner code
-inline int get_errno() {
+inline int get_errno() FL_NO_EXCEPT {
     return errno;
 }
 
 // Inline function to set errno value
-inline void set_errno(int value) {
+inline void set_errno(int value) FL_NO_EXCEPT {
     errno = value;
 }
 
 // Inline function to clear errno
-inline void clear_errno() {
+inline void clear_errno() FL_NO_EXCEPT {
     errno = 0;
 }
 

@@ -1,6 +1,199 @@
 # Task Tracker
 
+## Native ESP-IDF console footprint (#4870)
+
+- [x] Trace native UART/ring-buffer retention and measure pinned controls.
+- [x] Specialize fixed console initialization without removing configurable UART features.
+- [x] Verify image savings, explicit native/general UART consumers, tests, lint and review.
+- [x] Publish the focused implementation and its limitations.
+
+Review: native console saves 2,524 bytes flash with unchanged static RAM; both
+console backends pass physical ESP32 RPC smoke. Clean debug validation passes
+321 unit tests and 95 examples; modern ESP32-S3 AutoResearch and lint pass.
+
+## Merge and remaining flash investigation (#4870)
+
+- [x] Merge #4871 only after approval, resolved reviews and all 122 hosted checks pass; verify the merged tree.
+- [x] Compare the matched 3.10.3/current linker sections and verify selected LED backend symbols.
+- [x] Measure the native IDF console alternative; reject its 4,932-byte flash increase.
+- [x] Probe actual legacy RMT, preserve the failing bring-up evidence separately and restore merged production behavior.
+- [x] Document remaining 19,412-byte flash gap and correctness prerequisites without claiming further savings.
+
+## ESP32 memory regression (#4870)
+
+- [x] Compare the unchanged reporter sketch across 3.10.3, 3.10.8 and master on a pinned Lolin D32 toolchain.
+- [x] Trace retained memory to its linker root and preserve RMT reliability.
+- [x] Replace the ESP-DSP umbrella include with the precise FFT API; build real FFT callers on legacy and modern SDKs.
+- [x] Verify the regression size budget, native tests and code review; prepare the focused fix with measured residual costs.
+
+### FFT implementation follow-up
+
+- [x] Confirm production already uses FastLED's optimized real KissFFT transform.
+- [x] Remove the experimental ESP-DSP adapter and its unused dispatcher; preserve all eight production call paths.
+- [x] Verify FFT goldens, production audio builds, memory savings and final review before updating PR #4871.
+
 <!-- Add tasks here as checkable items -->
+
+## ESP FL_NO_EXCEPT lint
+
+- [x] Retain the ESP exception specification fixes with FL_NO_EXCEPT enabled.
+- [x] Remove SDK provisioning/matrix/cache additions and GitHub Actions edits.
+- [x] Add a Rust source parser to normal `./lint`, checking inactive branches.
+- [x] Verify original RISC-V regression, parser errors, and function signatures.
+- [x] Fix genuine ESP findings and pass lint/tests/review.
+- [ ] Push and merge the simplified PR.
+
+Validation: plain `./lint` passes; 164 Rust tests and 82 exception-policy/AST
+prerequisite tests pass. Native validation passes 321 unit targets and 96
+examples. ESP32-C6 Blink builds successfully. A temporary inactive-branch
+probe fails normal single-file `./lint` with exactly one annotation error,
+then passes after adding FL_NO_EXCEPT. Probe removed; no GHA diff.
+The source rule also checks both optional SD adapters; removing the original
+eight override annotations produces eight errors without loading either SDK.
+
+## PCH mtime replay and OBS cache integration
+
+- [x] Read both attached agent chats and inspect paused FastLED changes.
+- [x] Raise FastLED zccache floor to 1.15.5 and wrap native PCH producers.
+- [x] Verify identical-header replay and real-edit invalidation with real Clang.
+- [x] Upgrade OBS standalone zccache and soldr's embedded dependency.
+- [x] Run lint, native checks and code review; publish scoped feature PRs.
+
+Validation: 61 focused PCH/cache tests pass, including real Clang forward and
+backward timestamp repair, unchanged PCH bytes/mtime, and real-edit rebuilds.
+`bash lint` passes and `bash test --cpp` passes all 321 unit tests and 96
+examples. A real Emscripten PCH build passed; moving its input header mtime
+forward and backward preserves the PCH bytes/mtime and repairs the input.
+`bash compile wasm --examples Blink` passes (warm build). Code review found no
+blocking findings. PRs: FastLED/FastLED#4865, obs-rust/obs-studio#1265,
+zackees/soldr#3849. Soldr passes locked daemon compilation, full lint and all
+33 static gates. OBS passes 12 focused tests and real Clang PCH replay.
+The optional broad Python run was stopped after it entered unrelated QEMU
+coverage; the focused Python tests and complete native suite above are green.
+
+### CodeRabbit followup
+
+- [x] Restrict PCH input manifests to `.pch` outputs; real-object regression RED -> GREEN.
+- [x] Explain the direct user directive for the scoped build configuration changes.
+- [x] Reproduce stale ordinary objects across build directories with real Clang/Ninja.
+- [x] Preserve unchanged PCH reuse while tracking ordinary object content through partial builds.
+- [x] Verify source bytes in outer result/fingerprint/Ninja caches after timestamp rewind.
+- [x] Complete combined validation and publish review replies.
+- [ ] Finish OBS/soldr CI followups in their delegated worktrees.
+
+Review followup validation: 163 focused Python tests and six subtests pass,
+including real Clang/Ninja stale-object recovery, partial builds, hardlink
+metadata changes, content-aware early/fingerprint caches and pre-run signatures.
+`bash lint` passes. The production streaming path records 476 ordinary objects
+after `bash test --cpp` passes 321 unit tests and 96 examples. A repeat uses the
+fingerprint cache in 0.33 seconds. Missing object tracking causes one initial
+ordinary-object rebuild; verified PCHs and byte-identical input reuse remain intact.
+
+Second review followup: cached-only refreshes carry the original native content
+signature, and pending unrelated objects no longer disable content-validated
+target shortcuts. Their pending input history remains available to invalidate
+stale objects after a later timestamp rewind, including nondefault targets.
+Both findings have RED -> GREEN regressions. Combined focused checks pass;
+lint passes, and the native rerun passes all 321 units (96 examples cached).
+
+## WASM viewer issues #4776–#4778 (sequential)
+
+- [x] #4776: reproduce unset diameter in Chromium, fix the fallback, validate and publish a focused PR.
+- [x] #4777: reproduce separate strip coordinates in Chromium, use shared bounds, validate and publish a focused PR.
+- [x] #4778: reproduce legacy oversized rendering, verify the current bounded renderer, add regressions and publish a focused PR.
+
+### #4776 validation
+
+Chromium WebGL reproduced black pixels for diameter -1 on HTMLCanvas and
+OffscreenCanvas; the fix passes all 12 diameter cases (unset, -1, zero, 0.1,
+1 and 3). `bash lint`, `bash lint --js`, `bash test --cpp` (319 unit tests,
+95 examples), and `bash compile wasm --examples WasmScreenCoords` pass.
+The compiled example renders colored pixels with `?gfx=0` (1,362 bright
+pixels in the visible canvas screenshot). Browser tests require installed
+Playwright Chromium and run with
+`PYTEST_ADDOPTS='-k test_diameter_renders_led --runslow' bash test test_wasm_graphics_browser --debug`.
+Reviewed the source and browser test against `.claude/skills/code-review/review-rules.md`;
+no blocking findings.
+
+### #4777 validation
+
+Before the fix, both HTMLCanvas and OffscreenCanvas tests lose all 256 blue
+LEDs and leave the upper corner black. After subtracting the cached global
+minimum, the 511×511 grid retains 255 blue and 256 red LEDs (only the shared
+origin overlaps), including after screenmap translation and cache invalidation.
+All 14 browser tests pass with
+`PYTEST_ADDOPTS='-k test_wasm_graphics_browser --runslow' bash test test_wasm_graphics_browser --debug`.
+`bash lint` and the WASM example compile pass. The compiled unmodified
+WasmScreenCoords page shows both colors (535 red and 463 blue screenshot pixels).
+Code review found no blocking findings. PR #4781 supplies the preceding diameter fix.
+
+### #4778 validation
+
+The historical renderer from the parent of `0c7bb67e3c` reproduces the exact
+1280×30080 canvas for a 3×48 map. Chromium clamps its drawing buffer to
+1280×8192 on this machine (both texture and renderbuffer limits are 8192).
+PR #3621 already removed that renderer and selected `GraphicsManagerGfx`
+for the default main-thread and worker paths. The pinned gfx 0.1.1 core fits
+coordinates into a square and renders at 2048×2048, independent of layout
+aspect ratio. Its canvas and drawing buffer match and stay within context limits.
+Added eight real WebGL regressions for 3×48 and 48×3, diameters -1 and 1,
+and HTMLCanvas/OffscreenCanvas; each requires visible red pixels, matching
+canvas/buffer dimensions, no GL error and dimensions within texture,
+renderbuffer and viewport limits. All 22 browser cases and `bash lint` pass.
+No production change is needed for this issue on current master. The new
+tests require frontend dependencies (installed by `bash compile wasm`) and
+Playwright Chromium, and run through the same focused command above.
+Code review found no blocking findings; the browser wait has a five-second timeout.
+
+### Follow-up: compiled app screenshots
+
+Compiled six app snapshots and ran nine full-page/worker scenarios in Chromium.
+Before/after #4776 screenshots change from zero colored LED pixels to 1,050.
+Before/after #4777 screenshots change from 535 red / zero blue pixels to 535
+red / 487 blue, with the two colors centered at 25% / 73% of the canvas width.
+The exact 144-LED 3×48 rainbow sketch renders and animates in the default
+renderer on desktop and phone viewport emulation, with both unset and explicit
+diameters. Its canvas is 2048×2048. The same unset-diameter sketch also renders
+and animates at `?gfx=0` (42×672 canvas). All nine scenarios have zero browser
+errors; screenshots were visually inspected. Software WebGL and phone viewport
+emulation do not establish physical Android performance or device behavior.
+Local evidence: `.build/wasm-manual-validation/REPORT.md`, PNG screenshots,
+`screenshot-results.json`, exact scratch sketches and compile logs. Temporary
+source changes were restored after compilation; the AutoResearch fixture asset
+was staged in the served app snapshots.
+
+
+## Memory meta #4737: sequential local optimization
+
+- [x] Complete all ten native platform children: C3 #4739, C6 #4740, STM32 #4744, Uno #4742, ATtiny85 #4743, ESP32 #4738, S3 #4741, Teensy40 #4745, Teensy41 #4746, RP2040 #4747.
+- [x] Land reductions and existing-budget ratchets through PRs #4748–#4757, with matched 3.10.3/master fbuild bloat, published examples and controlled RGB evidence.
+- [x] Post a cumulative parent performance diff on each child closure; all ten comments verified.
+- [x] Run the final eleven-row local matrix sequentially at `41a6c284fcbbc8c6cb0a379bd994b98d017f78d1`. All budgets pass; every row verifies 2,394 tracked staged source files and its staged sketch against that commit.
+- [x] Publish the final three-version scorecard, matched savings, remaining gaps, source pins and metric limits: https://github.com/FastLED/FastLED/issues/4737#issuecomment-6041460246.
+- [x] Publish the parent acceptance audit and reconcile this tracker; keep #4737 open. Audit: https://github.com/FastLED/FastLED/issues/4737#issuecomment-6041492984.
+
+### Results and execution
+
+Eleven published rows save 2,868 B flash and 39,422 B physical RAM versus
+matched implementation anchors. RP2040 uses allocated image flash; other rows
+retain their board flash metric. This sum spans separate targets. Historical
+Teensy gains and frozen-to-matched baseline differences are excluded. Remaining
+3.10.3 gaps are explicit in the scorecard; exact parity is not claimed.
+
+RP2040 saves 76 B allocated image and 38,416 B physical RAM while preserving
+explicit RX capacity and SPI pin routing. GNU/fbuild raw flash includes reserved
+NOBITS heap/stack: final 388,476 raw versus 135,744 allocated image bytes. The
+scoped budget guards the allocated image and attributed RAM.
+
+Work used this checkout without git worktrees. Platform builds/tests ran locally
+and sequentially, never CI Full. Caches were retained; stale artifacts were
+rejected with source/flags checks and focused rebuilds. Logging, RMT/PARLIO,
+controller/settings storage and unused initialization were audited and trimmed.
+No fl::printf calls remain in ESP32/RP/Teensy4 platform trees; failure warnings
+and some legacy FL_WARN diagnostics remain. Features were retained. Strict native
+validation passed 417/417 unit/example jobs after the final source changes.
+Host/SDK/QEMU evidence does not claim physical waveforms; SPI SDK initialization
+timed out on both versions while direct ownership accounting passed.
 
 ## ESP32-S3 binary-size Batch 3 (#2856)
 
@@ -404,3 +597,31 @@
 - User subsequently chose upstream Wild Linux-only because Windows GNU uses special linker/DLL injection and macOS linker behavior is uncertain. The installer targets publisher-checksummed Wild 0.10.0 Linux GNU; macOS and Windows retain their existing linkers. A hosted full Linux debug-thin unit run at `636b0e4` passed 311/311 units but took 746.29s in the test step (659.62s compilation, including 306.40s reported unit linking, and 82.44s execution; 0/346 zccache hits). Its total job was 20m39s including 6m50s Python tests, so it does not show an end-to-end improvement against the earlier different-SHA LLD baseline.
 - Investigation corrected an earlier claim that no Python runs per wrapped link: `ci/meson/runner_helpers.py` set `ZCCACHE_LINK_DEPLOY_CMD=clang-tool-chain-libdeploy` on Linux, causing a Python runtime-deployment process after every cache-miss test/example link; `--deploy-dependencies` also reached core and runner links. The user confirmed this deployment is needed only for Windows. A RED→GREEN regression now confines both mechanisms to Windows, while Linux/macOS rely on their linked runtime search paths. The 12-test toolchain suite and local lint pass; a fresh hosted run is still needed to exclude stale local sanitizer sidecars.
 - Local same-revision debug-thin 410-link comparison with compiled objects reused: LLD with the old deploy hook took 442.95s wall (419.38s reported test linking); after disabling Unix deployment, Wild took 77.16s (56.96s linking) and LLD took 84.98s (65.21s linking). All three runs passed 311 units plus 95 examples. Thus removing deployment is the dominant improvement; with deployment equally disabled, Wild saved 7.82s (9.2%) wall and 8.25s (12.7%) reported linking versus bundled LLD. A subsequent Wild pass took 20.24s because its link outputs were warm in zccache; it is not a cold comparison. Host load and local cache state limit generalization until hosted validation.
+
+## ESP32 SD compile regression (#4826)
+
+- [x] Reproduce the SD/SdFat override exception mismatch before changing production code.
+- [x] Restore the base class exception contract on all eight affected overrides.
+- [x] Verify real ESP32 SDK compilation and the reporter's sketch, plus regression tests and lint.
+- [x] Review the fix and prepare the PR with root cause and validation evidence.
+
+### Validation
+
+- #4774 (`ce225edab6`) enabled real ESP `noexcept` and annotated `filebuf`, but
+  missed four error overrides in each Arduino SD implementation. Native tests
+  use the host filesystem, and the AST check lacks the optional SDK headers.
+- Both new compiler regression cases failed on the original declarations and
+  pass with the fix. The complete `test_esp_noexcept` module and `bash lint` pass;
+  `bash test --cpp` passes all 320 unit tests and 96 host examples.
+- Real SD and SdFat SDK branches fail before and pass after on GCC 8.4 / Arduino
+  ESP32 2.0.3 and GCC 14.2 / Arduino ESP32 3.3.11. Each probe requires the actual
+  backend type to be present, preventing a disabled preprocessor branch from passing.
+- The reporter's unchanged sketch builds and links for `lolin_d32` using
+  espressif32 6.13.0, Arduino ESP32 2.0.17 and GCC 8.4 patch5 via fbuild. Restoring
+  the original SD header reproduces all four reported errors; restoring the fix
+  builds the firmware again (522806 B flash, 30392 B RAM).
+- Linux validation supplies a scratch `fs.h` forwarding to SDK `FS.h` to emulate
+  Windows header lookup. The scratch project explicitly supplies SDK FS include
+  paths and sources because fbuild omitted that dependency. No Windows execution
+  or physical hardware run is claimed. Logs and scripts: `.build/4826/`.
+- Repository code review found no blocking issues.

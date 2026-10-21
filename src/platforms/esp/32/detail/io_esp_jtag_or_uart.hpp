@@ -8,7 +8,7 @@
 
 #include "platforms/esp/is_esp.h"
 
-#include "fl/log/log.h"  // FL_PRINT("%s", used by reportInitDiagnosticsIfNeeded)
+#include "fl/log/log.h"  // FL_PRINT (used by reportInitDiagnosticsIfNeeded)
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/singleton.h"
 #include "platforms/esp/32/drivers/uart_esp32.h"
@@ -191,9 +191,6 @@ private:
     }
 #else
     using ActiveDriver = UartEsp32;
-    static UartConfig defaultConfig() FL_NO_EXCEPT {
-        return UartConfig::reliable(UartPort::UART0);
-    }
 #endif
 
     ActiveDriver mDriver;            // The one backend selected at compile time.
@@ -202,11 +199,19 @@ private:
     bool mDiagnosticsReported;       // true once the one-shot init diagnostic ran
 
     // Constructor: initialize the single chosen driver.
+#if FL_ESP_IO_USE_USB_SERIAL_JTAG
     EspIO()
-        : mDriver(defaultConfig()),
+        FL_NO_EXCEPT : mDriver(defaultConfig()),
           mPeekByte(-1),
           mHasPeek(false),
           mDiagnosticsReported(false) {}
+#else
+    EspIO()
+        FL_NO_EXCEPT : mDriver(),
+          mPeekByte(-1),
+          mHasPeek(false),
+          mDiagnosticsReported(false) {}
+#endif
 
     // Emit a one-shot human-readable summary of the compile-time backend
     // choice on the first user-facing print/println.
@@ -227,7 +232,7 @@ private:
             case UsbSerialJtagEsp32::InitOutcome::kVerificationFailed:  outcome = "VerificationFailed"; break;
             case UsbSerialJtagEsp32::InitOutcome::kNotAvailable:        outcome = "NotAvailable"; break;
         }
-        FL_PRINT("EspIO: backend=%s usb_jtag_outcome=%s err=%s", backend, outcome, static_cast<int>(mDriver.initError()));
+        FL_PRINT("EspIO: backend=" << backend << " usb_jtag_outcome=" << outcome << " err=" << (static_cast<int>(mDriver.initError())));
 #else
         FL_PRINT("EspIO: backend=UART0 (compile-time choice; "
                  "#define FASTLED_ESP_FORCE_USB_SERIAL_JTAG to switch)");

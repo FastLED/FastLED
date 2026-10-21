@@ -8,6 +8,7 @@
 
 #include "fl/math/fixed_point/s16x16.h"
 #include "fl/stl/compiler_control.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -16,17 +17,17 @@ struct perlin_q16 {
     static constexpr fl::i32 HP_ONE = static_cast<fl::i32>(1) << HP_BITS; // 65536 = 1.0
 
     // Build 257-entry Perlin fade LUT in Q16 format (16 fractional bits).
-    static void init_fade_lut(fl::i32 *table);
+    static void init_fade_lut(fl::i32 *table) FL_NO_EXCEPT;
 
     // 2D Perlin noise. Input s16x16, output s16x16 approx [-1, 1].
     static fl::s16x16 pnoise2d(fl::s16x16 fx, fl::s16x16 fy,
                                       const fl::i32 *fade_lut,
-                                      const fl::u8 *perm);
+                                      const fl::u8 *perm) FL_NO_EXCEPT;
 
     // Raw i32 version using Q16 internal precision.
     static fl::i32 pnoise2d_raw(fl::i32 fx_raw, fl::i32 fy_raw,
                                         const fl::i32 *fade_lut,
-                                        const fl::u8 *perm);
+                                        const fl::u8 *perm) FL_NO_EXCEPT;
 
   private:
     static constexpr int FP_BITS = fl::s16x16::FRAC_BITS;
@@ -34,15 +35,15 @@ struct perlin_q16 {
 
     // Decompose s16x16 raw value into integer floor and Q16 fractional part.
     static FASTLED_FORCE_INLINE void floor_frac(fl::i32 fp16, int &ifloor,
-                                                fl::i32 &frac16);
+                                                fl::i32 &frac16) FL_NO_EXCEPT;
 
     // LUT fade: 1 lookup + 1 lerp replaces 5 multiplies.
-    static FASTLED_FORCE_INLINE fl::i32 fade(fl::i32 t, const fl::i32 *table);
+    static FASTLED_FORCE_INLINE fl::i32 fade(fl::i32 t, const fl::i32 *table) FL_NO_EXCEPT;
 
-    static FASTLED_FORCE_INLINE fl::i32 lerp(fl::i32 t, fl::i32 a, fl::i32 b);
+    static FASTLED_FORCE_INLINE fl::i32 lerp(fl::i32 t, fl::i32 a, fl::i32 b) FL_NO_EXCEPT;
 
     // z=0 gradient via branchless coefficient LUT (Q16 format).
-    static FASTLED_FORCE_INLINE fl::i32 grad(int hash, fl::i32 x, fl::i32 y);
+    static FASTLED_FORCE_INLINE fl::i32 grad(int hash, fl::i32 x, fl::i32 y) FL_NO_EXCEPT;
 };
 
 }  // namespace fl

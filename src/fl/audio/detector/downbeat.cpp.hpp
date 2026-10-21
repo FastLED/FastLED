@@ -9,7 +9,7 @@ namespace audio {
 namespace detector {
 
 Downbeat::Downbeat(shared_ptr<Beat> beatDetector)
-    : mBeatDetector(beatDetector)
+    FL_NO_EXCEPT : mBeatDetector(beatDetector)
     , mOwnsBeatDetector(false)
     , mDownbeatDetected(false)
     , mCurrentBeat(1)
@@ -28,14 +28,14 @@ Downbeat::Downbeat(shared_ptr<Beat> beatDetector)
 }
 
 Downbeat::Downbeat()
-    : Downbeat(make_shared<Beat>())
+    FL_NO_EXCEPT : Downbeat(make_shared<Beat>())
 {
     mOwnsBeatDetector = true;
 }
 
 Downbeat::~Downbeat() FL_NO_EXCEPT = default;
 
-void Downbeat::update(shared_ptr<Context> context) {
+void Downbeat::update(shared_ptr<Context> context) FL_NO_EXCEPT {
     // Update Beat if we own it
     if (mOwnsBeatDetector) {
         updateBeatDetector(context);
@@ -118,7 +118,7 @@ void Downbeat::update(shared_ptr<Context> context) {
     updateMeasurePhase(timestamp);
 }
 
-void Downbeat::fireCallbacks() {
+void Downbeat::fireCallbacks() FL_NO_EXCEPT {
     if (mFireDownbeat) {
         if (onDownbeat) onDownbeat();
         mFireDownbeat = false;
@@ -136,7 +136,7 @@ void Downbeat::fireCallbacks() {
     }
 }
 
-void Downbeat::reset() {
+void Downbeat::reset() FL_NO_EXCEPT {
     mDownbeatDetected = false;
     mCurrentBeat = 1;
     mBeatsPerMeasure = 4;
@@ -155,7 +155,7 @@ void Downbeat::reset() {
     }
 }
 
-void Downbeat::setTimeSignature(u8 beatsPerMeasure) {
+void Downbeat::setTimeSignature(u8 beatsPerMeasure) FL_NO_EXCEPT {
     if (beatsPerMeasure >= 2 && beatsPerMeasure <= 16) {
         u8 oldMeter = mBeatsPerMeasure;
         mBeatsPerMeasure = beatsPerMeasure;
@@ -173,20 +173,20 @@ void Downbeat::setTimeSignature(u8 beatsPerMeasure) {
     }
 }
 
-void Downbeat::setBeatDetector(shared_ptr<Beat> beatDetector) {
+void Downbeat::setBeatDetector(shared_ptr<Beat> beatDetector) FL_NO_EXCEPT {
     if (beatDetector) {
         mBeatDetector = beatDetector;
         mOwnsBeatDetector = false;
     }
 }
 
-void Downbeat::updateBeatDetector(shared_ptr<Context> context) {
+void Downbeat::updateBeatDetector(shared_ptr<Context> context) FL_NO_EXCEPT {
     if (mBeatDetector) {
         mBeatDetector->update(context);
     }
 }
 
-float Downbeat::calculateBeatAccent(const fft::Bins& fft, float bassEnergy) {
+float Downbeat::calculateBeatAccent(const fft::Bins& fft, float bassEnergy) FL_NO_EXCEPT {
     // Accent detection combines multiple factors:
     // 1. Energy increase (stronger accent = more energy)
     // 2. Bass energy (downbeats typically have more bass)
@@ -217,7 +217,7 @@ float Downbeat::calculateBeatAccent(const fft::Bins& fft, float bassEnergy) {
     return accent;
 }
 
-bool Downbeat::detectDownbeat(u32 timestamp, float accent) {
+bool Downbeat::detectDownbeat(u32 timestamp, float accent) FL_NO_EXCEPT {
     // Downbeat detection strategy:
     // 1. Check if we're at the expected measure boundary
     // 2. Check if accent is strong enough
@@ -310,7 +310,7 @@ bool Downbeat::detectDownbeat(u32 timestamp, float accent) {
     return isDownbeat;
 }
 
-void Downbeat::detectMeter() {
+void Downbeat::detectMeter() FL_NO_EXCEPT {
     // Analyze recent beat patterns to detect time signature
     // Look for recurring patterns in beat intervals and accents
 
@@ -375,7 +375,7 @@ void Downbeat::detectMeter() {
     }
 }
 
-void Downbeat::updateMeasurePhase(u32 timestamp) {
+void Downbeat::updateMeasurePhase(u32 timestamp) FL_NO_EXCEPT {
     if (mLastDownbeatTime == 0) {
         mMeasurePhase = 0.0f;
         return;
@@ -399,7 +399,7 @@ void Downbeat::updateMeasurePhase(u32 timestamp) {
     }
 }
 
-u8 Downbeat::findMostCommonMeter() const {
+u8 Downbeat::findMostCommonMeter() const FL_NO_EXCEPT {
     if (mMeterCandidates.empty()) {
         return 4;  // Default to 4/4
     }

@@ -24,6 +24,8 @@ KNOWN_UNBADGED_ALL_BOARD_ALIASES = {
     "esp32dev_heapdbg",
     "esp32dev_qemu",
     "esp32rmt_51",
+    "mega",
+    "nano",
     "nice_nano_nrf52840",
     "nrfmicro_nrf52840",
     "nucleo_g070rb",
@@ -46,7 +48,9 @@ def _readme_build_badges() -> dict[str, str]:
     readme = README.read_text(encoding="utf-8")
     matches = re.findall(
         r"\[!\[([^]]+)]\(https://github\.com/FastLED/FastLED/actions/"
-        r"workflows/(build_[^/)]+\.yml)/badge\.svg(?:\?event=push)?\)]",
+        # Any badge query (`?event=push`, or `?branch=master&event=
+        # workflow_dispatch` for ci-full-only workflows whose push runs skip).
+        r"workflows/(build_[^/)]+\.yml)/badge\.svg(?:\?[^)]*)?\)]",
         readme,
     )
     return {workflow: label for label, workflow in matches}

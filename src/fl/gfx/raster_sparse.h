@@ -30,7 +30,7 @@ class Leds;
 class XYRasterU8Sparse {
   public:
     XYRasterU8Sparse() FL_NO_EXCEPT = default;
-    XYRasterU8Sparse(int width, int height) {
+    XYRasterU8Sparse(int width, int height) FL_NO_EXCEPT {
         setBounds(rect<u16>(0, 0, width, height));
     }
     XYRasterU8Sparse(const XYRasterU8Sparse &) FL_NO_EXCEPT = default;
@@ -38,29 +38,29 @@ class XYRasterU8Sparse {
     XYRasterU8Sparse(XYRasterU8Sparse &&) FL_NO_EXCEPT = default;
     XYRasterU8Sparse &operator=(const XYRasterU8Sparse &) FL_NO_EXCEPT = default;
 
-    XYRasterU8Sparse &reset() {
+    XYRasterU8Sparse &reset() FL_NO_EXCEPT {
         mSparseGrid.clear();
         mCache.clear();
         return *this;
     }
 
-    XYRasterU8Sparse &clear() { return reset(); }
+    XYRasterU8Sparse &clear() FL_NO_EXCEPT { return reset(); }
 
     // Rasterizes point with a value For best visual results, you'll want to
     // rasterize tile2x2 tiles, which are generated for you by the XYPathRenderer
     // to represent sub pixel / neightbor splatting positions along a path.
     // TODO: Bring the math from XYPathRenderer::at_subpixel(float alpha)
     // into a general purpose function.
-    void rasterize(const vec2<u16> &pt, u8 value) {
+    void rasterize(const vec2<u16> &pt, u8 value) FL_NO_EXCEPT {
         // Turn it into a Tile2x2_u8 tile and see if we can cache it.
         write(pt, value);
     }
 
-    void setSize(u16 width, u16 height) {
+    void setSize(u16 width, u16 height) FL_NO_EXCEPT {
         setBounds(rect<u16>(0, 0, width, height));
     }
 
-    void setBounds(const rect<u16> &bounds) {
+    void setBounds(const rect<u16> &bounds) FL_NO_EXCEPT {
         mAbsoluteBounds = bounds;
         mAbsoluteBoundsSet = true;
     }
@@ -68,18 +68,18 @@ class XYRasterU8Sparse {
     using iterator = fl::unordered_map<vec2<u16>, u8>::iterator;
     using const_iterator = fl::unordered_map<vec2<u16>, u8>::const_iterator;
 
-    iterator begin() { return mSparseGrid.begin(); }
-    const_iterator begin() const { return mSparseGrid.begin(); }
-    iterator end() { return mSparseGrid.end(); }
-    const_iterator end() const { return mSparseGrid.end(); }
-    fl::size size() const { return mSparseGrid.size(); }
-    bool empty() const { return mSparseGrid.empty(); }
+    iterator begin() FL_NO_EXCEPT { return mSparseGrid.begin(); }
+    const_iterator begin() const FL_NO_EXCEPT { return mSparseGrid.begin(); }
+    iterator end() FL_NO_EXCEPT { return mSparseGrid.end(); }
+    const_iterator end() const FL_NO_EXCEPT { return mSparseGrid.end(); }
+    fl::size size() const FL_NO_EXCEPT { return mSparseGrid.size(); }
+    bool empty() const FL_NO_EXCEPT { return mSparseGrid.empty(); }
 
-    void rasterize(const span<const Tile2x2_u8> &tiles);
-    void rasterize(const Tile2x2_u8 &tile) { rasterize_internal(tile); }
+    void rasterize(const span<const Tile2x2_u8> &tiles) FL_NO_EXCEPT;
+    void rasterize(const Tile2x2_u8 &tile) FL_NO_EXCEPT { rasterize_internal(tile); }
 
     void rasterize_internal(const Tile2x2_u8 &tile,
-                            const rect<u16> *optional_bounds = nullptr);
+                            const rect<u16> *optional_bounds = nullptr) FL_NO_EXCEPT;
 
     // Renders the subpixel tiles to the raster. Any previous data is
     // cleared. Memory will only be allocated if the size of the raster
@@ -88,7 +88,7 @@ class XYRasterU8Sparse {
     // const u8 &at(u16 x, u16 y) const { return mGrid.at(x,
     // y); }
 
-    pair<bool, u8> at(u16 x, u16 y) const {
+    pair<bool, u8> at(u16 x, u16 y) const FL_NO_EXCEPT {
         const u8 *val = mSparseGrid.find_value(vec2<u16>(x, y));
         if (val != nullptr) {
             return {true, *val};
@@ -96,14 +96,14 @@ class XYRasterU8Sparse {
         return {false, 0};
     }
 
-    rect<u16> bounds() const {
+    rect<u16> bounds() const FL_NO_EXCEPT {
         if (mAbsoluteBoundsSet) {
             return mAbsoluteBounds;
         }
         return bounds_pixels();
     }
 
-    rect<u16> bounds_pixels() const {
+    rect<u16> bounds_pixels() const FL_NO_EXCEPT {
         u16 min_x = 0;
         bool min_x_set = false;
         u16 min_y = 0;
@@ -135,19 +135,19 @@ class XYRasterU8Sparse {
     }
 
     // Warning! - SLOW.
-    u16 width() const { return bounds().width(); }
-    u16 height() const { return bounds().height(); }
+    u16 width() const FL_NO_EXCEPT { return bounds().width(); }
+    u16 height() const FL_NO_EXCEPT { return bounds().height(); }
 
-    void draw(const CRGB &color, const XYMap &xymap, fl::span<CRGB> out);
-    void draw(const CRGB &color, Leds *leds);
+    void draw(const CRGB &color, const XYMap &xymap, fl::span<CRGB> out) FL_NO_EXCEPT;
+    void draw(const CRGB &color, Leds *leds) FL_NO_EXCEPT;
 
-    void drawGradient(const Gradient &gradient, const XYMap &xymap, fl::span<CRGB> out);
-    void drawGradient(const Gradient &gradient, Leds *leds);
+    void drawGradient(const Gradient &gradient, const XYMap &xymap, fl::span<CRGB> out) FL_NO_EXCEPT;
+    void drawGradient(const Gradient &gradient, Leds *leds) FL_NO_EXCEPT;
 
     // Inlined, yet customizable drawing access. This will only send you
     // pixels that are within the bounds of the XYMap.
     template <typename XYVisitor>
-    void draw(const XYMap &xymap, XYVisitor &visitor) {
+    void draw(const XYMap &xymap, XYVisitor &visitor) FL_NO_EXCEPT {
         for (const auto &it : mSparseGrid) {
             auto pt = it.first;
             if (!xymap.has(pt.x, pt.y)) {
@@ -163,7 +163,7 @@ class XYRasterU8Sparse {
 
     static const int kMaxCacheSize = 8; // Max size for tiny cache.
 
-    void write(const vec2<u16> &pt, u8 value) {
+    void write(const vec2<u16> &pt, u8 value) FL_NO_EXCEPT {
         // FL_WARN("write: " << pt.x << "," << pt.y << " value: " <<
         // value); mSparseGrid.insert(pt, value);
 
@@ -228,7 +228,7 @@ namespace fl {
 class XYRasterSparse_RGB8 {
   public:
     XYRasterSparse_RGB8() FL_NO_EXCEPT = default;
-    XYRasterSparse_RGB8(u16 width, u16 height) {
+    XYRasterSparse_RGB8(u16 width, u16 height) FL_NO_EXCEPT {
         setBounds(rect<u16>(0, 0, width, height));
     }
     XYRasterSparse_RGB8(const XYRasterSparse_RGB8 &) FL_NO_EXCEPT = default;
@@ -236,24 +236,24 @@ class XYRasterSparse_RGB8 {
     XYRasterSparse_RGB8(XYRasterSparse_RGB8 &&) FL_NO_EXCEPT = default;
     XYRasterSparse_RGB8 &operator=(XYRasterSparse_RGB8 &) FL_NO_EXCEPT = default;
 
-    XYRasterSparse_RGB8 &reset() {
+    XYRasterSparse_RGB8 &reset() FL_NO_EXCEPT {
         mSparseGrid.clear();
         mCache.clear();
         return *this;
     }
 
-    XYRasterSparse_RGB8 &clear() { return reset(); }
+    XYRasterSparse_RGB8 &clear() FL_NO_EXCEPT { return reset(); }
 
     // Rasterizes point with a CRGB color value
-    void rasterize(const vec2<u16> &pt, const CRGB &color) {
+    void rasterize(const vec2<u16> &pt, const CRGB &color) FL_NO_EXCEPT {
         write(pt, color);
     }
 
-    void setSize(u16 width, u16 height) {
+    void setSize(u16 width, u16 height) FL_NO_EXCEPT {
         setBounds(rect<u16>(0, 0, width, height));
     }
 
-    void setBounds(const rect<u16> &bounds) {
+    void setBounds(const rect<u16> &bounds) FL_NO_EXCEPT {
         mAbsoluteBounds = bounds;
         mAbsoluteBoundsSet = true;
     }
@@ -261,14 +261,14 @@ class XYRasterSparse_RGB8 {
     using iterator = fl::unordered_map<vec2<u16>, CRGB>::iterator;
     using const_iterator = fl::unordered_map<vec2<u16>, CRGB>::const_iterator;
 
-    iterator begin() { return mSparseGrid.begin(); }
-    const_iterator begin() const { return mSparseGrid.begin(); }
-    iterator end() { return mSparseGrid.end(); }
-    const_iterator end() const { return mSparseGrid.end(); }
-    fl::size size() const { return mSparseGrid.size(); }
-    bool empty() const { return mSparseGrid.empty(); }
+    iterator begin() FL_NO_EXCEPT { return mSparseGrid.begin(); }
+    const_iterator begin() const FL_NO_EXCEPT { return mSparseGrid.begin(); }
+    iterator end() FL_NO_EXCEPT { return mSparseGrid.end(); }
+    const_iterator end() const FL_NO_EXCEPT { return mSparseGrid.end(); }
+    fl::size size() const FL_NO_EXCEPT { return mSparseGrid.size(); }
+    bool empty() const FL_NO_EXCEPT { return mSparseGrid.empty(); }
 
-    pair<bool, CRGB> at(u16 x, u16 y) const {
+    pair<bool, CRGB> at(u16 x, u16 y) const FL_NO_EXCEPT {
         const CRGB *val = mSparseGrid.find_value(vec2<u16>(x, y));
         if (val != nullptr) {
             return {true, *val};
@@ -276,14 +276,14 @@ class XYRasterSparse_RGB8 {
         return {false, CRGB::Black};
     }
 
-    rect<u16> bounds() const {
+    rect<u16> bounds() const FL_NO_EXCEPT {
         if (mAbsoluteBoundsSet) {
             return mAbsoluteBounds;
         }
         return bounds_pixels();
     }
 
-    rect<u16> bounds_pixels() const {
+    rect<u16> bounds_pixels() const FL_NO_EXCEPT {
         u16 min_x = 0;
         bool min_x_set = false;
         u16 min_y = 0;
@@ -315,16 +315,16 @@ class XYRasterSparse_RGB8 {
     }
 
     // Warning! - SLOW.
-    u16 width() const { return bounds().width(); }
-    u16 height() const { return bounds().height(); }
+    u16 width() const FL_NO_EXCEPT { return bounds().width(); }
+    u16 height() const FL_NO_EXCEPT { return bounds().height(); }
 
-    void draw(const XYMap &xymap, fl::span<CRGB> out);
-    void draw(Leds *leds);
+    void draw(const XYMap &xymap, fl::span<CRGB> out) FL_NO_EXCEPT;
+    void draw(Leds *leds) FL_NO_EXCEPT;
 
     // Inlined, yet customizable drawing access. This will only send you
     // pixels that are within the bounds of the XYMap.
     template <typename XYVisitor>
-    void draw(const XYMap &xymap, XYVisitor &visitor) {
+    void draw(const XYMap &xymap, XYVisitor &visitor) FL_NO_EXCEPT {
         for (const auto &it : mSparseGrid) {
             auto pt = it.first;
             if (!xymap.has(pt.x, pt.y)) {
@@ -341,7 +341,7 @@ class XYRasterSparse_RGB8 {
 
     static const int kMaxCacheSize = 8; // Max size for tiny cache.
 
-    void write(const vec2<u16> &pt, const CRGB &color) {
+    void write(const vec2<u16> &pt, const CRGB &color) FL_NO_EXCEPT {
         CRGB **cached = mCache.find_value(pt);
         if (cached) {
             CRGB *val = *cached;

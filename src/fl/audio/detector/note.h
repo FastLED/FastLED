@@ -32,14 +32,14 @@ namespace detector {
 class Note : public Detector {
 public:
     Note() FL_NO_EXCEPT;
-    explicit Note(shared_ptr<Pitch> pitchDetector);
+    explicit Note(shared_ptr<Pitch> pitchDetector) FL_NO_EXCEPT;
     ~Note() FL_NO_EXCEPT override;
 
-    void update(shared_ptr<Context> context) override;
-    void fireCallbacks() override;
-    bool needsFFT() const override { return false; }  // Uses pitch detection
-    const char* getName() const override { return "Note"; }
-    void reset() override;
+    void update(shared_ptr<Context> context) FL_NO_EXCEPT override;
+    void fireCallbacks() FL_NO_EXCEPT override;
+    bool needsFFT() const FL_NO_EXCEPT override { return false; }  // Uses pitch detection
+    const char* getName() const FL_NO_EXCEPT override { return "Note"; }
+    void reset() FL_NO_EXCEPT override;
 
     // Callbacks (multiple listeners supported)
     function_list<void(u8 note, u8 velocity)> onNoteOn;   // Note started
@@ -47,22 +47,22 @@ public:
     function_list<void(u8 note, u8 velocity)> onNoteChange; // Note changed while held
 
     // State access
-    u8 getCurrentNote() const { return mCurrentNote; }
-    u8 getLastVelocity() const { return mLastVelocity; }
-    bool isNoteActive() const { return mNoteActive; }
-    float getCurrentPitch() const { return mCurrentPitch; }
-    float getPitchBend() const { return mPitchBend; }  // Cents from note center
+    u8 getCurrentNote() const FL_NO_EXCEPT { return mCurrentNote; }
+    u8 getLastVelocity() const FL_NO_EXCEPT { return mLastVelocity; }
+    bool isNoteActive() const FL_NO_EXCEPT { return mNoteActive; }
+    float getCurrentPitch() const FL_NO_EXCEPT { return mCurrentPitch; }
+    float getPitchBend() const FL_NO_EXCEPT { return mPitchBend; }  // Cents from note center
 
     // Configuration
-    void setNoteOnThreshold(float confidenceThreshold) { mNoteOnThreshold = confidenceThreshold; }
-    void setNoteOffThreshold(float confidenceThreshold) { mNoteOffThreshold = confidenceThreshold; }
-    void setMinNoteDuration(u32 ms) { mMinNoteDuration = ms; }
-    void setNoteChangeThreshold(u8 semitones) { mNoteChangeThreshold = semitones; }
-    void setVelocitySensitivity(float sensitivity) { mVelocitySensitivity = sensitivity; }
+    void setNoteOnThreshold(float confidenceThreshold) FL_NO_EXCEPT { mNoteOnThreshold = confidenceThreshold; }
+    void setNoteOffThreshold(float confidenceThreshold) FL_NO_EXCEPT { mNoteOffThreshold = confidenceThreshold; }
+    void setMinNoteDuration(u32 ms) FL_NO_EXCEPT { mMinNoteDuration = ms; }
+    void setNoteChangeThreshold(u8 semitones) FL_NO_EXCEPT { mNoteChangeThreshold = semitones; }
+    void setVelocitySensitivity(float sensitivity) FL_NO_EXCEPT { mVelocitySensitivity = sensitivity; }
 
     // Shared pitch detector access
-    void setPitchDetector(shared_ptr<Pitch> pitchDetector) { mPitchDetector = pitchDetector; }
-    shared_ptr<Pitch> getPitchDetector() const { return mPitchDetector; }
+    void setPitchDetector(shared_ptr<Pitch> pitchDetector) FL_NO_EXCEPT { mPitchDetector = pitchDetector; }
+    shared_ptr<Pitch> getPitchDetector() const FL_NO_EXCEPT { return mPitchDetector; }
 
 private:
     // Shared pitch detector (may be shared with Processor)
@@ -96,13 +96,13 @@ private:
     u8 mPendingOffNote = 0;
 
     // Helper methods
-    u8 frequencyToMidiNote(float hz) const;
-    float midiNoteToFrequency(u8 note) const;
-    float calculatePitchBend(float hz, u8 note) const;
-    u8 calculateVelocity(float energy, float confidence) const;
-    bool shouldTriggerNoteOn(float confidence, float pitch) const;
-    bool shouldTriggerNoteOff(float confidence, bool voiced) const;
-    bool shouldTriggerNoteChange(u8 newNote, u8 currentNote) const;
+    u8 frequencyToMidiNote(float hz) const FL_NO_EXCEPT;
+    float midiNoteToFrequency(u8 note) const FL_NO_EXCEPT;
+    float calculatePitchBend(float hz, u8 note) const FL_NO_EXCEPT;
+    u8 calculateVelocity(float energy, float confidence) const FL_NO_EXCEPT;
+    bool shouldTriggerNoteOn(float confidence, float pitch) const FL_NO_EXCEPT;
+    bool shouldTriggerNoteOff(float confidence, bool voiced) const FL_NO_EXCEPT;
+    bool shouldTriggerNoteChange(u8 newNote, u8 currentNote) const FL_NO_EXCEPT;
 
     // Constants
     static constexpr float A4_FREQUENCY = 440.0f;  // A4 reference pitch

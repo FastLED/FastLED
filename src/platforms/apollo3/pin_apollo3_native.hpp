@@ -71,7 +71,7 @@ static PWMState g_pwm_state[AM_HAL_GPIO_MAX_PADS] = {};
 
 inline void pinMode(int pin, PinMode mode) FL_NO_EXCEPT {
     if (pin < 0 || pin >= AM_HAL_GPIO_MAX_PADS) {
-        FL_WARN("Apollo3: Invalid pin %s", pin);
+        FL_WARN("Apollo3: Invalid pin " << pin);
         return;
     }
 
@@ -111,7 +111,7 @@ inline void pinMode(int pin, PinMode mode) FL_NO_EXCEPT {
 
     u32 result = am_hal_gpio_pinconfig(pin, pin_config);
     if (result != AM_HAL_STATUS_SUCCESS) {
-        FL_WARN("Apollo3: Failed to configure pin %s", pin);
+        FL_WARN("Apollo3: Failed to configure pin " << pin);
     }
 }
 
@@ -168,7 +168,7 @@ inline u16 analogRead(int pin) FL_NO_EXCEPT {
         case 34: adc_channel = AM_HAL_ADC_SLOT_CHSEL_SE7; break;
         case 35: adc_channel = AM_HAL_ADC_SLOT_CHSEL_SE8; break;
         default:
-            FL_WARN("Apollo3: Pin %s does not support ADC", pin);
+            FL_WARN("Apollo3: Pin " << pin << " does not support ADC");
             return 0;
     }
 
@@ -276,7 +276,7 @@ inline void analogWrite(int pin, u16 val) FL_NO_EXCEPT {
 
     // Validate pin range
     if (pin < 0 || pin >= AM_HAL_GPIO_MAX_PADS) {
-        FL_WARN("Apollo3: Invalid pin %s", pin);
+        FL_WARN("Apollo3: Invalid pin " << pin);
         return;
     }
 
@@ -327,7 +327,7 @@ inline void analogWrite(int pin, u16 val) FL_NO_EXCEPT {
 
         u32 status = am_hal_gpio_pinconfig(pin, pin_config);
         if (status != AM_HAL_STATUS_SUCCESS) {
-            FL_WARN("Apollo3: Failed to configure pin %s for PWM", pin);
+            FL_WARN("Apollo3: Failed to configure pin " << pin << " for PWM");
             return;
         }
 

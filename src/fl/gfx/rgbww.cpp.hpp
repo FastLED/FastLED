@@ -393,4 +393,34 @@ void rgb_2_rgbww_colorimetric_boosted(const Rgbww& cfg,
 
 #endif  // FASTLED_RGBW_COLORIMETRIC
 
+namespace detail {
+namespace {
+RgbwwConvertFn& rgbww_convert_slot() FL_NO_EXCEPT {
+    static RgbwwConvertFn slot = nullptr;  // zero-initialised before any ctor
+    return slot;
+}
+
+void rgbww_convert_pixel(const Rgbww& rgbww, const fl::u8 (&raw)[3],
+                         const fl::u8 (&premix)[3], const fl::u8 (&order)[3],
+                         fl::u8* b0, fl::u8* b1, fl::u8* b2, fl::u8* b3,
+                         fl::u8* b4) FL_NO_EXCEPT {
+    // Same steps as PixelController::loadAndScaleRGBWW.
+    fl::u8 c[3];
+    fl::u8 ww = 0;
+    fl::u8 wc = 0;
+    rgb_2_rgbww(rgbww, raw[0], raw[1], raw[2], premix[0], premix[1], premix[2],
+                &c[0], &c[1], &c[2], &ww, &wc);
+    rgbww_partial_reorder(rgbww.w_placement, c[order[0]], c[order[1]],
+                          c[order[2]], ww, wc, b0, b1, b2, b3, b4);
+}
+}  // namespace
+
+void enable_rgbww_conversion() FL_NO_EXCEPT {
+#if !defined(FL_IS_AVR)
+    rgbww_convert_slot() = &rgbww_convert_pixel;
+#endif
+}
+RgbwwConvertFn rgbww_conversion() FL_NO_EXCEPT { return rgbww_convert_slot(); }
+}  // namespace detail
+
 } // namespace fl

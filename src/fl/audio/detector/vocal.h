@@ -24,12 +24,12 @@ public:
     ~Vocal() FL_NO_EXCEPT override;
 
     // Detector interface
-    void update(shared_ptr<Context> context) override;
-    void fireCallbacks() override;
-    bool needsFFT() const override { return true; }
-    const char* getName() const override { return "Vocal"; }
-    void reset() override;
-    void setSampleRate(int sampleRate) override { mSampleRate = sampleRate; }
+    void update(shared_ptr<Context> context) FL_NO_EXCEPT override;
+    void fireCallbacks() FL_NO_EXCEPT override;
+    bool needsFFT() const FL_NO_EXCEPT override { return true; }
+    const char* getName() const FL_NO_EXCEPT override { return "Vocal"; }
+    void reset() FL_NO_EXCEPT override;
+    void setSampleRate(int sampleRate) FL_NO_EXCEPT override { mSampleRate = sampleRate; }
 
     // Callbacks (multiple listeners supported)
     function_list<void(u8 active)> onVocal;
@@ -37,10 +37,10 @@ public:
     function_list<void()> onVocalEnd;
 
     // State access
-    bool isVocal() const { return mVocalActive; }
-    float getConfidence() const { return mConfidenceSmoother.value(); }
-    void setThreshold(float threshold) { mOnThreshold = threshold; mOffThreshold = fl::max(0.0f, threshold - 0.13f); }
-    void setSmoothingAlpha(float tau) { mConfidenceSmoother.setTau(tau); }
+    bool isVocal() const FL_NO_EXCEPT { return mVocalActive; }
+    float getConfidence() const FL_NO_EXCEPT { return mConfidenceSmoother.value(); }
+    void setThreshold(float threshold) FL_NO_EXCEPT { mOnThreshold = threshold; mOffThreshold = fl::max(0.0f, threshold - 0.13f); }
+    void setSmoothingAlpha(float tau) FL_NO_EXCEPT { mConfidenceSmoother.setTau(tau); }
 
     friend struct VocalDetectorDiagnostics;
 
@@ -84,37 +84,37 @@ private:
     shared_ptr<const fft::Bins> mRetainedBroadFFT;    // 16 bins, 174.6-4698.3 Hz
 
     // Formant ratio from high-res narrow FFT (64 bins, 200-3500 Hz)
-    void computeFormantRatio(const fft::Bins& formantFft);
+    void computeFormantRatio(const fft::Bins& formantFft) FL_NO_EXCEPT;
     // Broad spectral features from low-res wide FFT (16 bins, 174.6-4698.3 Hz)
-    void computeBroadSpectralFeatures(const fft::Bins& broadFft);
+    void computeBroadSpectralFeatures(const fft::Bins& broadFft) FL_NO_EXCEPT;
     // Vocal presence ratio from broad FFT linear bins
-    float calculateVocalPresenceRatio(const fft::Bins& broadFft);
+    float calculateVocalPresenceRatio(const fft::Bins& broadFft) FL_NO_EXCEPT;
     // Fused PCM pass: computes envelope jitter + shimmer AND zero-crossing CV
     // in a single traversal. Saves one full PCM pass (~2-3 us).
-    void computePCMTimeDomainFeatures(span<const i16> pcm);
-    float calculateAutocorrelationIrregularity(span<const i16> pcm);
+    void computePCMTimeDomainFeatures(span<const i16> pcm) FL_NO_EXCEPT;
+    float calculateAutocorrelationIrregularity(span<const i16> pcm) FL_NO_EXCEPT;
     float calculateRawConfidence(float formantRatio,
                                  float spectralFlatness, float harmonicDensity,
                                  float vocalPresenceRatio, float spectralFlux,
-                                 float spectralVariance);
+                                 float spectralVariance) FL_NO_EXCEPT;
 };
 
 // Test-only accessor for internal diagnostic state
 struct VocalDetectorDiagnostics {
-    static int getNumBins(const Vocal& d) { return d.mFormantNumBins; }
-    static int getBroadNumBins(const Vocal& d) { return d.mBroadNumBins; }
-    static float getSpectralFlatness(const Vocal& d) { return d.mSpectralFlatness; }
-    static float getHarmonicDensity(const Vocal& d) { return d.mHarmonicDensity; }
-    static float getSpectralCentroid(const Vocal& d) { return d.mSpectralCentroid; }
-    static float getSpectralRolloff(const Vocal& d) { return d.mSpectralRolloff; }
-    static float getFormantRatio(const Vocal& d) { return d.mFormantRatio; }
-    static float getVocalPresenceRatio(const Vocal& d) { return d.mVocalPresenceRatio; }
-    static float getSpectralFlux(const Vocal& d) { return d.mSpectralFlux; }
-    static float getSpectralVariance(const Vocal& d) { return d.mSpectralVariance; }
-    static float getEnvelopeJitter(const Vocal& d) { return d.mEnvelopeJitter; }
-    static float getAutocorrelationIrregularity(const Vocal& d) { return d.mAutocorrelationIrregularity; }
-    static float getZeroCrossingCV(const Vocal& d) { return d.mZeroCrossingCV; }
-    static float getRawConfidence(const Vocal& d) { return d.mConfidence; }
+    static int getNumBins(const Vocal& d) FL_NO_EXCEPT { return d.mFormantNumBins; }
+    static int getBroadNumBins(const Vocal& d) FL_NO_EXCEPT { return d.mBroadNumBins; }
+    static float getSpectralFlatness(const Vocal& d) FL_NO_EXCEPT { return d.mSpectralFlatness; }
+    static float getHarmonicDensity(const Vocal& d) FL_NO_EXCEPT { return d.mHarmonicDensity; }
+    static float getSpectralCentroid(const Vocal& d) FL_NO_EXCEPT { return d.mSpectralCentroid; }
+    static float getSpectralRolloff(const Vocal& d) FL_NO_EXCEPT { return d.mSpectralRolloff; }
+    static float getFormantRatio(const Vocal& d) FL_NO_EXCEPT { return d.mFormantRatio; }
+    static float getVocalPresenceRatio(const Vocal& d) FL_NO_EXCEPT { return d.mVocalPresenceRatio; }
+    static float getSpectralFlux(const Vocal& d) FL_NO_EXCEPT { return d.mSpectralFlux; }
+    static float getSpectralVariance(const Vocal& d) FL_NO_EXCEPT { return d.mSpectralVariance; }
+    static float getEnvelopeJitter(const Vocal& d) FL_NO_EXCEPT { return d.mEnvelopeJitter; }
+    static float getAutocorrelationIrregularity(const Vocal& d) FL_NO_EXCEPT { return d.mAutocorrelationIrregularity; }
+    static float getZeroCrossingCV(const Vocal& d) FL_NO_EXCEPT { return d.mZeroCrossingCV; }
+    static float getRawConfidence(const Vocal& d) FL_NO_EXCEPT { return d.mConfidence; }
 };
 
 } // namespace detector

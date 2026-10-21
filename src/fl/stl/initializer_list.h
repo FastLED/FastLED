@@ -5,6 +5,7 @@
 // IWYU pragma: no_include "__config"
 // IWYU pragma: no_include "version"
 
+#include "fl/stl/noexcept.h"
 #include "platforms/is_platform.h"  // IWYU pragma: keep
 
 // Define if initializer_list is available
@@ -12,7 +13,6 @@
 #if !defined(FL_IS_AVR)
 // IWYU pragma: begin_keep
 #include <initializer_list>  // IWYU pragma: keep
-#include "fl/stl/noexcept.h"
 // IWYU pragma: end_keep
 #endif
 
@@ -28,7 +28,7 @@ namespace std {
         unsigned int mSize;  // Use unsigned int directly for AVR (16-bit)
 
         // Private constructor used by compiler
-        constexpr initializer_list(const T* first, unsigned int size)
+        constexpr initializer_list(const T* first, unsigned int size) FL_NO_EXCEPT
             : mBegin(first), mSize(size) {}
 
     public:
@@ -43,12 +43,12 @@ namespace std {
         constexpr initializer_list() FL_NO_EXCEPT : mBegin(nullptr), mSize(0) {}
 
         // Size and capacity
-        constexpr unsigned int size() const { return mSize; }
-        constexpr bool empty() const { return mSize == 0; }
+        constexpr unsigned int size() const FL_NO_EXCEPT { return mSize; }
+        constexpr bool empty() const FL_NO_EXCEPT { return mSize == 0; }
 
         // Iterators
-        constexpr const_iterator begin() const { return mBegin; }
-        constexpr const_iterator end() const { return mBegin + mSize; }
+        constexpr const_iterator begin() const FL_NO_EXCEPT { return mBegin; }
+        constexpr const_iterator end() const FL_NO_EXCEPT { return mBegin + mSize; }
 
         // Allow compiler access to private constructor
         template<typename U> friend class initializer_list;
@@ -56,12 +56,12 @@ namespace std {
 
     // Helper functions to match std::initializer_list interface  // IWYU pragma: keep
     template<typename T>
-    constexpr const T* begin(initializer_list<T> il) {
+    constexpr const T* begin(initializer_list<T> il) FL_NO_EXCEPT {
         return il.begin();
     }
 
     template<typename T>
-    constexpr const T* end(initializer_list<T> il) {
+    constexpr const T* end(initializer_list<T> il) FL_NO_EXCEPT {
         return il.end();
     }
 }

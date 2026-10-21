@@ -2,13 +2,14 @@
 #include "fl/fx/2d/animartrix_detail/viz/center_field.h"
 #include "fl/fx/2d/animartrix_detail/render_value_fp.h"
 #include "fl/fx/2d/animartrix_detail/perlin_float.h"
+#include "fl/stl/noexcept.h"
 
 FL_FAST_MATH_BEGIN
 FL_OPTIMIZATION_LEVEL_O3_BEGIN
 
 namespace fl {
 
-void Center_Field::draw(Context &ctx) {
+void Center_Field::draw(Context &ctx) FL_NO_EXCEPT {
     auto *e = ctx.mEngine.get();
     e->get_ready();
 
@@ -64,7 +65,7 @@ void Center_Field::draw(Context &ctx) {
 // Fixed-Point Q31 Implementation of Center_Field
 // ============================================================================
 
-void Center_Field_FP::draw(Context &ctx) {
+void Center_Field_FP::draw(Context &ctx) FL_NO_EXCEPT {
     using FP = fl::s16x16;
 
     auto *e = ctx.mEngine.get();

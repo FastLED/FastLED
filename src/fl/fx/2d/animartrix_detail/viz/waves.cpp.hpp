@@ -2,13 +2,14 @@
 #include "fl/fx/2d/animartrix_detail/viz/waves.h"
 #include "fl/fx/2d/animartrix_detail/render_value_fp.h"
 #include "fl/fx/2d/animartrix_detail/perlin_float.h"
+#include "fl/stl/noexcept.h"
 
 FL_FAST_MATH_BEGIN
 FL_OPTIMIZATION_LEVEL_O3_BEGIN
 
 namespace fl {
 
-void Waves::draw(Context &ctx) {
+void Waves::draw(Context &ctx) FL_NO_EXCEPT {
     auto *e = ctx.mEngine.get();
     e->get_ready();
 
@@ -55,7 +56,7 @@ void Waves::draw(Context &ctx) {
 // Fixed-Point Implementation of Waves
 // ============================================================================
 
-void Waves_FP::draw(Context &ctx) {
+void Waves_FP::draw(Context &ctx) FL_NO_EXCEPT {
     auto *e = ctx.mEngine.get();
     e->get_ready();
     mState.ensureCache(e);

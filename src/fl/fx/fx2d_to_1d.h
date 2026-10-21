@@ -7,6 +7,7 @@
 #include "fl/math/screenmap.h"
 #include "fl/fx/fx1d.h"
 #include "fl/fx/fx2d.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -47,31 +48,31 @@ class Fx2dTo1d : public Fx1d {
     /// @param screenMap Mapping from 1D index to 2D float coordinates
     /// @param mode Interpolation mode (default: BILINEAR)
     Fx2dTo1d(u16 numLeds, Fx2dPtr fx2d, const ScreenMap &screenMap,
-             InterpolationMode mode = BILINEAR);
+             InterpolationMode mode = BILINEAR) FL_NO_EXCEPT;
 
-    void draw(DrawContext context) override;
-    fl::string fxName() const override;
+    void draw(DrawContext context) FL_NO_EXCEPT override;
+    fl::string fxName() const FL_NO_EXCEPT override;
 
-    bool hasFixedFrameRate(float *fps) const override {
+    bool hasFixedFrameRate(float *fps) const FL_NO_EXCEPT override {
         return mFx2d->hasFixedFrameRate(fps);
     }
 
-    void pause(u32 now) override { mFx2d->pause(now); }
-    void resume(u32 now) override { mFx2d->resume(now); }
+    void pause(u32 now) FL_NO_EXCEPT override { mFx2d->pause(now); }
+    void resume(u32 now) FL_NO_EXCEPT override { mFx2d->resume(now); }
 
     /// @brief Set the screen map for coordinate mapping
-    void setScreenMap(const ScreenMap &screenMap) { mScreenMap = screenMap; }
+    void setScreenMap(const ScreenMap &screenMap) FL_NO_EXCEPT { mScreenMap = screenMap; }
 
     /// @brief Set the interpolation mode
-    void setInterpolationMode(InterpolationMode mode) {
+    void setInterpolationMode(InterpolationMode mode) FL_NO_EXCEPT {
         mInterpolationMode = mode;
     }
 
     /// @brief Replace the underlying 2D effect
-    void setFx2d(Fx2dPtr fx2d);
+    void setFx2d(Fx2dPtr fx2d) FL_NO_EXCEPT;
 
     /// @brief Get the underlying 2D effect
-    Fx2dPtr getFx2d() const { return mFx2d; }
+    Fx2dPtr getFx2d() const FL_NO_EXCEPT { return mFx2d; }
 
   private:
     Fx2dPtr mFx2d;

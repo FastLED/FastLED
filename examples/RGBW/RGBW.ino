@@ -1,3 +1,4 @@
+// @filter: (board is not atmega8*)  // RGBW does not fit 8 KB flash (#4805)
 
 
 #include <FastLED.h>

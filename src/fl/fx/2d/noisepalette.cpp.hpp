@@ -13,11 +13,12 @@
 #include "noise.h"
 
 #include "fl/fx/2d/noisepalette.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
 NoisePalette::NoisePalette(XYMap xyMap, float fps)
-    : Fx2d(xyMap), speed(0), scale(0), colorLoop(1), mFps(fps) {
+    FL_NO_EXCEPT : Fx2d(xyMap), speed(0), scale(0), colorLoop(1), mFps(fps) {
     // currentPalette = PartyColors_p;
     FL_STATIC_ASSERT(sizeof(currentPalette) == sizeof(CRGBPalette16),
                   "Palette size mismatch");
@@ -36,7 +37,7 @@ NoisePalette::NoisePalette(XYMap xyMap, float fps)
     noise.resize(width * height);
 }
 
-void NoisePalette::setPalettePreset(int paletteIndex) {
+void NoisePalette::setPalettePreset(int paletteIndex) FL_NO_EXCEPT {
     currentPaletteIndex = paletteIndex % 12; // Ensure the index wraps around
     switch (currentPaletteIndex) {
     case 0:
@@ -106,7 +107,7 @@ void NoisePalette::setPalettePreset(int paletteIndex) {
     }
 }
 
-void NoisePalette::mapNoiseToLEDsUsingPalette(fl::span<CRGB> leds) {
+void NoisePalette::mapNoiseToLEDsUsingPalette(fl::span<CRGB> leds) FL_NO_EXCEPT {
     static u8 ihue = 0; // okay static in header
 
     for (u16 i = 0; i < width; i++) {
@@ -139,7 +140,7 @@ void NoisePalette::mapNoiseToLEDsUsingPalette(fl::span<CRGB> leds) {
     ihue += 1;
 }
 
-void NoisePalette::fillnoise8() {
+void NoisePalette::fillnoise8() FL_NO_EXCEPT {
     // If we're running at a low "speed", some 8-bit artifacts become
     // visible from frame-to-frame.  In order to reduce this, we can do some
     // fast data-smoothing. The amount of data smoothing we're doing depends
@@ -181,7 +182,7 @@ void NoisePalette::fillnoise8() {
     mY -= speed / 16;
 }
 
-u8 NoisePalette::changeToRandomPalette() {
+u8 NoisePalette::changeToRandomPalette() FL_NO_EXCEPT {
     while (true) {
         u8 new_idx = random8() % 12;
         if (new_idx == currentPaletteIndex) {

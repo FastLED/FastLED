@@ -1,4 +1,6 @@
 #pragma once
+
+#include "fl/stl/noexcept.h"
 // IWYU pragma: private, include "fl/fx/2d/animartrix.hpp"
 // allow-include-after-namespace
 
@@ -124,7 +126,7 @@ namespace q31 {
 
 namespace q16 {
     // Q16 implementation aliased to Q31 (Q16 was removed, use Q31 instead)
-    inline void Chasing_Spirals_Q16_Batch4_ColorGrouped(Context &ctx) {
+    inline void Chasing_Spirals_Q16_Batch4_ColorGrouped(Context &ctx) FL_NO_EXCEPT {
         fl::Chasing_Spirals_Q31().draw(ctx);
     }
 }

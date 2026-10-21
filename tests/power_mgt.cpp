@@ -2,6 +2,8 @@
 /// Unit tests for PowerModel API (RGB, RGBW, RGBWW)
 
 #include "FastLED.h"
+#include "fl/channels/channel.h"
+#include "fl/stl/scope_exit.h"
 #include "power_mgt.h"
 #include "fl/gfx/pipeline.h"
 #include "fl/gfx/colorimetric_response.h"
@@ -542,21 +544,6 @@ class RegisteredController : public CLEDController {
     void init() FL_NO_EXCEPT override {}
 };
 
-#if FL_COLOR_PIPELINE_SHARED && !FL_PLATFORM_HAS_TINY_MEMORY
-class ManagedRegisteredController : public RegisteredController {
-  public:
-    ManagedRegisteredController()
-        : pipeline(fl::make_shared<fl::StreamingPipelineQ16>()) {}
-
-    fl::shared_ptr<fl::StreamingPipelineQ16> colorPipeline() const FL_NO_EXCEPT override {
-        return pipeline;
-    }
-
-  private:
-    fl::shared_ptr<fl::StreamingPipelineQ16> pipeline;
-};
-#endif
-
 } // namespace
 
 #if FL_COLOR_PIPELINE_SHARED && !FL_PLATFORM_HAS_TINY_MEMORY
@@ -566,17 +553,35 @@ FL_TEST_CASE("Managed wide dither reserves every physical emitter") {
     for (auto& led : leds) {
         led = CRGB(1, 1, 1);
     }
-    ManagedRegisteredController controller;
-    controller.setLeds(leds, 16);
-    controller.setDither(BINARY_DITHER);
-    controller.setRgbw(fl::RgbwDefault::value());
-    FL_CHECK_EQ(controller_dither_reserve_mW(controller),
-                static_cast<fl::u32>((16u * (10u + 20u + 30u + 80u) + 255u) >> 8));
+    const fl::EmitterProfile profiles[] = {
+        fl::EmitterProfile::rgbw(
+            "reserve/rgbw", fl::Chromaticity(.64f, .33f),
+            fl::Chromaticity(.30f, .60f), fl::Chromaticity(.15f, .06f),
+            fl::Chromaticity(.3127f, .3290f), 1, 1, 1, 1),
+        fl::EmitterProfile::rgbww(
+            "reserve/rgbww", fl::Chromaticity(.64f, .33f),
+            fl::Chromaticity(.30f, .60f), fl::Chromaticity(.15f, .06f),
+            fl::Chromaticity(.3457f, .3585f), fl::Chromaticity(.3127f, .3290f),
+            1, 1, 1, 1, 1),
+    };
+    for (int topology = 0; topology < 2; ++topology) {
+        fl::ChannelOptions options;
+        if (topology == 0) options.mWhiteCfg = fl::RgbwDefault::value();
+        else options.mWhiteCfg = fl::RgbwwDefault::value();
+        FL_REQUIRE(options.setColorProfile(profiles[topology]));
+        options.mDitherMode = BINARY_DITHER;
+        fl::ChannelConfig config(fl::ClocklessChipset(), leds, RGB, options);
+        fl::ChannelPtr channel = fl::Channel::create(config);
+        FL_REQUIRE(channel != nullptr);
+        FL_REQUIRE(channel->isColorManaged());
+        FastLED.add(channel);
+        auto cleanup = fl::make_scope_exit([&]() { FastLED.remove(channel); });
+        if (topology == 1) set_power_model(PowerModelRGBWW(10, 20, 30, 40, 80, 5));
+        const fl::u32 weights = topology == 0 ? 140u : 180u;
+        FL_CHECK_EQ(controller_dither_reserve_mW(*channel),
+                    static_cast<fl::u32>((16u * weights + 255u) >> 8));
+    }
 
-    set_power_model(PowerModelRGBWW(10, 20, 30, 40, 80, 5));
-    controller.setRgbww(fl::RgbwwDefault::value());
-    FL_CHECK_EQ(controller_dither_reserve_mW(controller),
-                static_cast<fl::u32>((16u * (10u + 20u + 30u + 80u + 40u) + 255u) >> 8));
 }
 #endif
 
@@ -1029,6 +1034,170 @@ FL_TEST_CASE("Power limiter - show() reports the brightness it applied") {
     FastLED.show();
     FL_CHECK_EQ(FastLED.getLastShowBrightness(), 200);
     FL_CHECK_FALSE(FastLED.isPowerLimited());
+}
+
+
+// --- 32-bit limiter arithmetic is bit-exact with the 64-bit form it replaced.
+// The limiter used to take its brightness ratio and scale32by8 in 64-bit
+// arithmetic, which links ~1 KB of libgcc helpers on AVR. These compare the
+// 32-bit replacements, and the whole limiter, against that 64-bit reference.
+
+namespace power_equivalence {
+
+fl::u32 lcg(fl::u32& state) {
+    state = state * 1664525u + 1013904223u;
+    return state;
+}
+
+// scale32by8 as it was: one 64-bit product.
+fl::u32 ref_scale32by8(fl::u32 i, fl::u8 scale) {
+    if (scale == 0) {
+        return 0;
+    }
+#if FASTLED_SCALE8_FIXED == 1
+    return static_cast<fl::u32>((static_cast<fl::u64>(i) * (1u + scale)) >> 8);
+#else
+    return static_cast<fl::u32>((static_cast<fl::u64>(i) * scale) >> 8);
+#endif
+}
+
+// The ratio as it was, clamped the way its only caller clamps it.
+fl::u32 ref_ratio_of_255(fl::u32 num, fl::u32 den) {
+    const fl::u64 q = (static_cast<fl::u64>(255) * num) / den;
+    return q > 255 ? 255u : static_cast<fl::u32>(q);
+}
+
+// calculate_max_brightness_for_power_mW(buffer, ...) as it was before the
+// 32-bit change, on the default linear model (where the power map is the
+// identity).
+fl::u8 ref_limit(const CRGB* leds, fl::u16 n, fl::u8 target, fl::u32 max_mW) {
+    const fl::u32 total = calculate_unscaled_power_mW(leds, n);
+    const fl::u32 fixed = static_cast<fl::u32>(get_power_model().dark_mW) * n;
+    const fl::u32 ctrl = total > fixed ? total - fixed : 0;
+    if (fixed + ref_scale32by8(ctrl, target) <= max_mW) {
+        return target;
+    }
+    if (ctrl == 0 || max_mW <= fixed) {
+        return 0;
+    }
+    fl::u64 allowed = (static_cast<fl::u64>(255) * (max_mW - fixed)) / ctrl;
+    if (allowed > target) {
+        allowed = target;
+    }
+    fl::u8 b = static_cast<fl::u8>(allowed);
+    while (b > 0 && fixed + ref_scale32by8(ctrl, b) > max_mW) {
+        --b;
+    }
+    return b;
+}
+
+}  // namespace power_equivalence
+
+FL_TEST_CASE("Power limiter - 32-bit scale32by8 matches the 64-bit product") {
+    using namespace power_equivalence;
+    const fl::u32 edges[] = {0u, 1u, 2u, 127u, 128u, 255u, 256u, 257u,
+                             65535u, 65536u, 0x00FFFFFFu, 0x01000000u,
+                             0x7FFFFFFFu, 0x80000000u, 0xFFFFFF00u,
+                             0xFFFFFFFEu, 0xFFFFFFFFu};
+    fl::u32 state = 12345u;
+    int mismatches = 0;
+    for (int s = 0; s < 256; ++s) {
+        const fl::u8 scale = static_cast<fl::u8>(s);
+        for (fl::u32 i : edges) {
+            mismatches += fl::scale32by8(i, scale) != ref_scale32by8(i, scale);
+        }
+        for (int k = 0; k < 4000; ++k) {
+            const fl::u32 i = lcg(state);
+            mismatches += fl::scale32by8(i, scale) != ref_scale32by8(i, scale);
+        }
+    }
+    FL_CHECK_EQ(mismatches, 0);
+}
+
+FL_TEST_CASE("Power limiter - 32-bit brightness ratio matches the 64-bit divide") {
+    using namespace power_equivalence;
+    const fl::u32 edges[] = {0u, 1u, 2u, 3u, 254u, 255u, 256u, 257u, 65535u,
+                             65536u, 0x00FFFFFFu, 0x01000000u, 0x01000001u,
+                             0x7FFFFFFFu, 0x80000000u, 0x80000001u,
+                             0xFFFFFFFEu, 0xFFFFFFFFu};
+    int mismatches = 0;
+    for (fl::u32 num : edges) {
+        for (fl::u32 den : edges) {
+            if (den == 0) {
+                continue;
+            }
+            mismatches += power_ratio_of_255(num, den) !=
+                          ref_ratio_of_255(num, den);
+        }
+    }
+    fl::u32 state = 777u;
+    for (int k = 0; k < 400000; ++k) {
+        // Mix full-range, near-equal and small operands.
+        fl::u32 den = lcg(state) >> (lcg(state) & 31u);
+        if (den == 0) {
+            den = 1;
+        }
+        fl::u32 num;
+        switch (lcg(state) & 3u) {
+        case 0: num = lcg(state); break;
+        case 1: num = den - (lcg(state) & 0xFFu); break;
+        case 2: num = lcg(state) % den; break;
+        default: num = lcg(state) >> (lcg(state) & 31u); break;
+        }
+        mismatches += power_ratio_of_255(num, den) !=
+                      ref_ratio_of_255(num, den);
+    }
+    FL_CHECK_EQ(mismatches, 0);
+}
+
+FL_TEST_CASE("Power limiter - sweep matches the 64-bit limiter exactly") {
+    using namespace power_equivalence;
+    ScopedDefaultPowerModel guard;
+    static CRGB leds[65535];
+    const fl::u16 counts[] = {0, 1, 2, 3, 8, 50, 255, 256, 300, 1000, 4096,
+                              20000, 65535};
+    const fl::u8 targets[] = {0, 1, 2, 20, 64, 127, 128, 200, 254, 255};
+    fl::u32 state = 4242u;
+    int checked = 0;
+    int mismatches = 0;
+    for (int pattern = 0; pattern < 4; ++pattern) {
+        for (fl::u16 n : counts) {
+            for (fl::u32 i = 0; i < n; ++i) {
+                switch (pattern) {
+                case 0: leds[i] = CRGB(0, 0, 0); break;
+                case 1: leds[i] = CRGB(255, 255, 255); break;
+                case 2: leds[i] = CRGB(255, 0, 0); break;
+                default: {
+                    const fl::u32 r = lcg(state);
+                    leds[i] = CRGB(r & 0xFF, (r >> 8) & 0xFF, (r >> 16) & 0xFF);
+                    break;
+                }
+                }
+            }
+            const fl::u32 total = calculate_unscaled_power_mW(leds, n);
+            const fl::u32 fixed =
+                static_cast<fl::u32>(get_power_model().dark_mW) * n;
+            fl::u32 budgets[] = {0u, 1u, fixed > 0 ? fixed - 1 : 0, fixed,
+                                 fixed + 1, fixed + 2, total / 7, total / 3,
+                                 total / 2, total - 1, total, total + 1,
+                                 2000u, 2000u * 1000u, 0x7FFFFFFFu,
+                                 0xFFFFFFFFu, 0, 0, 0, 0};
+            for (int k = 16; k < 20; ++k) {
+                budgets[k] = fixed + lcg(state) % (total - fixed + 2);
+            }
+            for (fl::u32 budget : budgets) {
+                for (fl::u8 target : targets) {
+                    ++checked;
+                    mismatches +=
+                        calculate_max_brightness_for_power_mW(leds, n, target,
+                                                              budget) !=
+                        ref_limit(leds, n, target, budget);
+                }
+            }
+        }
+    }
+    FL_CHECK_GT(checked, 2000);
+    FL_CHECK_EQ(mismatches, 0);
 }
 
 } // FL_TEST_FILE

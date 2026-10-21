@@ -2,6 +2,7 @@
 #pragma once
 
 #include "fl/stl/int.h"
+#include "fl/stl/noexcept.h"
 
 /*
 Experimental bilinearn downscaling algorithm. Not tested yet and completely
@@ -17,7 +18,7 @@ struct CRGB;
 class XYMap;
 
 void downscale(const CRGB *src, const XYMap &srcXY, CRGB *dst,
-               const XYMap &dstXY);
+               const XYMap &dstXY) FL_NO_EXCEPT;
 
 // Optimized versions for downscaling by 50%. This is here for testing purposes
 // mostly. You should prefer to use downscale(...) instead of calling these
@@ -25,10 +26,10 @@ void downscale(const CRGB *src, const XYMap &srcXY, CRGB *dst,
 // downscaleHalf(...) automatically when the source and destination are half the
 // size of each other.
 void downscaleHalf(const CRGB *src, fl::u16 srcWidth, fl::u16 srcHeight,
-                   CRGB *dst);
+                   CRGB *dst) FL_NO_EXCEPT;
 void downscaleHalf(const CRGB *src, const XYMap &srcXY, CRGB *dst,
-                   const XYMap &dstXY);
+                   const XYMap &dstXY) FL_NO_EXCEPT;
 void downscaleArbitrary(const CRGB *src, const XYMap &srcXY, CRGB *dst,
-                        const XYMap &dstXY);
+                        const XYMap &dstXY) FL_NO_EXCEPT;
 
 } // namespace fl

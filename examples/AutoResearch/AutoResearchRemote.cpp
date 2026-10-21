@@ -33,6 +33,9 @@
 #include "fl/stl/unique_ptr.h"
 #include "fl/stl/optional.h"
 #include "fl/stl/json.h"
+#include "fl/stl/cstring.h"
+#include "fl/stl/cstdio.h"
+#include "fl/stl/string_view.h"
 #include "fl/task/task.h"
 #include "fl/task/executor.h"
 #include <Arduino.h>
@@ -40,15 +43,7 @@
 #include "fl/stl/atomic.h"
 #include "fl/task/promise.h"
 
-// FastLED #3446: findConnectedPins consults FastLED's per-chip pin
-// validity table so the host scan sees the same forbidden-pin set the
-// rest of FastLED enforces (SPI flash pads, USB-JTAG, GPIO34-39
-// input-only, …). Pulling the platform's `fastpin_*.h` directly is the
-// cheapest way to reach `_FL_VALID_PIN_MASK` / `FASTLED_UNUSABLE_PIN_MASK`
-// at runtime.
-#if defined(FL_IS_ESP32)
-#include "platforms/esp/32/core/fastpin_esp32.h"  // for _FL_VALID_PIN_MASK et al.  // ok platform headers
-#endif
+#include "fl/system/pin_probe.h"  // pin discovery skip rules (#3446)
 #include "fl/math/simd.h"
 #include "AutoResearchSimd.h"
 #include "AutoResearchAnimartrixBench.h"  // animartrixPerlinBench RPC (#2628 follow-up)
@@ -70,37 +65,52 @@
 #include "fl/stl/detail/memory_file_handle.h"
 #include "fl/fx/frame.h"
 
+
 // ============================================================================
 // Raw Serial Output Functions (bypass fl::println and ScopedLogDisable)
 // ============================================================================
 
+namespace {
+
+// RPC output must use the selected console and bypass log-level filtering.
+void writeRaw(fl::string_view text) {
+    fl::write_bytes(reinterpret_cast<const fl::u8*>(text.data()), text.size()); // ok autoresearch rpc serial - selected console RPC transport boundary
+}
+
+void writeRawLine(fl::string_view text) {
+    writeRaw(text);
+    writeRaw("\r\n");
+}
+
+} // namespace
+
 void printJsonRaw(const fl::json& json, const char* prefix) {
     // Serialize and print response
     fl::string formatted = fl::formatJsonResponse(json, prefix);
-    Serial.println(formatted.c_str());  // ok serial - ok autoresearch rpc serial - RPC response boundary
-    Serial.flush();                     // ok serial - ok autoresearch rpc serial - host waits for RPC boundary
+    writeRawLine(formatted);
+    fl::flush(); // ok autoresearch rpc serial - host waits for RPC response completion
 }
 
 namespace {
 
 void printRemoteResponseRaw(const fl::json& response) {
     fl::string formatted = fl::formatJsonResponse(response, "REMOTE: ");
-    Serial.println(formatted.c_str());  // ok serial - ok autoresearch rpc serial - RPC response boundary
-    Serial.flush();                     // ok serial - ok autoresearch rpc serial - host waits for RPC boundary
+    writeRawLine(formatted);
+    fl::flush(); // ok autoresearch rpc serial - host waits for RPC response completion
 }
 
 void printRemoteStreamRaw(fl::JsonStreamCallback writeJson) {
-    Serial.print("REMOTE: ");  // ok serial - ok autoresearch rpc serial - RPC response boundary
+    writeRaw("REMOTE: ");
 
     fl::JsonStreamWriter writer([](const char* data, fl::size len) {
-        Serial.write(reinterpret_cast<const uint8_t*>(data), static_cast<size_t>(len));  // ok serial - ok autoresearch rpc serial - streamed JSON bytes
+        writeRaw(fl::string_view(data, len));
     });
     if (writeJson) {
         writeJson(writer);
     }
     writer.flush();
-    Serial.println();  // ok serial - ok autoresearch rpc serial - RPC response boundary
-    Serial.flush();    // ok serial - ok autoresearch rpc serial - host waits for RPC boundary
+    writeRaw("\r\n");
+    fl::flush(); // ok autoresearch rpc serial - host waits for RPC response completion
 }
 
 }  // namespace
@@ -120,7 +130,7 @@ void printStreamRaw(const char* messageType, const fl::json& data) {
 
     // Use fl:: serial transport for consistent formatting
     fl::string formatted = fl::formatJsonResponse(output, "RESULT: ");
-    Serial.println(formatted.c_str());  // ok serial - ok autoresearch rpc serial - stream response boundary
+    writeRawLine(formatted);
 }
 
 // ============================================================================
@@ -189,62 +199,26 @@ fl::json AutoResearchRemoteControl::findConnectedPinsImpl(const fl::json& args) 
         response.set("message", "Pin range must be 0-48 with startPin < endPin");
         return response;
     }
-
-    // FastLED #3446: defer to FastLED's existing per-chip pin map
-    // (`FASTLED_UNUSABLE_PIN_MASK` + `SOC_GPIO_VALID_*_MASK`) rather
-    // than hard-coding pin numbers here. The mask already covers
-    // SPI-flash pads, USB-JTAG pads, chip-strap pins, and packaging-
-    // reserved gaps for every supported ESP32 variant, and is the
-    // single source of truth `_ESPPIN<P>::validpin()` uses too. Any
-    // pin not in `_FL_VALID_PIN_MASK` is unsafe to drive; any pin in
-    // `SOC_GPIO_VALID_GPIO_MASK` but NOT `SOC_GPIO_VALID_OUTPUT_GPIO_MASK`
-    // is input-only (drivable in the forward direction only).
+    // FastLED #3446: the platform owns the per-chip list of pins a probe
+    // must not touch (SPI flash / PSRAM pads, flash power, USB-JTAG, the
+    // console UART) and of pins it may read but not drive (input-only).
+    // See fl/system/pin_probe.h; platforms without such pins report none.
     //
     // We surface skipped pins in the response so the host log says
-    // exactly which pins were forbidden and why — turning silent
+    // exactly which pins were forbidden and why, turning silent
     // "no jumper found" into actionable "pins 6-11 are flash, 20 is
     // USB-JTAG, 34-39 are input-only".
-    //
-    // The fallthrough for non-ESP32 hosts is "allow everything" —
-    // platform-specific gating lives on those platforms' own
-    // `findConnectedPins` paths.
-    auto isFastLedValidOutputPin = [](int p) -> bool {
-#if defined(FL_IS_ESP32)
-        if (p < 0 || p >= 64) return false;
-        return (_FL_VALID_PIN_MASK & (1ULL << p)) != 0;
-#else
-        (void)p;
-        return true;
-#endif
-    };
-
-    auto isFastLedInputOnlyPin = [](int p) -> bool {
-#if defined(FL_IS_ESP32)
-        if (p < 0 || p >= 64) return false;
-        constexpr u64 inputOnlyMask =
-            u64(SOC_GPIO_VALID_GPIO_MASK) & ~u64(SOC_GPIO_VALID_OUTPUT_GPIO_MASK);
-        return (inputOnlyMask & (1ULL << p)) != 0;
-#else
-        (void)p;
-        return false;
-#endif
-    };
-
-    auto isFastLedReservedPin = [&](int p) -> bool {
-        // Reserved means "in FASTLED_UNUSABLE_PIN_MASK", i.e. flash /
-        // USB-JTAG / strap pins. Distinct from input-only (those are
-        // probe-as-RX-only, not "skip entirely").
-#if defined(FL_IS_ESP32)
-        if (p < 0 || p >= 64) return false;
-        return (FASTLED_UNUSABLE_PIN_MASK & (1ULL << p)) != 0;
-#else
-        (void)p;
-        return false;
-#endif
-    };
 
     fl::json skipped_pins = fl::json::array();
+    // Each pin is recorded once: the all-pairs scan below visits a pin many
+    // times, and an unbounded array exhausts heap on ESP32.
+    fl::u64 skipped_mask = 0;
     auto recordSkip = [&](int p, const char* reason) {
+        const fl::u64 bit = fl::pinMaskBit(p);
+        if (skipped_mask & bit) {
+            return;
+        }
+        skipped_mask |= bit;
         fl::json entry = fl::json::object();
         entry.set("pin", static_cast<int64_t>(p));
         entry.set("reason", reason);
@@ -274,80 +248,51 @@ fl::json AutoResearchRemoteControl::findConnectedPinsImpl(const fl::json& args) 
         return (rx_when_tx_low == LOW) && (rx_when_tx_high == HIGH);
     };
 
-    // Search for connected adjacent pin pairs (n, n+1)
+    // Search every pin pair (a, b) in the range, both directions. Bench
+    // jumpers are not always on neighbouring pins (a Teensy 4.0 wired across
+    // the board was invisible to the old adjacent-only (n, n+1) scan).
+    // Cost: 2 probes x ~4 ms per pair; a 0-40 range is ~6 s.
     int found_tx = -1;
     int found_rx = -1;
-    fl::json tested_pairs = fl::json::array();
 
-    for (int pin = start_pin; pin < end_pin; pin++) {
-        int tx_candidate = pin;
-        int rx_candidate = pin + 1;
+    // Drive `tx`, read `rx`; skips (and records) a driver that can't output.
+    auto tryDirection = [&](int tx, int rx) -> bool {
+        if (const char* why = fl::pinProbeDriveSkipReason(tx)) {
+            recordSkip(tx, why);
+            return false;
+        }
+        return testPinPair(tx, rx);
+    };
 
-        // FastLED #3446: hands off the platform's reserved pads
-        // (SPI flash 6-11, USB-JTAG 20, …) — driving them locks the
-        // chip up or corrupts the live flash transaction. The
-        // FASTLED_UNUSABLE_PIN_MASK is per-chip authoritative.
-        if (isFastLedReservedPin(tx_candidate)) {
-            recordSkip(tx_candidate, "reserved-by-FastLED");
+    for (int a = start_pin; a <= end_pin && found_tx < 0; a++) {
+        // FastLED #3446: hands off the platform's reserved pads (SPI
+        // flash 6-11, USB-JTAG, ...) -- driving them locks the chip up or
+        // corrupts the live flash transaction -- and off this board's
+        // console and in-use PSRAM pins (fl::pinProbeSkipReason).
+        if (const char* why = fl::pinProbeSkipReason(a)) {
+            recordSkip(a, why);
             continue;
         }
-        if (isFastLedReservedPin(rx_candidate)) {
-            recordSkip(rx_candidate, "reserved-by-FastLED");
-            continue;
-        }
-
-        fl::json pair = fl::json::object();
-        pair.set("tx", static_cast<int64_t>(tx_candidate));
-        pair.set("rx", static_cast<int64_t>(rx_candidate));
-
-        // Test TX→RX direction. Skip when the TX side can't actually
-        // drive output (e.g. input-only GPIO34-39 on classic ESP32).
-        if (!isFastLedValidOutputPin(tx_candidate)) {
-            recordSkip(tx_candidate, "input-only");
-        } else {
-            bool connected_forward = testPinPair(tx_candidate, rx_candidate);
-            if (connected_forward) {
-                pair.set("connected", true);
-                pair.set("direction", "forward");
-                tested_pairs.push_back(pair);
-                found_tx = tx_candidate;
-                found_rx = rx_candidate;
+        for (int b = a + 1; b <= end_pin; b++) {
+            if (const char* why = fl::pinProbeSkipReason(b)) {
+                recordSkip(b, why);
+                continue;
+            }
+            if (tryDirection(a, b)) {
+                found_tx = a;
+                found_rx = b;
                 FL_DBG("[PIN PROBE] Found connected pair: TX=" << found_tx << " -> RX=" << found_rx);
                 break;
             }
+            if (tryDirection(b, a)) {
+                found_tx = b;  // Reversed: b drives a
+                found_rx = a;
+                FL_DBG("[PIN PROBE] Found connected pair (reversed): TX=" << found_tx << " -> RX=" << found_rx);
+                break;
+            }
         }
-
-        // Test RX→TX direction (reversed). Same drive-capability gate:
-        // if the would-be-driver is input-only, skip — `pinMode(p, OUTPUT)`
-        // is silently ignored and the test produces a false negative.
-        if (isFastLedInputOnlyPin(rx_candidate)) {
-            recordSkip(rx_candidate, "input-only");
-            tested_pairs.push_back(pair);
-            continue;
-        }
-        if (!isFastLedValidOutputPin(rx_candidate)) {
-            recordSkip(rx_candidate, "not-output-capable");
-            tested_pairs.push_back(pair);
-            continue;
-        }
-        bool connected_reverse = testPinPair(rx_candidate, tx_candidate);
-        if (connected_reverse) {
-            pair.set("connected", true);
-            pair.set("direction", "reverse");
-            tested_pairs.push_back(pair);
-            found_tx = rx_candidate;  // Swap since reversed
-            found_rx = tx_candidate;
-            FL_DBG("[PIN PROBE] Found connected pair (reversed): TX=" << found_tx << " -> RX=" << found_rx);
-            break;
-        }
-
-        pair.set("connected", false);
-        tested_pairs.push_back(pair);
     }
 
-    // NOTE: testedPairs array omitted - causes heap exhaustion on ESP32 (21+ objects = ~1500 bytes)
-    // Validation script doesn't use this data, only needs {found, txPin, rxPin}
-    // response.set("testedPairs", tested_pairs);
     fl::json search_range = fl::json::array();
     search_range.push_back(static_cast<int64_t>(start_pin));
     search_range.push_back(static_cast<int64_t>(end_pin));
@@ -356,8 +301,7 @@ fl::json AutoResearchRemoteControl::findConnectedPinsImpl(const fl::json& args) 
     // FastLED #3446: surface every pin we declined to drive (and why)
     // so the host log can render "Skipped GPIO 6/7/8/9/10/11 (SPI flash),
     // 20 (USB-JTAG), 34-39 (input-only)". A small list — at most the
-    // bad-pin count for the platform — so this doesn't bloat the
-    // response heap budget the way `tested_pairs` did.
+    // bad-pin count for the platform.
     response.set("skippedPins", skipped_pins);
 
     if (found_tx >= 0 && found_rx >= 0) {
@@ -409,7 +353,7 @@ fl::json AutoResearchRemoteControl::findConnectedPinsImpl(const fl::json& args) 
     } else {
         response.set("success", true);  // Function succeeded, just no pins found
         response.set("found", false);
-        response.set("message", "No connected pin pairs found. Please connect a jumper wire between adjacent GPIO pins.");
+        response.set("message", "No connected pin pairs found. Please connect a jumper wire between two GPIO pins.");
     }
 
     return response;

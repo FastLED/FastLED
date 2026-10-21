@@ -1,5 +1,6 @@
 #pragma once
 
+#include "fl/stl/adl_barrier.h"
 #include "fl/stl/move.h"
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/type_traits.h"
@@ -90,11 +91,14 @@ void swap(pair<T1, T2> &lhs, pair<T1, T2> &rhs) FL_NO_EXCEPT {
     lhs.swap(rhs);
 }
 
+namespace adl_barrier {  // see fl/stl/adl_barrier.h
 // make_pair function
 template <typename T1, typename T2>
 pair<typename fl::decay<T1>::type, typename fl::decay<T2>::type> make_pair(T1&& t, T2&& u) FL_NO_EXCEPT {
     return pair<typename fl::decay<T1>::type, typename fl::decay<T2>::type>(fl::forward<T1>(t), fl::forward<T2>(u));
 }
+}  // namespace adl_barrier
+
 
 // Helper for get function
 template <fl::size I, typename T1, typename T2>

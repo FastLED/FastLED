@@ -22,7 +22,7 @@ public:
     /// @param host Server hostname or IP address
     /// @param port Server port (default: 8080)
     /// @param heartbeatIntervalMs Heartbeat interval in milliseconds (default: 30000ms = 30s)
-    HttpStreamClient(const fl::string& host, u16 port = 8080, u32 heartbeatIntervalMs = 30000);
+    HttpStreamClient(const fl::string& host, u16 port = 8080, u32 heartbeatIntervalMs = 30000) FL_NO_EXCEPT;
 
     /// Virtual destructor
     ~HttpStreamClient() FL_NO_EXCEPT override;
@@ -32,14 +32,14 @@ public:
     /// Connect to HTTP server
     /// Sends initial HTTP POST request with headers
     /// @return true if connected successfully, false otherwise
-    bool connect() override;
+    bool connect() FL_NO_EXCEPT override;
 
     /// Disconnect from HTTP server
-    void disconnect() override;
+    void disconnect() FL_NO_EXCEPT override;
 
     /// Check if connected to server
     /// @return true if connected, false otherwise
-    bool isConnected() const override;
+    bool isConnected() const FL_NO_EXCEPT override;
 
 protected:
     // Abstract methods implementation (from HttpStreamTransport)
@@ -47,26 +47,26 @@ protected:
     /// Send raw data over socket
     /// @param data Data to send
     /// @return Number of bytes sent, or -1 on error
-    int sendData(fl::span<const u8> data) override;
+    int sendData(fl::span<const u8> data) FL_NO_EXCEPT override;
 
     /// Receive raw data from socket
     /// @param buffer Buffer to receive data into
     /// @return Number of bytes received, or -1 on error
-    int recvData(fl::span<u8> buffer) override;
+    int recvData(fl::span<u8> buffer) FL_NO_EXCEPT override;
 
     /// Trigger reconnection (override from HttpStreamTransport)
-    void triggerReconnect() override;
+    void triggerReconnect() FL_NO_EXCEPT override;
 
 private:
     /// Send HTTP POST request header
     /// Called once at connection time
     /// @return true if sent successfully, false otherwise
-    bool sendHttpRequestHeader();
+    bool sendHttpRequestHeader() FL_NO_EXCEPT;
 
     /// Read and validate HTTP response header
     /// Called once after connection
     /// @return true if valid response header received, false otherwise
-    bool readHttpResponseHeader();
+    bool readHttpResponseHeader() FL_NO_EXCEPT;
 
     /// Native socket client
     fl::unique_ptr<NativeHttpClient> mNativeClient;

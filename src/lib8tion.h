@@ -229,6 +229,7 @@
 #include "fl/math/scale8.h"
 #include "fl/math/random8.h"
 #include "fl/math/trig8.h"
+#include "fl/stl/noexcept.h"
 
 // Bring types and common math functions into global scope for backward compatibility.
 // Only import names that are actually defined in namespace fl (via platforms/ headers).
@@ -325,7 +326,7 @@ using fl::bseconds16;
 
 /// Conversion from 16-bit fixed point (::sfract15) to IEEE754 32-bit float.
 LIB8STATIC float sfract15ToFloat( sfract15 y)
-{
+FL_NO_EXCEPT {
     return y / 32768.0f;
 }
 
@@ -333,7 +334,7 @@ LIB8STATIC float sfract15ToFloat( sfract15 y)
 /// @note The extremes of one and negative one are NOT representable! The
 /// representable range is 0.99996948242 to -0.99996948242, in steps of 0.00003051757.
 LIB8STATIC sfract15 floatToSfract15( float f)
-{
+FL_NO_EXCEPT {
     return static_cast<sfract15>(f * 32768.0f);
 }
 
@@ -361,7 +362,7 @@ LIB8STATIC sfract15 floatToSfract15( float f)
 /// Linear interpolation between two unsigned 8-bit values,
 /// with 8-bit fraction
 LIB8STATIC fl::u8 lerp8by8( fl::u8 a, fl::u8 b, fract8 frac)
-{
+FL_NO_EXCEPT {
     fl::u8 result;
     if( b > a) {
         fl::u8 delta = b - a;
@@ -378,7 +379,7 @@ LIB8STATIC fl::u8 lerp8by8( fl::u8 a, fl::u8 b, fract8 frac)
 /// Linear interpolation between two unsigned 16-bit values,
 /// with 16-bit fraction
 LIB8STATIC fl::u16 lerp16by16( fl::u16 a, fl::u16 b, fract16 frac)
-{
+FL_NO_EXCEPT {
     fl::u16 result;
     if( b > a ) {
         fl::u16 delta = b - a;
@@ -395,7 +396,7 @@ LIB8STATIC fl::u16 lerp16by16( fl::u16 a, fl::u16 b, fract16 frac)
 /// Linear interpolation between two unsigned 16-bit values,
 /// with 8-bit fraction
 LIB8STATIC fl::u16 lerp16by8( fl::u16 a, fl::u16 b, fract8 frac)
-{
+FL_NO_EXCEPT {
     fl::u16 result;
     if( b > a) {
         fl::u16 delta = b - a;
@@ -412,7 +413,7 @@ LIB8STATIC fl::u16 lerp16by8( fl::u16 a, fl::u16 b, fract8 frac)
 /// Linear interpolation between two signed 15-bit values,
 /// with 8-bit fraction
 LIB8STATIC fl::i16 lerp15by8( fl::i16 a, fl::i16 b, fract8 frac)
-{
+FL_NO_EXCEPT {
     fl::i16 result;
     if( b > a) {
         fl::u16 delta = b - a;
@@ -429,7 +430,7 @@ LIB8STATIC fl::i16 lerp15by8( fl::i16 a, fl::i16 b, fract8 frac)
 /// Linear interpolation between two signed 15-bit values,
 /// with 8-bit fraction
 LIB8STATIC fl::i16 lerp15by16( fl::i16 a, fl::i16 b, fract16 frac)
-{
+FL_NO_EXCEPT {
     fl::i16 result;
     if( b > a) {
         fl::u16 delta = b - a;
@@ -465,7 +466,7 @@ LIB8STATIC fl::i16 lerp15by16( fl::i16 a, fl::i16 b, fract16 frac)
 ///
 /// but faster and specifically designed for 8-bit values.
 LIB8STATIC fl::u8 map8( fl::u8 in, fl::u8 rangeStart, fl::u8 rangeEnd)
-{
+FL_NO_EXCEPT {
     fl::u8 rangeWidth = rangeEnd - rangeStart;
     fl::u8 out = scale8( in, rangeWidth);
     out += rangeStart;
@@ -486,7 +487,7 @@ LIB8STATIC fl::u8 map8( fl::u8 in, fl::u8 rangeStart, fl::u8 rangeEnd)
 /// Takes around 13 cycles on AVR.
 #if (EASE8_C == 1) || defined(FASTLED_DOXYGEN)
 LIB8STATIC fl::u8 ease8InOutQuad(fl::u8 i)
-{
+FL_NO_EXCEPT {
     fl::u8 j = i;
     if( j & 0x80 ) {
         j = 255 - j;
@@ -529,7 +530,7 @@ LIB8STATIC fl::u8 ease8InOutQuad(fl::u8 val) {
 #endif
 
 LIB8STATIC fl::u16 ease16InOutQuad(fl::u16 i)
-{
+FL_NO_EXCEPT {
     // This is the legacy version, there is a slightly more accurate version in fl/ease.cpp
     // with fl::easeInOutQuad16. However the difference is minimal.
     //
@@ -546,7 +547,7 @@ LIB8STATIC fl::u16 ease16InOutQuad(fl::u16 i)
     return jj2;
 }
 
-LIB8STATIC fl::u16 ease16InOutCubic(fl::u16 i)  {
+LIB8STATIC fl::u16 ease16InOutCubic(fl::u16 i) FL_NO_EXCEPT {
     // This function produces wrong results, use fl::easeInOutCubic16 instead
     //
     // 16-bit cubic ease-in / ease-out function
@@ -572,7 +573,7 @@ LIB8STATIC fl::u16 ease16InOutCubic(fl::u16 i)  {
 /// 8-bit cubic ease-in / ease-out function. 
 /// Takes around 18 cycles on AVR.
 LIB8STATIC fract8 ease8InOutCubic( fract8 i)
-{
+FL_NO_EXCEPT {
     fl::u8 ii  = scale8_LEAVING_R1_DIRTY(  i, i);
     fl::u8 iii = scale8_LEAVING_R1_DIRTY( ii, i);
     // Do not rely on the generated multiplication instructions to restore
@@ -600,7 +601,7 @@ LIB8STATIC fract8 ease8InOutCubic( fract8 i)
 /// Asm version takes around 7 cycles on AVR.
 #if (EASE8_C == 1) || defined(FASTLED_DOXYGEN)
 LIB8STATIC fract8 ease8InOutApprox( fract8 i)
-{
+FL_NO_EXCEPT {
     if( i < 64) {
         // start with slope 0.5
         i /= 2;
@@ -675,7 +676,7 @@ LIB8STATIC fl::u8 ease8InOutApprox( fract8 i)
 /// On AVR this function takes just three cycles.
 ///
 LIB8STATIC fl::u8 triwave8(fl::u8 in)
-{
+FL_NO_EXCEPT {
     if( in & 0x80) {
         in = 255 - in;
     }
@@ -694,7 +695,7 @@ LIB8STATIC fl::u8 triwave8(fl::u8 in)
 /// This is even faster than "sin8()", and has
 /// a slightly different curve shape.
 LIB8STATIC fl::u8 quadwave8(fl::u8 in)
-{
+FL_NO_EXCEPT {
     return ease8InOutQuad( triwave8( in));
 }
 
@@ -702,7 +703,7 @@ LIB8STATIC fl::u8 quadwave8(fl::u8 in)
 /// at the limits than "sine" does. 
 /// @copydetails quadwave8()
 LIB8STATIC fl::u8 cubicwave8(fl::u8 in)
-{
+FL_NO_EXCEPT {
     return ease8InOutCubic( triwave8( in));
 }
 
@@ -873,22 +874,22 @@ public:
     fl::u32 mPrevTrigger;
     fl::u32 mPeriod;
 
-    CEveryNMillisDynamic(fl::u32 period) : mPeriod(period) { reset(); };
-    fl::u32 getTime() { return GET_MILLIS(); };
-    fl::u32 getPeriod() const { return mPeriod; };
-    fl::u32 getElapsed() { return getTime() - mPrevTrigger; }
-    fl::u32 getRemaining() { return getPeriod() - getElapsed(); }
-    fl::u32 getLastTriggerTime() { return mPrevTrigger; }
-    bool ready() {
+    CEveryNMillisDynamic(fl::u32 period) FL_NO_EXCEPT : mPeriod(period) { reset(); };
+    fl::u32 getTime() FL_NO_EXCEPT { return GET_MILLIS(); };
+    fl::u32 getPeriod() const FL_NO_EXCEPT { return mPeriod; };
+    fl::u32 getElapsed() FL_NO_EXCEPT { return getTime() - mPrevTrigger; }
+    fl::u32 getRemaining() FL_NO_EXCEPT { return getPeriod() - getElapsed(); }
+    fl::u32 getLastTriggerTime() FL_NO_EXCEPT { return mPrevTrigger; }
+    bool ready() FL_NO_EXCEPT {
         bool isReady = (getElapsed() >= getPeriod());
         if( isReady ) { reset(); }
         return isReady;
     }
-    void reset() { mPrevTrigger = getTime(); };
-    void trigger() { mPrevTrigger = getTime() - getPeriod(); };
-    void setPeriod(fl::u32 period) { mPeriod = period; }
+    void reset() FL_NO_EXCEPT { mPrevTrigger = getTime(); };
+    void trigger() FL_NO_EXCEPT { mPrevTrigger = getTime() - getPeriod(); };
+    void setPeriod(fl::u32 period) FL_NO_EXCEPT { mPeriod = period; }
 
-    operator bool() { return ready(); }
+    operator bool() FL_NO_EXCEPT { return ready(); }
 };
 /// @} CEveryNTime Base Classes
 
@@ -906,21 +907,21 @@ public:
     fl::u32 mMaxPeriod;
 
     CEveryNMillisRandom(fl::u32 minPeriod, fl::u32 maxPeriod)
-      : mMinPeriod(minPeriod), mMaxPeriod(maxPeriod)
+      FL_NO_EXCEPT : mMinPeriod(minPeriod), mMaxPeriod(maxPeriod)
     {
         computeNext();
         reset();
     }
 
-    void computeNext() {
+    void computeNext() FL_NO_EXCEPT {
         // random16(x) returns [0..x-1], so this yields MIN..MAX
         fl::u32 range = mMaxPeriod - mMinPeriod + 1;
         mPeriod = mMinPeriod + random16(range);
     }
 
-    fl::u32 getTime() const { return GET_MILLIS(); }
+    fl::u32 getTime() const FL_NO_EXCEPT { return GET_MILLIS(); }
 
-    bool ready() {
+    bool ready() FL_NO_EXCEPT {
         fl::u32 now = getTime();
         if (now - mPrevTrigger >= mPeriod) {
             mPrevTrigger = now;
@@ -930,7 +931,7 @@ public:
         return false;
     }
 
-    void reset() { mPrevTrigger = getTime(); }
+    void reset() FL_NO_EXCEPT { mPrevTrigger = getTime(); }
 };
 
 #else

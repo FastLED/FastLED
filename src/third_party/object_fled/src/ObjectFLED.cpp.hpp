@@ -88,14 +88,19 @@ ObjectFLED::ObjectFLED(uint16_t numLEDs, void *drawBuf, uint8_t config, uint8_t 
 	if (numPins > NUM_DIGITAL_PINS) {
 		// #3416 OF-LOW-2: warn on silent truncation so users debugging
 		// "why is my multi-strip setup short on pins" see the cause.
-		Serial.printf("ObjectFLED: numPins=%u exceeds NUM_DIGITAL_PINS=%u; truncating\r\n",
-		              numPins, NUM_DIGITAL_PINS);
+		// Serial.print, not Serial.printf: printf links ~16 KB of newlib
+		// formatting into ITCM (RAM1) for every Teensy 4 sketch (#4709).
+		Serial.print("ObjectFLED: numPins=");
+		Serial.print((unsigned)numPins);
+		Serial.print(" exceeds NUM_DIGITAL_PINS=");
+		Serial.print((unsigned)NUM_DIGITAL_PINS);
+		Serial.print("; truncating\r\n");
 		numPins = NUM_DIGITAL_PINS;
 	}
 	// CodeRabbit-flagged on PR #3419: guard against numPins=0 which
 	// would otherwise divide by zero in stripLen = numLEDs / numpinsLocal.
 	if (numPins == 0) {
-		Serial.printf("ObjectFLED: numPins=0 is invalid; abandoning init\r\n");
+		Serial.print("ObjectFLED: numPins=0 is invalid; abandoning init\r\n");
 		numpinsLocal = 0;
 		stripLen = 0;
 		initialized = false;
@@ -106,8 +111,13 @@ ObjectFLED::ObjectFLED(uint16_t numLEDs, void *drawBuf, uint8_t config, uint8_t 
 	// #3416 OF-LOW-8: warn if numLEDs doesn't divide evenly across pins
 	// -- tail LEDs are silently dropped from the per-strip stride.
 	if (numpinsLocal > 0 && numLEDs % numpinsLocal != 0) {
-		Serial.printf("ObjectFLED: numLEDs=%u not divisible by numpins=%u; last %u LED(s) ignored\r\n",
-		              numLEDs, numpinsLocal, (unsigned)(numLEDs % numpinsLocal));
+		Serial.print("ObjectFLED: numLEDs=");
+		Serial.print((unsigned)numLEDs);
+		Serial.print(" not divisible by numpins=");
+		Serial.print((unsigned)numpinsLocal);
+		Serial.print("; last ");
+		Serial.print((unsigned)(numLEDs % numpinsLocal));
+		Serial.print(" LED(s) ignored\r\n");
 	}
 	memcpy(pinlist, pinList, numpinsLocal);
 	if ((params & 0x3F) < 6) {
@@ -225,8 +235,8 @@ void ObjectFLED::begin(void) {
 		auto validation = objectfled::validate_teensy4_pin(pin);
 		if (!validation.valid) {
 			FL_WARN("================================================================================");
-			FL_WARN("FASTLED ERROR: Pin %s is INVALID and has been disabled", (int)pin);
-			FL_WARN("%s", validation.error_message);
+			FL_WARN("FASTLED ERROR: Pin " << (int)pin << " is INVALID and has been disabled");
+			FL_WARN(validation.error_message);
 			FL_WARN("================================================================================");
 			continue;
 		}
@@ -234,8 +244,8 @@ void ObjectFLED::begin(void) {
 		// Check for warnings (pin is valid but may have issues)
 		if (validation.error_message != nullptr) {
 			FL_WARN("================================================================================");
-			FL_WARN("FASTLED WARNING: Pin %s may have issues", (int)pin);
-			FL_WARN("%s", validation.error_message);
+			FL_WARN("FASTLED WARNING: Pin " << (int)pin << " may have issues");
+			FL_WARN(validation.error_message);
 			FL_WARN("================================================================================");
 		}
 
@@ -244,7 +254,7 @@ void ObjectFLED::begin(void) {
 		uint8_t offset = ((uint32_t)portOutputRegister(pin) - (uint32_t)&GPIO6_DR) >> 14;
 		if (offset > 3) {
 			FL_WARN("================================================================================");
-			FL_WARN("FASTLED ERROR: Pin %s does not map to GPIO6-9 (offset=%s)", (int)pin, (int)offset);
+			FL_WARN("FASTLED ERROR: Pin " << (int)pin << " does not map to GPIO6-9 (offset=" << (int)offset << ")");
 			FL_WARN("This pin may be a ground/power/read-only pin - strip disabled");
 			FL_WARN("================================================================================");
 			continue;
@@ -269,7 +279,7 @@ void ObjectFLED::begin(void) {
 	if (validPinCount == 0) {
 		FL_WARN("================================================================================");
 		FL_WARN("FASTLED CRITICAL ERROR: No valid pins configured!");
-		FL_WARN("All %s pins failed validation.", (int)numpinsLocal);
+		FL_WARN("All " << (int)numpinsLocal << " pins failed validation.");
 		FL_WARN("ObjectFLED driver is disabled - no LEDs will be updated.");
 		FL_WARN("================================================================================");
 		numpinsLocal = 0;
@@ -278,7 +288,7 @@ void ObjectFLED::begin(void) {
 
 	if (validPinCount < numpinsLocal) {
 		FL_WARN("================================================================================");
-		FL_WARN("FASTLED WARNING: Only %s of %s pins are valid", (int)validPinCount, (int)numpinsLocal);
+		FL_WARN("FASTLED WARNING: Only " << (int)validPinCount << " of " << (int)numpinsLocal << " pins are valid");
 		FL_WARN("Strips on invalid pins will not function.");
 		FL_WARN("================================================================================");
 	}
@@ -373,7 +383,7 @@ void ObjectFLED::begin(void) {
 	dma.dma1.TCD->CSR = DMA_TCD_CSR_DREQ;				// channel ERQ field cleared when minor loop completed
 	dma.dma1.triggerAtHardwareEvent(DMAMUX_SOURCE_XBAR1_0);	// only 4 XBAR1 triggers (DMA MUX mapping)
 
-	dma.dma2next.TCD->SADDR = dma.bitdata;				//uint32_t bitdata[BYTES_PER_DMA*64]
+	dma.dma2next.TCD->SADDR = dma.bitdata;				// may be null; showInternal() sets SADDR before arming
 	dma.dma2next.TCD->SOFF = 8;
 	dma.dma2next.TCD->ATTR = DMA_TCD_ATTR_SSIZE(3) | DMA_TCD_ATTR_DSIZE(2);
 	dma.dma2next.TCD->NBYTES_MLOFFYES = DMA_TCD_NBYTES_DMLOE |
@@ -639,6 +649,20 @@ void ObjectFLED::showInternal(bool regenerateFrameBuffer) {
 		dma.dma3.TCD->BITER_ELINKNO = dma.numbytes * 8;
 	} //done restoring context
 
+	// #4711: size bitdata to this frame while the DMA is idle (after
+	// acquire()). On allocation failure drop the frame rather than arm the
+	// DMA on a null or too-small buffer.
+	if (!dma.ensureBitdata(dma.numbytes)) {
+		static bool warned = false;  // warn once; don't flood serial per frame
+		if (!warned) {
+			warned = true;
+			FL_WARN("ObjectFLED: out of memory for the DMA bit buffer ("
+				<< dma.numbytes << " bytes/strip); frames dropped");
+		}
+		dma.release(this);
+		return;
+	}
+
 	if (regenerateFrameBuffer) {
 		genFrameBuffer(serpNumber);
 	}
@@ -656,9 +680,11 @@ void ObjectFLED::showInternal(bool regenerateFrameBuffer) {
 	clear_objectfled_xbar_dma_status();
 
 	// fill the DMA transmit buffer
-	memset(dma.bitdata, 0, sizeof(dma.bitdata));	//BYTES_PER_DMA * 64 words32
 	uint32_t count = dma.numbytes;					//bytes per strip
 	if (count > BYTES_PER_DMA*2) count = BYTES_PER_DMA*2;
+	// Clear only what this frame fills (count*32 words, at least one byte's
+	// worth for fillbits' do/while); ensureBitdata() guaranteed the capacity.
+	memset(dma.bitdata, 0, objectfled::bitdataWordsFor(count, BYTES_PER_DMA) * sizeof(uint32_t));
 	dma.framebuffer_index = count;					//ptr to framebuffer last byte output
 
 	//Sets each pin mask in bitdata32[BYTES_PER_DMA*64] for every 0 bit of pin's frameBuffer block bytes
@@ -683,6 +709,15 @@ void ObjectFLED::showInternal(bool regenerateFrameBuffer) {
 		// the channel mid-window if ERQ is set, leaving a brief gap
 		// where the channel is armed without ESG. Just write the final
 		// value directly.
+		//
+		// But clear DONE first: the previous frame leaves dma2 with
+		// CSR.DONE set, and the eDMA does not honour ESG written while
+		// DONE is set. At the end of chunk 1 the channel then applied
+		// DLASTSGA (the dma2next TCD address) as a DADDR offset instead of
+		// loading dma2next, took a destination bus error (DMA_ES = DBE on
+		// channel 2) and stopped clearing pins, so every bit from byte
+		// BYTES_PER_DMA onward went out as '1' (101 LEDs: LED 50+ = 0xFF).
+		dma.dma2.clearComplete();
 		dma.dma2.TCD->CSR = DMA_TCD_CSR_INTMAJOR | DMA_TCD_CSR_ESG;
 		dma.dma2next.TCD->SADDR = dma.bitdata + BYTES_PER_DMA*32;
 		dma.dma2next.TCD->CITER_ELINKNO = BYTES_PER_DMA * 8;
@@ -766,7 +801,9 @@ void ObjectFLED::isr(void)
 	// buffer memset in showInternal at frame start initialises only the
 	// half DMA reads first; this per-ISR memset initialises the OTHER
 	// half before each refill so the |= invariant holds.
-	memset(dest, 0, sizeof(dma.bitdata)/2);
+	// Only the >2*BPD path reaches here, where bitdataWords == 2*BPD*32
+	// (static_assert in ObjectFLEDDmaManager.h).
+	memset(dest, 0, BYTES_PER_DMA * 32 * sizeof(uint32_t));
 	uint32_t index = dma.framebuffer_index;
 	uint32_t count = dma.numbytes - dma.framebuffer_index;
 	if (count > BYTES_PER_DMA) count = BYTES_PER_DMA;
@@ -888,6 +925,17 @@ ObjectFLED::~ObjectFLED() {
 	if (initialized) {
 		while (micros() - update_begin_micros < numbytesLocal * 8 * TH_TL / 1000 + 5);
 		waitForDmaToFinish();
+	}
+	// The DMA manager caches the last instance's context (numbytes, pins,
+	// bitmask) keyed by its frame buffer address; showInternal() restores
+	// context only when that address differs. The next instance's buffer
+	// can be allocated at the same address, so it would run with this
+	// instance's byte count: a 101-LED frame after a 100-LED one sent 300
+	// data bytes while dma1/dma3 clocked 303, and the last LED went out as
+	// all ones. Drop the key so the next show() always restores.
+	auto& dma = ObjectFLEDDmaManager::getInstance();
+	if (dma.frameBuffer == frameBufferLocal) {
+		dma.frameBuffer = nullptr;
 	}
 	delete[] frameBufferLocal;
 }

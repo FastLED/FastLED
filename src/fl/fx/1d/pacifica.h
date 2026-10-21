@@ -1,5 +1,7 @@
 #pragma once
 
+#include "fl/stl/noexcept.h"
+
 #include "fl/fx/fx1d.h"
 
 namespace fl {
@@ -12,10 +14,10 @@ FASTLED_SHARED_PTR(Pacifica);
 
 class Pacifica : public Fx1d {
   public:
-    Pacifica(u16 num_leds) : Fx1d(num_leds) {}
+    Pacifica(u16 num_leds) FL_NO_EXCEPT : Fx1d(num_leds) {}
 
-    void draw(DrawContext context) override;
-    fl::string fxName() const override { return "Pacifica"; }
+    void draw(DrawContext context) FL_NO_EXCEPT override;
+    fl::string fxName() const FL_NO_EXCEPT override { return "Pacifica"; }
 
   private:
     u16 sCIStart1 = 0, sCIStart2 = 0, sCIStart3 = 0, sCIStart4 = 0;
@@ -35,12 +37,12 @@ class Pacifica : public Fx1d {
                                         0x001C70, 0x002080, 0x1040BF, 0x2060FF};
 
     void pacifica_one_layer(fl::span<CRGB> leds, CRGBPalette16 &p, u16 cistart,
-                            u16 wavescale, u8 bri, u16 ioff);
-    void pacifica_add_whitecaps(fl::span<CRGB> leds);
-    void pacifica_deepen_colors(fl::span<CRGB> leds);
+                            u16 wavescale, u8 bri, u16 ioff) FL_NO_EXCEPT;
+    void pacifica_add_whitecaps(fl::span<CRGB> leds) FL_NO_EXCEPT;
+    void pacifica_deepen_colors(fl::span<CRGB> leds) FL_NO_EXCEPT;
 };
 
-void Pacifica::draw(DrawContext ctx) {
+void Pacifica::draw(DrawContext ctx) FL_NO_EXCEPT {
     fl::span<CRGB> leds = ctx.leds;
     fl::u32 now = ctx.now;
     if (leds.empty() || mNumLeds == 0) {
@@ -87,7 +89,7 @@ void Pacifica::draw(DrawContext ctx) {
 // Add one layer of waves into the led array
 void Pacifica::pacifica_one_layer(fl::span<CRGB> leds, CRGBPalette16 &p,
                                   u16 cistart, u16 wavescale,
-                                  u8 bri, u16 ioff) {
+                                  u8 bri, u16 ioff) FL_NO_EXCEPT {
     u16 ci = cistart;
     u16 waveangle = ioff;
     u16 wavescale_half = (wavescale / 2) + 20;
@@ -105,7 +107,7 @@ void Pacifica::pacifica_one_layer(fl::span<CRGB> leds, CRGBPalette16 &p,
 
 // Add extra 'white' to areas where the four layers of light have lined up
 // brightly
-void Pacifica::pacifica_add_whitecaps(fl::span<CRGB> leds) {
+void Pacifica::pacifica_add_whitecaps(fl::span<CRGB> leds) FL_NO_EXCEPT {
     u8 basethreshold = beatsin8(9, 55, 65);
     u8 wave = beat8(7);
 
@@ -122,7 +124,7 @@ void Pacifica::pacifica_add_whitecaps(fl::span<CRGB> leds) {
 }
 
 // Deepen the blues and greens
-void Pacifica::pacifica_deepen_colors(fl::span<CRGB> leds) {
+void Pacifica::pacifica_deepen_colors(fl::span<CRGB> leds) FL_NO_EXCEPT {
     for (u16 i = 0; i < mNumLeds; i++) {
         leds[i].blue = scale8(leds[i].blue, 145);
         leds[i].green = scale8(leds[i].green, 200);

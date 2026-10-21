@@ -1,5 +1,6 @@
 #pragma once
 
+#include "fl/channels/rx.h"
 #include "fl/channels/rx/types.h"
 #include "fl/stl/cstddef.h"
 #include "fl/stl/noexcept.h"
@@ -22,6 +23,9 @@ struct RxChannelConfig {
     bool start_low = true;
     bool io_loop_back = false;
     bool use_dma = false;
+    /// Decode thresholds for backends that decode while capturing (Teensy
+    /// 4.x FlexPWM). Set it to the timing later passed to decode().
+    fl::optional<ChipsetTiming4Phase> stream_timing;
 
     RxChannelConfig() FL_NO_EXCEPT = default;
     explicit RxChannelConfig(int pin_param) FL_NO_EXCEPT

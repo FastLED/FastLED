@@ -33,7 +33,7 @@ constexpr float kFFTMaxFreq = 10000.0f;
 } // namespace
 
 FrequencyBands::FrequencyBands()
-    : mBass(0.0f)
+    FL_NO_EXCEPT : mBass(0.0f)
     , mMid(0.0f)
     , mTreble(0.0f)
     , mBassMin(20.0f)
@@ -46,7 +46,7 @@ FrequencyBands::FrequencyBands()
 
 FrequencyBands::~FrequencyBands() FL_NO_EXCEPT = default;
 
-void FrequencyBands::update(shared_ptr<Context> context) {
+void FrequencyBands::update(shared_ptr<Context> context) FL_NO_EXCEPT {
     // Use sample rate from context if available
     mSampleRate = context->getSampleRate();
 
@@ -80,7 +80,7 @@ void FrequencyBands::update(shared_ptr<Context> context) {
     mTrebleNorm = normalizeBand(mTreble, mTrebleMaxFilter, dt);
 }
 
-void FrequencyBands::fireCallbacks() {
+void FrequencyBands::fireCallbacks() FL_NO_EXCEPT {
     if (onLevelsUpdate) {
         onLevelsUpdate(mBass, mMid, mTreble);
     }
@@ -95,7 +95,7 @@ void FrequencyBands::fireCallbacks() {
     }
 }
 
-void FrequencyBands::reset() {
+void FrequencyBands::reset() FL_NO_EXCEPT {
     mBass = 0.0f;
     mMid = 0.0f;
     mTreble = 0.0f;
@@ -111,7 +111,7 @@ void FrequencyBands::reset() {
 }
 
 float FrequencyBands::calculateBandEnergy(const fft::Bins& fft, float minFreq, float maxFreq,
-                                           float fftMinFreq, float fftMaxFreq) {
+                                           float fftMinFreq, float fftMaxFreq) FL_NO_EXCEPT {
     const int numBins = static_cast<int>(fft.raw().size());
     if (numBins <= 1) {
         return 0.0f;

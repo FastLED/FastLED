@@ -267,7 +267,7 @@ public:
      *       [](const fl::json& r) { writeJsonRpcToSerial(r); }
      *   );
      */
-    WLED(RequestSource source, ResponseSink sink) : Remote(source, sink) {}
+    WLED(RequestSource source, ResponseSink sink) FL_NO_EXCEPT : Remote(source, sink) {}
 
     /**
      * @brief Set WLED state from JSON object
@@ -281,7 +281,7 @@ public:
      *   fl::json state = fl::json::parse(R"({"on":true,"bri":128})");
      *   remote.setState(state);
      */
-    void setState(const fl::json& wledState);
+    void setState(const fl::json& wledState) FL_NO_EXCEPT;
 
     /**
      * @brief Get current WLED state as JSON object
@@ -291,123 +291,123 @@ public:
      *   fl::json state = remote.getState();
      *   // Returns: {"on":true,"bri":128}
      */
-    fl::json getState() const;
+    fl::json getState() const FL_NO_EXCEPT;
 
     /**
      * @brief Get WLED on/off state
      * @return true if WLED is on, false if off
      */
-    bool getOn() const { return mWledOn; }
+    bool getOn() const FL_NO_EXCEPT { return mWledOn; }
 
     /**
      * @brief Get WLED brightness
      * @return Brightness value 0-255
      */
-    u8 getBrightness() const { return mWledBri; }
+    u8 getBrightness() const FL_NO_EXCEPT { return mWledBri; }
 
     /**
      * @brief Get transition duration
      * @return Crossfade duration in units of 100ms (0-65535)
      */
-    u16 getTransition() const { return mTransition; }
+    u16 getTransition() const FL_NO_EXCEPT { return mTransition; }
 
     /**
      * @brief Get active preset ID
      * @return Preset ID (-1 = none, 0-250)
      */
-    i16 getPreset() const { return mPreset; }
+    i16 getPreset() const FL_NO_EXCEPT { return mPreset; }
 
     /**
      * @brief Get active playlist ID
      * @return Playlist ID (-1 = none, 0-250)
      */
-    i16 getPlaylist() const { return mPlaylist; }
+    i16 getPlaylist() const FL_NO_EXCEPT { return mPlaylist; }
 
     /**
      * @brief Get live data override setting
      * @return Live override (0=off, 1=override, 2=until reboot)
      */
-    u8 getLiveOverride() const { return mLiveOverride; }
+    u8 getLiveOverride() const FL_NO_EXCEPT { return mLiveOverride; }
 
     /**
      * @brief Get main segment index
      * @return Main segment ID for global controls
      */
-    u8 getMainSegment() const { return mMainSegment; }
+    u8 getMainSegment() const FL_NO_EXCEPT { return mMainSegment; }
 
     /**
      * @brief Get nightlight active state
      * @return true if nightlight is active
      */
-    bool getNightlightOn() const { return mNightlightOn; }
+    bool getNightlightOn() const FL_NO_EXCEPT { return mNightlightOn; }
 
     /**
      * @brief Get nightlight duration
      * @return Duration in minutes (1-255)
      */
-    u8 getNightlightDuration() const { return mNightlightDuration; }
+    u8 getNightlightDuration() const FL_NO_EXCEPT { return mNightlightDuration; }
 
     /**
      * @brief Get nightlight mode
      * @return Mode (0=instant off, 1=fade, 2=color fade, 3=sunrise)
      */
-    u8 getNightlightMode() const { return mNightlightMode; }
+    u8 getNightlightMode() const FL_NO_EXCEPT { return mNightlightMode; }
 
     /**
      * @brief Get nightlight target brightness
      * @return Target brightness (0-255)
      */
-    u8 getNightlightTargetBrightness() const { return mNightlightTargetBrightness; }
+    u8 getNightlightTargetBrightness() const FL_NO_EXCEPT { return mNightlightTargetBrightness; }
 
     /**
      * @brief Get playlist configuration
      * @return JSON object with playlist settings (ps, dur, transition, repeat, end, r)
      */
-    fl::json getPlaylistConfig() const;
+    fl::json getPlaylistConfig() const FL_NO_EXCEPT;
 
     /**
      * @brief Check if playlist is active
      * @return true if playlist has preset IDs configured
      */
-    bool hasPlaylistConfig() const { return !mPlaylistPresets.empty(); }
+    bool hasPlaylistConfig() const FL_NO_EXCEPT { return !mPlaylistPresets.empty(); }
 
     /**
      * @brief Get UDP sync send setting
      * @return true if UDP broadcast packets should be sent on state change
      */
-    bool getUdpSend() const { return mUdpSend; }
+    bool getUdpSend() const FL_NO_EXCEPT { return mUdpSend; }
 
     /**
      * @brief Get UDP sync receive setting
      * @return true if UDP broadcast packets should be received
      */
-    bool getUdpReceive() const { return mUdpReceive; }
+    bool getUdpReceive() const FL_NO_EXCEPT { return mUdpReceive; }
 
     /**
      * @brief Get segment count
      * @return Number of configured segments
      */
-    size_t getSegmentCount() const { return mSegments.size(); }
+    size_t getSegmentCount() const FL_NO_EXCEPT { return mSegments.size(); }
 
     /**
      * @brief Get segment by index
      * @param index Segment index in the array (not segment ID)
      * @return Reference to the segment
      */
-    const WLEDSegment& getSegment(size_t index) const { return mSegments[index]; }
+    const WLEDSegment& getSegment(size_t index) const FL_NO_EXCEPT { return mSegments[index]; }
 
     /**
      * @brief Get all segments
      * @return Const reference to the segments vector
      */
-    const fl::vector<WLEDSegment>& getSegments() const { return mSegments; }
+    const fl::vector<WLEDSegment>& getSegments() const FL_NO_EXCEPT { return mSegments; }
 
     /**
      * @brief Find segment by ID
      * @param id Segment ID to find
      * @return Pointer to segment if found, nullptr otherwise
      */
-    const WLEDSegment* findSegmentById(u8 id) const;
+    const WLEDSegment* findSegmentById(u8 id) const FL_NO_EXCEPT;
 
 private:
     /**
@@ -417,7 +417,7 @@ private:
      * Called when Remote needs to check for incoming requests.
      * Logs FL_ERROR to indicate this needs to be implemented.
      */
-    fl::optional<fl::json> stubRequestSource();
+    fl::optional<fl::json> stubRequestSource() FL_NO_EXCEPT;
 
     /**
      * @brief Stub response sink callback
@@ -426,7 +426,7 @@ private:
      * Called when Remote has a response to send.
      * Logs FL_ERROR to indicate this needs to be implemented.
      */
-    void stubResponseSink(const fl::json& response);
+    void stubResponseSink(const fl::json& response) FL_NO_EXCEPT;
 
     // WLED state (runtime-only, no persistence)
     bool mWledOn = false;           // WLED on/off state

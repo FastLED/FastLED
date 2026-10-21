@@ -206,7 +206,7 @@ namespace fl {
 
 template<typename T>
 template<typename Y>
-shared_ptr<T>::shared_ptr(const weak_ptr<Y>& weak) : mPtr(nullptr), mControlBlock(nullptr) {
+shared_ptr<T>::shared_ptr(const weak_ptr<Y>& weak) FL_NO_EXCEPT : mPtr(nullptr), mControlBlock(nullptr) {
     if (!weak.expired()) {
         if (weak.mControlBlock && weak.mControlBlock->shared_count > 0) {
             ++weak.mControlBlock->shared_count;

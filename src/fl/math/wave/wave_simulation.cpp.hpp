@@ -5,10 +5,11 @@
 #include "fl/math/math.h"
 #include "fl/math/wave/wave_simulation.h"
 #include "fl/stl/int.h"
+#include "fl/stl/noexcept.h"
 
 namespace {
 
-fl::u8 half_duplex_blend_sqrt_q15(fl::u16 x) {
+fl::u8 half_duplex_blend_sqrt_q15(fl::u16 x) FL_NO_EXCEPT {
     x = fl::min(x, 32767); // Q15
     const int Q = 15;
     fl::u32 X = (fl::u32)x << Q; // promote to Q30
@@ -21,7 +22,7 @@ fl::u8 half_duplex_blend_sqrt_q15(fl::u16 x) {
     return static_cast<fl::i16>(y) >> 8;
 }
 
-fl::u8 half_duplex_blend_linear(fl::u16 x) {
+fl::u8 half_duplex_blend_linear(fl::u16 x) FL_NO_EXCEPT {
     x = fl::min(x, 32767); // Q15
     x *= 2;
     return x >> 8;
@@ -31,15 +32,15 @@ fl::u8 half_duplex_blend_linear(fl::u16 x) {
 
 namespace fl {
 
-void WaveSimulation2D::setSpeed(float speed) { mSim->setSpeed(speed); }
+void WaveSimulation2D::setSpeed(float speed) FL_NO_EXCEPT { mSim->setSpeed(speed); }
 
 WaveSimulation2D::WaveSimulation2D(u32 W, u32 H, SuperSample factor,
-                                   float speed, float dampening) {
+                                   float speed, float dampening) FL_NO_EXCEPT {
     init(W, H, factor, speed, dampening);
 }
 
 void WaveSimulation2D::init(u32 width, u32 height, SuperSample factor,
-                            float speed, int dampening) {
+                            float speed, int dampening) FL_NO_EXCEPT {
     mOuterWidth = width;
     mOuterHeight = height;
     mMultiplier = static_cast<u32>(factor);
@@ -65,13 +66,13 @@ void WaveSimulation2D::init(u32 width, u32 height, SuperSample factor,
     mExtraFrames = u8(factor) - 1;
 }
 
-void WaveSimulation2D::setDampening(int damp) { mSim->setDampening(damp); }
+void WaveSimulation2D::setDampening(int damp) FL_NO_EXCEPT { mSim->setDampening(damp); }
 
-int WaveSimulation2D::getDampenening() const { return mSim->getDampenening(); }
+int WaveSimulation2D::getDampenening() const FL_NO_EXCEPT { return mSim->getDampenening(); }
 
-float WaveSimulation2D::getSpeed() const { return mSim->getSpeed(); }
+float WaveSimulation2D::getSpeed() const FL_NO_EXCEPT { return mSim->getSpeed(); }
 
-float WaveSimulation2D::getf(fl::size x, fl::size y) const {
+float WaveSimulation2D::getf(fl::size x, fl::size y) const FL_NO_EXCEPT {
     if (!has(x, y))
         return 0.0f;
     float sum = 0.0f;
@@ -83,7 +84,7 @@ float WaveSimulation2D::getf(fl::size x, fl::size y) const {
     return sum / static_cast<float>(mMultiplier * mMultiplier);
 }
 
-i16 WaveSimulation2D::geti16(fl::size x, fl::size y) const {
+i16 WaveSimulation2D::geti16(fl::size x, fl::size y) const FL_NO_EXCEPT {
     if (!has(x, y))
         return 0;    
     i32 sum = 0;
@@ -110,7 +111,7 @@ i16 WaveSimulation2D::geti16(fl::size x, fl::size y) const {
     return out;
 }
 
-i16 WaveSimulation2D::geti16Previous(fl::size x, fl::size y) const {
+i16 WaveSimulation2D::geti16Previous(fl::size x, fl::size y) const FL_NO_EXCEPT {
     if (!has(x, y))
         return 0;
     i32 sum = 0;
@@ -126,7 +127,7 @@ i16 WaveSimulation2D::geti16Previous(fl::size x, fl::size y) const {
 }
 
 bool WaveSimulation2D::geti16All(fl::size x, fl::size y, i16 *curr,
-                                 i16 *prev, i16 *diff) const {
+                                 i16 *prev, i16 *diff) const FL_NO_EXCEPT {
     if (!has(x, y))
         return false;
     *curr = geti16(x, y);
@@ -135,11 +136,11 @@ bool WaveSimulation2D::geti16All(fl::size x, fl::size y, i16 *curr,
     return true;
 }
 
-i8 WaveSimulation2D::geti8(fl::size x, fl::size y) const {
+i8 WaveSimulation2D::geti8(fl::size x, fl::size y) const FL_NO_EXCEPT {
     return static_cast<i8>(geti16(x, y) >> 8);
 }
 
-u8 WaveSimulation2D::getu8(fl::size x, fl::size y) const {
+u8 WaveSimulation2D::getu8(fl::size x, fl::size y) const FL_NO_EXCEPT {
     i16 value = geti16(x, y);
     if (mSim->getHalfDuplex()) {
         u16 v2 = static_cast<u16>(value);
@@ -153,11 +154,11 @@ u8 WaveSimulation2D::getu8(fl::size x, fl::size y) const {
     return static_cast<u8>(((static_cast<u16>(value) + 32768)) >> 8);
 }
 
-bool WaveSimulation2D::has(fl::size x, fl::size y) const {
+bool WaveSimulation2D::has(fl::size x, fl::size y) const FL_NO_EXCEPT {
     return (x < mOuterWidth) && (y < mOuterHeight);
 }
 
-void WaveSimulation2D::seti16(fl::size x, fl::size y, i16 v16) {
+void WaveSimulation2D::seti16(fl::size x, fl::size y, i16 v16) FL_NO_EXCEPT {
     if (!has(x, y))
         return;
 
@@ -207,7 +208,7 @@ void WaveSimulation2D::seti16(fl::size x, fl::size y, i16 v16) {
     }
 }
 
-void WaveSimulation2D::setf(fl::size x, fl::size y, float value) {
+void WaveSimulation2D::setf(fl::size x, fl::size y, float value) FL_NO_EXCEPT {
     if (!has(x, y))
         return;
 
@@ -216,7 +217,7 @@ void WaveSimulation2D::setf(fl::size x, fl::size y, float value) {
     seti16(x, y, v16);
 }
 
-void WaveSimulation2D::update() {
+void WaveSimulation2D::update() FL_NO_EXCEPT {
     if (mUseChangeGrid) {
         const vec2<i16> min_max = mChangeGrid.minMax();
         const bool has_updates = min_max != vec2<i16>(0, 0);
@@ -246,12 +247,12 @@ void WaveSimulation2D::update() {
     }
 }
 
-u32 WaveSimulation2D::getWidth() const { return mOuterWidth; }
-u32 WaveSimulation2D::getHeight() const { return mOuterHeight; }
+u32 WaveSimulation2D::getWidth() const FL_NO_EXCEPT { return mOuterWidth; }
+u32 WaveSimulation2D::getHeight() const FL_NO_EXCEPT { return mOuterHeight; }
 
-void WaveSimulation2D::setExtraFrames(u8 extra) { mExtraFrames = extra; }
+void WaveSimulation2D::setExtraFrames(u8 extra) FL_NO_EXCEPT { mExtraFrames = extra; }
 
-void WaveSimulation2D::setUseChangeGrid(bool enabled) {
+void WaveSimulation2D::setUseChangeGrid(bool enabled) FL_NO_EXCEPT {
     if (mUseChangeGrid == enabled) {
         return; // No change needed
     }
@@ -270,12 +271,12 @@ void WaveSimulation2D::setUseChangeGrid(bool enabled) {
 }
 
 WaveSimulation1D::WaveSimulation1D(u32 length, SuperSample factor,
-                                   float speed, int dampening) {
+                                   float speed, int dampening) FL_NO_EXCEPT {
     init(length, factor, speed, dampening);
 }
 
 void WaveSimulation1D::init(u32 length, SuperSample factor, float speed,
-                            int dampening) {
+                            int dampening) FL_NO_EXCEPT {
     mOuterLength = length;
     mMultiplier = static_cast<u32>(factor);
     mSim.reset(); // clear out memory first.
@@ -285,17 +286,17 @@ void WaveSimulation1D::init(u32 length, SuperSample factor, float speed,
     mExtraFrames = static_cast<u8>(factor) - 1;
 }
 
-void WaveSimulation1D::setSpeed(float speed) { mSim->setSpeed(speed); }
+void WaveSimulation1D::setSpeed(float speed) FL_NO_EXCEPT { mSim->setSpeed(speed); }
 
-void WaveSimulation1D::setDampening(int damp) { mSim->setDampening(damp); }
+void WaveSimulation1D::setDampening(int damp) FL_NO_EXCEPT { mSim->setDampening(damp); }
 
-int WaveSimulation1D::getDampenening() const { return mSim->getDampenening(); }
+int WaveSimulation1D::getDampenening() const FL_NO_EXCEPT { return mSim->getDampenening(); }
 
-void WaveSimulation1D::setExtraFrames(u8 extra) { mExtraFrames = extra; }
+void WaveSimulation1D::setExtraFrames(u8 extra) FL_NO_EXCEPT { mExtraFrames = extra; }
 
-float WaveSimulation1D::getSpeed() const { return mSim->getSpeed(); }
+float WaveSimulation1D::getSpeed() const FL_NO_EXCEPT { return mSim->getSpeed(); }
 
-float WaveSimulation1D::getf(fl::size x) const {
+float WaveSimulation1D::getf(fl::size x) const FL_NO_EXCEPT {
     if (!has(x))
         return 0.0f;
     float sum = 0.0f;
@@ -306,7 +307,7 @@ float WaveSimulation1D::getf(fl::size x) const {
     return sum / static_cast<float>(mult);
 }
 
-i16 WaveSimulation1D::geti16(fl::size x) const {
+i16 WaveSimulation1D::geti16(fl::size x) const FL_NO_EXCEPT {
     if (!has(x))
         return 0;
     u8 mult = fl::max(1, mMultiplier);
@@ -317,7 +318,7 @@ i16 WaveSimulation1D::geti16(fl::size x) const {
     return static_cast<i16>(sum / mult);
 }
 
-i16 WaveSimulation1D::geti16Previous(fl::size x) const {
+i16 WaveSimulation1D::geti16Previous(fl::size x) const FL_NO_EXCEPT {
     if (!has(x))
         return 0;
     u8 mult = fl::max(1, mMultiplier);
@@ -329,7 +330,7 @@ i16 WaveSimulation1D::geti16Previous(fl::size x) const {
 }
 
 bool WaveSimulation1D::geti16All(fl::size x, i16 *curr, i16 *prev,
-                                 i16 *diff) const {
+                                 i16 *diff) const FL_NO_EXCEPT {
     if (!has(x))
         return false;
     *curr = geti16(x);
@@ -338,7 +339,7 @@ bool WaveSimulation1D::geti16All(fl::size x, i16 *curr, i16 *prev,
     return true;
 }
 
-i8 WaveSimulation1D::geti8(fl::size x) const {
+i8 WaveSimulation1D::geti8(fl::size x) const FL_NO_EXCEPT {
     return static_cast<i8>(geti16(x) >> 8);
 }
 
@@ -357,7 +358,7 @@ i8 WaveSimulation1D::geti8(fl::size x) const {
 //     8);
 // }
 
-u8 WaveSimulation1D::getu8(fl::size x) const {
+u8 WaveSimulation1D::getu8(fl::size x) const FL_NO_EXCEPT {
     i16 value = geti16(x);
     if (mSim->getHalfDuplex()) {
         u16 v2 = static_cast<u16>(value);
@@ -371,9 +372,9 @@ u8 WaveSimulation1D::getu8(fl::size x) const {
     return static_cast<u8>(((static_cast<u16>(value) + 32768)) >> 8);
 }
 
-bool WaveSimulation1D::has(fl::size x) const { return (x < mOuterLength); }
+bool WaveSimulation1D::has(fl::size x) const FL_NO_EXCEPT { return (x < mOuterLength); }
 
-void WaveSimulation1D::setf(fl::size x, float value) {
+void WaveSimulation1D::setf(fl::size x, float value) FL_NO_EXCEPT {
     if (!has(x))
         return;
     value = fl::clamp(value, -1.0f, 1.0f);
@@ -383,13 +384,13 @@ void WaveSimulation1D::setf(fl::size x, float value) {
     }
 }
 
-void WaveSimulation1D::update() {
+void WaveSimulation1D::update() FL_NO_EXCEPT {
     mSim->update();
     for (u8 i = 0; i < mExtraFrames; ++i) {
         mSim->update();
     }
 }
 
-u32 WaveSimulation1D::getLength() const { return mOuterLength; }
+u32 WaveSimulation1D::getLength() const FL_NO_EXCEPT { return mOuterLength; }
 
 } // namespace fl

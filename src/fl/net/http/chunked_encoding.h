@@ -21,10 +21,10 @@ struct ChunkedReadResult {
     fl::span<const u8> mData;  // Subspan of caller's buffer containing the bytes read
 
     ChunkedReadResult() FL_NO_EXCEPT : mStatus(CHUNKED_NO_DATA) {}
-    ChunkedReadResult(Status s, fl::span<const u8> d) : mStatus(s), mData(d) {}
+    ChunkedReadResult(Status s, fl::span<const u8> d) FL_NO_EXCEPT : mStatus(s), mData(d) {}
 
-    bool hasData() const { return mStatus == CHUNKED_DATA; }
-    bool isFinal() const { return mStatus == CHUNKED_FINAL; }
+    bool hasData() const FL_NO_EXCEPT { return mStatus == CHUNKED_DATA; }
+    bool isFinal() const FL_NO_EXCEPT { return mStatus == CHUNKED_FINAL; }
 };
 
 // ChunkedReader: Parse HTTP/1.1 chunked transfer encoding
@@ -34,24 +34,24 @@ public:
     ChunkedReader() FL_NO_EXCEPT;
 
     // Feed raw bytes received from a socket into the parser (incremental/streaming)
-    void feed(fl::span<const u8> data);
+    void feed(fl::span<const u8> data) FL_NO_EXCEPT;
 
     // Check if complete chunk is available
-    bool hasChunk() const;
+    bool hasChunk() const FL_NO_EXCEPT;
 
     // Read next chunk into caller-provided buffer.
     // On CHUNKED_DATA, result.mData is a subspan of `out` containing the bytes read.
     // If the output span is too small, the chunk remains buffered (returns CHUNKED_NO_DATA).
-    ChunkedReadResult readChunk(fl::span<u8> out);
+    ChunkedReadResult readChunk(fl::span<u8> out) FL_NO_EXCEPT;
 
     // Peek the size of the next available chunk (0 if none)
-    size_t nextChunkSize() const;
+    size_t nextChunkSize() const FL_NO_EXCEPT;
 
     // Check if final chunk (size 0) received
-    bool isFinal() const;
+    bool isFinal() const FL_NO_EXCEPT;
 
     // Reset state
-    void reset();
+    void reset() FL_NO_EXCEPT;
 
 private:
     enum State {
@@ -69,13 +69,13 @@ private:
     fl::vector<u8> mCurrentChunk;  // Chunk being assembled (not yet complete)
 
     // Parse hex chunk size from buffer
-    bool parseChunkSize(size_t& outSize);
+    bool parseChunkSize(size_t& outSize) FL_NO_EXCEPT;
 
     // Check if buffer contains CRLF at current position
-    bool hasCRLF() const;
+    bool hasCRLF() const FL_NO_EXCEPT;
 
     // Consume n bytes from buffer
-    void consume(size_t n);
+    void consume(size_t n) FL_NO_EXCEPT;
 };
 
 // ChunkedWriter: Format HTTP/1.1 chunked transfer encoding
@@ -86,15 +86,15 @@ public:
     // Write chunk into caller-provided buffer.
     // Output format: <size-hex>\r\n<data>\r\n
     // Returns number of bytes written, or 0 if output span is too small.
-    size_t writeChunk(fl::span<const u8> data, fl::span<u8> out);
+    size_t writeChunk(fl::span<const u8> data, fl::span<u8> out) FL_NO_EXCEPT;
 
     // Write final chunk into caller-provided buffer.
     // Output format: 0\r\n\r\n (always 5 bytes)
     // Returns number of bytes written, or 0 if output span is too small.
-    size_t writeFinal(fl::span<u8> out);
+    size_t writeFinal(fl::span<u8> out) FL_NO_EXCEPT;
 
     // Compute the output size needed for writeChunk with the given data length
-    static size_t chunkOverhead(size_t dataLen);
+    static size_t chunkOverhead(size_t dataLen) FL_NO_EXCEPT;
 
     // Final chunk is always 5 bytes: "0\r\n\r\n"
     static constexpr size_t FINAL_SIZE = 5;

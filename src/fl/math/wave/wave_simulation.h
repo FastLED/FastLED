@@ -42,11 +42,11 @@ class WaveSimulation1D {
     //  - speed and dampening are passed on to the internal simulation.
     WaveSimulation1D(u32 length,
                      SuperSample factor = SuperSample::SUPER_SAMPLE_NONE,
-                     float speed = 0.16f, int dampening = 6);
+                     float speed = 0.16f, int dampening = 6) FL_NO_EXCEPT;
 
-    void init(u32 length, SuperSample factor, float speed, int dampening);
+    void init(u32 length, SuperSample factor, float speed, int dampening) FL_NO_EXCEPT;
 
-    void setSuperSample(SuperSample factor) {
+    void setSuperSample(SuperSample factor) FL_NO_EXCEPT {
         if (u32(factor) == mMultiplier) {
             return;
         }
@@ -54,52 +54,52 @@ class WaveSimulation1D {
     }
 
     // Only applies to getu8().
-    void setEasingMode(U8EasingFunction mode) { mU8Mode = mode; }
+    void setEasingMode(U8EasingFunction mode) FL_NO_EXCEPT { mU8Mode = mode; }
 
     ~WaveSimulation1D() FL_NO_EXCEPT = default;
 
     // Delegate methods to the internal simulation.
-    void setSpeed(float speed);
-    void setDampening(int damp);
-    int getDampenening() const;
-    float getSpeed() const;
+    void setSpeed(float speed) FL_NO_EXCEPT;
+    void setDampening(int damp) FL_NO_EXCEPT;
+    int getDampenening() const FL_NO_EXCEPT;
+    float getSpeed() const FL_NO_EXCEPT;
 
     // Runs the simulator faster by updating it multiple times.
-    void setExtraFrames(u8 extra);
+    void setExtraFrames(u8 extra) FL_NO_EXCEPT;
 
     // Downsampled getter for the floating point value at index x.
     // It averages over the corresponding 'multiplier'-sized block in the
     // high-res simulation.
-    float getf(fl::size x) const;
+    float getf(fl::size x) const FL_NO_EXCEPT;
 
     // Downsampled getter for the Q15 (fixed point) value at index x.
     // It averages the multiplier cells of Q15 values.
-    i16 geti16(fl::size x) const;
-    i16 geti16Previous(fl::size x) const;
+    i16 geti16(fl::size x) const FL_NO_EXCEPT;
+    i16 geti16Previous(fl::size x) const FL_NO_EXCEPT;
 
-    bool geti16All(fl::size x, i16 *curr, i16 *prev, i16 *diff) const;
+    bool geti16All(fl::size x, i16 *curr, i16 *prev, i16 *diff) const FL_NO_EXCEPT;
 
     // Downsampled getters for the 8-bit representations.
-    i8 geti8(fl::size x) const;
+    i8 geti8(fl::size x) const FL_NO_EXCEPT;
 
-    u8 getu8(fl::size x) const;
+    u8 getu8(fl::size x) const FL_NO_EXCEPT;
 
     // Check if x is within the bounds of the outer (downsampled) simulation.
-    bool has(fl::size x) const;
+    bool has(fl::size x) const FL_NO_EXCEPT;
 
     // Upsampling setter: set the value at an outer grid cell x by replicating
     // it to the corresponding multiplier cells in the high-res simulation.
-    void setf(fl::size x, float value);
+    void setf(fl::size x, float value) FL_NO_EXCEPT;
 
-    void setHalfDuplex(bool on) { mSim->setHalfDuplex(on); }
+    void setHalfDuplex(bool on) FL_NO_EXCEPT { mSim->setHalfDuplex(on); }
 
     // Advance the simulation one time step.
-    void update();
+    void update() FL_NO_EXCEPT;
 
     // Get the outer (downsampled) grid length.
-    u32 getLength() const;
+    u32 getLength() const FL_NO_EXCEPT;
 
-    WaveSimulation1D_Real &real() { return *mSim; }
+    WaveSimulation1D_Real &real() FL_NO_EXCEPT { return *mSim; }
 
   private:
     u32 mOuterLength; // Length of the downsampled simulation.
@@ -123,27 +123,27 @@ class WaveSimulation2D {
     //   simulation.
     WaveSimulation2D(u32 W, u32 H,
                      SuperSample factor = SuperSample::SUPER_SAMPLE_NONE,
-                     float speed = 0.16f, float dampening = 6.0f);
+                     float speed = 0.16f, float dampening = 6.0f) FL_NO_EXCEPT;
 
     void init(u32 width, u32 height, SuperSample factor, float speed,
-              int dampening);
+              int dampening) FL_NO_EXCEPT;
 
     ~WaveSimulation2D() FL_NO_EXCEPT = default;
 
     // Delegated simulation methods.
-    void setSpeed(float speed);
+    void setSpeed(float speed) FL_NO_EXCEPT;
 
-    void setExtraFrames(u8 extra);
+    void setExtraFrames(u8 extra) FL_NO_EXCEPT;
 
-    void setDampening(int damp);
+    void setDampening(int damp) FL_NO_EXCEPT;
 
-    void setEasingMode(U8EasingFunction mode) { mU8Mode = mode; }
+    void setEasingMode(U8EasingFunction mode) FL_NO_EXCEPT { mU8Mode = mode; }
 
-    int getDampenening() const;
+    int getDampenening() const FL_NO_EXCEPT;
 
-    float getSpeed() const;
+    float getSpeed() const FL_NO_EXCEPT;
 
-    void setSuperSample(SuperSample factor) {
+    void setSuperSample(SuperSample factor) FL_NO_EXCEPT {
         if (u32(factor) == mMultiplier) {
             return;
         }
@@ -172,52 +172,52 @@ class WaveSimulation2D {
     }
     LaplacianStencil getStencil() const FL_NO_EXCEPT { return mSim->getStencil(); }
 
-    void setXCylindrical(bool on) { mSim->setXCylindrical(on); }
+    void setXCylindrical(bool on) FL_NO_EXCEPT { mSim->setXCylindrical(on); }
 
     // Downsampled getter for the floating point value at (x,y) in the outer
     // grid. It averages over the corresponding multiplier×multiplier block in
     // the high-res simulation.
-    float getf(fl::size x, fl::size y) const;
+    float getf(fl::size x, fl::size y) const FL_NO_EXCEPT;
 
     // Downsampled getter for the Q15 (fixed point) value at (x,y).
     // It averages the multiplier×multiplier block of Q15 values.
-    i16 geti16(fl::size x, fl::size y) const;
-    i16 geti16Previous(fl::size x, fl::size y) const;
+    i16 geti16(fl::size x, fl::size y) const FL_NO_EXCEPT;
+    i16 geti16Previous(fl::size x, fl::size y) const FL_NO_EXCEPT;
 
     bool geti16All(fl::size x, fl::size y, i16 *curr, i16 *prev,
-                   i16 *diff) const;
+                   i16 *diff) const FL_NO_EXCEPT;
 
     // Downsampled getters for the 8-bit representations.
-    i8 geti8(fl::size x, fl::size y) const;
+    i8 geti8(fl::size x, fl::size y) const FL_NO_EXCEPT;
 
     // Special function to get the value as a u8 for drawing / gradients.
     // Ease out functions are applied to this when in half duplex mode.
-    u8 getu8(fl::size x, fl::size y) const;
+    u8 getu8(fl::size x, fl::size y) const FL_NO_EXCEPT;
 
     // Check if (x,y) is within the bounds of the outer (downsampled) grid.
-    bool has(fl::size x, fl::size y) const;
+    bool has(fl::size x, fl::size y) const FL_NO_EXCEPT;
 
     // Upsampling setter: set the value at an outer grid cell (x,y) by
     // replicating it to all cells of the corresponding multiplier×multiplier
     // block in the high-res simulation.
-    void setf(fl::size x, fl::size y, float value);
+    void setf(fl::size x, fl::size y, float value) FL_NO_EXCEPT;
 
-    void seti16(fl::size x, fl::size y, i16 value);
+    void seti16(fl::size x, fl::size y, i16 value) FL_NO_EXCEPT;
 
-    void setHalfDuplex(bool on) { mSim->setHalfDuplex(on); }
+    void setHalfDuplex(bool on) FL_NO_EXCEPT { mSim->setHalfDuplex(on); }
 
     // Advance the simulation one time step.
-    void update();
+    void update() FL_NO_EXCEPT;
 
     // Get the outer grid dimensions.
-    u32 getWidth() const;
-    u32 getHeight() const;
+    u32 getWidth() const FL_NO_EXCEPT;
+    u32 getHeight() const FL_NO_EXCEPT;
 
     // Configure whether to use the change grid tracking optimization
-    void setUseChangeGrid(bool enabled);
-    bool getUseChangeGrid() const { return mUseChangeGrid; }
+    void setUseChangeGrid(bool enabled) FL_NO_EXCEPT;
+    bool getUseChangeGrid() const FL_NO_EXCEPT { return mUseChangeGrid; }
 
-    WaveSimulation2D_Real &real() { return *mSim; }
+    WaveSimulation2D_Real &real() FL_NO_EXCEPT { return *mSim; }
 
   private:
     u32 mOuterWidth;  // Width of the downsampled (outer) grid.

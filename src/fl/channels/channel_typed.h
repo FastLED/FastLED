@@ -88,6 +88,7 @@ public:
         // Register only the compile-time-selected bus specialization and its
         // associated driver(s). This retains the required translation unit(s)
         // without pulling in enableAllDrivers().
+        detail::enable_clockless_for<Chipset, BusTraits<kBus, Which>>::apply();  // #4793
         BusTraits<kBus, Which>::registerWithManager();
         ChannelConfig erased = cfg.toErased();
         erased.options.mBus = kBus;
@@ -102,6 +103,7 @@ public:
     /// match `Chipset` -- there's no compile-time guarantee at this overload,
     /// so the static_assert above is the only contract.
     static ChannelPtr create(const ChannelConfig& cfg) FL_NO_EXCEPT {
+        detail::enable_clockless_for<Chipset, BusTraits<kBus, Which>>::apply();  // #4793
         BusTraits<kBus, Which>::registerWithManager();
         ChannelConfig erased = cfg;
         erased.options.mBus = kBus;

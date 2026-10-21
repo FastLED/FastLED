@@ -4,6 +4,20 @@
 #include "fl/stl/cstddef.h"
 #include "fl/stl/optional.h"
 #include "fl/stl/noexcept.h"
+// IWYU pragma: begin_keep
+#include "platforms/is_platform.h"
+// IWYU pragma: end_keep
+
+// FL_SERIAL_BEGIN_INLINE: 1 where fl::serial_begin() is header-inline (see
+// its declaration below and platforms/arduino/io_arduino.hpp).
+#if defined(FL_IS_AVR) && defined(ARDUINO)
+#define FL_SERIAL_BEGIN_INLINE 1
+// IWYU pragma: begin_keep
+#include "fl/system/arduino.h"
+// IWYU pragma: end_keep
+#else
+#define FL_SERIAL_BEGIN_INLINE 0
+#endif
 
 namespace fl {
 class sstream;  // Forward declaration
@@ -95,7 +109,17 @@ private:
 // =============================================================================
 // Initialize serial communication with specified baud rate
 // Note: On some platforms (host), this is a no-op
+#if FL_SERIAL_BEGIN_INLINE
+// AVR + Arduino (#4725): inline, so the strong reference to Arduino's
+// `Serial` lands in the caller's object file. FastLED's own I/O shims only
+// reference it weakly, so sketches that never begin a serial port do not
+// link the core's Serial object, ring buffers and USART ISRs.
+inline void serial_begin(u32 baudRate = 115200) FL_NO_EXCEPT {
+    ::Serial.begin(baudRate);
+}
+#else
 void serial_begin(u32 baudRate = 115200) FL_NO_EXCEPT;
+#endif
 
 // =============================================================================
 // Low-Level Print Functions

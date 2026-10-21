@@ -15,41 +15,41 @@ class TypeConversionResult {
 public:
     TypeConversionResult() FL_NO_EXCEPT : mHasError(false) {}
 
-    static TypeConversionResult success() {
+    static TypeConversionResult success() FL_NO_EXCEPT {
         return TypeConversionResult();
     }
 
-    static TypeConversionResult warning(const fl::string& msg) {
+    static TypeConversionResult warning(const fl::string& msg) FL_NO_EXCEPT {
         TypeConversionResult result;
         result.mWarnings.push_back(msg);
         return result;
     }
 
-    static TypeConversionResult error(const fl::string& msg) {
+    static TypeConversionResult error(const fl::string& msg) FL_NO_EXCEPT {
         TypeConversionResult result;
         result.mHasError = true;
         result.mErrorMessage = msg;
         return result;
     }
 
-    bool ok() const { return !mHasError; }
-    bool hasWarning() const { return !mWarnings.empty(); }
-    bool hasError() const { return mHasError; }
+    bool ok() const FL_NO_EXCEPT { return !mHasError; }
+    bool hasWarning() const FL_NO_EXCEPT { return !mWarnings.empty(); }
+    bool hasError() const FL_NO_EXCEPT { return mHasError; }
 
-    const fl::vector<fl::string>& warnings() const { return mWarnings; }
-    const fl::string& errorMessage() const { return mErrorMessage; }
+    const fl::vector<fl::string>& warnings() const FL_NO_EXCEPT { return mWarnings; }
+    const fl::string& errorMessage() const FL_NO_EXCEPT { return mErrorMessage; }
 
-    void addWarning(const fl::string& msg) {
+    void addWarning(const fl::string& msg) FL_NO_EXCEPT {
         mWarnings.push_back(msg);
     }
 
-    void setError(const fl::string& msg) {
+    void setError(const fl::string& msg) FL_NO_EXCEPT {
         mHasError = true;
         mErrorMessage = msg;
     }
 
     // Merge another result into this one
-    void merge(const TypeConversionResult& other) {
+    void merge(const TypeConversionResult& other) FL_NO_EXCEPT {
         for (fl::size i = 0; i < other.mWarnings.size(); i++) {
             mWarnings.push_back(other.mWarnings[i]);
         }

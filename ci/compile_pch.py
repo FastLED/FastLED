@@ -22,6 +22,9 @@ Solution 2: Hash all input files listed in the saved depfile from the previous
 build. If the input hash matches, skip compilation entirely. The ninja rule uses
 `restat = 1`, so unchanged output triggers no downstream rebuilds. The depfile
 is saved as `.d.cache` since ninja deletes the original after reading it.
+All PCH producers and consumers run through zccache, which supplies private
+header snapshots with the timestamps the PCH recorded. Shared source files
+are never modified; real content or compiler flag changes rebuild the PCH.
 
 Usage:
     python compile_pch.py <compiler> <args...>
@@ -32,6 +35,7 @@ The script expects:
 """
 
 import hashlib
+import re
 import shutil
 import sys
 from pathlib import Path
@@ -266,6 +270,12 @@ def invalidate_stale_pch(pch_file: Path) -> None:
     try:
         input_files = parse_depfile_inputs(saved_depfile)
         if not input_files:
+            print(
+                f"PCH dependency tracking invalid — removing {pch_file.name} to force rebuild",
+                file=sys.stderr,
+            )
+            pch_file.unlink(missing_ok=True)
+            hash_file.unlink(missing_ok=True)
             return
         current_hash = hash_input_files(input_files)
         stored_hash = hash_file.read_text(encoding="utf-8").strip()
@@ -281,6 +291,91 @@ def invalidate_stale_pch(pch_file: Path) -> None:
         raise
     except Exception as e:
         print(f"WARNING: PCH staleness check failed: {e}", file=sys.stderr)
+
+
+# Sidecars compile_pch.py writes next to a PCH. Removing them together with
+# the .pch forces a clean rebuild of that PCH and nothing else.
+PCH_SIDECAR_SUFFIXES = (
+    ".pch.input_hash",
+    ".pch.flags_hash",
+    ".pch.inputs.json",  # Legacy local input manifest; cleanup only.
+    ".pch.zccache-imports.json",
+)
+
+# The clang failure a stale PCH produces: the header is parsed a second time
+# on top of the PCH copy because #pragma once no longer recognises it.
+_PCH_REDEFINITION_RE = re.compile(
+    r"(\S+?):\d+:\d+: error: "
+    r"(?:redefinition of|template parameter redefines default argument)"
+)
+
+
+# Match zccache's explicit refusal, not arbitrary source text containing it.
+_ZCCACHE_PCH_REBUILD_RE = re.compile(
+    r"(?m)^zccache\[[^\]\r\n]+\]\[[^\]\r\n]+\]: "
+    r"[^\r\n]*PCH input validation failed; rebuild the PCH: ([^\r\n]+)"
+)
+
+
+def pch_input_headers(build_dir: Path) -> set[Path]:
+    """Every header any PCH under ``build_dir`` was built from (resolved)."""
+    headers: set[Path] = set()
+    for saved in build_dir.rglob("*.d.cache"):
+        try:
+            for dep in parse_depfile_inputs(saved):
+                headers.add(dep.resolve())
+        except OSError:
+            continue
+    return headers
+
+
+def is_stale_pch_error(output: str, build_dir: Path) -> bool:
+    """Recognize a Clang stale-header error or zccache refusal for this build.
+
+    Legacy chained PCHs can lack zccache's import provenance. A content-hash
+    match may preserve them across a cache upgrade, so the existing bounded
+    purge/retry must also handle zccache's explicit request to rebuild.
+    """
+    refusals = _ZCCACHE_PCH_REBUILD_RE.findall(output)
+    if refusals:
+        for pch in build_dir.rglob("*.pch"):
+            try:
+                spellings = {str(pch), str(pch.resolve())}
+            except (OSError, ValueError):
+                continue
+            for refusal in refusals:
+                normalized = refusal.replace("\\", "/")
+                if any(
+                    normalized.startswith(spelling.replace("\\", "/") + ":")
+                    for spelling in spellings
+                ):
+                    return True
+    matches = _PCH_REDEFINITION_RE.findall(output)
+    if not matches:
+        return False
+    headers = pch_input_headers(build_dir)
+    for raw in matches:
+        try:
+            if Path(raw).resolve() in headers:
+                return True
+        except (OSError, ValueError):
+            continue
+    return False
+
+
+def purge_pch_artifacts(build_dir: Path) -> int:
+    """Delete every PCH under ``build_dir`` plus its sidecars. Returns the count."""
+    removed = 0
+    for pch in list(build_dir.rglob("*.pch")):
+        targets = [pch, pch.with_name(pch.name.replace(".pch", ".d.cache"))]
+        targets += [Path(str(pch) + s[len(".pch") :]) for s in PCH_SIDECAR_SUFFIXES]
+        for t in targets:
+            try:
+                t.unlink()
+                removed += 1
+            except FileNotFoundError:
+                continue
+    return removed
 
 
 def main() -> int:
@@ -317,6 +412,10 @@ def main() -> int:
         and hash_file
         and flags_file
         and pch_output.exists()
+        # Only a PCH may be skipped on a hash match. wasm_build_library.py
+        # also routes ordinary .o compiles through this wrapper; skipping one
+        # of those would keep an object built against an older PCH.
+        and pch_output.suffix == ".pch"
     ):
         if saved_depfile.exists() and hash_file.exists() and flags_file.exists():
             try:
@@ -351,7 +450,9 @@ def main() -> int:
                 # Continue with normal compilation
 
     # Run the compiler
-    result = RunningProcess.run(args, check=False)
+    from ci.meson.native_launchers import wrap_compiler_with_zccache
+
+    result = RunningProcess.run(wrap_compiler_with_zccache(args), check=False)
 
     # Fix the depfile and save caching data if compilation succeeded
     if result.returncode == 0 and pch_output and depfile:
@@ -367,7 +468,13 @@ def main() -> int:
             traceback.print_exc(file=sys.stderr)
 
         # Save depfile copy and input hash for next build's cache check
-        if saved_depfile and hash_file and flags_file and depfile.exists():
+        if (
+            pch_output.suffix == ".pch"
+            and saved_depfile
+            and hash_file
+            and flags_file
+            and depfile.exists()
+        ):
             # Written before the input hash: if the process dies between the
             # two, the next run sees a flags sidecar with no input hash and
             # rebuilds. The reverse order would leave an input hash with no

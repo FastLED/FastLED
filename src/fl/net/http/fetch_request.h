@@ -60,13 +60,13 @@ public:
     ///
     /// Advances the request through its states. Safe to call repeatedly.
     /// Once done, subsequent calls are no-ops.
-    void update();
+    void update() FL_NO_EXCEPT;
 
     /// @brief Check if request is complete (success or failure)
-    bool is_done() const { return mState == COMPLETED || mState == FAILED; }
+    bool is_done() const FL_NO_EXCEPT { return mState == COMPLETED || mState == FAILED; }
 
     /// @brief Get current state
-    State get_state() const { return mState; }
+    State get_state() const FL_NO_EXCEPT { return mState; }
 
 private:
     State mState;
@@ -99,18 +99,18 @@ private:
     u32 mStateStartTime;
 
     // State handlers
-    void handle_dns_lookup();
-    void handle_connecting();
-    void handle_sending();
-    void handle_receiving();
+    void handle_dns_lookup() FL_NO_EXCEPT;
+    void handle_connecting() FL_NO_EXCEPT;
+    void handle_sending() FL_NO_EXCEPT;
+    void handle_receiving() FL_NO_EXCEPT;
 
     // Completion helpers
-    void complete_success(const Response& resp);
-    void complete_error(const char* message);
+    void complete_success(const Response& resp) FL_NO_EXCEPT;
+    void complete_error(const char* message) FL_NO_EXCEPT;
 
     // Utilities
-    Response parse_http_response(const fl::string& raw);
-    void close_socket();
+    Response parse_http_response(const fl::string& raw) FL_NO_EXCEPT;
+    void close_socket() FL_NO_EXCEPT;
 };
 
 } // namespace http

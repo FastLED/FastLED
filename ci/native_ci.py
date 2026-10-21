@@ -30,8 +30,12 @@ PY_SMOKE = (
     "ci/tests/test_ci_labels.py",
     "ci/tests/test_native_ci_modes.py",
     "ci/tests/test_github_actions_security.py",
+    "ci/tests/test_autoresearch_pin_discovery_safety.py",
     "ci/tests/test_compile_example_sharding.py",
     "ci/tests/test_header_singleton_cross_dll.py",
+    # PCH staleness: real-clang e2e (~15s) plus the WASM reuse paths. See
+    # agents/docs/testing-commands.md -> "Precompiled Header Invariant".
+    "ci/tests/test_pch_e2e.py",
 )
 
 

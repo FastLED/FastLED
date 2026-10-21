@@ -6,6 +6,7 @@
 // Note: fl/stl/cstdio.h intentionally NOT included — workaround for
 // zackees/zccache#619 (Windows PCH path-spelling drift). Dead include.
 #include "fl/stl/cstdlib.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace net {
@@ -13,11 +14,11 @@ namespace http {
 
 // ChunkedReader implementation
 
-ChunkedReader::ChunkedReader()
+ChunkedReader::ChunkedReader() FL_NO_EXCEPT
     : mState(READ_SIZE), mChunkSize(0), mBytesRead(0) {
 }
 
-void ChunkedReader::feed(fl::span<const u8> data) {
+void ChunkedReader::feed(fl::span<const u8> data) FL_NO_EXCEPT {
     mBuffer.insert(mBuffer.end(), data.begin(), data.end());
 
     // Process buffer based on current state
@@ -81,11 +82,11 @@ void ChunkedReader::feed(fl::span<const u8> data) {
     }
 }
 
-bool ChunkedReader::hasChunk() const {
+bool ChunkedReader::hasChunk() const FL_NO_EXCEPT {
     return !mChunks.empty();
 }
 
-ChunkedReadResult ChunkedReader::readChunk(fl::span<u8> out) {
+ChunkedReadResult ChunkedReader::readChunk(fl::span<u8> out) FL_NO_EXCEPT {
     using Status = ChunkedReadResult::Status;
     if (mChunks.empty()) {
         Status s = isFinal() ? Status::CHUNKED_FINAL : Status::CHUNKED_NO_DATA;
@@ -102,18 +103,18 @@ ChunkedReadResult ChunkedReader::readChunk(fl::span<u8> out) {
     return ChunkedReadResult(Status::CHUNKED_DATA, written);
 }
 
-size_t ChunkedReader::nextChunkSize() const {
+size_t ChunkedReader::nextChunkSize() const FL_NO_EXCEPT {
     if (mChunks.empty()) {
         return 0;
     }
     return mChunks.front().size();
 }
 
-bool ChunkedReader::isFinal() const {
+bool ChunkedReader::isFinal() const FL_NO_EXCEPT {
     return mState == STATE_FINAL;
 }
 
-void ChunkedReader::reset() {
+void ChunkedReader::reset() FL_NO_EXCEPT {
     mState = READ_SIZE;
     mBuffer.clear();
     mChunkSize = 0;
@@ -122,7 +123,7 @@ void ChunkedReader::reset() {
     mCurrentChunk.clear();
 }
 
-bool ChunkedReader::parseChunkSize(size_t& outSize) {
+bool ChunkedReader::parseChunkSize(size_t& outSize) FL_NO_EXCEPT {
     // Find CRLF in buffer
     for (size_t i = 0; i + 1 < mBuffer.size(); i++) {
         if (mBuffer[i] == '\r' && mBuffer[i + 1] == '\n') {
@@ -152,11 +153,11 @@ bool ChunkedReader::parseChunkSize(size_t& outSize) {
     return false;
 }
 
-bool ChunkedReader::hasCRLF() const {
+bool ChunkedReader::hasCRLF() const FL_NO_EXCEPT {
     return mBuffer.size() >= 2 && mBuffer[0] == '\r' && mBuffer[1] == '\n';
 }
 
-void ChunkedReader::consume(size_t n) {
+void ChunkedReader::consume(size_t n) FL_NO_EXCEPT {
     if (n >= mBuffer.size()) {
         mBuffer.clear();
     } else {
@@ -172,10 +173,10 @@ void ChunkedReader::consume(size_t n) {
 
 // ChunkedWriter implementation
 
-ChunkedWriter::ChunkedWriter() {
+ChunkedWriter::ChunkedWriter() FL_NO_EXCEPT {
 }
 
-size_t ChunkedWriter::chunkOverhead(size_t dataLen) {
+size_t ChunkedWriter::chunkOverhead(size_t dataLen) FL_NO_EXCEPT {
     // Overhead: hex-digits + "\r\n" + data + "\r\n"
     // Count hex digits needed
     char sizeHex[32];
@@ -183,7 +184,7 @@ size_t ChunkedWriter::chunkOverhead(size_t dataLen) {
     return static_cast<size_t>(hexLen) + 2 + dataLen + 2; // hex + \r\n + data + \r\n
 }
 
-size_t ChunkedWriter::writeChunk(fl::span<const u8> data, fl::span<u8> out) {
+size_t ChunkedWriter::writeChunk(fl::span<const u8> data, fl::span<u8> out) FL_NO_EXCEPT {
     // Format: <size-hex>\r\n<data>\r\n
     char sizeHex[32];
     int hexLen = fl::snprintf(sizeHex, sizeof(sizeHex), "%zx\r\n", data.size());
@@ -209,7 +210,7 @@ size_t ChunkedWriter::writeChunk(fl::span<const u8> data, fl::span<u8> out) {
     return totalNeeded;
 }
 
-size_t ChunkedWriter::writeFinal(fl::span<u8> out) {
+size_t ChunkedWriter::writeFinal(fl::span<u8> out) FL_NO_EXCEPT {
     if (out.size() < FINAL_SIZE) {
         return 0;
     }

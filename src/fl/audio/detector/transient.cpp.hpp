@@ -9,7 +9,7 @@ namespace audio {
 namespace detector {
 
 Transient::Transient()
-    : mTransientDetected(false)
+    FL_NO_EXCEPT : mTransientDetected(false)
     , mStrength(0.0f)
     , mThreshold(1.5f)
     , mSensitivity(1.0f)
@@ -24,7 +24,7 @@ Transient::Transient()
 
 Transient::~Transient() FL_NO_EXCEPT = default;
 
-void Transient::update(shared_ptr<Context> context) {
+void Transient::update(shared_ptr<Context> context) FL_NO_EXCEPT {
     mRetainedFFT = context->getFFT16();
     const fft::Bins& fft = *mRetainedFFT;
     u32 timestamp = context->getTimestamp();
@@ -56,7 +56,7 @@ void Transient::update(shared_ptr<Context> context) {
     mEnergyHistory.push_back(filteredEnergy);
 }
 
-void Transient::fireCallbacks() {
+void Transient::fireCallbacks() FL_NO_EXCEPT {
     if (mTransientDetected) {
         if (onTransient) {
             onTransient();
@@ -70,7 +70,7 @@ void Transient::fireCallbacks() {
     }
 }
 
-void Transient::reset() {
+void Transient::reset() FL_NO_EXCEPT {
     mTransientDetected = false;
     mStrength = 0.0f;
     mLastTransientTime = 0;
@@ -82,7 +82,7 @@ void Transient::reset() {
     mEnergyOutlierFilter.reset();
 }
 
-float Transient::calculateHighFreqEnergy(const fft::Bins& fft) {
+float Transient::calculateHighFreqEnergy(const fft::Bins& fft) FL_NO_EXCEPT {
     // Focus on mid-high to high frequencies (bins 4-15) for transient detection
     // Low frequencies tend to have slower attack times
     float energy = 0.0f;
@@ -98,7 +98,7 @@ float Transient::calculateHighFreqEnergy(const fft::Bins& fft) {
     return energy / static_cast<float>(validBins);
 }
 
-float Transient::calculateEnergyFlux(float currentEnergy) {
+float Transient::calculateEnergyFlux(float currentEnergy) FL_NO_EXCEPT {
     // Calculate positive energy flux (increase in energy)
     float flux = fl::max(0.0f, currentEnergy - mPreviousEnergy);
 
@@ -110,7 +110,7 @@ float Transient::calculateEnergyFlux(float currentEnergy) {
     return flux;
 }
 
-bool Transient::detectTransient(float flux, u32 timestamp) {
+bool Transient::detectTransient(float flux, u32 timestamp) FL_NO_EXCEPT {
     // Check cooldown period
     u32 timeSinceLastTransient = timestamp - mLastTransientTime;
     if (timeSinceLastTransient < mMinIntervalMs) {
@@ -148,7 +148,7 @@ bool Transient::detectTransient(float flux, u32 timestamp) {
     return true;
 }
 
-void Transient::updateAttackTime(float flux) {
+void Transient::updateAttackTime(float flux) FL_NO_EXCEPT {
     // Estimate attack time based on flux magnitude
     // Higher flux = faster attack = shorter attack time
     // Range: ~1-20ms for typical transients

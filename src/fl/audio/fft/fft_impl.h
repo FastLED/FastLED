@@ -26,21 +26,21 @@ class Impl {
     // Result indicating success or failure of the Impl run (in which case
     // there will be an error message).
     struct Result {
-        Result(bool ok, const string &error) : ok(ok), error(error) {}
+        Result(bool ok, const string &error) FL_NO_EXCEPT : ok(ok), error(error) {}
         bool ok = false;
         fl::string error;
     };
     // Default values for the Impl.
-    Impl(const Args &args);
+    Impl(const Args &args) FL_NO_EXCEPT;
     ~Impl() FL_NO_EXCEPT;
 
-    fl::size sampleSize() const;
+    fl::size sampleSize() const FL_NO_EXCEPT;
     // Note that the sample sizes MUST match the samples size passed into the
     // constructor.
-    Result run(const Sample &sample, Bins *out);
-    Result run(span<const i16> sample, Bins *out);
+    Result run(const Sample &sample, Bins *out) FL_NO_EXCEPT;
+    Result run(span<const i16> sample, Bins *out) FL_NO_EXCEPT;
     // Info on what the frequency the bins represent
-    fl::string info() const;
+    fl::string info() const FL_NO_EXCEPT;
 
     // Disable copy and move constructors and assignment operators
     Impl(const Impl &) FL_NO_EXCEPT = delete;

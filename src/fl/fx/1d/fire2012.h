@@ -49,7 +49,7 @@ class Fire2012 : public Fx1d {
   public:
     Fire2012(u16 num_leds, u8 cooling = 55, u8 sparking = 120,
              bool reverse_direction = false,
-             const CRGBPalette16 &palette = (const CRGBPalette16 &)HeatColors_p)
+             const CRGBPalette16 &palette = (const CRGBPalette16 &)HeatColors_p) FL_NO_EXCEPT
         : Fx1d(num_leds), cooling(cooling), sparking(sparking),
           reverse_direction(reverse_direction), palette(palette) {
         heat.resize(num_leds); // Vector elements are default-initialized
@@ -57,7 +57,7 @@ class Fire2012 : public Fx1d {
 
     ~Fire2012() FL_NO_EXCEPT {}
 
-    void draw(DrawContext context) override {
+    void draw(DrawContext context) FL_NO_EXCEPT override {
         fl::span<CRGB> leds = context.leds;
         if (leds.empty()) {
             return;
@@ -96,7 +96,7 @@ class Fire2012 : public Fx1d {
         }
     }
 
-    fl::string fxName() const override { return "Fire2012"; }
+    fl::string fxName() const FL_NO_EXCEPT override { return "Fire2012"; }
 
   private:
     fl::vector_psram<u8> heat;

@@ -12,7 +12,7 @@ namespace fl {
 namespace {
 
 // Helper: Convert string to lowercase
-fl::string toLower(const fl::string& str) {
+fl::string toLower(const fl::string& str) FL_NO_EXCEPT {
     fl::string result = str;
     for (size_t i = 0; i < result.size(); i++) {
         result[i] = fl::tolower(result[i]);
@@ -21,7 +21,7 @@ fl::string toLower(const fl::string& str) {
 }
 
 // Helper: Trim whitespace from string
-fl::string http_parser_trim(const fl::string& str) {
+fl::string http_parser_trim(const fl::string& str) FL_NO_EXCEPT {
     if (str.empty()) return str;
 
     size_t start = 0;
@@ -38,7 +38,7 @@ fl::string http_parser_trim(const fl::string& str) {
 }
 
 // Helper: Parse integer from string
-bool parseInt(const fl::string& str, int& out) {
+bool parseInt(const fl::string& str, int& out) FL_NO_EXCEPT {
     if (str.empty()) return false;
 
     int value = 0;
@@ -58,7 +58,7 @@ bool parseInt(const fl::string& str, int& out) {
 // HttpRequestParser
 //==============================================================================
 
-HttpRequestParser::HttpRequestParser()
+HttpRequestParser::HttpRequestParser() FL_NO_EXCEPT
     : mState(READ_REQUEST_LINE)
     , mRequest(fl::make_shared<HttpRequest>())
     , mChunkedReader(fl::make_shared<net::http::ChunkedReader>())
@@ -69,7 +69,7 @@ HttpRequestParser::HttpRequestParser()
 
 HttpRequestParser::~HttpRequestParser() FL_NO_EXCEPT = default;
 
-void HttpRequestParser::feed(fl::span<const u8> data) {
+void HttpRequestParser::feed(fl::span<const u8> data) FL_NO_EXCEPT {
     mBuffer.insert(mBuffer.end(), data.begin(), data.end());
 
     // State machine: parse incrementally
@@ -134,11 +134,11 @@ void HttpRequestParser::feed(fl::span<const u8> data) {
     }
 }
 
-bool HttpRequestParser::isComplete() const {
+bool HttpRequestParser::isComplete() const FL_NO_EXCEPT {
     return mState == COMPLETE;
 }
 
-HttpRequestPtrConst HttpRequestParser::getRequest() {
+HttpRequestPtrConst HttpRequestParser::getRequest() FL_NO_EXCEPT {
     if (mState != COMPLETE) {
         return HttpRequestPtr();
     }
@@ -149,7 +149,7 @@ HttpRequestPtrConst HttpRequestParser::getRequest() {
     return result;
 }
 
-void HttpRequestParser::reset() {
+void HttpRequestParser::reset() FL_NO_EXCEPT {
     mState = READ_REQUEST_LINE;
     mBuffer.clear();
     mRequest = fl::make_shared<HttpRequest>();
@@ -158,7 +158,7 @@ void HttpRequestParser::reset() {
     mIsChunked = false;
 }
 
-bool HttpRequestParser::parseRequestLine() {
+bool HttpRequestParser::parseRequestLine() FL_NO_EXCEPT {
     auto crlfPos = findCRLF();
     if (!crlfPos.has_value()) {
         return false;  // Need more data
@@ -187,7 +187,7 @@ bool HttpRequestParser::parseRequestLine() {
     return true;
 }
 
-bool HttpRequestParser::parseHeaders() {
+bool HttpRequestParser::parseHeaders() FL_NO_EXCEPT {
     while (true) {
         auto crlfPos = findCRLF();
         if (!crlfPos.has_value()) {
@@ -217,7 +217,7 @@ bool HttpRequestParser::parseHeaders() {
     }
 }
 
-void HttpRequestParser::parseBody() {
+void HttpRequestParser::parseBody() FL_NO_EXCEPT {
     if (mIsChunked) {
         // Feed buffer to chunked reader
         if (!mBuffer.empty()) {
@@ -251,7 +251,7 @@ void HttpRequestParser::parseBody() {
     }
 }
 
-fl::optional<size_t> HttpRequestParser::findCRLF() const {
+fl::optional<size_t> HttpRequestParser::findCRLF() const FL_NO_EXCEPT {
     for (size_t i = 0; i + 1 < mBuffer.size(); i++) {
         if (mBuffer[i] == '\r' && mBuffer[i + 1] == '\n') {
             return i;
@@ -260,7 +260,7 @@ fl::optional<size_t> HttpRequestParser::findCRLF() const {
     return fl::nullopt;
 }
 
-void HttpRequestParser::consume(size_t n) {
+void HttpRequestParser::consume(size_t n) FL_NO_EXCEPT {
     if (n >= mBuffer.size()) {
         mBuffer.clear();
     } else {
@@ -270,7 +270,7 @@ void HttpRequestParser::consume(size_t n) {
     }
 }
 
-fl::optional<fl::string> HttpRequestParser::getHeader(const char* name) const {
+fl::optional<fl::string> HttpRequestParser::getHeader(const char* name) const FL_NO_EXCEPT {
     fl::string lowerName = toLower(name);
 
     for (const auto& pair : req().headers) {
@@ -286,7 +286,7 @@ fl::optional<fl::string> HttpRequestParser::getHeader(const char* name) const {
 // HttpResponseParser
 //==============================================================================
 
-HttpResponseParser::HttpResponseParser()
+HttpResponseParser::HttpResponseParser() FL_NO_EXCEPT
     : mState(READ_STATUS_LINE)
     , mResponse(fl::make_shared<HttpResponse>())
     , mChunkedReader(fl::make_shared<net::http::ChunkedReader>())
@@ -297,7 +297,7 @@ HttpResponseParser::HttpResponseParser()
 
 HttpResponseParser::~HttpResponseParser() FL_NO_EXCEPT = default;
 
-void HttpResponseParser::feed(fl::span<const u8> data) {
+void HttpResponseParser::feed(fl::span<const u8> data) FL_NO_EXCEPT {
     mBuffer.insert(mBuffer.end(), data.begin(), data.end());
 
     // State machine: parse incrementally
@@ -362,11 +362,11 @@ void HttpResponseParser::feed(fl::span<const u8> data) {
     }
 }
 
-bool HttpResponseParser::isComplete() const {
+bool HttpResponseParser::isComplete() const FL_NO_EXCEPT {
     return mState == COMPLETE;
 }
 
-HttpResponsePtrConst HttpResponseParser::getResponse() {
+HttpResponsePtrConst HttpResponseParser::getResponse() FL_NO_EXCEPT {
     if (mState != COMPLETE) {
         return HttpResponsePtr();
     }
@@ -377,7 +377,7 @@ HttpResponsePtrConst HttpResponseParser::getResponse() {
     return result;
 }
 
-void HttpResponseParser::reset() {
+void HttpResponseParser::reset() FL_NO_EXCEPT {
     mState = READ_STATUS_LINE;
     mBuffer.clear();
     mResponse = fl::make_shared<HttpResponse>();
@@ -386,7 +386,7 @@ void HttpResponseParser::reset() {
     mIsChunked = false;
 }
 
-bool HttpResponseParser::parseStatusLine() {
+bool HttpResponseParser::parseStatusLine() FL_NO_EXCEPT {
     auto crlfPos = findCRLF();
     if (!crlfPos.has_value()) {
         return false;  // Need more data
@@ -422,7 +422,7 @@ bool HttpResponseParser::parseStatusLine() {
     return true;
 }
 
-bool HttpResponseParser::parseHeaders() {
+bool HttpResponseParser::parseHeaders() FL_NO_EXCEPT {
     while (true) {
         auto crlfPos = findCRLF();
         if (!crlfPos.has_value()) {
@@ -452,7 +452,7 @@ bool HttpResponseParser::parseHeaders() {
     }
 }
 
-void HttpResponseParser::parseBody() {
+void HttpResponseParser::parseBody() FL_NO_EXCEPT {
     if (mIsChunked) {
         // Feed buffer to chunked reader
         if (!mBuffer.empty()) {
@@ -486,7 +486,7 @@ void HttpResponseParser::parseBody() {
     }
 }
 
-fl::optional<size_t> HttpResponseParser::findCRLF() const {
+fl::optional<size_t> HttpResponseParser::findCRLF() const FL_NO_EXCEPT {
     for (size_t i = 0; i + 1 < mBuffer.size(); i++) {
         if (mBuffer[i] == '\r' && mBuffer[i + 1] == '\n') {
             return i;
@@ -495,7 +495,7 @@ fl::optional<size_t> HttpResponseParser::findCRLF() const {
     return fl::nullopt;
 }
 
-void HttpResponseParser::consume(size_t n) {
+void HttpResponseParser::consume(size_t n) FL_NO_EXCEPT {
     if (n >= mBuffer.size()) {
         mBuffer.clear();
     } else {
@@ -505,7 +505,7 @@ void HttpResponseParser::consume(size_t n) {
     }
 }
 
-fl::optional<fl::string> HttpResponseParser::getHeader(const char* name) const {
+fl::optional<fl::string> HttpResponseParser::getHeader(const char* name) const FL_NO_EXCEPT {
     fl::string lowerName = toLower(name);
 
     for (const auto& pair : resp().headers) {

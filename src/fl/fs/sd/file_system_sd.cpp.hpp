@@ -78,7 +78,7 @@ namespace fl {
 // Weak fallback when no platform-specific SD implementation is
 // available in the build environment. Returns nullptr so
 // `FileSystem::beginSd()` cleanly returns `false`.
-FL_LINK_WEAK FsImplPtr make_sdcard_filesystem(int cs_pin) {
+FL_LINK_WEAK FsImplPtr make_sdcard_filesystem(int cs_pin) FL_NO_EXCEPT {
     FASTLED_UNUSED(cs_pin);
     return FsImplPtr();
 }

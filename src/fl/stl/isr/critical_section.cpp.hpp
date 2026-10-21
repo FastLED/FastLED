@@ -7,17 +7,17 @@
 
 namespace fl {
 
-void interrupt_disable() {
+void interrupt_disable() FL_NO_EXCEPT {
     interruptsDisable();
 }
 
-void interrupt_enable() {
+void interrupt_enable() FL_NO_EXCEPT {
     interruptsEnable();
 }
 
 namespace isr {
 
-critical_section::critical_section() {
+critical_section::critical_section() FL_NO_EXCEPT {
     fl::interrupt_disable();
 }
 

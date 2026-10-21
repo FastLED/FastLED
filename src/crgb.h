@@ -27,6 +27,7 @@ using CRGB = fl::CRGB;
 // Include hsv2rgb.h AFTER the CRGB and CHSV typedefs are established
 // This is necessary because hsv2rgb.h uses these types in function declarations
 #include "hsv2rgb.h"
+#include "fl/stl/noexcept.h"
 
 
 
@@ -45,7 +46,7 @@ using CRGB = fl::CRGB;
 /// @param prgb CRGB array to store the result of the conversion (will be modified)
 /// @param numLeds the number of array values to process
 FASTLED_FORCE_INLINE void hsv2rgb_dispatch( const CHSV* phsv, CRGB * prgb, int numLeds)
-{
+FL_NO_EXCEPT {
 #if defined(FASTLED_HSV_CONVERSION_SPECTRUM)
     hsv2rgb_spectrum(phsv, prgb, numLeds);
 #elif defined(FASTLED_HSV_CONVERSION_FULL_SPECTRUM)
@@ -59,7 +60,7 @@ FASTLED_FORCE_INLINE void hsv2rgb_dispatch( const CHSV* phsv, CRGB * prgb, int n
 }
 
 FASTLED_FORCE_INLINE void hsv2rgb_dispatch( const CHSV& hsv, CRGB& rgb)
-{
+FL_NO_EXCEPT {
 #if defined(FASTLED_HSV_CONVERSION_SPECTRUM)
     hsv2rgb_spectrum(hsv, rgb);
 #elif defined(FASTLED_HSV_CONVERSION_FULL_SPECTRUM)

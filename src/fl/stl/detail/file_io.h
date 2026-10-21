@@ -1,5 +1,7 @@
 #pragma once
 
+#include "fl/stl/noexcept.h"
+
 #include "fl/stl/cstddef.h"  // fl::size_t
 #include "fl/stl/int.h"
 #include "platforms/is_platform.h"
@@ -56,12 +58,12 @@ namespace io {
 /// @param path File path
 /// @param mode File mode string (e.g., "r", "w", "rb", "wb", "r+", "w+", "a", "ab")
 /// @return File handle pointer, or nullptr on failure
-FILE* fopen(const char* path, const char* mode);
+FILE* fopen(const char* path, const char* mode) FL_NO_EXCEPT;
 
 /// Close a file
 /// @param file File handle
 /// @return 0 on success, non-zero on error
-int fclose(FILE* file);
+int fclose(FILE* file) FL_NO_EXCEPT;
 
 /// Read from file
 /// @param buffer Destination buffer
@@ -69,7 +71,7 @@ int fclose(FILE* file);
 /// @param count Number of elements to read
 /// @param file File handle
 /// @return Number of elements actually read
-fl::size_t fread(void* buffer, fl::size_t size, fl::size_t count, FILE* file);
+fl::size_t fread(void* buffer, fl::size_t size, fl::size_t count, FILE* file) FL_NO_EXCEPT;
 
 /// Write to file
 /// @param data Source data
@@ -77,24 +79,24 @@ fl::size_t fread(void* buffer, fl::size_t size, fl::size_t count, FILE* file);
 /// @param count Number of elements to write
 /// @param file File handle
 /// @return Number of elements actually written
-fl::size_t fwrite(const void* data, fl::size_t size, fl::size_t count, FILE* file);
+fl::size_t fwrite(const void* data, fl::size_t size, fl::size_t count, FILE* file) FL_NO_EXCEPT;
 
 /// Get current file position
 /// @param file File handle
 /// @return Current position, or -1 on error
-long ftell(FILE* file);
+long ftell(FILE* file) FL_NO_EXCEPT;
 
 /// Set file position
 /// @param file File handle
 /// @param offset Offset from origin
 /// @param origin Seek origin (io::seek_set, io::seek_cur, io::seek_end)
 /// @return 0 on success, non-zero on error
-int fseek(FILE* file, long offset, int origin);
+int fseek(FILE* file, long offset, int origin) FL_NO_EXCEPT;
 
 /// Flush file buffers
 /// @param file File handle
 /// @return 0 on success, non-zero on error
-int fflush(FILE* file);
+int fflush(FILE* file) FL_NO_EXCEPT;
 
 // On some platforms (e.g., AVR), feof, ferror, and clearerr are macros
 // Save them only if they exist, undefine temporarily to declare our functions
@@ -121,26 +123,26 @@ int fflush(FILE* file);
 /// @param file File handle
 /// @return Non-zero if EOF, 0 otherwise
 #ifdef FL_IS_AVR
-int (feof)(FILE* file);
+int (feof)(FILE* file) FL_NO_EXCEPT;
 #else
-int feof(FILE* file);
+int feof(FILE* file) FL_NO_EXCEPT;
 #endif
 
 /// Check for file error
 /// @param file File handle
 /// @return Non-zero if error, 0 otherwise
 #ifdef FL_IS_AVR
-int (ferror)(FILE* file);
+int (ferror)(FILE* file) FL_NO_EXCEPT;
 #else
-int ferror(FILE* file);
+int ferror(FILE* file) FL_NO_EXCEPT;
 #endif
 
 /// Clear file error indicators
 /// @param file File handle
 #ifdef FL_IS_AVR
-void (clearerr)(FILE* file);
+void (clearerr)(FILE* file) FL_NO_EXCEPT;
 #else
-void clearerr(FILE* file);
+void clearerr(FILE* file) FL_NO_EXCEPT;
 #endif
 
 // Note: On AVR, we use parentheses around function names to prevent macro expansion
@@ -166,60 +168,60 @@ struct FILE_impl : public ::FILE {};
 // Map fl:: functions to standard libc functions
 // Note: static_cast is safe here because FILE_impl inherits from ::FILE
 // This is a platform abstraction layer that wraps the POSIX FILE* API
-inline FILE* fopen(const char* path, const char* mode) {
+inline FILE* fopen(const char* path, const char* mode) FL_NO_EXCEPT {
     return static_cast<FILE*>(::fopen(path, mode));
 }
 
-inline int fclose(FILE* file) {
+inline int fclose(FILE* file) FL_NO_EXCEPT {
     return ::fclose(static_cast<::FILE*>(file));
 }
 
-inline fl::size_t fread(void* buffer, fl::size_t size, fl::size_t count, FILE* file) {
+inline fl::size_t fread(void* buffer, fl::size_t size, fl::size_t count, FILE* file) FL_NO_EXCEPT {
     return ::fread(buffer, size, count, static_cast<::FILE*>(file));
 }
 
-inline fl::size_t fwrite(const void* data, fl::size_t size, fl::size_t count, FILE* file) {
+inline fl::size_t fwrite(const void* data, fl::size_t size, fl::size_t count, FILE* file) FL_NO_EXCEPT {
     return ::fwrite(data, size, count, static_cast<::FILE*>(file));
 }
 
-inline long ftell(FILE* file) {
+inline long ftell(FILE* file) FL_NO_EXCEPT {
     return ::ftell(static_cast<::FILE*>(file));
 }
 
-inline int fseek(FILE* file, long offset, int origin) {
+inline int fseek(FILE* file, long offset, int origin) FL_NO_EXCEPT {
     return ::fseek(static_cast<::FILE*>(file), offset, origin);
 }
 
-inline int fflush(FILE* file) {
+inline int fflush(FILE* file) FL_NO_EXCEPT {
     return ::fflush(static_cast<::FILE*>(file));
 }
 
 #ifdef FL_IS_AVR
-inline int (feof)(FILE* file) {
+inline int (feof)(FILE* file) FL_NO_EXCEPT {
     return ::feof(static_cast<::FILE*>(file));
 }
 #else
-inline int feof(FILE* file) {
+inline int feof(FILE* file) FL_NO_EXCEPT {
     return ::feof(static_cast<::FILE*>(file));
 }
 #endif
 
 #ifdef FL_IS_AVR
-inline int (ferror)(FILE* file) {
+inline int (ferror)(FILE* file) FL_NO_EXCEPT {
     return ::ferror(static_cast<::FILE*>(file));
 }
 #else
-inline int ferror(FILE* file) {
+inline int ferror(FILE* file) FL_NO_EXCEPT {
     return ::ferror(static_cast<::FILE*>(file));
 }
 #endif
 
 #ifdef FL_IS_AVR
-inline void (clearerr)(FILE* file) {
+inline void (clearerr)(FILE* file) FL_NO_EXCEPT {
     ::clearerr(static_cast<::FILE*>(file));
 }
 #else
-inline void clearerr(FILE* file) {
+inline void clearerr(FILE* file) FL_NO_EXCEPT {
     ::clearerr(static_cast<::FILE*>(file));
 }
 #endif
@@ -244,59 +246,59 @@ struct FILE_impl {
 };
 
 // No-op implementations
-inline FILE* fopen(const char* /*path*/, const char* /*mode*/) {
+inline FILE* fopen(const char* /*path*/, const char* /*mode*/) FL_NO_EXCEPT {
     return nullptr;
 }
 
-inline int fclose(FILE* /*file*/) {
+inline int fclose(FILE* /*file*/) FL_NO_EXCEPT {
     return -1;
 }
 
-inline fl::size_t fread(void* /*buffer*/, fl::size_t /*size*/, fl::size_t /*count*/, FILE* /*file*/) {
+inline fl::size_t fread(void* /*buffer*/, fl::size_t /*size*/, fl::size_t /*count*/, FILE* /*file*/) FL_NO_EXCEPT {
     return 0;
 }
 
-inline fl::size_t fwrite(const void* /*data*/, fl::size_t /*size*/, fl::size_t /*count*/, FILE* /*file*/) {
+inline fl::size_t fwrite(const void* /*data*/, fl::size_t /*size*/, fl::size_t /*count*/, FILE* /*file*/) FL_NO_EXCEPT {
     return 0;
 }
 
-inline long ftell(FILE* /*file*/) {
+inline long ftell(FILE* /*file*/) FL_NO_EXCEPT {
     return -1;
 }
 
-inline int fseek(FILE* /*file*/, long /*offset*/, int /*origin*/) {
+inline int fseek(FILE* /*file*/, long /*offset*/, int /*origin*/) FL_NO_EXCEPT {
     return -1;
 }
 
-inline int fflush(FILE* /*file*/) {
+inline int fflush(FILE* /*file*/) FL_NO_EXCEPT {
     return -1;
 }
 
 #ifdef FL_IS_AVR
-inline int (feof)(FILE* /*file*/) {
+inline int (feof)(FILE* /*file*/) FL_NO_EXCEPT {
     return 0;
 }
 #else
-inline int feof(FILE* /*file*/) {
+inline int feof(FILE* /*file*/) FL_NO_EXCEPT {
     return 0;
 }
 #endif
 
 #ifdef FL_IS_AVR
-inline int (ferror)(FILE* /*file*/) {
+inline int (ferror)(FILE* /*file*/) FL_NO_EXCEPT {
     return 1;
 }
 #else
-inline int ferror(FILE* /*file*/) {
+inline int ferror(FILE* /*file*/) FL_NO_EXCEPT {
     return 1;
 }
 #endif
 
 #ifdef FL_IS_AVR
-inline void (clearerr)(FILE* /*file*/) {
+inline void (clearerr)(FILE* /*file*/) FL_NO_EXCEPT {
 }
 #else
-inline void clearerr(FILE* /*file*/) {
+inline void clearerr(FILE* /*file*/) FL_NO_EXCEPT {
 }
 #endif
 

@@ -6,6 +6,36 @@ reviews:
   # Per-path natural-language review instructions.
   # See https://docs.coderabbit.ai/getting-started/configure-coderabbit
   path_instructions:
+    - path: "**/*"
+      instructions: |
+        Optimization scope and authorization gate (historical example: #4736,
+        withdrawn unmerged). A request to optimize flash, RAM, runtime, or build
+        time does not authorize a repository-wide rewrite or refactor. Require
+        explicit maintainer authorization in the referenced issue or its
+        comments before broad API changes, mass annotation edits, moving or
+        splitting implementations across the codebase, or changing unity-build
+        architecture. Measurements and passing tests prove benefit, not
+        authorization. A PR author's own explanation is not maintainer approval.
+
+        Flag unauthorized expansion as HIGH severity and request changes.
+        Ask for the exact issue/comment link granting the expanded scope;
+        without it, require a smaller patch within the authorized scope or
+        preservation of the experiment on a separate branch for later review.
+        Evaluate the breadth and structural impact of the diff, not a fixed
+        file-count threshold. Narrow, directly relevant optimization fixes do
+        not need separate authorization merely because they touch several files.
+
+        Build files require a specific maintainer directive in the referenced
+        issue authorizing the build changes. This includes build scripts and
+        configuration, source inventories, CI workflows, linker/compiler flags,
+        canonical compilation units (src/fl/build/*), and unity include routers
+        (**/_build.cpp.hpp). Do not accept incidental cleanup, opportunistic
+        restructuring, or splitting/consolidating unity groups under a generic
+        optimization request. For each build change, require the directive's
+        issue/comment link and explain how that change implements the directive.
+        Flag missing directives as HIGH severity and request removal of the
+        unauthorized build changes. Apply this gate to build-related files
+        regardless of their directory or extension.
     - path: "src/**"
       instructions: |
         End-to-end value and proportionality gate. For a feature or bug-fix PR,
@@ -305,6 +335,34 @@ reviews:
         "`fl::span` for Callback Typedefs and Small Fixed-Size Arrays" and
         FastLED issue #3233.
 
+    - path: "examples/AutoResearch/**"
+      instructions: |
+        AutoResearch must stay platform neutral. BLOCKING: flag every line this
+        PR adds or changes under examples/AutoResearch/ that contains
+        platform-specific code, including:
+        - platform branches: `#if`/`#ifdef`/`#elif` on `FL_IS_*`,
+          `ARDUINO_*`, `FASTLED_ESP*`, `ESP32`, `__IMXRT1062__`, `__AVR__`,
+          `PICO_*`, `CONFIG_IDF_*`, or similar chip/core macros;
+        - register names or address literals (for example `WDOG3_CS`,
+          `CCM_CCGR5`, `IMXRT_*`, `0x2027FF60`, `*(volatile uint32_t*)0x...`);
+        - vendor SDK or core calls such as `esp_*()`, `_reboot_Teensyduino_()`,
+          Pico SDK `watchdog_*`/`reset_usb_boot()`, nRF/STM32 HAL calls, or
+          weak startup hooks like `startup_early_hook`;
+        - direct `#include` of `platforms/...` headers or vendor SDK headers
+          (`esp_*.h`, `driver/...`, `hardware/...`, `pico/...`, `imxrt.h`).
+        The fix is always the same: add a platform-neutral API in the core
+        (`src/fl/...`, e.g. on `FastLED.watchdog()`), delegate it to
+        `src/platforms/...` with a no-op fallback, and have AutoResearch call
+        only the neutral API. Example: the Teensy 4.x early-boot loop guard is
+        `FL_WATCHDOG_BOOT_GUARD()` (src/fl/wdt/boot_guard.h) plus
+        `FastLED.watchdog().markBootHealthy()`.
+        Exception: a line may stay only if it carries an explicit
+        `// ok platform specific - <reason>` marker whose reason explains why
+        no core API can serve (for example, a test that exists only for one
+        driver). Flag markers without a concrete reason. Pre-existing code is
+        tracked in FastLED/FastLED#4720; do not flag untouched lines.
+        Reference: `.claude/skills/code-review/review-rules.md` ->
+        "examples/AutoResearch/** changes - PLATFORM NEUTRALITY".
     - path: ".github/workflows/check_*_size.yml"
       instructions: |
         BINARY-SIZE THRESHOLD LOCKDOWN.
@@ -551,30 +609,31 @@ reviews:
 
     - path: "src/fl/log/**"
       instructions: |
-        FL_WARN / FL_ERROR default-visibility invariant (#2886 Stage 1):
+        FL_ERROR default-visibility invariant (#2886 Stage 1, #4712):
 
-        FL_WARN and FL_ERROR MUST remain active by default on NON-release
-        builds. Flag changes that:
+        FL_ERROR MUST remain active by default on NON-release builds.
+        Flag changes that:
 
-        1. Add an outer guard around FL_WARN(...) / FL_ERROR(...) that
-           requires an opt-in macro to fire on debug/non-release builds.
-        2. Change the unset default of FASTLED_LOG_VERBOSITY so that
-           non-release builds (no NDEBUG) default below 1. Release builds
-           (NDEBUG defined) default to 0 — that is intentional and not
-           a violation.
-        3. Add a new logging knob whose default suppresses FL_WARN /
-           FL_ERROR on non-release builds without explicit user opt-in.
+        1. Add an outer guard around FL_ERROR(...) that requires an
+           opt-in macro to fire on debug/non-release builds.
+        2. Change the unset default of FL_LOG_LEVEL so that non-release
+           builds (no NDEBUG) default below 1 (errors only). Release
+           builds (NDEBUG defined) default to 0 — intentional, not a
+           violation.
+        3. Change the legacy FASTLED_LOG_VERBOSITY mapping (0 => off,
+           >= 1 => full) so -DFASTLED_LOG_VERBOSITY=1 no longer restores
+           full logs.
 
-        Rationale: developers depend on warnings / errors firing during
-        development. The bloat-reduction work in #2886 is scoped to
-        release builds via NDEBUG; it explicitly preserves the
-        debug-build default at verbosity 1.
+        FL_WARN / FL_INFO / FL_DBG compiling out by default (level 1) is
+        the intended contract since #4712; -DFL_LOG_LEVEL=2 restores them.
 
-        Resolution order (the contract): FASTLED_TESTING => 1, NDEBUG
-        => 0, otherwise => 1. See src/fl/log/log.h.
+        Resolution order (the contract): FASTLED_TESTING => 2, explicit
+        FL_LOG_LEVEL, legacy FASTLED_LOG_VERBOSITY, NDEBUG => 0,
+        otherwise => 1. See src/fl/log/log.h.
 
-        Flag any PR that wraps an existing or new FL_WARN(...) /
-        FL_ERROR(...) site in an additional `#if !defined(...)` or
-        `#ifdef FASTLED_LOG_*` block that would suppress the call on
-        non-release builds by default — that breaks the
-        developer-visibility contract above.
+        Flag any PR that wraps an existing or new FL_ERROR(...) site in an
+        additional `#if !defined(...)` or `#ifdef FASTLED_LOG_*` block that
+        would suppress the call on non-release builds by default — that
+        breaks the developer-visibility contract above.
+        For FL_WARN(...), flag an additional guard only if it prevents
+        -DFL_LOG_LEVEL=2 (including FASTLED_TESTING) from restoring the call.

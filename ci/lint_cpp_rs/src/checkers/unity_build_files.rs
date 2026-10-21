@@ -30,7 +30,7 @@ fn check_build_file_naming(src_dir: &Path, _project_root: &Path) -> Vec<String> 
             .filter_map(Result::ok)
             .filter_map(|entry| {
                 let path = entry.path();
-                if path.extension().and_then(|ext| ext.to_str()) == Some("cpp") {
+                if unity_is_build_unit(&path) {
                     path.file_name()
                         .and_then(|name| name.to_str())
                         .map(str::to_string)
@@ -67,7 +67,7 @@ Not in EXPECTED_BUILD_FILES list."
             reader
                 .filter_map(Result::ok)
                 .map(|entry| entry.path())
-                .filter(|path| path.extension().and_then(|ext| ext.to_str()) == Some("cpp"))
+                .filter(|path| unity_is_build_unit(path))
                 .collect()
         })
         .unwrap_or_default();
@@ -104,7 +104,7 @@ fn check_build_file_preheaders(src_dir: &Path, project_root: &Path) -> Vec<Strin
             reader
                 .filter_map(Result::ok)
                 .map(|entry| entry.path())
-                .filter(|path| path.extension().and_then(|ext| ext.to_str()) == Some("cpp"))
+                .filter(|path| unity_is_build_unit(path))
                 .collect()
         })
         .unwrap_or_default();
@@ -177,7 +177,7 @@ fn check_build_file_content(
             reader
                 .filter_map(Result::ok)
                 .map(|entry| entry.path())
-                .filter(|path| path.extension().and_then(|ext| ext.to_str()) == Some("cpp"))
+                .filter(|path| unity_is_build_unit(path))
                 .collect()
         })
         .unwrap_or_default();
@@ -450,7 +450,7 @@ fn compute_independently_compiled_dirs(src_dir: &Path) -> HashSet<String> {
     };
     for entry in reader.filter_map(Result::ok) {
         let path = entry.path();
-        if path.extension().and_then(|ext| ext.to_str()) != Some("cpp") {
+        if !unity_is_build_unit(&path) {
             continue;
         }
         let Some(name) = path.file_name().and_then(|name| name.to_str()) else {

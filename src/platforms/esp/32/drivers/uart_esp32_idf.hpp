@@ -7,6 +7,7 @@
 
 #include "platforms/esp/32/drivers/uart_esp32.h"
 #include "fl/stl/assert.h"
+#include "fl/stl/compiler_control.h"
 #include "fl/stl/singleton.h"
 #include "fl/stl/noexcept.h"
 #include "platforms/esp/esp_version.h"
@@ -49,11 +50,11 @@ namespace fl {
 // Helper: Convert fl enum classes to ESP-IDF types
 // ============================================================================
 
-static uart_port_t convertPort(UartPort port) FL_NO_EXCEPT {
+static FASTLED_FORCE_INLINE uart_port_t convertPort(UartPort port) FL_NO_EXCEPT {
     return static_cast<uart_port_t>(static_cast<u8>(port));
 }
 
-static uart_word_length_t convertDataBits(UartDataBits bits) FL_NO_EXCEPT {
+static FASTLED_FORCE_INLINE uart_word_length_t convertDataBits(UartDataBits bits) FL_NO_EXCEPT {
     switch (bits) {
         case UartDataBits::BITS_5: return UART_DATA_5_BITS;
         case UartDataBits::BITS_6: return UART_DATA_6_BITS;
@@ -63,7 +64,7 @@ static uart_word_length_t convertDataBits(UartDataBits bits) FL_NO_EXCEPT {
     }
 }
 
-static uart_parity_t convertParity(UartParity parity) FL_NO_EXCEPT {
+static FASTLED_FORCE_INLINE uart_parity_t convertParity(UartParity parity) FL_NO_EXCEPT {
     switch (parity) {
         case UartParity::NONE: return UART_PARITY_DISABLE;
         case UartParity::ODD:  return UART_PARITY_ODD;
@@ -72,7 +73,7 @@ static uart_parity_t convertParity(UartParity parity) FL_NO_EXCEPT {
     }
 }
 
-static uart_stop_bits_t convertStopBits(UartStopBits bits) FL_NO_EXCEPT {
+static FASTLED_FORCE_INLINE uart_stop_bits_t convertStopBits(UartStopBits bits) FL_NO_EXCEPT {
     switch (bits) {
         case UartStopBits::BITS_1:   return UART_STOP_BITS_1;
         case UartStopBits::BITS_1_5: return UART_STOP_BITS_1_5;
@@ -81,7 +82,7 @@ static uart_stop_bits_t convertStopBits(UartStopBits bits) FL_NO_EXCEPT {
     }
 }
 
-static uart_hw_flowcontrol_t convertFlowControl(UartFlowControl ctrl) FL_NO_EXCEPT {
+static FASTLED_FORCE_INLINE uart_hw_flowcontrol_t convertFlowControl(UartFlowControl ctrl) FL_NO_EXCEPT {
     switch (ctrl) {
         case UartFlowControl::NONE:    return UART_HW_FLOWCTRL_DISABLE;
         case UartFlowControl::RTS:     return UART_HW_FLOWCTRL_RTS;
@@ -91,7 +92,7 @@ static uart_hw_flowcontrol_t convertFlowControl(UartFlowControl ctrl) FL_NO_EXCE
     }
 }
 
-static int convertIntrFlags(UartIntrPriority priority, UartIntrFlags flags) FL_NO_EXCEPT {
+static FASTLED_FORCE_INLINE int convertIntrFlags(UartIntrPriority priority, UartIntrFlags flags) FL_NO_EXCEPT {
     int esp_flags = 0;
 
     // Add priority level (LEVEL1-5)
@@ -121,13 +122,13 @@ static int convertIntrFlags(UartIntrPriority priority, UartIntrFlags flags) FL_N
 // - IDF 5.0+: UART_SCLK_DEFAULT exists on all variants (maps to chip's preferred clock)
 // - IDF 4.x: UART_SCLK_APB is the universal clock source
 #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
-static uart_sclk_t convertClockSource(UartClockSource) FL_NO_EXCEPT {
+static FASTLED_FORCE_INLINE uart_sclk_t convertClockSource(UartClockSource) FL_NO_EXCEPT {
     // UART_SCLK_DEFAULT is the portable choice on IDF 5.x — it resolves to
     // the chip's preferred clock (APB on ESP32/S3/C3, PLL_F80M on C6, etc.)
     return UART_SCLK_DEFAULT;
 }
 #elif ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 0, 0)
-static uart_sclk_t convertClockSource(UartClockSource) FL_NO_EXCEPT {
+static FASTLED_FORCE_INLINE uart_sclk_t convertClockSource(UartClockSource) FL_NO_EXCEPT {
     return UART_SCLK_APB;
 }
 #endif
@@ -189,12 +190,120 @@ private:
 // UartEsp32 Implementation
 // ============================================================================
 
-UartEsp32::UartEsp32(const UartConfig& config) FL_NO_EXCEPT
-    : mConfig(config)
-    , mPortInt(static_cast<int>(convertPort(config.port)))
-    , mBuffered(false)
-    , mEventQueue(nullptr) {
+FASTLED_FORCE_INLINE bool UartEsp32::initDriver(const UartConfig& config) FL_NO_EXCEPT {
+    uart_port_t port = static_cast<uart_port_t>(mPortInt);
 
+    // ROBUST DRIVER DETECTION:
+    // Use uart_get_buffered_data_len() as the definitive test for driver installation.
+    // This is more reliable than uart_write_bytes(port, "", 0) which can succeed even
+    // without a driver installed (0-byte write is a no-op).
+    size_t buffered_len = 0;
+    esp_err_t check_err = uart_get_buffered_data_len(port, &buffered_len);
+
+    if (check_err == ESP_OK) {
+        // Driver is installed and working - use it
+        mBuffered = true;
+        return true;  // Success: driver is installed and functional
+    }
+
+    // Driver not installed - install it ourselves
+
+    // Configure UART parameters from UartConfig
+    uart_config_t uart_config = {};
+    uart_config.baud_rate = static_cast<int>(config.baudRate);
+    uart_config.data_bits = convertDataBits(config.dataBits);
+    uart_config.parity = convertParity(config.parity);
+    uart_config.stop_bits = convertStopBits(config.stopBits);
+    uart_config.flow_ctrl = convertFlowControl(config.flowControl);
+    uart_config.rx_flow_ctrl_thresh = static_cast<u8>(config.rxFlowControlThresh);
+
+    // Set clock source (version-dependent field)
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 0, 0)
+    uart_config.source_clk = convertClockSource(config.clockSource);
+#endif
+    // IDF 3.x: source_clk field doesn't exist - skip it
+
+    esp_err_t err = uart_param_config(port, &uart_config);
+    if (err != ESP_OK) {
+        return false;  // Failed - mBuffered remains false, will use ROM UART
+    }
+
+    // Configure pins if specified
+    if (config.pins.txPin >= 0 || config.pins.rxPin >= 0 ||
+        config.pins.rtsPin >= 0 || config.pins.ctsPin >= 0) {
+        err = uart_set_pin(
+            port,
+            config.pins.txPin,   // TX pin
+            config.pins.rxPin,   // RX pin
+            config.pins.rtsPin,  // RTS pin
+            config.pins.ctsPin   // CTS pin
+        );
+        if (err != ESP_OK) {
+            return false;  // Pin configuration failed
+        }
+    }
+
+    // Configure signal inversion if requested
+    if (config.signalInvert.txInvert || config.signalInvert.rxInvert ||
+        config.signalInvert.rtsInvert || config.signalInvert.ctsInvert) {
+        u32 inv_mask = 0;
+        if (config.signalInvert.txInvert)  inv_mask |= UART_SIGNAL_TXD_INV;
+        if (config.signalInvert.rxInvert)  inv_mask |= UART_SIGNAL_RXD_INV;
+        if (config.signalInvert.rtsInvert) inv_mask |= UART_SIGNAL_RTS_INV;
+        if (config.signalInvert.ctsInvert) inv_mask |= UART_SIGNAL_CTS_INV;
+
+        err = uart_set_line_inverse(port, inv_mask);
+        if (err != ESP_OK) {
+            return false;  // Signal inversion failed
+        }
+    }
+
+    // Convert interrupt priority + flags to ESP-IDF format
+    int intr_alloc_flags = convertIntrFlags(config.intrPriority, config.intrFlags);
+
+    // Install driver with TX and RX buffers from config
+    // Event queue: 0 = polling mode (we use uart_read_bytes directly)
+    //             >0 = event-driven mode (ISR posts uart_event_t to queue)
+    // Interrupt flags: Controls ISR priority and IRAM placement
+    //   ESP_INTR_FLAG_IRAM (0x400) = ISR runs from IRAM (survives flash cache disable)
+    //   ESP_INTR_FLAG_LEVEL1-5 = ISR priority level
+    void** queue_handle_ptr = config.eventQueueSize > 0 ? &mEventQueue : nullptr;
+
+    err = uart_driver_install(
+        port,
+        static_cast<int>(config.rxBufferSize),      // RX buffer size
+        static_cast<int>(config.txBufferSize),      // TX buffer size
+        static_cast<int>(config.eventQueueSize),    // Event queue size (0 = no queue)
+        (QueueHandle_t*)queue_handle_ptr,            // Event queue handle
+        intr_alloc_flags                             // ISR priority + flags
+    );
+
+    if (err == ESP_OK || err == ESP_ERR_INVALID_STATE) {
+        // ESP_ERR_INVALID_STATE means already installed - OK
+        mBuffered = true;
+
+        // CRITICAL FIX: Add delay after driver installation
+        // ESP-IDF UART driver requires a delay after installation before transmitting
+        // Without this, uart_write_bytes() will succeed but data won't transmit
+        // Reference: https://esp32.com/viewtopic.php?t=2319
+        vTaskDelay(100 / portTICK_PERIOD_MS);  // 100ms delay
+
+        // Configure RS485 mode if enabled
+        if (config.rs485Config.enabled) {
+            // Note: RS485 mode configuration varies by ESP-IDF version
+            // For now, we assume RTS pin is already configured above
+            // and ESP-IDF will handle RS485 mode automatically if RTS is set
+            // Future: Add explicit uart_set_mode(UART_MODE_RS485_HALF_DUPLEX) if available
+        }
+
+        return true;
+    }
+
+    // Installation failed - will fall back to ROM UART
+    return false;
+}
+
+FASTLED_FORCE_INLINE void UartEsp32::initialize(const UartConfig& config) FL_NO_EXCEPT {
     // Check allocation status
     UartManager& manager = UartManager::instance();
     FL_ASSERT(!manager.isAllocated(config.port),
@@ -204,7 +313,25 @@ UartEsp32::UartEsp32(const UartConfig& config) FL_NO_EXCEPT
     manager.allocateUart(config.port);
 
     // Initialize driver
-    initDriver();
+    initDriver(config);
+}
+
+UartEsp32::UartEsp32() FL_NO_EXCEPT
+    : mConfig(UartConfig::reliable(UartPort::UART0))
+    , mPortInt(static_cast<fl::i32>(convertPort(UartPort::UART0)))
+    , mBuffered(false)
+    , mEventQueue(nullptr) {
+    const UartConfig config = UartConfig::reliable(UartPort::UART0);
+    initialize(config);
+}
+
+UartEsp32::UartEsp32(const UartConfig& config) FL_NO_EXCEPT
+    : mConfig(config)
+    , mPortInt(static_cast<int>(convertPort(config.port)))
+    , mBuffered(false)
+    , mEventQueue(nullptr) {
+
+    initialize(mConfig);
 }
 
 UartEsp32::~UartEsp32() {
@@ -246,118 +373,6 @@ UartEsp32& UartEsp32::operator=(UartEsp32&& other) FL_NO_EXCEPT {
     return *this;
 }
 
-bool UartEsp32::initDriver() FL_NO_EXCEPT {
-    uart_port_t port = static_cast<uart_port_t>(mPortInt);
-
-    // ROBUST DRIVER DETECTION:
-    // Use uart_get_buffered_data_len() as the definitive test for driver installation.
-    // This is more reliable than uart_write_bytes(port, "", 0) which can succeed even
-    // without a driver installed (0-byte write is a no-op).
-    size_t buffered_len = 0;
-    esp_err_t check_err = uart_get_buffered_data_len(port, &buffered_len);
-
-    if (check_err == ESP_OK) {
-        // Driver is installed and working - use it
-        mBuffered = true;
-        return true;  // Success: driver is installed and functional
-    }
-
-    // Driver not installed - install it ourselves
-
-    // Configure UART parameters from UartConfig
-    uart_config_t uart_config = {};
-    uart_config.baud_rate = static_cast<int>(mConfig.baudRate);
-    uart_config.data_bits = convertDataBits(mConfig.dataBits);
-    uart_config.parity = convertParity(mConfig.parity);
-    uart_config.stop_bits = convertStopBits(mConfig.stopBits);
-    uart_config.flow_ctrl = convertFlowControl(mConfig.flowControl);
-    uart_config.rx_flow_ctrl_thresh = static_cast<u8>(mConfig.rxFlowControlThresh);
-
-    // Set clock source (version-dependent field)
-#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 0, 0)
-    uart_config.source_clk = convertClockSource(mConfig.clockSource);
-#endif
-    // IDF 3.x: source_clk field doesn't exist - skip it
-
-    esp_err_t err = uart_param_config(port, &uart_config);
-    if (err != ESP_OK) {
-        return false;  // Failed - mBuffered remains false, will use ROM UART
-    }
-
-    // Configure pins if specified
-    if (mConfig.pins.txPin >= 0 || mConfig.pins.rxPin >= 0 ||
-        mConfig.pins.rtsPin >= 0 || mConfig.pins.ctsPin >= 0) {
-        err = uart_set_pin(
-            port,
-            mConfig.pins.txPin,   // TX pin
-            mConfig.pins.rxPin,   // RX pin
-            mConfig.pins.rtsPin,  // RTS pin
-            mConfig.pins.ctsPin   // CTS pin
-        );
-        if (err != ESP_OK) {
-            return false;  // Pin configuration failed
-        }
-    }
-
-    // Configure signal inversion if requested
-    if (mConfig.signalInvert.txInvert || mConfig.signalInvert.rxInvert ||
-        mConfig.signalInvert.rtsInvert || mConfig.signalInvert.ctsInvert) {
-        u32 inv_mask = 0;
-        if (mConfig.signalInvert.txInvert)  inv_mask |= UART_SIGNAL_TXD_INV;
-        if (mConfig.signalInvert.rxInvert)  inv_mask |= UART_SIGNAL_RXD_INV;
-        if (mConfig.signalInvert.rtsInvert) inv_mask |= UART_SIGNAL_RTS_INV;
-        if (mConfig.signalInvert.ctsInvert) inv_mask |= UART_SIGNAL_CTS_INV;
-
-        err = uart_set_line_inverse(port, inv_mask);
-        if (err != ESP_OK) {
-            return false;  // Signal inversion failed
-        }
-    }
-
-    // Convert interrupt priority + flags to ESP-IDF format
-    int intr_alloc_flags = convertIntrFlags(mConfig.intrPriority, mConfig.intrFlags);
-
-    // Install driver with TX and RX buffers from config
-    // Event queue: 0 = polling mode (we use uart_read_bytes directly)
-    //             >0 = event-driven mode (ISR posts uart_event_t to queue)
-    // Interrupt flags: Controls ISR priority and IRAM placement
-    //   ESP_INTR_FLAG_IRAM (0x400) = ISR runs from IRAM (survives flash cache disable)
-    //   ESP_INTR_FLAG_LEVEL1-5 = ISR priority level
-    void** queue_handle_ptr = mConfig.eventQueueSize > 0 ? &mEventQueue : nullptr;
-
-    err = uart_driver_install(
-        port,
-        static_cast<int>(mConfig.rxBufferSize),      // RX buffer size
-        static_cast<int>(mConfig.txBufferSize),      // TX buffer size
-        static_cast<int>(mConfig.eventQueueSize),    // Event queue size (0 = no queue)
-        (QueueHandle_t*)queue_handle_ptr,            // Event queue handle
-        intr_alloc_flags                             // ISR priority + flags
-    );
-
-    if (err == ESP_OK || err == ESP_ERR_INVALID_STATE) {
-        // ESP_ERR_INVALID_STATE means already installed - OK
-        mBuffered = true;
-
-        // CRITICAL FIX: Add delay after driver installation
-        // ESP-IDF UART driver requires a delay after installation before transmitting
-        // Without this, uart_write_bytes() will succeed but data won't transmit
-        // Reference: https://esp32.com/viewtopic.php?t=2319
-        vTaskDelay(100 / portTICK_PERIOD_MS);  // 100ms delay
-
-        // Configure RS485 mode if enabled
-        if (mConfig.rs485Config.enabled) {
-            // Note: RS485 mode configuration varies by ESP-IDF version
-            // For now, we assume RTS pin is already configured above
-            // and ESP-IDF will handle RS485 mode automatically if RTS is set
-            // Future: Add explicit uart_set_mode(UART_MODE_RS485_HALF_DUPLEX) if available
-        }
-
-        return true;
-    }
-
-    // Installation failed - will fall back to ROM UART
-    return false;
-}
 
 void UartEsp32::write(const char* str) FL_NO_EXCEPT {
     if (!str)

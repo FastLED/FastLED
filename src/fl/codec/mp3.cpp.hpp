@@ -269,20 +269,20 @@ class Mp3StreamDecoderImpl {
     Mp3StreamDecoderImpl() FL_NO_EXCEPT;
     ~Mp3StreamDecoderImpl() FL_NO_EXCEPT;
 
-    bool begin(fl::filebuf_ptr stream);
-    void end();
-    bool isReady() const { return mStream != nullptr && mDecoder != nullptr; }
-    bool hasError(fl::string* msg = nullptr) const;
-    bool decodeNextFrame(audio::Sample* out_sample);
-    fl::size getPosition() const { return mBytesProcessed; }
-    void reset();
-    Mp3Info getInfo() const { return mInfo; }
+    bool begin(fl::filebuf_ptr stream) FL_NO_EXCEPT;
+    void end() FL_NO_EXCEPT;
+    bool isReady() const FL_NO_EXCEPT { return mStream != nullptr && mDecoder != nullptr; }
+    bool hasError(fl::string* msg = nullptr) const FL_NO_EXCEPT;
+    bool decodeNextFrame(audio::Sample* out_sample) FL_NO_EXCEPT;
+    fl::size getPosition() const FL_NO_EXCEPT { return mBytesProcessed; }
+    void reset() FL_NO_EXCEPT;
+    Mp3Info getInfo() const FL_NO_EXCEPT { return mInfo; }
 
   private:
     static constexpr fl::size BUFFER_SIZE = MP3_MINIMP3_STREAM_BUFFER_SIZE;
 
-    bool fillBuffer();
-    bool findAndDecodeFrame(audio::Sample* out_sample);
+    bool fillBuffer() FL_NO_EXCEPT;
+    bool findAndDecodeFrame(audio::Sample* out_sample) FL_NO_EXCEPT;
 
     /* VBR-tag state (FastLED#4129). mSkipTagFrame suppresses the metadata
        frame itself; mSkipSamples counts the encoder priming after it.
@@ -326,7 +326,7 @@ Mp3StreamDecoderImpl::~Mp3StreamDecoderImpl() FL_NO_EXCEPT {
     end();
 }
 
-bool Mp3StreamDecoderImpl::begin(fl::filebuf_ptr stream) {
+bool Mp3StreamDecoderImpl::begin(fl::filebuf_ptr stream) FL_NO_EXCEPT {
     if (!stream) {
         mErrorMsg = "Invalid stream provided";
         mHasError = true;
@@ -361,7 +361,7 @@ bool Mp3StreamDecoderImpl::begin(fl::filebuf_ptr stream) {
     return true;
 }
 
-void Mp3StreamDecoderImpl::end() {
+void Mp3StreamDecoderImpl::end() FL_NO_EXCEPT {
     mDecoder.reset();
     if (mStream) {
         mStream->close();
@@ -370,14 +370,14 @@ void Mp3StreamDecoderImpl::end() {
     mBuffer.reset();
 }
 
-bool Mp3StreamDecoderImpl::hasError(fl::string* msg) const {
+bool Mp3StreamDecoderImpl::hasError(fl::string* msg) const FL_NO_EXCEPT {
     if (msg && mHasError) {
         *msg = mErrorMsg;
     }
     return mHasError;
 }
 
-void Mp3StreamDecoderImpl::reset() {
+void Mp3StreamDecoderImpl::reset() FL_NO_EXCEPT {
     if (mDecoder) {
         mDecoder->reset();
         if (!mDecoder->init()) {
@@ -396,7 +396,7 @@ void Mp3StreamDecoderImpl::reset() {
     resetVbrState();
 }
 
-bool Mp3StreamDecoderImpl::fillBuffer() {
+bool Mp3StreamDecoderImpl::fillBuffer() FL_NO_EXCEPT {
     // Shift remaining data to beginning of buffer
     if (mBufferPos > 0 && mBufferFilled > mBufferPos) {
         fl::size remaining = mBufferFilled - mBufferPos;
@@ -422,7 +422,7 @@ bool Mp3StreamDecoderImpl::fillBuffer() {
     return false;
 }
 
-bool Mp3StreamDecoderImpl::findAndDecodeFrame(audio::Sample* out_sample) {
+bool Mp3StreamDecoderImpl::findAndDecodeFrame(audio::Sample* out_sample) FL_NO_EXCEPT {
     if (!mDecoder) {
         return false;
     }
@@ -545,7 +545,7 @@ bool Mp3StreamDecoderImpl::findAndDecodeFrame(audio::Sample* out_sample) {
     return false;
 }
 
-bool Mp3StreamDecoderImpl::decodeNextFrame(audio::Sample* out_sample) {
+bool Mp3StreamDecoderImpl::decodeNextFrame(audio::Sample* out_sample) FL_NO_EXCEPT {
     if (!isReady()) {
         mErrorMsg = "Decoder not ready";
         mHasError = true;
@@ -588,54 +588,54 @@ bool Mp3StreamDecoderImpl::decodeNextFrame(audio::Sample* out_sample) {
 }  // namespace third_party
 
 // Mp3Decoder implementation
-Mp3Decoder::Mp3Decoder() : mImpl(fl::make_unique<third_party::Mp3StreamDecoderImpl>()) {}
+Mp3Decoder::Mp3Decoder() FL_NO_EXCEPT : mImpl(fl::make_unique<third_party::Mp3StreamDecoderImpl>()) {}
 
 Mp3Decoder::~Mp3Decoder() FL_NO_EXCEPT = default;
 
-bool Mp3Decoder::begin(fl::filebuf_ptr stream) {
+bool Mp3Decoder::begin(fl::filebuf_ptr stream) FL_NO_EXCEPT {
     return mImpl->begin(stream);
 }
 
-void Mp3Decoder::end() {
+void Mp3Decoder::end() FL_NO_EXCEPT {
     mImpl->end();
 }
 
-bool Mp3Decoder::isReady() const {
+bool Mp3Decoder::isReady() const FL_NO_EXCEPT {
     return mImpl->isReady();
 }
 
-bool Mp3Decoder::hasError(fl::string* msg) const {
+bool Mp3Decoder::hasError(fl::string* msg) const FL_NO_EXCEPT {
     return mImpl->hasError(msg);
 }
 
-bool Mp3Decoder::decodeNextFrame(audio::Sample* out_sample) {
+bool Mp3Decoder::decodeNextFrame(audio::Sample* out_sample) FL_NO_EXCEPT {
     return mImpl->decodeNextFrame(out_sample);
 }
 
-fl::size Mp3Decoder::getPosition() const {
+fl::size Mp3Decoder::getPosition() const FL_NO_EXCEPT {
     return mImpl->getPosition();
 }
 
-void Mp3Decoder::reset() {
+void Mp3Decoder::reset() FL_NO_EXCEPT {
     mImpl->reset();
 }
 
-Mp3Info Mp3Decoder::getInfo() const {
+Mp3Info Mp3Decoder::getInfo() const FL_NO_EXCEPT {
     return mImpl->getInfo();
 }
 
 // Mp3 factory implementation
-Mp3DecoderPtr Mp3::createDecoder(fl::string* error_message) {
+Mp3DecoderPtr Mp3::createDecoder(fl::string* error_message) FL_NO_EXCEPT {
     FL_UNUSED(error_message);
     return fl::make_shared<Mp3Decoder>();
 }
 
-bool Mp3::isSupported() {
+bool Mp3::isSupported() FL_NO_EXCEPT {
     // MP3 decoder is available on all platforms
     return true;
 }
 
-Mp3Info Mp3::parseMp3Info(fl::span<const fl::u8> data, fl::string* error_message) {
+Mp3Info Mp3::parseMp3Info(fl::span<const fl::u8> data, fl::string* error_message) FL_NO_EXCEPT {
     Mp3Info info;
 
     // Validate input data

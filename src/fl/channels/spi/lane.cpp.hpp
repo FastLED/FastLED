@@ -1,18 +1,19 @@
 #include "fl/channels/spi/lane.h"
 #include "fl/log/log.h"
 #include "fl/log/log.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace spi {
 
 Lane::Lane(size_t lane_id, MultiLaneDevice* parent)
-    : mLaneId(lane_id) {
+    FL_NO_EXCEPT : mLaneId(lane_id) {
     (void)parent;  // Unused parameter (reserved for future use)
 }
 
-void Lane::write(const u8* data, size_t size) {
+void Lane::write(const u8* data, size_t size) FL_NO_EXCEPT {
     if (!data || size == 0) {
-        FL_WARN("Lane %s: Invalid data or size", mLaneId);
+        FL_WARN("Lane " << mLaneId << ": Invalid data or size");
         return;
     }
 
@@ -24,10 +25,10 @@ void Lane::write(const u8* data, size_t size) {
         mBuffer[i] = data[i];
     }
 
-    FL_DBG("Lane %s: Buffered %s bytes", mLaneId, size);
+    FL_DBG("Lane " << mLaneId << ": Buffered " << size << " bytes");
 }
 
-fl::span<u8> Lane::getBuffer(size_t size) {
+fl::span<u8> Lane::getBuffer(size_t size) FL_NO_EXCEPT {
     // Resize buffer to requested size
     mBuffer.resize(size);
 
@@ -35,7 +36,7 @@ fl::span<u8> Lane::getBuffer(size_t size) {
     return mBuffer;
 }
 
-fl::span<const u8> Lane::data() const {
+fl::span<const u8> Lane::data() const FL_NO_EXCEPT {
     return mBuffer;
 }
 

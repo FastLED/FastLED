@@ -4,7 +4,7 @@ contact_links:
     url: https://github.com/FastLED/fbuild/issues
     about: File board compile/build compatibility problems with fbuild.
   - name: FastLED Documentation
-    url: https://fastled.io/docs
+    url: https://fastled.github.io/dox/
     about: Check the documentation before opening an issue
   - name: FastLED Reddit
     url: https://www.reddit.com/r/FastLED/

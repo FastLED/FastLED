@@ -74,7 +74,7 @@ public:
         fl::vector<int> priorities,
         fl::vector<const char*> names,
         const char* adapterName
-    );
+    ) FL_NO_EXCEPT;
 
     /// @brief Destructor
     ~SpiChannelEngineAdapter() FL_NO_EXCEPT override;
@@ -85,43 +85,43 @@ public:
     /// @param data Channel data to check
     /// @return true if data is true SPI chipset (APA102, SK9822, HD108)
     /// @note Rejects clockless chipsets (WS2812, SK6812, etc.)
-    bool canHandle(const ChannelDataPtr& data) const override;
+    bool canHandle(const ChannelDataPtr& data) const FL_NO_EXCEPT override;
 
     /// @brief Enqueue channel data for transmission
     /// @param channelData Channel data to transmit
     /// @note Batches multiple channels for later transmission
-    void enqueue(ChannelDataPtr channelData) override;
+    void enqueue(ChannelDataPtr channelData) FL_NO_EXCEPT override;
 
     /// @brief Trigger transmission of enqueued data
     /// @note Groups channels by clock pin, acquires DMA buffers, calls transmit()
-    void show() override;
+    void show() FL_NO_EXCEPT override;
 
     /// @brief Query driver state and perform maintenance
     /// @return Current driver state (READY, BUSY, DRAINING, or ERROR)
     /// @note Checks isBusy(), releases buffers when complete
-    DriverState poll() override;
+    DriverState poll() FL_NO_EXCEPT override;
 
     /// @brief Get adapter name for debugging
     /// @return Engine name (e.g., "SPI_SINGLE")
-    fl::string getName() const override { return mName; }
+    fl::string getName() const FL_NO_EXCEPT override { return mName; }
 
     /// @brief Get driver capabilities (SPI protocols only)
     /// @return Capabilities with supportsSpi=true, supportsClockless=false
-    Capabilities getCapabilities() const override {
+    Capabilities getCapabilities() const FL_NO_EXCEPT override {
         return Capabilities(false, true);  // SPI only
     }
 
     /// @brief Get maximum priority among all controllers
     /// @return Highest priority (5-9 for true SPI adapters)
-    int getPriority() const;
+    int getPriority() const FL_NO_EXCEPT;
 
 private:
     /// @brief Friend declaration for make_shared to access private constructor
     template<typename T, typename... Args>
-    friend fl::shared_ptr<T> fl::make_shared(Args&&... args) FL_NO_EXCEPT;
+    friend fl::shared_ptr<T> fl::adl_barrier::make_shared(Args&&... args) FL_NO_EXCEPT;  // see fl/stl/adl_barrier.h
 
     /// @brief Private constructor - use create() factory method
-    SpiChannelEngineAdapter(const char* name);
+    SpiChannelEngineAdapter(const char* name) FL_NO_EXCEPT;
 
     /// @brief Information about a registered SPI hardware controller
     struct ControllerInfo {
@@ -130,9 +130,11 @@ private:
         fl::string name;                       ///< Name (e.g., "SPI2", "SPI3", "I2S0")
         fl::vector<int> assignedClockPins;     ///< Clock pins assigned to this controller
         bool isInitialized;                    ///< Whether begin() has been called
+        int configuredDataPin = -1;
+        u32 configuredClockSpeedHz = 0;
 
         ControllerInfo(fl::shared_ptr<SpiHwBase> ctrl, int prio, const char* n)
-            : controller(ctrl), priority(prio), name(n), isInitialized(false) {}
+            FL_NO_EXCEPT : controller(ctrl), priority(prio), name(n), isInitialized(false) {}
     };
 
     struct ClockPinAssignment {
@@ -150,34 +152,37 @@ private:
     /// @param ctrl Controller to check
     /// @param clockPin Clock pin to test
     /// @returns true if compatible, false otherwise
-    bool canControllerHandleClockPin(const ControllerInfo& ctrl, int clockPin) const;
+    bool canControllerHandleClockPin(const ControllerInfo& ctrl, int clockPin) const FL_NO_EXCEPT;
 
     /// @brief Initialize controller if needed for this clock pin
     /// @param ctrl Controller to initialize
     /// @param clockPin Clock pin for configuration
     /// @param dataPin Data pin for configuration
+    /// @param clockSpeedHz Requested SPI clock rate
     /// @returns true on success, false on error
-    bool initializeControllerIfNeeded(ControllerInfo& ctrl, int clockPin, int dataPin);
+    bool initializeControllerIfNeeded(ControllerInfo& ctrl, int clockPin, int dataPin,
+                                      u32 clockSpeedHz) FL_NO_EXCEPT;
 
-    /// @brief Group data structure for channels with same clock pin
+    /// @brief Channels sharing one SPI bus configuration
     struct ClockPinGroup {
         int clockPin;
+        int dataPin;
+        u32 clockSpeedHz;
         Esp32SpiBus requestedBus = Esp32SpiBus::AUTO;
         fl::vector<ChannelDataPtr> channels;
     };
 
-    /// @brief Group channels by clock pin for efficient transmission
+    /// @brief Group adjacent channels with matching pins, host, and clock rate
     /// @param channels Span of channel data to group
-    /// @return Vector of groups (clock pin + channels)
-    /// @note Channels with same clock pin can share SPI bus configuration
+    /// @return Vector of groups in enqueue order
     fl::vector<ClockPinGroup> groupByClockPin(
         fl::span<const ChannelDataPtr> channels
-    );
+    ) FL_NO_EXCEPT;
 
-    /// @brief Transmit a batch of channels (all same clock pin)
-    /// @param channels Channels to transmit (must have same clock pin)
+    /// @brief Transmit a batch of channels sharing one SPI configuration
+    /// @param channels Channels to transmit (must have matching pins, host, and rate)
     /// @return true on success, false on error
-    bool transmitBatch(fl::span<const ChannelDataPtr> channels);
+    bool transmitBatch(fl::span<const ChannelDataPtr> channels) FL_NO_EXCEPT;
 
     fl::vector<ControllerInfo> mControllers;              ///< All managed controllers
     fl::vector<ClockPinAssignment> mClockPinAssignments;  ///< Clock pin → controller mapping

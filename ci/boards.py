@@ -18,13 +18,9 @@ ESP32_IDF_5_4_PIOARDUINO = "https://github.com/pioarduino/platform-espressif32/r
 ESP32_IDF_5_5_PIOARDUINO = "https://github.com/pioarduino/platform-espressif32/releases/download/55.03.34/platform-espressif32.zip"
 ESP32_IDF_5_5_1_PIOARDUINO = "https://github.com/pioarduino/platform-espressif32/releases/download/55.03.35/platform-espressif32.zip"
 ESP32_IDF_5_5_5_PIOARDUINO = "https://github.com/pioarduino/platform-espressif32/releases/download/55.03.311/platform-espressif32.zip"
-# IDF 6.0 preview via pioarduino prep_IDF6 branch (commit 98230ad4aa, 2026-05-25).
-# platform.json in this branch pins framework-arduinoespressif32 to
-# arduino-esp32/archive/master.zip — arduino-esp32 master built on ESP-IDF v6.0.1+.
-# Moves to a release tag when pioarduino cuts one. See FastLED#3516.
-ESP32_IDF_6_PIOARDUINO = (
-    "https://github.com/pioarduino/platform-espressif32.git#prep_IDF6"
-)
+# Arduino 4 on ESP-IDF 6: pioarduino 61.04.00-RC1 release (FastLED#4827,
+# FastLED#3516). Bump to the final 61.04.x tag when pioarduino cuts it.
+ESP32_IDF_6_PIOARDUINO = "https://github.com/pioarduino/platform-espressif32/releases/download/61.04.00-RC1/platform-espressif32.zip"
 ESP32_IDF_LATEST_PIOARDUINO = ESP32_IDF_5_5_1_PIOARDUINO
 
 ESP32_IDF_LATEST_PIOARDUINO = (
@@ -42,6 +38,51 @@ APOLLO3_2_2_0 = "https://github.com/nigelb/platform-apollo3blue"
 # ALL is auto-populated by Board.__post_init__ for every board declared with
 # add_board_to_all left at its default. Clones, create_board()'s unknown-board
 # fallbacks and test fixtures pass False and stay out.
+# Memory-tier board names (see Board.memory_class). Every name must be a
+# registered Board or a host pseudo-board (ci/tests/test_board_memory_tiers.py).
+TINY_MEMORY_BOARDS: frozenset[str] = frozenset(
+    {
+        "attiny85",  # 512B RAM
+        "attiny88",  # 512B RAM
+        "attiny4313",  # 256B RAM
+        "attiny1604",  # 1KB RAM (ATtinyxy4)
+        "digispark-tiny",  # 512B RAM
+        "atmega8a",  # 1KB RAM
+    }
+)
+
+LOW_MEMORY_BOARDS: frozenset[str] = frozenset(
+    {
+        "uno",
+        "nano",
+        "nano_every",
+        "leonardo",
+        "attiny1616",  # 2KB RAM (ATtinyxy6) — has room for standard sketches
+        "teensylc",
+        "teensy30",
+        "teensy31",
+        "teensy32",
+        "stm32f103c8",
+        "stm32f103cb",
+        "stm32f103tb",
+        "esp8266",
+        "uno_r4_wifi",
+        # uno_r4_minima: no Board yet (fbuild's Renesas core lacks its bsp_api.h);
+        # its renesas-ra platform already classifies it as low memory.
+    }
+)
+
+HUGE_MEMORY_BOARDS: frozenset[str] = frozenset(
+    {
+        "teensy35",
+        "teensy36",
+        "teensy40",
+        "teensy41",
+        "native",
+        "web",
+    }
+)
+
 ALL: list["Board"] = []
 
 
@@ -275,35 +316,10 @@ class Board:
         # FastLED example sketches. Matches sketch_macros.h SKETCH_HAS_TINY_MEMORY.
         # Case-insensitive match — board names vary in casing (e.g.
         # "attiny85" vs "ATtiny1604").
-        tiny_memory_boards = {
-            "attiny85",  # 512B RAM
-            "attiny88",  # 512B RAM
-            "attiny4313",  # 256B RAM
-            "attiny1604",  # 1KB RAM (ATtinyxy4)
-            "digispark-tiny",  # 512B RAM
-            "atmega8a",  # 1KB RAM
-        }
-        if self.board_name.lower() in tiny_memory_boards:
+        if self.board_name.lower() in TINY_MEMORY_BOARDS:
             return "tiny"
 
         # Low-memory board list (matches sketch_macros.h)
-        low_memory_boards = {
-            "uno",
-            "nano",
-            "nano_every",
-            "leonardo",
-            "attiny1616",  # 2KB RAM (ATtinyxy6) — has room for standard sketches
-            "teensylc",
-            "teensy30",
-            "teensy31",
-            "teensy32",
-            "stm32f103c8",
-            "stm32f103cb",
-            "stm32f103tb",
-            "esp8266",
-            "uno_r4_wifi",
-            "uno_r4_minima",
-        }
 
         # Low-memory platform families
         low_memory_platforms = {
@@ -313,23 +329,15 @@ class Board:
         }
 
         # Check low-memory first
-        if self.board_name in low_memory_boards:
+        if self.board_name in LOW_MEMORY_BOARDS:
             return "low"
         if self.platform and self.platform in low_memory_platforms:
             return "low"
 
         # Huge-memory boards (>= 256KB RAM, >= 512KB flash)
         # Matches sketch_macros.h SKETCH_HAS_HUGE_MEMORY=1 platforms
-        huge_memory_boards = {
-            "teensy35",
-            "teensy36",
-            "teensy40",
-            "teensy41",
-            "native",
-            "web",
-        }
 
-        if self.board_name in huge_memory_boards:
+        if self.board_name in HUGE_MEMORY_BOARDS:
             return "huge"
 
         # Huge-memory platform families
@@ -826,8 +834,8 @@ ESP32DEV_IDF4_4 = Board(
 )
 
 # IDF 6.0 target for the classic-ESP32 I2S parallel-out driver bring-up
-# (FastLED#3515). Uses pioarduino's prep_IDF6 branch until an IDF6 release
-# tag ships. No FASTLED_ESP32_I2S selector — the driver auto-compiles via
+# (FastLED#3515). Uses the pioarduino 61.04.00-RC1 release (Arduino core
+# 4.0.0-RC1 on ESP-IDF 6.1, FastLED#4827). No FASTLED_ESP32_I2S selector — the driver auto-compiles via
 # FASTLED_ESP32_HAS_I2S (feature flag) and gc-sections elides it when
 # unused. Users select the I2S driver at runtime via
 # `FastLED.enableDriver<fl::Bus::FLEX_IO, 0>()` or
@@ -1399,6 +1407,20 @@ TEENSY41 = Board(
 # Basic Arduino boards
 UNO = Board(
     board_name="uno",
+    platform="atmelavr",
+    framework="arduino",
+)
+
+NANO = Board(
+    board_name="nano",
+    real_board_name="nanoatmega328",
+    platform="atmelavr",
+    framework="arduino",
+)
+
+ATMEGA2560_MEGA = Board(
+    board_name="mega",
+    real_board_name="megaatmega2560",
     platform="atmelavr",
     framework="arduino",
 )

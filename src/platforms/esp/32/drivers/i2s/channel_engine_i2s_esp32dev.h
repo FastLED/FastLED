@@ -54,6 +54,7 @@
 // the classic-ESP32 I2S feature flag.
 
 #include "fl/channels/data.h"
+#include "platforms/is_platform.h"
 #include "fl/channels/driver.h"
 #include "fl/channels/wave8.h"
 #include "fl/stl/compiler_control.h"
@@ -85,6 +86,14 @@ class ChannelEngineI2sEsp32Dev : public IChannelDriver {
     bool canHandle(const ChannelDataPtr &data) const FL_NO_EXCEPT override;
     void enqueue(ChannelDataPtr data) FL_NO_EXCEPT override;
     void show() FL_NO_EXCEPT override;
+
+#if defined(FL_IS_ESP32)
+    /// Install the clockless (wave8) pipeline. Called via
+    /// platforms::enableClocklessEncoders() from every clockless channel
+    /// construction; until then show() rejects clockless batches and the
+    /// pipeline is not linked (#4793).
+    static void enableClockless() FL_NO_EXCEPT;
+#endif
     DriverState poll() FL_NO_EXCEPT override;
 
     fl::string getName() const FL_NO_EXCEPT override {
@@ -105,7 +114,8 @@ class ChannelEngineI2sEsp32Dev : public IChannelDriver {
     // Introspection (test-only public accessors)
     //=========================================================================
 
-    /// @brief The peripheral this engine was constructed with. Tests
+    /// @brief The peripheral in use: the injected one (tests), or on ESP32 the
+    /// one acquired on the first clockless batch (null before that, #4809). Tests
     ///        use this to reach into the mock without going through
     ///        the singleton.
     fl::shared_ptr<II2sPeripheralEsp32Dev> peripheral() const FL_NO_EXCEPT {
@@ -125,6 +135,14 @@ class ChannelEngineI2sEsp32Dev : public IChannelDriver {
     DriverState currentState() const FL_NO_EXCEPT { return mState; }
 
   private:
+    /// Clockless half of show(): peripheral init, wave8 encode, transmit.
+    void showClocklessBatch() FL_NO_EXCEPT;
+    /// Acquire the peripheral on first clockless use (ESP32), #4809.
+    bool ensurePeripheral() FL_NO_EXCEPT;
+    void registerPeripheralCallback() FL_NO_EXCEPT;
+#if defined(FL_IS_ESP32)
+    static void (ChannelEngineI2sEsp32Dev::*sClocklessBatch)();
+#endif
     /// @brief Ensure the scratch buffer is at least `required` bytes.
     ///        Reallocates via the peripheral if the current buffer
     ///        is too small. Returns false on allocation failure.

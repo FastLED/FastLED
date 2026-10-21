@@ -1616,7 +1616,7 @@ def runner(
     # `except Exception: pass`, .full_run_cache.json was never written, and the
     # fast path it gates could never fire (#3783). Binding at function scope
     # means no branch can omit it again.
-    _watermarks: Optional[dict[str, float]] = None
+    _watermarks: Optional[dict[str, float | str]] = None
     if test_categories.unit and not test_categories.unit_only and cpp_test_change:
         from ci.meson.cache_utils import capture_source_watermarks
         from ci.util.paths import PROJECT_ROOT
@@ -2056,6 +2056,7 @@ def runner(
                                     "tests_max_file_mtime",
                                     "examples_max_file_mtime",
                                     "meson_max_file_mtime",
+                                    "native_source_hash",
                                 )
                                 # Only refresh when the whole watermark set
                                 # survives. A partial carry (e.g. a cache file

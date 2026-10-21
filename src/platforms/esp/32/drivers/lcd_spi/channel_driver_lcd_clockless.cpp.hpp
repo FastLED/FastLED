@@ -462,7 +462,7 @@ bool ChannelDriverLcdClockless::beginTransmission(
     }
 
     if (channels.size() > 16) {
-        FL_WARN("ChannelDriverLcdClockless: too many channels (%s), max 16 supported", channels.size());
+        FL_WARN("ChannelDriverLcdClockless: too many channels (" << channels.size() << "), max 16 supported");
         return false;
     }
 

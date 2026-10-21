@@ -92,8 +92,10 @@ Additional I2S defines and guidance:
   - For independent per-controller selection with the ESP-IDF backend, pass
     `fl::Esp32SpiBus::HOST2` or `fl::Esp32SpiBus::HOST3` as the final argument:
     `FastLED.addLeds<APA102, DATA, CLOCK, RGB, DATA_RATE_MHZ(20)>(leds, count, fl::Esp32SpiBus::HOST3);`.
-    An omitted override remains `AUTO` and preserves the existing automatic
-    host allocation order.
+    An explicit host uses the native SPI adapter; on ESP32-S3, this bypasses
+    the default LCD_CAM SPI driver so two strips can use HOST2 and HOST3
+    independently. An omitted override remains `AUTO` and uses the platform
+    default SPI driver.
   - **`FASTLED_ESP32_SPI_BULK_TRANSFER`**: When `1`, batches pixels into blocks to reduce transfer overhead and improve throughput at the cost of RAM. Default `0`.
   - **`FASTLED_ESP32_SPI_BULK_TRANSFER_SIZE`**: Bulk block size (CRGBs) when bulk mode is enabled. Default `64`.
 

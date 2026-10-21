@@ -44,6 +44,10 @@ enum class ProfileId : u8 { WS2812B };
 FASTLED_SHARED_PTR(Channel);
 FASTLED_SHARED_PTR(ChannelData);
 
+#if FL_COLOR_PIPELINE_SHARED
+shared_ptr<StreamingPipelineQ16> channelColorPipeline(const CLEDController& controller) FL_NO_EXCEPT;
+#endif
+
 /// @brief LED channel for parallel output, pretty much a CPixelLEDController
 ///        but with timing and pin information.
 ///
@@ -63,9 +67,12 @@ public:
     ///        emits a one-shot `FL_ERROR` (see channel.cpp.hpp).
     /// @return Shared pointer to channel (auto-cleanup when out of scope)
     /// @note Channels always use ChannelManager by default.
-    static ChannelPtr create(const ChannelConfig& config);
+    static ChannelPtr create(const ChannelConfig& config) FL_NO_EXCEPT;
     template<const EmitterProfile& Profile>
     static ChannelPtr create(const ChannelConfig& config) FL_NO_EXCEPT {
+#ifdef FL_IS_AVR
+        FL_STATIC_ASSERT(&Profile == nullptr, "Color profiles are unsupported on AVR");
+#endif
         ChannelConfig rebound(config);
 #if FL_COLOR_PROFILE_RUNTIME
         rebound.options.clearColorProfile();
@@ -77,6 +84,12 @@ public:
         auto channel = fl::make_shared<StaticProfileChannel<Profile>>(rebound);
         channel->mName = makeName(channel->mId, rebound.mName);
         auto& events = ChannelEvents::instance();
+#if FL_COLOR_PROFILE_RUNTIME
+        if (channel->reconcileColorProfile(rebound.options)) {
+            events.onColorProfileFallback(
+                ColorProfileEvent{channel->id(), channel->colorProfileStatus(), {}});
+        }
+#endif
         events.onChannelCreated(*channel);
         return channel;
     }
@@ -90,62 +103,62 @@ public:
 
     /// @brief Get the channel ID
     /// @return Channel ID (always increments, starts at 0)
-    i32 id() const override { return mId; }
+    i32 id() const FL_NO_EXCEPT override { return mId; }
 
     /// @brief Get the channel name
     /// @return Channel name (user-specified or auto-generated "Channel_<id>")
-    const fl::string& name() const override { return mName; }
+    const fl::string& name() const FL_NO_EXCEPT override { return mName; }
 
     /// @brief Get the pin number for this channel (data pin)
     /// @return Pin number
-    int getPin() const;
+    int getPin() const FL_NO_EXCEPT;
 
     /// @brief Get the clock pin for this channel (SPI only, -1 for clockless)
     /// @return Clock pin number or -1
-    int getClockPin() const;
+    int getClockPin() const FL_NO_EXCEPT;
 
     /// @brief Set gamma correction value
     /// @param gamma Gamma value (e.g., 2.8)
     /// @return Reference to this channel for chaining
-    Channel& setGamma(float gamma);
+    Channel& setGamma(float gamma) FL_NO_EXCEPT;
 
     /// @brief Get gamma correction value
     /// @return Gamma value if set, nullopt otherwise
-    fl::optional<float> getGamma() const;
+    fl::optional<float> getGamma() const FL_NO_EXCEPT;
 
     /// @brief Get the timing configuration for this channel (clockless only)
     /// @return ChipsetTimingConfig reference
     /// @deprecated Use getChipset() instead
-    const ChipsetTimingConfig& getTiming() const;
+    const ChipsetTimingConfig& getTiming() const FL_NO_EXCEPT;
 
     /// @brief Get the chipset configuration variant
     /// @return ChipsetVariant reference
-    const ChipsetVariant& getChipset() const { return mChipset; }
+    const ChipsetVariant& getChipset() const FL_NO_EXCEPT { return mChipset; }
 
     /// @brief Get the RGB channel ordering
     /// @return EOrder value
-    EOrder getRgbOrder() const { return mRgbOrder; }
+    EOrder getRgbOrder() const FL_NO_EXCEPT { return mRgbOrder; }
 
     /// @brief Check if this is a clockless chipset
-    bool isClockless() const { return mChipset.is<ClocklessChipset>(); }
+    bool isClockless() const FL_NO_EXCEPT { return mChipset.is<ClocklessChipset>(); }
 
     /// @brief Check if this is an SPI chipset
-    bool isSpi() const { return mChipset.is<SpiChipsetConfig>(); }
+    bool isSpi() const FL_NO_EXCEPT { return mChipset.is<SpiChipsetConfig>(); }
 
     /// @brief Apply reconfigurable settings from a ChannelConfig
     /// @param config The configuration to apply
     /// @note Does NOT change: mChipset, mDriver, mId
-    void applyConfig(const ChannelConfig& config);
+    void applyConfig(const ChannelConfig& config) FL_NO_EXCEPT;
 
     // Re-expose protected base class methods for external access
     /// @brief Add this channel to the global controller draw list
-    void addToDrawList();
+    void addToDrawList() FL_NO_EXCEPT;
 
     /// @brief Remove this channel from the global controller draw list
-    void removeFromDrawList();
+    void removeFromDrawList() FL_NO_EXCEPT;
 
     /// @brief Get the number of LEDs in this channel
-    int size() const override;
+    int size() const FL_NO_EXCEPT OVERRIDE_IF_NOT_AVR;
 
 #if FL_COLOR_PROFILE_RUNTIME
     /// How a channel stores the colour pipeline its binding describes.
@@ -170,32 +183,35 @@ public:
 #endif
 
     /// @brief Show the LEDs with optional brightness scaling
-    void showLeds(u8 brightness = 255) OVERRIDE_IF_NOT_AVR;
+    void showLeds(u8 brightness = 255) FL_NO_EXCEPT OVERRIDE_IF_NOT_AVR;
 
     /// @brief Check if this channel is in the controller draw list
-    bool isInDrawList() const;
+    bool isInDrawList() const FL_NO_EXCEPT;
 
     /// @brief Get pointer to base CLEDController for linked list traversal
-    CLEDController* asController() { return static_cast<CLEDController*>(this); }
-    const CLEDController* asController() const { return static_cast<const CLEDController*>(this); }
+    CLEDController* asController() FL_NO_EXCEPT { return static_cast<CLEDController*>(this); }
+    const CLEDController* asController() const FL_NO_EXCEPT { return static_cast<const CLEDController*>(this); }
+#ifndef FL_IS_AVR
+    const Channel* asChannel() const FL_NO_EXCEPT override { return this; }
+#endif
 
     /// @brief Get the LED array as a span (non-const)
-    fl::span<CRGB> leds();
+    fl::span<CRGB> leds() FL_NO_EXCEPT;
 
     /// @brief Get the LED array as a span (const)
-    fl::span<const CRGB> leds() const;
+    fl::span<const CRGB> leds() const FL_NO_EXCEPT;
 
     /// @brief Get the color correction
-    CRGB getCorrection();
+    CRGB getCorrection() FL_NO_EXCEPT;
 
     /// @brief Get the color temperature
-    CRGB getTemperature();
+    CRGB getTemperature() FL_NO_EXCEPT;
 
     /// @brief Get the dither mode
-    u8 getDither();
+    u8 getDither() FL_NO_EXCEPT;
 
     /// @brief Get the RGBW conversion mode
-    Rgbw getRgbw() const;
+    Rgbw getRgbw() const FL_NO_EXCEPT;
 
     bool hasColorProfile() const FL_NO_EXCEPT { return emitterProfile() != nullptr; }
     /// True when the streaming transform is actually installed in the output
@@ -215,7 +231,13 @@ public:
 #endif
     }
     const EmitterProfile* emitterProfile() const FL_NO_EXCEPT {
-        return CLEDController::emitterProfile();
+#ifdef FL_IS_AVR
+        return nullptr;
+#else
+        const EmitterProfile* profile = staticEmitterProfile();
+        return profile != nullptr && !mStaticProfileCleared
+            ? profile : mSettings.emitterProfile();
+#endif
     }
     const SourceProfile& sourceProfile() const FL_NO_EXCEPT {
 #if FL_COLOR_PROFILE_RUNTIME
@@ -230,7 +252,7 @@ public:
     /// The installed streaming pipeline, or null on the legacy path. The power
     /// limiter charges its solved drives rather than the source (#4344), and
     /// holds this reference while it does (#4440).
-    fl::shared_ptr<StreamingPipelineQ16> colorPipeline() const FL_NO_EXCEPT override;
+    fl::shared_ptr<StreamingPipelineQ16> colorPipeline() const FL_NO_EXCEPT;
 #endif
     bool isEnabled() const FL_NO_EXCEPT { return const_cast<Channel*>(this)->getEnabled(); }
     /// Where this channel is in its dither cycle: the number of frames its
@@ -258,51 +280,51 @@ public:
     }
     /// @brief Get the name of the currently bound driver (if any)
     /// @return Engine name, or empty string if no driver is bound or driver has expired
-    fl::string getEngineName() const;
+    fl::string getEngineName() const FL_NO_EXCEPT;
 
     /// @brief Set screen map for JS canvas visualization from XYMap
     /// @param map 2D addressing mode (serpentine, line-by-line, etc.)
     /// @param diameter Optional LED diameter for canvas rendering
     /// @return Reference to this channel for method chaining
-    Channel& setScreenMap(const fl::XYMap& map, float diameter = -1.f);
+    Channel& setScreenMap(const fl::XYMap& map, float diameter = -1.f) FL_NO_EXCEPT;
 
     /// @brief Set screen map for JS canvas visualization
     /// @param map ScreenMap with LED positions
     /// @return Reference to this channel for method chaining
-    Channel& setScreenMap(const fl::ScreenMap& map);
+    Channel& setScreenMap(const fl::ScreenMap& map) FL_NO_EXCEPT;
 
     /// @brief Set screen map for JS canvas visualization from dimensions
     /// @param width Grid width in pixels
     /// @param height Grid height in pixels
     /// @param diameter Optional LED diameter for canvas rendering
     /// @return Reference to this channel for method chaining
-    Channel& setScreenMap(fl::u16 width, fl::u16 height, float diameter = -1.f);
+    Channel& setScreenMap(fl::u16 width, fl::u16 height, float diameter = -1.f) FL_NO_EXCEPT;
 
     /// @brief Set screen map for 1D strip remapping from XMap
     /// @param map 1D addressing mode (linear, reverse, custom function, LUT)
     /// @return Reference to this channel for method chaining
-    Channel& setScreenMap(const fl::XMap& map);
+    Channel& setScreenMap(const fl::XMap& map) FL_NO_EXCEPT;
 
     /// @brief Get the current screen map
     /// @return Reference to current screen map
-    const fl::ScreenMap& getScreenMap() const;
+    const fl::ScreenMap& getScreenMap() const FL_NO_EXCEPT;
 
     /// @brief Check if screen map is configured
     /// @return true if screen map has been set
-    bool hasScreenMap() const;
+    bool hasScreenMap() const FL_NO_EXCEPT;
 
 private:
     /// @brief Friend declaration for make_shared to access private constructor
     template<typename T, typename... Args>
-    friend fl::shared_ptr<T> fl::make_shared(Args&&... args) FL_NO_EXCEPT;
+    friend fl::shared_ptr<T> fl::adl_barrier::make_shared(Args&&... args) FL_NO_EXCEPT;  // see fl/stl/adl_barrier.h
     template<const EmitterProfile& Profile>
     friend class StaticProfileChannel;
 
 protected:
     // CPixelLEDController interface implementation - protected so subclass delegates
     // (e.g., UCS7604's DelegateController) can call through the base class chain.
-    void showPixels(PixelController<RGB, 1, 0xFFFFFFFF>& pixels) override;
-    void init() override;
+    void showPixels(PixelController<RGB, 1, 0xFFFFFFFF>& pixels) FL_NO_EXCEPT override;
+    void init() FL_NO_EXCEPT override;
     using PixelEncoder = void (*)(Channel&, PixelIterator&, bool,
                                   fl::vector_psram<u8>&);
 
@@ -315,7 +337,7 @@ private:
     /// Marked `FL_NO_INLINE` to keep `showPixels()` compact -- see #2773
     /// item 2.1. Returns `nullptr` on a hard miss (caller should silently
     /// bail).
-    FL_NO_INLINE fl::shared_ptr<IChannelDriver> resolveDynamicDriver();
+    FL_NO_INLINE fl::shared_ptr<IChannelDriver> resolveDynamicDriver() FL_NO_EXCEPT;
 
     /// @brief Cold helper for `showPixels()` when mChannelData is still in use
     ///        by the driver: warns and waits for READY (#4566).
@@ -385,8 +407,8 @@ private:
     Channel(Channel&&) FL_NO_EXCEPT = delete;
     Channel& operator=(Channel&&) FL_NO_EXCEPT = delete;
 
-    static i32 nextId();
-    static fl::string makeName(i32 id, const fl::optional<fl::string>& configName = fl::optional<fl::string>());
+    static i32 nextId() FL_NO_EXCEPT;
+    static fl::string makeName(i32 id, const fl::optional<fl::string>& configName = fl::optional<fl::string>()) FL_NO_EXCEPT;
 
     ChipsetVariant mChipset;         // Chipset configuration (clockless or SPI)
     PixelEncoder mPixelEncoder = nullptr;  // Bound once from mChipset at construction.
@@ -434,16 +456,23 @@ private:
     fl::string mName;               // User-specified or auto-generated name
     ChannelDataPtr mChannelData;
     fl::ScreenMap mScreenMap;        // Screen map for JS canvas visualization
+    ChannelOptions mSettings;
+#ifndef FL_IS_AVR
+    bool mStaticProfileCleared = false;
+#endif
+    void syncLegacySettings() FL_NO_EXCEPT;
+#ifndef FL_IS_AVR
+    void onSettingsChanged(SettingsChange change) FL_NO_EXCEPT override;
+    virtual const EmitterProfile* staticEmitterProfile() const FL_NO_EXCEPT { return nullptr; }
+#endif
+
 #if FL_COLOR_PROFILE_RUNTIME
     // Recompute the color-profile verdict from the current mSettings and
     // apply its consequences. Runs on both creation and reconfiguration, so
     // applyConfig() cannot leave a channel reporting the verdict of the
     // configuration it just replaced. Returns true when the binding fell back.
-    // Reads the requested/bound state from `options` rather than mSettings on
-    // purpose: the constructor and applyConfig() both call setCorrection()
-    // when no profile is bound, and that runs clearColorProfile(), which wipes
-    // mRequested and mUseGlobalSourceDefault. mSettings therefore no longer
-    // remembers that management was asked for; the caller's options do.
+    // Reads the requested configuration from `options`; mSettings may receive
+    // the current global source default while deriving the installed pipeline.
     bool reconcileColorProfile(const ChannelOptions& options) FL_NO_EXCEPT;
 
     /// Raise C5's fallback state and its one-time warning. Shared by the two
@@ -467,9 +496,14 @@ template<const EmitterProfile& Profile>
 class StaticProfileChannel final : public Channel {
 public:
     explicit StaticProfileChannel(const ChannelConfig& config) FL_NO_EXCEPT
-        : Channel(config.chipset, config.mLeds, config.rgb_order, config.options) {}
+        : Channel(config.chipset, config.mLeds, config.rgb_order, config.options) {
+#ifdef FL_IS_AVR
+        FL_STATIC_ASSERT(&Profile == nullptr, "Color profiles are unsupported on AVR");
+#endif
+    }
 
 protected:
+#ifndef FL_IS_AVR
     const EmitterProfile* staticEmitterProfile() const FL_NO_EXCEPT override {
 #if FL_COLOR_PROFILE_RUNTIME
         return nullptr;
@@ -477,11 +511,12 @@ protected:
         return &Profile;
 #endif
     }
+#endif
 };
 
 /// @brief Get stub channel driver for testing or unsupported platforms
 /// @return Pointer to singleton stub driver instance
 /// @note Returns a no-op driver that allows code to compile/run on all platforms
-IChannelDriver* getStubChannelEngine();
+IChannelDriver* getStubChannelEngine() FL_NO_EXCEPT;
 
 }  // namespace fl

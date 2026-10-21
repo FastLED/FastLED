@@ -11,7 +11,7 @@ namespace fl {
 // filebuf default implementations
 // ============================================================================
 
-fl::size_t filebuf::bytes_left() const {
+fl::size_t filebuf::bytes_left() const FL_NO_EXCEPT {
     fl::size_t s = size();
     // tell() is non-const in the interface, but bytes_left needs it.
     // Use const_cast for this read-only query - tell() doesn't mutate logical state.
@@ -19,7 +19,7 @@ fl::size_t filebuf::bytes_left() const {
     return (t <= s) ? (s - t) : 0;
 }
 
-fl::size_t filebuf::pos() const {
+fl::size_t filebuf::pos() const FL_NO_EXCEPT {
     return const_cast<filebuf*>(this)->tell();
 }
 
@@ -30,7 +30,7 @@ namespace detail {
 // ============================================================================
 
 posix_filebuf::posix_filebuf(const char* path, const char* mode)
-    : mFile(nullptr), mLastError(0), mPath(path ? path : "") {
+    FL_NO_EXCEPT : mFile(nullptr), mLastError(0), mPath(path ? path : "") {
     mFile = fl::fopen(path, mode);
     if (!mFile) {
         captureError();
@@ -60,11 +60,11 @@ posix_filebuf& posix_filebuf::operator=(posix_filebuf&& other) FL_NO_EXCEPT {
     return *this;
 }
 
-bool posix_filebuf::is_open() const {
+bool posix_filebuf::is_open() const FL_NO_EXCEPT {
     return mFile != nullptr;
 }
 
-void posix_filebuf::close() {
+void posix_filebuf::close() FL_NO_EXCEPT {
     if (mFile) {
         int result = fl::fclose(mFile);
         mFile = nullptr;
@@ -76,7 +76,7 @@ void posix_filebuf::close() {
     }
 }
 
-fl::size_t posix_filebuf::read(char* buffer, fl::size_t count) {
+fl::size_t posix_filebuf::read(char* buffer, fl::size_t count) FL_NO_EXCEPT {
     if (!mFile) {
         return 0;
     }
@@ -92,7 +92,7 @@ fl::size_t posix_filebuf::read(char* buffer, fl::size_t count) {
     return bytes_read;
 }
 
-fl::size_t posix_filebuf::write(const char* data, fl::size_t count) {
+fl::size_t posix_filebuf::write(const char* data, fl::size_t count) FL_NO_EXCEPT {
     if (!mFile) {
         mLastError = fl::io::err_bad_file;
         return 0;
@@ -107,7 +107,7 @@ fl::size_t posix_filebuf::write(const char* data, fl::size_t count) {
     return bytes_written;
 }
 
-fl::size_t posix_filebuf::tell() {
+fl::size_t posix_filebuf::tell() FL_NO_EXCEPT {
     if (!mFile) {
         mLastError = fl::io::err_bad_file;
         return 0;
@@ -121,7 +121,7 @@ fl::size_t posix_filebuf::tell() {
     return static_cast<fl::size_t>(pos);
 }
 
-bool posix_filebuf::seek(fl::size_t pos, seek_dir dir) {
+bool posix_filebuf::seek(fl::size_t pos, seek_dir dir) FL_NO_EXCEPT {
     if (!mFile) {
         mLastError = fl::io::err_bad_file;
         return false;
@@ -137,7 +137,7 @@ bool posix_filebuf::seek(fl::size_t pos, seek_dir dir) {
     return true;
 }
 
-fl::size_t posix_filebuf::size() const {
+fl::size_t posix_filebuf::size() const FL_NO_EXCEPT {
     if (!mFile) {
         return 0;
     }
@@ -155,38 +155,38 @@ fl::size_t posix_filebuf::size() const {
     return static_cast<fl::size_t>(end_pos);
 }
 
-const char* posix_filebuf::path() const {
+const char* posix_filebuf::path() const FL_NO_EXCEPT {
     return mPath.c_str();
 }
 
-bool posix_filebuf::is_eof() const {
+bool posix_filebuf::is_eof() const FL_NO_EXCEPT {
     return mFile ? (fl::feof(mFile) != 0) : false;
 }
 
-bool posix_filebuf::has_error() const {
+bool posix_filebuf::has_error() const FL_NO_EXCEPT {
     return mLastError != 0 || (mFile && fl::ferror(mFile) != 0);
 }
 
-void posix_filebuf::clear_error() {
+void posix_filebuf::clear_error() FL_NO_EXCEPT {
     clearErrorState();
 }
 
-int posix_filebuf::error_code() const {
+int posix_filebuf::error_code() const FL_NO_EXCEPT {
     return mLastError;
 }
 
-const char* posix_filebuf::error_message() const {
+const char* posix_filebuf::error_message() const FL_NO_EXCEPT {
     if (mLastError == 0) {
         return "No error";
     }
     return fl::strerror(mLastError);
 }
 
-void posix_filebuf::captureError() {
+void posix_filebuf::captureError() FL_NO_EXCEPT {
     mLastError = fl::get_errno();
 }
 
-void posix_filebuf::clearErrorState() {
+void posix_filebuf::clearErrorState() FL_NO_EXCEPT {
     mLastError = 0;
     if (mFile) {
         fl::clearerr(mFile);

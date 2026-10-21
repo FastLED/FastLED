@@ -142,7 +142,7 @@ bool SpiHw4MXRT1062::begin(const SpiHw4::Config& config) {
 
     // Validate bus_num against mBusId if driver has pre-assigned ID
     if (mBusId != -1 && config.bus_num != static_cast<u8>(mBusId)) {
-        FL_LOG_SPI("SpiHw4MXRT1062: Bus mismatch - expected %s, got %s", mBusId, static_cast<int>(config.bus_num));
+        FL_LOG_SPI("SpiHw4MXRT1062: Bus mismatch - expected " << mBusId << ", got " << (static_cast<int>(config.bus_num)));
         return false;
     }
 
@@ -162,7 +162,7 @@ bool SpiHw4MXRT1062::begin(const SpiHw4::Config& config) {
             mBusId = 2;
             break;
         default:
-            FL_LOG_SPI("SpiHw4MXRT1062: Invalid bus number %s", static_cast<int>(bus_num));
+            FL_LOG_SPI("SpiHw4MXRT1062: Invalid bus number " << (static_cast<int>(bus_num)));
             return false;
     }
 
@@ -207,7 +207,7 @@ bool SpiHw4MXRT1062::begin(const SpiHw4::Config& config) {
     // Initialize the SPI peripheral
     mSPI->begin();
 
-    FL_LOG_SPI("SpiHw4MXRT1062: Initialized on bus %s clock=%sHz lanes=%s pins: CLK=%s D0=%s D1=%s D2=%s D3=%s", mBusId, mClockSpeed, static_cast<int>(mActiveLanes), (int)mClockPin, (int)mData0Pin, (int)mData1Pin, (int)mData2Pin, (int)mData3Pin);
+    FL_LOG_SPI("SpiHw4MXRT1062: Initialized on bus " << mBusId << " clock=" << mClockSpeed << "Hz lanes=" << (static_cast<int>(mActiveLanes)) << " pins: CLK=" << ((int)mClockPin) << " D0=" << ((int)mData0Pin) << " D1=" << ((int)mData1Pin) << " D2=" << ((int)mData2Pin) << " D3=" << ((int)mData3Pin));
 
     mInitialized = true;
     mTransactionActive = false;
@@ -266,7 +266,7 @@ bool SpiHw4MXRT1062::transmit(TransmitMode mode) {
         return true;  // Nothing to transmit
     }
 
-    FL_LOG_SPI("SpiHw4MXRT1062: Transmitting %s bytes via LPSPI bus %s with %s lanes", mCurrentTotalSize, mBusId, static_cast<int>(mActiveLanes));
+    FL_LOG_SPI("SpiHw4MXRT1062: Transmitting " << mCurrentTotalSize << " bytes via LPSPI bus " << mBusId << " with " << (static_cast<int>(mActiveLanes)) << " lanes");
 
     // Begin SPI transaction with configured clock speed
     mSPI->beginTransaction(fl::platforms::teensy::LpspiSettings(mClockSpeed, MSBFIRST, SPI_MODE0));

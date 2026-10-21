@@ -55,7 +55,7 @@ namespace fl {
  *     fl::vector<uint8_t> bytes;
  *     auto result = rx->decode(rx_timing, fl::back_inserter(bytes));
  *     if (result.ok()) {
- *         FL_DBG("Decoded %s bytes", result.value());
+ *         FL_DBG("Decoded " << result.value() << " bytes");
  *     }
  * }
  * @endcode
@@ -120,13 +120,13 @@ public:
      * // Result: Only last 100 symbols captured in buffer
      * @endcode
      */
-    virtual bool begin(const RxConfig& config) override = 0;
+    virtual bool begin(const RxConfig& config) FL_NO_EXCEPT override = 0;
 
     /**
      * @brief Check if receive operation is complete
      * @return true if receive finished, false if still in progress
      */
-    virtual bool finished() const override = 0;
+    virtual bool finished() const FL_NO_EXCEPT override = 0;
 
     /**
      * @brief Wait for RMT symbols with timeout
@@ -168,13 +168,13 @@ public:
      * }
      * @endcode
      */
-    virtual RxWaitResult wait(u32 timeout_ms) override = 0;
+    virtual RxWaitResult wait(u32 timeout_ms) FL_NO_EXCEPT override = 0;
 
     /**
      * @brief Get the RMT clock resolution in Hz
      * @return Resolution in Hz (e.g., 40000000 for 40MHz)
      */
-    virtual u32 getResolutionHz() const = 0;
+    virtual u32 getResolutionHz() const FL_NO_EXCEPT = 0;
 
     /**
      * @brief Decode received RMT symbols to bytes into a span
@@ -199,13 +199,13 @@ public:
      *     uint8_t buffer[256];
      *     auto result = rx->decode(rx_timing, buffer);
      *     if (result.ok()) {
-     *         FL_DBG("Decoded %s bytes", result.value());
+     *         FL_DBG("Decoded " << result.value() << " bytes");
      *     }
      * }
      * @endcode
      */
     virtual fl::result<u32, DecodeError> decode(const ChipsetTiming4Phase &timing,
-                                                       fl::span<u8> out) override = 0;
+                                                       fl::span<u8> out) FL_NO_EXCEPT override = 0;
 
     /**
      * @brief Get raw edge timings in universal format (for debugging)
@@ -228,17 +228,17 @@ public:
      * EdgeTime edges[100];
      * size_t count = rx->getRawEdgeTimes(edges);
      * for (size_t i = 0; i < count; i++) {
-     *     FL_DBG("%s%sns", (edges[i].high ? "HIGH " : "LOW "), edges[i].ns);
+     *     FL_DBG((edges[i].high ? "HIGH " : "LOW ") << edges[i].ns << "ns");
      * }
      * @endcode
      */
-    virtual size_t getRawEdgeTimes(fl::span<EdgeTime> out, size_t offset = 0) override = 0;
+    virtual size_t getRawEdgeTimes(fl::span<EdgeTime> out, size_t offset = 0) FL_NO_EXCEPT override = 0;
 
     /**
      * @brief Get device type name
      * @return "RMT" for RMT-based receiver
      */
-    virtual const char* name() const override = 0;
+    virtual const char* name() const FL_NO_EXCEPT override = 0;
 
     /**
      * @brief Manually inject edge timings for testing (Phase 1)
@@ -248,7 +248,7 @@ public:
      * Converts EdgeTime (nanosecond) to RMT symbols (ticks) and stores
      * in internal buffer. After injection, use decode() to process edges.
      */
-    virtual bool injectEdges(fl::span<const EdgeTime> edges) override = 0;
+    virtual bool injectEdges(fl::span<const EdgeTime> edges) FL_NO_EXCEPT override = 0;
 
 protected:
     RmtRxChannel() = default;
@@ -257,7 +257,7 @@ protected:
      * @brief Get received symbols as a span (internal method for decode())
      * @return Span of const RmtSymbol containing received data
      */
-    virtual fl::span<const RmtSymbol> getReceivedSymbols() const = 0;
+    virtual fl::span<const RmtSymbol> getReceivedSymbols() const FL_NO_EXCEPT = 0;
 };
 
 } // namespace fl

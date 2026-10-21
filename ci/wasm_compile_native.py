@@ -155,8 +155,13 @@ def needs_compilation(source_file: Path, output_object: Path) -> bool:
 
     source_mtime = source_file.stat().st_mtime
     object_mtime = output_object.stat().st_mtime
+    if source_mtime > object_mtime:
+        return True
 
-    return source_mtime > object_mtime
+    # An object built against an older PCH is stale even if its own source
+    # did not change.
+    pch_file = BUILD_DIR / "wasm_pch.h.pch"
+    return pch_file.exists() and pch_file.stat().st_mtime > object_mtime
 
 
 def compile_object(
@@ -214,6 +219,8 @@ def compile_object(
             str(output_object),
             "-include-pch",
             str(pch_file),
+            "-Werror=invalid-pch",  # Error if PCH is invalid
+            "-fpch-validate-input-files-content",  # Strict PCH validation (pch_strict_flags lint)
         ]
     )
     cmd += includes + flags["defines"] + flags["compiler_flags"]
@@ -222,7 +229,9 @@ def compile_object(
         print(f"Compiling {source_file.name}...")
         print(f"Command: {list2cmdline(cmd)}")
 
-    result = RunningProcess.run(cmd, cwd=PROJECT_ROOT)
+    from ci.meson.native_launchers import wrap_compiler_with_zccache
+
+    result = RunningProcess.run(wrap_compiler_with_zccache(cmd), cwd=PROJECT_ROOT)
     return result.returncode == 0
 
 

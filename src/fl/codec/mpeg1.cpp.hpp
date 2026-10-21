@@ -1,22 +1,23 @@
 #include "fl/codec/mpeg1.h"
 #include "fl/stl/utility.h"
 #include "fl/stl/detail/memory_file_handle.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
 // MPEG1 factory implementation
-IDecoderPtr Mpeg1::createDecoder(const Mpeg1Config& config, fl::string* error_message) {
+IDecoderPtr Mpeg1::createDecoder(const Mpeg1Config& config, fl::string* error_message) FL_NO_EXCEPT {
     FL_UNUSED(error_message);
     // MPEG1 is currently supported via software decoder on all platforms
     return fl::make_shared<third_party::SoftwareMpeg1Decoder>(config);
 }
 
-bool Mpeg1::isSupported() {
+bool Mpeg1::isSupported() FL_NO_EXCEPT {
     // Software MPEG1 decoder is available on all platforms
     return true;
 }
 
-Mpeg1Info Mpeg1::parseMpeg1Info(fl::span<const fl::u8> data, fl::string* error_message) {
+Mpeg1Info Mpeg1::parseMpeg1Info(fl::span<const fl::u8> data, fl::string* error_message) FL_NO_EXCEPT {
     Mpeg1Info info;
 
     // Validate input data

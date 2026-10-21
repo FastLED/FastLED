@@ -98,6 +98,9 @@ struct FlexIODiagnostics {
     u32 tcd_biter;
     u32 tcd_csr;
     u32 dma_es;  ///< #3416 FX-HIGH-5: eDMA error status snapshot
+    u32 txUnderruns;      ///< streamed-frame ring halves refilled too late
+    u32 txIsrMaxCycles;   ///< worst refill ISR, CPU cycles
+    u32 txStreamedWords;  ///< words in the last streamed frame (0 = one-shot)
     bool initialized;
     bool dmaComplete;
 };

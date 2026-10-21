@@ -36,7 +36,7 @@ public:
      * @param timestamp Execution time (e.g., millis())
      * @param task Callable to execute when timestamp arrives
      */
-    void schedule(u32 timestamp, Task task) {
+    void schedule(u32 timestamp, Task task) FL_NO_EXCEPT {
         mQueue.push({timestamp, fl::move(task)});
     }
 
@@ -45,7 +45,7 @@ public:
      * @param currentTime Current time (e.g., millis())
      * @return Number of tasks executed
      */
-    size_t tick(u32 currentTime) {
+    size_t tick(u32 currentTime) FL_NO_EXCEPT {
         size_t executed = 0;
 
         while (!mQueue.empty() && currentTime >= mQueue.top().executeAt) {
@@ -63,14 +63,14 @@ public:
      * @brief Get number of pending scheduled tasks
      * @return Count of tasks waiting to be executed
      */
-    size_t pendingCount() const {
+    size_t pendingCount() const FL_NO_EXCEPT {
         return mQueue.size();
     }
 
     /**
      * @brief Clear all scheduled tasks
      */
-    void clear() {
+    void clear() FL_NO_EXCEPT {
         mQueue.clear();
     }
 
@@ -82,7 +82,7 @@ private:
         // Comparison for stable priority queue (earlier times = higher priority)
         // priority_queue_stable uses fl::less by default, creating a max-heap
         // Invert comparison so earlier (smaller) timestamps are "greater" = higher priority
-        bool operator<(const ScheduledTask& other) const {
+        bool operator<(const ScheduledTask& other) const FL_NO_EXCEPT {
             return executeAt > other.executeAt;  // Inverted: smaller timestamps = higher priority
         }
     };

@@ -15,6 +15,7 @@
 // RGBCCT implementations live in rgbw_colorimetric.cpp.hpp, included once
 // by the unity build manifest (fl/gfx/_build.cpp.hpp).
 #include "fl/gfx/rgbw_colorimetric.h"
+#include "fl/stl/noexcept.h"
 #endif
 
 
@@ -71,7 +72,7 @@ inline u8 rgbw_min3(u8 a, u8 b, u8 c) FL_NO_EXCEPT {
     }
 }
 
-inline u8 divide_by_3(u8 x) {
+inline u8 divide_by_3(u8 x) FL_NO_EXCEPT {
     u16 y = (u16(x) * 85) >> 8;
     return static_cast<u8>(y);
 }
@@ -83,7 +84,7 @@ inline u8 divide_by_3(u8 x) {
 void rgb_2_rgbw_exact(u16 w_color_temperature, u8 r, u8 g,
                       u8 b, u8 r_scale, u8 g_scale,
                       u8 b_scale, u8 *out_r, u8 *out_g,
-                      u8 *out_b, u8 *out_w) {
+                      u8 *out_b, u8 *out_w) FL_NO_EXCEPT {
     (void)w_color_temperature;
     r = scale8(r, r_scale);
     g = scale8(g, g_scale);
@@ -98,7 +99,7 @@ void rgb_2_rgbw_exact(u16 w_color_temperature, u8 r, u8 g,
 void rgb_2_rgbw_max_brightness(u16 w_color_temperature, u8 r,
                                u8 g, u8 b, u8 r_scale,
                                u8 g_scale, u8 b_scale, u8 *out_r,
-                               u8 *out_g, u8 *out_b, u8 *out_w) {
+                               u8 *out_g, u8 *out_b, u8 *out_w) FL_NO_EXCEPT {
     (void)w_color_temperature;
     *out_r = scale8(r, r_scale);
     *out_g = scale8(g, g_scale);
@@ -110,7 +111,7 @@ void rgb_2_rgbw_null_white_pixel(u16 w_color_temperature, u8 r,
                                  u8 g, u8 b, u8 r_scale,
                                  u8 g_scale, u8 b_scale,
                                  u8 *out_r, u8 *out_g, u8 *out_b,
-                                 u8 *out_w) {
+                                 u8 *out_w) FL_NO_EXCEPT {
     (void)w_color_temperature;
     *out_r = scale8(r, r_scale);
     *out_g = scale8(g, g_scale);
@@ -121,7 +122,7 @@ void rgb_2_rgbw_null_white_pixel(u16 w_color_temperature, u8 r,
 void rgb_2_rgbw_white_boosted(u16 w_color_temperature, u8 r,
                               u8 g, u8 b, u8 r_scale,
                               u8 g_scale, u8 b_scale, u8 *out_r,
-                              u8 *out_g, u8 *out_b, u8 *out_w) {
+                              u8 *out_g, u8 *out_b, u8 *out_w) FL_NO_EXCEPT {
     (void)w_color_temperature;
     r = scale8(r, r_scale);
     g = scale8(g, g_scale);
@@ -173,14 +174,14 @@ struct Rgb2RgbwUserState {
 };
 } // namespace
 
-void set_rgb_2_rgbw_function(rgb_2_rgbw_function func) {
+void set_rgb_2_rgbw_function(rgb_2_rgbw_function func) FL_NO_EXCEPT {
     fl::Singleton<Rgb2RgbwUserState>::instance().fn = func;
 }
 
 void rgb_2_rgbw_user_function(u16 w_color_temperature, u8 r,
                               u8 g, u8 b, u8 r_scale,
                               u8 g_scale, u8 b_scale, u8 *out_r,
-                              u8 *out_g, u8 *out_b, u8 *out_w) {
+                              u8 *out_g, u8 *out_b, u8 *out_w) FL_NO_EXCEPT {
     rgb_2_rgbw_function fn = fl::Singleton<Rgb2RgbwUserState>::instance().fn;
     if (fn == nullptr) {
         fn = rgb_2_rgbw_exact;
@@ -677,7 +678,7 @@ void rgb_2_rgbw_colorimetric_boosted(const Rgbw& cfg, u8 r,
 
 void rgbw_partial_reorder(EOrderW w_placement, u8 b0, u8 b1,
                           u8 b2, u8 w, u8 *out_b0,
-                          u8 *out_b1, u8 *out_b2, u8 *out_b3) {
+                          u8 *out_b1, u8 *out_b2, u8 *out_b3) FL_NO_EXCEPT {
 
     u8 out[4] = {b0, b1, b2, 0};
     switch (w_placement) {
@@ -706,5 +707,35 @@ void rgbw_partial_reorder(EOrderW w_placement, u8 b0, u8 b1,
     *out_b2 = out[2];
     *out_b3 = out[3];
 }
+
+namespace detail {
+namespace {
+RgbwConvertFn& rgbw_convert_slot() FL_NO_EXCEPT {
+    static RgbwConvertFn slot = nullptr;  // zero-initialised before any ctor
+    return slot;
+}
+
+void rgbw_convert_pixel(const Rgbw& rgbw, const u8 (&raw)[3],
+                        const u8 (&premix)[3], const u8 (&order)[3], u8* b0, u8* b1, u8* b2,
+                        u8* b3) FL_NO_EXCEPT {
+    // Same steps as PixelController::loadAndScaleRGBW: source-order RGB plus
+    // W from the raw pixel and premixed scale, then the wire reorder.
+    u8 c[3];
+    u8 w = 0;
+    rgb_2_rgbw(rgbw, raw[0], raw[1], raw[2], premix[0], premix[1], premix[2],
+               &c[0], &c[1], &c[2], &w);
+    rgbw_partial_reorder(rgbw.w_placement, c[order[0]], c[order[1]],
+                         c[order[2]], w, b0, b1, b2, b3);
+}
+}  // namespace
+
+void enable_rgbw_conversion() FL_NO_EXCEPT {
+#if !defined(FL_IS_AVR)
+    // AVR's PixelIterator keeps its own thunk and never reads the slot.
+    rgbw_convert_slot() = &rgbw_convert_pixel;
+#endif
+}
+RgbwConvertFn rgbw_conversion() FL_NO_EXCEPT { return rgbw_convert_slot(); }
+}  // namespace detail
 
 } // namespace fl
