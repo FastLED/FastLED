@@ -42,8 +42,8 @@
 #include "fl/stl/span.h"
 #include "fl/stl/singleton.h"
 #include <Arduino.h>
-#if defined(FL_IS_ESP32) // ok platform specific - the chip's SPI3 capability macro lives in this ESP32 driver header
-#include "platforms/esp/32/drivers/spi/spi_hw_base.h" // ok platform specific - reads the chip's SPI host count for this hardware probe
+#if defined(FL_IS_ESP32) // ok platform specific - the explicit ESP32 SPI host probe needs this chip's peripheral count
+#include "platforms/esp/32/drivers/spi/spi_hw_base.h" // ok platform specific - FASTLED_ESP32_HAS_SPI3 rejects one-host chips
 #endif
 
 // #3428: FlexIO2 SPI mode bring-up smoke test (`flexioSpiSelfTest` RPC).
@@ -82,6 +82,7 @@ void AutoResearchRemoteControl::bindDriverMethods(fl::Remote& remote) {
     remote.bind("dualSpiHostLoopback", [this](const fl::json& args) -> fl::json {
         fl::json response = fl::json::object();
 #if !defined(FL_IS_ESP32) || !FASTLED_ESP32_HAS_SPI3 // ok platform specific - this probe requires two physical ESP32 SPI hosts
+        (void)this;
         (void)args;
         response.set("success", false);
         response.set("error", "TwoSpiHostsUnavailable");
@@ -118,14 +119,14 @@ void AutoResearchRemoteControl::bindDriverMethods(fl::Remote& remote) {
             dummy_leds[i] = CRGB::Black;
         }
         const auto register_active = [&]() {
-            FastLED.addLeds<APA102, 1, 3, RGB, DATA_RATE_KHZ(2400)>(
+            FastLED.addLeds<APA102, 1, 3, RGB, DATA_RATE_KHZ(2400)>( // ok platform specific - test the public explicit ESP32 host API
                 active_leds, kLedCount, active_host == 2
-                    ? fl::Esp32SpiBus::HOST2 : fl::Esp32SpiBus::HOST3);
+                    ? fl::Esp32SpiBus::HOST2 : fl::Esp32SpiBus::HOST3); // ok platform specific - select the measured physical host
         };
         const auto register_dummy = [&]() {
-            FastLED.addLeds<APA102, 4, 5, RGB, DATA_RATE_KHZ(2400)>(
+            FastLED.addLeds<APA102, 4, 5, RGB, DATA_RATE_KHZ(2400)>( // ok platform specific - register the other host as the dummy
                 dummy_leds, kLedCount, active_host == 2
-                    ? fl::Esp32SpiBus::HOST3 : fl::Esp32SpiBus::HOST2);
+                    ? fl::Esp32SpiBus::HOST3 : fl::Esp32SpiBus::HOST2); // ok platform specific - choose the host opposite the measured output
         };
         if (dummy_first) {
             register_dummy();

@@ -12,27 +12,31 @@ import asyncio
 
 from running_process import RunningProcess
 
-from ci.rpc_client import RpcClient
+from ci.rpc_client import RpcClient, RpcError, RpcTimeoutError
 from ci.util.serial_interface import create_serial_interface
 
 
 async def run_case(port: str, active_host: int, dummy_first: bool) -> bool:
-    async with RpcClient(
-        port, serial_interface=create_serial_interface(port)
-    ) as client:
-        response = await client.send(
-            "dualSpiHostLoopback",
-            {"activeHost": active_host, "dummyFirst": dummy_first},
-            timeout=20,
-        )
-        result = response.data
-        passed = isinstance(result, dict) and result.get("success") is True
-        print(
-            f"HOST{active_host} active, dummy first={dummy_first}: "
-            f"{'PASS' if passed else 'FAIL'} {result}",
-            flush=True,
-        )
-        return passed
+    try:
+        async with RpcClient(
+            port, serial_interface=create_serial_interface(port)
+        ) as client:
+            response = await client.send(
+                "dualSpiHostLoopback",
+                {"activeHost": active_host, "dummyFirst": dummy_first},
+                timeout=20,
+            )
+    except (RpcError, RpcTimeoutError) as exc:
+        print(f"HOST{active_host} active, dummy first={dummy_first}: FAIL {exc}")
+        return False
+    result = response.data
+    passed = isinstance(result, dict) and result.get("success") is True
+    print(
+        f"HOST{active_host} active, dummy first={dummy_first}: "
+        f"{'PASS' if passed else 'FAIL'} {result}",
+        flush=True,
+    )
+    return passed
 
 
 async def reset_board(environment: str, port: str) -> None:
