@@ -4,7 +4,13 @@
 
 - [x] Remove linker roots for unused PWM teardown and vector initialization without changing features.
 - [x] Measure the unchanged reporter sketch before/after and verify explicit feature consumers.
-- [ ] Run native tests, lint and code review; publish measured implementation.
+- [x] Run native tests, lint and code review; publish measured implementation.
+
+Validation: clean reporter 272,434/23,292 -> 270,414/23,148 flash/static RAM;
+Blink budget rejects the previous report and accepts the new image. Real SDK
+PWM/Serial/UCS7604 consumer links; native debug passes 321 units + 95 examples;
+full lint and code review pass. Published on #4872; hosted CI is separate from
+these local validation results.
 
 ## Merge and remaining flash investigation (#4870)
 
