@@ -61,6 +61,43 @@ src/fl/stl/fixed_point/          ← implementation directory
     - `header.cpp`: Has platform guards (e.g., `#ifdef ESP32 ... #endif`)
   - Avoid: Adding `#ifdef ESP32` to both header and implementation files (degrades IDE experience)
 
+## Select Types at the Preprocessor Boundary (REQUIRED)
+
+When behavior is selected at compile time, keep platform/capability `#if`
+branches at the dispatch boundary. Select a concrete backend type or template
+specialization there, then express shared behavior in ordinary C++ using that
+type. Avoid repeating the same platform conditions throughout constructors,
+methods and call sites.
+
+Illustrative shape (use the component's actual capability macros and backends):
+
+```cpp
+#if defined(FL_COMPONENT_HAS_BACKEND_A)
+#include "backend_a.h"
+using SelectedBackend = BackendA;
+#else
+#include "backend_b.h"
+using SelectedBackend = BackendB;
+#endif
+
+using PlatformComponent = Component<SelectedBackend>;
+```
+
+- Use a backend template when it shares meaningful implementation across
+  backends. If no shared algorithm needs a template, a selected type alias alone
+  is sufficient. Do not introduce a template solely to wrap an existing type.
+- Keep guards for unavailable SDK headers, types and symbols at the boundary;
+  templates and `if constexpr` do not make unavailable non-dependent names valid.
+  Follow the capability-detection rules above and sparse-dispatch rules below.
+- Make fixed configuration visible to the compiler through concrete types,
+  template parameters or small inline helpers so unused branches can be removed.
+  Keep runtime configuration when callers require it; this rule does not replace
+  runtime driver selection such as `Bus::FLEX_IO`.
+- Preserve public behavior, defaults and diagnostics when refactoring. For a
+  footprint claim, measure matched before/after images and check that template
+  instantiations have not duplicated code. This pattern alone does not guarantee
+  a smaller binary.
+
 ## Sparse Platform Dispatch Pattern (`.cpp.hpp` files)
 
 A `.cpp.hpp` file is a **compile-time component router** that assembles a complete feature from sparse, per-platform fragments with null/no-op fallbacks.
