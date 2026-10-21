@@ -113,7 +113,8 @@ int SpiChannelEngineAdapter::selectControllerForClockPin(int clockPin, Esp32SpiB
             mControllers[i].controller->getBusId() != static_cast<int>(requestedBus)) {
             continue;
         }
-        if (!canControllerHandleClockPin(mControllers[i], clockPin)) {
+        if (requestedBus == Esp32SpiBus::AUTO &&
+            !canControllerHandleClockPin(mControllers[i], clockPin)) {
             continue;
         }
 
@@ -154,14 +155,15 @@ bool SpiChannelEngineAdapter::initializeControllerIfNeeded(
     ControllerInfo& ctrl, int clockPin, int dataPin, u32 clockSpeedHz) FL_NO_EXCEPT {
 
     if (ctrl.isInitialized) {
-        // Verify compatibility
-        for (int pin : ctrl.assignedClockPins) {
-            if (pin == clockPin) {
-                return true;  // Already configured for this pin
-            }
+        if (!ctrl.assignedClockPins.empty() &&
+            ctrl.assignedClockPins[0] == clockPin &&
+            ctrl.configuredDataPin == dataPin &&
+            ctrl.configuredClockSpeedHz == clockSpeedHz) {
+            return true;
         }
-        FL_WARN("SpiChannelEngineAdapter: Controller " << ctrl.name << " already initialized with different clock pin");
-        return false;
+        ctrl.controller->end();
+        ctrl.isInitialized = false;
+        ctrl.assignedClockPins.clear();
     }
 
     // Initialize controller based on lane count
@@ -186,6 +188,8 @@ bool SpiChannelEngineAdapter::initializeControllerIfNeeded(
     }
 
     ctrl.isInitialized = true;
+    ctrl.configuredDataPin = dataPin;
+    ctrl.configuredClockSpeedHz = clockSpeedHz;
     ctrl.assignedClockPins.push_back(clockPin);
 
     FL_DBG("SpiChannelEngineAdapter: Initialized " << ctrl.name << " with clock pin " << clockPin);
@@ -237,11 +241,10 @@ void SpiChannelEngineAdapter::show() FL_NO_EXCEPT {
     mTransmittingChannels = fl::move(mEnqueuedChannels);
     mEnqueuedChannels.clear();
 
-    // Group channels by clock pin
-    // Channels with the same clock pin can share SPI bus configuration
+    // Group adjacent channels with identical SPI bus configuration.
     auto groups = groupByClockPin(mTransmittingChannels);
 
-    FL_DBG("SpiChannelEngineAdapter: Grouped into " << groups.size() << " clock pin groups");
+    FL_DBG("SpiChannelEngineAdapter: Grouped into " << groups.size() << " SPI configuration groups");
 
     // Transmit each group sequentially
     for (size_t i = 0; i < groups.size(); i++) {
@@ -311,26 +314,27 @@ fl::vector<SpiChannelEngineAdapter::ClockPinGroup> SpiChannelEngineAdapter::grou
 
         const SpiChipsetConfig& spiConfig = chipset.get<SpiChipsetConfig>();
         int clockPin = spiConfig.clockPin;
+        int dataPin = channel->getPin();
+        u32 clockSpeedHz = spiConfig.timing.clock_hz;
 
-        // Find existing group for this clock pin
-        ClockPinGroup* existingGroup = nullptr;
-        for (ClockPinGroup& group : groups) {
-            if (group.clockPin == clockPin && group.requestedBus == spiConfig.spiBus) {
-                existingGroup = &group;
-                break;
+        // Preserve enqueue order when the same host alternates configurations.
+        if (!groups.empty()) {
+            ClockPinGroup& last = groups.back();
+            if (last.clockPin == clockPin && last.dataPin == dataPin &&
+                last.clockSpeedHz == clockSpeedHz &&
+                last.requestedBus == spiConfig.spiBus) {
+                last.channels.push_back(channel);
+                continue;
             }
         }
 
-        // Add to existing group or create new group
-        if (existingGroup) {
-            existingGroup->channels.push_back(channel);
-        } else {
-            ClockPinGroup newGroup;
-            newGroup.clockPin = clockPin;
-            newGroup.requestedBus = spiConfig.spiBus;
-            newGroup.channels.push_back(channel);
-            groups.push_back(newGroup);
-        }
+        ClockPinGroup newGroup;
+        newGroup.clockPin = clockPin;
+        newGroup.dataPin = dataPin;
+        newGroup.clockSpeedHz = clockSpeedHz;
+        newGroup.requestedBus = spiConfig.spiBus;
+        newGroup.channels.push_back(channel);
+        groups.push_back(newGroup);
     }
 
     return groups;
