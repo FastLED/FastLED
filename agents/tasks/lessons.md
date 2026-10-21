@@ -547,3 +547,20 @@
   backend consumes a queue or only its first strip. LPC SCT requires immediate
   per-strip flushing; opt RMT4 into batched completion with a separate template
   policy and test both lifecycles.
+
+- Distinguish interrupt-driven output from nonblocking `show()` return when
+  comparing historical backends. Verify both contracts from source and device
+  evidence. READY alone cannot establish a complete waveform: an SDK translator
+  that ends a frame early must propagate an error, and long-transfer validation
+  must inspect output beyond the initial hardware buffer.
+
+- Queue insertion can fail without throwing. Acquire a frame's in-use lease
+  only after insertion succeeds, and reserve destination capacity before moving
+  a batch. Exercise failure with a rejecting memory resource and selectively
+  restore the old insertion order to verify the regression test catches it.
+
+- Reserve the complete encoded frame before clearing or writing it. A vector's
+  failed growth can otherwise create a valid-looking short transmission; keep
+  batch failure sticky even if later strips encode successfully.
+- Refill deadlines must start from hardware launch, using a clock shared by
+  the producer task and ISR. SDK software preload is not a hardware underrun.

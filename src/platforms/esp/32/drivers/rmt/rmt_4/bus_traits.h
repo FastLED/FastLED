@@ -24,15 +24,23 @@
 #include "fl/channels/bus_priorities.h"
 #include "fl/channels/bus_traits.h"
 #include "fl/channels/config.h"
+#include "fl/channels/detail/driver_completion_wait.h"
 #include "fl/channels/manager.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/type_traits.h"
 #include "platforms/esp/32/drivers/rmt/rmt_4/channel_driver_rmt4.h"
 #include "platforms/esp/32/drivers/rmt/rmt_4/rmt4_peripheral_esp.h"
+#include "platforms/esp/32/drivers/rmt/rmt_4/rmt4_async_driver.h"
 
 namespace fl {
 
 namespace detail {
+#if FL_RMT4_ASYNC
+using Rmt4LegacyDriver = Rmt4AsyncDriver;
+#else
+using Rmt4LegacyDriver = ChannelEngineRMT4Impl;
+#endif
+
 /// @brief RMT4 singleton: peripheral + driver lifetimes paired (#3458).
 ///
 /// Mirrors `UartBusHolder` — same shape so the channel-driver registry
@@ -43,7 +51,7 @@ struct Rmt4BusHolder {
     fl::shared_ptr<ChannelEngineRMT4> driver;
     Rmt4BusHolder() FL_NO_EXCEPT
         : peripheral(fl::make_shared<Rmt4PeripheralESP>()),
-          driver(ChannelEngineRMT4::create(peripheral)) {}
+          driver(fl::make_shared<Rmt4LegacyDriver>(peripheral)) {}
 };
 } // namespace detail
 
@@ -52,10 +60,26 @@ template <> struct BusTraits<Bus::RMT> {
 
     static fl::shared_ptr<Driver> instancePtr() FL_NO_EXCEPT {
         static detail::Rmt4BusHolder gHolder;
+        detail::setLegacyCompletionWait(&waitLegacy);
         return gHolder.driver;
     }
 
     static Driver &instance() FL_NO_EXCEPT { return *instancePtr(); }
+
+    static bool waitLegacy(u32 timeoutMs) FL_NO_EXCEPT {
+        return instance().waitDone(timeoutMs);
+    }
+
+    static void showLegacy() FL_NO_EXCEPT {
+        instance().show();
+        if (!FL_RMT4_ASYNC) { instance().waitDone(); }
+    }
+
+    static void rejectLegacyFrame() FL_NO_EXCEPT {
+        // An invalid submission reports an encoding failure without sending
+        // a shortened frame. Keep this backend-specific error contract here.
+        instance().enqueue(ChannelDataPtr());
+    }
 
     static void registerWithManager() FL_NO_EXCEPT {
         ChannelManager::registry().addDriver(default_bus_priority(Bus::RMT, 0),

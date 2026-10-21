@@ -9,6 +9,13 @@
 
 #include <FastLED.h>
 #include "fl/stl/unique_ptr.h"
+#include "fl/stl/weak_ptr.h"
+
+#if defined(FL_IS_ESP_32DEV) && !FASTLED_RMT5 && !defined(FASTLED_ESP32_USE_CLOCKLESS_SPI) // ok platform specific - only this backend exposes retained frame leases.
+#define AUTORESEARCH_LEGACY_OBSERVES_RMT4_FRAMES 1
+#else
+#define AUTORESEARCH_LEGACY_OBSERVES_RMT4_FRAMES 0
+#endif
 
 enum class LegacyClocklessChipset : uint8_t {
     WS2812B,
@@ -36,7 +43,7 @@ enum class LegacyClocklessChipset : uint8_t {
 // so the gate never fired and esp32dev compile still hit the
 // static_assert. LegacyClocklessProxy iterates pins 0-8 so all three
 // of 6/7/8 must be excluded for the classic ESP32 build.
-#if defined(FL_IS_ESP_32DEV)
+#if defined(FL_IS_ESP_32DEV) // ok platform specific - safe output pins 18/19 provide five strips without instantiating flash pins or invalid pins on other boards.
 #define AUTORESEARCH_LEGACY_SUPPORTS_PIN_6 0
 #define AUTORESEARCH_LEGACY_SUPPORTS_PIN_7 0
 #define AUTORESEARCH_LEGACY_SUPPORTS_PIN_8 0
@@ -141,12 +148,18 @@ inline const char* legacyClocklessBoundDriverName() {
 /// automatically calls removeFromDrawList() via ~CLEDController().
 class LegacyClocklessProxy {
     fl::unique_ptr<CLEDController> mController;
+#if AUTORESEARCH_LEGACY_OBSERVES_RMT4_FRAMES
+    fl::weak_ptr<fl::ChannelData> mFrame;
+#endif
 
     template<typename Controller>
     fl::unique_ptr<CLEDController> createTyped(CRGB* leds, int numLeds,
                                                bool rgbw) {
         auto c = fl::make_unique<Controller>();
         FastLED.addLeds(c.get(), leds, numLeds);
+#if AUTORESEARCH_LEGACY_OBSERVES_RMT4_FRAMES
+        mFrame = c->channelData();
+#endif
         if (rgbw) {
             c->setRgbw(RgbwDefault());
         }
@@ -182,6 +195,10 @@ public:
             case 3: mController = create<3>(leds, numLeds, chipset, rgbw); break;
             case 4: mController = create<4>(leds, numLeds, chipset, rgbw); break;
             case 5: mController = create<5>(leds, numLeds, chipset, rgbw); break;
+#if defined(FL_IS_ESP_32DEV)
+            case 18: mController = create<18>(leds, numLeds, chipset, rgbw); break;
+            case 19: mController = create<19>(leds, numLeds, chipset, rgbw); break;
+#endif
 #if AUTORESEARCH_LEGACY_SUPPORTS_PIN_6
             case 6: mController = create<6>(leds, numLeds, chipset, rgbw); break;
 #endif
@@ -206,4 +223,20 @@ public:
 
     /// @brief Check if the proxy was successfully created
     bool valid() const { return mController != nullptr; }
+
+    void showLeds(uint8_t brightness = 255) {
+        if (mController) { mController->showLeds(brightness); }
+    }
+
+    void setEnabled(bool enabled) {
+        if (mController) { mController->setEnabled(enabled); }
+    }
+
+    void setLeds(fl::span<CRGB> leds) {
+        if (mController) { mController->setLeds(leds); }
+    }
+
+#if AUTORESEARCH_LEGACY_OBSERVES_RMT4_FRAMES
+    fl::weak_ptr<fl::ChannelData> frameData() const { return mFrame; }
+#endif
 };
