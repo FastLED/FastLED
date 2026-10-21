@@ -526,3 +526,5 @@
   inside return types, default-argument lambdas, or same-line bodies cannot
   excuse an unannotated enclosing function. After deleting a regex exemption,
   verify its remaining call sites as well as the added regression test.
+
+- For header-based size changes, inspect the claimed removed symbols after building. If an incremental image retains impossible old guards, verify with a clean rebuild before publishing the size claim; keep the first result as diagnostic evidence. Use FL_STATIC_ASSERT for portable compile-time regression assertions.
