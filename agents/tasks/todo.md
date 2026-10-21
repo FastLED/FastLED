@@ -7,6 +7,12 @@
 - [x] Replace the ESP-DSP umbrella include with the precise FFT API; build real FFT callers on legacy and modern SDKs.
 - [x] Verify the regression size budget, native tests and code review; prepare the focused fix with measured residual costs.
 
+### FFT implementation follow-up
+
+- [x] Confirm production already uses FastLED's optimized real KissFFT transform.
+- [x] Remove the experimental ESP-DSP adapter and its unused dispatcher; preserve all eight production call paths.
+- [x] Verify FFT goldens, production audio builds, memory savings and final review before updating PR #4871.
+
 <!-- Add tasks here as checkable items -->
 
 ## ESP FL_NO_EXCEPT lint

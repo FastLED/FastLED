@@ -179,7 +179,6 @@ const INT_TEMPLATE_ARG_BASELINE: &[(&str, usize)] = &[
     ("src/fl/audio/detector/pitch.cpp.hpp", 5),
     ("src/fl/audio/detector/vocal.cpp.hpp", 8),
     ("src/fl/audio/fft/fft.cpp.hpp", 4),
-    ("src/fl/audio/fft/fft_backend.h", 1),
     ("src/fl/audio/fft/fft_impl.cpp.hpp", 18),
     ("src/fl/audio/input.h", 1),
     ("src/fl/channels/adapters/spi_channel_adapter.cpp.hpp", 4),

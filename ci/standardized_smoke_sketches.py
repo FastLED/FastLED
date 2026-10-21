@@ -17,7 +17,7 @@ Typical usage::
         # feed to ci-compile.py / fbuild / pio_compile / arduino-cli ...
         ...
 
-Per-board filtering (e.g. ``AudioFftParity`` is ESP32-only) is handled by the
+Per-board filtering (e.g. ``Audio`` requires a supported audio platform) uses
 existing ``@filter`` directives inside each ``.ino`` - this loader stays
 platform-agnostic on purpose.
 """
