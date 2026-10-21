@@ -7,6 +7,7 @@
 namespace fl {
 
 bool RmtMemoryManager4::tryReserveBlocks(int first, u8 count) FL_NO_EXCEPT {
+    fl::lock_guard<const detail::Rmt4MemoryMutex> lock(*this);
     const size_t blockCount = mWordsPerBlock ? mPoolWords / mWordsPerBlock : 0;
     if (first < 0 || count == 0 || count >= 32 || blockCount > 32 ||
         static_cast<size_t>(first) >= blockCount ||
@@ -22,6 +23,7 @@ bool RmtMemoryManager4::tryReserveBlocks(int first, u8 count) FL_NO_EXCEPT {
 }
 
 void RmtMemoryManager4::releaseBlocks(int first, u8 count) FL_NO_EXCEPT {
+    fl::lock_guard<const detail::Rmt4MemoryMutex> lock(*this);
     const size_t blockCount = mWordsPerBlock ? mPoolWords / mWordsPerBlock : 0;
     if (first < 0 || count == 0 || count >= 32 || blockCount > 32 ||
         static_cast<size_t>(first) >= blockCount ||

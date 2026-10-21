@@ -33,6 +33,10 @@
 #include "fl/stl/noexcept.h"
 #include "fl/stl/stdint.h"
 #include "fl/stl/vector.h"
+#include "fl/stl/mutex.h"
+#include "fl/stl/atomic.h"
+#include "platforms/is_platform.h"
+#include "platforms/esp/32/drivers/rmt/rmt_4/rmt4_config.h"
 
 namespace fl {
 
@@ -60,15 +64,51 @@ namespace detail {
 constexpr size_t kRmt4WordsPerBlock = 64;
 constexpr size_t kRmt4TxIdleWords = 2 * kRmt4WordsPerBlock;
 constexpr size_t kRmt4TxNetworkActiveWords = 3 * kRmt4WordsPerBlock;
+
+#if defined(FL_IS_ESP32)
+// Sleep rather than merely yielding: a higher-priority TX worker must allow
+// an application task holding the ledger to run. No interrupt masking or heap.
+void rmt4MemoryMutexContentionWait() FL_NO_EXCEPT;
+#else
+// Host scheduling is preemptive; brief spinning needs no platform dependency.
+inline void rmt4MemoryMutexContentionWait() FL_NO_EXCEPT {}
+#endif
+
+class Rmt4AsyncMemoryMutex {
+  public:
+    void lock() const FL_NO_EXCEPT {
+        bool expected = false;
+        while (!mLocked.compare_exchange_weak(expected, true, memory_order_acquire)) {
+            expected = false;
+            rmt4MemoryMutexContentionWait();
+        }
+    }
+    void unlock() const FL_NO_EXCEPT { mLocked.store(false, memory_order_release); }
+
+  private:
+    mutable atomic_bool mLocked{false};
+};
+
+// Empty in blocking builds, so the manager gains no per-instance storage.
+class Rmt4BlockingMemoryMutex {
+  public:
+    void lock() const FL_NO_EXCEPT {}
+    void unlock() const FL_NO_EXCEPT {}
+};
+
+#if FL_RMT4_ASYNC
+using Rmt4MemoryMutex = Rmt4AsyncMemoryMutex;
+#else
+using Rmt4MemoryMutex = Rmt4BlockingMemoryMutex;
+#endif
 } // namespace detail
 
 /// @brief RMT4 memory allocator — global-pool tracker for classic
 ///        ESP32 / S2 with the IDF 4.x driver.
 ///
-/// Everything is single-threaded from the RMT4 driver's perspective
-/// (setup and Show run on the Arduino main task). No lock is taken
-/// inside the manager.
-class RmtMemoryManager4 {
+/// Async TX and application RX share this ledger. Blocking builds omit the
+/// mutex storage and operations.
+class RmtMemoryManager4 : private detail::Rmt4MemoryMutex {
   public:
     /// @brief Get the platform-default singleton instance. Only
     ///        defined on `FL_IS_ESP32 && !FASTLED_RMT5` — host tests
@@ -96,6 +136,7 @@ class RmtMemoryManager4 {
 
     bool tryAllocateTx(int channel_id, bool network_active,
                        size_t &out_words) FL_NO_EXCEPT {
+        fl::lock_guard<const detail::Rmt4MemoryMutex> lock(*this);
         for (const auto &alloc : mAllocations) {
             if (alloc.channel_id == channel_id && alloc.is_tx) {
                 FL_WARN("RmtMemoryManager4: TX channel " << channel_id << " already allocated");
@@ -105,12 +146,12 @@ class RmtMemoryManager4 {
 
         size_t desired = (network_active ? 3 : 2) * mWordsPerBlock;
 
-        if (desired > availableWords()) {
+        if (desired > availableWordsUnlocked()) {
             if (network_active &&
-                2 * mWordsPerBlock <= availableWords()) {
+                2 * mWordsPerBlock <= availableWordsUnlocked()) {
                 desired = 2 * mWordsPerBlock; // Graceful demotion.
             } else {
-                FL_WARN("RmtMemoryManager4: TX allocation refused, pool exhausted (want " << desired << ", have " << availableWords() << " / " << mPoolWords << ")");
+                FL_WARN("RmtMemoryManager4: TX allocation refused, pool exhausted (want " << desired << ", have " << availableWordsUnlocked() << " / " << mPoolWords << ")");
                 return false;
             }
         }
@@ -119,7 +160,9 @@ class RmtMemoryManager4 {
         rec.channel_id = channel_id;
         rec.words = static_cast<u16>(desired);
         rec.is_tx = true;
+        const size_t previous = mAllocations.size();
         mAllocations.push_back(rec);
+        if (mAllocations.size() == previous) { return false; }
         mAllocatedWords += desired;
         out_words = desired;
         return true;
@@ -127,6 +170,7 @@ class RmtMemoryManager4 {
 
     bool tryAllocateRx(int channel_id, size_t symbols,
                        size_t &out_words) FL_NO_EXCEPT {
+        fl::lock_guard<const detail::Rmt4MemoryMutex> lock(*this);
         for (const auto &alloc : mAllocations) {
             if (alloc.channel_id == channel_id && !alloc.is_tx) {
                 FL_WARN("RmtMemoryManager4: RX channel " << channel_id << " already allocated");
@@ -137,8 +181,8 @@ class RmtMemoryManager4 {
             FL_WARN("RmtMemoryManager4: RX allocation refused, zero symbols");
             return false;
         }
-        if (symbols > availableWords()) {
-            FL_WARN("RmtMemoryManager4: RX allocation refused, pool exhausted (want " << symbols << ", have " << availableWords() << " / " << mPoolWords << ")");
+        if (symbols > availableWordsUnlocked()) {
+            FL_WARN("RmtMemoryManager4: RX allocation refused, pool exhausted (want " << symbols << ", have " << availableWordsUnlocked() << " / " << mPoolWords << ")");
             return false;
         }
 
@@ -146,7 +190,9 @@ class RmtMemoryManager4 {
         rec.channel_id = channel_id;
         rec.words = static_cast<u16>(symbols);
         rec.is_tx = false;
+        const size_t previous = mAllocations.size();
         mAllocations.push_back(rec);
+        if (mAllocations.size() == previous) { return false; }
         mAllocatedWords += symbols;
         out_words = symbols;
         return true;
@@ -156,6 +202,7 @@ class RmtMemoryManager4 {
     ///        this in a "free-before-reallocate" idiom where the
     ///        first-time-configure path always misses.
     bool free(int channel_id, bool is_tx) FL_NO_EXCEPT { // ok bare allocation — member function, not C free()
+        fl::lock_guard<const detail::Rmt4MemoryMutex> lock(*this);
         for (size_t i = 0; i < mAllocations.size(); ++i) {
             if (mAllocations[i].channel_id == channel_id &&
                 mAllocations[i].is_tx == is_tx) {
@@ -177,15 +224,19 @@ class RmtMemoryManager4 {
     bool tryReserveBlocks(int first, u8 count) FL_NO_EXCEPT;
     void releaseBlocks(int first, u8 count) FL_NO_EXCEPT;
 
-    size_t allocatedWords() const FL_NO_EXCEPT { return mAllocatedWords; }
+    size_t allocatedWords() const FL_NO_EXCEPT {
+        fl::lock_guard<const detail::Rmt4MemoryMutex> lock(*this);
+        return mAllocatedWords;
+    }
     size_t poolSize() const FL_NO_EXCEPT { return mPoolWords; }
     size_t wordsPerBlock() const FL_NO_EXCEPT;
     size_t availableWords() const FL_NO_EXCEPT {
-        return (mPoolWords > mAllocatedWords) ? (mPoolWords - mAllocatedWords)
-                                              : 0;
+        fl::lock_guard<const detail::Rmt4MemoryMutex> lock(*this);
+        return availableWordsUnlocked();
     }
 
     bool hasActiveRxChannels() const FL_NO_EXCEPT {
+        fl::lock_guard<const detail::Rmt4MemoryMutex> lock(*this);
         for (const auto &alloc : mAllocations) {
             if (!alloc.is_tx) {
                 return true;
@@ -199,10 +250,11 @@ class RmtMemoryManager4 {
     /// @return 3 (triple-buffer) when the network is active AND the
     ///         pool has room; otherwise 2 (double-buffer, historic default).
     u8 calculateMemoryBlocks(bool network_active) const FL_NO_EXCEPT {
+        fl::lock_guard<const detail::Rmt4MemoryMutex> lock(*this);
         if (!network_active) {
             return 2;
         }
-        if (availableWords() >= mWordsPerBlock) {
+        if (availableWordsUnlocked() >= mWordsPerBlock) {
             return 3;
         }
         return 2;
@@ -213,12 +265,17 @@ class RmtMemoryManager4 {
     //=========================================================================
 
     void reset() FL_NO_EXCEPT {
+        fl::lock_guard<const detail::Rmt4MemoryMutex> lock(*this);
         mAllocations.clear();
         mAllocatedWords = 0;
         mReservedBlocks = 0;
     }
 
   private:
+    size_t availableWordsUnlocked() const FL_NO_EXCEPT {
+        return (mPoolWords > mAllocatedWords) ? (mPoolWords - mAllocatedWords)
+                                            : 0;
+    }
     size_t mPoolWords;
     size_t mWordsPerBlock;
     size_t mAllocatedWords;

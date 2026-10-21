@@ -14,6 +14,15 @@
 
 #include "platforms/esp/32/drivers/rmt/rmt_4/rmt_memory_manager_4.h"
 
+#if FL_RMT4_ASYNC
+FL_EXTERN_C_BEGIN
+// IWYU pragma: begin_keep
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+// IWYU pragma: end_keep
+FL_EXTERN_C_END
+#endif
+
 // SOC_RMT_MEM_WORDS_PER_CHANNEL is 64 on both classic ESP32 and S2 on
 // IDF 4.x. Guarded fallback in case the SOC header isn't pulled in on
 // some corners of the toolchain.
@@ -26,6 +35,14 @@
 #endif
 
 namespace fl {
+
+#if FL_RMT4_ASYNC
+namespace detail {
+void rmt4MemoryMutexContentionWait() FL_NO_EXCEPT {
+    vTaskDelay(1);
+}
+} // namespace detail
+#endif
 
 namespace {
 

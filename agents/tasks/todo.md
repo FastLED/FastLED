@@ -651,3 +651,33 @@ RMT4-only; immediate direct backends retain their existing lifecycle. Full
 lint, clean sanitizer run (322 unit / 95 example targets), and physical legacy
 and Channel byte loopback pass. The 35-LED refill smoke completes 553 shows.
 Managed override remains available for registry controls.
+
+## Nonblocking legacy RMT4 (#4883)
+
+- [x] Reproduce blocking return and unsafe pending ownership before implementation.
+- [x] Implement async output by default, autonomous completion, lifetime and backpressure.
+- [x] Verify overflow, errors/recovery, legacy/mixed APIs and other direct policies.
+- [x] Measure matched blocking/async/Channel flash and physical static RAM.
+- [x] Complete matched runtime heap measurement.
+- [x] Prepare reviewed implementation and evidence for publication in a stacked PR.
+
+Final shipping builds: blocking 290,306 / 23,708; default async 293,006 /
+23,716; Channel 363,022 / 25,236 bytes (flash / physical static RAM).
+Both legacy ELFs have zero executable ChannelManager functions. Five 2,000-LED
+strips translate all 30,000 bytes, retain exact 6,000-byte encoded capacities,
+and release every frame without application polling after controller removal.
+All 11 normal hardware scenarios pass with a 2 KB worker stack, leaving at
+least 1,196 bytes unused. Five normal reset holds report zero latch violations.
+Task/mutex/install fault injection releases resources and recovers; a 1 ms
+transmission timeout aborts after 120 of 12,000 bytes, then the same driver
+successfully sends the next frame (1,236 stack bytes unused).
+Queue OOM, encoding reserve, refill deadline and string growth have focused
+RED -> GREEN evidence with fixed source restored. Full native sanitizer suite
+previously passed 325 units / 95 examples; final runner-selected rerun passes
+294 units / 57 examples. Full
+lint passes. Final independent production review reports no blockers.
+Matched harness heap after completion: blocking 109,424 free / async 106,384
+free (3,040 bytes additional retained heap, including the 2 KB stack). Largest
+free block stays 65,524 bytes; both heap integrity checks pass. Final blocking
+control sends all 6,000 bytes before returning in 66,887 us; async returns
+active in 7,062 us and completes autonomously.

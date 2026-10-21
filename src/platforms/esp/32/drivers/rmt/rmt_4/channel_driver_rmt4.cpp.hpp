@@ -26,9 +26,11 @@
 #include "platforms/esp/32/drivers/rmt/rmt_4/rmt4_peripheral_esp.h"
 #include "platforms/esp/32/drivers/rmt/rmt_4/rmt4_refill_timing.h"
 #include "platforms/esp/32/drivers/rmt/rmt_4/rmt_memory_manager_4.h"
+#include "platforms/esp/32/drivers/rmt/rmt_4/rmt4_refill_deadline.h"
 
 FL_EXTERN_C_BEGIN
 #include "esp_heap_caps.h"
+#include "esp_timer.h"
 #include "soc/soc_memory_layout.h" // IWYU pragma: keep
 FL_EXTERN_C_END
 
@@ -38,8 +40,32 @@ namespace {
 struct Rmt4Symbols {
     rmt_item32_t zero;
     rmt_item32_t one;
-    u32 maxCyclesPerFill;
+    Rmt4RefillDeadline deadline;
     detail::Rmt4RefillTiming refillTiming;
+    atomic_bool lateRefill{false};
+#if FL_RMT4_DIAGNOSTICS
+    atomic<u32> translatedBytes{0};
+    atomic<u32> cumulativeTranslatedBytes{0};
+    atomic<u32> latchChecks{0};
+    atomic<u32> latchViolations{0};
+    atomic<u32> minLatchHeldUs{0xffffffffu};
+    atomic<u32> maxRequiredResetUs{0};
+    atomic<u32> lateAborts{0};
+    atomic<u32> maxDeltaCycles{0};
+    atomic<u32> abortDeltaCycles{0};
+    atomic<u32> allowedDeltaCycles{0};
+    atomic<u32> preloadCycles{0};
+    atomic<u32> firstIsrCycles{0};
+    atomic<u32> lastFillCycles{0};
+    atomic<u32> postStartCycles{0};
+    atomic<u32> postStartUs{0};
+    atomic<u32> firstIsrUs{0};
+    atomic<u32> maxDeltaUs{0};
+    atomic<u32> abortDeltaUs{0};
+    atomic<u32> allowedDeltaUs{0};
+    atomic_int preloadCore{-1};
+    atomic_int isrCore{-1};
+#endif
 };
 
 // Translators never retain an engine pointer. The SDK may invoke them with
@@ -51,14 +77,55 @@ FL_NO_INLINE IRAM_ATTR void translateRmt4Bytes(
     const void *source, rmt_item32_t *destination, size_t sourceSize,
     size_t wantedItems, size_t *translatedSize, size_t *itemCount,
     Rmt4Symbols &symbols) FL_NO_EXCEPT {
+    // Shared hardware time remains comparable if task preload and the SDK's
+    // shared ISR run on different cores. CCOUNT is per-core.
+    const u32 previousUs = symbols.deadline.previousFillUs();
+    const u32 nowUs = static_cast<u32>(esp_timer_get_time());
+    const bool inIsr = xPortInIsrContext();
+#if FL_RMT4_DIAGNOSTICS
+    const u32 deltaUs = nowUs - previousUs;
     const u32 now = __clock_cycles();
-    if (!symbols.refillTiming.allowFill(now, symbols.maxCyclesPerFill)) {
+    if (inIsr) {
+        if (symbols.isrCore.load(memory_order_relaxed) < 0) {
+            symbols.firstIsrCycles.store(now, memory_order_relaxed);
+            symbols.firstIsrUs.store(nowUs, memory_order_relaxed);
+            symbols.isrCore.store(xPortGetCoreID(), memory_order_relaxed);
+        }
+    } else {
+        symbols.preloadCycles.store(now, memory_order_relaxed);
+        symbols.preloadCore.store(xPortGetCoreID(), memory_order_relaxed);
+    }
+    const u32 previous = symbols.lastFillCycles.load(memory_order_relaxed);
+    const u32 delta = now - previous;
+    if (previous != 0 &&
+        delta > symbols.maxDeltaCycles.load(memory_order_relaxed)) {
+        symbols.maxDeltaCycles.store(delta, memory_order_relaxed);
+    }
+    if (previousUs != 0 && deltaUs > symbols.maxDeltaUs.load(memory_order_relaxed)) {
+        symbols.maxDeltaUs.store(deltaUs, memory_order_relaxed);
+    }
+#endif
+    // Keep diagnostic timestamps separate from the authoritative three-phase
+    // deadline: task preload and the first ISR establish distinct phases.
+    (void)symbols.deadline.tryRefill(previousUs, nowUs, inIsr);
+    if (!symbols.refillTiming.allowFill(nowUs, symbols.deadline.maxRefillUs)) {
         // Preserve the legacy late-refill safeguard: end this frame rather
         // than knowingly continue after a missed hardware buffer deadline.
         *translatedSize = sourceSize;
         *itemCount = 0;
+#if FL_RMT4_DIAGNOSTICS
+        symbols.abortDeltaCycles.store(delta, memory_order_relaxed);
+        symbols.abortDeltaUs.store(deltaUs, memory_order_relaxed);
+        symbols.lateAborts.store(
+            symbols.lateAborts.load(memory_order_relaxed) + 1,
+            memory_order_relaxed);
+#endif
+        symbols.lateRefill.store(true, memory_order_release);
         return;
     }
+#if FL_RMT4_DIAGNOSTICS
+    symbols.lastFillCycles.store(now, memory_order_relaxed);
+#endif
     const auto *bytes = static_cast<const u8 *>(source);
     size_t count = wantedItems / 8;
     if (count > sourceSize) {
@@ -73,6 +140,14 @@ FL_NO_INLINE IRAM_ATTR void translateRmt4Bytes(
     }
     *translatedSize = count;
     *itemCount = count * 8;
+#if FL_RMT4_DIAGNOSTICS
+    symbols.translatedBytes.store(
+        symbols.translatedBytes.load(memory_order_relaxed) + count,
+        memory_order_relaxed);
+    symbols.cumulativeTranslatedBytes.store(
+        symbols.cumulativeTranslatedBytes.load(memory_order_relaxed) + count,
+        memory_order_relaxed);
+#endif
 }
 
 #if FASTLED_RMT_MAX_CHANNELS > 0
@@ -194,7 +269,14 @@ ChannelEngineRMT4Impl::~ChannelEngineRMT4Impl() {
     for (auto &state : mChannels) {
         destroyChannel(&state);
     }
+    clearPendingChannels();
+    for (auto &data : mEnqueuedChannels) { data->setInUse(false); }
     unlockFlash();
+}
+
+void ChannelEngineRMT4Impl::clearPendingChannels() FL_NO_EXCEPT {
+    for (auto &data : mPendingChannels) { data->setInUse(false); }
+    mPendingChannels.clear();
 }
 
 void ChannelEngineRMT4Impl::InternalSourceDeleter::operator()(u8 *pointer) const FL_NO_EXCEPT {
@@ -286,6 +368,28 @@ void ChannelEngineRMT4Impl::destroyChannel(ChannelState *state) FL_NO_EXCEPT {
 }
 
 void ChannelEngineRMT4Impl::releaseChannel(ChannelState *state) FL_NO_EXCEPT {
+#if FL_RMT4_DIAGNOSTICS
+    // Count only normal, nonempty SDK transmissions. Teardown has already
+    // cleared configured; empty frames start a reset timer without SDK TX.
+    if (state->configured && state->resetWaitStarted && state->sourceData &&
+        state->sourceData->getSize() != 0) {
+        auto &symbols = sRmt4Symbols[state->channel];
+        const u32 heldUs = fl::micros() - state->resetStartTimeUs;
+        symbols.latchChecks.store(symbols.latchChecks.load(memory_order_relaxed) + 1,
+                                  memory_order_relaxed);
+        if (heldUs < state->resetDurationUs) {
+            symbols.latchViolations.store(
+                symbols.latchViolations.load(memory_order_relaxed) + 1,
+                memory_order_relaxed);
+        }
+        if (heldUs < symbols.minLatchHeldUs.load(memory_order_relaxed)) {
+            symbols.minLatchHeldUs.store(heldUs, memory_order_relaxed);
+        }
+        if (state->resetDurationUs > symbols.maxRequiredResetUs.load(memory_order_relaxed)) {
+            symbols.maxRequiredResetUs.store(state->resetDurationUs, memory_order_relaxed);
+        }
+    }
+#endif
     state->internalSource.reset();
     if (state->sourceData) {
         state->sourceData->setInUse(false);
@@ -320,12 +424,10 @@ bool ChannelEngineRMT4Impl::configureChannel(
     state->pin = pin;
     sRmt4Symbols[channel].zero = makeZeroSymbol(timing);
     sRmt4Symbols[channel].one = makeOneSymbol(timing);
-    const u32 cyclesPerBit = NS_TO_ESP_CYCLES(timing.t1_ns) +
-                            NS_TO_ESP_CYCLES(timing.t2_ns) +
-                            NS_TO_ESP_CYCLES(timing.t3_ns);
-    const u32 cyclesPerHalf = cyclesPerBit *
+    const u32 nanosecondsPerHalf = (timing.t1_ns + timing.t2_ns + timing.t3_ns) *
         (FASTLED_RMT_MEM_WORDS_PER_CHANNEL * state->memBlocks / 2);
-    sRmt4Symbols[channel].maxCyclesPerFill = cyclesPerHalf + cyclesPerHalf / 2;
+    sRmt4Symbols[channel].deadline.maxRefillUs =
+        (nanosecondsPerHalf + nanosecondsPerHalf / 2 + 999) / 1000;
     return true;
 }
 
@@ -334,6 +436,14 @@ ChannelEngineRMT4Impl::ChannelState *ChannelEngineRMT4Impl::acquireChannel(
     if (!mPeripheral) {
         mError = true;
         return nullptr;
+    }
+    // A removed controller can be replaced on the same GPIO before its
+    // retained frame completes. Keep the replacement queued until that pad's
+    // previous transmission and latch interval finish.
+    for (const auto &state : mChannels) {
+        if (state.inUse && state.pin == pin) {
+            return nullptr;
+        }
     }
     for (auto &state : mChannels) {
         if (state.configured && !state.inUse) {
@@ -347,12 +457,10 @@ ChannelEngineRMT4Impl::ChannelState *ChannelEngineRMT4Impl::acquireChannel(
             state.pin = pin;
             sRmt4Symbols[state.channel].zero = makeZeroSymbol(timing);
             sRmt4Symbols[state.channel].one = makeOneSymbol(timing);
-            const u32 cyclesPerBit = NS_TO_ESP_CYCLES(timing.t1_ns) +
-                                    NS_TO_ESP_CYCLES(timing.t2_ns) +
-                                    NS_TO_ESP_CYCLES(timing.t3_ns);
-            const u32 cyclesPerHalf = cyclesPerBit *
+            const u32 nanosecondsPerHalf = (timing.t1_ns + timing.t2_ns + timing.t3_ns) *
                 (FASTLED_RMT_MEM_WORDS_PER_CHANNEL * state.memBlocks / 2);
-            sRmt4Symbols[state.channel].maxCyclesPerFill = cyclesPerHalf + cyclesPerHalf / 2;
+            sRmt4Symbols[state.channel].deadline.maxRefillUs =
+                (nanosecondsPerHalf + nanosecondsPerHalf / 2 + 999) / 1000;
             state.inUse = true;
             return &state;
         }
@@ -389,7 +497,13 @@ ChannelEngineRMT4Impl::ChannelState *ChannelEngineRMT4Impl::acquireChannel(
                 return &old;
             }
         }
+        const size_t previous = mChannels.size();
         mChannels.push_back(fl::move(state));
+        if (mChannels.size() == previous) {
+            destroyChannel(&state);
+            mError = true;
+            return nullptr;
+        }
         return &mChannels.back();
     }
     return nullptr;
@@ -402,7 +516,28 @@ void ChannelEngineRMT4Impl::startTransmission(
     state->resetWaitStarted = false;
     state->resetDurationUs = data->getTiming().reset_us;
     state->transmissionStartTime = fl::millis();
-    sRmt4Symbols[state->channel].refillTiming.reset();
+    auto &diagnostics = sRmt4Symbols[state->channel];
+    diagnostics.refillTiming.reset();
+    diagnostics.deadline.reset(diagnostics.deadline.maxRefillUs);
+    diagnostics.lateRefill.store(false, memory_order_relaxed);
+#if FL_RMT4_DIAGNOSTICS
+    diagnostics.translatedBytes.store(0, memory_order_relaxed);
+    diagnostics.lateAborts.store(0, memory_order_relaxed);
+    diagnostics.maxDeltaCycles.store(0, memory_order_relaxed);
+    diagnostics.abortDeltaCycles.store(0, memory_order_relaxed);
+    diagnostics.allowedDeltaCycles.store(diagnostics.deadline.maxRefillUs * (F_CPU / 1000000UL), memory_order_relaxed);
+    diagnostics.preloadCycles.store(0, memory_order_relaxed);
+    diagnostics.firstIsrCycles.store(0, memory_order_relaxed);
+    diagnostics.lastFillCycles.store(0, memory_order_relaxed);
+    diagnostics.postStartCycles.store(0, memory_order_relaxed);
+    diagnostics.postStartUs.store(0, memory_order_relaxed);
+    diagnostics.firstIsrUs.store(0, memory_order_relaxed);
+    diagnostics.maxDeltaUs.store(0, memory_order_relaxed);
+    diagnostics.abortDeltaUs.store(0, memory_order_relaxed);
+    diagnostics.allowedDeltaUs.store(diagnostics.deadline.maxRefillUs, memory_order_relaxed);
+    diagnostics.preloadCore.store(-1, memory_order_relaxed);
+    diagnostics.isrCore.store(-1, memory_order_relaxed);
+#endif
     const auto &bytes = data->getData();
     if (bytes.empty()) {
         state->resetWaitStarted = true;
@@ -433,7 +568,17 @@ void ChannelEngineRMT4Impl::startTransmission(
     if (rmt_write_sample(state->channel, source, bytes.size(), false) != ESP_OK) {
         mError = true;
         destroyChannel(state);
+        return;
     }
+    // The SDK performs task-context preload before it starts hardware. Exclude
+    // that setup time from the first refill deadline. Preserve an ISR's newer
+    // timestamp if it already ran before rmt_write_sample returned.
+    const u32 startedUs = static_cast<u32>(esp_timer_get_time());
+    diagnostics.deadline.recordHardwareStart(startedUs);
+#if FL_RMT4_DIAGNOSTICS
+    diagnostics.postStartCycles.store(__clock_cycles(), memory_order_relaxed);
+    diagnostics.postStartUs.store(startedUs, memory_order_relaxed);
+#endif
 }
 
 void ChannelEngineRMT4Impl::processPendingChannels() FL_NO_EXCEPT {
@@ -460,22 +605,38 @@ void ChannelEngineRMT4Impl::processPendingChannels() FL_NO_EXCEPT {
     if (mError) {
         // A hard setup failure must reach the manager instead of leaving a
         // permanently BUSY pending queue that can never acquire a channel.
-        mPendingChannels.clear();
+        clearPendingChannels();
     }
 }
 
 void ChannelEngineRMT4Impl::enqueue(ChannelDataPtr data) FL_NO_EXCEPT {
     if (data) {
+        const size_t previous = mEnqueuedChannels.size();
         mEnqueuedChannels.push_back(fl::move(data));
+        if (mEnqueuedChannels.size() == previous) {
+            data->setInUse(false);
+            mError = true;
+        }
+    } else {
+        mError = true;
     }
 }
 
 void ChannelEngineRMT4Impl::show() FL_NO_EXCEPT {
     lockFlash();
     for (auto &data : mEnqueuedChannels) {
+        const size_t previous = mPendingChannels.size();
         mPendingChannels.push_back(fl::move(data));
+        if (mPendingChannels.size() == previous) {
+            data->setInUse(false);
+            mError = true;
+        }
     }
     mEnqueuedChannels.clear();
+    if (mError) {
+        clearPendingChannels();
+        return;
+    }
     processPendingChannels();
 }
 
@@ -484,9 +645,22 @@ IChannelDriver::DriverState ChannelEngineRMT4Impl::poll() FL_NO_EXCEPT {
         if (!state.inUse) {
             continue;
         }
+        if (sRmt4Symbols[state.channel].lateRefill.exchange(false, memory_order_acquire)) {
+            destroyChannel(&state);
+            mError = true;
+            continue;
+        }
         if (!state.resetWaitStarted && rmt_wait_tx_done(state.channel, 0) == ESP_OK) {
             state.resetWaitStarted = true;
             state.resetStartTimeUs = fl::micros();
+        }
+        // Completion can race the first flag load. Once TX is done the ISR
+        // cannot publish another late refill for this frame.
+        if (state.resetWaitStarted &&
+            sRmt4Symbols[state.channel].lateRefill.exchange(false, memory_order_acquire)) {
+            destroyChannel(&state);
+            mError = true;
+            continue;
         }
         if (state.resetWaitStarted) {
             if (fl::micros() - state.resetStartTimeUs >= state.resetDurationUs) {
@@ -504,7 +678,7 @@ IChannelDriver::DriverState ChannelEngineRMT4Impl::poll() FL_NO_EXCEPT {
 #endif
     }
     if (mError) {
-        mPendingChannels.clear();
+        clearPendingChannels();
         mError = false;
         bool active = false;
         for (const auto &state : mChannels) {
@@ -536,6 +710,53 @@ IChannelDriver::DriverState ChannelEngineRMT4Impl::poll() FL_NO_EXCEPT {
         unlockFlash();
     }
     return mPendingChannels.empty() ? DriverState::READY : DriverState::BUSY;
+}
+
+Rmt4TxDiagnostics ChannelEngineRMT4Impl::txDiagnostics(int channel) const FL_NO_EXCEPT {
+    Rmt4TxDiagnostics result;
+#if FL_RMT4_DIAGNOSTICS
+    for (int index = 0; index < FASTLED_RMT_MAX_CHANNELS; ++index) {
+        if (channel >= 0 && channel != index) { continue; }
+        const auto &symbols = sRmt4Symbols[index];
+        const u32 bytes = symbols.translatedBytes.load(memory_order_acquire);
+        result.translatedBytes += bytes;
+        result.cumulativeTranslatedBytes +=
+            symbols.cumulativeTranslatedBytes.load(memory_order_acquire);
+        const u32 latchChecks = symbols.latchChecks.load(memory_order_acquire);
+        result.latchChecks += latchChecks;
+        result.latchViolations += symbols.latchViolations.load(memory_order_acquire);
+        if (latchChecks) {
+            const u32 heldUs = symbols.minLatchHeldUs.load(memory_order_acquire);
+            if (result.minLatchHeldUs == 0 || heldUs < result.minLatchHeldUs) {
+                result.minLatchHeldUs = heldUs;
+            }
+            const u32 requiredUs = symbols.maxRequiredResetUs.load(memory_order_acquire);
+            if (requiredUs > result.maxRequiredResetUs) {
+                result.maxRequiredResetUs = requiredUs;
+            }
+        }
+        result.lateAborts += symbols.lateAborts.load(memory_order_acquire);
+        const u32 maximum = symbols.maxDeltaCycles.load(memory_order_acquire);
+        if (maximum > result.maxDeltaCycles) { result.maxDeltaCycles = maximum; }
+        if (bytes) {
+            result.abortDeltaCycles = symbols.abortDeltaCycles.load(memory_order_acquire);
+            result.allowedDeltaCycles = symbols.allowedDeltaCycles.load(memory_order_acquire);
+            result.preloadCycles = symbols.preloadCycles.load(memory_order_acquire);
+            result.firstIsrCycles = symbols.firstIsrCycles.load(memory_order_acquire);
+            result.postStartCycles = symbols.postStartCycles.load(memory_order_acquire);
+            result.postStartUs = symbols.postStartUs.load(memory_order_acquire);
+            result.firstIsrUs = symbols.firstIsrUs.load(memory_order_acquire);
+            result.maxDeltaUs = symbols.maxDeltaUs.load(memory_order_acquire);
+            result.abortDeltaUs = symbols.abortDeltaUs.load(memory_order_acquire);
+            result.allowedDeltaUs = symbols.allowedDeltaUs.load(memory_order_acquire);
+            result.preloadCore = symbols.preloadCore.load(memory_order_acquire);
+            result.isrCore = symbols.isrCore.load(memory_order_acquire);
+        }
+    }
+#else
+    (void)channel;
+#endif
+    return result;
 }
 
 } // namespace fl
