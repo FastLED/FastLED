@@ -10,7 +10,7 @@ Drive **30,000+ LEDs** on high-end devices • **Sub-$1 compatibility** on tiny 
 
 [![Nightly Examples (Linux)](https://github.com/FastLED/FastLED/actions/workflows/nightly-examples.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/nightly-examples.yml) [![Compile Tests (Linux)](https://github.com/FastLED/FastLED/actions/workflows/example_test_linux.yml/badge.svg?event=push)](https://github.com/FastLED/FastLED/actions/workflows/example_test_linux.yml) [![Compile Tests (macOS)](https://github.com/FastLED/FastLED/actions/workflows/example_test_macos.yml/badge.svg?event=push)](https://github.com/FastLED/FastLED/actions/workflows/example_test_macos.yml) [![Compile Tests (Windows)](https://github.com/FastLED/FastLED/actions/workflows/example_test_windows.yml/badge.svg?event=push)](https://github.com/FastLED/FastLED/actions/workflows/example_test_windows.yml)
 
-[![Documentation](https://img.shields.io/badge/Docs-Doxygen-blue.svg)](http://fastled.io/docs) [![Community](https://img.shields.io/badge/reddit-/r/FastLED-orange.svg?logo=reddit)](https://www.reddit.com/r/FastLED/)
+[![Documentation](https://img.shields.io/badge/Docs-Doxygen-blue.svg)](https://fastled.github.io/dox/) [![Community](https://img.shields.io/badge/reddit-/r/FastLED-orange.svg?logo=reddit)](https://www.reddit.com/r/FastLED/)
 
 
 ## ⚡ Get Blinking in 30 Seconds
@@ -569,9 +569,14 @@ After installing the Arduino IDE, add FastLED through the Library Manager:
 
 | **📖 Documentation** | **💬 Community** | **🐛 Issues** | **📺 Examples** |
 |---------------------|------------------|---------------|-----------------|
-| [API Reference](http://fastled.io/docs) | [Reddit r/FastLED](https://www.reddit.com/r/FastLED/) | [GitHub Issues](http://fastled.io/issues) | [Live Demos](https://zackees.github.io/fastled-wasm/) |
-| [Doxygen Docs](https://fastled.io/docs/files.html) | 1000s of users & solutions | Bug reports & feature requests | [GitHub Examples](examples) |
+| [API Reference](https://fastled.github.io/dox/) | [Reddit r/FastLED](https://www.reddit.com/r/FastLED/) | [GitHub Issues](http://fastled.io/issues) | [Live Demos](https://zackees.github.io/fastled-wasm/) |
+| [Doxygen Docs](https://fastled.github.io/dox/files.html) | 1000s of users & solutions | Bug reports & feature requests | [GitHub Examples](examples) |
 | [**Cookbook**](cookbook/README.md) | [Community Projects](cool_projects.md) | | [100+ Example Sketches](examples) |
+
+The API reference is published by [FastLED/dox](https://github.com/FastLED/dox).
+It checks daily for a new stable FastLED release and rebuilds only when that release
+changes. The publisher uses the Doxygen configuration and styling assets in this
+repository's `docs/` directory from the release tag.
 
 **Need Help?** Visit [r/FastLED](https://reddit.com/r/FastLED) - thousands of knowledgeable users and extensive solution history!
 
@@ -1251,7 +1256,7 @@ Use the `compile` script to test on 20+ platforms:
 |-------------------|------------------|
 | **Code contributions**: Bug fixes, new features, optimizations | [Contributing Guide](CONTRIBUTING.md) |  
 | **Platform support**: Help test on new/existing platforms | [Platform Testing](compile) |
-| **Documentation**: Improve examples, fix typos, add tutorials | [Documentation](http://fastled.io/docs) |
+| **Documentation**: Improve examples, fix typos, add tutorials | [Documentation](https://fastled.github.io/dox/) |
 | **Community**: Answer questions on Reddit, report issues | [r/FastLED](https://reddit.com/r/FastLED) |
 
 **Platform Porting**: Information on porting FastLED to new platforms: [PORTING.md](PORTING.md)
