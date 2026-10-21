@@ -1,5 +1,12 @@
 # Lessons Learned
 
+- Verify the selected peripheral backend in the actual ELF before describing
+  size parity as preserving hardware-driver quality. Older ESP32 SDKs can
+  expose RMT geometry without `SOC_RMT_SUPPORTED`; silently selecting a
+  generic fallback invalidates RMT-versus-RMT conclusions even when the same
+  sketch and toolchain build successfully. Keep failed bring-up probes out
+  of production and retain their evidence separately.
+
 - Keep annotation enforcement in the existing `./lint` path. Before adding
   SDK provisioning, a CI matrix, or a cache subsystem, test whether a small
   source parser can reject missing annotations across inactive branches.

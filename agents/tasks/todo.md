@@ -1,5 +1,13 @@
 # Task Tracker
 
+## Merge and remaining flash investigation (#4870)
+
+- [x] Merge #4871 only after approval, resolved reviews and all 122 hosted checks pass; verify the merged tree.
+- [x] Compare the matched 3.10.3/current linker sections and verify selected LED backend symbols.
+- [x] Measure the native IDF console alternative; reject its 4,932-byte flash increase.
+- [x] Probe actual legacy RMT, preserve the failing bring-up evidence separately and restore merged production behavior.
+- [x] Document remaining 19,412-byte flash gap and correctness prerequisites without claiming further savings.
+
 ## ESP32 memory regression (#4870)
 
 - [x] Compare the unchanged reporter sketch across 3.10.3, 3.10.8 and master on a pinned Lolin D32 toolchain.
