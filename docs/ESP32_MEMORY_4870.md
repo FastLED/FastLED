@@ -21,6 +21,12 @@ SDK-dependent implementation switch or additional FFT work/twiddle cache.
 
 ## Controlled Lolin D32 comparison
 
+**Backend qualification:** the follow-up [flash investigation](ESP32_FLASH_REMAINDER_4870.md)
+found that the older SDK omits `SOC_RMT_SUPPORTED`, causing current FastLED
+to select the generic blocking fallback. The 3.10.3 image uses RMT. These
+figures do not establish equal RMT runtime behavior across versions. Both
+before/after FFT-removal controls used the fallback; their savings remain valid.
+
 The unchanged 96-pixel sketch from [the reporter's repository](https://github.com/chemdoc77/CD77_FastLED_2026/blob/1cc4929bec905543d224b225603e269c25381bdc/NEOPIXEL%20New%20Product%20Test%20by%20Chemdoc77/src/Neopixel_New_Product_Test.cpp)
 was built with fbuild 2.5.42, `board = lolin_d32`,
 `platform = espressif32@6.13.0`, Arduino ESP32 2.0.17 / IDF 4.4.7 and
@@ -47,6 +53,10 @@ No runtime heap saving or physical-device waveform result is claimed.
 
 The existing legacy ESP32 Blink target provides an in-repository regression
 control without requiring the external sketch or a new workflow:
+
+This budget currently measures the generic fallback selected by the missing
+legacy capability macro. It catches the FFT dependency regression, but is not
+an RMT runtime or memory-budget validation.
 
 ```bash
 bash bloat esp32dev_idf44 --build --budget tests/data/esp32dev_idf44_bloat_budget.json
