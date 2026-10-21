@@ -558,6 +558,30 @@ FL_TEST_CASE("SpiChannelEngineAdapter - explicit SPI host selects matching contr
     FL_CHECK_TRUE(spi3->wasTransmitCalled());
 }
 
+FL_TEST_CASE("SpiChannelEngineAdapter - distinct SPI hosts work in either registration order") {
+    for (bool host3First : {false, true}) {
+        auto spi2 = fl::make_shared<MockSpiHw>(1, "SPI2", 5);
+        auto spi3 = fl::make_shared<MockSpiHw>(1, "SPI3", 5);
+        spi2->setBusId(2);
+        spi3->setBusId(3);
+
+        fl::vector<fl::shared_ptr<SpiHwBase>> controllers = {spi2, spi3};
+        fl::vector<int> priorities = {5, 5};
+        fl::vector<const char*> names = {"SPI2", "SPI3"};
+        auto adapter = SpiChannelEngineAdapter::create(
+            controllers, priorities, names, "SPI_UNIFIED");
+
+        auto stripA = createSpiChannelData(1, 3, Esp32SpiBus::HOST2);
+        auto stripB = createSpiChannelData(5, 7, Esp32SpiBus::HOST3);
+        adapter->enqueue(host3First ? stripB : stripA);
+        adapter->enqueue(host3First ? stripA : stripB);
+        adapter->show();
+
+        FL_CHECK_EQ(spi2->getTransmitCount(), 1);
+        FL_CHECK_EQ(spi3->getTransmitCount(), 1);
+    }
+}
+
 FL_TEST_CASE("SpiChannelEngineAdapter - AUTO preserves controller priority") {
     auto preferred = fl::make_shared<MockSpiHw>(1, "preferred", 10);
     auto fallback = fl::make_shared<MockSpiHw>(1, "fallback", 5);
