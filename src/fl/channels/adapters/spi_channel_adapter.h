@@ -156,8 +156,10 @@ private:
     /// @param ctrl Controller to initialize
     /// @param clockPin Clock pin for configuration
     /// @param dataPin Data pin for configuration
+    /// @param clockSpeedHz Requested SPI clock rate
     /// @returns true on success, false on error
-    bool initializeControllerIfNeeded(ControllerInfo& ctrl, int clockPin, int dataPin) FL_NO_EXCEPT;
+    bool initializeControllerIfNeeded(ControllerInfo& ctrl, int clockPin, int dataPin,
+                                      u32 clockSpeedHz) FL_NO_EXCEPT;
 
     /// @brief Group data structure for channels with same clock pin
     struct ClockPinGroup {

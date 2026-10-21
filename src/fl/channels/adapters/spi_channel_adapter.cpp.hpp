@@ -151,7 +151,7 @@ bool SpiChannelEngineAdapter::canControllerHandleClockPin(
 }
 
 bool SpiChannelEngineAdapter::initializeControllerIfNeeded(
-    ControllerInfo& ctrl, int clockPin, int dataPin) FL_NO_EXCEPT {
+    ControllerInfo& ctrl, int clockPin, int dataPin, u32 clockSpeedHz) FL_NO_EXCEPT {
 
     if (ctrl.isInitialized) {
         // Verify compatibility
@@ -172,7 +172,7 @@ bool SpiChannelEngineAdapter::initializeControllerIfNeeded(
         config.bus_num = static_cast<fl::u8>(ctrl.controller->getBusId());
         config.clock_pin = clockPin;
         config.data_pin = dataPin;
-        config.clock_speed_hz = 20000000;  // 20 MHz for APA102
+        config.clock_speed_hz = clockSpeedHz;
         config.max_transfer_sz = 65536;
 
         if (!ctrl.controller->begin(&config)) {
@@ -362,7 +362,8 @@ bool SpiChannelEngineAdapter::transmitBatch(fl::span<const ChannelDataPtr> chann
     ControllerInfo& ctrl = mControllers[controllerIndex];
 
     // Initialize controller if needed
-    if (!initializeControllerIfNeeded(ctrl, clockPin, dataPin)) {
+    if (!initializeControllerIfNeeded(ctrl, clockPin, dataPin,
+                                      spiConfig.timing.clock_hz)) {
         return false;
     }
 
