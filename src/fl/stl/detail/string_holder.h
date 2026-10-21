@@ -18,6 +18,11 @@ class StringHolder {
     ~StringHolder() FL_DTOR_NOEXCEPT;
 
     void grow(size newLength) FL_NO_EXCEPT;
+#ifdef FASTLED_TESTING
+    /// Fail growth deterministically without exhausting the host process heap.
+    /// This affects only StringHolder growth and is absent from device builds.
+    static bool setGrowFailureForTesting(bool fail) FL_NO_EXCEPT;
+#endif
     bool hasCapacity(size newLength) const FL_NO_EXCEPT { return newLength + 1 <= mCapacity; }
     const char *data() const FL_NO_EXCEPT { return mData; }
     char *data() FL_NO_EXCEPT { return mData; }
