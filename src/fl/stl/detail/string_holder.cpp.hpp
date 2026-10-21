@@ -7,8 +7,26 @@
 #include "fl/stl/cstring.h"  // For memcpy
 #include "fl/stl/malloc.h"   // For fl::malloc, fl::free, fl::realloc
 #include "fl/stl/noexcept.h"
+#ifdef FASTLED_TESTING
+#include "fl/stl/singleton.h"
+#endif
 
 namespace fl {
+
+#ifdef FASTLED_TESTING
+namespace {
+struct StringHolderGrowFailure {
+    bool fail = false;
+};
+}
+
+bool StringHolder::setGrowFailureForTesting(bool fail) FL_NO_EXCEPT {
+    auto &state = Singleton<StringHolderGrowFailure>::instance();
+    const bool previous = state.fail;
+    state.fail = fail;
+    return previous;
+}
+#endif
 
 // StringHolder implementations
 //
@@ -74,7 +92,13 @@ void StringHolder::grow(size newLength) FL_NO_EXCEPT {
     // Use fl::realloc for efficient growth without memory move.
     // Keep the old buffer if the allocation fails — the string simply
     // does not grow (callers observe the unchanged length).
-    char *grown = (char*)fl::realloc(mData, newLength + 1);
+    char *grown = nullptr;
+#ifdef FASTLED_TESTING
+    if (!Singleton<StringHolderGrowFailure>::instance().fail)
+#endif
+    {
+        grown = (char*)fl::realloc(mData, newLength + 1);
+    }
     if (grown == nullptr) {
         return;
     }
