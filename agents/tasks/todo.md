@@ -1,5 +1,12 @@
 # Task Tracker
 
+## ESP32 memory regression (#4870)
+
+- [x] Compare the unchanged reporter sketch across 3.10.3, 3.10.8 and master on a pinned Lolin D32 toolchain.
+- [x] Trace retained memory to its linker root and preserve RMT reliability.
+- [x] Replace the ESP-DSP umbrella include with the precise FFT API; build real FFT callers on legacy and modern SDKs.
+- [x] Verify the regression size budget, native tests and code review; prepare the focused fix with measured residual costs.
+
 <!-- Add tasks here as checkable items -->
 
 ## ESP FL_NO_EXCEPT lint

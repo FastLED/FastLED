@@ -97,7 +97,11 @@
 // stays on kiss_fftr by default. See issue #2308.
 #if defined(FL_IS_ESP32) && FL_HAS_INCLUDE("esp_dsp.h")
 #define FL_FFT_ESP_DSP_AVAILABLE 1
-#include "esp_dsp.h"
+// The umbrella esp_dsp.h also includes mat.h and <iostream>, whose static
+// initialization retains stream/locale code even in sketches without audio.
+// IWYU pragma: begin_keep
+#include <dsps_fft2r.h> // ok include - ESP-DSP FFT API from the vendor SDK
+// IWYU pragma: end_keep
 #include "fl/stl/vector.h"
 #include "fl/log/log.h"
 #include "fl/math/math.h"  // cosf / sinf wrappers
