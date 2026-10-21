@@ -1,0 +1,8 @@
+{
+  "board": "esp32dev_idf44",
+  "example": "Blink",
+  "profile": "default",
+  "image_flash": 240000,
+  "total_ram": 23000,
+  "reference": "#4870: Arduino ESP32 2.0.3 / IDF 4.4.1 / GCC 8.4 patch3, fbuild 2.5.42. Removing the unused ESP-DSP adapter preserves the tested KissFFT path and avoids the SDK matrix header's iostream initializer. Blink image_flash 473613 -> 232265 B; attributed RAM 33005 -> 21511 B. Board-reported flash/RAM separately: 473598/24292 -> 232250/17248 B. Ceilings leave modest headroom while rejecting the original regression. See docs/ESP32_MEMORY_4870.md."
+}

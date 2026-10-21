@@ -7,7 +7,6 @@
 // IWYU pragma: begin_keep
 #include "third_party/cq_kernel/cq_kernel.h"
 #include "third_party/cq_kernel/kiss_fftr.h"
-#include "fl/audio/fft/fft_backend.h"
 
 // IWYU pragma: end_keep
 #include "fl/stl/alloca.h"
@@ -261,7 +260,7 @@ class Context {
         s.rawBinsI.resize(bands);
 
         applyWindow(buffer.data(), mWindowBuf.data(), s.windowed.data(), N);
-        fl_fft_real_forward(mFftrCfg, mInputSamples, s.windowed.data(), s.fftOut.data());
+        kiss_fftr(mFftrCfg, s.windowed.data(), s.fftOut.data());
 
         // Deinterleave AoS → SoA and batch-compute magnitudes
         deinterleave(s.fftOut.data(), s.re.data(), s.im.data(), numRawBins);
@@ -313,7 +312,7 @@ class Context {
         s.im.resize(numRawBins);
         s.mag.resize(numRawBins);
 
-        fl_fft_real_forward(mFftrCfg, mInputSamples, buffer.data(), s.fftOut.data());
+        kiss_fftr(mFftrCfg, buffer.data(), s.fftOut.data());
 
         // Deinterleave AoS → SoA and batch-compute magnitudes
         deinterleave(s.fftOut.data(), s.re.data(), s.im.data(), numRawBins);
@@ -706,7 +705,7 @@ class Context {
         }
 
         // FFT at full sample rate (for linear bins + top octave CQ)
-        fl_fft_real_forward(mFftrCfg, mInputSamples, mWorkBuf.data(), mFftOut.data());
+        kiss_fftr(mFftrCfg, mWorkBuf.data(), mFftOut.data());
 
         // Deinterleave AoS → SoA and batch-compute magnitudes
         FftScratch &s = scratch();
@@ -742,7 +741,7 @@ class Context {
                 // Zero-pad remainder so FFT sees clean input
                 for (int i = workLen; i < N; i++)
                     mWorkBuf[i] = 0;
-                fl_fft_real_forward(mFftrCfg, mInputSamples, mWorkBuf.data(), mFftOut.data());
+                kiss_fftr(mFftrCfg, mWorkBuf.data(), mFftOut.data());
             }
             // Zero the CQ accumulator and apply kernels
             fl::memset(cq, 0, sizeof(kiss_fft_cpx) * oi.numBins);
@@ -770,7 +769,7 @@ class Context {
         s.fftOut.resize(N);
         s.rawBinsI.resize(mTotalBands);
         applyWindow(buffer.data(), mWindowBuf.data(), s.windowed.data(), N);
-        fl_fft_real_forward(mFftrCfg, N, s.windowed.data(), s.fftOut.data());
+        kiss_fftr(mFftrCfg, s.windowed.data(), s.fftOut.data());
         deinterleave(s.fftOut.data(), s.re.data(), s.im.data(), numRawBins);
         batchMag(s.re.data(), s.im.data(), s.mag.data(), numRawBins);
         fl::memset(s.rawBinsI.data(), 0, sizeof(u32) * mTotalBands);
@@ -976,7 +975,7 @@ class Context {
         // Phase 1: Windowed 512pt FFT → LOG_REBIN for upper bins
         applyWindow(buffer.data(), mWindowBuf.data(), s.windowed.data(), N);
 
-        fl_fft_real_forward(mFftrCfg, mInputSamples, s.windowed.data(), mFftOut.data());
+        kiss_fftr(mFftrCfg, s.windowed.data(), mFftOut.data());
 
         deinterleave(mFftOut.data(), s.re.data(), s.im.data(), numRawBins);
         batchMag(s.re.data(), s.im.data(), s.mag.data(), numRawBins);
@@ -1013,9 +1012,8 @@ class Context {
             for (int i = mHybridMidN; i < midFftN; ++i) {
                 s.windowed[i] = 0;
             }
-            fl_fft_real_forward(mHybridMidFft, mHybridMidN * 2,
-                                s.windowed.data(),
-                                mHybridMidFftOut.data());
+            kiss_fftr(mHybridMidFft, s.windowed.data(),
+                      mHybridMidFftOut.data());
             deinterleave(mHybridMidFftOut.data(), s.re.data(), s.im.data(), midRawBins);
             batchMag(s.re.data(), s.im.data(), s.mag.data(), midRawBins);
 
@@ -1035,9 +1033,8 @@ class Context {
             s.windowed.resize(mHybridSmallN);
             applyWindow(mWorkBuf.data(), mHybridBassWindow.data(),
                            s.windowed.data(), mHybridSmallN);
-            fl_fft_real_forward(mHybridSmallFft, mHybridSmallN,
-                                s.windowed.data(),
-                                mHybridSmallFftOut.data());
+            kiss_fftr(mHybridSmallFft, s.windowed.data(),
+                      mHybridSmallFftOut.data());
             deinterleave(mHybridSmallFftOut.data(), s.re.data(), s.im.data(), bassRawBins);
             batchMag(s.re.data(), s.im.data(), s.mag.data(), bassRawBins);
             logRebinRange(s.mag.data(), mHybridSmallN,

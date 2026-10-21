@@ -1,5 +1,18 @@
 # Task Tracker
 
+## ESP32 memory regression (#4870)
+
+- [x] Compare the unchanged reporter sketch across 3.10.3, 3.10.8 and master on a pinned Lolin D32 toolchain.
+- [x] Trace retained memory to its linker root and preserve RMT reliability.
+- [x] Replace the ESP-DSP umbrella include with the precise FFT API; build real FFT callers on legacy and modern SDKs.
+- [x] Verify the regression size budget, native tests and code review; prepare the focused fix with measured residual costs.
+
+### FFT implementation follow-up
+
+- [x] Confirm production already uses FastLED's optimized real KissFFT transform.
+- [x] Remove the experimental ESP-DSP adapter and its unused dispatcher; preserve all eight production call paths.
+- [x] Verify FFT goldens, production audio builds, memory savings and final review before updating PR #4871.
+
 <!-- Add tasks here as checkable items -->
 
 ## ESP FL_NO_EXCEPT lint

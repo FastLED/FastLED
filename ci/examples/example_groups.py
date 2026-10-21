@@ -115,7 +115,6 @@ GROUPS: dict[str, tuple[str, ...]] = {
         "Asio/RpcClient",
         "Asio/RpcServer",
         "Asio/Server",
-        "AudioFftParity",
         "AudioUrl",
         "BlurBenchmark",
         "ColorProfile",
