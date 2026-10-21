@@ -12,6 +12,17 @@ functional refill smoke completes 418 shows. The repaired reporter is 295,714
 flash / 23,844 physical static RAM bytes. S2/C3 legacy builds expose existing
 fbuild SDK/toolchain mismatches; do not claim those target builds passed.
 
+## Native ESP-IDF console footprint (#4870)
+
+- [x] Trace native UART/ring-buffer retention and measure pinned controls.
+- [x] Specialize fixed console initialization without removing configurable UART features.
+- [x] Verify image savings, explicit native/general UART consumers, tests, lint and review.
+- [x] Publish the focused implementation and its limitations.
+
+Review: native console saves 2,524 bytes flash with unchanged static RAM; both
+console backends pass physical ESP32 RPC smoke. Clean debug validation passes
+321 unit tests and 95 examples; modern ESP32-S3 AutoResearch and lint pass.
+
 ## Merge and remaining flash investigation (#4870)
 
 - [x] Merge #4871 only after approval, resolved reviews and all 122 hosted checks pass; verify the merged tree.

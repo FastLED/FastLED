@@ -536,3 +536,5 @@
   inside return types, default-argument lambdas, or same-line bodies cannot
   excuse an unannotated enclosing function. After deleting a regex exemption,
   verify its remaining call sites as well as the added regression test.
+
+- A native-console hardware test must use the selected backend for both directions. AutoResearch formerly read through fl I/O but replied through Arduino Serial; raw RPC output must use fl::write_bytes to bypass log filtering while honoring console selection. Compare failing hardware behavior with a selective revert before attributing it to an optimization.

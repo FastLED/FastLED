@@ -191,9 +191,6 @@ private:
     }
 #else
     using ActiveDriver = UartEsp32;
-    static UartConfig defaultConfig() FL_NO_EXCEPT {
-        return UartConfig::reliable(UartPort::UART0);
-    }
 #endif
 
     ActiveDriver mDriver;            // The one backend selected at compile time.
@@ -202,11 +199,19 @@ private:
     bool mDiagnosticsReported;       // true once the one-shot init diagnostic ran
 
     // Constructor: initialize the single chosen driver.
+#if FL_ESP_IO_USE_USB_SERIAL_JTAG
     EspIO()
         FL_NO_EXCEPT : mDriver(defaultConfig()),
           mPeekByte(-1),
           mHasPeek(false),
           mDiagnosticsReported(false) {}
+#else
+    EspIO()
+        FL_NO_EXCEPT : mDriver(),
+          mPeekByte(-1),
+          mHasPeek(false),
+          mDiagnosticsReported(false) {}
+#endif
 
     // Emit a one-shot human-readable summary of the compile-time backend
     // choice on the first user-facing print/println.
