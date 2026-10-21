@@ -8,7 +8,7 @@
 - [x] Review and publish the fix with hardware, size evidence and cross-target build limitations.
 
 Review: classic ESP32 Channel and legacy API byte loopback pass; 35-LED
-functional refill smoke completes 418 shows. The repaired reporter is 295,714
+functional refill smoke completes 418 shows. The repaired reporter is 295,670
 flash / 23,844 physical static RAM bytes. S2/C3 legacy builds expose existing
 fbuild SDK/toolchain mismatches; do not claim those target builds passed.
 

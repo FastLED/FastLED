@@ -15,9 +15,7 @@
 /// adaptive-buffer recommendation used by TX during network-active
 /// windows. Wiring the recommendation into `rmt_config.mem_block_num`
 /// gives TX more headroom before the ISR misses its refill deadline
-/// — the reactive `checkTime` truncation in
-/// `channel_driver_rmt4.h::fillNextBuffer` stays as a belt-and-braces
-/// safety net.
+/// while the SDK byte translator retains a late-refill deadline check.
 ///
 /// **The class body is header-inline** on purpose — it's a pure
 /// accounting ledger with no ESP-IDF dependencies. Host unit tests

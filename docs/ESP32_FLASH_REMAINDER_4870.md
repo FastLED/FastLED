@@ -254,21 +254,22 @@ Same reporter sketch and Lolin D32 / Arduino 2.0.17 / IDF 4.4.7 / GCC 8.4 patch5
 | Build | Board flash bytes | Physical static RAM bytes |
 | --- | ---: | ---: |
 | 3.10.3 RMT | 253,022 | 22,216 |
-| master `e19e9e7a9`, blocking fallback | 272,434 | 23,292 |
-| RMT restoration candidate | 295,714 | 23,844 |
-| Candidate minus master fallback | +23,280 | +552 |
-| Candidate minus 3.10.3 RMT | +42,692 | +1,628 |
+| master `f9774576e`, blocking fallback | 272,434 | 23,292 |
+| RMT restoration candidate | 295,670 | 23,844 |
+| Candidate minus master fallback | +23,236 | +552 |
+| Candidate minus 3.10.3 RMT | +42,648 | +1,628 |
 
 The new ELF contains `ChannelEngineRMT4Impl`, `rmt_write_sample` and
 `rmt_translator_init`, with no `ClocklessBlockingGeneric<12...>` controller.
-Allocated image flash is 295,713 bytes; board flash is one byte larger, as in
+Allocated image flash is 295,669 bytes; board flash is one byte larger, as in
 the controls. Attributed RAM from the symbol report is not physical static RAM.
 
 This restores expected hardware behavior; it does not remove the memory
 regression. SDK translation also allocates a bounded 512-byte heap buffer for
 each two-block classic TX channel, plus bookkeeping, and a raw-byte internal
 copy when the source is in PSRAM. Those dynamic allocations are not included
-in the static-RAM column. Pending #4873/#4874 savings are not included or added.
+in the static-RAM column. #4874 is now included in both integrated builds; pending #4873 is excluded.
+No savings from separate experiments are added together.
 Use this working RMT baseline for subsequent size work. Investigate default
 Arduino console and managed-power/driver-registration reachability without
 removing diagnostics, power safeguards or runtime API behavior.
