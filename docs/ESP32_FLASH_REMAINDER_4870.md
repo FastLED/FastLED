@@ -125,3 +125,97 @@ The linker reports, build logs and experimental scripts are retained under
 `.build/4870-evidence/`, `.build/symbols/4870-lolin-*` and
 `.build/4870_measure.py`. No production runtime changes or new workflows were
 made during this follow-up investigation.
+
+## Follow-up: restore the legacy RMT backend
+
+The implementation on `fix/esp32-legacy-rmt-selection` repairs the missing
+capability detection and dormant driver errors described above. IDF 4.x channel
+geometry now supplies the missing `SOC_RMT_SUPPORTED` default, without overriding
+an explicit SDK capability value. Regression tests fail the old ESP32/S2 cases
+and pass with the normalization.
+
+TX uses the SDK byte translator and shared RX/TX interrupt handler, preserving
+asynchronous operation, chipset timing conversion, latch/reset waits, timeout
+recovery and the late-refill check. Physical span reservations prevent TX/TX
+and TX/RX memory overlaps. An internal-RAM source passes directly to the SDK;
+PSRAM data receives a checked internal-RAM copy retained through completion.
+
+Hardware testing also exposed and repaired RX and harness problems:
+
+- Legacy cycle-counter API compatibility and same-pin GPIO pre-test setup.
+- GPIO direction helpers disconnecting the RMT output matrix; vendor enable-bit
+  operations now preserve routing, and release preserves idle LOW.
+- An oversized receive-buffer request exhausting heap. SDK RX storage is now
+  bounded to hardware capture capacity, including ring-buffer header space.
+- Empty SDK packets not being returned to the ring buffer. Rearming now stops
+  and clears stale captures; complete packets stop RX.
+- The decoder assuming HIGH/LOW symbol pairing while classic RX captures
+  LOW/HIGH. A directly tested SDK-independent helper handles either phase and
+  preserves the last bit when the SDK omits its final LOW duration. Physical
+  overflow is rejected before allowing that completed-packet behavior; injected
+  edge data remains supported.
+
+### On-device evidence
+
+The connected CP2104 device `/dev/ttyUSB0`, serial `0254E5B6`, identifies as
+ESP32-D0WDQ6 revision 1.0. Using Arduino 2.0.3 / IDF 4.4.1 and canonical
+`bash autoresearch`, both Channel API (GPIO25) and legacy `addLeds` (GPIO4)
+same-pin loopback pass all tested patterns for one- and two-LED strips with
+three frames per pattern. No external jumper is required for this same-pin
+RMT capture. This proves actual byte transport, not merely successful boot.
+
+A separate existing `timingDriftTest` RPC on the deployed AutoResearch firmware
+completes 418 shows of a 35-LED strip, exercising SDK refill beyond its initial
+hardware buffer, followed by a successful ping and no watchdog reset. This is
+functional progress evidence, not full byte capture of the longer strip or
+timing parity: show durations were 2,968–3,045 microseconds and sequence periods
+1,347 / 2,580 milliseconds (the first is partial). Wi-Fi and flash-cache stress
+remain unmeasured. Classic RX is limited to one hardware memory block here.
+
+### Revised size baseline
+
+Same reporter sketch and Lolin D32 / Arduino 2.0.17 / IDF 4.4.7 / GCC 8.4 patch5:
+
+| Build | Board flash bytes | Physical static RAM bytes |
+| --- | ---: | ---: |
+| 3.10.3 RMT | 253,022 | 22,216 |
+| master `e19e9e7a9`, blocking fallback | 272,434 | 23,292 |
+| RMT restoration candidate | 295,714 | 23,844 |
+| Candidate minus master fallback | +23,280 | +552 |
+| Candidate minus 3.10.3 RMT | +42,692 | +1,628 |
+
+The new ELF contains `ChannelEngineRMT4Impl`, `rmt_write_sample` and
+`rmt_translator_init`, with no `ClocklessBlockingGeneric<12...>` controller.
+Allocated image flash is 295,713 bytes; board flash is one byte larger, as in
+the controls. Attributed RAM from the symbol report is not physical static RAM.
+
+This restores expected hardware behavior; it does not remove the memory
+regression. SDK translation also allocates a bounded 512-byte heap buffer for
+each two-block classic TX channel, plus bookkeeping, and a raw-byte internal
+copy when the source is in PSRAM. Those dynamic allocations are not included
+in the static-RAM column. Pending #4873/#4874 savings are not included or added.
+Use this working RMT baseline for subsequent size work. Investigate default
+Arduino console and managed-power/driver-registration reachability without
+removing diagnostics, power safeguards or runtime API behavior.
+
+### Validation and remaining limits
+
+- Full native debug run: 321 unit targets and 95 examples pass.
+- New production decoder target: nine direct-helper cases, including real
+  LOW/HIGH phase, final-bit preservation, invalid timing and output overflow.
+- Focused Python regression contracts: ten cases pass.
+- Classic IDF 4.4.1 AutoResearch and IDF 4.4.7 reporter build and run as above.
+- Modern IDF 5.5.5 ESP32-S3 Blink builds. Legacy IDF 4.4.7 S3 Blink also builds.
+- Legacy S2 source compatibility needed its SDK's 13-bit ADC enum. Final S2
+  linking is blocked by fbuild requesting absent `esp32s2.rom.wdt.ld`; C3 is
+  blocked by modern ISA/C++ flags passed to the legacy GCC8 toolchain. These
+  builds are not claimed as passing. Full hosted validation is required before
+  a platform-sensitive merge.
+- The capability audit found another confirmed false-negative, WiFi, tracked
+  in [#4876](https://github.com/FastLED/FastLED/issues/4876). It is separate work.
+
+Evidence is retained under `.build/4870-evidence/rmt-restored-*` and
+`.build/symbols/4870-native-arduino/`. Temporary ROM-print diagnostics were
+restored after the controlled experiment. All deployment used fbuild; its
+supported alternate flashing transport was selected with
+`FBUILD_USE_ESPFLASH_VERIFY=0 FBUILD_USE_ESPFLASH_WRITE=0`. No new workflows.

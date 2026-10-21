@@ -1,6 +1,6 @@
 // @filter
 // require:
-//   - board: esp32s3,esp32c6,esp32p4,teensy41,teensy40,rp2350,rp2350w,lpc845,lpc845brk,lpcxpresso845max,lpcxpresso804
+//   - board: esp32dev_idf44,esp32s3,esp32c6,esp32p4,teensy41,teensy40,rp2350,rp2350w,lpc845,lpc845brk,lpcxpresso845max,lpcxpresso804
 // @end-filter
 //
 // Low-memory mode (FastLED #3030): on Low-tier targets (LPC8xx etc., per

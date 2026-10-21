@@ -1,5 +1,17 @@
 # Task Tracker
 
+## Restore legacy ESP32 RMT selection
+
+- [x] Reproduce missing SDK capability selection with regression tests.
+- [x] Repair RMT4 TX/RX build compatibility, interrupt ownership and memory spans.
+- [x] Validate classic legacy/modern builds, host tests, lint and connected ESP32 behavior.
+- [x] Review and publish the fix with hardware, size evidence and cross-target build limitations.
+
+Review: classic ESP32 Channel and legacy API byte loopback pass; 35-LED
+functional refill smoke completes 418 shows. The repaired reporter is 295,714
+flash / 23,844 physical static RAM bytes. S2/C3 legacy builds expose existing
+fbuild SDK/toolchain mismatches; do not claim those target builds passed.
+
 ## Merge and remaining flash investigation (#4870)
 
 - [x] Merge #4871 only after approval, resolved reviews and all 122 hosted checks pass; verify the merged tree.

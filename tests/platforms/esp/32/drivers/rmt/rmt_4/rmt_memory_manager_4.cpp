@@ -13,6 +13,52 @@
 
 using namespace fl;
 
+FL_TEST_CASE("RmtMemoryManager4 - contiguous TX spans exclude neighboring RX") {
+    RmtMemoryManager4 mgr(512);
+    FL_CHECK(mgr.tryReserveBlocks(0, 2));
+    FL_CHECK_FALSE(mgr.tryReserveBlocks(1, 1));
+    FL_CHECK(mgr.tryReserveBlocks(7, 1));
+    FL_CHECK_FALSE(mgr.tryReserveBlocks(6, 2));
+    FL_CHECK(mgr.tryReserveBlocks(2, 3));
+    FL_CHECK_FALSE(mgr.tryReserveBlocks(4, 1));
+    mgr.releaseBlocks(0, 2);
+    FL_CHECK(mgr.tryReserveBlocks(1, 1));
+}
+
+FL_TEST_CASE("RmtMemoryManager4 - RX reservation excludes later TX span") {
+    RmtMemoryManager4 mgr(512);
+    FL_CHECK(mgr.tryReserveBlocks(3, 1));
+    FL_CHECK_FALSE(mgr.tryReserveBlocks(2, 2));
+    FL_CHECK_FALSE(mgr.tryReserveBlocks(3, 2));
+    FL_CHECK(mgr.tryReserveBlocks(4, 2));
+    mgr.releaseBlocks(3, 1);
+    FL_CHECK(mgr.tryReserveBlocks(2, 2));
+}
+
+FL_TEST_CASE("RmtMemoryManager4 - reservation validates geometry and reset") {
+    RmtMemoryManager4 mgr(256);
+    FL_CHECK_FALSE(mgr.tryReserveBlocks(-1, 1));
+    FL_CHECK_FALSE(mgr.tryReserveBlocks(0, 0));
+    FL_CHECK_FALSE(mgr.tryReserveBlocks(4, 1));
+    FL_CHECK_FALSE(mgr.tryReserveBlocks(3, 2));
+    FL_CHECK_FALSE(mgr.tryReserveBlocks(0, 255));
+    FL_CHECK(mgr.tryReserveBlocks(0, 4));
+    mgr.reset();
+    FL_CHECK(mgr.tryReserveBlocks(0, 4));
+}
+
+FL_TEST_CASE("RmtMemoryManager4 - 48 word SoC geometry") {
+    RmtMemoryManager4 mgr(8 * 48, 48);
+    size_t words = 0;
+    FL_CHECK(mgr.tryAllocateTx(0, false, words));
+    FL_CHECK(words == 96u);
+    FL_CHECK(mgr.tryReserveBlocks(0, 2));
+    FL_CHECK(mgr.tryReserveBlocks(7, 1));
+    FL_CHECK_FALSE(mgr.tryReserveBlocks(6, 2));
+    FL_CHECK(mgr.tryAllocateTx(2, true, words));
+    FL_CHECK(words == 144u);
+}
+
 FL_TEST_CASE("RmtMemoryManager4 - pool starts empty") {
     RmtMemoryManager4 mgr(/*total_words=*/512);
     FL_CHECK(mgr.poolSize() == 512u);

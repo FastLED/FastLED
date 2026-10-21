@@ -174,7 +174,11 @@ void AutoResearchRemoteControl::bindPinMethods(fl::Remote& remote) {
 
         // Test 1: TX drives LOW, RX has pullup → RX should read LOW if connected
         pinMode(tx_pin, OUTPUT);
-        pinMode(rx_pin, INPUT_PULLUP);
+        // Same-pin RMT loopback needs the output to remain enabled. Turning
+        // that same pin into an input would only measure its pullup.
+        if (rx_pin != tx_pin) {
+            pinMode(rx_pin, INPUT_PULLUP);
+        }
         digitalWrite(tx_pin, LOW);
         delay(5);  // Allow signal to settle
         int rx_when_tx_low = digitalRead(rx_pin);

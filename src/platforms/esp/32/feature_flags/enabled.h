@@ -22,7 +22,12 @@ FL_EXTERN_C_END
 
 // Provide safe defaults for SoC capabilities if not defined
 #ifndef SOC_RMT_SUPPORTED
+#if defined(SOC_RMT_CHANNELS_PER_GROUP) && SOC_RMT_CHANNELS_PER_GROUP > 0
+// IDF 4.x exposes RMT channel geometry without SOC_RMT_SUPPORTED.
+#define SOC_RMT_SUPPORTED 1
+#else
 #define SOC_RMT_SUPPORTED 0
+#endif
 #endif
 
 // SOC_CPU_CORES_NUM is defined in soc/soc_caps.h on IDF 4.0+. For IDF 3.x

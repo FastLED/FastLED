@@ -22,23 +22,15 @@
 ///     buffer for us.
 ///   - `rmt_get_ringbuf_handle()` then `xRingbufferReceive()` to pop
 ///     captured `rmt_item32_t*` chunks.
-///   - No custom IRAM ISR. Unlike the TX path (which needs ISR-driven
-///     refill because the RMT TX buffer is 64 symbols), RX has no
-///     latency pressure — the IDF ring buffer absorbs symbols and
-///     the consumer thread drains them in `wait()` / `decode()`.
+///   - TX and RX share the SDK ISR. RX capture is bounded by one
+///     hardware memory block; a larger software ring buffer cannot
+///     extend that classic-ESP32 hardware limit.
 ///
 /// ## Decode helpers
 ///
-/// The bit-decoding helpers (`isResetPulse`, `isGapPulse`,
-/// `decodeBit`, `decodeRmtSymbols`) are intentionally duplicated from
-/// the IDF 5 impl rather than refactored into a shared header. The
-/// IDF 5 helpers use `rmt_symbol_word_t` (from `driver/rmt_rx.h`) and
-/// the IDF 4 equivalents below use `rmt_item32_t` (from
-/// `driver/rmt.h`). Both have identical 32-bit field layout
-/// (duration0:15 / level0:1 / duration1:15 / level1:1) so the
-/// algorithmic code is line-for-line the same. Factoring the helpers
-/// into a single backend-agnostic file is a sensible follow-up and is
-/// flagged in issue #3465.
+/// The SDK can pair LOW/HIGH phases instead of HIGH/LOW. Convert symbols
+/// to edges and use the tested, SDK-independent RMT4 decoder so leading
+/// idle and packet-end truncation cannot shift or discard data bits.
 
 #include "platforms/is_platform.h"
 #ifdef FL_IS_ESP32
@@ -60,12 +52,16 @@
 #include "fl/stl/static_assert.h"
 #include "fl/stl/type_traits.h"
 #include "platforms/esp/32/drivers/rmt/rmt_4/rmt_memory_manager_4.h"
+#include "platforms/esp/32/drivers/rmt_rx/rmt_rx_4/rmt_rx_decode_4.h"
 #include "platforms/esp/esp_version.h"
 
 FL_EXTERN_C_BEGIN
 // IWYU pragma: begin_keep
 #include "driver/gpio.h"
 #include "driver/rmt.h"
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 0, 0)
+#include "hal/gpio_ll.h"
+#endif
 #include "esp_attr.h"
 #include "esp_err.h"
 #include "esp_timer.h"
@@ -102,142 +98,10 @@ FL_STATIC_ASSERT(fl::is_trivially_copyable<rmt_item32_t>::value,
 namespace {
 
 //=============================================================================
-// Decode helpers — IDF 4 port of the IDF 5 sibling's anonymous-namespace
-// helpers. Same algorithm, substitutes rmt_symbol_word_t -> rmt_item32_t.
+// Convert captured hardware ticks into nanoseconds.
 //=============================================================================
 
 inline u32 ticksToNs(u32 ticks, u32 ns_per_tick) FL_NO_EXCEPT { return ticks * ns_per_tick; }
-
-inline bool isResetPulse(RmtSymbol symbol, const ChipsetTiming4Phase &timing,
-                         u32 ns_per_tick) FL_NO_EXCEPT {
-    const auto item = fl::bit_cast<rmt_item32_t>(symbol);
-    u32 duration0_ns = ticksToNs(item.duration0, ns_per_tick);
-    u32 duration1_ns = ticksToNs(item.duration1, ns_per_tick);
-    u32 reset_min_ns = timing.reset_min_us * 1000;
-    if (item.level0 == 0 && duration0_ns >= reset_min_ns) {
-        return true;
-    }
-    if (item.level1 == 0 && duration1_ns >= reset_min_ns) {
-        return true;
-    }
-    return false;
-}
-
-inline bool isGapPulse(RmtSymbol symbol, const ChipsetTiming4Phase &timing,
-                       u32 ns_per_tick) FL_NO_EXCEPT {
-    if (timing.gap_tolerance_ns == 0) {
-        return false;
-    }
-    const auto item = fl::bit_cast<rmt_item32_t>(symbol);
-    u32 duration0_ns = ticksToNs(item.duration0, ns_per_tick);
-    u32 duration1_ns = ticksToNs(item.duration1, ns_per_tick);
-    if (item.level1 == 0 && duration1_ns > timing.t0l_max_ns &&
-        duration1_ns <= timing.gap_tolerance_ns) {
-        return true;
-    }
-    if (item.level0 == 0 && duration0_ns > timing.t0l_max_ns &&
-        duration0_ns <= timing.gap_tolerance_ns) {
-        return true;
-    }
-    return false;
-}
-
-/**
- * @brief Decode a gap symbol's bit from its HIGH time alone
- * @return 0 or 1 when the symbol is HIGH-then-LOW with a valid bit HIGH time,
- * -1 otherwise
- *
- * A gap symbol is a bit whose LOW phase a TX hand-off stretched (a DMA chunk
- * boundary, an LCD line blank). Its HIGH phase is still a real bit, so it is
- * classified by HIGH time exactly as the shared decodeWs2812Edges() does.
- * Skipping the whole symbol instead dropped that bit and shifted the rest of
- * the frame by one bit (LCD_RGB on ESP32-P4, FastLED#4669).
- */
-inline int decodeGapBit(RmtSymbol symbol, const ChipsetTiming4Phase &timing,
-                        u32 ns_per_tick) FL_NO_EXCEPT {
-    const auto item = fl::bit_cast<rmt_item32_t>(symbol);
-    if (item.level0 != 1 || item.level1 != 0) {
-        return -1;
-    }
-    const u32 high_ns = ticksToNs(item.duration0, ns_per_tick);
-    if (high_ns >= timing.t1h_min_ns && high_ns <= timing.t1h_max_ns) {
-        return 1;
-    }
-    if (high_ns >= timing.t0h_min_ns && high_ns <= timing.t0h_max_ns) {
-        return 0;
-    }
-    return -1;
-}
-
-inline int decodeBit(RmtSymbol symbol, const ChipsetTiming4Phase &timing,
-                     u32 ns_per_tick) FL_NO_EXCEPT {
-    const auto item = fl::bit_cast<rmt_item32_t>(symbol);
-    u32 high_ns = ticksToNs(item.duration0, ns_per_tick);
-    u32 low_ns = ticksToNs(item.duration1, ns_per_tick);
-    if (item.level0 != 1 || item.level1 != 0) {
-        return -1;
-    }
-    bool t0h_match =
-        (high_ns >= timing.t0h_min_ns) && (high_ns <= timing.t0h_max_ns);
-    bool t0l_match =
-        (low_ns >= timing.t0l_min_ns) && (low_ns <= timing.t0l_max_ns);
-    if (t0h_match && t0l_match) {
-        return 0;
-    }
-    bool t1h_match =
-        (high_ns >= timing.t1h_min_ns) && (high_ns <= timing.t1h_max_ns);
-    bool t1l_match =
-        (low_ns >= timing.t1l_min_ns) && (low_ns <= timing.t1l_max_ns);
-    if (t1h_match && t1l_match) {
-        return 1;
-    }
-    return -1;
-}
-
-fl::result<u32, DecodeError> decodeRmtSymbols(const ChipsetTiming4Phase &timing,
-                                              u32 resolution_hz,
-                                              fl::span<const RmtSymbol> symbols,
-                                              fl::span<u8> bytes_out) FL_NO_EXCEPT {
-    if (symbols.empty() || bytes_out.empty()) {
-        return fl::result<u32, DecodeError>::failure(
-            DecodeError::INVALID_ARGUMENT);
-    }
-    u32 ns_per_tick = 1000000000UL / resolution_hz;
-    u32 bytes_decoded = 0;
-    u8 current_byte = 0;
-    int bit_index = 0;
-    for (size_t i = 0; i < symbols.size(); ++i) {
-        if (isResetPulse(symbols[i], timing, ns_per_tick)) {
-            break;
-        }
-        int bit;
-        if (isGapPulse(symbols[i], timing, ns_per_tick)) {
-            // Keep the bit a stretched-LOW symbol carries (see decodeGapBit).
-            bit = decodeGapBit(symbols[i], timing, ns_per_tick);
-            if (bit < 0) {
-                continue;
-            }
-        } else {
-            bit = decodeBit(symbols[i], timing, ns_per_tick);
-        }
-        if (bit < 0) {
-            return fl::result<u32, DecodeError>::failure(
-                DecodeError::INVALID_SYMBOL);
-        }
-        current_byte = static_cast<u8>((current_byte << 1) | (bit & 0x1));
-        ++bit_index;
-        if (bit_index == 8) {
-            if (bytes_decoded >= bytes_out.size()) {
-                // Output buffer full — silent stop, matches IDF 5 sibling.
-                break;
-            }
-            bytes_out[bytes_decoded++] = current_byte;
-            current_byte = 0;
-            bit_index = 0;
-        }
-    }
-    return fl::result<u32, DecodeError>::success(bytes_decoded);
-}
 
 //=============================================================================
 // Channel allocation
@@ -248,8 +112,8 @@ fl::result<u32, DecodeError> decodeRmtSymbols(const ChipsetTiming4Phase &timing,
 // coexist on the same chip without colliding.
 //=============================================================================
 
-#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 4, 0)
-constexpr int kRmt4RxMaxChannels = SOC_RMT_TX_CANDIDATES_PER_GROUP;
+#if defined(SOC_RMT_CHANNELS_PER_GROUP)
+constexpr int kRmt4RxMaxChannels = SOC_RMT_CHANNELS_PER_GROUP;
 #elif defined(FL_IS_ESP_32S2)
 constexpr int kRmt4RxMaxChannels = 4;
 #else
@@ -258,12 +122,20 @@ constexpr int kRmt4RxMaxChannels = 8;
 
 static bool s_channel_in_use[kRmt4RxMaxChannels] = {false};
 
+#if defined(SOC_RMT_TX_CANDIDATES_PER_GROUP) && \
+    defined(SOC_RMT_RX_CANDIDATES_PER_GROUP) && \
+    SOC_RMT_TX_CANDIDATES_PER_GROUP + SOC_RMT_RX_CANDIDATES_PER_GROUP == SOC_RMT_CHANNELS_PER_GROUP
+constexpr int kRmt4RxFirstChannel = SOC_RMT_TX_CANDIDATES_PER_GROUP;
+#else
+constexpr int kRmt4RxFirstChannel = 0;
+#endif
+
 int allocateRxChannel() FL_NO_EXCEPT {
-    // Descend from the highest channel so TX (which uses 0,1,...
-    // ascending) and RX (which uses N-1,N-2,... descending) don't
-    // collide on a typical 1-TX + 1-RX AutoResearch setup.
-    for (int ch = kRmt4RxMaxChannels - 1; ch >= 0; --ch) {
-        if (!s_channel_in_use[ch]) {
+    // Reserve the physical block as well as the logical RX channel. A TX
+    // allocation can span several consecutive channel memory blocks.
+    for (int ch = kRmt4RxMaxChannels - 1; ch >= kRmt4RxFirstChannel; --ch) {
+        if (!s_channel_in_use[ch] &&
+            RmtMemoryManager4::instance().tryReserveBlocks(ch, 1)) {
             s_channel_in_use[ch] = true;
             return ch;
         }
@@ -273,6 +145,9 @@ int allocateRxChannel() FL_NO_EXCEPT {
 
 void releaseRxChannel(int channel) FL_NO_EXCEPT {
     if (channel >= 0 && channel < kRmt4RxMaxChannels) {
+        if (s_channel_in_use[channel]) {
+            RmtMemoryManager4::instance().releaseBlocks(channel, 1);
+        }
         s_channel_in_use[channel] = false;
     }
 }
@@ -290,6 +165,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
           mChannel(-1),
           mInstalled(false),
           mRunning(false),
+          mCaptureOverflow(false),
           mResolutionHz(0),
           mBufferSize(0),
           mInternalBuffer(),
@@ -304,7 +180,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
         // channel numbers 0..7) never collides with an RX record.
         // Failure is non-fatal — the RX device still constructs; the
         // caller can retry allocation at begin() time.
-        constexpr size_t kMinRxSymbols = 64;
+        const size_t kMinRxSymbols = RmtMemoryManager4::instance().wordsPerBlock();
         size_t reserved = 0;
         if (RmtMemoryManager4::instance().tryAllocateRx(
                 mMemoryChannelId, kMinRxSymbols, reserved)) {
@@ -322,19 +198,34 @@ class RmtRxChannelImpl : public RmtRxChannel {
     }
 
     bool begin(const RxConfig &config) FL_NO_EXCEPT override {
+        mCaptureOverflow = false;
         // Re-arm path: if already installed, just clear our buffer and
         // restart RX. The driver stays installed across begin() calls
         // for the lifetime of the object.
         if (mInstalled) {
+            rmt_rx_stop(static_cast<rmt_channel_t>(mChannel));
+            drainRingbuf();
             mInternalBuffer.clear();
-            mRunning = true;
+            mRunning = false;
             esp_err_t err = rmt_rx_start(static_cast<rmt_channel_t>(mChannel),
                                          /*rx_idx_rst=*/true);
             if (err != ESP_OK) {
                 FL_WARN("[RMT4 RX] rmt_rx_start re-arm failed, err=" << err);
                 return false;
             }
+            mRunning = true;
             return true;
+        }
+
+        // Construction may have preceded another channel releasing memory.
+        // Never start hardware unless its RX allocation is accounted for.
+        if (!mMemoryRegistered) {
+            size_t reserved = 0;
+            if (!RmtMemoryManager4::instance().tryAllocateRx(
+                    mMemoryChannelId, RmtMemoryManager4::instance().wordsPerBlock(), reserved)) {
+                return false;
+            }
+            mMemoryRegistered = true;
         }
 
         // First-time init.
@@ -346,10 +237,18 @@ class RmtRxChannelImpl : public RmtRxChannel {
             }
         }
 
-        // Resolve clock + buffer parameters from RxConfig (with the
-        // documented FastLED defaults when the caller leaves them at 0).
-        mResolutionHz = (config.hz != 0) ? config.hz : 40000000u; // 40 MHz
-        mBufferSize = (config.buffer_size != 0) ? config.buffer_size : 1024;
+        // Resolve the optional clock and zero-valued buffer defaults.
+        mResolutionHz = config.hz.value_or(40000000u); // Default: 40 MHz
+        if (mResolutionHz == 0) {
+            mResolutionHz = 40000000u;
+        }
+        // Classic RMT RX cannot stream beyond its configured hardware block.
+        // AutoResearch's shared decode buffer can advertise hundreds of
+        // thousands of symbols; allocating that as an SDK ring buffer would
+        // exhaust the classic ESP32 heap without extending hardware capture.
+        const size_t requested = config.buffer_size != 0 ? config.buffer_size : 1024;
+        const size_t capacity = RmtMemoryManager4::instance().wordsPerBlock();
+        mBufferSize = requested < capacity ? requested : capacity;
 
         // RMT clock divider so the RMT tick rate matches the requested
         // resolution. The APB clock is 80 MHz on classic ESP32 / S2.
@@ -360,6 +259,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
             clk_div = 1;
         if (clk_div > 255)
             clk_div = 255;
+        mResolutionHz = kApbHz / clk_div;
 
         rmt_config_t cfg = {};
         cfg.rmt_mode = RMT_MODE_RX;
@@ -370,24 +270,34 @@ class RmtRxChannelImpl : public RmtRxChannel {
         // RX-mode config: how long without an edge before "done", and
         // optional noise-filter threshold. The numbers below mirror
         // the IDF 5 impl's behaviour for WS2812B-family capture.
-        cfg.rx_config.idle_threshold = 12000; // ticks
-        cfg.rx_config.filter_ticks_thresh = 100;
-        cfg.rx_config.filter_en = true;
+        const u64 idle_ticks = static_cast<u64>(config.signal_range_max_ns) *
+                               mResolutionHz / 1000000000ULL;
+        cfg.rx_config.idle_threshold = static_cast<u16>(
+            idle_ticks == 0 ? 1 : (idle_ticks > 32767 ? 32767 : idle_ticks));
+        // The IDF4 glitch filter counts APB cycles, not divided RX ticks.
+        const u64 filter_ticks = static_cast<u64>(config.signal_range_min_ns) *
+                                 kApbHz / 1000000000ULL;
+        cfg.rx_config.filter_ticks_thresh = static_cast<u8>(
+            filter_ticks > 255 ? 255 : filter_ticks);
+        cfg.rx_config.filter_en = filter_ticks != 0;
 
         esp_err_t err = rmt_config(&cfg);
         if (err != ESP_OK) {
             FL_WARN("[RMT4 RX] rmt_config failed on channel " << mChannel << " pin " << (static_cast<int>(mPin)) << ", err=" << err);
+            teardown();
             return false;
         }
 
         // Install the IDF driver and let it own the RX ring buffer. The
         // rx_buf_size argument is in BYTES. We size for the requested
         // symbol count (each rmt_item32_t is 4 bytes).
-        size_t rx_buf_bytes = mBufferSize * sizeof(rmt_item32_t);
+        // Leave room for the ring-buffer item header and a full hardware frame.
+        size_t rx_buf_bytes = 2 * (capacity + 4) * sizeof(rmt_item32_t);
         err = rmt_driver_install(static_cast<rmt_channel_t>(mChannel),
-                                 rx_buf_bytes, 0);
+                                 rx_buf_bytes, ESP_INTR_FLAG_IRAM | ESP_INTR_FLAG_LEVEL3);
         if (err != ESP_OK) {
             FL_WARN("[RMT4 RX] rmt_driver_install failed on channel " << mChannel << ", err=" << err);
+            teardown();
             return false;
         }
         mInstalled = true;
@@ -399,6 +309,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
             FL_WARN("[RMT4 RX] rmt_get_ringbuf_handle failed on channel " << mChannel << ", err=" << err);
             rmt_driver_uninstall(static_cast<rmt_channel_t>(mChannel));
             mInstalled = false;
+            teardown();
             return false;
         }
 
@@ -416,7 +327,24 @@ class RmtRxChannelImpl : public RmtRxChannel {
             FL_WARN("[RMT4 RX] rmt_set_gpio/pin failed on channel " << mChannel << " pin " << (static_cast<int>(mPin)) << ", err=" << err);
             rmt_driver_uninstall(static_cast<rmt_channel_t>(mChannel));
             mInstalled = false;
+            teardown();
             return false;
+        }
+
+        if (config.io_loop_back) {
+            // rmt_config(RX) makes the pin input-only. Keep its output enabled
+            // without gpio_set_direction(), which resets the output matrix.
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 0, 0)
+            gpio_ll_output_enable(&GPIO, mPin);
+#else
+            err = gpio_set_direction(mPin, GPIO_MODE_INPUT_OUTPUT);
+            if (err != ESP_OK) {
+                rmt_driver_uninstall(static_cast<rmt_channel_t>(mChannel));
+                mInstalled = false;
+                teardown();
+                return false;
+            }
+#endif
         }
 
         // Arm the receiver.
@@ -426,6 +354,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
             FL_WARN("[RMT4 RX] rmt_rx_start failed on channel " << mChannel << ", err=" << err);
             rmt_driver_uninstall(static_cast<rmt_channel_t>(mChannel));
             mInstalled = false;
+            teardown();
             return false;
         }
         mRunning = true;
@@ -462,24 +391,31 @@ class RmtRxChannelImpl : public RmtRxChannel {
             size_t item_size_bytes = 0;
             rmt_item32_t *raw = static_cast<rmt_item32_t *>(xRingbufferReceive(
                 mRingbufHandle, &item_size_bytes, pop_ticks_each));
-            if (raw != nullptr && item_size_bytes > 0) {
+            if (raw != nullptr) {
                 size_t count = item_size_bytes / sizeof(rmt_item32_t);
                 appendSymbols(raw, count);
+                // IDF4 also queues empty idle packets. Every received item
+                // must be returned, including those with a zero-byte payload.
                 vRingbufferReturnItem(mRingbufHandle, static_cast<void *>(raw));
-                if (mInternalBuffer.size() >= mBufferSize) {
-                    drainRingbuf();
-                    return mInternalBuffer.size() >= mBufferSize
-                               ? RxWaitResult::BUFFER_OVERFLOW
-                               : RxWaitResult::SUCCESS;
-                }
-                if (mInternalBuffer.size() > 0 && finishedSentinelSeen()) {
-                    drainRingbuf();
-                    return RxWaitResult::SUCCESS;
+                if (count > 0) {
+                    // Each non-empty SDK RX item is a complete capture ending
+                    // at idle or hardware capacity, rather than a stream chunk.
+                    rmt_rx_stop(static_cast<rmt_channel_t>(mChannel));
+                    mRunning = false;
+                    mCaptureOverflow = mInternalBuffer.size() >= mBufferSize;
+                    return mCaptureOverflow
+                               ? RxWaitResult::BUFFER_OVERFLOW : RxWaitResult::SUCCESS;
                 }
             }
             TickType_t now = xTaskGetTickCount();
             if ((now - start) >= total_ticks) {
+                rmt_rx_stop(static_cast<rmt_channel_t>(mChannel));
+                mRunning = false;
                 drainRingbuf();
+                if (mInternalBuffer.size() >= mBufferSize) {
+                    mCaptureOverflow = true;
+                    return RxWaitResult::BUFFER_OVERFLOW;
+                }
                 if (!mInternalBuffer.empty()) {
                     return RxWaitResult::SUCCESS;
                 }
@@ -497,11 +433,14 @@ class RmtRxChannelImpl : public RmtRxChannel {
             return fl::result<u32, DecodeError>::failure(
                 DecodeError::INVALID_ARGUMENT);
         }
-        return decodeRmtSymbols(
-            timing, mResolutionHz,
-            fl::span<const RmtSymbol>(mInternalBuffer.data(),
-                                      mInternalBuffer.size()),
-            out);
+        if (mCaptureOverflow) {
+            return fl::result<u32, DecodeError>::failure(DecodeError::BUFFER_OVERFLOW);
+        }
+        fl::vector<EdgeTime> edges;
+        edges.resize(mInternalBuffer.size() * 2);
+        const size_t count = getRawEdgeTimes(edges, 0);
+        return detail::decodeRmt4Edges(
+            timing, fl::span<const EdgeTime>(edges.data(), count), out);
     }
 
     size_t getRawEdgeTimes(fl::span<EdgeTime> out,
@@ -529,7 +468,12 @@ class RmtRxChannelImpl : public RmtRxChannel {
 
     const char *name() const FL_NO_EXCEPT override { return "RMT"; }
 
+    int getPin() const FL_NO_EXCEPT override { return static_cast<i32>(mPin); }
+
+    u32 getResolutionHz() const FL_NO_EXCEPT override { return mResolutionHz; }
+
     bool injectEdges(fl::span<const EdgeTime> edges) FL_NO_EXCEPT override {
+        mCaptureOverflow = false;
         if (mResolutionHz == 0) {
             mResolutionHz = 40000000u;
         }
@@ -576,16 +520,6 @@ class RmtRxChannelImpl : public RmtRxChannel {
         }
     }
 
-    bool finishedSentinelSeen() FL_NO_EXCEPT {
-        // A symbol with both durations == 0 is the IDF-4 "RX idle"
-        // sentinel that fires when idle_threshold expires.
-        if (mInternalBuffer.empty()) {
-            return false;
-        }
-        const auto last = fl::bit_cast<rmt_item32_t>(mInternalBuffer.back());
-        return (last.duration0 == 0) && (last.duration1 == 0);
-    }
-
     void drainRingbuf() FL_NO_EXCEPT {
         if (mRingbufHandle == nullptr) {
             return;
@@ -594,7 +528,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
             size_t item_size_bytes = 0;
             rmt_item32_t *raw = static_cast<rmt_item32_t *>(
                 xRingbufferReceive(mRingbufHandle, &item_size_bytes, 0));
-            if (raw == nullptr || item_size_bytes == 0) {
+            if (raw == nullptr) {
                 break;
             }
             size_t count = item_size_bytes / sizeof(rmt_item32_t);
@@ -607,6 +541,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
     int mChannel;    // -1 until allocated
     bool mInstalled; // rmt_driver_install() succeeded
     bool mRunning;   // rmt_rx_start() called
+    bool mCaptureOverflow;
     u32 mResolutionHz;
     size_t mBufferSize;
     fl::vector<RmtSymbol> mInternalBuffer;
@@ -626,7 +561,7 @@ fl::shared_ptr<RmtRxChannel> RmtRxChannel::create(int pin) FL_NO_EXCEPT {
         FL_WARN("[RMT4 RX] create() refused: pin " << pin << " is negative");
         return nullptr;
     }
-    return fl::shared_ptr<RmtRxChannel>(new RmtRxChannelImpl(pin)); // ok bare allocation — RmtRxChannelImpl is private, cannot construct externally via make_shared without exposing type
+    return fl::make_shared<RmtRxChannelImpl>(pin);
 }
 
 } // namespace fl

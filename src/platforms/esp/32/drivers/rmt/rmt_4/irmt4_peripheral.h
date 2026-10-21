@@ -1,55 +1,10 @@
 /// @file irmt4_peripheral.h
-/// @brief Virtual interface for the IDF-4.x RMT peripheral hardware
-///        abstraction (classic-ESP32 / S2 path).
+/// @brief Platform-independent lifecycle interface for the IDF 4 RMT driver.
 ///
-/// Companion to `IRMT5Peripheral` (under `../rmt_5/`) for the legacy
-/// IDF 4.x RMT driver. Mirrors the `IUartPeripheral` shape: lifecycle
-/// + control surface only — the hot-path ISR + double-buffer refill
-/// stays inline in `ChannelEngineRMT4Impl` to remain in IRAM with no
-/// vtable lookups.
-///
-/// ## Why this exists (issue #3458)
-///
-/// The rmt_4 driver historically inlined every ESP-IDF call right into
-/// `ChannelEngineRMT4Impl::{configureChannel,releaseChannel,~Impl}`.
-/// That ties the engine class directly to `driver/rmt.h` and forces every
-/// engine consumer (channel manager + legacy `addLeds<>` template path)
-/// to recompile against the ESP-IDF surface. Extracting this thin
-/// virtual interface gives us:
-///
-/// 1. **Pattern parity.** `BusTraits<Bus::RMT>` now uses the same
-///    `XBusHolder { peripheral, driver }` shape that UART / FlexIO use,
-///    so the channel-driver registry is uniform across peripherals.
-/// 2. **Testability.** A mock implementation can sit in for
-///    `Rmt4PeripheralESP` so the engine's channel-management logic
-///    (acquire / reconfigure / release strategies) can be exercised on
-///    a host build.
-/// 3. **Hot-path stays hot.** Only the lifecycle calls go through the
-///    interface. The IRAM ISR continues to touch `RMT.*` registers and
-///    `RMTMEM.chan[...]` directly.
-///
-/// ## Interface scope — what's IN
-///
-/// - `rmt_config()` channel setup
-/// - `rmt_driver_install()` / `rmt_driver_uninstall()`
-/// - `rmt_set_tx_thr_intr_en()` threshold-interrupt arming
-/// - `rmt_set_tx_intr_en()` per-channel interrupt toggle
-/// - `rmt_set_gpio()` / `rmt_set_pin()` pin assignment
-/// - `esp_intr_alloc()` / `esp_intr_free()` global ISR install/free
-///
-/// ## Interface scope — what's OUT
-///
-/// - Direct `RMT.*` register access from the ISR — must stay inline in
-///   IRAM.
-/// - `gpio_matrix_out()` disconnect from ISR — same reason.
-/// - The double-buffer refill (`fillNextBuffer`) — same reason.
-/// - The `tx_start` per-platform register writes — same reason.
-///
-/// These are all `static FL_NO_INLINE IRAM_ATTR` methods on the engine
-/// and stay there. Virtual dispatch in the ISR would defeat the literal-
-/// pool placement guarantees that `FL_NO_INLINE` exists to enforce on
-/// Xtensa (see the `#2247` / `#2252` history in this directory's
-/// `README.md`).
+/// ChannelEngineRMT4 uses the SDK-managed shared RX/TX ISR. Its byte
+/// translators are out-of-line IRAM functions without virtual dispatch.
+/// This interface retains low-level interrupt hooks for existing peripheral
+/// implementations; the production TX engine does not install a custom ISR.
 
 #pragma once
 
@@ -77,8 +32,7 @@ namespace detail {
 ///
 /// Captures everything `rmt_config()` needs plus the FastLED-specific
 /// threshold count. Channel number is part of the config because the
-/// engine assigns channels statically (`channel = mChannels.size()`)
-/// rather than letting ESP-IDF allocate.
+/// engine reserves a contiguous physical memory span before SDK setup.
 struct Rmt4ChannelConfig {
     int mChannel;      ///< RMT hardware channel (0..FASTLED_RMT_MAX_CHANNELS-1)
     int mGpioPin;      ///< GPIO pin for this channel
@@ -140,11 +94,8 @@ class IRMT4Peripheral {
     virtual bool
     configureChannel(const Rmt4ChannelConfig &cfg) FL_NO_EXCEPT = 0;
 
-    /// @brief Install the ESP-IDF RMT driver for one channel with no
-    ///        internal ring buffer (FastLED uses a custom double-buffer
-    ///        refill ISR).
-    ///
-    /// Maps to `rmt_driver_install(channel, 0, 0)`.
+    /// @brief Install the SDK-managed TX driver with no RX ring buffer.
+    /// Requests IRAM and LEVEL3 interrupt allocation flags.
     virtual bool installDriver(int channel) FL_NO_EXCEPT = 0;
 
     /// @brief Uninstall the ESP-IDF RMT driver for one channel.

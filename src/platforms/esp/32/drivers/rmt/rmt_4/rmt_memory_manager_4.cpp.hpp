@@ -34,7 +34,9 @@ namespace {
 ///        Classic ESP32 = 8 channels × 64 words = 512.
 ///        ESP32-S2      = 4 channels × 64 words = 256.
 constexpr size_t platformPoolWords() FL_NO_EXCEPT {
-#if defined(FL_IS_ESP_32S2)
+#if defined(SOC_RMT_CHANNELS_PER_GROUP)
+    return SOC_RMT_CHANNELS_PER_GROUP * FASTLED_RMT4_MEM_WORDS_PER_CHANNEL;
+#elif defined(FL_IS_ESP_32S2)
     return 4 * FASTLED_RMT4_MEM_WORDS_PER_CHANNEL;
 #else
     return 8 * FASTLED_RMT4_MEM_WORDS_PER_CHANNEL;
@@ -46,7 +48,7 @@ constexpr size_t platformPoolWords() FL_NO_EXCEPT {
 RmtMemoryManager4 &RmtMemoryManager4::instance() FL_NO_EXCEPT {
     // Function-local static: single global manager, constructed on
     // first use with the platform's pool size baked in.
-    static RmtMemoryManager4 sInstance{platformPoolWords()};
+    static RmtMemoryManager4 sInstance{platformPoolWords(), FASTLED_RMT4_MEM_WORDS_PER_CHANNEL};
     return sInstance;
 }
 

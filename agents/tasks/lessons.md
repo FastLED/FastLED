@@ -1,5 +1,15 @@
 # Lessons Learned
 
+- GPIO direction helpers can reset peripheral output routing. On legacy ESP32,
+  enabling output via gpio_set_direction reconnects SIG_GPIO_OUT_IDX. Preserve
+  RMT routing with vendor input/output-enable operations that only change the
+  enable bits, and verify actual loopback bytes after lifecycle changes.
+
+- Treat questions about an unexpected backend as questions first. Confirm the
+  selected implementation and cause before interpreting them as scope changes.
+  A hardware-backed driver silently falling back deserves explicit investigation
+  when the user expects that peripheral to be used.
+
 - Verify the selected peripheral backend in the actual ELF before describing
   size parity as preserving hardware-driver quality. Older ESP32 SDKs can
   expose RMT geometry without `SOC_RMT_SUPPORTED`; silently selecting a

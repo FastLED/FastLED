@@ -80,9 +80,10 @@ class RmtMemoryManager4 {
     static RmtMemoryManager4 &instance() FL_NO_EXCEPT;
 
     /// @brief Test-only constructor to inject a custom pool size.
-    explicit RmtMemoryManager4(size_t total_words) FL_NO_EXCEPT
-        : mPoolWords(total_words),
-          mAllocatedWords(0),
+    explicit RmtMemoryManager4(size_t total_words,
+                              size_t words_per_block = detail::kRmt4WordsPerBlock) FL_NO_EXCEPT
+        : mPoolWords(total_words), mWordsPerBlock(words_per_block),
+          mAllocatedWords(0), mReservedBlocks(0),
           mAllocations() {
         mAllocations.reserve(8);
     }
@@ -105,13 +106,12 @@ class RmtMemoryManager4 {
             }
         }
 
-        size_t desired = network_active ? detail::kRmt4TxNetworkActiveWords
-                                        : detail::kRmt4TxIdleWords;
+        size_t desired = (network_active ? 3 : 2) * mWordsPerBlock;
 
         if (desired > availableWords()) {
             if (network_active &&
-                detail::kRmt4TxIdleWords <= availableWords()) {
-                desired = detail::kRmt4TxIdleWords; // Graceful demotion.
+                2 * mWordsPerBlock <= availableWords()) {
+                desired = 2 * mWordsPerBlock; // Graceful demotion.
             } else {
                 FL_WARN("RmtMemoryManager4: TX allocation refused, pool exhausted (want " << desired << ", have " << availableWords() << " / " << mPoolWords << ")");
                 return false;
@@ -175,8 +175,37 @@ class RmtMemoryManager4 {
     // Queries
     //=========================================================================
 
+    /// Reserve the actual contiguous hardware blocks, independently of the
+    /// word ledger. RX and TX must both claim before configuring hardware.
+    bool tryReserveBlocks(int first, u8 count) FL_NO_EXCEPT {
+        const size_t blockCount = mWordsPerBlock ? mPoolWords / mWordsPerBlock : 0;
+        if (first < 0 || count == 0 || count >= 32 || blockCount > 32 ||
+            static_cast<size_t>(first) >= blockCount ||
+            count > blockCount - static_cast<size_t>(first)) {
+            return false;
+        }
+        const u32 mask = ((static_cast<u32>(1) << count) - 1) << first;
+        if (mReservedBlocks & mask) {
+            return false;
+        }
+        mReservedBlocks |= mask;
+        return true;
+    }
+
+    void releaseBlocks(int first, u8 count) FL_NO_EXCEPT {
+        const size_t blockCount = mWordsPerBlock ? mPoolWords / mWordsPerBlock : 0;
+        if (first < 0 || count == 0 || count >= 32 || blockCount > 32 ||
+            static_cast<size_t>(first) >= blockCount ||
+            count > blockCount - static_cast<size_t>(first)) {
+            return;
+        }
+        const u32 mask = ((static_cast<u32>(1) << count) - 1) << first;
+        mReservedBlocks &= ~mask;
+    }
+
     size_t allocatedWords() const FL_NO_EXCEPT { return mAllocatedWords; }
     size_t poolSize() const FL_NO_EXCEPT { return mPoolWords; }
+    size_t wordsPerBlock() const FL_NO_EXCEPT { return mWordsPerBlock; }
     size_t availableWords() const FL_NO_EXCEPT {
         return (mPoolWords > mAllocatedWords) ? (mPoolWords - mAllocatedWords)
                                               : 0;
@@ -199,8 +228,7 @@ class RmtMemoryManager4 {
         if (!network_active) {
             return 2;
         }
-        constexpr size_t kExtraBlockWords = detail::kRmt4WordsPerBlock;
-        if (availableWords() >= kExtraBlockWords) {
+        if (availableWords() >= mWordsPerBlock) {
             return 3;
         }
         return 2;
@@ -213,11 +241,14 @@ class RmtMemoryManager4 {
     void reset() FL_NO_EXCEPT {
         mAllocations.clear();
         mAllocatedWords = 0;
+        mReservedBlocks = 0;
     }
 
   private:
     size_t mPoolWords;
+    size_t mWordsPerBlock;
     size_t mAllocatedWords;
+    u32 mReservedBlocks;
     fl::vector<RmtAllocation4> mAllocations;
 };
 
