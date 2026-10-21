@@ -13,7 +13,6 @@
 #ifdef FL_IS_ESP32
 
 #include <Arduino.h>
-#include "esp_cpu.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "soc/io_mux_reg.h"
@@ -30,12 +29,10 @@ volatile fl::u32 g_probe_state = 0; // 1=task started 2=triggered 3=sample done
 volatile fl::u32 g_rmt_live[8] = {0};
 int g_pin = -1;
 
-// Cycle counter. NOTE: plain `rdcycle` is an ILLEGAL INSTRUCTION on
-// Espressif RISC-V cores (C3/C6/P4 don't implement the standard cycle
-// CSR — they use a custom performance-counter CSR); esp_cpu_get_cycle_count()
-// reads the right register on every ESP32 variant.
+// Arduino's wrapper selects the SDK-compatible cycle counter, including
+// Espressif's custom counter on RISC-V and the older IDF 4.x HAL API.
 static inline fl::u32 probeCycles() {
-    return static_cast<fl::u32>(esp_cpu_get_cycle_count());
+    return static_cast<fl::u32>(ESP.getCycleCount()); // ok platform specific - this ESP-only edge probe needs a cycle counter; FastLED has no public equivalent
 }
 
 void ARDUINO_ISR_ATTR edgeIsr() {
