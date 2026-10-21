@@ -161,7 +161,7 @@ pr       = { mode = "none", families = [], max-per-pr = "0MB", budget = "0MB", t
 # `max` is documented as the per-instance cap and `per` supplies the
 # multiplier. There is no `per` value for "per board", and the alternative
 # readings are both wrong in a way that costs bytes:
-#   per = "platform" -> x4. 2921 MiB x 4 = 11.4 GiB > the 10 GiB cap, while
+#   per = "platform" -> x4. 2921 MiB x 4 = 11.4 GiB > this policy target, while
 #       the 3 live entries are one OS (Linux) on one arch (X64). Multiplies
 #       3 real entries by 4.
 #   per = "os" -> x3, same overcount, same failure.
@@ -170,7 +170,7 @@ pr       = { mode = "none", families = [], max-per-pr = "0MB", budget = "0MB", t
 #
 # `max = "8723MB"` = 9146465611 B measured / 1048576 = 8722.9 MiB, rounded UP
 # to 8723 MiB. That is >= the family's live bytes, so `ci-lint cache janitor`'s
-# LRU footprint (max x cardinality = 8723 MiB) keeps all 3 live entries and
+# LRU footprint (max x cardinality = 8723 MiB) covers the 3 entries in the October 5 snapshot and
 # evicts a 4th board only once the family is genuinely over. Stating `max` as
 # the single-entry size (2921 MiB) instead would hand the janitor a 3.3x
 # UNDER-count and it would delete two live caches — the dangerous direction,
