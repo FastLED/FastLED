@@ -1,5 +1,11 @@
 # Task Tracker
 
+## Eliminate unused flash dependencies (#4870 follow-up)
+
+- [x] Remove linker roots for unused PWM teardown and vector initialization without changing features.
+- [x] Measure the unchanged reporter sketch before/after and verify explicit feature consumers.
+- [ ] Run native tests, lint and code review; publish measured implementation.
+
 ## Merge and remaining flash investigation (#4870)
 
 - [x] Merge #4871 only after approval, resolved reviews and all 122 hosted checks pass; verify the merged tree.

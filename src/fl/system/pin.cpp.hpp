@@ -99,9 +99,10 @@ struct PwmPinState {
 struct PwmStateData {
     PwmPinState channels[MAX_PWM_CHANNELS];
     fl::isr::handle isr_handle;
+    decltype(&fl::isr::detach_handler) detach_isr;
     bool isr_active;
 
-    PwmStateData() FL_NO_EXCEPT : isr_active(false) {}
+    PwmStateData() FL_NO_EXCEPT : detach_isr(nullptr), isr_active(false) {}
 };
 
 // Set the first time state() runs, which happens only on the paths that
@@ -202,6 +203,9 @@ int ensureIsrActive() FL_NO_EXCEPT {
         FL_WARN("PWM: ISR attach failed: " << (fl::isr::get_error_string(result)));
         return result;
     }
+    // Only software-PWM setup retains the timer teardown implementation.
+    // Ordinary pinMode() cleanup must not link unused timer/GPIO ISR drivers.
+    st.detach_isr = &fl::isr::detach_handler;
     st.isr_active = true;
     return 0;
 }
@@ -213,7 +217,7 @@ void maybeShutdownIsr() FL_NO_EXCEPT {
     if (!st.isr_active) return;
     if (countIsrChannels() > 0) return;
 
-    fl::isr::detach_handler(st.isr_handle);
+    st.detach_isr(st.isr_handle);
     st.isr_active = false;
 }
 
