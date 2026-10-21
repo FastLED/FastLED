@@ -5,13 +5,15 @@
 # This file is CACHE-ONLY policy, on purpose. FastLED runs 121 workflow files
 # of its own shape (73 board builds fanning into build_template.yml, plus
 # unit/example/qemu/size lanes); none of that is rewritten here. What this
-# declares is the ceiling on the repository's Actions cache, which as of
-# 2026-10-05 sat at 8.898 GiB of GitHub's 10 GiB per-repo cap across 12
-# entries — 89% — with no declared bound at all. Three of those entries are
-# 8.52 GiB: one board's build, keyed three times, one entry per board
-# (esp32s3 / attiny85 / leonardo, all from source commit 763fb4d9). A fourth
-# board variant does not fit: GitHub refuses the save and every later board
-# PR runs cold.
+# declares is the project's 9 GiB cache policy target. The original occupancy
+# audit below was taken on 2026-10-05; it is historical evidence, not a current
+# capacity guarantee. PR #4706 records the refreshed 2026-10-21 inventory.
+#
+# GitHub's default storage limit is configurable. Its normal size policy saves
+# new entries and evicts least-recently-accessed caches, which can cause cache
+# thrashing; occupancy alone does not prove that every subsequent save fails.
+# https://docs.github.com/en/actions/reference/workflows-and-actions/dependency-caching#usage-limits-and-eviction-policy
+# No repository billing/storage setting is changed by this declaration.
 #
 # SIZING RULE, stated once because everything below follows from it: every
 # `max` is at or above the largest entry MEASURED live in this repository, and
@@ -104,7 +106,7 @@ ci-full = { add = { platforms = "all", suites = ["example", "iwyu"] } }
 
 # ── Caches ───────────────────────────────────────────────────────────────────
 # Measured 2026-10-05 (read-only GET, 12 entries, 9554148763 B = 8.898 GiB =
-# 89% of the 10 GiB cap). Per-family live totals:
+# historical occupancy). Per-family totals at that audit:
 #
 #   family          entries   live bytes        largest entry
 #   fbuild-v1-*          3   9146665611 B   3062998798 B (esp32s3)
@@ -115,7 +117,7 @@ ci-full = { add = { platforms = "all", suites = ["example", "iwyu"] } }
 #                       12   9554148763 B  (8.898 GiB)
 [cache]
 # The declared footprint is 9 GiB = 9216 MiB, against a measured 8.898 GiB:
-# 318 MiB of headroom over today's real bytes and 1024 MiB under GitHub's cap.
+# 318 MiB of headroom over that historical snapshot, not today's occupancy.
 # That headroom is the whole finding — see the fbuild family note below.
 budget   = "9GB"
 write-on = ["main", "nightly"]
@@ -126,9 +128,10 @@ never    = ["linked-tests", "nextest-archives", "wheels", "incremental", "target
 # (`cache-mode` is never passed at any of the 4 call sites), so there is
 # nothing to retire and nothing to declare for them.
 retired  = []
-# PR pushes add no cache entries of their own. The fbuild composite's `save`
-# input is the switch and PR runs restore only; setup-uv's save-cache is not
-# narrowed to a writer flow either, so the PR delta budget is honestly zero.
+# This specialized delta-cache mode is off; it is not an accounting of ordinary
+# cache entries scoped to PR merge refs. Writer controls are being added in
+# PR #4706, including an upstream fbuild install-cache save-input fix. Existing
+# PR-scoped entries and generation overlap still need a truthful budget model.
 pr       = { mode = "none", families = [], max-per-pr = "0MB", budget = "0MB", trim = "on-close" }
 
 [cache.family]
