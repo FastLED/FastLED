@@ -375,7 +375,7 @@ fn find_element_address_uses(code: &str) -> Vec<(String, String)> {
             // Plain member access: re-anchor on the member and keep walking.
             cursor = member_start;
         }
-        index = index + 1;
+        index += 1;
     }
 
     uses

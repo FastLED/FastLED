@@ -424,8 +424,8 @@ fn classify_noexcept_line(
                 return Some(("copy constructor", paren));
             }
         }
-        if rest.starts_with(name) {
-            let after = rest[name.len()..].trim_start();
+        if let Some(after) = rest.strip_prefix(name) {
+            let after = after.trim_start();
             if after.starts_with("&&") {
                 return Some(("move constructor", paren));
             }

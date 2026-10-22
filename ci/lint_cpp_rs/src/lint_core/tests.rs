@@ -185,7 +185,7 @@ mod tests {
             &history,
             "2026-08-25",
             policy,
-            &blake3::hash(b"").to_hex().to_string(),
+            blake3::hash(b"").to_hex().as_ref(),
         );
         assert_eq!(rendered.matches("name: \"Zach Vorhies\"").count(), 1);
         assert!(rendered.find("Another Contributor").unwrap() < rendered.find("Zach Vorhies").unwrap());

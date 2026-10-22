@@ -681,8 +681,7 @@ constexpr int kX = 5;
   /* still string@@;
 int after_cont = 4;
 "
-            .replace("@@", "\"")
-            .replace("\\", &"\\".to_string());
+            .replace("@@", "\"");
         let visible = scan_visible(&src);
         assert!(visible.last().unwrap().contains("after_cont"), "{visible:?}");
     }

@@ -56,17 +56,16 @@ impl FileContentChecker for BareUsingChecker {
                 if regex_anon_namespace_open().is_match(&clean) {
                     scopes_to_push.push("local");
                     open_braces -= 1;
-                } else if regex_named_namespace_open().is_match(&clean) {
-                    scopes_to_push.push("namespace");
-                    open_braces -= 1;
-                } else if regex_extern_c_open().is_match(&clean) {
+                } else if regex_named_namespace_open().is_match(&clean)
+                    || regex_extern_c_open().is_match(&clean)
+                {
                     scopes_to_push.push("namespace");
                     open_braces -= 1;
                 } else if regex_local_scope_keyword().is_match(&clean) {
                     scopes_to_push.push("local");
                     open_braces -= 1;
                 }
-                scopes_to_push.extend(std::iter::repeat("local").take(open_braces));
+                scopes_to_push.extend(std::iter::repeat_n("local", open_braces));
             }
 
             scope_stack.extend(scopes_to_push);
@@ -270,7 +269,7 @@ impl FileContentChecker for StdintTypeChecker {
                 continue;
             }
 
-            let trimmed_start = line.trim_start_matches(|ch| ch == ' ' || ch == '\t');
+            let trimmed_start = line.trim_start_matches([' ', '\t']);
             let is_line_comment = trimmed_start.starts_with("//");
             if is_line_comment && !in_multiline_comment {
                 continue;
@@ -595,11 +594,9 @@ impl FileContentChecker for HeadersExistChecker {
                     first_mismatched_include_dir = Some(include_dir.to_string());
                 }
             }
-            if !any_include_matches
-                && first_mismatched_include_dir.is_some()
-                && !source_mirror_dir_has_headers(&root_prefix, test_dir_path)
-            {
-                let include_dir = first_mismatched_include_dir.unwrap();
+            if let Some(include_dir) = first_mismatched_include_dir.filter(|_| {
+                !any_include_matches && !source_mirror_dir_has_headers(&root_prefix, test_dir_path)
+            }) {
                 let test_full_rel = project_relative_path(&normalized).unwrap_or(test_rel);
                 return vec![(
                     0,

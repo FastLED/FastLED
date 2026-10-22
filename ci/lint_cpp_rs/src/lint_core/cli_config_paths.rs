@@ -453,23 +453,19 @@ fn strip_block_comments_from_line(line: &str, state: &mut CommentScanState) -> S
         }
         if bytes[cursor] == b'"' && is_raw_string_open(bytes, cursor) {
             let raw_start = cursor;
-            match raw_string_delimiter(bytes, cursor) {
-                Some((delim, body_start)) => {
-                    let close = format!("){delim}\"");
-                    match find_subslice(&bytes[body_start..], close.as_bytes()) {
-                        Some(pos) => cursor = body_start + pos + close.len(),
-                        None => {
-                            // Runs on to the next line; nothing after this is
-                            // code on this line.
-                            state.in_raw_string = Some(delim);
-                            cursor = bytes.len();
-                        }
+            if let Some((delim, body_start)) = raw_string_delimiter(bytes, cursor) {
+                let close = format!("){delim}\"");
+                match find_subslice(&bytes[body_start..], close.as_bytes()) {
+                    Some(pos) => cursor = body_start + pos + close.len(),
+                    None => {
+                        // Runs on to the next line; nothing after this is
+                        // code on this line.
+                        state.in_raw_string = Some(delim);
+                        cursor = bytes.len();
                     }
                 }
-                // Malformed delimiter: not a raw string after all, so fall
-                // through and read it as an ordinary string literal.
-                None => {}
             }
+            // A malformed delimiter falls through as an ordinary string.
             if cursor != raw_start {
                 continue;
             }

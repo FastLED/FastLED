@@ -241,7 +241,7 @@ fn private_libcpp_header_recommendation(header: &str) -> &'static str {
         .iter()
         .find(|(candidate, _)| *candidate == header)
     {
-        return *recommendation;
+        return recommendation;
     }
     PRIVATE_LIBCPP_HEADER_MAPPINGS_RS
         .iter()
@@ -574,11 +574,11 @@ fn is_under_config_excluded_test_dir(path: &str) -> bool {
 // call, served from memory thereafter. TestIncludePathsChecker called
 // this per file (368 files), each call did a fresh fs::read_dir; the
 // cache turns it into a single read_dir for the whole lint run.
-fn top_level_headers_cache(
-) -> &'static std::sync::Mutex<HashMap<(String, String), std::sync::Arc<HashSet<String>>>> {
-    static CACHE: std::sync::OnceLock<
-        std::sync::Mutex<HashMap<(String, String), std::sync::Arc<HashSet<String>>>>,
-    > = std::sync::OnceLock::new();
+type TopLevelHeadersCache =
+    std::sync::Mutex<HashMap<(String, String), std::sync::Arc<HashSet<String>>>>;
+
+fn top_level_headers_cache() -> &'static TopLevelHeadersCache {
+    static CACHE: std::sync::OnceLock<TopLevelHeadersCache> = std::sync::OnceLock::new();
     CACHE.get_or_init(|| std::sync::Mutex::new(HashMap::new()))
 }
 
