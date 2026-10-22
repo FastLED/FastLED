@@ -24,7 +24,6 @@
 #include "platforms/esp/32/drivers/rmt/rmt_4/channel_driver_rmt4.h"
 #include "platforms/esp/32/drivers/rmt/rmt_4/network_state_tracker_4.h"
 #include "platforms/esp/32/drivers/rmt/rmt_4/rmt4_peripheral_esp.h"
-#include "platforms/esp/32/drivers/rmt/rmt_4/rmt4_refill_timing.h"
 #include "platforms/esp/32/drivers/rmt/rmt_4/rmt_memory_manager_4.h"
 #include "platforms/esp/32/drivers/rmt/rmt_4/rmt4_refill_deadline.h"
 
@@ -41,7 +40,6 @@ struct Rmt4Symbols {
     rmt_item32_t zero;
     rmt_item32_t one;
     Rmt4RefillDeadline deadline;
-    detail::Rmt4RefillTiming refillTiming;
     atomic_bool lateRefill{false};
 #if FL_RMT4_DIAGNOSTICS
     atomic<u32> translatedBytes{0};
@@ -79,11 +77,11 @@ FL_NO_INLINE IRAM_ATTR void translateRmt4Bytes(
     Rmt4Symbols &symbols) FL_NO_EXCEPT {
     // Shared hardware time remains comparable if task preload and the SDK's
     // shared ISR run on different cores. CCOUNT is per-core.
-    const u32 previousUs = symbols.deadline.previousFillUs();
+    const auto previous = symbols.deadline.previousFill();
     const u32 nowUs = static_cast<u32>(esp_timer_get_time());
     const bool inIsr = xPortInIsrContext();
 #if FL_RMT4_DIAGNOSTICS
-    const u32 deltaUs = nowUs - previousUs;
+    const u32 deltaUs = nowUs - previous.timeUs;
     const u32 now = __clock_cycles();
     if (inIsr) {
         if (symbols.isrCore.load(memory_order_relaxed) < 0) {
@@ -95,20 +93,17 @@ FL_NO_INLINE IRAM_ATTR void translateRmt4Bytes(
         symbols.preloadCycles.store(now, memory_order_relaxed);
         symbols.preloadCore.store(xPortGetCoreID(), memory_order_relaxed);
     }
-    const u32 previous = symbols.lastFillCycles.load(memory_order_relaxed);
-    const u32 delta = now - previous;
-    if (previous != 0 &&
+    const u32 previousCycles = symbols.lastFillCycles.load(memory_order_relaxed);
+    const u32 delta = now - previousCycles;
+    if (previousCycles != 0 &&
         delta > symbols.maxDeltaCycles.load(memory_order_relaxed)) {
         symbols.maxDeltaCycles.store(delta, memory_order_relaxed);
     }
-    if (previousUs != 0 && deltaUs > symbols.maxDeltaUs.load(memory_order_relaxed)) {
+    if (previous.armed && deltaUs > symbols.maxDeltaUs.load(memory_order_relaxed)) {
         symbols.maxDeltaUs.store(deltaUs, memory_order_relaxed);
     }
 #endif
-    // Keep diagnostic timestamps separate from the authoritative three-phase
-    // deadline: task preload and the first ISR establish distinct phases.
-    (void)symbols.deadline.tryRefill(previousUs, nowUs, inIsr);
-    if (!symbols.refillTiming.allowFill(nowUs, symbols.deadline.maxRefillUs)) {
+    if (!symbols.deadline.tryRefill(previous, nowUs, inIsr)) {
         // Preserve the legacy late-refill safeguard: end this frame rather
         // than knowingly continue after a missed hardware buffer deadline.
         *translatedSize = sourceSize;
@@ -517,7 +512,6 @@ void ChannelEngineRMT4Impl::startTransmission(
     state->resetDurationUs = data->getTiming().reset_us;
     state->transmissionStartTime = fl::millis();
     auto &diagnostics = sRmt4Symbols[state->channel];
-    diagnostics.refillTiming.reset();
     diagnostics.deadline.reset(diagnostics.deadline.maxRefillUs);
     diagnostics.lateRefill.store(false, memory_order_relaxed);
 #if FL_RMT4_DIAGNOSTICS
