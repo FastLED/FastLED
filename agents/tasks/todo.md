@@ -706,7 +706,7 @@ USB/HAL callback roots. Physical USB enumeration/reconnect remains unverified.
 
 - [x] #4889: implementation, review and local validation complete; published PR #4894 with ci-full attached. Master integration/full CI remains pending for the stack.
 - [x] #4890: implementation, contention HIL, matched bloat and local review complete; published PR #4896 with ci-full requested. Stack/master integration remains pending.
-- [ ] #4891: transitive Arduino-header enforcement in existing lint, regression fixtures and real SDK probes.
+- [x] #4891: implementation, regression/SDK/HIL/bloat validation and review complete; published PR #4897 with full CI requested. Stack/master integration pending.
 - [ ] #4892: eliminate framework startup Serial0 retention from this repository while preserving application Serial APIs; measured maps and HIL.
 - [ ] #4893: physical native USB matrix, RPC/reconnect/ownership/LED and recovery checks; document any unavailable routes without claiming them validated.
 
@@ -767,7 +767,7 @@ absolute heap totals. Contended show is about 6.2ms including peer traffic.
 Docs: docs/ESP32_SPI_PROVIDER.md. Measurements: .build/4890/bloat/report.md.
 No workflows added. PR: https://github.com/FastLED/FastLED/pull/4896.
 Implementation/local validation is published; stack/master CI is pending.
-#4891 implementation/local verification is in progress on
+#4891 implementation/local verification is published in PR #4897 on
 `feat/esp32-transitive-arduino-lint`, based on `b58cf683f`.
 
 ### #4891 verification
@@ -789,7 +789,7 @@ Implementation/local validation is published; stack/master CI is pending.
 - [x] Normal `bash lint --cpp` rejects selectively restoring the old FastLED.h
       Arduino import, reporting the real transitive compile_test.hpp chain.
       Corrected source restored; full final `bash lint` passes.
-- [ ] Publish reviewed stacked PR, request full CI, update issue evidence.
+- [x] Publish reviewed stacked PR #4897, request full CI, update issue evidence.
 
 Policy/limits: docs/ESP32_ARDUINO_DEPENDENCY_LINT.md. Local evidence is in
 `.build/4891/evidence/` and `.build/4891/bloat/`. Physical USB evidence is
