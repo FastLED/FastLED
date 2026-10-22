@@ -637,3 +637,17 @@ timed out on both versions while direct ownership accounting passed.
   paths and sources because fbuild omitted that dependency. No Windows execution
   or physical hardware run is claimed. Logs and scripts: `.build/4826/`.
 - Repository code review found no blocking issues.
+
+## Slim legacy RMT4 channel path
+
+- [x] Test batched direct-show lifecycle and completion before changing production.
+- [x] Reuse slim bridge with direct RMT4 legacy default and managed override.
+- [x] Measure matched flash/RAM; validate host suite and physical loopback.
+- [x] Review and publish the measured change and API tradeoffs.
+
+Review: RMT4 legacy default saves 6,244 flash / 208 static RAM bytes versus
+#4877 (289,426 / 23,636). Channel API remains managed. Batched completion is
+RMT4-only; immediate direct backends retain their existing lifecycle. Full
+lint, clean sanitizer run (322 unit / 95 example targets), and physical legacy
+and Channel byte loopback pass. The 35-LED refill smoke completes 553 shows.
+Managed override remains available for registry controls.

@@ -4,6 +4,39 @@ The IDF 4.x backend implements `IChannelDriver` for clockless LED output.
 `ChannelEngineRMT4Impl` queues source `ChannelData`, starts asynchronous SDK
 transfers and polls their completion. IDF 5.x uses the separate RMT5 backend.
 
+## Legacy API footprint
+
+`FastLED.addLeds<>()` uses the existing slim bridge in direct mode by default.
+All legacy strips enqueue before `endShowLeds()` flushes their shared driver
+and waits for completion. Strips still transmit in parallel when hardware
+capacity allows; polling also advances strips waiting for a hardware channel.
+Standalone `controller.showLeds()` uses the same completion hook.
+
+A legacy-only sketch therefore does not retain `ChannelManager` just to render
+its LEDs. `FastLED.add()` continues to use the Channel API and its manager.
+Mixed sketches retain that manager as required by their Channel API calls.
+
+Direct legacy controllers use their controller's `setEnabled()` setting. They
+do not participate in the ChannelManager registry's runtime driver enable,
+disable, exclusive selection or enumeration. Sketches needing those controls
+for legacy controllers can build with `FL_SLIM_BRIDGE_DIRECT_SHOW=0` to restore
+the managed bridge. This choice does not change RMT4's translator, allocation,
+reset timing or transmission timeout handling.
+
+Matched 96-RGB-LED Lolin D32 reporter (espressif32 6.13.0, Arduino 2.0.17,
+IDF 4.4.7), compared with PR #4877 at `b8ae6a398`:
+
+| Build | Flash bytes | Static RAM bytes |
+|---|---:|---:|
+| Managed legacy bridge before this change | 295,670 | 23,844 |
+| Direct legacy bridge with completion polling | 289,426 | 23,636 |
+| Saving | 6,244 | 208 |
+
+`bash bloat` confirms no executable `ChannelManager` symbols in the direct
+reporter. This is static memory accounting; the SDK translator and frame
+storage still allocate heap. The managed override on the new code measures
+295,686 flash / 23,844 static RAM bytes.
+
 ## Interrupt ownership
 
 TX and RX both use the SDK's RMT driver and its single shared ISR. TX installs
