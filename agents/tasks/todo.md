@@ -671,3 +671,11 @@ RMT4-only; immediate direct backends retain their existing lifecycle. Full
 lint, clean sanitizer run (322 unit / 95 example targets), and physical legacy
 and Channel byte loopback pass. The 35-LED refill smoke completes 553 shows.
 Managed override remains available for registry controls.
+## PR #4706 cache policy continuation
+
+- [x] Refresh live cache and writer inventory.
+- [x] Restrict consumer cache saves to master push/schedule; preserve PR restores where supported.
+- [x] Land fbuild install-cache restore-only fix (FastLED/fbuild#1687).
+- [ ] Verify the consumer writer controls in hosted CI and merge this separate fix.
+- [ ] Bound generation overlap and model every family from real measurements.
+- [ ] Validate budget and complete required CI before merge.
