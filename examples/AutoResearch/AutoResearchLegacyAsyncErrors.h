@@ -33,11 +33,11 @@ unsigned consumedFaults() FL_NO_EXCEPT;
 // their reservations, and every fixture reservation is restored on exit.
 class FreeBlockReservations {
 public:
-    explicit FreeBlockReservations(fl::RmtMemoryManager4 &manager)
+    explicit FreeBlockReservations(fl::RmtMemoryManager4 &manager) // ok platform specific - reserve and audit real RMT4 hardware blocks for exhaustion recovery; no neutral allocator exposes them.
         : mManager(manager) {
-        const size_t count = manager.poolSize() / manager.wordsPerBlock();
+        const size_t count = manager.poolSize() / manager.wordsPerBlock(); // ok platform specific - size exhaustion reservations from real RMT4 memory geometry; no neutral allocator exposes it.
         for (size_t block = 0; block < count && block < 32; ++block) {
-            if (manager.tryReserveBlocks(static_cast<int>(block), 1)) {
+            if (manager.tryReserveBlocks(static_cast<int>(block), 1)) { // ok platform specific - reserve and audit real RMT4 hardware blocks for exhaustion recovery; no neutral allocator exposes them.
                 mReserved |= fl::u32(1) << block;
                 ++mCount;
             }
@@ -46,7 +46,7 @@ public:
     ~FreeBlockReservations() {
         for (unsigned block = 0; block < 32; ++block) {
             if (mReserved & (fl::u32(1) << block)) {
-                mManager.releaseBlocks(static_cast<int>(block), 1);
+                mManager.releaseBlocks(static_cast<int>(block), 1); // ok platform specific - reserve and audit real RMT4 hardware blocks for exhaustion recovery; no neutral allocator exposes them.
             }
         }
     }
@@ -56,7 +56,7 @@ public:
     FreeBlockReservations &operator=(const FreeBlockReservations &) = delete;
 
 private:
-    fl::RmtMemoryManager4 &mManager;
+    fl::RmtMemoryManager4 &mManager; // ok platform specific - reserve and audit real RMT4 hardware blocks for exhaustion recovery; no neutral allocator exposes them.
     fl::u32 mReserved = 0;
     unsigned mCount = 0;
 };
@@ -86,10 +86,10 @@ struct Observation {
     fl::u32 workerStackUnusedBytes = 0;
 };
 
-inline Observation submit(fl::Rmt4AsyncDriver &driver,
+inline Observation submit(fl::Rmt4AsyncDriver &driver, // ok platform specific - construct an isolated RMT4 worker for backend-specific failure recovery, unavailable through the neutral factory.
                           const fl::ChannelDataPtr &frame) {
     Observation result;
-    const fl::u32 before = driver.txDiagnostics().cumulativeTranslatedBytes;
+    const fl::u32 before = driver.txDiagnostics().cumulativeTranslatedBytes; // ok platform specific - observe the selected RMT4 worker internals without adding a generic driver diagnostic API.
     driver.enqueue(frame);
     result.leasedAtSubmission = frame->isInUse();
     driver.show();
@@ -98,9 +98,9 @@ inline Observation submit(fl::Rmt4AsyncDriver &driver,
     result.releasedAutonomously = !frame->isInUse();
     result.errorReported = driver.poll().state ==
         fl::IChannelDriver::DriverState::ERROR;
-    result.completionSucceeded = driver.waitDone(1000);
-    result.translatedBytes = driver.txDiagnostics().cumulativeTranslatedBytes - before;
-    result.workerStackUnusedBytes = driver.workerStackHighWaterBytes();
+    result.completionSucceeded = driver.waitDone(1000); // ok platform specific - verify isolated RMT4 worker completion after injected failure; no neutral factory creates this worker.
+    result.translatedBytes = driver.txDiagnostics().cumulativeTranslatedBytes - before; // ok platform specific - observe the selected RMT4 worker internals without adding a generic driver diagnostic API.
+    result.workerStackUnusedBytes = driver.workerStackHighWaterBytes(); // ok platform specific - observe the selected RMT4 worker internals without adding a generic driver diagnostic API.
     return result;
 }
 
@@ -113,21 +113,21 @@ inline void appendObservation(fl::json &result, const Observation &observed) {
     result.set("workerStackUnusedBytes", static_cast<int>(observed.workerStackUnusedBytes));
 }
 
-inline bool recoverySucceeded(fl::Rmt4AsyncDriver &driver) {
+inline bool recoverySucceeded(fl::Rmt4AsyncDriver &driver) { // ok platform specific - construct an isolated RMT4 worker for backend-specific failure recovery, unavailable through the neutral factory.
     auto recovery = makeFrame(1);
     if (!recovery) { return false; }
     const auto observed = submit(driver, recovery);
     return observed.leasedAtSubmission && observed.releasedAutonomously &&
         !observed.errorReported && observed.completionSucceeded &&
-        (!FL_RMT4_DIAGNOSTICS || observed.translatedBytes == 3);
+        (!FL_RMT4_DIAGNOSTICS || observed.translatedBytes == 3); // ok platform specific - this fixture requires RMT4-only worker diagnostics or fault-test configuration, with no neutral equivalent.
 }
 
 #if defined(FL_RMT4_FAULT_TEST) && FL_RMT4_FAULT_TEST == 1 // ok platform specific - only fault-injection firmware references the linker wrapper control symbols.
 inline fl::json injectedFailureProbe(const fl::string &mode) {
     fl::json result = fl::json::object();
     result.set("mode", mode);
-    auto &manager = fl::RmtMemoryManager4::instance();
-    const size_t baseline = manager.allocatedWords();
+    auto &manager = fl::RmtMemoryManager4::instance(); // ok platform specific - reserve and audit real RMT4 hardware blocks for exhaustion recovery; no neutral allocator exposes them.
+    const size_t baseline = manager.allocatedWords(); // ok platform specific - reserve and audit real RMT4 hardware blocks for exhaustion recovery; no neutral allocator exposes them.
     auto frame = makeFrame(1);
     if (!frame) {
         result.set("success", false);
@@ -139,26 +139,26 @@ inline fl::json injectedFailureProbe(const fl::string &mode) {
     unsigned consumed = 0;
     if (mode == "mutex-allocation") {
         // Only this constructor runs while the next mutex allocation is armed.
-        auto peripheral = fl::make_shared<fl::Rmt4PeripheralESP>();
+        auto peripheral = fl::make_shared<fl::Rmt4PeripheralESP>(); // ok platform specific - construct an isolated RMT4 worker for backend-specific failure recovery, unavailable through the neutral factory.
         armFault(Fault::MutexAllocation);
         {
-            fl::Rmt4AsyncDriver driver(peripheral);
+            fl::Rmt4AsyncDriver driver(peripheral); // ok platform specific - construct an isolated RMT4 worker for backend-specific failure recovery, unavailable through the neutral factory.
             consumed = consumedFaults();
             disarmFault();
             observed = submit(driver, frame);
         }
         // A driver missing its construction-time mutex cannot recover in place.
-        fl::Rmt4AsyncDriver replacement(fl::make_shared<fl::Rmt4PeripheralESP>());
+        fl::Rmt4AsyncDriver replacement(fl::make_shared<fl::Rmt4PeripheralESP>()); // ok platform specific - construct an isolated RMT4 worker for backend-specific failure recovery, unavailable through the neutral factory.
         recovered = recoverySucceeded(replacement);
     } else {
-        fl::Rmt4AsyncDriver driver(fl::make_shared<fl::Rmt4PeripheralESP>());
+        fl::Rmt4AsyncDriver driver(fl::make_shared<fl::Rmt4PeripheralESP>()); // ok platform specific - construct an isolated RMT4 worker for backend-specific failure recovery, unavailable through the neutral factory.
         armFault(mode == "task-allocation" ? Fault::TaskAllocation : Fault::DriverInstall);
         observed = submit(driver, frame);
         consumed = consumedFaults();
         disarmFault();
         recovered = recoverySucceeded(driver);
     }
-    const size_t after = manager.allocatedWords();
+    const size_t after = manager.allocatedWords(); // ok platform specific - reserve and audit real RMT4 hardware blocks for exhaustion recovery; no neutral allocator exposes them.
     const bool expectedLease = mode == "mutex-allocation" ?
         !observed.leasedAtSubmission : observed.leasedAtSubmission;
     appendObservation(result, observed);
@@ -195,12 +195,12 @@ inline fl::json legacyAsyncErrorProbe(const fl::json &args) {
         return result;
     }
     if (mode == "timeout" &&
-        (FASTLED_RMT4_TRANSMISSION_TIMEOUT_MS != 1 || !FL_RMT4_DIAGNOSTICS)) {
+        (FASTLED_RMT4_TRANSMISSION_TIMEOUT_MS != 1 || !FL_RMT4_DIAGNOSTICS)) { // ok platform specific - this fixture requires RMT4-only worker diagnostics or fault-test configuration, with no neutral equivalent.
         result.set("success", false);
         result.set("error", "timeout fixture requires FASTLED_RMT4_TRANSMISSION_TIMEOUT_MS=1 and FL_RMT4_DIAGNOSTICS=1");
         return result;
     }
-    if (mode == "invalid-batch" && !FL_RMT4_DIAGNOSTICS) {
+    if (mode == "invalid-batch" && !FL_RMT4_DIAGNOSTICS) { // ok platform specific - this fixture requires RMT4-only worker diagnostics or fault-test configuration, with no neutral equivalent.
         result.set("success", false);
         result.set("error", "invalid-batch fixture requires FL_RMT4_DIAGNOSTICS=1");
         return result;
@@ -219,8 +219,8 @@ inline fl::json legacyAsyncErrorProbe(const fl::json &args) {
         return result;
 #endif
     }
-    auto &manager = fl::RmtMemoryManager4::instance();
-    const size_t baseline = manager.allocatedWords();
+    auto &manager = fl::RmtMemoryManager4::instance(); // ok platform specific - reserve and audit real RMT4 hardware blocks for exhaustion recovery; no neutral allocator exposes them.
+    const size_t baseline = manager.allocatedWords(); // ok platform specific - reserve and audit real RMT4 hardware blocks for exhaustion recovery; no neutral allocator exposes them.
     auto frame = makeFrame(mode == "timeout" ? 4000 : 1);
     if (!frame) {
         result.set("success", false);
@@ -235,15 +235,15 @@ inline fl::json legacyAsyncErrorProbe(const fl::json &args) {
         FreeBlockReservations reservations(manager);
         reserved = reservations.count();
         reservationMask = reservations.mask();
-        fl::Rmt4AsyncDriver driver(fl::make_shared<fl::Rmt4PeripheralESP>());
+        fl::Rmt4AsyncDriver driver(fl::make_shared<fl::Rmt4PeripheralESP>()); // ok platform specific - construct an isolated RMT4 worker for backend-specific failure recovery, unavailable through the neutral factory.
         observed = submit(driver, frame);
     } else if (mode == "setup") {
         // A missing real peripheral exercises the existing setup-failure path;
         // no SDK return value or production behavior is replaced by a mock.
-        fl::Rmt4AsyncDriver driver{fl::shared_ptr<fl::detail::IRMT4Peripheral>()};
+        fl::Rmt4AsyncDriver driver{fl::shared_ptr<fl::detail::IRMT4Peripheral>()}; // ok platform specific - construct an isolated RMT4 worker for backend-specific failure recovery, unavailable through the neutral factory.
         observed = submit(driver, frame);
     } else {
-        fl::Rmt4AsyncDriver driver(fl::make_shared<fl::Rmt4PeripheralESP>());
+        fl::Rmt4AsyncDriver driver(fl::make_shared<fl::Rmt4PeripheralESP>()); // ok platform specific - construct an isolated RMT4 worker for backend-specific failure recovery, unavailable through the neutral factory.
         if (mode == "invalid-batch") {
             // The bridge rejects an unencodable strip this way. A subsequent
             // valid strip must not erase that failure from the same batch.
@@ -252,13 +252,13 @@ inline fl::json legacyAsyncErrorProbe(const fl::json &args) {
         observed = submit(driver, frame);
         recovered = recoverySucceeded(driver);
     }
-    const size_t after = manager.allocatedWords();
+    const size_t after = manager.allocatedWords(); // ok platform specific - reserve and audit real RMT4 hardware blocks for exhaustion recovery; no neutral allocator exposes them.
     bool reservationsRestored = true;
     for (unsigned block = 0; block < 32; ++block) {
         if (reservationMask & (fl::u32(1) << block)) {
-            const bool available = manager.tryReserveBlocks(static_cast<int>(block), 1);
+            const bool available = manager.tryReserveBlocks(static_cast<int>(block), 1); // ok platform specific - reserve and audit real RMT4 hardware blocks for exhaustion recovery; no neutral allocator exposes them.
             reservationsRestored &= available;
-            if (available) { manager.releaseBlocks(static_cast<int>(block), 1); }
+            if (available) { manager.releaseBlocks(static_cast<int>(block), 1); } // ok platform specific - reserve and audit real RMT4 hardware blocks for exhaustion recovery; no neutral allocator exposes them.
         }
     }
     appendObservation(result, observed);
