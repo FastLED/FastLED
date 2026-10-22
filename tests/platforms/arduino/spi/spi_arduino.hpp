@@ -106,17 +106,19 @@ inline fl::json probe(const fl::json&) {
         config.bus_num = 2; config.data_pin = 4; config.clock_pin = 18;
         config.clock_speed_hz = 500000; config.max_transfer_sz = 4096;
         contracts &= temporary && temporary->begin(config) && !temporary->transmit();
-        auto tooLarge = temporary->acquireDMABuffer(4097);
-        contracts &= !tooLarge.ok();
-        fault.heapTask = xTaskGetCurrentTaskHandle(); fault.heapSize = 4096;
-        const auto allocationFailures = fault.heapFailures;
-        auto failed = temporary->acquireDMABuffer(4096);
-        fault.heapTask = nullptr;
-        contracts &= fault.heapFailures > allocationFailures && !failed.ok() && !temporary->transmit();
-        temporary->end();
-        config.clock_speed_hz = 1000000;
-        contracts &= temporary->begin(config);
-        temporary->end();
+        if (temporary) {
+            auto tooLarge = temporary->acquireDMABuffer(4097);
+            contracts &= !tooLarge.ok();
+            fault.heapTask = xTaskGetCurrentTaskHandle(); fault.heapSize = 4096;
+            const auto allocationFailures = fault.heapFailures;
+            auto failed = temporary->acquireDMABuffer(4096);
+            fault.heapTask = nullptr;
+            contracts &= fault.heapFailures > allocationFailures && !failed.ok() && !temporary->transmit();
+            temporary->end();
+            config.clock_speed_hz = 1000000;
+            contracts &= temporary->begin(config);
+            temporary->end();
+        }
         contracts &= busOwner()->ready(); // Adapter release must not end the app bus.
         auto borrowed = fl::make_shared<fl::platforms::ArduinoSpiBus>(rawOwner(), 2, 4, 18);
         auto retained = fl::platforms::makeArduinoSpiHw1(borrowed);
