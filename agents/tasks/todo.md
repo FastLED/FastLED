@@ -704,7 +704,7 @@ USB/HAL callback roots. Physical USB enumeration/reconnect remains unverified.
 
 ## #4888 optional Arduino integration goal (sequential)
 
-- [ ] #4889: implementation, review and local validation complete; publish optional weak Arduino provider with native fallback and request full CI.
+- [x] #4889: implementation, review and local validation complete; published PR #4894 with ci-full attached. Master integration/full CI remains pending for the stack.
 - [ ] #4890: complete SPI transaction provider; preserve native default, contention HIL and bloat before/after.
 - [ ] #4891: transitive Arduino-header enforcement in existing lint, regression fixtures and real SDK probes.
 - [ ] #4892: eliminate framework startup Serial0 retention from this repository while preserving application Serial APIs; measured maps and HIL.
@@ -726,4 +726,5 @@ Python run exposed five failures (four stale prior-change assertions and the
 new registry's header-local singleton); all five are fixed, with 18 relevant
 tests passing on debug rerun. Registry storage is now in the isolated .cpp.hpp.
 Full lint and independent production review pass. Details and lifecycle limits:
-docs/ESP32_EMBEDDED_FS.md. Canonical RMT image restoration is being verified.
+docs/ESP32_EMBEDDED_FS.md. Canonical AutoResearch image restored; final GPIO
+and legacy RMT checks pass (3/3 scenarios, both LED payload captures 4/4).
