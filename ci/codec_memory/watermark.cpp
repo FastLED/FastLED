@@ -43,6 +43,7 @@ void* volatile gAllocationWitness = nullptr;
    is a guarantee from the standard rather than a build flag someone can drop.
    Slow is fine: nothing here is timed. */
 namespace fl {
+namespace libc_impl {
 
 void* memcpy(void* dst, const void* src, fl::size n) FL_NO_EXCEPT {
     volatile unsigned char* d = static_cast<volatile unsigned char*>(dst);
@@ -77,6 +78,8 @@ void* memset(void* dst, int value, fl::size n) FL_NO_EXCEPT {
     }
     return dst;
 }
+
+} // namespace libc_impl
 
 namespace third_party {
 

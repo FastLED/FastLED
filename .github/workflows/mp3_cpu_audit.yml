@@ -82,18 +82,34 @@ jobs:
 
       # The target-codegen audit needs the xtensa-esp32, riscv32-esp and
       # arm-none-eabi cross compilers. fbuild fetches each toolchain into
-      # $FBUILD_CACHE_DIR/toolchains/ as a side effect of building a board
-      # that uses it; a Blink build per target is the cheapest way to get
-      # there. The bin/ directories then go on PATH so the audit's
-      # `shutil.which` lookup resolves them.
+      # $FBUILD_CACHE_DIR/toolchains/ as a side effect of building a board.
+      # esp32c6 uses the GCC 14 generation measured by the codegen baseline;
+      # esp32c3 still uses GCC 13. Export only compiler-driver directories:
+      # nested target bin/ directories contain bare cross ld binaries that
+      # would shadow the host linker used by the native codec checks.
       - name: Fetch MCU toolchains through fbuild
         run: |
           set -euo pipefail
-          for board in esp32dev esp32c3 adafruit_feather_nrf52840_sense; do
+          for board in esp32dev esp32c6 adafruit_feather_nrf52840_sense; do
             ./compile "$board" --examples Blink --no-interactive
           done
-          find "$FBUILD_CACHE_DIR/toolchains" -type d -name bin | while read -r bin_dir; do
-            echo "$bin_dir" >> "$GITHUB_PATH"
+          for driver in xtensa-esp32-elf-g++ riscv32-esp-elf-g++ arm-none-eabi-g++; do
+            selected=''
+            mapfile -t compilers < <(find "$FBUILD_CACHE_DIR/toolchains" -type f -name "$driver" | sort)
+            for compiler in "${compilers[@]}"; do
+              version="$("$compiler" -dumpversion)"
+              if [[ "$driver" != arm-none-eabi-g++ && "$version" != 14* ]]; then
+                continue
+              fi
+              selected="$compiler"
+              break
+            done
+            if [[ -z "$selected" ]]; then
+              echo "::error::Missing baseline-compatible compiler: $driver"
+              exit 1
+            fi
+            echo "CPU audit compiler: $selected ($version)"
+            dirname "$selected" >> "$GITHUB_PATH"
           done
 
       # The fixed-point SIMD kernels must not be slower than the scalar ones

@@ -630,6 +630,7 @@ timed out on both versions while direct ownership accounting passed.
 
 - [x] Refresh live cache and writer inventory.
 - [x] Restrict consumer cache saves to master push/schedule; preserve PR restores where supported.
-- [ ] Land fbuild install-cache restore-only fix and verify consumer behavior.
+- [x] Land fbuild install-cache restore-only fix (FastLED/fbuild#1687).
+- [ ] Verify the consumer writer controls in hosted CI and merge this separate fix.
 - [ ] Bound generation overlap and model every family from real measurements.
 - [ ] Validate budget and complete required CI before merge.
