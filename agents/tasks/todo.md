@@ -681,3 +681,23 @@ free (3,040 bytes additional retained heap, including the 2 KB stack). Largest
 free block stays 65,524 bytes; both heap integrity checks pass. Final blocking
 control sends all 6,000 bytes before returning in 66,887 us; async returns
 active in 7,062 us and completes autonomously.
+
+## Native ESP32 console and Arduino dependency lint
+
+- [x] Reproduce ignored baud, peek availability and Arduino-default selection.
+- [x] Fix native baud and peek semantics; focused host sanitizer tests pass.
+- [x] Verify native default with AutoResearch RPC and physical RMT loopback.
+- [x] Verify explicit Arduino Serial coexistence and baud changes on device.
+- [x] Integrate ESP Arduino dependency policy into existing lint and tests.
+- [x] Measure final footprint and complete independent production review.
+- [ ] Publish the stacked PR; require full CI and physical USB validation before merge.
+
+Final verification: native sanitizer suite passes 326 units / 95 examples;
+normal lint and focused Python board/transport tests pass. Old dispatcher
+source-copy lint produces the expected two Arduino dependency violations.
+Matched native D32 build is 289,446 flash / 23,476 static RAM (saves 3,560 /
+240 versus async baseline). Six HIL contention batches pass 240 whole records,
+including 20 weak-provider calls, both initialization orders and real baud
+changes. Canonical image restored; final RMT 4/4 and heap checks pass. Native
+CDC SDK probes pass S2 IDF 5.3.2, S3 IDF 4.4.7 and P4 IDF 5.5.5 with no Arduino
+USB/HAL callback roots. Physical USB enumeration/reconnect remains unverified.

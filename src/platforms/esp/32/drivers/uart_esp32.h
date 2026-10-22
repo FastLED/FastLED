@@ -435,6 +435,7 @@ public:
      * @return true if UART driver successfully installed, false if using ROM fallback
      */
     bool isBuffered() const FL_NO_EXCEPT { return mBuffered; }
+    bool isReady() const FL_NO_EXCEPT { return isBuffered(); }
 
     /**
      * @brief Get UART port configuration
@@ -447,6 +448,9 @@ public:
      * @return Baud rate in bits per second
      */
     u32 getBaudRate() const FL_NO_EXCEPT { return mConfig.baudRate; }
+
+    /// Change the active port baud rate; preserve configuration on failure.
+    bool setBaudRate(u32 baudRate) FL_NO_EXCEPT;
 
 private:
     // Fixed console configuration; other callers retain the configured API.

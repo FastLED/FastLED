@@ -10,7 +10,32 @@
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/singleton.h"
 #include "fl/stl/noexcept.h"
+#include "fl/stl/has_include.h"
 #include "platforms/esp/esp_version.h"
+
+// Arduino's C UART HAL owns an additional mutex used by Serial.begin().
+// Older cores assume that mutex already exists when replacing an SDK driver.
+#if FL_HAS_INCLUDE("esp32-hal-uart.h") && FL_HAS_INCLUDE("esp_arduino_version.h")
+#include "esp_arduino_version.h"
+#if ESP_ARDUINO_VERSION_MAJOR == 2 && ESP_ARDUINO_VERSION < ESP_ARDUINO_VERSION_VAL(2, 0, 17)
+#include <esp32-hal-uart.h> // IWYU pragma: keep
+#define FL_CONSOLE_NEEDS_ARDUINO_UART_BOOTSTRAP 1
+// Address-only weak references do not extract HardwareSerial from an archive.
+// These are the SDK's actual global object types, never a guessed class ABI.
+class HardwareSerial;
+#if defined(ARDUINO_USB_CDC_ON_BOOT) && ARDUINO_USB_CDC_ON_BOOT
+extern HardwareSerial Serial0 FL_LINK_WEAK;
+#define FL_CONSOLE_ARDUINO_UART0_OBJECT Serial0
+#else
+extern HardwareSerial Serial FL_LINK_WEAK;
+#define FL_CONSOLE_ARDUINO_UART0_OBJECT Serial
+#endif
+#else
+#define FL_CONSOLE_NEEDS_ARDUINO_UART_BOOTSTRAP 0
+#endif
+#else
+#define FL_CONSOLE_NEEDS_ARDUINO_UART_BOOTSTRAP 0
+#endif
 
 // ESP-IDF headers (only in .cpp.hpp, not in .h)
 FL_EXTERN_C_BEGIN
@@ -317,11 +342,26 @@ FASTLED_FORCE_INLINE void UartEsp32::initialize(const UartConfig& config) FL_NO_
 }
 
 UartEsp32::UartEsp32() FL_NO_EXCEPT
-    : mConfig(UartConfig::reliable(UartPort::UART0))
+    : mConfig(UartConfig::minimal(UartPort::UART0))
     , mPortInt(static_cast<fl::i32>(convertPort(UartPort::UART0)))
     , mBuffered(false)
     , mEventQueue(nullptr) {
-    const UartConfig config = UartConfig::reliable(UartPort::UART0);
+    // Console traffic must not consume the level-3 interrupt reserved for
+    // timing-sensitive peripherals such as RMT. Match the SDK UART default.
+    const UartConfig config = UartConfig::minimal(UartPort::UART0);
+#if FL_CONSOLE_NEEDS_ARDUINO_UART_BOOTSTRAP
+    if (&::FL_CONSOLE_ARDUINO_UART0_OBJECT && !uart_is_driver_installed(UART_NUM_0)) {
+        // Bootstrap through the C HAL so a later Arduino Serial.begin() can
+        // replace this driver safely. Adopt existing owners without changing
+        // their pins, baud or buffer configuration. No HardwareSerial ABI.
+        // HAL packs parity in bits 0-1, data width in 2-3 and stop bits in 4-5.
+        constexpr u32 format8N1 = static_cast<u32>(UART_PARITY_DISABLE) |
+            (static_cast<u32>(UART_DATA_8_BITS) << 2) |
+            (static_cast<u32>(UART_STOP_BITS_1) << 4);
+        (void)uartBegin(0, config.baudRate, format8N1, -1, -1,
+            config.rxBufferSize, config.txBufferSize, false, 120);
+    }
+#endif
     initialize(config);
 }
 
@@ -373,6 +413,18 @@ UartEsp32& UartEsp32::operator=(UartEsp32&& other) FL_NO_EXCEPT {
     return *this;
 }
 
+
+bool UartEsp32::setBaudRate(u32 baudRate) FL_NO_EXCEPT {
+    if (!mBuffered || baudRate == 0 || baudRate > 0x7fffffffu) {
+        return false;
+    }
+    const auto port = static_cast<uart_port_t>(mPortInt);
+    if (uart_set_baudrate(port, baudRate) != ESP_OK) {
+        return false;
+    }
+    mConfig.baudRate = baudRate;
+    return true;
+}
 
 void UartEsp32::write(const char* str) FL_NO_EXCEPT {
     if (!str)

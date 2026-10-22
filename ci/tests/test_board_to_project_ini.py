@@ -1,6 +1,15 @@
 import unittest
 
-from ci.boards import ALL, SPARKFUN_XRP_CONTROLLER_2350B, Board
+from ci.boards import (
+    ALL,
+    ESP32_C6_DEVKITC_1,
+    ESP32_P4,
+    ESP32_S2_DEVKITM_1,
+    ESP32_S3_DEVKITC_1,
+    SPARKFUN_XRP_CONTROLLER_2350B,
+    XIAO_ESP32S3,
+    Board,
+)
 from ci.compiler.build_config import _apply_esp_release_exception_policy
 from ci.compiler.project_ini import ProjectIni
 
@@ -83,6 +92,59 @@ class TestBoardToProjectIni(unittest.TestCase):
         self.assertIn("framework-arduinopico", ini)
         self.assertIn("rp2040-5.7.0.zip", ini)
         self.assertIn("board_build.core = earlephilhower", ini)
+
+
+class TestEspNativeConsoleProfiles(unittest.TestCase):
+    """Generated builds must give each USB peripheral one RX/ISR owner."""
+
+    jtag_profiles: tuple[Board, ...] = (
+        ESP32_C6_DEVKITC_1,
+        ESP32_S3_DEVKITC_1,
+        ESP32_P4,
+        XIAO_ESP32S3,
+    )
+
+    def test_hardware_jtag_profiles_disable_arduino_cdc_owner(self) -> None:
+        for board in self.jtag_profiles:
+            with self.subTest(board=board.board_name):
+                project = ProjectIni.parseString(board.to_project_ini())
+                flags = project.get_build_flags(board.board_name)
+                self.assertIn("-DARDUINO_USB_CDC_ON_BOOT=0", flags)
+                self.assertIn("-DFASTLED_ESP_FORCE_USB_SERIAL_JTAG=1", flags)
+                self.assertNotIn("-DARDUINO_USB_CDC_ON_BOOT=1", flags)
+                unflags = (
+                    project.get_option(f"env:{board.board_name}", "build_unflags", "")
+                    or ""
+                )
+                self.assertIn("-DARDUINO_USB_CDC_ON_BOOT=1", unflags)
+
+    def test_qemu_does_not_inherit_native_usb_transport(self) -> None:
+        for board in (*self.jtag_profiles, ESP32_S2_DEVKITM_1):
+            for marker in (
+                "QEMU_BUILD=1",
+                "FASTLED_ESP32_IS_QEMU",
+                "FASTLED_ESP32_IS_QEMU=1",
+            ):
+                with self.subTest(board=board.board_name, marker=marker):
+                    project = ProjectIni.parseString(
+                        board.to_project_ini(additional_defines=[marker])
+                    )
+                    flags = project.get_build_flags(board.board_name)
+                    self.assertIn("-DFASTLED_ESP_FORCE_UART_SERIAL=1", flags)
+                    self.assertNotIn("-DFASTLED_ESP_FORCE_USB_SERIAL_JTAG=1", flags)
+                    self.assertNotIn("-DFL_ESP_USE_TINYUSB_CDC=1", flags)
+                    self.assertIn("-DARDUINO_USB_CDC_ON_BOOT=0", flags)
+
+    def test_s2_uses_native_tinyusb_without_arduino_auto_start(self) -> None:
+        board = ESP32_S2_DEVKITM_1
+        project = ProjectIni.parseString(board.to_project_ini())
+        flags = project.get_build_flags(board.board_name)
+        self.assertIn("-DFL_ESP_USE_TINYUSB_CDC=1", flags)
+        self.assertNotIn("-DFASTLED_ESP_FORCE_USB_SERIAL_JTAG=1", flags)
+        for name in ("CDC", "MSC", "DFU"):
+            self.assertIn(f"-DARDUINO_USB_{name}_ON_BOOT=0", flags)
+        self.assertIn("-DARDUINO_USB_ON_BOOT=0", flags)
+        self.assertEqual(board.get_real_board_name(), "lolin_s2_mini")
 
 
 class TestEspReleaseExceptionPolicy(unittest.TestCase):
