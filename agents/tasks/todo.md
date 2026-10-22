@@ -788,3 +788,12 @@ Docs: docs/ESP32_SPI_PROVIDER.md. Measurements: .build/4890/bloat/report.md.
 No workflows added. PR: https://github.com/FastLED/FastLED/pull/4896.
 Implementation/local validation is published; stack/master CI is pending.
 #4891 is the next sequential implementation task.
+
+## PR #4706 cache policy continuation
+
+- [x] Refresh live cache and writer inventory.
+- [x] Restrict consumer cache saves to master push/schedule; preserve PR restores where supported.
+- [x] Land fbuild install-cache restore-only fix (FastLED/fbuild#1687).
+- [ ] Verify the consumer writer controls in hosted CI and merge this separate fix.
+- [ ] Bound generation overlap and model every family from real measurements.
+- [ ] Validate budget and complete required CI before merge.

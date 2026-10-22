@@ -50,6 +50,7 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v6
         with:
+          save-cache: ${{ github.ref == 'refs/heads/master' && (github.event_name == 'push' || github.event_name == 'schedule') }}
           enable-cache: true
           cache-dependency-glob: "**/pyproject.toml"
           version: "0.8.0" # 0.8.8 has problems with deployment on linux.

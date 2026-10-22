@@ -44,10 +44,13 @@ jobs:
 
       - name: Install uv for pinned esptool
         uses: astral-sh/setup-uv@v6
+        with:
+          save-cache: ${{ github.ref == 'refs/heads/master' && (github.event_name == 'push' || github.event_name == 'schedule') }}
 
       - name: Set up fbuild (install + cache)
         uses: FastLED/fbuild/.github/actions/setup@main
         with:
+          save: ${{ github.ref == 'refs/heads/master' && (github.event_name == 'push' || github.event_name == 'schedule') }}
           fbuild-version: latest
           cache-key-extra: kitchensink-${{ hashFiles('ci/kitchensink/platformio.ini', 'library.json') }}
 
