@@ -846,6 +846,7 @@ class TestAutoResearchFilter:
         assert sketch_filter is not None, "AutoResearch should have a @filter directive"
         assert sketch_filter.require == {
             "board": [
+                "esp32dev_idf44",
                 "esp32s3",
                 "esp32c6",
                 "esp32p4",

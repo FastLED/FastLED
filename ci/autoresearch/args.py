@@ -151,6 +151,9 @@ class Args:
 
     watchdog_soak: bool = False
     mp3: bool = False
+    embedded_fs: bool = False
+    embedded_fs_provider: bool = False
+    embedded_fs_format_fixture: bool = False
 
     @staticmethod
     def parse_args(argv: list[str] | None = None) -> "Args":
@@ -373,6 +376,21 @@ See Also:
             "--all",
             action="store_true",
             help="Test all currently implemented drivers (Teensy 4.x: --object-fled --flex-io)",
+        )
+        driver_group.add_argument(
+            "--embedded-fs",
+            action="store_true",
+            help="Test native ESP32 embedded storage through staged AutoResearch RPC",
+        )
+        driver_group.add_argument(
+            "--embedded-fs-provider",
+            action="store_true",
+            help="Use the explicit Arduino LittleFS provider in the embedded-storage test",
+        )
+        driver_group.add_argument(
+            "--embedded-fs-format-fixture",
+            action="store_true",
+            help="Allow formatting an unmountable test filesystem; requires --embedded-fs",
         )
         driver_group.add_argument(
             "--simd",
@@ -904,6 +922,9 @@ See Also:
             math=parsed.math,
             fft=parsed.fft,
             mp3=parsed.mp3,
+            embedded_fs=parsed.embedded_fs,
+            embedded_fs_provider=parsed.embedded_fs_provider,
+            embedded_fs_format_fixture=parsed.embedded_fs_format_fixture,
             rpc_smoke=parsed.rpc_smoke,
             watchdog_soak=parsed.watchdog_soak,
             perf_wave2d=parsed.perf_wave2d,

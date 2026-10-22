@@ -41,8 +41,10 @@ namespace fl {
 ///                        whatever was there, which is rarely wanted
 ///                        unprompted.
 ///
-///                        Honored on ESP32, whose core takes the flag
-///                        directly. ESP8266 exposes a no-argument
+///                        Honored by the native ESP32 backend when it owns
+///                        the mount. An optional Arduino provider borrows
+///                        application-mounted storage; its owner handles
+///                        formatting. ESP8266 exposes a no-argument
 ///                        `begin()` with no such hook and ignores it —
 ///                        an unformatted filesystem there simply fails to
 ///                        mount, which is the safe outcome either way.
