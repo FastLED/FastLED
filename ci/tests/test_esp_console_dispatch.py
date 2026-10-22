@@ -10,6 +10,20 @@ from running_process import RunningProcess
 SRC = Path(__file__).resolve().parents[2] / "src"
 
 
+def test_s2_board_profile_keeps_unverified_usb_opt_in(tmp_path: Path) -> None:
+    from ci.boards import ESP32_S2_DEVKITM_1
+
+    board = ESP32_S2_DEVKITM_1
+    flags = [flag.removeprefix("-D") for flag in board.build_flags or []]
+    test_native_console_transport(tmp_path, "ESP32S2", flags, False, (0, 0), None)
+    # The application/framework keeps its own USB startup settings. UART as
+    # FastLED's default must not silently disable the application's CDC route.
+    assert not any(
+        "ARDUINO_USB_" in flag
+        for flag in [*(board.build_flags or []), *(board.build_unflags or [])]
+    )
+
+
 @pytest.mark.parametrize(
     "target,uart,override,expected",
     [

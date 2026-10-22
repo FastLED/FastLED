@@ -27,6 +27,10 @@ build flags. Those profiles retain their upload-port RPC route. QEMU selects
 UART. These project configurations do not impose USB flag changes on other
 Arduino applications merely to include FastLED.
 
+The `esp32s2` profile defaults FastLED to UART and preserves the application's
+Arduino USB startup settings. Native TinyUSB on S2 remains an explicit opt-in
+until #4893 verifies physical enumeration, USB RPC, and reconnect.
+
 The optional application writer hook can explicitly route complete FastLED
 writes through an existing application stream; it redirects output only.
 Input and initialization remain on the selected native transport.

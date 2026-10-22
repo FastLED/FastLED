@@ -342,6 +342,14 @@ API calls. Compile checks and UART RPC tests do not establish native USB
 enumeration, RX/TX, disconnect, or reconnect behavior: verify those on the
 corresponding physical USB transport before claiming hardware support.
 
+The `esp32s2` build profile defaults FastLED's console to SDK UART and leaves
+the application's Arduino USB startup settings unchanged. An application's
+Arduino CDC connection is a separate route; it does not establish FastLED
+RPC over USB. Native TinyUSB remains an explicit opt-in pending physical
+enumeration, CDC RPC and reconnect validation in #4893. No previous USB
+console parity is claimed. The opt-in uses the internal full-speed PHY on
+S2/S3 and the UTMI high-speed PHY on P4.
+
 ### 3. IDF Version Separation (rmt_4/ vs rmt_5/)
 
 **Decision**: Completely separate implementations for ESP-IDF 4.x and 5.x.
