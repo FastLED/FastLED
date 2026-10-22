@@ -285,7 +285,8 @@ megaAVR targets require a different emulator or physical hardware.
 bash test --run uno Test
 ```
 
-`Test` must emit both its setup and loop markers. Other sketches, such as
+`Test` must exit successfully (code `0`) and emit both its setup and loop
+markers. Other sketches, such as
 `bash test --run uno Blink`, run for a fixed smoke duration without requiring
 serial output. Only the emulator's terminal timeout verdict is accepted for
 those smoke runs; build failures and outer process timeouts still fail.
