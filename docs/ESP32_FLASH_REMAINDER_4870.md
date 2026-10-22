@@ -7,9 +7,50 @@
 Its merge tree matches the tested head. The optimized real KissFFT path remains
 unchanged; the experimental ESP-DSP adapter is removed.
 
-The matched Lolin D32 sketch still measures 272,434 bytes board flash and
-23,292 bytes static RAM, versus 253,022 / 22,216 for 3.10.3. **The remaining
-19,412-byte flash increase has not been removed.**
+The FFT-only fix measured 272,434 bytes board flash and 23,292 bytes static
+RAM on the matched Lolin D32 sketch. The implementation below reduces that to
+**270,414 / 23,148**, saving another **2,020 bytes flash and 144 bytes static RAM**.
+Against 3.10.3's 253,022 / 22,216, **17,392 bytes flash and 932 bytes static RAM
+remain**. The complete regression has not been removed.
+
+## Implemented dead-dependency cleanup
+
+All measurements use the unchanged reporter sketch and pinned toolchain below;
+final results come from a clean rebuild, since an incremental build retained
+stale operation-table guards in two objects.
+
+- Ordinary digital pin cleanup used to reference timer interrupt teardown even
+  when software PWM was never configured. Successful PWM setup now stores the
+  same teardown function in its existing lazy state. Cleanup invokes it only
+  for an active ISR. This removes unused timer and GPIO interrupt cleanup from
+  pin-only images, while explicit PWM consumers still link the original driver.
+  PWM users pay one additional function pointer (four bytes on ESP32); the
+  pin-only sketch does not instantiate that state.
+- Vector operation tables now contain constant function pointers, using named
+  thunks and C++11-compatible constexpr selectors. Copy, move, construction,
+  destruction and swap retain their previous implementations and availability.
+  Unused initialization guards and runtime table setup disappear.
+- UCS7604 current-control constructors are constexpr, eliminating a startup
+  initializer and unused default storage from non-UCS7604 images. Runtime
+  brightness setters and four-bit masking are preserved.
+
+The final reporter ELF contains no `timer_deinit`, `timer_pause`,
+`timer_disable_intr`, `timer_isr_callback_remove`, `gpio_isr_handler_remove`,
+vector operation-table guards or UCS7604 startup constructor. A real SDK
+consumer explicitly using software PWM setup/cleanup/restart, Serial output
+and UCS7604 brightness compiles and links; its ELF retains timer teardown,
+Serial initialization and the brightness accessor. This is link evidence,
+not an on-device waveform test. Existing native PWM lifecycle and vector
+operation tests cover the unchanged runtime paths.
+
+Logging levels, console backend, FFT implementation and selected LED driver
+are unchanged. No new workflow or opt-in feature restriction is introduced.
+The Blink budget is tightened to reject the preceding FFT-only image on both
+flash and attributed RAM; it continues to qualify the generic fallback backend.
+Clean Blink board flash/static RAM are **232,250 / 17,248 -> 230,626 / 17,192**;
+bloat image flash/attributed RAM are **232,265 / 21,511 -> 230,641 / 21,369**.
+The new ceilings are 231,000 image flash and 21,400 attributed RAM. The saved
+pre-change report fails both ceilings; the new report passes both.
 
 ## Important correction: these images select different LED backends
 
@@ -109,8 +150,7 @@ Two additional runtime risks were found by source review:
 
 The experimental detection/compile patch is preserved locally at
 `.build/4870-evidence/legacy-rmt-investigation.patch` and passes
-`git apply --check`. It is **not activated or included in this documentation
-change**. Enabling it by default would not meet the requirement to preserve
+`git apply --check`. It is **not activated or included in this implementation**. Enabling it by default would not meet the requirement to preserve
 transmission quality.
 
 ## Next work
@@ -123,8 +163,8 @@ transmission quality.
 
 The linker reports, build logs and experimental scripts are retained under
 `.build/4870-evidence/`, `.build/symbols/4870-lolin-*` and
-`.build/4870_measure.py`. No production runtime changes or new workflows were
-made during this follow-up investigation.
+`.build/4870_measure.py`. The initial investigation left production behavior unchanged; the focused
+dead-dependency implementation is described above. No new workflows were added.
 
 
 ## Native IDF console optimization

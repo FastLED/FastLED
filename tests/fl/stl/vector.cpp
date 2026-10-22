@@ -7,6 +7,7 @@
 #include "fl/stl/cstddef.h"
 #include "fl/stl/new.h"
 #include "test.h"
+#include "fl/stl/static_assert.h"
 #include "fl/stl/allocator.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/move.h"
@@ -15,6 +16,45 @@
 #include "fl/stl/cstdlib.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
+
+struct OpsMoveOnly {
+    OpsMoveOnly() = delete;
+    explicit OpsMoveOnly(int) FL_NO_EXCEPT {}
+    OpsMoveOnly(const OpsMoveOnly&) = delete;
+    OpsMoveOnly(OpsMoveOnly&&) FL_NO_EXCEPT {}
+    OpsMoveOnly& operator=(OpsMoveOnly&&) = delete;
+    ~OpsMoveOnly() FL_NO_EXCEPT {}
+};
+
+// Aggregate initialization must remain a constant expression even in C++11.
+// The restricted type also proves unsupported operations stay null without
+// instantiating their construction or assignment thunks.
+constexpr fl::vector_element_ops string_ops = {
+    fl::detail::get_copy_construct_fn<fl::string>(),
+    fl::detail::get_move_construct_fn<fl::string>(),
+    fl::detail::get_default_construct_fn<fl::string>(),
+    fl::detail::get_swap_fn<fl::string>(),
+    &fl::detail::vector_destroy_n<fl::string>
+};
+constexpr fl::vector_element_ops move_only_ops = {
+    fl::detail::get_copy_construct_fn<OpsMoveOnly>(),
+    fl::detail::get_move_construct_fn<OpsMoveOnly>(),
+    fl::detail::get_default_construct_fn<OpsMoveOnly>(),
+    fl::detail::get_swap_fn<OpsMoveOnly>(),
+    &fl::detail::vector_destroy_n<OpsMoveOnly>
+};
+FL_STATIC_ASSERT(string_ops.copy_construct != nullptr &&
+                  string_ops.move_construct != nullptr &&
+                  string_ops.default_construct != nullptr &&
+                  string_ops.swap_elements != nullptr &&
+                  string_ops.destroy_n != nullptr,
+              "string operations must be constant initialized");
+FL_STATIC_ASSERT(move_only_ops.copy_construct == nullptr &&
+                  move_only_ops.move_construct != nullptr &&
+                  move_only_ops.default_construct == nullptr &&
+                  move_only_ops.swap_elements == nullptr &&
+                  move_only_ops.destroy_n != nullptr,
+              "constant initialization must preserve operation SFINAE");
 
 class rejecting_memory_resource : public fl::memory_resource {
   public:

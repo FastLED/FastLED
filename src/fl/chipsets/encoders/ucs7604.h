@@ -41,14 +41,14 @@ struct UCS7604CurrentControl {
     u8 w;  ///< White channel current (0x0-0xF)
 
     /// Default constructor - maximum brightness
-    UCS7604CurrentControl() FL_NO_EXCEPT : r(0xF), g(0xF), b(0xF), w(0xF) {}
+    constexpr UCS7604CurrentControl() FL_NO_EXCEPT : r(0xF), g(0xF), b(0xF), w(0xF) {}
 
     /// Construct from single brightness value (all channels)
-    explicit UCS7604CurrentControl(u8 brightness)
+    explicit constexpr UCS7604CurrentControl(u8 brightness)
         FL_NO_EXCEPT : r(brightness & 0xF), g(brightness & 0xF), b(brightness & 0xF), w(brightness & 0xF) {}
 
     /// Construct from individual channel values
-    UCS7604CurrentControl(u8 r_, u8 g_, u8 b_, u8 w_)
+    constexpr UCS7604CurrentControl(u8 r_, u8 g_, u8 b_, u8 w_)
         FL_NO_EXCEPT : r(r_ & 0xF), g(g_ & 0xF), b(b_ & 0xF), w(w_ & 0xF) {}
 };
 

@@ -2,7 +2,7 @@
   "board": "esp32dev_idf44",
   "example": "Blink",
   "profile": "default",
-  "image_flash": 240000,
-  "total_ram": 23000,
-  "reference": "#4870: Arduino ESP32 2.0.3 / IDF 4.4.1 / GCC 8.4 patch3, fbuild 2.5.42. This SDK omits SOC_RMT_SUPPORTED: the measured current image selects the generic blocking fallback, not RMT4. This is an FFT dependency budget, not RMT quality evidence. Removing the unused ESP-DSP adapter preserves KissFFT and avoids the SDK matrix header's iostream initializer. Blink image_flash 473613 -> 232265 B; attributed RAM 33005 -> 21511 B. Board flash/RAM: 473598/24292 -> 232250/17248 B. See docs/ESP32_MEMORY_4870.md and docs/ESP32_FLASH_REMAINDER_4870.md."
+  "image_flash": 231000,
+  "total_ram": 21400,
+  "reference": "#4870: Arduino ESP32 2.0.3 / IDF 4.4.1 / GCC 8.4 patch3, fbuild 2.5.42. This SDK omits SOC_RMT_SUPPORTED: the measured current image selects the generic blocking fallback, not RMT4. This is an FFT dependency budget, not RMT quality evidence. Removing the unused ESP-DSP adapter preserves KissFFT and avoids the SDK matrix header's iostream initializer. Blink image_flash 473613 -> 232265 B; attributed RAM 33005 -> 21511 B. Board flash/RAM: 473598/24292 -> 232250/17248 B. See docs/ESP32_MEMORY_4870.md and docs/ESP32_FLASH_REMAINDER_4870.md. Dead-dependency follow-up: late-bound PWM teardown, constant vector operation tables and UCS7604 defaults; unchanged APIs and backend. Tightened ceilings reject the preceding FFT-only image (232265 image flash / 21511 attributed RAM)."
 }
