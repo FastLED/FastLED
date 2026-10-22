@@ -750,10 +750,12 @@ and strong owner lifetime; it never begins/ends/reconfigures the app bus.
 - [x] Matched fbuild bloat and modern IDF5.5.5/P4 provider compile/link.
 - [x] 25 focused Python/link tests, full debug 326 unit + 95 examples, lint,
       independent production and contention-fix review.
-- [ ] Full Python debug suite (running).
+- [x] Full Python debug suite:1980 passed,47 skipped,2 xfailed; only QEMU
+      smoke failed before compile on daemon startup, then passed verbose debug retry.
 - [x] Canonical firmware restored; GPIO connectivity and legacy RMT pass 3/3
       scenarios, both payload captures 4/4.
-- [ ] Publish focused PR with evidence, then complete stack/master CI integration.
+- [x] Publish focused PR #4896 with evidence and ci-full requested.
+- [ ] Complete stack/master CI integration before closing #4890.
 
 Matched Lolin D32/espressif32@6.13.0: no SPI remains 231094 flash / 21000
 static RAM; native APA102 304118 -> 304170 flash, 23040 static unchanged;
@@ -763,4 +765,6 @@ The provider drops duplicate native SDK master code, saving 16824 flash and
 sharing controls. Runtime fixture workloads differ, so do not compare their
 absolute heap totals. Contended show is about 6.2ms including peer traffic.
 Docs: docs/ESP32_SPI_PROVIDER.md. Measurements: .build/4890/bloat/report.md.
-No workflows added. #4890 remains active until final validation/publication.
+No workflows added. PR: https://github.com/FastLED/FastLED/pull/4896.
+Implementation/local validation is published; stack/master CI is pending.
+#4891 is the next sequential implementation task.
