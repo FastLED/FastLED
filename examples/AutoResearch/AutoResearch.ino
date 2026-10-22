@@ -312,12 +312,15 @@ constexpr int RX_BUFFER_SIZE = 1000 * 32 + 100;
 #elif defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2) || \
     defined(FL_IS_ESP_32C5) || defined(FL_IS_RP)
 constexpr int RX_BUFFER_SIZE = 100 * 32 + 100;  // Memory-constrained: 100 LEDs max for autoresearch
-#elif defined(FL_IS_ESP_32DEV)
+#elif defined(FL_IS_ESP_32DEV) || (defined(FL_IS_ESP32) && !defined(CONFIG_SPIRAM))
 // FastLED#3569 — classic ESP32-WROOM (~320 KB DRAM, no PSRAM) ran out
 // of heap during runSingleTest with the 96 KB tier: `fl::aligned_alloc`
 // returned null inside fl::json::set (StoreProhibited @ 0x400d2ece).
 // 1000 LEDs × 32 symbols covers every bench scenario and frees 64 KB
 // for the 16 KB loop stack + result-JSON building.
+// FastLED#4903 — the same applies to any ESP32 built without PSRAM: on a
+// XIAO ESP32-S3 the 96 KB tier left 30 KB of heap, so the RMT RX capture
+// could not allocate and every loopback decode stopped at 200 edges.
 constexpr int RX_BUFFER_SIZE = 1000 * 32 + 100;
 #else
 constexpr int RX_BUFFER_SIZE = 3000 * 32 + 100;  // LEDs × 32:1 expansion + headroom
