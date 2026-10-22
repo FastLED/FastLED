@@ -92,6 +92,11 @@ async def run(args: Args | None = None) -> int:
         print("--spi-provider-native requires --spi-provider", file=sys.stderr)
         return 1
 
+    if args.usb_console:
+        from ci.autoresearch.usb_console import run_usb_console
+
+        return await run_usb_console(args)
+
     if args.embedded_fs:
         from ci.autoresearch.embedded_fs import run_embedded_fs
 

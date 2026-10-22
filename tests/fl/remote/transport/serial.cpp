@@ -335,4 +335,33 @@ FL_TEST_CASE("String view: zero-copy operations") {
     FL_REQUIRE(view1.size() == view2.size());
     FL_REQUIRE(view1.size() == 7);  // "content"
 }
+
+// FastLED #4893: a request that overflowed the console receive buffer arrives
+// truncated. It must be reported, and still passed on so the RPC layer can
+// answer with its invalid-request error.
+FL_TEST_CASE("Serial: truncated JSON request is reported, not dropped silently") {
+    static const char kLine[] = "{\"method\":\"debugTest\",\"params\":[{\"t\":\"xxxx\n";
+    static fl::size pos = 0;
+    pos = 0;
+    fl::inject_available_handler([]() {
+        return pos < sizeof(kLine) - 1 ? 1 : 0;
+    });
+    fl::inject_read_handler([]() {
+        return pos < sizeof(kLine) - 1 ? static_cast<int>(kLine[pos++]) : -1;
+    });
+    static fl::string captured;
+    captured.clear();
+    fl::inject_print_handler([](const char* text) { captured += text; });
+    fl::inject_println_handler([](const char* text) { captured += text; });
+
+    auto requestSource = fl::createSerialRequestSource();
+    fl::optional<fl::json> request = requestSource();
+
+    fl::clear_io_handlers();
+    FL_REQUIRE(request.has_value());
+    FL_CHECK_FALSE(request->has_value());
+    FL_CHECK(captured.find("malformed") != fl::string::npos);
+}
+
 } // FL_TEST_FILE
+

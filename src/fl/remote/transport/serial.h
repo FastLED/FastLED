@@ -177,7 +177,15 @@ createSerialRequestSource(const char* prefix = "") FL_NO_EXCEPT {
 
         // Single copy when parsing JSON (unavoidable - JSON needs owned string)
         fl::string input(view);
-        return fl::json::parse(input);
+        fl::json parsed = fl::json::parse(input);
+        if (!parsed.has_value()) {
+            // A request that overflowed the transport's receive buffer arrives
+            // with bytes missing and fails here; say so, then pass it on so
+            // the RPC layer still answers with its invalid-request error
+            // (FastLED #4893).
+            FL_WARN("[RPC] received a malformed " << (static_cast<unsigned>(line->size())) << " byte request; requests larger than the console receive buffer lose bytes");
+        }
+        return parsed;
     };
 }
 
