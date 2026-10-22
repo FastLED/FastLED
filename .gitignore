@@ -101,6 +101,8 @@ tests/example_compile_fastled_objects.dir/
 tests/x64/
 tests/bin
 qemu_output.log
+avr8js_output.txt
+avr8js_output.log
 gdb*.txt
 .gdb_crash/
 qemu-build

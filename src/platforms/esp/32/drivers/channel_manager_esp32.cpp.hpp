@@ -346,6 +346,13 @@ static void addI2sIfPossible(ChannelManager& manager) FL_NO_EXCEPT {
 
 namespace platforms {
 
+void registerNativeSpiDriver() FL_NO_EXCEPT {
+    auto& manager = ChannelManager::registry();
+    if (!manager.findDriverByName(fl::string::from_literal("SPI_UNIFIED"))) {
+        detail::addSpiHardwareIfPossible(manager);
+    }
+}
+
 /// @brief Initialize channel drivers for ESP32 (no-op, post-#2428).
 ///
 /// Drivers do NOT auto-register with `ChannelManager`. Only the
