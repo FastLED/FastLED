@@ -24,6 +24,7 @@
 #include "platforms/esp/32/drivers/rmt/rmt_4/channel_driver_rmt4.h"
 #include "platforms/esp/32/drivers/rmt/rmt_4/network_state_tracker_4.h"
 #include "platforms/esp/32/drivers/rmt/rmt_4/rmt4_peripheral_esp.h"
+#include "platforms/esp/32/drivers/rmt/rmt_4/rmt4_refill_timing.h"
 #include "platforms/esp/32/drivers/rmt/rmt_4/rmt_memory_manager_4.h"
 
 FL_EXTERN_C_BEGIN
@@ -38,7 +39,7 @@ struct Rmt4Symbols {
     rmt_item32_t zero;
     rmt_item32_t one;
     u32 maxCyclesPerFill;
-    volatile u32 lastFill;
+    detail::Rmt4RefillTiming refillTiming;
 };
 
 // Translators never retain an engine pointer. The SDK may invoke them with
@@ -51,14 +52,13 @@ FL_NO_INLINE IRAM_ATTR void translateRmt4Bytes(
     size_t wantedItems, size_t *translatedSize, size_t *itemCount,
     Rmt4Symbols &symbols) FL_NO_EXCEPT {
     const u32 now = __clock_cycles();
-    if (symbols.lastFill != 0 && now - symbols.lastFill > symbols.maxCyclesPerFill) {
+    if (!symbols.refillTiming.allowFill(now, symbols.maxCyclesPerFill)) {
         // Preserve the legacy late-refill safeguard: end this frame rather
         // than knowingly continue after a missed hardware buffer deadline.
         *translatedSize = sourceSize;
         *itemCount = 0;
         return;
     }
-    symbols.lastFill = now;
     const auto *bytes = static_cast<const u8 *>(source);
     size_t count = wantedItems / 8;
     if (count > sourceSize) {
@@ -402,7 +402,7 @@ void ChannelEngineRMT4Impl::startTransmission(
     state->resetWaitStarted = false;
     state->resetDurationUs = data->getTiming().reset_us;
     state->transmissionStartTime = fl::millis();
-    sRmt4Symbols[state->channel].lastFill = 0;
+    sRmt4Symbols[state->channel].refillTiming.reset();
     const auto &bytes = data->getData();
     if (bytes.empty()) {
         state->resetWaitStarted = true;

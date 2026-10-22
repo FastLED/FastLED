@@ -50,7 +50,7 @@ def test_rmt4_legacy_wait_time_can_only_extend_trait_reset_time() -> None:
     clockless = CLOCKLESS.read_text(encoding="utf-8")
     assert (
         "public SlimBridgeController<DATA_PIN, TIMING, RGB_ORDER, WAIT_TIME, "
-        "BusTraits<Bus::RMT>>" in clockless
+        "BusTraits<Bus::RMT>, 0," in " ".join(clockless.split())
     )
     bridge = SLIM_BRIDGE.read_text(encoding="utf-8")
     assert "static_cast<u32>(WAIT_TIME) > timing.reset_us" in bridge

@@ -8,6 +8,8 @@
 
 #include "platforms/esp/32/drivers/rmt/rmt_4/rmt_memory_manager_4.h"
 
+#include "platforms/esp/32/drivers/rmt/rmt_4/rmt4_refill_timing.h"
+
 #include "fl/stl/cstddef.h"
 #include "test.h"
 
@@ -238,4 +240,25 @@ FL_TEST_CASE(
     FL_CHECK(mgr.allocatedWords() == 512u);
     FL_CHECK(mgr.availableWords() == 0u);
     FL_CHECK_FALSE(mgr.tryAllocateTx(4, false, got)); // fifth doesn't fit
+}
+
+FL_TEST_CASE("RMT4 refill deadline excludes delay before hardware starts") {
+    fl::detail::Rmt4RefillTiming timing;
+    timing.reset();
+    FL_REQUIRE(timing.allowFill(100, 150)); // SDK initial fill before TX starts.
+    FL_REQUIRE(timing.allowFill(10000, 150)); // First hardware ISR establishes time.
+    FL_CHECK(timing.allowFill(10100, 150)); // Normal refill cadence.
+    FL_CHECK_FALSE(timing.allowFill(10300, 150)); // Missed hardware deadline.
+}
+
+FL_TEST_CASE("RMT4 refill timing resets between frames and handles counter wrap") {
+    fl::detail::Rmt4RefillTiming timing;
+    timing.reset();
+    FL_REQUIRE(timing.allowFill(50, 150));
+    FL_REQUIRE(timing.allowFill(10000, 150));
+    timing.reset();
+    FL_REQUIRE(timing.allowFill(20000, 150));
+    FL_REQUIRE(timing.allowFill(0xFFFFFFF0u, 150));
+    FL_CHECK(timing.allowFill(0x20u, 150));
+    FL_CHECK_FALSE(timing.allowFill(0x200u, 150));
 }

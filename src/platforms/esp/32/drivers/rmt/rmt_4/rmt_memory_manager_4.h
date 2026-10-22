@@ -17,9 +17,8 @@
 /// gives TX more headroom before the ISR misses its refill deadline
 /// while the SDK byte translator retains a late-refill deadline check.
 ///
-/// **The class body is header-inline** on purpose — it's a pure
-/// accounting ledger with no ESP-IDF dependencies. Host unit tests
-/// build it from the test TU directly (see
+/// The accounting ledger has no ESP-IDF dependencies. Shared physical-span
+/// helpers live in the companion `_shared.cpp.hpp`, also included by host tests (see
 /// `tests/platforms/esp/32/drivers/rmt/rmt_4/rmt_memory_manager_4.cpp`).
 /// Only the platform-default `instance()` singleton constructor lives
 /// out-of-line in the `.cpp.hpp` behind the usual `FL_IS_ESP32 &&
@@ -175,35 +174,12 @@ class RmtMemoryManager4 {
 
     /// Reserve the actual contiguous hardware blocks, independently of the
     /// word ledger. RX and TX must both claim before configuring hardware.
-    bool tryReserveBlocks(int first, u8 count) FL_NO_EXCEPT {
-        const size_t blockCount = mWordsPerBlock ? mPoolWords / mWordsPerBlock : 0;
-        if (first < 0 || count == 0 || count >= 32 || blockCount > 32 ||
-            static_cast<size_t>(first) >= blockCount ||
-            count > blockCount - static_cast<size_t>(first)) {
-            return false;
-        }
-        const u32 mask = ((static_cast<u32>(1) << count) - 1) << first;
-        if (mReservedBlocks & mask) {
-            return false;
-        }
-        mReservedBlocks |= mask;
-        return true;
-    }
-
-    void releaseBlocks(int first, u8 count) FL_NO_EXCEPT {
-        const size_t blockCount = mWordsPerBlock ? mPoolWords / mWordsPerBlock : 0;
-        if (first < 0 || count == 0 || count >= 32 || blockCount > 32 ||
-            static_cast<size_t>(first) >= blockCount ||
-            count > blockCount - static_cast<size_t>(first)) {
-            return;
-        }
-        const u32 mask = ((static_cast<u32>(1) << count) - 1) << first;
-        mReservedBlocks &= ~mask;
-    }
+    bool tryReserveBlocks(int first, u8 count) FL_NO_EXCEPT;
+    void releaseBlocks(int first, u8 count) FL_NO_EXCEPT;
 
     size_t allocatedWords() const FL_NO_EXCEPT { return mAllocatedWords; }
     size_t poolSize() const FL_NO_EXCEPT { return mPoolWords; }
-    size_t wordsPerBlock() const FL_NO_EXCEPT { return mWordsPerBlock; }
+    size_t wordsPerBlock() const FL_NO_EXCEPT;
     size_t availableWords() const FL_NO_EXCEPT {
         return (mPoolWords > mAllocatedWords) ? (mPoolWords - mAllocatedWords)
                                               : 0;
