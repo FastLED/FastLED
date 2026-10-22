@@ -1,0 +1,90 @@
+# Cache retention policy only. This does not replace the native CI selector.
+# Runtime: ci-labels.yml audits; nightly-examples.yml applies scoped LRU cleanup.
+# Pinned checker schema 3; no fleet-wide precheck/adoption is claimed.
+schema = 3
+profile = "fastled-cache-retention"
+linter = "zackees/ci.yml@dfc7e7d8e0e266db5b71355b281220ab3b0c563f"
+
+# Minimal honest context required by schema 3. These cache-only flows do not
+# select, skip, or otherwise replace FastLED's native/board validation jobs.
+[platforms]
+linux-x64 = { target = "x86_64-unknown-linux-gnu", runs-on = "ubuntu-latest", group = "linux" }
+[suites]
+cache-audit = { run = "ci-lint cache budget --default-branch master" }
+[flow.pr]
+platforms = ["linux-x64"]
+suites = ["cache-audit"]
+[flow.main]
+extends = "pr"
+cache = "write"
+[flow.nightly]
+extends = "main"
+schedule = "daily"
+janitor = true
+[tags]
+
+[cache]
+# A post-cleanup retention TARGET, not a bound on concurrent saves or peaks.
+# No GitHub storage/billing setting is changed. Existing occupancy may exceed
+# it until maintenance runs; PRs report inherited occupancy as a warning.
+budget = "9GB"
+write-on = ["main", "nightly"]
+never = []
+retired = []
+# #4886 restricts all current shared-cache producers to master push/schedule.
+# Existing historical PR entries can remain until the janitor handles them.
+pr = { mode = "none", families = [], max-per-pr = "0MB", budget = "0MB", trim = "on-close" }
+
+# Read-only complete paginated audit 2026-10-22: 45 entries, 15,117,797,637 B.
+# family         entries       total B       largest B
+# fbuild             9    13,412,859,748   2,242,475,922
+# fbuild-install     7       215,533,322      33,918,001
+# uv                21       230,700,318      13,891,734
+# rust-lint          7       863,178,114     139,943,694
+# arduino15          1       395,526,135     395,526,135
+# codec-conformance has an active writer but no live entry in this snapshot.
+#
+# max values below are NEW EVICTION QUOTAS, not fabricated measurements of
+# today's family totals. Each exceeds the observed largest entry. The codec
+# quota is a policy choice, not a measured size; oversize/protected entries
+# leave the budget check red instead of proving a nonexistent bound.
+# With per=none, each max is the aggregate family quota, including boards
+# and generations. Total quotas=4352MiB; static one-generation peak=8192MiB
+# (the fixed-revision codec cache adds no lockfile-change overlap).
+# That arithmetic is a planning model ONLY: immutable keys and asynchronous
+# writers can create more generations before nightly cleanup. No pre-prune
+# waiver is claimed. Strict save admission/peak bounds remain open in #4705.
+#
+# Every family uses LRU: the pinned janitor protects ONE newest base entry
+# per family, not one per board/key shape. Older board baselines ARE eligible.
+# It also protects all entries younger than ten minutes, caps each sweep at
+# 100 deletes, and keeps entries when PR state cannot be read. Concurrent
+# saves and these protections may leave occupancy above target after a sweep;
+# the maintenance budget check reports that rather than asserting success.
+[cache.family]
+fbuild = { prefix = "fbuild-v1-", max = "2304MB", per = "none", lockfile = true, evict = "lru" }
+fbuild-install = { prefix = "fbuild-install-", max = "256MB", per = "none", lockfile = true, evict = "lru" }
+uv = { prefix = "setup-uv-", max = "256MB", per = "none", lockfile = true, evict = "lru" }
+rust-lint = { prefix = "rust-lint-", max = "512MB", per = "none", lockfile = true, evict = "lru" }
+arduino15 = { prefix = "arduino15-", max = "512MB", per = "none", lockfile = true, evict = "lru" }
+codec-conformance = { prefix = "codec-conformance-", max = "512MB", per = "none", lockfile = false, evict = "lru" }
+[cache.promote]
+mode = "off"
+
+# Required schema context; no local-gate, publisher, fleet action allowlist,
+# runner pin migration, or workflow-generation claim is made by this policy.
+[local]
+runner = "native"
+lanes = []
+cache = "off"
+[allow]
+actions = []
+tools = []
+secrets = []
+platform-selector = ".github/workflows/ci-labels.yml"
+platform-code = []
+[allow.workflows]
+"ci-labels.yml" = ["cache-audit"]
+[allow.setup-soldr]
+only-in = ".github/actions/setup"
+[publish]

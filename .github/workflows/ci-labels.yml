@@ -10,6 +10,8 @@ on:
 
 permissions:
   contents: read
+  actions: read
+  pull-requests: read
 
 jobs:
   validate:
@@ -34,3 +36,21 @@ jobs:
         env:
           GITHUB_EVENT_NAME: ${{ github.event_name }}
         run: bash ci-labels select --event-file "$GITHUB_EVENT_PATH" >> "$GITHUB_STEP_SUMMARY"
+      # Classification includes historical entries this PR did not create.
+      # Keep that report informational; budget applies the checker's native
+      # PR ownership rules and reports inherited overflow as a warning.
+      - name: Classify live cache entries (read only)
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: >-
+          uv tool run --python 3.12
+          --from git+https://github.com/zackees/ci.yml@dfc7e7d8e0e266db5b71355b281220ab3b0c563f
+          ci-lint cache audit --repo "$GITHUB_WORKSPACE" --default-branch master
+      - name: Check live cache retention target (read only)
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: >-
+          uv tool run --python 3.12
+          --from git+https://github.com/zackees/ci.yml@dfc7e7d8e0e266db5b71355b281220ab3b0c563f
+          ci-lint cache budget --repo "$GITHUB_WORKSPACE" --default-branch master
