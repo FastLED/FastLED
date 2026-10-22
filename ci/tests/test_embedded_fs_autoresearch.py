@@ -52,3 +52,68 @@ def test_embedded_fs_dependencies_preserve_board_configuration(tmp_path: Path) -
     project = ProjectIni.parseFile(ini)
     assert project.get_option("env:board", "lib_deps") == "FS, LittleFS"
     assert project.get_option("env:board", "board") == "actual-board"
+
+
+@pytest.mark.parametrize(
+    "timeout,expected_seconds", [(None, 30.0), ("5s", 30.0), ("2m", 120.0)]
+)
+def test_embedded_fs_pipeline_timeout(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    timeout: str | None,
+    expected_seconds: float,
+) -> None:
+    import asyncio
+    from unittest.mock import AsyncMock, Mock
+
+    from ci.autoresearch import embedded_fs
+    from ci.rpc_client import RpcResponse
+    from ci.util.fbuild_runner import FbuildCommandResult
+
+    project = tmp_path / "staged"
+    stage = Mock(return_value=project)
+    inject = Mock()
+    dependencies = Mock()
+    deploy = Mock(return_value=FbuildCommandResult(success=True, output=""))
+    client = Mock()
+    client.connect = AsyncMock()
+    client.close = AsyncMock()
+    client.send = AsyncMock(
+        return_value=RpcResponse(
+            True,
+            {"success": True, "provider": False, "heapStart": 100, "heapEnd": 100},
+            "",
+        )
+    )
+    factory = Mock(return_value=client)
+    monkeypatch.setattr(embedded_fs, "synthesise_autoresearch_project", stage)
+    monkeypatch.setattr(embedded_fs, "inject_embedded_fs_fixture", inject)
+    monkeypatch.setattr(embedded_fs, "configure_embedded_fs_dependencies", dependencies)
+    monkeypatch.setattr(embedded_fs, "run_fbuild_deploy", deploy)
+    monkeypatch.setattr(embedded_fs, "RpcClient", factory)
+    arguments: list[str] = [
+        "esp32dev_idf44",
+        "--embedded-fs",
+        "--upload-port",
+        "/dev/test",
+        "--skip-lint",
+    ]
+    if timeout is not None:
+        arguments.extend(["--timeout", timeout])
+    args = Args.parse_args(arguments)
+    args.project_dir = tmp_path
+    assert args.timeout == timeout
+
+    assert asyncio.run(embedded_fs.run_embedded_fs(args)) == 0
+    deploy.assert_called_once_with(
+        project, environment="esp32dev_idf44", upload_port="/dev/test", timeout=1800
+    )
+    factory.assert_called_once_with(
+        "/dev/test", timeout=expected_seconds, verbose=args.verbose
+    )
+    client.connect.assert_awaited_once()
+    assert client.send.await_count == 2
+    assert all(
+        call.args == ("embeddedFsSelfTest",) for call in client.send.call_args_list
+    )
+    client.close.assert_awaited_once()

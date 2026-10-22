@@ -101,8 +101,11 @@ Arduino provider retains those expected symbols and eliminates
 `NativeEmbeddedFile` entirely. The provider comparison includes the same real
 application `LittleFS.begin()`/`end()` lifecycle on both sides.
 
-On the physical classic ESP32 / Arduino 2.0.3 / IDF 4.4.1, the native fixture
-passes 105 checks per invocation. Its first call retains 96 bytes for lazy
+The following physical results are historical evidence from the original
+#4894 implementation, before the current master-integration refresh. The
+refreshed head has not been physically retested for filesystem behavior.
+On classic ESP32 / Arduino 2.0.3 / IDF 4.4.1, the native fixture
+passed 105 checks per invocation. Its first call retains 96 bytes for lazy
 mount synchronization; warm cycles retain zero bytes. The Arduino-provider
 fixture passes 82 checks per invocation, including eight factory calls on
 the cold run and sixteen cumulatively on the warm run. Its first cycle
