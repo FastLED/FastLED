@@ -45,6 +45,7 @@ jobs:
 
       - uses: astral-sh/setup-uv@v6
         with:
+          save-cache: ${{ github.ref == 'refs/heads/master' && (github.event_name == 'push' || github.event_name == 'schedule') }}
           enable-cache: true
           version: '0.8.0'
 
@@ -60,7 +61,8 @@ jobs:
       # revision in the component manifest, so the suite is reproducible and
       # the repo stays small enough to clone.
       - name: Cache conformance vectors
-        uses: actions/cache@v4
+        id: codec-conformance-cache
+        uses: actions/cache/restore@v4
         with:
           path: .cache/codec-conformance
           key: codec-conformance-ea99364f61c14656440e8d77e9c233ccf3124633
@@ -83,3 +85,11 @@ jobs:
       # the polyphase that every well-formed vector walked straight past.
       - name: Sanitizers over the full ISO suite
         run: uv run python ci/codec_conformance/run.py --sanitize
+
+      - name: Save codec-conformance-cache on default-branch writers
+        if: ${{ github.ref == 'refs/heads/master' && (github.event_name == 'push' || github.event_name == 'schedule') && steps.codec-conformance-cache.outputs.cache-hit != 'true' }}
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            .cache/codec-conformance
+          key: ${{ steps.codec-conformance-cache.outputs.cache-primary-key }}

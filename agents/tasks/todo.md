@@ -748,3 +748,12 @@ tests passing on debug rerun. Registry storage is now in the isolated .cpp.hpp.
 Full lint and independent production review pass. Details and lifecycle limits:
 docs/ESP32_EMBEDDED_FS.md. Canonical AutoResearch image restored; final GPIO
 and legacy RMT checks pass (3/3 scenarios, both LED payload captures 4/4).
+
+## PR #4706 cache policy continuation
+
+- [x] Refresh live cache and writer inventory.
+- [x] Restrict consumer cache saves to master push/schedule; preserve PR restores where supported.
+- [x] Land fbuild install-cache restore-only fix (FastLED/fbuild#1687).
+- [ ] Verify the consumer writer controls in hosted CI and merge this separate fix.
+- [ ] Bound generation overlap and model every family from real measurements.
+- [ ] Validate budget and complete required CI before merge.

@@ -49,6 +49,7 @@ jobs:
 
       - uses: astral-sh/setup-uv@v6
         with:
+          save-cache: ${{ github.ref == 'refs/heads/master' && (github.event_name == 'push' || github.event_name == 'schedule') }}
           enable-cache: true
           version: '0.8.0'
 
