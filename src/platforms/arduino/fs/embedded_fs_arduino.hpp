@@ -25,6 +25,7 @@
 // IWYU pragma: end_keep
 
 #include "fl/fs/file_handle.h"
+#include "fl/stl/cstring.h"
 #include "fl/stl/memory.h"
 #include "fl/stl/noexcept.h"
 #include "fl/stl/string.h"
@@ -161,8 +162,17 @@ class FsLittleFs : public FsImpl {
     void end() FL_NO_EXCEPT override { _lifetime.end(); }
 
     filebuf_ptr openRead(const char *name) FL_NO_EXCEPT override {
-        if (!_lifetime.ready() || !name) return filebuf_ptr();
-        File file = LittleFS.open(name, "r");
+        if (!_lifetime.ready() || !name || !*name) return filebuf_ptr();
+        string normalized;
+        const char *vendorPath = name;
+        if (*name != '/') {
+            normalized = "/";
+            normalized += name;
+            // Never open a truncated path if allocation failed.
+            if (normalized.size() != fl::strlen(name) + 1) return filebuf_ptr();
+            vendorPath = normalized.c_str();
+        }
+        File file = LittleFS.open(vendorPath, "r");
         if (!file) {
             return filebuf_ptr();
         }

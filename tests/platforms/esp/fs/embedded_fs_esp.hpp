@@ -167,7 +167,6 @@ inline fl::json probe(const fl::json&) {
     check("heap_after", heap_caps_check_integrity_all(true));
     fl::json checks = fl::json::object();
     for (int i=0; i<total && i<128; ++i) checks.set(records[i].name, records[i].passed);
-    response.set("factoryPresent", static_cast<bool>(fl::platforms::fastled_embedded_fs_provider));
 #if FL_TEST_EMBEDDED_FS_PROVIDER
     response.set("providerCalls", embeddedProviderCalls());
 #endif
