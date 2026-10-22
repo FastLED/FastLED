@@ -118,3 +118,26 @@ workloads, so their absolute free-heap values are not a matched comparison.
 Response JSON allocation is outside each measured interval. The Arduino
 fixture's interval starts after application bus initialization and includes
 creation and release of temporary clients and the capture/peer task lifecycle.
+
+## Native transaction ownership on shutdown
+
+The SDK owns the queued transaction descriptor and its DMA storage until
+`spi_device_get_trans_result` returns the descriptor. A timed-out explicit wait
+or `end()` retains that ownership state so the caller can retry; `transmit()`
+rejects another submission while the preceding descriptor remains queued.
+Normal destruction waits indefinitely for the pending result, then releases
+the device and bus as before. See the stock
+[IDF 4.4.7 result implementation](https://github.com/espressif/esp-idf/blob/v4.4.7/components/driver/spi_master.c#L769-L785)
+and its descriptor-ownership contract in `driver/spi_master.h`.
+
+If that final wait nevertheless returns an error, destruction cannot safely
+release its in-object descriptor or DMA storage. The driver calls unconditional
+`__builtin_abort()` before member destruction. This also applies with `NDEBUG`; ordinary
+recoverable explicit waits do not abort. Such an unrecoverable final SDK error
+is fatal rather than returning with memory still referenced by the SDK. No
+background recovery task, retained allocation registry or SDK patch is used.
+
+The ownership regression probe compiles the actual native implementation with
+controlled SDK calls and checks normal shutdown, failed `end()` followed by
+recovery, rejected repeat submission and final-wait failure in debug and release
+configurations. These are host ownership checks, not physical SPI measurements.
