@@ -46,6 +46,7 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v6
         with:
+          save-cache: ${{ github.ref == 'refs/heads/master' && (github.event_name == 'push' || github.event_name == 'schedule') }}
           enable-cache: true
           cache-dependency-glob: "**/pyproject.toml"
           version: "0.8.0" # 0.8.8 has problems with deployment on linux.
@@ -79,7 +80,8 @@ jobs:
         # rebuild. Persists the cached fastled-lint binary plus the
         # native-Python fingerprint that the build-on-change wrapper
         # consults at lint time. See FastLED #3288.
-        uses: actions/cache@v4
+        id: rust-lint-cache
+        uses: actions/cache/restore@v4
         with:
           path: |
             ci/lint_cpp_rs/target
@@ -255,3 +257,12 @@ jobs:
             echo "ALL UNIT TESTS PASSED"
           fi
         shell: bash
+
+      - name: Save rust-lint-cache on default-branch writers
+        if: ${{ github.ref == 'refs/heads/master' && (github.event_name == 'push' || github.event_name == 'schedule') && steps.rust-lint-cache.outputs.cache-hit != 'true' }}
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            ci/lint_cpp_rs/target
+            .cache/rust_lint_binary.fingerprint
+          key: ${{ steps.rust-lint-cache.outputs.cache-primary-key }}

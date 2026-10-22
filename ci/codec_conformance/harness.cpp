@@ -31,9 +31,11 @@
 #undef MINIMP3_IMPLEMENTATION
 
 namespace fl {
+namespace libc_impl {
 void* memcpy(void* d, const void* s, fl::size n) FL_NO_EXCEPT { return ::memcpy(d, s, n); }
 void* memmove(void* d, const void* s, fl::size n) FL_NO_EXCEPT { return ::memmove(d, s, n); }
 void* memset(void* d, int v, fl::size n) FL_NO_EXCEPT { return ::memset(d, v, n); }
+} // namespace libc_impl
 namespace third_party {
 void* Mp3MemoryAllocate(fl::size b, Mp3MemoryTag) FL_NO_EXCEPT { return ::malloc(b); }
 void Mp3MemoryFree(void* p, fl::size, Mp3MemoryTag) FL_NO_EXCEPT { ::free(p); }

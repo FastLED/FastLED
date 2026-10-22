@@ -199,6 +199,77 @@ class IntegerProducts:
     values: set[str]
 
 
+def _feeds_address_or_call(body: list[str], product: str, definition: int) -> bool:
+    """Follow unchanged spill values along LLVM edges, unioning reaching stores.
+
+    Stores kill a slot only on their own path. Iteration handles backedges and
+    blocks printed before their predecessors; textual order is not execution.
+    """
+    blocks: list[list[str]] = [[]]
+    labels: dict[str, int] = {}
+    start = 0
+    for index, line in enumerate(body):
+        label = re.match(r"^([-\w.$]+):", line)
+        if label:
+            blocks.append([])
+            labels[label.group(1)] = len(blocks) - 1
+        if index == definition:
+            start = len(blocks) - 1
+        blocks[-1].append(line)
+
+    # Seed the first visit after the definition. Keep the original block whole
+    # for backedges: the next iteration can consume the stored product before
+    # defining its replacement.
+    product_line = body[definition]
+    blocks.append(blocks[start][blocks[start].index(product_line) + 1 :])
+    start = len(blocks) - 1
+    successors: list[set[int]] = []
+    for block in blocks:
+        targets = re.findall(r"\blabel %([-\w.$]+)", "\n".join(block))
+        successors.append({labels[target] for target in targets if target in labels})
+
+    incoming: dict[int, set[str]] = {start: set()}
+    outgoing: dict[int, set[str]] = {}
+    aliases = {product}
+    changed = True
+    while changed:
+        changed = False
+        for block_index, block in enumerate(blocks):
+            if block_index not in incoming:
+                continue
+            slots = set(incoming[block_index])
+            alias_count = len(aliases)
+            for line in block:
+                if re.search(r"\b(?:call|getelementptr)\b", line) and any(
+                    re.search(rf"{re.escape(value)}(?![-\w.$])", line)
+                    for value in aliases
+                ):
+                    return True
+                store = re.search(r"\bstore i64 ([^,]+), ptr (%[-\w.$]+)", line)
+                if store:
+                    value, slot = store.groups()
+                    if value in aliases:
+                        slots.add(slot)
+                    else:
+                        slots.discard(slot)
+                load = re.match(
+                    r"\s*(%[-\w.$]+) = load i64, ptr (%[-\w.$]+)(?:,|$)", line
+                )
+                if load and load.group(2) in slots:
+                    aliases.add(load.group(1))
+            if outgoing.get(block_index) != slots or len(aliases) != alias_count:
+                outgoing[block_index] = slots
+                changed = True
+            for successor in successors[block_index]:
+                if successor not in incoming:
+                    incoming[successor] = set()
+                    changed = True
+                before = len(incoming[successor])
+                incoming[successor].update(slots)
+                changed |= len(incoming[successor]) != before
+    return False
+
+
 def _integer_product_lines(body: list[str]) -> IntegerProducts:
     """Q-format multiplies in the fixed-point pipeline, and the values they
     define.
@@ -249,7 +320,6 @@ def _integer_product_lines(body: list[str]) -> IntegerProducts:
                 if operands and all(value in widened for value in operands):
                     widened.add(result)
 
-    joined = "\n".join(body)
     lines: set[int] = set()
     values: set[str] = set()
     for index, line in enumerate(body):
@@ -262,15 +332,7 @@ def _integer_product_lines(body: list[str]) -> IntegerProducts:
         result, left, right = match.group(1), match.group(2), match.group(3)
         if left not in widened and right not in widened:
             continue
-        # Negative lookahead on word characters rather than a positive one on
-        # separators: `(?=[\s,)])` needs a *following* character, so a value at
-        # the end of the last line -- a getelementptr closing a block, say --
-        # slipped past the exclusion and got counted as arithmetic. This still
-        # keeps %off from matching inside %offset.
-        used = re.escape(result) + r"(?![\w.])"
-        if re.search(r"getelementptr[^\n]*" + used, joined):
-            continue
-        if re.search(r"\bcall\b[^\n]*" + used, joined):
+        if _feeds_address_or_call(body, result, index):
             continue
         lines.add(index)
         values.add(result)
