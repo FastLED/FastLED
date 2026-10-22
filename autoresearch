@@ -54,6 +54,9 @@ Driver Selection (optional - omit for GPIO-only mode):
   --test-fault-emit   LPC845-only: trigger intentional OOM/stack faults and
                       assert FAULT diagnostics (FastLED #3302)
   --all               Test all drivers
+  --embedded-fs       Test ESP32 embedded storage (explicit environment and port)
+  --embedded-fs-provider  Test an application-owned Arduino LittleFS provider
+  --embedded-fs-format-fixture  Allow formatting an unmountable test volume
   --simd              Test SIMD operations only (no LED drivers needed)
   --coroutine         Test coroutine/task creation, stop, await (no LED drivers needed)
   --parallel          Test multiple drivers simultaneously (requires 2+ drivers)

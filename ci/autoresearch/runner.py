@@ -84,6 +84,14 @@ async def run(args: Args | None = None) -> int:
     args = args or Args.parse_args()
     assert args is not None
 
+    if args.embedded_fs:
+        from ci.autoresearch.embedded_fs import run_embedded_fs
+
+        return await run_embedded_fs(args)
+    if args.embedded_fs_provider or args.embedded_fs_format_fixture:
+        print("Embedded-storage options require --embedded-fs", file=sys.stderr)
+        return 1
+
     if args.quiet:
         args.skip_lint = True
         args.skip_schema = True

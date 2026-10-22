@@ -710,7 +710,7 @@ active in 7,062 us and completes autonomously.
 - [x] Verify explicit Arduino Serial coexistence and baud changes on device.
 - [x] Integrate ESP Arduino dependency policy into existing lint and tests.
 - [x] Measure final footprint and complete independent production review.
-- [ ] Publish the stacked PR; require full CI and physical USB validation before merge.
+- [x] Publish stacked PR #4887; full CI and physical USB validation remain required before merge.
 
 Final verification: native sanitizer suite passes 326 units / 95 examples;
 normal lint and focused Python board/transport tests pass. Old dispatcher
@@ -721,6 +721,34 @@ including 20 weak-provider calls, both initialization orders and real baud
 changes. Canonical image restored; final RMT 4/4 and heap checks pass. Native
 CDC SDK probes pass S2 IDF 5.3.2, S3 IDF 4.4.7 and P4 IDF 5.5.5 with no Arduino
 USB/HAL callback roots. Physical USB enumeration/reconnect remains unverified.
+
+## #4888 optional Arduino integration goal (sequential)
+
+- [x] #4889: implementation, review and local validation complete; published PR #4894 with ci-full attached. Master integration/full CI remains pending for the stack.
+- [ ] #4890: complete SPI transaction provider; preserve native default, contention HIL and bloat before/after.
+- [ ] #4891: transitive Arduino-header enforcement in existing lint, regression fixtures and real SDK probes.
+- [ ] #4892: eliminate framework startup Serial0 retention from this repository while preserving application Serial APIs; measured maps and HIL.
+- [ ] #4893: physical native USB matrix, RPC/reconnect/ownership/LED and recovery checks; document any unavailable routes without claiming them validated.
+
+Each child is completed and verified before implementation starts on the next.
+Keep parent active until all requirements have authoritative evidence. No new GHA.
+
+#4889 local evidence: matched D32 default storage 293,858 -> 284,070 flash,
+21,420 -> 21,412 static RAM; no-storage remains 231,094 / 21,000. Explicit
+app-mounted Arduino provider 293,894 -> 293,998 flash, static RAM unchanged.
+Actual production-entry linker tests cover absent/archive/direct providers;
+selectively restoring the original entry makes the direct-provider test fail,
+then passes after restoration. Native hardware passes 105 checks cold and warm;
+provider passes 82 checks with 8/16 factory calls. Warm retained heap is zero
+for both; first cycles retain native96/provider440 bytes. SDK 4.4 and 5.5
+compile probes pass. Full debug suite passes 326 units / 95 examples. Full
+Python run exposed five failures (four stale prior-change assertions and the
+new registry's header-local singleton); all five are fixed, with 18 relevant
+tests passing on debug rerun. Registry storage is now in the isolated .cpp.hpp.
+Full lint and independent production review pass. Details and lifecycle limits:
+docs/ESP32_EMBEDDED_FS.md. Canonical AutoResearch image restored; final GPIO
+and legacy RMT checks pass (3/3 scenarios, both LED payload captures 4/4).
+
 ## PR #4706 cache policy continuation
 
 - [x] Refresh live cache and writer inventory.
