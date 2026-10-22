@@ -161,6 +161,18 @@ def test_widened_operands_are_still_counted_as_one_multiply() -> None:
     assert AUDIT._integer_product_lines(addressing).values == set()
 
 
+def test_integer_memset_size_through_inline_wrapper_is_not_sample_arithmetic() -> None:
+    """The always-inline memory wrapper spills its byte count at -O0."""
+    body = [
+        "  %count = sext i32 %remaining to i64",
+        "  %bytes = mul i64 %count, 4",
+        "  store i64 %bytes, ptr %n.addr.i, align 8",
+        "  %size = load i64, ptr %n.addr.i, align 8",
+        "  call ptr @memset(ptr %buffer, i32 0, i64 %size)",
+    ]
+    assert AUDIT._integer_product_lines(body).values == set()
+
+
 def test_integer_mac_counts_one_accumulate_for_two_products() -> None:
     """Mirrors the float MAC test. Two products feeding one add is two
     multiplies and one multiply-accumulate, not three multiplies."""
