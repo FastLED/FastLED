@@ -3,6 +3,7 @@
 
 #include "fl/channels/manager.h"
 #include "fl/channels/detail/wait_spin_budget.h"
+#include "fl/channels/detail/driver_completion_wait.h"
 #include "fl/stl/singleton.h"
 #include "fl/log/log.h"
 #include "fl/system/engine_events.h"
@@ -19,7 +20,13 @@
 namespace fl {
 
 ChannelManager& ChannelManager::registry() FL_NO_EXCEPT {
-    return Singleton<ChannelManager>::instance();
+    auto &manager = Singleton<ChannelManager>::instance();
+    // The optional thunk is retained only when the registry itself is used.
+    // Local manager instances must not replace the singleton completion hook.
+    detail::setManagedCompletionWait([](u32 timeoutMs) {
+        return Singleton<ChannelManager>::instance().waitForReady(timeoutMs);
+    });
+    return manager;
 }
 
 ChannelManager& ChannelManager::instance() FL_NO_EXCEPT {

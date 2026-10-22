@@ -15,6 +15,7 @@
 #include "fl/system/trace.h"
 #include "fl/channels/driver.h"  // for IChannelDriver
 #include "fl/channels/detail/wait_spin_budget.h"  // for tiered-wait spin-budget setters (#2818)
+#include "fl/channels/detail/driver_completion_wait.h"
 #include "fl/system/delay.h"  // for delayMicroseconds
 #include "fl/system/yield.h"  // for fl::yield
 #include "fl/system/sketch_macros.h"
@@ -789,15 +790,15 @@ fl::span<const fl::DriverInfo> CFastLED::getDriverInfos() const FL_NO_EXCEPT {
 // ============================================================================
 
 void CFastLED::wait() FL_NO_EXCEPT {
-	fl::ChannelManager& manager = fl::channelManager();
 	// A zero timeout means wait indefinitely. The void API cannot report a
 	// timeout, so returning early would violate its completion contract.
-	manager.waitForReady(0);
+	// Dispatch only to consumers already in use; do not construct a manager
+	// in legacy-only sketches just to wait for their direct driver.
+	fl::detail::waitForDriverCompletion(0);
 }
 
 bool CFastLED::wait(fl::u32 timeout_ms) FL_NO_EXCEPT {
-	fl::ChannelManager& manager = fl::channelManager();
-	return manager.waitForReady(timeout_ms);
+	return fl::detail::waitForDriverCompletion(timeout_ms);
 }
 
 // Tiered-wait spin-budget shims (#2818). Storage in

@@ -14,8 +14,8 @@ def test_no_argument_wait_requests_unbounded_completion() -> None:
         )
     ]
 
-    assert "manager.waitForReady(0);" in no_argument_wait
-    assert "manager.waitForReady();" not in no_argument_wait
+    assert "fl::detail::waitForDriverCompletion(0);" in no_argument_wait
+    assert "fl::detail::waitForDriverCompletion();" not in no_argument_wait
 
 
 def test_bounded_wait_forwards_the_callers_timeout() -> None:
@@ -26,4 +26,4 @@ def test_bounded_wait_forwards_the_callers_timeout() -> None:
         )
     ]
 
-    assert "return manager.waitForReady(timeout_ms);" in bounded_wait
+    assert "return fl::detail::waitForDriverCompletion(timeout_ms);" in bounded_wait

@@ -1,3 +1,7 @@
+# Stock console integration atop #4873: FBuild 2.5.43 / Arduino3.3.11 /
+# IDF5.5.5 stock packages, local image_flash325075 (down13668 vs338743).
+# Hosted exact-head validation must confirm this ratchet.
+
 # PR #4873 refreshed against master 6e6ae47606 with published fbuild 2.5.43:
 # local clean image_flash 338743 B, down 2312 B from 341055. The previous
 # hosted PR image was 338735; revalidate the final head in hosted CI.
@@ -372,4 +376,4 @@
 # the CI Blink report contains no ResponseLutsQ16 symbol. The local fbuild
 # symbol total remains ~4 KB higher for the same source (FastLED/fbuild#1456),
 # so this ratchet uses the CI measurement from PR #4511.
-338743
+325075

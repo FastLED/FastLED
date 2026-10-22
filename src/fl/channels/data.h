@@ -4,6 +4,7 @@
 #pragma once
 
 #include "fl/stl/noexcept.h"
+#include "fl/stl/atomic.h"
 
 #include "fl/stl/vector.h"
 #include "fl/stl/stdint.h"
@@ -125,11 +126,11 @@ public:
 
     /// @brief Check if channel data is currently in use by the driver
     /// @return true if driver is transmitting this data, false otherwise
-    bool isInUse() const FL_NO_EXCEPT { return mInUse; }
+    bool isInUse() const FL_NO_EXCEPT { return mInUse.load(fl::memory_order_acquire); }
 
     /// @brief Mark channel data as in use by the driver
     /// @param inUse true to mark as in use, false to mark as available
-    void setInUse(bool inUse) FL_NO_EXCEPT { mInUse = inUse; }
+    void setInUse(bool inUse) FL_NO_EXCEPT { mInUse.store(inUse, fl::memory_order_release); }
 
     /// @brief Set the padding generator for this channel
     /// @param generator Function that writes data with padding to destination (nullptr for default left-padding)
@@ -191,7 +192,7 @@ private:
     PaddingGenerator mPaddingGenerator;     ///< Optional padding generator for block-size alignment
     fl::vector_psram<u8> mEncodedData; ///< Encoded transmission bytes (PSRAM)
     u8 mExtraZeroBits = 0;                  ///< Trailing zero bits per byte (legacy XTRA0)
-    volatile bool mInUse = false;           ///< Engine is transmitting this data (prevents creator updates)
+    fl::atomic_bool mInUse{false};           ///< Engine is transmitting this data (prevents creator updates)
 };
 
 }  // namespace fl

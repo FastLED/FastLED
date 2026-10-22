@@ -6,6 +6,78 @@
 // itself.
 
     #[test]
+    fn esp_arduino_headers_flags_includes_and_probes_in_all_branches() {
+        let checker = EspArduinoHeaderChecker;
+        let cases = [
+            "#include <Arduino.h>",
+            "#include <HardwareSerial.h>",
+            "#include <Stream.h>",
+            "#include <WString.h>",
+            "#include <Print.h>",
+            "#include <USB.h>",
+            "#include <USBCDC.h>",
+            "#include <HWCDC.h>",
+            "# include \"WProgram.h\"",
+            "#INCLUDE <aRdUiNo.H>",
+            "# /* dispatch */ include /* header */ <Arduino.h>",
+            "#include \\\n<Arduino.h>",
+            "#inc\\\nlude <Arduino.h>",
+            "#include /* comment\nmore comment */ <Arduino.h>",
+            "#if FL_HAS_INCLUDE( <Arduino.h> )",
+            "#elif __has_include ( \"WProgram.h\" )",
+            "#if 0\n#include <Arduino.h>\n#endif",
+            "#if FL_HAS_INCLUDE(\\\n /* ignored */ <Arduino.h>)",
+            "#define AVAILABLE __has_include(<Arduino.h>)",
+            "constexpr bool available = FL_HAS_INCLUDE(<Arduino.h>);",
+            "#include \"platforms/arduino/io_arduino.hpp\"",
+        ];
+        for source in cases {
+            let hits = checker.check_file_content(&file("src/platforms/esp/32/io.hpp", source));
+            assert_eq!(hits.len(), 1, "missed ESP Arduino dependency: {source}");
+        }
+    }
+
+    #[test]
+    fn esp_arduino_headers_ignores_comments_strings_and_native_headers() {
+        let checker = EspArduinoHeaderChecker;
+        let source = r##"
+// #include <Arduino.h>
+/* #if FL_HAS_INCLUDE(<Arduino.h>) */
+const char *text = "#include <Arduino.h>";
+const char *raw = R"fixture(
+#include <Arduino.h>
+#if __has_include("Arduino.h")
+)fixture";
+#define LABEL "FL_HAS_INCLUDE(<Arduino.h>)"
+#define RAW R"fixture(" __has_include(<Arduino.h>))fixture"
+// Continued comment \
+#include <Arduino.h>
+#include "driver/uart.h"
+#include <esp32-hal-uart.h>
+#if FL_HAS_INCLUDE("driver/gpio.h")
+#include <ArduinoJson.h>
+#endif
+"##;
+        assert!(checker.check_file_content(&file("src/platforms/esp/32/io.hpp", source)).is_empty());
+    }
+
+    #[test]
+    fn esp_arduino_headers_scopes_to_esp_and_reports_original_line() {
+        let checker = EspArduinoHeaderChecker;
+        for path in ["src/platforms/esp/32/io.hpp", "/repo/src/platforms/esp/8266/io.h"] {
+            assert!(checker.should_process_file(path, Path::new(".")));
+        }
+        for path in ["src/platforms/arduino/io.hpp", "tests/platforms/esp/x.cpp",
+                     "src/platforms/espish/x.h", "src/platforms/esp/readme.md"] {
+            assert!(!checker.should_process_file(path, Path::new(".")));
+        }
+        let hits = checker.check_file_content(&file("src/platforms/esp/x.h",
+            "// header\n\n# include \\\n<Arduino.h>\n"));
+        assert_eq!(hits.len(), 1);
+        assert_eq!(hits[0].0, 3);
+    }
+
+    #[test]
     fn prefer_constexpr_ignores_compound_assignment_and_increment() {
         for mutation in ["sCount += 1;", "sCount++;", "sCount |= 2;"] {
             let src = format!(

@@ -36,6 +36,8 @@
 #include "AutoResearchWave8Expand.h"
 #include "AutoResearchParlioEncode.h"
 #include "AutoResearchParlioStream.h"
+#include "AutoResearchLegacyAsync.h"
+#include "AutoResearchLegacyAsyncErrors.h"
 #include "AutoResearchTimingDrift.h"  // timingDriftTest RPC (#2994 repro)
 #include "fl/chipsets/spi.h"
 #include "fl/channels/config.h"
@@ -731,6 +733,13 @@ void AutoResearchRemoteControl::bindDriverMethods(fl::Remote& remote) {
         response.set("first_edges", edges_arr);
         return response;
 #endif
+    });
+
+    remote.bind("legacyAsyncProbe", [](const fl::json& args) -> fl::json {
+        return autoresearch::legacyAsyncProbe(args);
+    });
+    remote.bind("legacyAsyncErrorProbe", [](const fl::json& args) -> fl::json {
+        return autoresearch::legacyAsyncErrorProbe(args);
     });
 
     // Register "timingDriftTest" — issue #2994 reproducer for compounded

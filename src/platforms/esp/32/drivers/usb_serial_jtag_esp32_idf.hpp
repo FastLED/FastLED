@@ -10,6 +10,7 @@
 #include "fl/stl/assert.h"
 #include "fl/stl/noexcept.h"
 #include "platforms/esp/esp_version.h"
+#include "platforms/esp/32/detail/console_config.h"
 
 // ESP-IDF headers (only in .cpp.hpp, not in .h)
 FL_EXTERN_C_BEGIN
@@ -21,10 +22,7 @@ FL_EXTERN_C_BEGIN
 // IWYU pragma: end_keep
 #endif
 
-// USB-Serial JTAG driver is only available on ESP32-S3, C3, C6, H2 with IDF 4.4+
-#if defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32C3) || \
-    defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32H2)
-#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 4, 0)
+#if FL_ESP_HAS_USB_SERIAL_JTAG
 #define FL_HAS_USB_SERIAL_JTAG 1
 // IWYU pragma: begin_keep
 #include "driver/usb_serial_jtag.h"
@@ -35,7 +33,6 @@ FL_EXTERN_C_BEGIN
 // IWYU pragma: begin_keep
 #include "freertos/task.h"       // For portTICK_PERIOD_MS
 // IWYU pragma: end_keep
-#endif
 #endif
 
 FL_EXTERN_C_END

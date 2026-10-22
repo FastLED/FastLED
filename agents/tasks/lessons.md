@@ -549,4 +549,39 @@
   backend consumes a queue or only its first strip. LPC SCT requires immediate
   per-strip flushing; opt RMT4 into batched completion with a separate template
   policy and test both lifecycles.
+
+- Distinguish interrupt-driven output from nonblocking `show()` return when
+  comparing historical backends. Verify both contracts from source and device
+  evidence. READY alone cannot establish a complete waveform: an SDK translator
+  that ends a frame early must propagate an error, and long-transfer validation
+  must inspect output beyond the initial hardware buffer.
+
+- Queue insertion can fail without throwing. Acquire a frame's in-use lease
+  only after insertion succeeds, and reserve destination capacity before moving
+  a batch. Exercise failure with a rejecting memory resource and selectively
+  restore the old insertion order to verify the regression test catches it.
+
+- Reserve the complete encoded frame before clearing or writing it. A vector's
+  failed growth can otherwise create a valid-looking short transmission; keep
+  batch failure sticky even if later strips encode successfully.
+- Refill deadlines must start from hardware launch, using a clock shared by
+  the producer task and ISR. SDK software preload is not a hardware underrun.
+
+- An absolute native-ESP policy includes every ESP32 variant and USB route;
+  do not preserve an Arduino-header probe or serial bridge as a convenience
+  exception. Keep application-owned Arduino calls separate from FastLED's
+  implementation. Native TinyUSB ownership requires disabling Arduino's USB
+  auto-start callbacks and retaining the board's registered USB identity.
+- Validate console IRQ priority with RMT active. Native UART console traffic
+  must use level 1 so RMT's level-3 refill ISR can preempt it. Bidirectional
+  AutoResearch RPC plus physical loopback passed after this priority change;
+  that evidence covers the UART path, not TinyUSB or USB Serial/JTAG hardware.
+- UART write-call atomicity already exists in the shared SDK TX mutex. Preserve
+  complete records in one write; a separate library mutex cannot serialize
+  arbitrary external print fragments. Weak C provider hooks avoid pulling a
+  framework class into native code, while address-only weak vendor-object
+  references can detect a linked owner without assuming its class layout.
+- Check framework lifecycle as well as SDK behavior: Arduino 2.0.3 can crash
+  when Serial.begin replaces a native driver before its HAL mutex exists.
+  Test both initialization orders; preserve native-only fallback behavior.
 - Library footprint changes must work with unmodified supported SDKs. Do not rely on forked framework startup patches or custom package pins for a claimed FastLED saving; stock framework-owned references remain outside the library's control.

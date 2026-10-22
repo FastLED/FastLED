@@ -1,3 +1,89 @@
+struct EspArduinoHeaderChecker;
+
+// Preserve header arguments to preprocessor probes while rejecting matches
+// inside ordinary/raw string literals (e.g. a macro containing example text).
+fn esp_arduino_probe_is_code(code: &str, position: usize) -> bool {
+    let bytes = code.as_bytes();
+    let mut cursor = 0;
+    while cursor < position {
+        if bytes[cursor] == b'"' && is_raw_string_open(bytes, cursor) {
+            if let Some((delimiter, body)) = raw_string_delimiter(bytes, cursor) {
+                let closing = format!("){delimiter}\"");
+                let Some(end) = find_subslice(&bytes[body..], closing.as_bytes()) else {
+                    return false;
+                };
+                cursor = body + end + closing.len();
+                continue;
+            }
+        }
+        if bytes[cursor] == b'"'
+            || (bytes[cursor] == b'\'' && !is_digit_separator_quote(bytes, cursor))
+        {
+            cursor = scan_quoted(bytes, cursor + 1, bytes[cursor]);
+        } else {
+            cursor += 1;
+        }
+    }
+    cursor == position
+}
+
+impl FileContentChecker for EspArduinoHeaderChecker {
+    fn name(&self) -> &'static str { "EspArduinoHeaderChecker" }
+
+    fn should_process_file(&self, file_path: &str, _project_root: &Path) -> bool {
+        ends_with_any(file_path, &[".cpp", ".h", ".hpp", ".ino", ".cpp.hpp"])
+            && is_under_dir(&normalize_path(file_path), "src/platforms/esp")
+    }
+
+    fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
+        // C++ splices physical lines before recognizing comments. Keeping that
+        // order also prevents a continued // comment from exposing fake code.
+        let mut logical_lines = Vec::new();
+        let mut logical = String::new();
+        let mut first_line = 1;
+        for (index, line) in file_content.lines.iter().enumerate() {
+            if logical.is_empty() { first_line = index + 1; }
+            let physical = line.trim_end_matches('\r');
+            if let Some(prefix) = physical.strip_suffix('\\') {
+                logical.push_str(prefix);
+            } else {
+                logical.push_str(physical);
+                logical_lines.push((first_line, std::mem::take(&mut logical)));
+            }
+        }
+        if !logical.is_empty() { logical_lines.push((first_line, logical)); }
+
+        let mut comments = CommentScanState::default();
+        let mut directive = String::new();
+        let mut directive_line = 1;
+        let mut violations = Vec::new();
+        for (line, text) in logical_lines {
+            let literal_continuation = comments.in_raw_string.is_some() || comments.in_quoted.is_some();
+            let visible = strip_block_comments_from_line(&text, &mut comments);
+            if literal_continuation { continue; }
+            let code = split_line_comment(&visible);
+            if directive.is_empty() {
+                if code.trim().is_empty() { continue; }
+                directive_line = line;
+            }
+            directive.push_str(code);
+            if comments.in_block_comment {
+                directive.push(' ');
+                continue;
+            }
+            let banned = regex_esp_arduino_include().is_match(&directive)
+                || regex_esp_arduino_probe().find_iter(&directive)
+                    .any(|hit| esp_arduino_probe_is_code(&directive, hit.start()));
+            if banned {
+                violations.push((directive_line,
+                    "ESP platform code must use native SDK capabilities, not Arduino.h/WProgram.h includes, availability probes, or the Arduino serial bridge. Use ESP-IDF headers and native fl:: platform I/O.".to_string()));
+            }
+            directive.clear();
+        }
+        violations
+    }
+}
+
 struct WeakAttributeChecker;
 
 impl FileContentChecker for WeakAttributeChecker {

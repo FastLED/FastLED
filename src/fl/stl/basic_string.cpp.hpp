@@ -243,6 +243,9 @@ fl::size basic_string::write(const char* str, fl::size n) FL_NO_EXCEPT {
             mLength = newLen;
         } else {
             NotNullStringHolderPtr newData = NotNullStringHolderPtr(fl::make_shared<StringHolder>(newLen));
+            if (!newData->hasCapacity(newLen)) {
+                return mLength;
+            }
             if (existingLen > 0 && existingData) {
                 fl::memcpy(newData->data(), existingData, existingLen);
             }
@@ -268,6 +271,11 @@ fl::size basic_string::write(const char* str, fl::size n) FL_NO_EXCEPT {
             } else {
                 heap->grow(grow_length);
             }
+            // grow() preserves the old allocation on OOM. Do not append or
+            // write its terminator unless the requested bytes actually fit.
+            if (!heap->hasCapacity(newLen)) {
+                return mLength;
+            }
         }
         fl::memcpy(heap->data() + mLength, str, n);
         mLength = newLen;
@@ -276,6 +284,9 @@ fl::size basic_string::write(const char* str, fl::size n) FL_NO_EXCEPT {
     } else if (hasHeapData()) {
         // Copy-on-write
         NotNullStringHolderPtr newData = NotNullStringHolderPtr(fl::make_shared<StringHolder>(newLen));
+        if (!newData->hasCapacity(newLen)) {
+            return mLength;
+        }
         {
             const NotNullStringHolderPtr& heap = heapData();
             fl::memcpy(newData->data(), heap->data(), mLength);
@@ -297,6 +308,9 @@ fl::size basic_string::write(const char* str, fl::size n) FL_NO_EXCEPT {
     }
     // Transition from inline to heap
     NotNullStringHolderPtr newData = NotNullStringHolderPtr(fl::make_shared<StringHolder>(newLen));
+    if (!newData->hasCapacity(newLen)) {
+        return mLength;
+    }
     {
         fl::memcpy(newData->data(), inlineBufferPtr(), mLength);
         fl::memcpy(newData->data() + mLength, str, n);
@@ -500,12 +514,23 @@ void basic_string::reserve(fl::size newCapacity) FL_NO_EXCEPT {
     if (newCapacity <= mLength) return;
     if (newCapacity + 1 <= mInlineCapacity) return;
     if (hasHeapData()) {
-        const NotNullStringHolderPtr& heap = heapData();
-        if (heap.get().use_count() <= 1 && heap->hasCapacity(newCapacity)) {
+        NotNullStringHolderPtr& heap = heapData();
+        if (heap.get().use_count() <= 1) {
+            if (!heap->hasCapacity(newCapacity)) {
+                heap->grow(newCapacity);
+                // grow updates holder length to the allocation length, but
+                // reserve must retain the original string and its terminator.
+                if (heap->hasCapacity(mLength)) {
+                    heap->data()[mLength] = '\0';
+                }
+            }
             return;
         }
     }
     NotNullStringHolderPtr newData = NotNullStringHolderPtr(fl::make_shared<StringHolder>(newCapacity));
+    if (!newData->hasCapacity(newCapacity)) {
+        return;
+    }
     fl::memcpy(newData->data(), c_str(), mLength);
     newData->data()[mLength] = '\0';
     mStorage = newData;
@@ -1466,6 +1491,9 @@ void basic_string::resize(fl::size count, char ch) FL_NO_EXCEPT {
         fl::size additional_chars = count - mLength;
         reserve(count);
         char* data_ptr = c_str_mutable();
+        // Materialize literal/view storage before checking its writable space.
+        // A failed heap growth must leave the existing bytes and length intact.
+        if (capacity() <= count) { return; }
         for (fl::size i = 0; i < additional_chars; ++i) {
             data_ptr[mLength + i] = ch;
         }

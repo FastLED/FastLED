@@ -39,6 +39,28 @@ struct SlimBridgeDirectShow {
 #endif
 };
 
+namespace detail {
+template <typename Traits>
+auto reject_legacy_frame(int) FL_NO_EXCEPT -> decltype(Traits::rejectLegacyFrame(), void()) {
+    Traits::rejectLegacyFrame();
+}
+
+template <typename Traits>
+void reject_legacy_frame(...) FL_NO_EXCEPT {}
+
+template <typename Traits>
+auto show_batched_legacy(int) FL_NO_EXCEPT -> decltype(Traits::showLegacy(), void()) {
+    Traits::showLegacy();
+}
+
+template <typename Traits>
+void show_batched_legacy(...) FL_NO_EXCEPT {
+    IChannelDriver& driver = Traits::instance();
+    driver.show();
+    driver.waitForReady();
+}
+} // namespace detail
+
 /// How a SlimBridgeController reaches its driver. Specialized (not an
 /// `if`) so the direct variant never names ChannelManager at all.
 template <bool DIRECT_SHOW, bool BATCHED = false>
@@ -77,11 +99,9 @@ struct SlimBridgeShowPolicy<true, true> : SlimBridgeShowPolicy<true, false> {
     static void afterEnqueue(IChannelDriver&) FL_NO_EXCEPT {}
     template <typename DriverTraits>
     static void endShow() FL_NO_EXCEPT {
-        IChannelDriver& driver = DriverTraits::instance();
-        driver.show();
-        // Poll through completion: async drivers release frame ownership and
-        // advance strips beyond hardware capacity only while being polled.
-        driver.waitForReady();
+        // RMT4 supplies autonomous completion. Other batched drivers retain
+        // the bounded synchronous fallback until they supply that capability.
+        detail::show_batched_legacy<DriverTraits>(0);
     }
 };
 
@@ -186,10 +206,6 @@ protected:
             }
         }
 
-        // Give subclasses a chance to observe the accepted frame before it is
-        // encoded (e.g. feeding ActiveStripTracker for stub/WASM channels).
-        onBeforeEncode(pixels);
-
         // (A5) Publish the pixel byte layout so the driver (and any
         // downstream padding/diagnostic code) knows the encoded stride.
         if (this->getRgbww().active()) {
@@ -200,11 +216,41 @@ protected:
             mData->setPixelFormat(ChannelPixelFormat::RGB);
         }
 
+        const int pixelCount = pixels.size();
+        const fl::size bytesPerPixel = channelPixelFormatBytesPerPixel(mData->getPixelFormat());
+        if (pixelCount < 0 || bytesPerPixel == 0 ||
+            static_cast<fl::size>(pixelCount) > static_cast<fl::size>(-1) / bytesPerPixel) {
+            detail::reject_legacy_frame<DriverTraits>(0);
+            FL_WARN_ONCE("SlimBridgeController: invalid encoded frame size - dropping frame");
+            return;
+        }
+        const fl::size expectedSize = static_cast<fl::size>(pixelCount) * bytesPerPixel;
+        auto &encoded = mData->getData();
+        // Reserve the complete snapshot before clearing the old one. Byte-wise
+        // geometric growth could fail partway through encoding and enqueue a
+        // silently truncated frame; exact reservation also bounds peak heap.
+        encoded.reserve(expectedSize);
+        if (encoded.capacity() < expectedSize) {
+            detail::reject_legacy_frame<DriverTraits>(0);
+            FL_WARN_ONCE("SlimBridgeController: cannot allocate encoded frame - dropping frame");
+            return;
+        }
+
+        // Observe accepted frames only after allocation succeeds (e.g. feeding
+        // ActiveStripTracker for stub/WASM channels).
+        onBeforeEncode(pixels);
+
         // (A3) Re-encode into the same buffer every frame -- clear() keeps
         // capacity, so steady-state operation is allocation-free.
-        mData->getData().clear();
+        encoded.clear();
         fl::PixelIterator iterator(&pixels, this->getRgbw(), this->getRgbww());
-        iterator.writeWS2812(&mData->getData());
+        iterator.writeWS2812(&encoded);
+        if (encoded.size() != expectedSize) {
+            encoded.clear();
+            detail::reject_legacy_frame<DriverTraits>(0);
+            FL_WARN_ONCE("SlimBridgeController: incomplete encoded frame - dropping frame");
+            return;
+        }
 
         driver.enqueue(mData);
         Policy::afterEnqueue(driver);

@@ -115,6 +115,15 @@ platforms/esp/32/core/fastled_esp32.h (Master Aggregator)
             └─→ strip_spi.h / strip_spi.cpp
 ```
 
+## Stock Arduino USB ownership
+
+Stock Arduino CDC startup remains supported without changing core flags merely
+to include FastLED. Unless native USB is explicitly selected, FastLED uses SDK
+UART while application `Serial` retains its framework-owned USB route. Existing
+FBuild USB profiles explicitly select native ownership and retain their RPC
+transport. See [stock console integration](../../../../docs/ESP32_STOCK_CONSOLE_INTEGRATION.md)
+for configuration, footprint accounting and physical validation limits.
+
 ## Target-Specific Code Organization
 
 The ESP32 platform supports 9+ chip variants using inline conditional compilation rather than separate directories:
@@ -279,23 +288,59 @@ The ESP32 platform has **two completely different SPI subsystems**:
 
 ### 2. No Environment Directories (Arduino vs ESP-IDF)
 
-**Decision**: Handle Arduino vs ESP-IDF differences inline, dispatching on **capability detection** (`FL_HAS_INCLUDE("driver/gpio.h")`, `FL_HAS_INCLUDE(<Arduino.h>)`) rather than `#ifdef ARDUINO`.
+**Decision**: Use native Espressif APIs on every ESP32 variant, under both
+Arduino-ESP32 and bare ESP-IDF. Select the required SDK capability, such as
+`FL_HAS_INCLUDE("driver/gpio.h")`, at the platform dispatch boundary.
 
 **Rationale**:
-- Differences are typically <10 lines per file (e.g., `#include <Arduino.h>` vs `#include "esp_system.h"`)
-- Arduino-ESP32 framework uses ESP-IDF underneath, so most APIs are identical — the ESP-IDF driver headers this code asks for via `FL_HAS_INCLUDE` are present under Arduino too
+- Arduino-ESP32 bundles ESP-IDF, so its presence does not require Arduino APIs
+- Selecting SDK drivers directly keeps peripheral ownership and linker dependencies explicit
 - Separate directories would duplicate 95% of code
 
-**Rule (FastLED#3715): dispatch on the presence of the Espressif driver header you need, never on `ARDUINO`.** `#ifdef ARDUINO` inverts the real question — "is the IDF driver available" — into "is Arduino the active framework", which makes Arduino-ESP32 the default runtime for code paths that work identically under bare ESP-IDF. `pin_esp32_native.hpp` (`FL_HAS_INCLUDE("driver/gpio.h") && FL_HAS_INCLUDE("driver/ledc.h")`) is the reference pattern: the native/IDF implementation is selected whenever the driver header is discoverable — which is true for both Arduino-ESP32 (which bundles the same ESP-IDF drivers) and bare ESP-IDF — and Arduino becomes an explicit, narrow opt-in (e.g. `FL_ESP32_SPI_ARDUINO=1` in `core/fastspi_esp32.h`) rather than the silent default.
+**Rule: ESP platform source must not include or probe for `Arduino.h` or
+`WProgram.h`, or include `platforms/arduino/io_arduino.hpp`.** There is no
+Arduino-backend opt-in exception. `EspArduinoHeaderChecker` enforces this through
+normal `./lint`, including inactive preprocessor branches. A header-availability
+probe for Arduino is itself an unwanted dependency decision, even if the native
+branch would usually be selected. Application sketches may still include
+`Arduino.h` and explicitly use Arduino `Serial`; this policy governs FastLED's
+ESP implementation.
+
+`pin_esp32_native.hpp`'s SDK capability checks remain the reference pattern.
+Keep chip selection at the preprocessor boundary and select concrete C++ types
+for shared behavior; do not duplicate framework-specific implementations.
 
 Two categories of exception to the "no `defined(ARDUINO)`" rule are expected and fine, and don't need converting:
 
 1. **Platform identification**, not dispatch: `is_esp.h`'s `ARDUINO_ARCH_ESP32`/`ARDUINO_ARCH_ESP8266` checks identify which chip family is compiling, not which framework/API surface to call.
 2. **Host-mock selection**: files under `drivers/*/​*_mock.cpp.hpp` and their matching `channel_driver_*.cpp.hpp` dispatchers guard on `!defined(ARDUINO) && (linux/apple/win)` to select the host test-double vs the real device implementation — that's choosing device-vs-host, not Arduino-vs-IDF, and both device-side arms already dispatch on capability detection internally.
 
-`io_esp.cpp.hpp`'s `FL_HAS_INCLUDE(<Arduino.h>)` probe is itself the correct pattern (capability detection, not `#ifdef ARDUINO`) — it already selects `io_esp_idf.hpp` whenever `Arduino.h` is genuinely absent, so bare ESP-IDF builds get working console I/O with no additional change needed. See FastLED#3720 for why a broader default flip there was rejected (it would have regressed the USB-Serial-JTAG bring-up work in #2665/#2668).
+#### Native console transports
 
-**When might this change?**: If Arduino-specific code becomes substantial (e.g., >50 lines per file).
+- **UART:** use the ESP-IDF UART driver. Console interrupts use level 1 so
+  timing-sensitive RMT level-3 interrupts can preempt console traffic.
+- **Hardware USB Serial/JTAG:** use the SDK USB Serial/JTAG driver when the
+  selected chip and board route support that peripheral. Set
+  `FASTLED_ESP_FORCE_USB_SERIAL_JTAG=1` and disable
+  `ARDUINO_USB_CDC_ON_BOOT` globally, removing any board default that enables
+  it. Arduino HWCDC installs a separate interrupt handler and RX queue; it
+  cannot share the native driver. Flag changes must apply to the core build,
+  not just a sketch header.
+- **TinyUSB CDC:** this is a separate USB peripheral path, not a synonym for
+  hardware USB Serial/JTAG. Native ownership is explicit with
+  `FL_ESP_USE_TINYUSB_CDC=1`. Set all Arduino USB startup flags to zero:
+  `ARDUINO_USB_CDC_ON_BOOT`, `ARDUINO_USB_MSC_ON_BOOT`,
+  `ARDUINO_USB_DFU_ON_BOOT`, and `ARDUINO_USB_ON_BOOT`. Arduino's automatic CDC
+  startup installs callbacks that consume incoming bytes, so a second native
+  reader cannot safely share that ownership. Supply `USB_VID`/`USB_PID` from
+  the board build configuration; identities must already exist in the
+  [FastLED boards registry](https://github.com/FastLED/boards), following
+  [the registry policy](../../../../agents/docs/usb-vid-pid-registry.md).
+
+Board USB-mode flags are configuration inputs; they do not authorize Arduino
+API calls. Compile checks and UART RPC tests do not establish native USB
+enumeration, RX/TX, disconnect, or reconnect behavior: verify those on the
+corresponding physical USB transport before claiming hardware support.
 
 ### 3. IDF Version Separation (rmt_4/ vs rmt_5/)
 
@@ -547,3 +592,82 @@ This organization makes it straightforward for developers to:
 **Version**: 1.1
 **Last Updated**: 2025-11-05
 **Status**: Complete (Post-Refactoring + LCD_RGB Documentation)
+
+### Optional console writer without Arduino headers
+
+ESP output checks the weak C symbol `fastled_esp_console_write` before using
+its native writer. A weak reference does not extract an adapter or Arduino
+Serial object from an archive. An application can provide the function in an
+object it already links, without exposing Arduino types to FastLED:
+
+```cpp
+// Application code; initialize Serial in setup before using it.
+#include <Arduino.h>
+#include <stddef.h>
+#include <stdint.h>
+
+extern "C" size_t fastled_esp_console_write(const uint8_t* bytes,
+                                            size_t size) noexcept {
+    if (!Serial) return static_cast<size_t>(-1); // Use native output.
+    return Serial.write(bytes, size);
+}
+```
+
+Return the accepted byte count, or `size_t(-1)` to choose native output. A
+partial count is not retried through a different writer. The provider must not
+call FastLED's console functions recursively. This hook redirects output only;
+console initialization and input retain their selected backend.
+
+Native UART and Arduino `Serial.write(buffer, size)` already share the SDK
+per-port TX mutex. FastLED assembles each `println` body and newline into one
+write so another complete-buffer writer cannot split it. Separate application
+`print` calls remain separate records; a private FastLED mutex cannot make
+those calls atomic against arbitrary Arduino output. USB backend chunking has
+its own transport limits, so this UART guarantee is not a USB frame guarantee.
+
+For older Arduino 2.x cores before 2.0.17, an address-only weak reference detects
+an already linked `HardwareSerial` object. Only that coexistence case initializes
+the small C UART HAL before installing a fresh console driver, avoiding the old
+core's null-mutex crash on a later `Serial.begin()`. Preinstalled ports keep
+their configuration. No class layout or C++ method ABI is assumed; native-only
+sketches do not acquire a strong dependency on Arduino's Serial object.
+
+The native TinyUSB driver currently provides a CDC-only device. Applications
+using composite USB classes must migrate those classes with the device-stack
+owner. Arduino's software upload/reset handshake is not provided by this
+backend; use the board's ROM download/BOOT procedure when necessary. Neither
+compilation nor UART AutoResearch establishes USB enumeration or reset parity.
+
+Packaged TinyUSB SDKs can enable class drivers absent from this device's CDC
+configuration. Their mandatory callbacks must be supplied by the native owner
+with unsupported responses; otherwise the linker may extract Arduino composite
+USB owners to satisfy those references. These callbacks do not advertise or
+implement HID, storage, network, or DFU interfaces. Modern Arduino startup can
+also reference Serial0 directly (for example, main.cpp in core 3.3.11 calls
+Serial0.setPins). Removing FastLED's references does not remove that independent
+framework root; do not silently disable application Serial to hide it.
+
+
+#### Console change validation
+
+The matched 96-pixel Lolin D32 reporter, built with Arduino 2.0.17 / IDF 4.4.7,
+uses 289,446 bytes flash and 23,476 bytes physical static RAM with the native
+console. The previous async RMT baseline uses 293,006 / 23,716 bytes: a saving
+of 3,560 flash and 240 static RAM bytes. No executable HardwareSerial or
+Arduino String functions remain in the native reporter. This does not remove
+the entire regression relative to 3.10.3 (253,022 / 22,216 bytes).
+
+Physical classic ESP32 validation uses the canonical AutoResearch
+`esp32dev_idf44` target (Arduino 2.0.3 / IDF 4.4.1). Native RPC and three RMT
+loopback cases pass. Both initialization orders, real baud changes to 57,600
+and back to 115,200, and the optional writer hook pass six concurrent-output
+batches: 240 exact 192-byte records, with heap integrity before and after every
+batch. The provider case records exactly 20 adapter calls. These measurements
+cover UART hardware; native USB still requires physical enumeration and
+reconnection validation on each route.
+
+
+The clean native sanitizer suite passes 326 unit targets and 95 examples.
+Normal `bash lint` passes. The previous console dispatcher produces two
+`EspArduinoHeaderChecker` violations when checked as an isolated source copy;
+the current dispatcher passes. No additional CI workflow is needed.
