@@ -34,19 +34,27 @@ fn esp_dependency_include_dirs(root: &Path) -> Vec<Vec<EspIncludePath>> {
             continue;
         };
         for entry in entries {
-            let Some(arguments) = entry.get("arguments").and_then(|value| value.as_array()) else {
+            let arguments: Vec<String> = if let Some(arguments) =
+                entry.get("arguments").and_then(|value| value.as_array())
+            {
+                arguments
+                    .iter()
+                    .filter_map(|value| value.as_str().map(str::to_owned))
+                    .collect()
+            } else if let Some(command) = entry.get("command").and_then(|value| value.as_str()) {
+                let Some(arguments) = shlex::split(command) else {
+                    continue;
+                };
+                arguments
+            } else {
                 continue;
             };
-            if !arguments
-                .iter()
-                .filter_map(|value| value.as_str())
-                .any(|arg| {
-                    arg.starts_with("-DESP32")
-                        || arg.starts_with("-DARDUINO_ARCH_ESP32")
-                        || arg.starts_with("-DESP_PLATFORM")
-                        || arg.starts_with("-DCONFIG_IDF_TARGET_")
-                })
-            {
+            if !arguments.iter().any(|arg| {
+                arg.starts_with("-DESP32")
+                    || arg.starts_with("-DARDUINO_ARCH_ESP32")
+                    || arg.starts_with("-DESP_PLATFORM")
+                    || arg.starts_with("-DCONFIG_IDF_TARGET_")
+            }) {
                 continue;
             }
             let directory = entry
@@ -55,10 +63,7 @@ fn esp_dependency_include_dirs(root: &Path) -> Vec<Vec<EspIncludePath>> {
                 .map(PathBuf::from)
                 .unwrap_or_else(|| root.to_path_buf());
             let mut dirs = Vec::new();
-            let args: Vec<&str> = arguments
-                .iter()
-                .filter_map(|value| value.as_str())
-                .collect();
+            let args: Vec<&str> = arguments.iter().map(String::as_str).collect();
             let mut index = 0;
             while index < args.len() {
                 let arg = args[index];
@@ -380,4 +385,48 @@ fn esp_arduino_dependency_pass(
         }
     }
     violations.into_iter().collect()
+}
+
+#[cfg(test)]
+mod esp_compile_command_tests {
+    use super::*;
+
+    #[test]
+    fn esp_compile_database_profiles_include_shell_command_sdk_paths() {
+        let unique = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .as_nanos();
+        let root = std::env::temp_dir().join(format!(
+            "fastled_esp_compile_commands_{}_{}",
+            std::process::id(),
+            unique
+        ));
+        let sdk = root.join("vendor sdk");
+        fs::create_dir_all(&sdk).unwrap();
+        for command_only in [false, true] {
+            let mut entry = serde_json::json!({"directory": root, "file": "native.cpp"});
+            if command_only {
+                // Spaces in SDK directories must remain a single include flag.
+                entry["command"] = serde_json::json!("c++ -DESP32 '-Ivendor sdk' -c native.cpp");
+            } else {
+                entry["arguments"] =
+                    serde_json::json!(["c++", "-DESP32", "-Ivendor sdk", "-c", "native.cpp"]);
+            }
+            fs::write(
+                root.join("compile_commands.json"),
+                serde_json::to_string(&vec![entry]).unwrap(),
+            )
+            .unwrap();
+            let includes_sdk = esp_dependency_include_dirs(&root)
+                .iter()
+                .flatten()
+                .any(|include| include.path == sdk);
+            assert!(
+                includes_sdk,
+                "SDK profile missing for command_only={command_only}"
+            );
+        }
+        fs::remove_dir_all(root).unwrap();
+    }
 }

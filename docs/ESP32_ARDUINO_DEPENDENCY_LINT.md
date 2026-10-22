@@ -6,6 +6,22 @@ include chain such as `native.hpp -> wrapper.h -> FS.h -> Arduino.h`.
 Application adapters under `src/platforms/arduino/` may use Arduino interfaces;
 native implementations must not reach those adapters implicitly.
 
+## Application include migration
+
+On ESP32 Arduino builds, `FastLED.h` no longer includes `<Arduino.h>`.
+Sketches that receive that header from the Arduino builder are unchanged.
+Non-`.ino` translation units using Arduino APIs such as `Serial`, `pinMode`,
+or `digitalRead` must include `<Arduino.h>` themselves, before using those APIs:
+
+```cpp
+#include <Arduino.h>
+#include <FastLED.h>
+```
+
+This keeps application Arduino interfaces explicit while FastLED's ESP32
+implementation uses native SDK headers. Other Arduino platforms retain their
+existing include behavior.
+
 ## Policy and scope
 
 - Comments and string literals are ignored. Native feature branches, including
@@ -29,8 +45,9 @@ use this exception.
 
 The existing whole-project Rust lint pass uses `compile_commands.json` in the
 project root and `.build/fbuild/*/`. It inspects every ESP32 entry's `arguments`
-array and deduplicates include-path profiles. Quoted includes search their
-containing directory first; angle includes use configured search paths.
+array, or shell-word-parsed `command` when the array is absent, and deduplicates
+include-path profiles. Quoted includes search their containing directory first;
+angle includes use configured search paths.
 Compiler include-class precedence (quote, regular, then system paths) and
 directory order within each class are preserved. A fbuild-staged
 `<environment>/lib/FastLED` path is replaced at that same position by current
@@ -45,10 +62,10 @@ populate it; lint does not download or build a toolchain itself.
 This is a bounded structural dependency check, not a full C++ preprocessor.
 It follows literal SDK includes, caches parsed files, handles cycles, and
 limits external traversal to 4096 reachable headers per profile. Macro
-includes inside installed SDKs are not expanded. Compilation databases using
-only shell `command` strings are not consumed. Arbitrary missing SDK headers
-cannot establish a verified closure, so representative SDK compilation remains
-necessary. Save-time single-file checks retain the direct rule; the closure
+includes inside installed SDKs are not expanded. Malformed shell `command`
+strings are skipped. Response-file expansion is not provided by this check.
+Arbitrary missing SDK headers cannot establish a verified closure, so
+representative SDK compilation remains necessary. Save-time single-file checks retain the direct rule; the closure
 runs during whole-project lint.
 
 The full lint command took approximately 56 seconds in this checkout with

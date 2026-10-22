@@ -109,6 +109,7 @@ dependencies = [
  "serde",
  "serde_json",
  "serde_yaml",
+ "shlex",
  "tree-sitter",
  "tree-sitter-cpp",
  "walkdir",
