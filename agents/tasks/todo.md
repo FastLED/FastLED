@@ -729,22 +729,38 @@ Full lint and independent production review pass. Details and lifecycle limits:
 docs/ESP32_EMBEDDED_FS.md. Canonical AutoResearch image restored; final GPIO
 and legacy RMT checks pass (3/3 scenarios, both LED payload captures 4/4).
 
-#4890 starts from `47ad6f04c142fb6bf0df69554b89e8573f2252e5`, integrating
-current master host/frequency fixes into the new isolated SPI branch. The
-physical RED uses real legacy APA102 (HOST2, 500kHz, 32 LEDs) and an application
-Arduino SPI owner/second client: ownerReady=true, completed=true, providerCalls=0,
-success=false. Baseline SDK sources are preserved under .build/4890/baseline.
-After the factory change, the same real-device selection fixture reports
-providerCalls=2 and nativeUnclaimed=true (SDK add-device witness returns
-invalid-state). This intentional null provider disables that host without
-native takeover; it does not prove LED output. Normal lint and the current
-SPI adapter debug target pass. The device currently runs this SPI selection
-fixture; restore canonical AutoResearch when #4890 hardware work finishes.
-Reuse SpiHw1's complete lifecycle at getController2/3 before native acquisition;
-do not patch only the older ESP32SPIOutput escape hatch. Next: checked shared
-application guard and borrowed Arduino adapter, provider/null/archive tests,
-complete-frame physical capture with a second SPI client, SDK mode/clock/CS
-witnesses, native timeout-buffer retention regression, matched fbuild bloat,
-tests/review/publication. Arduino writeBytes is void: report only observable
-failures. APA102 has no CS: a mutex prevents interleaving but does not isolate
-an ungated strip from unrelated bus traffic. Keep that electrical limit explicit.
+#4890 is on `feat/esp32-optional-spi-provider`, based on archived baseline
+`47ad6f04c142fb6bf0df69554b89e8573f2252e5` with current master host/frequency
+fixes integrated. Selection happens at getController2/3 before native bus
+acquisition; null disables a host without native takeover. The actual selection
+fragment has absent/archive/direct ELF tests. The application adapter has a
+checked shared mutex, complete transactions, generic withBus library callbacks,
+and strong owner lifetime; it never begins/ends/reconfigures the app bus.
+
+### #4890 verification
+
+- [x] Physical original-provider RED (real legacy APA102 HOST2 app; providerCalls=0).
+- [x] Complete 140-byte SPI3 capture, zero mismatches, settings/CS witnesses,
+      second client and observed contention on the exact mutex.
+- [x] Invalid configuration, mutex/buffer OOM, empty/rejected operations,
+      adapter release/rebegin and owner lifetime checks on device.
+- [x] Native timeout and buffer-OOM RED -> GREEN, later completion/poll recovery.
+- [x] Durable CLI hardware checks; two settled provider warm cycles retain 0
+      heap, native warm cycle retains 0. Initial SDK/task settling is printed.
+- [x] Matched fbuild bloat and modern IDF5.5.5/P4 provider compile/link.
+- [x] 25 focused Python/link tests, full debug 326 unit + 95 examples, lint,
+      independent production and contention-fix review.
+- [ ] Full Python debug suite (running).
+- [x] Canonical firmware restored; GPIO connectivity and legacy RMT pass 3/3
+      scenarios, both payload captures 4/4.
+- [ ] Publish focused PR with evidence, then complete stack/master CI integration.
+
+Matched Lolin D32/espressif32@6.13.0: no SPI remains 231094 flash / 21000
+static RAM; native APA102 304118 -> 304170 flash, 23040 static unchanged;
+application Arduino owner 308746 -> 291922 flash, 23128 -> 22796 static.
+The provider drops duplicate native SDK master code, saving 16824 flash and
+332 static bytes. Baseline owner cannot safely share; do not claim two working
+sharing controls. Runtime fixture workloads differ, so do not compare their
+absolute heap totals. Contended show is about 6.2ms including peer traffic.
+Docs: docs/ESP32_SPI_PROVIDER.md. Measurements: .build/4890/bloat/report.md.
+No workflows added. #4890 remains active until final validation/publication.

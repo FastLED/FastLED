@@ -57,6 +57,8 @@ Driver Selection (optional - omit for GPIO-only mode):
   --embedded-fs       Test ESP32 embedded storage (explicit environment and port)
   --embedded-fs-provider  Test an application-owned Arduino LittleFS provider
   --embedded-fs-format-fixture  Allow formatting an unmountable test volume
+  --spi-provider      Test Arduino SPI provider (explicit classic ESP32 env and port)
+  --spi-provider-native  With --spi-provider, test native SPI timeout/ownership faults
   --simd              Test SIMD operations only (no LED drivers needed)
   --coroutine         Test coroutine/task creation, stop, await (no LED drivers needed)
   --parallel          Test multiple drivers simultaneously (requires 2+ drivers)

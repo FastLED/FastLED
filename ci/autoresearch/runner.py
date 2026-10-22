@@ -84,6 +84,14 @@ async def run(args: Args | None = None) -> int:
     args = args or Args.parse_args()
     assert args is not None
 
+    if args.spi_provider:
+        from ci.autoresearch.spi_provider import run_spi_provider
+
+        return await run_spi_provider(args)
+    if args.spi_provider_native:
+        print("--spi-provider-native requires --spi-provider", file=sys.stderr)
+        return 1
+
     if args.embedded_fs:
         from ci.autoresearch.embedded_fs import run_embedded_fs
 
