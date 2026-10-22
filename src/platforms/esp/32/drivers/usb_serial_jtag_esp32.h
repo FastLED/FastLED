@@ -76,7 +76,7 @@ public:
      * 3. If not installed, installs driver with buffer sizes from config
      * 4. If installation fails, falls back to ROM UART
      */
-    explicit UsbSerialJtagEsp32(const UsbSerialJtagConfig& config) FL_NO_EXCEPT;
+    explicit UsbSerialJtagEsp32(const UsbSerialJtagConfig& config = UsbSerialJtagConfig::defaults()) FL_NO_EXCEPT;
 
     /**
      * @brief Destructor - uninstalls driver if we installed it
@@ -157,7 +157,11 @@ public:
      * @brief Check if driver is in buffered mode
      * @return true if driver successfully installed, false if using ROM fallback
      */
+    // USB transport speed is independent of the console baud setting.
+    bool setBaudRate(u32) FL_NO_EXCEPT { return true; }
+
     bool isBuffered() const FL_NO_EXCEPT { return mBuffered; }
+    bool isReady() const FL_NO_EXCEPT { return isBuffered(); }
 
     /**
      * @brief Outcome of the constructor's driver-install attempt
