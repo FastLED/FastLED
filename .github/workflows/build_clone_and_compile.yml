@@ -52,6 +52,7 @@ jobs:
       - name: Set up fbuild (install + cache)
         uses: FastLED/fbuild/.github/actions/setup@main
         with:
+          save: ${{ github.ref == 'refs/heads/master' && (github.event_name == 'push' || github.event_name == 'schedule') }}
           fbuild-version: latest
           cache-key-extra: clone-and-compile-${{ hashFiles('platformio.ini', 'library.json', 'pyproject.toml') }}
 

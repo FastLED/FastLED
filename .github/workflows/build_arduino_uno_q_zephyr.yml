@@ -50,7 +50,8 @@ jobs:
         uses: arduino/setup-arduino-cli@v2
 
       - name: Cache Arduino core
-        uses: actions/cache@v4
+        id: arduino-core-cache
+        uses: actions/cache/restore@v4
         with:
           path: ~/.arduino15
           key: arduino15-${{ env.ZEPHYR_CORE }}
@@ -64,3 +65,11 @@ jobs:
 
       - name: Compile Blink
         run: arduino-cli compile --fqbn "$FQBN" --library "$GITHUB_WORKSPACE" examples/Blink
+
+      - name: Save arduino-core-cache on default-branch writers
+        if: ${{ github.ref == 'refs/heads/master' && (github.event_name == 'push' || github.event_name == 'schedule') && steps.arduino-core-cache.outputs.cache-hit != 'true' }}
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            ~/.arduino15
+          key: ${{ steps.arduino-core-cache.outputs.cache-primary-key }}

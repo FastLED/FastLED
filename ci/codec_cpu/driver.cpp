@@ -239,6 +239,7 @@ extern "C" void fastled_mp3_cpu_operation(int stage, int multiplies,
 }
 
 namespace fl {
+namespace libc_impl {
 
 void* memcpy(void* dst, const void* src, fl::size n) FL_NO_EXCEPT {
     return ::memcpy(dst, src, n);
@@ -251,6 +252,8 @@ void* memmove(void* dst, const void* src, fl::size n) FL_NO_EXCEPT {
 void* memset(void* dst, int value, fl::size n) FL_NO_EXCEPT {
     return ::memset(dst, value, n);
 }
+
+} // namespace libc_impl
 
 namespace third_party {
 
