@@ -140,31 +140,29 @@ static u32 calculate_actual_frequency(u8 prescaler_idx, u16 ocr_value) FL_NO_EXC
 }
 
 // =============================================================================
-// Timer1 ISR (TIMER1_COMPA_vect)
+// Timer1 ISR (TIMER1_COMPB_vect)
 // =============================================================================
 
-/**
- * Timer1 Compare Match A ISR
- * This is called automatically when TCNT1 == OCR1A in CTC mode
- */
-// A strong vector from Servo (or another Timer1 user) takes precedence over
-// this weak alias. Keep a distinct handler symbol to detect that case before
-// FastLED changes Timer1 registers.
-ISR(fastled_timer1_compa_isr) {
+// Servo owns compare A. Use compare B at the same CTC TOP so the two
+// libraries can link, and reject timer attachment when compare A is owned.
+// A weak compare-A ISR cannot override AVR startup's own weak default reliably.
+extern "C" void TIMER1_COMPA_vect(void) __attribute__((signal));
+extern "C" void __bad_interrupt(void);
+ISR(TIMER1_COMPB_vect) {
     if (g_avr_timer_data && g_avr_timer_data->mUserHandler) {
         g_avr_timer_data->mUserHandler(g_avr_timer_data->mUserData);
     }
 }
-extern "C" void TIMER1_COMPA_vect(void)
-    __attribute__((signal, used, externally_visible))
-    ISR_ALIASOF(fastled_timer1_compa_isr) FL_LINK_WEAK;
 
 // =============================================================================
 // AVR ATmega ISR Implementation (fl::isr::platform namespace)
 // =============================================================================
 
 int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) FL_NO_EXCEPT {
-    if (TIMER1_COMPA_vect != fastled_timer1_compa_isr) {
+    // Compare linked addresses, including any strong vector supplied by Servo.
+    void (*volatile vector_handler)(void) = TIMER1_COMPA_vect;
+    void (*volatile default_handler)(void) = __bad_interrupt;
+    if (vector_handler != default_handler) {
         FL_WARN("AVR ISR: Timer1 vector is owned by another library");
         return -16;
     }
@@ -235,12 +233,13 @@ int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) F
 
     // Set compare value
     OCR1A = ocr_value;
+    OCR1B = ocr_value;  // Compare B fires at the CTC TOP.
 
     // Reset counter
     TCNT1 = 0;
 
-    // Enable Timer1 Compare Match A interrupt
-    TIMSK1 |= (1 << OCIE1A);
+    // Enable Timer1 Compare Match B interrupt
+    TIMSK1 |= (1 << OCIE1B);
 
     // Restore interrupts
     SREG = oldSREG;
@@ -288,7 +287,7 @@ int detach_handler(isr_handle_t& handle) FL_NO_EXCEPT {
         u8 oldSREG = SREG;
         cli();
 
-        TIMSK1 &= ~(1 << OCIE1A);  // Disable compare match interrupt
+        TIMSK1 &= ~(1 << OCIE1B);  // Disable compare match interrupt
         TCCR1B = 0;  // Stop timer (no clock source)
         TCCR1A = 0;  // Reset control register
 
@@ -332,8 +331,9 @@ int enable_handler(const isr_handle_t& handle) FL_NO_EXCEPT {
         TCCR1A = 0;
         TCCR1B = (1 << WGM12) | PRESCALERS[handle_data->mPrescalerIndex].cs_bits;
         OCR1A = handle_data->mOcrValue;
+        OCR1B = handle_data->mOcrValue;
         TCNT1 = 0;
-        TIMSK1 |= (1 << OCIE1A);
+        TIMSK1 |= (1 << OCIE1B);
 
         SREG = oldSREG;
 
@@ -363,7 +363,7 @@ int disable_handler(const isr_handle_t& handle) FL_NO_EXCEPT {
         u8 oldSREG = SREG;
         cli();
 
-        TIMSK1 &= ~(1 << OCIE1A);  // Disable interrupt
+        TIMSK1 &= ~(1 << OCIE1B);  // Disable interrupt
         TCCR1B = 0;  // Stop timer
 
         SREG = oldSREG;
