@@ -61,6 +61,7 @@ def test_embedded_fs_dependencies_preserve_board_configuration(tmp_path: Path) -
     "deployed_port,expected_port",
     [(None, "/dev/test"), ("/dev/application", "/dev/application")],
 )
+@pytest.mark.parametrize("missing_heap", [False, True])
 def test_embedded_fs_pipeline_timeout(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -68,6 +69,7 @@ def test_embedded_fs_pipeline_timeout(
     expected_seconds: float,
     deployed_port: str | None,
     expected_port: str,
+    missing_heap: bool,
 ) -> None:
     import asyncio
     from unittest.mock import AsyncMock, Mock
@@ -86,13 +88,10 @@ def test_embedded_fs_pipeline_timeout(
     client = Mock()
     client.connect = AsyncMock()
     client.close = AsyncMock()
-    client.send = AsyncMock(
-        return_value=RpcResponse(
-            True,
-            {"success": True, "provider": False, "heapStart": 100, "heapEnd": 100},
-            "",
-        )
-    )
+    data: dict[str, object] = {"success": True, "provider": False}
+    if not missing_heap:
+        data.update({"heapStart": 100, "heapEnd": 100})
+    client.send = AsyncMock(return_value=RpcResponse(True, data, ""))
     factory = Mock(return_value=client)
     monkeypatch.setattr(embedded_fs, "synthesise_autoresearch_project", stage)
     monkeypatch.setattr(embedded_fs, "inject_embedded_fs_fixture", inject)
@@ -112,7 +111,7 @@ def test_embedded_fs_pipeline_timeout(
     args.project_dir = tmp_path
     assert args.timeout == timeout
 
-    assert asyncio.run(embedded_fs.run_embedded_fs(args)) == 0
+    assert asyncio.run(embedded_fs.run_embedded_fs(args)) == (1 if missing_heap else 0)
     deploy.assert_called_once_with(
         project, environment="esp32dev_idf44", upload_port="/dev/test", timeout=1800
     )
@@ -125,3 +124,43 @@ def test_embedded_fs_pipeline_timeout(
         call.args == ("embeddedFsSelfTest",) for call in client.send.call_args_list
     )
     client.close.assert_awaited_once()
+
+
+@pytest.mark.parametrize(
+    "mode",
+    [
+        "bitbang",
+        "lpuart",
+        "parallel",
+        "legacy",
+        "legacy_mixed_timings",
+        "legacy_rgbw_small_counts",
+        "tight_timing",
+        "test_fault_emit",
+        "rp_spi_loopback",
+        "rp_spi_public_api",
+        "rp_pio_both",
+        "pwm_dma_cl",
+        "dma_spi",
+        "dma_uart",
+        "pin_toggle_rx",
+        "ws2812_loopback",
+    ],
+)
+def test_embedded_fs_rejects_unrelated_modes_before_staging(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, mode: str
+) -> None:
+    import asyncio
+    from unittest.mock import Mock
+
+    from ci.autoresearch import embedded_fs
+
+    stage = Mock(side_effect=AssertionError("Unrelated mode reached hardware staging"))
+    monkeypatch.setattr(embedded_fs, "synthesise_autoresearch_project", stage)
+    args = Args.parse_args(
+        ["esp32dev_idf44", "--embedded-fs", "--upload-port", "/dev/test", "--skip-lint"]
+    )
+    args.project_dir = tmp_path
+    setattr(args, mode, True)
+    assert asyncio.run(embedded_fs.run_embedded_fs(args)) == 1
+    stage.assert_not_called()

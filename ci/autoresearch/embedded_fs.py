@@ -62,6 +62,22 @@ async def run_embedded_fs(args: Args) -> int:
         print("The embedded-storage device fixture requires ESP32", file=sys.stderr)
         return 1
     separate_modes = (
+        args.bitbang,
+        args.lpuart,
+        args.parallel,
+        args.legacy,
+        args.legacy_mixed_timings,
+        args.legacy_rgbw_small_counts,
+        args.tight_timing,
+        args.test_fault_emit,
+        args.rp_spi_loopback,
+        args.rp_spi_public_api,
+        args.rp_pio_both,
+        args.pwm_dma_cl,
+        args.dma_spi,
+        args.dma_uart,
+        args.pin_toggle_rx,
+        args.ws2812_loopback,
         args.parlio,
         args.rmt,
         args.spi,
@@ -160,8 +176,14 @@ async def run_embedded_fs(args: Args) -> int:
             if args.embedded_fs_provider and not result.get("providerCalls", 0):
                 print("Arduino filesystem provider was not called", file=sys.stderr)
                 return 1
-            if phase == "warm" and result.get("heapEnd") != result.get("heapStart"):
-                print("Warm filesystem cycles retained heap", file=sys.stderr)
+            if phase == "warm" and (
+                result.get("heapStart") is None
+                or result.get("heapEnd") != result.get("heapStart")
+            ):
+                print(
+                    "Warm filesystem cycles omitted heap metrics or retained heap",
+                    file=sys.stderr,
+                )
                 return 1
     finally:
         await client.close()
