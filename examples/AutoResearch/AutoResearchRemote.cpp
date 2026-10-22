@@ -77,25 +77,32 @@ void writeRaw(fl::string_view text) {
     fl::write_bytes(reinterpret_cast<const fl::u8*>(text.data()), text.size()); // ok autoresearch rpc serial - selected console RPC transport boundary
 }
 
-void writeRawLine(fl::string_view text) {
-    writeRaw(text);
+// Stream a JSON line without a heap buffer proportional to the document;
+// large responses such as rpc.discover exceed the S3 largest free block
+// (FastLED #4899).
+void writeJsonLine(const fl::json& json, const char* prefix) {
+    if (prefix && prefix[0] != '\0') {
+        writeRaw(prefix);
+    }
+    json.write_to(
+        [](void*, const char* data, fl::size len) {
+            writeRaw(fl::string_view(data, len));
+        },
+        nullptr);
     writeRaw("\r\n");
 }
 
 } // namespace
 
 void printJsonRaw(const fl::json& json, const char* prefix) {
-    // Serialize and print response
-    fl::string formatted = fl::formatJsonResponse(json, prefix);
-    writeRawLine(formatted);
+    writeJsonLine(json, prefix);
     fl::flush(); // ok autoresearch rpc serial - host waits for RPC response completion
 }
 
 namespace {
 
 void printRemoteResponseRaw(const fl::json& response) {
-    fl::string formatted = fl::formatJsonResponse(response, "REMOTE: ");
-    writeRawLine(formatted);
+    writeJsonLine(response, "REMOTE: ");
     fl::flush(); // ok autoresearch rpc serial - host waits for RPC response completion
 }
 
@@ -128,9 +135,7 @@ void printStreamRaw(const char* messageType, const fl::json& data) {
         }
     }
 
-    // Use fl:: serial transport for consistent formatting
-    fl::string formatted = fl::formatJsonResponse(output, "RESULT: ");
-    writeRawLine(formatted);
+    writeJsonLine(output, "RESULT: ");
 }
 
 // ============================================================================

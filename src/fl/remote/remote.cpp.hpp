@@ -340,6 +340,9 @@ Remote::Remote(RequestSource source, ResponseSink sink, ResponseStreamSink strea
             mResponseStreamSink(fl::move(writeJson));
         }
     });
+    mRpc.setResponseStreamAvailable([this]() -> bool {
+        return static_cast<bool>(mResponseStreamSink);
+    });
 #endif
 }
 

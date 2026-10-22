@@ -82,3 +82,37 @@ FL_TEST_CASE("Rpc: streaming method without stream sink returns an error") {
     FL_CHECK_EQ(response["error"]["code"].as_int().value_or(0), -32603);
     FL_CHECK_EQ(response["id"].as_int().value_or(0), 9);
 }
+
+// FastLED #4899: rpc.discover streams one method at a time when a stream
+// sink is configured; the bytes must match the tree-built schema.
+FL_TEST_CASE("Rpc: rpc.discover streams the same schema as schema()") {
+    fl::string streamed;
+    fl::vector<fl::json> queued;
+
+    Remote remote(
+        []() { return fl::optional<fl::json>(); },
+        [&queued](const fl::json& response) { queued.push_back(response); },
+        [&streamed](fl::JsonStreamCallback writeJson) {
+            fl::JsonStreamWriter writer([&streamed](const char* data, fl::size len) {
+                streamed.append(data, len);
+            });
+            writeJson(writer);
+            writer.flush();
+        });
+    remote.bind("add", [](int a, int b) { return a + b; });
+    remote.bind("name", []() { return fl::string("s3"); });
+
+    fl::json request = fl::json::object();
+    request.set("jsonrpc", "2.0");
+    request.set("method", "rpc.discover");
+    request.set("params", fl::json::array());
+    request.set("id", 5);
+    fl::json skip = remote.processRpc(request);
+    FL_CHECK(skip["noEnqueue"].as_bool().value_or(false));
+
+    fl::json parsed = fl::json::parse(streamed);
+    FL_REQUIRE(parsed.is_object());
+    FL_CHECK_EQ(parsed["id"].as_int().value_or(0), 5);
+    FL_CHECK(parsed["result"].to_string() == remote.schema().to_string());
+    FL_CHECK_EQ(parsed["result"]["schema"].size(), 2u);
+}

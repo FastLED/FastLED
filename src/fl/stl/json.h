@@ -840,6 +840,13 @@ public:
     // Native serialization (without external libraries)
     fl::string to_string_native() const FL_NO_EXCEPT;
 
+    // Streaming serialization: emits the same bytes as to_string() to `fn`
+    // in small chunks from a fixed stack buffer, so no heap buffer
+    // proportional to the document is allocated (FastLED #4899). `fn` must
+    // not retain `data` past the call.
+    using WriteFn = void (*)(void* ctx, const char* data, fl::size len);
+    void write_to(WriteFn fn, void* ctx) const FL_NO_EXCEPT;
+
     // Parsing factory method - uses native parser
     static json parse(const fl::string &txt) FL_NO_EXCEPT {
         auto parsed = json_value::parse2(txt);

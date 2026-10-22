@@ -1217,6 +1217,24 @@ struct JsonStringSink {
     fl::string& str;
     void push_back(char c) FL_NO_EXCEPT { str.push_back(c); }
 };
+
+// Buffers serialized bytes on the stack and hands them to a callback.
+struct JsonChunkSink {
+    static constexpr fl::size kSize = 64;
+    json::WriteFn fn;
+    void* ctx;
+    char buf[kSize];
+    fl::size len;
+    JsonChunkSink(json::WriteFn f, void* c) FL_NO_EXCEPT : fn(f), ctx(c), len(0) {}
+    void push_back(char c) FL_NO_EXCEPT {
+        buf[len++] = c;
+        if (len == kSize) flush();
+    }
+    void flush() FL_NO_EXCEPT {
+        if (len) fn(ctx, buf, len);
+        len = 0;
+    }
+};
 } // namespace
 
 // Recursive serializer visitor - declared and defined at file scope
@@ -1405,6 +1423,18 @@ fl::string json::to_string_native() const FL_NO_EXCEPT {
         return fl::string();
     }
     return result;
+}
+
+void json::write_to(WriteFn fn, void* ctx) const FL_NO_EXCEPT {
+    if (!fn) return;
+    if (!mValue) {
+        fn(ctx, "null", 4);
+        return;
+    }
+    JsonChunkSink sink(fn, ctx);
+    SerializerVisitor<JsonChunkSink> write{sink};
+    write.serialize_value(mValue.get());
+    sink.flush();
 }
 
 // Forward declaration for the serializeValue function

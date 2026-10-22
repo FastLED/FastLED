@@ -229,6 +229,11 @@ public:
     /// Set response stream sink for methods registered with bindStreaming().
     void setResponseStreamSink(fl::ResponseStreamSink sink) FL_NO_EXCEPT;
 
+    /// Reports whether the stream sink currently reaches a transport. When
+    /// unset, a configured stream sink is assumed live. rpc.discover streams
+    /// only when it is live and otherwise returns its result inline.
+    void setResponseStreamAvailable(fl::function<bool()> available) FL_NO_EXCEPT;
+
     // =========================================================================
     // Method Registration (Binding)
     // =========================================================================
@@ -341,6 +346,12 @@ public:
     /// The built-in "rpc.discover" method returns this schema.
     json schema() const FL_NO_EXCEPT;
 
+#if FL_PLATFORM_HAS_LARGE_MEMORY
+    /// Streams the same document as schema() one method at a time, so only
+    /// a single method's params tree is live (FastLED #4899).
+    void writeSchema(fl::JsonStreamWriter& writer) const FL_NO_EXCEPT;
+#endif
+
     /// Returns number of registered methods.
     fl::size count() const FL_NO_EXCEPT {
         return mRegistry.size();
@@ -407,6 +418,7 @@ private:
     fl::function<void(const fl::json&)> mResponseSink;  // For sending ACK responses
 #if FL_PLATFORM_HAS_LARGE_MEMORY
     fl::ResponseStreamSink mResponseStreamSink;
+    fl::function<bool()> mResponseStreamAvailable;
 #endif
 };
 

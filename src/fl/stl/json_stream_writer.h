@@ -22,6 +22,8 @@
 
 namespace fl {
 
+class json;
+
 class JsonStreamWriter {
   public:
     // Sink receives UTF-8 bytes to write to the transport (serial, socket,
@@ -58,6 +60,8 @@ class JsonStreamWriter {
     void value(int n) FL_NO_EXCEPT { value(static_cast<fl::i64>(n)); }
     void value(bool b) FL_NO_EXCEPT;          // true / false
     void valueNull() FL_NO_EXCEPT;            // null
+    // Serialize a json tree in place, through this writer's fixed buffer.
+    void value(const json &j) FL_NO_EXCEPT;
 
     // Convenience: key + value in one call.
     void member(const char *k, const char *s) FL_NO_EXCEPT { key(k); value(s); }

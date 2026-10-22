@@ -2752,6 +2752,41 @@ FL_TEST_CASE("json serializes large nested escaped documents exactly") {
     FL_CHECK(reparsed.to_string() == expected);
 }
 
+FL_TEST_CASE("json write_to streams the same bytes as to_string") {
+    json root = json::array();
+    for (int i = 0; i < 100; ++i) {
+        json entry = json::object();
+        entry.set("name", "method\"name\n");
+        entry.set("index", i);
+        root.push_back(entry);
+    }
+    struct Capture {
+        fl::string out;
+        int calls = 0;
+        fl::size largest = 0;
+    } cap;
+    root.write_to(
+        [](void* ctx, const char* data, fl::size len) {
+            Capture* c = static_cast<Capture*>(ctx);
+            c->out.append(data, len);
+            ++c->calls;
+            if (len > c->largest) c->largest = len;
+        },
+        &cap);
+    FL_CHECK(cap.out == root.to_string());
+    FL_CHECK_GT(cap.calls, 1);
+    FL_CHECK_LE(cap.largest, 64u);
+
+    json empty;
+    Capture none;
+    empty.write_to(
+        [](void* ctx, const char* data, fl::size len) {
+            static_cast<Capture*>(ctx)->out.append(data, len);
+        },
+        &none);
+    FL_CHECK(none.out == "null");
+}
+
 FL_TEST_CASE("json escapes remaining control characters as \\u00XX") {
     fl::string raw;
     raw.push_back('\x01');
