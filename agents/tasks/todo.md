@@ -725,7 +725,7 @@ USB/HAL callback roots. Physical USB enumeration/reconnect remains unverified.
 ## #4888 optional Arduino integration goal (sequential)
 
 - [x] #4889: implementation, review and local validation complete; published PR #4894 with ci-full attached. Master integration/full CI remains pending for the stack.
-- [ ] #4890: complete SPI transaction provider; preserve native default, contention HIL and bloat before/after.
+- [ ] #4890: complete SPI transaction provider; preserve native default, contention HIL and bloat before/after. Factory selection/null ownership has hardware RED -> GREEN; actual Arduino adapter and frame validation remain in progress.
 - [ ] #4891: transitive Arduino-header enforcement in existing lint, regression fixtures and real SDK probes.
 - [ ] #4892: eliminate framework startup Serial0 retention from this repository while preserving application Serial APIs; measured maps and HIL.
 - [ ] #4893: physical native USB matrix, RPC/reconnect/ownership/LED and recovery checks; document any unavailable routes without claiming them validated.
@@ -748,6 +748,46 @@ tests passing on debug rerun. Registry storage is now in the isolated .cpp.hpp.
 Full lint and independent production review pass. Details and lifecycle limits:
 docs/ESP32_EMBEDDED_FS.md. Canonical AutoResearch image restored; final GPIO
 and legacy RMT checks pass (3/3 scenarios, both LED payload captures 4/4).
+
+#4890 is on `feat/esp32-optional-spi-provider`, based on archived baseline
+`47ad6f04c142fb6bf0df69554b89e8573f2252e5` with current master host/frequency
+fixes integrated. Selection happens at getController2/3 before native bus
+acquisition; null disables a host without native takeover. The actual selection
+fragment has absent/archive/direct ELF tests. The application adapter has a
+checked shared mutex, complete transactions, generic withBus library callbacks,
+and strong owner lifetime; it never begins/ends/reconfigures the app bus.
+
+### #4890 verification
+
+- [x] Physical original-provider RED (real legacy APA102 HOST2 app; providerCalls=0).
+- [x] Complete 140-byte SPI3 capture, zero mismatches, settings/CS witnesses,
+      second client and observed contention on the exact mutex.
+- [x] Invalid configuration, mutex/buffer OOM, empty/rejected operations,
+      adapter release/rebegin and owner lifetime checks on device.
+- [x] Native timeout and buffer-OOM RED -> GREEN, later completion/poll recovery.
+- [x] Durable CLI hardware checks; two settled provider warm cycles retain 0
+      heap, native warm cycle retains 0. Initial SDK/task settling is printed.
+- [x] Matched fbuild bloat and modern IDF5.5.5/P4 provider compile/link.
+- [x] 25 focused Python/link tests, full debug 326 unit + 95 examples, lint,
+      independent production and contention-fix review.
+- [x] Full Python debug suite:1980 passed,47 skipped,2 xfailed; only QEMU
+      smoke failed before compile on daemon startup, then passed verbose debug retry.
+- [x] Canonical firmware restored; GPIO connectivity and legacy RMT pass 3/3
+      scenarios, both payload captures 4/4.
+- [x] Publish focused PR #4896 with evidence and ci-full requested.
+- [ ] Complete stack/master CI integration before closing #4890.
+
+Matched Lolin D32/espressif32@6.13.0: no SPI remains 231094 flash / 21000
+static RAM; native APA102 304118 -> 304170 flash, 23040 static unchanged;
+application Arduino owner 308746 -> 291922 flash, 23128 -> 22796 static.
+The provider drops duplicate native SDK master code, saving 16824 flash and
+332 static bytes. Baseline owner cannot safely share; do not claim two working
+sharing controls. Runtime fixture workloads differ, so do not compare their
+absolute heap totals. Contended show is about 6.2ms including peer traffic.
+Docs: docs/ESP32_SPI_PROVIDER.md. Measurements: .build/4890/bloat/report.md.
+No workflows added. PR: https://github.com/FastLED/FastLED/pull/4896.
+Implementation/local validation is published; stack/master CI is pending.
+#4891 is the next sequential implementation task.
 
 ## PR #4706 cache policy continuation
 

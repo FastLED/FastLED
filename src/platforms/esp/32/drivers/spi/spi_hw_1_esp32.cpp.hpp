@@ -16,6 +16,7 @@
 #include "platforms/shared/spi_hw_1.h"
 #include "platforms/shared/spi_manager.h"  // For DMABuffer, TransmitMode, SPIError
 #include "platforms/esp/32/drivers/spi/spi_hw_base.h"  // Common ESP32 SPI definitions
+#include "platforms/esp/32/drivers/spi/spi_provider.hpp"
 #include "fl/stl/cstring.h"
 #include "fl/stl/limits.h"
 #include "fl/stl/noexcept.h"
@@ -90,6 +91,11 @@ SPISingleESP32::SPISingleESP32(int bus_id, const char* name) FL_NO_EXCEPT
 
 SPISingleESP32::~SPISingleESP32() {
     cleanup();
+    if (mTransactionActive) {
+        // The SDK still owns this descriptor and its DMA storage. Destruction
+        // cannot return safely after a failed final wait, even in release builds.
+        __builtin_abort();
+    }
 }
 
 bool SPISingleESP32::begin(const SpiHw1::Config& config) FL_NO_EXCEPT {
@@ -199,8 +205,11 @@ DMABuffer SPISingleESP32::acquireDMABuffer(size_t bytes_per_lane) FL_NO_EXCEPT {
     }
 
     // Allocate new DMABuffer - it will manage its own memory
+    mBufferAcquired = false;
     mDMABuffer = DMABuffer(total_size);
-    if (!mDMABuffer.ok()) {
+    // The shared buffer object can exist even if its vector storage failed.
+    if (!mDMABuffer.ok() || mDMABuffer.size() != total_size) {
+        mDMABuffer.reset();
         return DMABuffer(SPIError::ALLOCATION_FAILED);
     }
 
@@ -211,7 +220,7 @@ DMABuffer SPISingleESP32::acquireDMABuffer(size_t bytes_per_lane) FL_NO_EXCEPT {
 }
 
 bool SPISingleESP32::transmit(TransmitMode mode) FL_NO_EXCEPT {
-    if (!mInitialized || !mBufferAcquired) {
+    if (!mInitialized || !mBufferAcquired || mTransactionActive) {
         return false;
     }
 
@@ -249,8 +258,13 @@ bool SPISingleESP32::waitComplete(u32 timeout_ms) FL_NO_EXCEPT {
     esp_err_t ret = spi_device_get_trans_result(
         mSPIHandle,
         &result,
-        pdMS_TO_TICKS(timeout_ms)
+        timeout_ms == (fl::numeric_limits<u32>::max)()
+            ? portMAX_DELAY : pdMS_TO_TICKS(timeout_ms)
     );
+
+    // A timeout does not return ownership of the queued transaction or its
+    // storage. Keep both alive so a later wait/poll can reap the real result.
+    if (ret != ESP_OK) return false;
 
     mTransactionActive = false;
 
@@ -262,7 +276,10 @@ bool SPISingleESP32::waitComplete(u32 timeout_ms) FL_NO_EXCEPT {
 }
 
 bool SPISingleESP32::isBusy() const FL_NO_EXCEPT {
-    return mTransactionActive;
+    // Complete a timed-out wait when the SDK result arrives. Otherwise the
+    // channel manager could poll BUSY forever after an ordinary timeout.
+    return mTransactionActive &&
+           !const_cast<SPISingleESP32*>(this)->waitComplete(0);
 }
 
 bool SPISingleESP32::isInitialized() const FL_NO_EXCEPT {
@@ -281,7 +298,7 @@ void SPISingleESP32::cleanup() FL_NO_EXCEPT {
     if (mInitialized) {
         // Wait for any pending transmission
         if (mTransactionActive) {
-            waitComplete();
+            if (!waitComplete()) return;
         }
 
         // Release DMA buffer
@@ -309,17 +326,21 @@ void SPISingleESP32::cleanup() FL_NO_EXCEPT {
 // Singleton getters for controller instances (Meyer's Singleton pattern)
 // These are called from the centralized registration in spi_esp32_init.cpp
 // Return as SpiHw1 base class pointer to avoid forward declaration issues
-fl::shared_ptr<SpiHw1>& getController2() FL_NO_EXCEPT {
-    static fl::shared_ptr<SpiHw1> instance = fl::make_shared<SPISingleESP32>(2, "SPI2");
-    return instance;
-}
-
+namespace platforms {
+namespace detail {
+fl::shared_ptr<SpiHw1> makeNativeSpiHw1(u8 bus) FL_NO_EXCEPT {
+    if (bus == 2) {
+        return fl::make_shared<SPISingleESP32>(2, "SPI2");
+    }
 #if SOC_SPI_PERIPH_NUM > 2
-fl::shared_ptr<SpiHw1>& getController3() FL_NO_EXCEPT {
-    static fl::shared_ptr<SpiHw1> instance = fl::make_shared<SPISingleESP32>(3, "SPI3");
-    return instance;
-}
+    if (bus == 3) {
+        return fl::make_shared<SPISingleESP32>(3, "SPI3");
+    }
 #endif
+    return {};
+}
+} // namespace detail
+} // namespace platforms
 
 }  // namespace fl
 
