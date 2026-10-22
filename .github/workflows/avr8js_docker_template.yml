@@ -1,7 +1,7 @@
 name: AVR8JS Test Template (fbuild)
 
 # The existing template path is retained for workflow callers. fbuild owns
-# compilation, Node/avr8js setup, execution and process-tree shutdown.
+# compilation, avr8js setup, execution and process shutdown.
 on:
   workflow_call:
     inputs:

@@ -275,8 +275,8 @@ FastLED supports fast host-based compilation of `.ino` examples using Meson buil
 ## AVR8JS Emulator
 
 The AVR8JS runner stages the example, then uses native `fbuild test-emu` for
-compilation and emulation. fbuild sets up its Node/avr8js runtime; Docker is
-not required.
+compilation and emulation. Project dependencies provide Node.js, and fbuild
+sets up the avr8js runtime. Docker is not required.
 
 The native AVR8JS model used here supports the Uno's ATmega328P. ATtiny and
 megaAVR targets require a different emulator or physical hardware.
