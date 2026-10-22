@@ -3,6 +3,20 @@ fn regex_has_include() -> &'static Regex {
     VALUE.get_or_init(|| Regex::new(r"\b__has_include\s*\(").unwrap())
 }
 
+fn regex_esp_arduino_include() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| Regex::new(
+        r#"(?i)^\s*#\s*include\s*[<"]\s*(?:arduino\.h|wprogram\.h|hardwareserial\.h|stream\.h|wstring\.h|print\.h|usb\.h|usbcdc\.h|hwcdc\.h|platforms/arduino/io_arduino\.hpp)\s*[>"]"#
+    ).unwrap())
+}
+
+fn regex_esp_arduino_probe() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| Regex::new(
+        r#"(?i)\b(?:fl_has_include|__has_include)\s*\(\s*[<"]\s*(?:arduino\.h|wprogram\.h|hardwareserial\.h|stream\.h|wstring\.h|print\.h|usb\.h|usbcdc\.h|hwcdc\.h|platforms/arduino/io_arduino\.hpp)\s*[>"]"#
+    ).unwrap())
+}
+
 fn regex_static_assert() -> &'static Regex {
     static VALUE: OnceLock<Regex> = OnceLock::new();
     VALUE.get_or_init(|| Regex::new(r"\bstatic_assert\s*\(").unwrap())

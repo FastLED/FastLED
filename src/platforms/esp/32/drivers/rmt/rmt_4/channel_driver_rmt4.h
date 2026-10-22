@@ -40,6 +40,7 @@
 #include "fl/stl/unique_ptr.h"
 #include "platforms/esp/32/core/clock_cycles.h"
 #include "platforms/esp/32/drivers/rmt/rmt_4/irmt4_peripheral.h"
+#include "platforms/esp/32/drivers/rmt/rmt_4/rmt4_config.h"
 
 FL_EXTERN_C_BEGIN
 #if defined(ESP_IDF_VERSION_MAJOR) && ESP_IDF_VERSION_MAJOR > 3
@@ -170,6 +171,29 @@ FL_EXTERN_C_END
 
 namespace fl {
 
+struct Rmt4TxDiagnostics {
+    u32 translatedBytes = 0;
+    u32 cumulativeTranslatedBytes = 0;
+    u32 latchChecks = 0;
+    u32 latchViolations = 0;
+    u32 minLatchHeldUs = 0;
+    u32 maxRequiredResetUs = 0;
+    u32 lateAborts = 0;
+    u32 maxDeltaCycles = 0;
+    u32 abortDeltaCycles = 0;
+    u32 allowedDeltaCycles = 0;
+    u32 preloadCycles = 0;
+    u32 firstIsrCycles = 0;
+    u32 postStartCycles = 0;
+    u32 postStartUs = 0;
+    u32 firstIsrUs = 0;
+    u32 maxDeltaUs = 0;
+    u32 abortDeltaUs = 0;
+    u32 allowedDeltaUs = 0;
+    int preloadCore = -1;
+    int isrCore = -1;
+};
+
 // Forward declarations
 class ChannelEngineRMT4;
 FASTLED_SHARED_PTR(ChannelEngineRMT4);
@@ -255,6 +279,8 @@ class ChannelEngineRMT4Impl final : public ChannelEngineRMT4 {
     /// @brief Query driver state (hardware polling implementation)
     DriverState poll() FL_NO_EXCEPT override;
 
+    Rmt4TxDiagnostics txDiagnostics(int channel = -1) const FL_NO_EXCEPT;
+
   private:
     struct InternalSourceDeleter {
         void operator()(u8 *pointer) const FL_NO_EXCEPT;
@@ -292,6 +318,7 @@ class ChannelEngineRMT4Impl final : public ChannelEngineRMT4 {
     bool configureChannel(ChannelState *state, gpio_num_t pin,
                           const ChipsetTimingConfig &timing) FL_NO_EXCEPT;
     void processPendingChannels() FL_NO_EXCEPT;
+    void clearPendingChannels() FL_NO_EXCEPT;
     void startTransmission(ChannelState *state,
                            const ChannelDataPtr &data) FL_NO_EXCEPT;
     static rmt_item32_t makeZeroSymbol(const ChipsetTimingConfig &timing) FL_NO_EXCEPT;

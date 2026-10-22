@@ -2,6 +2,8 @@
 // Tests for serial transport layer optimizations
 
 #include "fl/remote/transport/serial.h"
+#include "fl/stl/cstring.h"
+#include "fl/stl/detail/string_holder.h"
 #include "test.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
@@ -177,6 +179,79 @@ FL_TEST_CASE("Serial: formatJsonResponse - with prefix") {
     // Should contain the JSON
     FL_REQUIRE(formatted.find("\"result\"") != fl::string::npos);
     FL_REQUIRE(formatted.find("42") != fl::string::npos);
+}
+
+namespace serial_response_growth_test {
+
+void checkPayload(fl::size payloadSize) {
+    const fl::string payload(payloadSize, 'x');
+    fl::json response = fl::json::object();
+    response.set("payload", payload);
+    // Repeated production formatting exercises prefix growth and reuse of
+    // freed allocations, as repeated RPC replies do on ESP32.
+    for (int repeat = 0; repeat < 3; ++repeat) {
+        const fl::string formatted = fl::formatJsonResponse(response, "REMOTE: ");
+        const fl::size payloadOffset = 8 + 12; // prefix + {"payload":"
+        FL_REQUIRE_EQ(formatted.size(), payloadSize + 8 + 14);
+        FL_CHECK(formatted.starts_with("REMOTE: {\"payload\":\""));
+        FL_CHECK_EQ(fl::memcmp(formatted.c_str() + payloadOffset,
+                              payload.c_str(), payloadSize), 0);
+        FL_CHECK_EQ(formatted.c_str()[formatted.size() - 2], '"');
+        FL_CHECK_EQ(formatted.c_str()[formatted.size() - 1], '}');
+        FL_CHECK_EQ(formatted.c_str()[formatted.size()], '\0');
+    }
+}
+
+} // namespace serial_response_growth_test
+
+FL_TEST_CASE("Serial: formatJsonResponse preserves bytes across allocation boundaries") {
+    // Include every small boundary, then powers of two and adjacent lengths.
+    // Cover prefix insertion at both inline and heap allocation boundaries.
+    for (fl::size size = 0; size <= 256; ++size) {
+        serial_response_growth_test::checkPayload(size);
+    }
+    for (fl::size size = 512; size <= 65536; size *= 2) {
+        serial_response_growth_test::checkPayload(size - 1);
+        serial_response_growth_test::checkPayload(size);
+        serial_response_growth_test::checkPayload(size + 1);
+    }
+    serial_response_growth_test::checkPayload(100000);
+}
+
+FL_TEST_CASE("Serial: formatJsonResponse preserves escapes in a large schema-shaped reply") {
+    fl::json methods = fl::json::array();
+    for (int index = 0; index < 256; ++index) {
+        fl::json method = fl::json::array();
+        method.push_back("legacyAsyncProbe");
+        method.push_back("json");
+        method.push_back("quotes\"slash\\newline\ncarriage\rtab\t");
+        methods.push_back(method);
+    }
+    fl::json response = fl::json::object();
+    response.set("schema", methods);
+    const fl::string expected = response.to_string();
+    const fl::string formatted = fl::formatJsonResponse(response, "REMOTE: ");
+    FL_REQUIRE_EQ(formatted.size(), expected.size() + 8);
+    FL_CHECK_EQ(fl::memcmp(formatted.c_str() + 8, expected.c_str(), expected.size()), 0);
+    FL_CHECK_EQ(formatted.c_str()[formatted.size()], '\0');
+    FL_CHECK_EQ(formatted.find('\n'), fl::string::npos);
+    FL_CHECK_EQ(formatted.find('\r'), fl::string::npos);
+}
+
+FL_TEST_CASE("Serial: formatJsonResponse reports failed prefix growth without corrupting JSON") {
+    fl::json response = fl::json::object();
+    response.set("payload", fl::string(1000, 'x'));
+    struct FailGrowth {
+        bool previous = fl::StringHolder::setGrowFailureForTesting(true);
+        ~FailGrowth() { fl::StringHolder::setGrowFailureForTesting(previous); }
+    } fail;
+    const fl::string formatted = fl::formatJsonResponse(response, "REMOTE: ");
+    FL_REQUIRE(formatted.starts_with("REMOTE: "));
+    const fl::json parsed = fl::json::parse(formatted.substr(8));
+    FL_CHECK_EQ(parsed["jsonrpc"].as_string().value_or(""), "2.0");
+    FL_CHECK_EQ(parsed["error"]["code"].as_int().value_or(0), -32603);
+    FL_CHECK(parsed["id"].is_null());
+    FL_CHECK_EQ(formatted.c_str()[formatted.size()], '\0');
 }
 
 FL_TEST_CASE("Serial: createSerialResponseStreamSink - streams framed JSON") {

@@ -576,7 +576,11 @@ class Board:
         # Hardware builds should use QIO for better performance (30-50% faster)
         # Check both static board defines and additional_defines passed at build time
         # (workflow uses FASTLED_ESP32_IS_QEMU; legacy board def uses QEMU_BUILD=1)
-        qemu_markers = {"QEMU_BUILD=1", "FASTLED_ESP32_IS_QEMU"}
+        qemu_markers: set[str] = {
+            "QEMU_BUILD=1",
+            "FASTLED_ESP32_IS_QEMU",
+            "FASTLED_ESP32_IS_QEMU=1",
+        }
         is_qemu_build = bool(
             (self.defines and qemu_markers & set(self.defines))
             or (additional_defines and qemu_markers & set(additional_defines))
@@ -586,10 +590,7 @@ class Board:
         # Collect extra build flags needed for QEMU overrides
         qemu_build_flags: list[str] = []
 
-        if is_qemu_build and (
-            self.board_name.startswith("esp32")
-            or (self.real_board_name and self.real_board_name.startswith("esp32"))
-        ):
+        if is_qemu_build and self.platform_family == "esp32":
             lines.append("board_build.flash_mode = dio")
             lines.append("board_upload.flash_mode = dio")
 
@@ -602,12 +603,17 @@ class Board:
                 [
                     "-DARDUINO_USB_MODE=1",
                     "-DARDUINO_USB_CDC_ON_BOOT=1",
+                    "-DFASTLED_ESP_FORCE_USB_SERIAL_JTAG=1",
+                    "-DFASTLED_ESP_FORCE_USB_SERIAL_JTAG",
+                    "-DFL_ESP_USE_TINYUSB_CDC=1",
+                    "-DFL_ESP_USE_TINYUSB_CDC",
                 ]
             )
             qemu_build_flags.extend(
                 [
                     "-DARDUINO_USB_MODE=0",
                     "-DARDUINO_USB_CDC_ON_BOOT=0",
+                    "-DFASTLED_ESP_FORCE_UART_SERIAL=1",
                     "-DCORE_DEBUG_LEVEL=1",
                 ]
             )
@@ -644,6 +650,18 @@ class Board:
 
         # Add QEMU-specific build flags (e.g., force UART0 serial)
         if qemu_build_flags:
+            # Board profiles select native USB for physical upload ports.
+            # QEMU has only UART0; remove those profile choices before adding
+            # its override, including defines supplied by the caller.
+            usb_selectors: set[str] = {
+                "-DFASTLED_ESP_FORCE_USB_SERIAL_JTAG",
+                "-DFL_ESP_USE_TINYUSB_CDC",
+            }
+            build_flags_elements = [
+                flag
+                for flag in build_flags_elements
+                if flag.replace(" ", "").split("=", 1)[0] not in usb_selectors
+            ]
             build_flags_elements.extend(qemu_build_flags)
 
         if build_flags_elements:
@@ -955,10 +973,12 @@ ESP32_C6_DEVKITC_1 = Board(
     board_build_flash_size="4MB",  # ESP32-C6FH4 actual flash size confirmed by esptool
     board_partitions="huge_app.csv",
     parlio_capable=True,  # SOC_PARLIO_SUPPORTED=1 — flags auto-emitted by to_project_ini()
+    build_unflags=["-DARDUINO_USB_CDC_ON_BOOT=1", "-DARDUINO_USB_CDC_ON_BOOT"],
     build_flags=[
         "-funwind-tables",  # Better stack traces for RISC-V crash decoding
-        "-DARDUINO_USB_MODE=1",  # Select HWCDC (USB-Serial/JTAG) over OTG
-        "-DARDUINO_USB_CDC_ON_BOOT=1",  # Route Serial to HWCDC. Safe with setTxTimeoutMs(0); see #2668
+        "-DARDUINO_USB_MODE=1",
+        "-DARDUINO_USB_CDC_ON_BOOT=0",  # Native SDK owns the peripheral ISR/RX queue.
+        "-DFASTLED_ESP_FORCE_USB_SERIAL_JTAG=1",
         "-DARDUINO_LOOP_STACK_SIZE=16384",  # AutoResearch PARLIO init plus JSON-RPC exceeds the Arduino 8KB default on C6
     ],
 )
@@ -974,22 +994,42 @@ ESP32_S3_DEVKITC_1 = Board(
     # FS.h. Declare both bundled libraries so fbuild adds their headers and
     # archives before compiling examples.
     lib_deps=["FS", "LittleFS"],
-    build_unflags=["-DFASTLED_RMT5=0", "-DFASTLED_RMT5"],
+    build_unflags=[
+        "-DFASTLED_RMT5=0",
+        "-DFASTLED_RMT5",
+        "-DARDUINO_USB_CDC_ON_BOOT=1",
+        "-DARDUINO_USB_CDC_ON_BOOT",
+    ],
     # NOTE: esp32s3 has NO PARLIO peripheral (SOC_PARLIO_SUPPORTED is unset in
     # soc_caps.h). Do NOT set parlio_capable=True here — PR #3276 historically
     # had this wrong; #3304 fixes it.
     build_flags=[
-        "-DARDUINO_USB_MODE=1",  # Route Serial over native USB for AutoResearch RPC on the upload port
-        "-DARDUINO_USB_CDC_ON_BOOT=1",
+        "-DARDUINO_USB_MODE=1",
+        "-DARDUINO_USB_CDC_ON_BOOT=0",
+        "-DFASTLED_ESP_FORCE_USB_SERIAL_JTAG=1",  # Native console on the upload port.
         "-DARDUINO_LOOP_STACK_SIZE=16384",  # AutoResearch RPC plus ESP driver setup is deep enough to exceed the Arduino 8KB default
     ],
 )
 
 ESP32_S2_DEVKITM_1 = Board(
     board_name="esp32s2",
-    real_board_name="lolin_s2_mini ",
+    real_board_name="lolin_s2_mini",
     board_build_mcu="esp32s2",
     platform=ESP32_IDF_5_3_PIOARDUINO,
+    build_unflags=[
+        "-DARDUINO_USB_CDC_ON_BOOT=1",
+        "-DARDUINO_USB_CDC_ON_BOOT",
+        "-DARDUINO_USB_MSC_ON_BOOT=1",
+        "-DARDUINO_USB_DFU_ON_BOOT=1",
+        "-DARDUINO_USB_ON_BOOT=1",
+    ],
+    build_flags=[
+        "-DFL_ESP_USE_TINYUSB_CDC=1",
+        "-DARDUINO_USB_CDC_ON_BOOT=0",
+        "-DARDUINO_USB_MSC_ON_BOOT=0",
+        "-DARDUINO_USB_DFU_ON_BOOT=0",
+        "-DARDUINO_USB_ON_BOOT=0",
+    ],
 )
 
 ESP32_UPESY_WROOM = Board(
@@ -1011,13 +1051,13 @@ ESP32_P4 = Board(
     platform=ESP32_IDF_5_5_1_PIOARDUINO,
     board_partitions="huge_app.csv",
     parlio_capable=True,  # SOC_PARLIO_SUPPORTED=1 — flags auto-emitted by to_project_ini()
-    # Route Serial → USB-Serial-JTAG (HWCDCSerial) instead of UART0 (pins 37/38).
-    # Without these the AutoResearch firmware listens on UART0 while the host
-    # tool talks to the USB-Serial-JTAG COM port — every RPC write times out.
-    # See #2541.
+    # Native SDK USB Serial/JTAG matches the physical upload port. Disable
+    # Arduino HWCDC startup so it cannot consume RX into a private queue.
+    build_unflags=["-DARDUINO_USB_CDC_ON_BOOT=1", "-DARDUINO_USB_CDC_ON_BOOT"],
     defines=[
         "ARDUINO_USB_MODE=1",
-        "ARDUINO_USB_CDC_ON_BOOT=1",
+        "ARDUINO_USB_CDC_ON_BOOT=0",
+        "FASTLED_ESP_FORCE_USB_SERIAL_JTAG=1",
     ],
 )
 
@@ -1480,7 +1520,16 @@ XIAO_ESP32S3 = Board(
     board_build_flash_size="4MB",  # Set to 4MB for QEMU compatibility (default is 8MB)
     board_partitions="default.csv",  # Use default 4MB partition table for QEMU compatibility
     defines=None,
-    build_unflags=["-DFASTLED_RMT5=0", "-DFASTLED_RMT5"],
+    build_unflags=[
+        "-DFASTLED_RMT5=0",
+        "-DFASTLED_RMT5",
+        "-DARDUINO_USB_CDC_ON_BOOT=1",
+        "-DARDUINO_USB_CDC_ON_BOOT",
+    ],
+    build_flags=[
+        "-DARDUINO_USB_CDC_ON_BOOT=0",
+        "-DFASTLED_ESP_FORCE_USB_SERIAL_JTAG=1",
+    ],
 )
 
 # STM32F4 Black Pill board - addresses GitHub issue #726

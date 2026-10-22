@@ -23,6 +23,7 @@
 #include "fl/stl/span.h"
 #include "fl/stl/string.h"
 #include "fl/stl/vector.h"
+#include "fl/stl/memory_resource.h"
 #include "test.h"
 
 using namespace fl;
@@ -45,6 +46,7 @@ public:
     int pollCount = 0;
     int enqueuedAtFirstShow = 0;
     int busyPolls = 0;
+    int rejectedFrameCount = 0;
     DriverState::Value mState = DriverState::READY;
 
     fl::vector<u8> lastBytes;
@@ -372,6 +374,83 @@ struct DirectDriverTraits {
     static IChannelDriver& instance() FL_NO_EXCEPT { return directDriverInstance(); }
     static void registerWithManager() FL_NO_EXCEPT { ++directRegisterCount(); }
 };
+
+struct RejectingDirectDriverTraits : DirectDriverTraits {
+    static void rejectLegacyFrame() FL_NO_EXCEPT {
+        ++directDriverInstance().rejectedFrameCount;
+    }
+};
+
+class FrameBudgetResource : public fl::memory_resource {
+public:
+    fl::size limit;
+    fl::size largestRequest = 0;
+    fl::size allocatedBytes = 0;
+    explicit FrameBudgetResource(fl::size budget) : limit(budget) {}
+
+protected:
+    void *do_allocate(fl::size bytes) FL_NO_EXCEPT override {
+        if (bytes > largestRequest) { largestRequest = bytes; }
+        if (bytes > limit) { return nullptr; }
+        void *allocation = fl::default_memory_resource()->allocate(bytes);
+        if (allocation) { allocatedBytes += bytes; }
+        return allocation;
+    }
+    void do_deallocate(void *pointer, fl::size bytes) FL_NO_EXCEPT override {
+        allocatedBytes -= bytes;
+        fl::default_memory_resource()->deallocate(pointer, bytes);
+    }
+};
+
+using BudgetController = SlimBridgeController<7, TIMING_WS2812_800KHZ, RGB, 280,
+    RejectingDirectDriverTraits, 0, true>;
+
+FL_TEST_CASE("Slim bridge rejects an incomplete encoded frame on allocation failure") {
+    auto &driver = directDriverInstance();
+    driver.enqueueCount = 0;
+    driver.rejectedFrameCount = 0;
+    FrameBudgetResource resource(6);
+    BudgetController controller;
+    fl::vector<fl::u8> encoded(&resource);
+    encoded.push_back(0xab);
+    controller.channelData()->getData().swap(encoded);
+    CRGB pixels[3] = {CRGB::White, CRGB::White, CRGB::White};
+    controller.setLeds(fl::span<CRGB>(pixels, 3));
+
+    controller.showLeds(255);
+
+    FL_CHECK_EQ(driver.enqueueCount, 0);
+    FL_CHECK_EQ(driver.rejectedFrameCount, 1);
+    // Failed reservation must preserve the previous complete snapshot.
+    FL_REQUIRE_EQ(controller.channelData()->getSize(), 1);
+    FL_CHECK_EQ(controller.channelData()->getData()[0], 0xab);
+    FL_CHECK_FALSE(controller.channelData()->isInUse());
+}
+
+FL_TEST_CASE("Slim bridge encodes 2000 RGB pixels within a 6000 byte frame budget") {
+    auto &driver = directDriverInstance();
+    driver.enqueueCount = 0;
+    driver.rejectedFrameCount = 0;
+    FrameBudgetResource resource(6000);
+    BudgetController controller;
+    fl::vector<fl::u8> encoded(&resource);
+    controller.channelData()->getData().swap(encoded);
+    fl::vector<CRGB> pixels(2000, CRGB::White);
+    controller.setLeds(fl::span<CRGB>(pixels));
+
+    controller.showLeds(255);
+
+    FL_CHECK_EQ(driver.enqueueCount, 1);
+    FL_CHECK_EQ(driver.rejectedFrameCount, 0);
+    FL_REQUIRE_EQ(driver.lastBytes.size(), 6000);
+    for (fl::size i = 0; i < driver.lastBytes.size(); ++i) {
+        FL_CHECK_EQ(driver.lastBytes[i], 255);
+    }
+    // This is the board's actual frame budget: geometric growth previously
+    // requested 8092 bytes and silently transmitted only 5395 bytes.
+    FL_CHECK_LE(resource.largestRequest, 6000u);
+    FL_CHECK_EQ(resource.allocatedBytes, 6000u);
+}
 
 using DirectController = SlimBridgeController<7, TIMING_WS2812_800KHZ, GRB, 280,
                                               DirectDriverTraits, 0, /*DIRECT_SHOW=*/true>;
