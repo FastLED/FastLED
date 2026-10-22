@@ -195,7 +195,7 @@ public:
             case 3: mController = create<3>(leds, numLeds, chipset, rgbw); break;
             case 4: mController = create<4>(leds, numLeds, chipset, rgbw); break;
             case 5: mController = create<5>(leds, numLeds, chipset, rgbw); break;
-#if defined(FL_IS_ESP_32DEV)
+#if defined(FL_IS_ESP_32DEV) // ok platform specific - five-strip overflow probe needs safe classic ESP32 output pins 18/19
             case 18: mController = create<18>(leds, numLeds, chipset, rgbw); break;
             case 19: mController = create<19>(leds, numLeds, chipset, rgbw); break;
 #endif

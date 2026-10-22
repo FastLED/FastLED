@@ -151,7 +151,7 @@ class RmtMemoryManager4 : private detail::Rmt4MemoryMutex {
                 2 * mWordsPerBlock <= availableWordsUnlocked()) {
                 desired = 2 * mWordsPerBlock; // Graceful demotion.
             } else {
-                FL_WARN("RmtMemoryManager4: TX allocation refused, pool exhausted (want " << desired << ", have " << availableWordsUnlocked() << " / " << mPoolWords << ")");
+                FL_WARN_ONCE("RmtMemoryManager4: TX allocation refused, pool exhausted (want " << desired << ", have " << availableWordsUnlocked() << " / " << mPoolWords << ")");
                 return false;
             }
         }

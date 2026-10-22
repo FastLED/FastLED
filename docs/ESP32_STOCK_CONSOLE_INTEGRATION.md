@@ -42,16 +42,18 @@ matched controls, not fresh measurements of the integrated master revision.
 Do not sum different workload/accounting measurements into a new size claim.
 
 The refreshed stock classic-ESP32 Blink build (FBuild 2.5.43, Arduino 2.0.3 /
-IDF 4.4.1 / GCC 8.4 patch3), including #4873, measures 259,217 image-flash
+IDF 4.4.1 / GCC 8.4 patch3), including #4873, measures 259,269 image-flash
 bytes and 23,099 attributed RAM bytes. The synchronous RMT4 control in
-#4877 measures 245,341 / 21,301: this integrated behavior costs 13,876 image
+#4877 measures 245,341 / 21,301: this integrated behavior costs 13,928 image
 bytes and 1,798 attributed RAM bytes. The increase includes native SDK UART
 retention as well as async frame ownership; it is not a console size saving.
 Deduplicated symbol attribution grows in SDK driver flash text (+5,838 B),
 SDK driver rodata (+1,996 B), HAL text (+1,213 B), SoC rodata (+1,168 B), and
 FastLED text (+3,591 B); those symbol totals use different accounting from
 image flash and must not be added as an exact image delta. The committed
-classic budget records this current integration cost explicitly.
+classic budget records this current integration cost explicitly. The final
+resize-allocation and backpressure repairs add 52 image bytes compared with
+the initial integration measurement, retaining the same 63-byte budget margin.
 
 The modern ESP32-S3 stock build (Arduino 3.3.11 / IDF 5.5.5) measures
 325,075 image-flash bytes and 39,147 attributed RAM bytes, down 13,668 image
