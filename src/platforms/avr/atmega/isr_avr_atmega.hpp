@@ -147,17 +147,27 @@ static u32 calculate_actual_frequency(u8 prescaler_idx, u16 ocr_value) FL_NO_EXC
  * Timer1 Compare Match A ISR
  * This is called automatically when TCNT1 == OCR1A in CTC mode
  */
-ISR(TIMER1_COMPA_vect) {
+// A strong vector from Servo (or another Timer1 user) takes precedence over
+// this weak alias. Keep a distinct handler symbol to detect that case before
+// FastLED changes Timer1 registers.
+ISR(fastled_timer1_compa_isr) {
     if (g_avr_timer_data && g_avr_timer_data->mUserHandler) {
         g_avr_timer_data->mUserHandler(g_avr_timer_data->mUserData);
     }
 }
+extern "C" void TIMER1_COMPA_vect(void)
+    __attribute__((signal, used, externally_visible))
+    ISR_ALIASOF(fastled_timer1_compa_isr) FL_LINK_WEAK;
 
 // =============================================================================
 // AVR ATmega ISR Implementation (fl::isr::platform namespace)
 // =============================================================================
 
 int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) FL_NO_EXCEPT {
+    if (TIMER1_COMPA_vect != fastled_timer1_compa_isr) {
+        FL_WARN("AVR ISR: Timer1 vector is owned by another library");
+        return -16;
+    }
     if (!config.handler) {
         FL_WARN("AVR ISR: handler is null");
         return -1;  // Invalid parameter
