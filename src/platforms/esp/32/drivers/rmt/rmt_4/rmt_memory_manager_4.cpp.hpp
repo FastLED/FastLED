@@ -2,8 +2,7 @@
 
 /// @file rmt_memory_manager_4.cpp.hpp
 /// @brief Platform-default singleton constructor for `RmtMemoryManager4`
-///        (#3469). Class body itself is header-inline — see the .h
-///        for the docblock.
+///        (#3469). Shared ledger helpers are in the companion `_shared.cpp.hpp`.
 
 #include "platforms/is_platform.h"
 #ifdef FL_IS_ESP32

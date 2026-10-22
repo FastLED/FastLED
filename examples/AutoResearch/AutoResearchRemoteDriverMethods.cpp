@@ -44,6 +44,9 @@
 #include "fl/stl/span.h"
 #include "fl/stl/singleton.h"
 #include <Arduino.h>
+#if defined(FL_IS_ESP32) // ok platform specific - the explicit ESP32 SPI host probe needs this chip's peripheral count
+#include "platforms/esp/32/drivers/spi/spi_hw_base.h" // ok platform specific - FASTLED_ESP32_HAS_SPI3 rejects one-host chips
+#endif
 
 // #3428: FlexIO2 SPI mode bring-up smoke test (`flexioSpiSelfTest` RPC).
 // The header is Teensy 4.x-gated, but #include is safe on any platform
@@ -76,6 +79,140 @@ FlexIoObjectFledState& flexIoObjectFledState() {
 }  // namespace
 
 void AutoResearchRemoteControl::bindDriverMethods(fl::Remote& remote) {
+    // One physical data jumper checks either SPI host while a second APA102
+    // channel exercises the registration-order interaction from #4864.
+    remote.bind("dualSpiHostLoopback", [this](const fl::json& args) -> fl::json {
+        fl::json response = fl::json::object();
+#if !defined(FL_IS_ESP32) || !FASTLED_ESP32_HAS_SPI3 // ok platform specific - this probe requires two physical ESP32 SPI hosts
+        (void)this;
+        (void)args;
+        response.set("success", false);
+        response.set("error", "TwoSpiHostsUnavailable");
+        return response;
+#else
+        if (!args.is_object() || !args.contains("activeHost") ||
+            !args["activeHost"].is_int()) {
+            response.set("success", false);
+            response.set("error", "ExpectedActiveHost");
+            return response;
+        }
+        const int active_host = static_cast<int>(args["activeHost"].as_int().value());
+        if (active_host != 2 && active_host != 3) {
+            response.set("success", false);
+            response.set("error", "InvalidActiveHost");
+            return response;
+        }
+        const bool dummy_first = args.contains("dummyFirst") &&
+            args["dummyFirst"].is_bool() && args["dummyFirst"].as_bool().value();
+        constexpr int kLedCount = 100;
+        static bool already_run = false;
+        if (already_run) {
+            response.set("success", false);
+            response.set("error", "ResetBoardBeforeNextOrder");
+            return response;
+        }
+        already_run = true;
+        static CRGB active_leds[kLedCount];
+        static CRGB dummy_leds[kLedCount];
+        for (int i = 0; i < kLedCount; ++i) {
+            active_leds[i] = CRGB(static_cast<uint8_t>(i * 19 + 1),
+                                  static_cast<uint8_t>(i * 13 + 2),
+                                  static_cast<uint8_t>(i * 7 + 3));
+            dummy_leds[i] = CRGB::Black;
+        }
+        const auto register_active = [&]() {
+            FastLED.addLeds<APA102, 1, 3, RGB, DATA_RATE_KHZ(2400)>( // ok platform specific - test the public explicit ESP32 host API
+                active_leds, kLedCount, active_host == 2
+                    ? fl::Esp32SpiBus::HOST2 : fl::Esp32SpiBus::HOST3); // ok platform specific - select the measured physical host
+        };
+        const auto register_dummy = [&]() {
+            FastLED.addLeds<APA102, 4, 5, RGB, DATA_RATE_KHZ(2400)>( // ok platform specific - register the other host as the dummy
+                dummy_leds, kLedCount, active_host == 2
+                    ? fl::Esp32SpiBus::HOST3 : fl::Esp32SpiBus::HOST2); // ok platform specific - choose the host opposite the measured output
+        };
+        if (dummy_first) {
+            register_dummy();
+            register_active();
+        } else {
+            register_active();
+            register_dummy();
+        }
+        FastLED.setBrightness(255);
+        FastLED.show();
+        const bool primed = FastLED.wait(1000);
+        size_t captured = 0;
+        fl::RunResult diagnostics;
+        if (primed) {
+            captured = capture(mState->rx_channel, mState->rx_buffer,
+                               kLedCount * 3, 1,
+                               fl::makeTimingConfig<fl::TIMING_WS2812B_V5>(),
+                               "SPI_UNIFIED", &diagnostics);
+        }
+        response.set("activeHost", active_host);
+        response.set("dummyFirst", dummy_first);
+        response.set("genericDecodedBytes", static_cast<int>(captured));
+        response.set("primed", primed);
+        response.set("rxWaitResult", diagnostics.captureWaitResult);
+        response.set("rxEdges", diagnostics.rawEdgesAfterWait);
+        response.set("rxBeginError", diagnostics.rxBeginError.c_str());
+        fl::EdgeTime edge_samples[256];
+        const size_t edge_count = mState->rx_channel->getRawEdgeTimes(
+            fl::span<fl::EdgeTime>(edge_samples, 256), 0);
+        response.set("rawEdges", static_cast<int>(edge_count));
+        constexpr size_t kVerifiedLeds = 8;
+        uint8_t first_bytes[kVerifiedLeds * 4] = {};
+        size_t bit_count = 0;
+        for (size_t i = 0; i < edge_count && bit_count < sizeof(first_bytes) * 8; ++i) {
+            const size_t bits = (edge_samples[i].ns + 208) / 416;
+            for (size_t j = 0; j < bits && bit_count < sizeof(first_bytes) * 8; ++j, ++bit_count) {
+                if (edge_samples[i].high) {
+                    first_bytes[bit_count / 8] |=
+                        static_cast<uint8_t>(1u << (7 - bit_count % 8));
+                }
+            }
+        }
+        int wire_mismatches = 0;
+        if (bit_count < sizeof(first_bytes) * 8) {
+            wire_mismatches = static_cast<int>(sizeof(first_bytes) * 8 - bit_count);
+        } else {
+            for (size_t i = 0; i < kVerifiedLeds; ++i) {
+                const size_t offset = i * 4;
+                wire_mismatches += first_bytes[offset] != 0xFF;
+                wire_mismatches += first_bytes[offset + 1] != active_leds[i].r;
+                wire_mismatches += first_bytes[offset + 2] != active_leds[i].g;
+                wire_mismatches += first_bytes[offset + 3] != active_leds[i].b;
+            }
+        }
+        response.set("verifiedLeds", static_cast<int>(kVerifiedLeds));
+        response.set("wireBits", static_cast<int>(bit_count));
+        response.set("wireMismatches", wire_mismatches);
+        response.set("first0", first_bytes[0]);
+        response.set("first1", first_bytes[1]);
+        response.set("first2", first_bytes[2]);
+        response.set("first3", first_bytes[3]);
+        response.set("first4", first_bytes[4]);
+        response.set("first5", first_bytes[5]);
+        response.set("first6", first_bytes[6]);
+        response.set("first7", first_bytes[7]);
+        if (edge_count >= 4) {
+            response.set("edge0Ns", static_cast<int>(edge_samples[0].ns));
+            response.set("edge1Ns", static_cast<int>(edge_samples[1].ns));
+            response.set("edge2Ns", static_cast<int>(edge_samples[2].ns));
+            response.set("edge3Ns", static_cast<int>(edge_samples[3].ns));
+            response.set("edge0High", edge_samples[0].high);
+            response.set("edge1High", edge_samples[1].high);
+        }
+        auto driver = fl::ChannelManager::registry().findDriverByName(
+            fl::string::from_literal("SPI_UNIFIED"));
+        const bool native_driver_found = static_cast<bool>(driver);
+        const bool native_driver_enabled = driver &&
+            fl::ChannelManager::registry().isDriverEnabled(*driver);
+        response.set("nativeDriverFound", native_driver_found);
+        response.set("nativeDriverEnabled", native_driver_enabled);
+        response.set("success", primed && native_driver_enabled && wire_mismatches == 0);
+        return response;
+#endif
+    });
     // Register "flexioRxBenchmark" — square-wave validation for the new
     // FlexIO RX backend (Phase 2 of FastLED#2764).
     //
