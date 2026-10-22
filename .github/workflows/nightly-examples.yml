@@ -2,6 +2,11 @@ name: nightly examples linux
 
 on:
   workflow_dispatch:
+    inputs:
+      cache-dry-run:
+        description: "Preview cache retention cleanup without deleting entries"
+        type: boolean
+        default: true
   schedule:
     - cron: '20 3 * * *'
       timezone: America/Los_Angeles
@@ -16,6 +21,65 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  cache-maintenance:
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      actions: write
+      pull-requests: read
+    concurrency:
+      group: fastled-cache-retention-maintenance
+      cancel-in-progress: false
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
+      CACHE_DRY_RUN: ${{ github.event_name != 'schedule' && inputs.cache-dry-run }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: false
+          version: "0.8.0"
+      - name: Classify before cleanup
+        continue-on-error: true
+        run: >-
+          uv tool run --python 3.12
+          --from git+https://github.com/zackees/ci.yml@dfc7e7d8e0e266db5b71355b281220ab3b0c563f
+          ci-lint cache audit --repo "$GITHUB_WORKSPACE" --default-branch master --json > cache-before.json
+      - name: Apply or preview scoped cache retention
+        run: |
+          args=()
+          if [[ "$CACHE_DRY_RUN" == true ]]; then
+            args+=(--dry-run)
+          fi
+          uv tool run --python 3.12 \
+            --from git+https://github.com/zackees/ci.yml@dfc7e7d8e0e266db5b71355b281220ab3b0c563f \
+            ci-lint cache janitor --repo "$GITHUB_WORKSPACE" --default-branch master --max-deletes 100 \
+            --json "${args[@]}" > cache-maintenance.json
+      - name: Classify after cleanup
+        if: always()
+        continue-on-error: true
+        run: >-
+          uv tool run --python 3.12
+          --from git+https://github.com/zackees/ci.yml@dfc7e7d8e0e266db5b71355b281220ab3b0c563f
+          ci-lint cache audit --repo "$GITHUB_WORKSPACE" --default-branch master --json > cache-after.json
+      - name: Enforce post-cleanup retention target
+        if: ${{ !cancelled() && env.CACHE_DRY_RUN != 'true' }}
+        run: >-
+          uv tool run --python 3.12
+          --from git+https://github.com/zackees/ci.yml@dfc7e7d8e0e266db5b71355b281220ab3b0c563f
+          ci-lint cache budget --repo "$GITHUB_WORKSPACE" --default-branch master
+      - name: Retain cleanup evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cache-retention-evidence
+          path: cache-*.json
+          if-no-files-found: error
+
   examples:
     uses: ./.github/workflows/template_example_test.yml
     with:
