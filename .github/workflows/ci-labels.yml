@@ -22,6 +22,7 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - uses: astral-sh/setup-uv@v6
         with:
+          save-cache: ${{ github.ref == 'refs/heads/master' && (github.event_name == 'push' || github.event_name == 'schedule') }}
           version: "0.8.0"
       - name: Check registry and generated board gates
         run: bash ci-labels check
