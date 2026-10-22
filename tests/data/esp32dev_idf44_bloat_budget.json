@@ -2,7 +2,7 @@
   "board": "esp32dev_idf44",
   "example": "Blink",
   "profile": "default",
-  "image_flash": 245400,
-  "total_ram": 21400,
-  "reference": "#4877 restores the real stock IDF 4.4 RMT4 backend; the prior #4873 generic blocking fallback ceiling (231000 image / 21400 attributed RAM) measured a different driver. Arduino ESP32 2.0.3 / IDF 4.4.1 / GCC 8.4 patch3, FBuild 2.5.43: actual RMT4 Blink image_flash 245341 B, attributed RAM 21301 B. This ceiling reserves only 59 image / 99 attributed RAM bytes above that measured backend. Native debug memory/timing tests and ELF IRAM placement are checked separately; this budget does not establish physical LED timing reliability."
+  "image_flash": 259280,
+  "total_ram": 23150,
+  "reference": "Stock console/async RMT4 integration atop #4877 and #4873; Arduino ESP32 2.0.3 / IDF 4.4.1 / GCC 8.4 patch3, FBuild 2.5.43. Blink image_flash 259217 B, attributed RAM 23099 B. Previous synchronous real-RMT4 image was 245341 / 21301: nonblocking frame queue/ownership and stock native-console integration cost 13876 image bytes and 1798 attributed RAM bytes. Ceilings allow 63 image and 51 attributed RAM bytes above the measured build. No forked framework or startup hook; no physical waveform claim."
 }
