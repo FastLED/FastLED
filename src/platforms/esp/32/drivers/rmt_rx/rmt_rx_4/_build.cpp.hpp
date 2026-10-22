@@ -10,3 +10,4 @@
 /// See issue #3465.
 
 #include "platforms/esp/32/drivers/rmt_rx/rmt_rx_4/rmt_rx_channel_4.cpp.hpp"
+#include "platforms/esp/32/drivers/rmt_rx/rmt_rx_4/rmt_rx_decode_4.cpp.hpp"
