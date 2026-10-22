@@ -18,24 +18,8 @@ inline void streamJsonRpcId(fl::JsonStreamWriter& writer,
         writer.valueNull();
         return;
     }
-    if (id.is_string()) {
-        fl::string s = id.as_string().value_or("");
-        writer.value(s.c_str());
-        return;
-    }
-    if (id.is_bool()) {
-        writer.value(id.as_bool().value_or(false));
-        return;
-    }
-    if (id.is_int()) {
-        writer.value(id.as_int().value_or(0));
-        return;
-    }
-    if (id.is_number()) {
-        writer.value(static_cast<fl::i64>(id.as_float().value_or(0.0f)));
-        return;
-    }
-    writer.valueNull();
+    // Echo the id exactly as received, including non-integer numbers.
+    writer.value(id);
 }
 
 inline void streamJsonRpcResultEnvelope(

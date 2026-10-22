@@ -26,6 +26,14 @@ void Rpc::setResponseSink(fl::function<void(const fl::json&)> sink) FL_NO_EXCEPT
     mResponseSink = fl::move(sink);
 }
 
+void Rpc::setResponseStreamAvailable(fl::function<bool()> available) FL_NO_EXCEPT {
+#if FL_PLATFORM_HAS_LARGE_MEMORY
+    mResponseStreamAvailable = fl::move(available);
+#else
+    (void)available;
+#endif
+}
+
 void Rpc::setResponseStreamSink(fl::ResponseStreamSink sink) FL_NO_EXCEPT {
 #if FL_PLATFORM_HAS_LARGE_MEMORY
     mResponseStreamSink = fl::move(sink);
@@ -145,6 +153,28 @@ json Rpc::handle(const json& request) FL_NO_EXCEPT {
     // RPC catalog as a known constant -- callers don't introspect at runtime.
     // See FastLED #3081.
     if (methodName == "rpc.discover") {
+        // Stream when possible: the schema tree for a large registry can
+        // exceed the free heap on ESP32-S3 (FastLED #4899). Scheduled calls
+        // (non-zero timestamp) keep the inline result so it is recorded.
+        // Stream sinks run the callback synchronously, so `self` outlives it.
+        const bool scheduled = request.contains("timestamp") &&
+                               request["timestamp"].as_int().value_or(0) != 0;
+        if (!scheduled && mResponseStreamSink &&
+            (!mResponseStreamAvailable || mResponseStreamAvailable())) {
+            fl::json requestId = request.contains("id") ? request["id"] : json(nullptr);
+            const bool includeId = request.contains("id");
+            const Rpc* self = this;
+            mResponseStreamSink([self, requestId, includeId](fl::JsonStreamWriter& writer) {
+                streamJsonRpcResultEnvelope(
+                    writer, requestId, includeId,
+                    [self](fl::JsonStreamWriter& resultWriter) {
+                        self->writeSchema(resultWriter);
+                    });
+            });
+            fl::json skip = fl::json::object();
+            skip.set("noEnqueue", true);
+            return skip;
+        }
         json response = json::object();
         response.set("jsonrpc", "2.0");
         response.set("result", schema());
@@ -371,5 +401,23 @@ json Rpc::schema() const FL_NO_EXCEPT {
     doc.set("schema", methods());
     return doc;
 }
+
+#if FL_PLATFORM_HAS_LARGE_MEMORY
+void Rpc::writeSchema(fl::JsonStreamWriter& writer) const FL_NO_EXCEPT {
+    writer.beginObject();
+    writer.key("schema");
+    writer.beginArray();
+    for (auto it = mRegistry.begin(); it != mRegistry.end(); ++it) {
+        writer.beginArray();
+        writer.value(it->first.c_str());
+        writer.value(it->second.mSchemaGenerator->resultTypeName());
+        writer.value(it->second.mSchemaGenerator->params());
+        writer.value((it->second.mMode == RpcMode::ASYNC) ? "async" : "sync");
+        writer.endArray();
+    }
+    writer.endArray();
+    writer.endObject();
+}
+#endif
 
 } // namespace fl

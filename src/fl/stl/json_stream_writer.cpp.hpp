@@ -5,6 +5,7 @@
 #include "fl/stl/json_stream_writer.h"
 
 #include "fl/stl/charconv.h" // fl::itoa64
+#include "fl/stl/json.h"
 #include "fl/stl/move.h"     // fl::move
 
 namespace fl {
@@ -185,6 +186,21 @@ void JsonStreamWriter::value(bool b) FL_NO_EXCEPT {
     }
     prefixForValue();
     puts(b ? "true" : "false");
+}
+
+void JsonStreamWriter::value(const json &j) FL_NO_EXCEPT {
+    if (mSuppressedDepth > 0) {
+        return;
+    }
+    prefixForValue();
+    j.write_to(
+        [](void *ctx, const char *data, fl::size len) {
+            JsonStreamWriter *self = static_cast<JsonStreamWriter *>(ctx);
+            for (fl::size i = 0; i < len; ++i) {
+                self->writeChar(data[i]);
+            }
+        },
+        this);
 }
 
 void JsonStreamWriter::valueNull() FL_NO_EXCEPT {

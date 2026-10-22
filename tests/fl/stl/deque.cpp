@@ -1,4 +1,5 @@
 #include "fl/stl/compiler_control.h"
+#include "fl/stl/allocator.h"
 #include "fl/stl/deque.h"
 #include "fl/stl/cstddef.h"
 #include "fl/stl/new.h"
@@ -21,6 +22,20 @@ struct deque_traits<SmallChunkTag> {
     static constexpr fl::size chunk_size = 4u;
 };
 } // namespace fl
+
+namespace {
+class rejecting_memory_resource : public fl::memory_resource {
+  public:
+    bool reject = false;
+
+  protected:
+    void* do_allocate(fl::size bytes) override {
+        return reject ? nullptr : fl::Malloc(bytes);
+    }
+
+    void do_deallocate(void* ptr, fl::size) override { fl::Free(ptr); }
+};
+} // namespace
 
 FL_TEST_FILE(FL_FILEPATH) {
 
@@ -685,11 +700,10 @@ FL_TEST_CASE("fl::deque - emplace_back") {
     };
 
     deque<TestObj> dq;
-    auto& obj = dq.emplace_back(10, 20);
+    dq.emplace_back(10, 20);
     FL_CHECK_EQ(dq.size(), 1u);
     FL_CHECK_EQ(dq[0].x, 10);
     FL_CHECK_EQ(dq[0].y, 20);
-    FL_CHECK_EQ(obj.x, 10);
 }
 
 FL_TEST_CASE("fl::deque - emplace_front") {
@@ -700,12 +714,11 @@ FL_TEST_CASE("fl::deque - emplace_front") {
 
     deque<TestObj> dq;
     dq.push_back(TestObj(5, 6));
-    auto& obj = dq.emplace_front(10, 20);
+    dq.emplace_front(10, 20);
     FL_CHECK_EQ(dq.size(), 2u);
     FL_CHECK_EQ(dq[0].x, 10);
     FL_CHECK_EQ(dq[0].y, 20);
     FL_CHECK_EQ(dq[1].x, 5);
-    FL_CHECK_EQ(obj.x, 10);
 }
 
 FL_TEST_CASE("fl::deque - emplace at position") {
@@ -1077,6 +1090,57 @@ FL_TEST_CASE("fl::deque - grow_map releases orphaned chunks (#3286)") {
     }
     FL_CHECK_EQ(dq.size(), 24u);
     FL_CHECK_EQ(dq[23].v, 1049);
+}
+
+// FastLED #4899: a failed chunk or map allocation must drop the element,
+// not construct it through a null chunk pointer.
+FL_TEST_CASE("fl::deque - push fails safely when allocation fails") {
+    FL_SUBCASE("first allocation rejected") {
+        rejecting_memory_resource resource;
+        resource.reject = true;
+        deque<char> dq(&resource);
+        dq.push_back('a');
+        dq.push_front('b');
+        FL_CHECK(dq.empty());
+    }
+
+    FL_SUBCASE("rejected after the first chunk fills") {
+        rejecting_memory_resource resource;
+        deque<SmallChunkTag> dq(&resource);
+        for (int i = 0; i < 4; ++i) {
+            dq.push_back(SmallChunkTag(i));
+        }
+        resource.reject = true;
+        for (int i = 0; i < 64; ++i) {
+            dq.push_back(SmallChunkTag(100 + i));
+            dq.push_front(SmallChunkTag(200 + i));
+        }
+        FL_REQUIRE_EQ(dq.size(), 4u);
+        for (int i = 0; i < 4; ++i) {
+            FL_CHECK_EQ(dq[i].v, i);
+        }
+        dq.resize(32);
+        FL_CHECK_EQ(dq.size(), 4u);
+        FL_CHECK(dq.insert(dq.begin() + 1, SmallChunkTag(7)) == dq.end());
+        FL_CHECK(dq.insert(dq.begin() + 1, 3, SmallChunkTag(7)) == dq.end());
+        FL_CHECK(dq.emplace(dq.begin() + 1, 7) == dq.end());
+        dq.emplace_back(8);
+        dq.emplace_front(9);
+        FL_CHECK(dq.emplace(dq.end(), 7) == dq.end());
+        deque<SmallChunkTag> copy(&resource);
+        copy = dq;
+        FL_CHECK(copy.empty());
+        copy.assign(8, SmallChunkTag(5));
+        FL_CHECK(copy.empty());
+        FL_REQUIRE_EQ(dq.size(), 4u);
+        for (int i = 0; i < 4; ++i) {
+            FL_CHECK_EQ(dq[i].v, i);
+        }
+        resource.reject = false;
+        dq.push_back(SmallChunkTag(9));
+        FL_REQUIRE_EQ(dq.size(), 5u);
+        FL_CHECK_EQ(dq[4].v, 9);
+    }
 }
 
 } // FL_TEST_FILE

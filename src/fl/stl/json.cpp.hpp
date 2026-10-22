@@ -4,7 +4,6 @@
 #include "fl/system/sketch_macros.h"  // FL_PLATFORM_HAS_LARGE_MEMORY -- gates ieee754_format_decimal
 #include "fl/stl/string.h"
 #include "fl/stl/vector.h"
-#include "fl/stl/deque.h"
 #include "fl/stl/span.h"
 #include "fl/stl/charconv.h"
 #include "fl/stl/ieee754_string.h"  // FastLED #3022 phase 2 -- integer-only IEEE 754 codec
@@ -639,6 +638,40 @@ bool has_escape_sequences(const fl::span<const char>& span) FL_NO_EXCEPT {
     return false;
 }
 
+// Reads four hex digits at span[pos]; returns -1 if they are not all hex.
+long read_hex4(const fl::span<const char>& span, size_t pos) FL_NO_EXCEPT {
+    if (pos + 4 > span.size()) return -1;
+    long value = 0;
+    for (size_t k = 0; k < 4; ++k) {
+        char h = span[pos + k];
+        int digit;
+        if (h >= '0' && h <= '9') digit = h - '0';
+        else if (h >= 'a' && h <= 'f') digit = h - 'a' + 10;
+        else if (h >= 'A' && h <= 'F') digit = h - 'A' + 10;
+        else return -1;
+        value = (value << 4) | digit;
+    }
+    return value;
+}
+
+void append_utf8(fl::string& out, unsigned long cp) FL_NO_EXCEPT {
+    if (cp < 0x80) {
+        out += static_cast<char>(cp);
+    } else if (cp < 0x800) {
+        out += static_cast<char>(0xC0 | (cp >> 6));
+        out += static_cast<char>(0x80 | (cp & 0x3F));
+    } else if (cp < 0x10000) {
+        out += static_cast<char>(0xE0 | (cp >> 12));
+        out += static_cast<char>(0x80 | ((cp >> 6) & 0x3F));
+        out += static_cast<char>(0x80 | (cp & 0x3F));
+    } else {
+        out += static_cast<char>(0xF0 | (cp >> 18));
+        out += static_cast<char>(0x80 | ((cp >> 12) & 0x3F));
+        out += static_cast<char>(0x80 | ((cp >> 6) & 0x3F));
+        out += static_cast<char>(0x80 | (cp & 0x3F));
+    }
+}
+
 // Helper: Unescape JSON string (only call if has_escape_sequences() returns true)
 fl::string unescape_string(const fl::span<const char>& span) FL_NO_EXCEPT {
     fl::string result;
@@ -656,6 +689,30 @@ fl::string unescape_string(const fl::span<const char>& span) FL_NO_EXCEPT {
                 case 'n':  result += '\n'; i++; break;
                 case 'r':  result += '\r'; i++; break;
                 case 't':  result += '\t'; i++; break;
+                case 'u': {
+                    long cp = read_hex4(span, i + 2);
+                    if (cp < 0) {
+                        result += span[i];  // Malformed: pass through
+                        break;
+                    }
+                    size_t consumed = 5;
+                    // Combine a UTF-16 surrogate pair into one code point.
+                    if (cp >= 0xD800 && cp <= 0xDBFF && i + 11 < span.size() &&
+                        span[i + 6] == '\\' && span[i + 7] == 'u') {
+                        long lo = read_hex4(span, i + 8);
+                        if (lo >= 0xDC00 && lo <= 0xDFFF) {
+                            cp = 0x10000 + ((cp - 0xD800) << 10) + (lo - 0xDC00);
+                            consumed = 11;
+                        }
+                    }
+                    // An unpaired surrogate has no UTF-8 encoding; emit U+FFFD.
+                    if (cp >= 0xD800 && cp <= 0xDFFF) {
+                        cp = 0xFFFD;
+                    }
+                    append_utf8(result, static_cast<unsigned long>(cp));
+                    i += consumed;
+                    break;
+                }
                 default:   result += span[i]; break;  // Pass through unknown escapes
             }
         } else {
@@ -1151,10 +1208,44 @@ fl::string json_value::to_string() const FL_NO_EXCEPT {
     return temp.to_string_native();
 }
 
+namespace {
+// Output sinks for SerializerVisitor. Serialization runs twice: once into
+// a counting sink to size the result exactly, then once into the reserved
+// string. Peak heap is the final string alone (FastLED #4899).
+struct JsonCountSink {
+    fl::size count = 0;
+    void push_back(char) FL_NO_EXCEPT { ++count; }
+};
+
+struct JsonStringSink {
+    fl::string& str;
+    void push_back(char c) FL_NO_EXCEPT { str.push_back(c); }
+};
+
+// Buffers serialized bytes on the stack and hands them to a callback.
+struct JsonChunkSink {
+    static constexpr fl::size kSize = 64;
+    json::WriteFn fn;
+    void* ctx;
+    char buf[kSize];
+    fl::size len;
+    JsonChunkSink(json::WriteFn f, void* c) FL_NO_EXCEPT : fn(f), ctx(c), len(0) {}
+    void push_back(char c) FL_NO_EXCEPT {
+        buf[len++] = c;
+        if (len == kSize) flush();
+    }
+    void flush() FL_NO_EXCEPT {
+        if (len) fn(ctx, buf, len);
+        len = 0;
+    }
+};
+} // namespace
+
 // Recursive serializer visitor - declared and defined at file scope
 // Receives direct references to variant data (no copies) and handles serialization recursively
+template <typename Sink>
 struct SerializerVisitor {
-    fl::deque<char>& out;
+    Sink& out;
 
     void append(const char* str) FL_NO_EXCEPT {
         while (*str) { out.push_back(*str++); }
@@ -1178,7 +1269,18 @@ struct SerializerVisitor {
                 case '\t': append("\\t"); break;
                 case '\b': append("\\b"); break;
                 case '\f': append("\\f"); break;
-                default: out.push_back(c); break;
+                default:
+                    if (static_cast<unsigned char>(c) < 0x20) {
+                        // Remaining control characters must be \u-escaped
+                        // to produce valid JSON.
+                        static const char kHex[] = "0123456789abcdef";
+                        append("\\u00");
+                        out.push_back(kHex[(c >> 4) & 0xF]);
+                        out.push_back(kHex[c & 0xF]);
+                    } else {
+                        out.push_back(c);
+                    }
+                    break;
             }
         }
         out.push_back('"');
@@ -1306,27 +1408,37 @@ fl::string json::to_string_native() const FL_NO_EXCEPT {
         return "null";
     }
 
-    // Use fl::deque for memory-efficient JSON serialization
-    fl::deque<char> json_chars;
+    // Pass 1: measure the exact serialized length without allocating it.
+    JsonCountSink counter;
+    SerializerVisitor<JsonCountSink> measure{counter};
+    measure.serialize_value(mValue.get());
 
-    // Use the visitor to serialize the value recursively
-    SerializerVisitor visitor{json_chars};
-    visitor.serialize_value(mValue.get());
-
-    // Convert deque to fl::string. With FastLED #3270 the deque is chunked,
-    // so its storage is no longer contiguous -- treating `&json_chars[0]`
-    // as a buffer would walk off the first chunk. Reserve + per-element
-    // append is correct for the chunked layout (and was correct for the
-    // pre-#3270 layout too whenever a wraparound occurred).
+    // Pass 2: write into one exactly-sized buffer. If that buffer cannot be
+    // allocated, return an empty string rather than a truncated document.
     fl::string result;
-    if (!json_chars.empty()) {
-        result.reserve(json_chars.size());
-        for (fl::size i = 0; i < json_chars.size(); ++i) {
-            result.push_back(json_chars[i]);
-        }
+    result.reserve(counter.count);
+    if (result.capacity() < counter.count) {
+        return fl::string();
     }
-
+    JsonStringSink sink{result};
+    SerializerVisitor<JsonStringSink> write{sink};
+    write.serialize_value(mValue.get());
+    if (result.size() != counter.count) {
+        return fl::string();
+    }
     return result;
+}
+
+void json::write_to(WriteFn fn, void* ctx) const FL_NO_EXCEPT {
+    if (!fn) return;
+    if (!mValue) {
+        fn(ctx, "null", 4);
+        return;
+    }
+    JsonChunkSink sink(fn, ctx);
+    SerializerVisitor<JsonChunkSink> write{sink};
+    write.serialize_value(mValue.get());
+    sink.flush();
 }
 
 // Forward declaration for the serializeValue function

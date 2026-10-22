@@ -188,10 +188,19 @@ createSerialRequestSource(const char* prefix = "") FL_NO_EXCEPT {
 inline fl::function<void(const fl::json&)>
 createSerialResponseSink(const char* prefix = "REMOTE: ") FL_NO_EXCEPT {
     return [prefix](const fl::json& response) {
-        // Format and write to serial (no filtering needed - protocol uses flat structure)
+        // Stream the serialized response straight to serial so large
+        // responses (e.g. rpc.discover) never need a contiguous heap buffer
+        // proportional to the document (FastLED #4899).
         SerialWriter serial;
-        fl::string formatted = formatJsonResponse(response, prefix);
-        writeSerialLine(serial, formatted);
+        if (prefix && prefix[0] != '\0') {
+            serial.write(prefix, fl::strlen(prefix));
+        }
+        response.write_to(
+            [](void* ctx, const char* data, fl::size len) {
+                static_cast<SerialWriter*>(ctx)->write(data, len);
+            },
+            &serial);
+        serial.println("");
     };
 }
 

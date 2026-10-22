@@ -2715,4 +2715,107 @@ FL_TEST_CASE("Const json operator[] with multiple keys") {
     FL_CHECK(boolVal == true);
 }
 
+// FastLED #4899: serialization sizes its output exactly before writing.
+// A large, nested, escape-heavy document must serialize byte-for-byte and
+// round-trip unchanged.
+FL_TEST_CASE("json serializes large nested escaped documents exactly") {
+    json root = json::array();
+    fl::string expected = "[";
+    for (int i = 0; i < 300; ++i) {
+        json flags = json::array();
+        flags.push_back(true);
+        flags.push_back(false);
+        json fields = json::array();
+        fl::string name = "n\"\\\n\r\t\b\f";
+        name.append(i);
+        fields.push_back(name);
+        fields.push_back(i);
+        fields.push_back(flags);
+        json entry = json::object();
+        entry.set("m", fields);
+        root.push_back(entry);
+
+        if (i > 0) expected += ",";
+        expected += "{\"m\":[\"n\\\"\\\\\\n\\r\\t\\b\\f";
+        expected.append(i);
+        expected += "\",";
+        expected.append(i);
+        expected += ",[true,false]]}";
+    }
+    expected += "]";
+
+    fl::string out = root.to_string();
+    FL_CHECK_EQ(out.size(), expected.size());
+    FL_CHECK(out == expected);
+
+    json reparsed = json::parse(out);
+    FL_CHECK(reparsed.to_string() == expected);
+}
+
+FL_TEST_CASE("json write_to streams the same bytes as to_string") {
+    json root = json::array();
+    for (int i = 0; i < 100; ++i) {
+        json entry = json::object();
+        entry.set("name", "method\"name\n");
+        entry.set("index", i);
+        root.push_back(entry);
+    }
+    struct Capture {
+        fl::string out;
+        int calls = 0;
+        fl::size largest = 0;
+    } cap;
+    root.write_to(
+        [](void* ctx, const char* data, fl::size len) {
+            Capture* c = static_cast<Capture*>(ctx);
+            c->out.append(data, len);
+            ++c->calls;
+            if (len > c->largest) c->largest = len;
+        },
+        &cap);
+    FL_CHECK(cap.out == root.to_string());
+    FL_CHECK_GT(cap.calls, 1);
+    FL_CHECK_LE(cap.largest, 64u);
+
+    json empty;
+    Capture none;
+    empty.write_to(
+        [](void* ctx, const char* data, fl::size len) {
+            static_cast<Capture*>(ctx)->out.append(data, len);
+        },
+        &none);
+    FL_CHECK(none.out == "null");
+}
+
+FL_TEST_CASE("json escapes remaining control characters as \\u00XX") {
+    fl::string raw;
+    raw.push_back('\x01');
+    raw.push_back('\x1b');
+    raw.push_back('\x1f');
+    json arr = json::array();
+    arr.push_back(raw);
+    FL_CHECK(arr.to_string() == "[\"\\u0001\\u001b\\u001f\"]");
+
+    json reparsed = json::parse(arr.to_string());
+    FL_REQUIRE(reparsed.is_array());
+    fl::string back = reparsed[0] | fl::string();
+    FL_CHECK(back == raw);
+}
+
+FL_TEST_CASE("json parses \\u escapes as UTF-8") {
+    json doc = json::parse("[\"\\u00e9\\u20ac\\ud83d\\ude00\\u0041\"]");
+    FL_REQUIRE(doc.is_array());
+    fl::string s = doc[0] | fl::string();
+    FL_CHECK(s == "\xC3\xA9\xE2\x82\xAC\xF0\x9F\x98\x80" "A");
+}
+
+
+FL_TEST_CASE("json parse - unpaired surrogates become U+FFFD") {
+    json doc = json::parse("[\"\\ud800x\\udc00\"]");
+    FL_REQUIRE(doc.is_array());
+    fl::string s = doc[0] | fl::string();
+    FL_CHECK(s == "\xEF\xBF\xBD" "x" "\xEF\xBF\xBD");
+}
+
 } // FL_TEST_FILE
+

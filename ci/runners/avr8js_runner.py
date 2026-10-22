@@ -1,6 +1,7 @@
 import os
 import sys
 from pathlib import Path
+from typing import cast
 
 from ci.util.test_types import TestArgs
 from ci.util.timestamp_print import ts_print
@@ -99,12 +100,15 @@ def run_avr8js_tests(args: TestArgs) -> None:
                 errors="replace",
                 env=child_env,
             )
-            returncode = process.wait(echo=ts_print, timeout=900)
-            output = process.stdout + process.stderr
+            # No idle detector is passed, so wait() returns the exit code; the
+            # utf-8 encoding makes both streams text.
+            returncode = cast(int, process.wait(echo=ts_print, timeout=900))
+            stdout = cast(str, process.stdout)
+            output = stdout + cast(str, process.stderr)
             Path("avr8js_output.txt").write_text(output, encoding="utf-8")
             # Judge stdout separately: the emulator's stderr diagnostics may
             # be delivered after fbuild's terminal verdict.
-            if avr8js_run_succeeded(example, returncode, process.stdout):
+            if avr8js_run_succeeded(example, returncode, stdout):
                 ts_print(f"SUCCESS: {example} ran in native fbuild AVR8JS")
             else:
                 ts_print(f"FAILED: {example} (fbuild exit code {returncode})")

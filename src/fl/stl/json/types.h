@@ -1522,7 +1522,7 @@ struct json_value {
     fl::string to_string() const FL_NO_EXCEPT;
     
     // Visitor-based serialization helper
-    friend struct SerializerVisitor;
+    template <typename Sink> friend struct SerializerVisitor;
 
     // Custom two-phase JSON parser (PRODUCTION READY)
     // Features:
