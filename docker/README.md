@@ -1,15 +1,14 @@
 # FastLED Docker Images
 
-Docker is used only for the AVR8JS emulator image and the VS Code development
-container. fbuild owns board compilation and native emulator execution.
+Docker is used for the VS Code development container. fbuild owns board
+compilation and native emulator execution, including AVR8JS.
 
 ## Available Images
 
-### 1. AVR8JS Emulator (`ci/docker_utils/`)
+### 1. Legacy AVR8JS Emulator (`ci/docker_utils/`)
 
-Runs Arduino AVR firmware in a JavaScript AVR simulator. Used by the `uno AVR8JS
-Test` GitHub Actions workflow (`.github/workflows/avr8js_uno_test.yml`) to
-validate Uno / ATtiny sketches without hardware.
+Retained for manual use. The Uno AVR8JS workflow and `bash test --run uno`
+use native fbuild and do not pull or build this image.
 
 - `ci/docker_utils/Dockerfile.avr8js` — image definition.
 - `ci/docker_utils/avr8js_docker.py` — Python runner (`DockerAVR8jsRunner`).
@@ -29,5 +28,5 @@ Code and select "Reopen in Container" when prompted.
 |----------|-------|
 | Cross-compile for Arduino / ESP32 / etc | `bash compile <board>` (native fbuild, no Docker) |
 | Run C++ unit tests | `bash test --cpp` (native, no Docker) |
-| Run AVR8JS emulator (Uno / ATtiny) | `ci/docker_utils/` (CI-driven; local via `ci.docker_utils.avr8js_docker.DockerAVR8jsRunner`) |
+| Run AVR8JS emulator (Uno) | `bash test --run uno Test` (native fbuild, no Docker) |
 | VS Code remote development | `.devcontainer/` |

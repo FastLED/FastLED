@@ -1,9 +1,6 @@
 
 {
     "avr8js": {
-        "uno": "avr8js",
-        "attiny85": "avr8js",
-        "attiny88": "avr8js",
-        "nano_every": "avr8js"
+        "uno": "avr8js"
     }
 }

@@ -2,7 +2,7 @@
   "board": "esp32dev_idf44",
   "example": "Blink",
   "profile": "default",
-  "image_flash": 240000,
-  "total_ram": 23000,
-  "reference": "#4870: Arduino ESP32 2.0.3 / IDF 4.4.1 / GCC 8.4 patch3, fbuild 2.5.42. This SDK omits SOC_RMT_SUPPORTED: the measured current image selects the generic blocking fallback, not RMT4. This is an FFT dependency budget, not RMT quality evidence. Removing the unused ESP-DSP adapter preserves KissFFT and avoids the SDK matrix header's iostream initializer. Blink image_flash 473613 -> 232265 B; attributed RAM 33005 -> 21511 B. Board flash/RAM: 473598/24292 -> 232250/17248 B. See docs/ESP32_MEMORY_4870.md and docs/ESP32_FLASH_REMAINDER_4870.md."
+  "image_flash": 259280,
+  "total_ram": 23150,
+  "reference": "Stock console/async RMT4 integration atop #4877 and #4873; Arduino ESP32 2.0.3 / IDF 4.4.1 / GCC 8.4 patch3, FBuild 2.5.43. Blink image_flash 259217 B, attributed RAM 23099 B. Previous synchronous real-RMT4 image was 245341 / 21301: nonblocking frame queue/ownership and stock native-console integration cost 13876 image bytes and 1798 attributed RAM bytes. Ceilings allow 63 image and 51 attributed RAM bytes above the measured build. No forked framework or startup hook; no physical waveform claim."
 }

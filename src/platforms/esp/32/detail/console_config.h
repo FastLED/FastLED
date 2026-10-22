@@ -25,20 +25,21 @@
 #endif
 #define FL_ESP_IO_USE_TINYUSB_CDC 1
 #define FL_ESP_IO_USE_USB_SERIAL_JTAG 0
-#elif defined(ARDUINO_USB_CDC_ON_BOOT) && ARDUINO_USB_CDC_ON_BOOT
-// Arduino HWCDC installs its own ISR and RX queue, so even hardware JTAG
-// requires exclusive native ownership. Select the transport explicitly.
-#error "Native USB console requires Arduino USB startup disabled; select FASTLED_ESP_FORCE_USB_SERIAL_JTAG=1 or FL_ESP_USE_TINYUSB_CDC=1 at build time"
 #elif defined(FASTLED_ESP_FORCE_UART_SERIAL)
 #define FL_ESP_IO_USE_TINYUSB_CDC 0
 #define FL_ESP_IO_USE_USB_SERIAL_JTAG 0
 #elif defined(FASTLED_ESP_FORCE_USB_SERIAL_JTAG)
+#if defined(ARDUINO_USB_CDC_ON_BOOT) && ARDUINO_USB_CDC_ON_BOOT
+#error "Native USB console requires Arduino USB startup disabled at build time"
+#endif
 #if !FL_ESP_HAS_USB_SERIAL_JTAG
 #error "Selected console requires an SDK and chip with USB Serial/JTAG support"
 #endif
 #define FL_ESP_IO_USE_TINYUSB_CDC 0
 #define FL_ESP_IO_USE_USB_SERIAL_JTAG 1
 #else
+// Stock Arduino CDC remains owned by the framework. FastLED uses SDK UART
+// unless native USB was explicitly selected; including FastLED needs no core flags.
 #define FL_ESP_IO_USE_TINYUSB_CDC 0
 #define FL_ESP_IO_USE_USB_SERIAL_JTAG 0
 #endif

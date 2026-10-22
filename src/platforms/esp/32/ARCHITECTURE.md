@@ -115,6 +115,15 @@ platforms/esp/32/core/fastled_esp32.h (Master Aggregator)
             └─→ strip_spi.h / strip_spi.cpp
 ```
 
+## Stock Arduino USB ownership
+
+Stock Arduino CDC startup remains supported without changing core flags merely
+to include FastLED. Unless native USB is explicitly selected, FastLED uses SDK
+UART while application `Serial` retains its framework-owned USB route. Existing
+FBuild USB profiles explicitly select native ownership and retain their RPC
+transport. See [stock console integration](../../../../docs/ESP32_STOCK_CONSOLE_INTEGRATION.md)
+for configuration, footprint accounting and physical validation limits.
+
 ## Target-Specific Code Organization
 
 The ESP32 platform supports 9+ chip variants using inline conditional compilation rather than separate directories:

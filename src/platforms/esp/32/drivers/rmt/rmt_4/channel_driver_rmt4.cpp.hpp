@@ -77,11 +77,11 @@ FL_NO_INLINE IRAM_ATTR void translateRmt4Bytes(
     Rmt4Symbols &symbols) FL_NO_EXCEPT {
     // Shared hardware time remains comparable if task preload and the SDK's
     // shared ISR run on different cores. CCOUNT is per-core.
-    const u32 previousUs = symbols.deadline.previousFillUs();
+    const auto previous = symbols.deadline.previousFill();
     const u32 nowUs = static_cast<u32>(esp_timer_get_time());
     const bool inIsr = xPortInIsrContext();
 #if FL_RMT4_DIAGNOSTICS
-    const u32 deltaUs = nowUs - previousUs;
+    const u32 deltaUs = nowUs - previous.timeUs;
     const u32 now = __clock_cycles();
     if (inIsr) {
         if (symbols.isrCore.load(memory_order_relaxed) < 0) {
@@ -93,17 +93,17 @@ FL_NO_INLINE IRAM_ATTR void translateRmt4Bytes(
         symbols.preloadCycles.store(now, memory_order_relaxed);
         symbols.preloadCore.store(xPortGetCoreID(), memory_order_relaxed);
     }
-    const u32 previous = symbols.lastFillCycles.load(memory_order_relaxed);
-    const u32 delta = now - previous;
-    if (previous != 0 &&
+    const u32 previousCycles = symbols.lastFillCycles.load(memory_order_relaxed);
+    const u32 delta = now - previousCycles;
+    if (previousCycles != 0 &&
         delta > symbols.maxDeltaCycles.load(memory_order_relaxed)) {
         symbols.maxDeltaCycles.store(delta, memory_order_relaxed);
     }
-    if (previousUs != 0 && deltaUs > symbols.maxDeltaUs.load(memory_order_relaxed)) {
+    if (previous.armed && deltaUs > symbols.maxDeltaUs.load(memory_order_relaxed)) {
         symbols.maxDeltaUs.store(deltaUs, memory_order_relaxed);
     }
 #endif
-    if (!symbols.deadline.tryRefill(previousUs, nowUs, inIsr)) {
+    if (!symbols.deadline.tryRefill(previous, nowUs, inIsr)) {
         // Preserve the legacy late-refill safeguard: end this frame rather
         // than knowingly continue after a missed hardware buffer deadline.
         *translatedSize = sourceSize;

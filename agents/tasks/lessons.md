@@ -537,6 +537,8 @@
   excuse an unannotated enclosing function. After deleting a regex exemption,
   verify its remaining call sites as well as the added regression test.
 
+- For header-based size changes, inspect the claimed removed symbols after building. If an incremental image retains impossible old guards, verify with a clean rebuild before publishing the size claim; keep the first result as diagnostic evidence. Use FL_STATIC_ASSERT for portable compile-time regression assertions.
+
 - A native-console hardware test must use the selected backend for both directions. AutoResearch formerly read through fl I/O but replied through Arduino Serial; raw RPC output must use fl::write_bytes to bypass log filtering while honoring console selection. Compare failing hardware behavior with a selective revert before attributing it to an optimization.
 
 - "Legacy-only" means sketches using `FastLED.addLeds<>()`, not
@@ -582,3 +584,4 @@
 - Check framework lifecycle as well as SDK behavior: Arduino 2.0.3 can crash
   when Serial.begin replaces a native driver before its HAL mutex exists.
   Test both initialization orders; preserve native-only fallback behavior.
+- Library footprint changes must work with unmodified supported SDKs. Do not rely on forked framework startup patches or custom package pins for a claimed FastLED saving; stock framework-owned references remain outside the library's control.

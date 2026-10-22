@@ -91,6 +91,11 @@ SPISingleESP32::SPISingleESP32(int bus_id, const char* name) FL_NO_EXCEPT
 
 SPISingleESP32::~SPISingleESP32() {
     cleanup();
+    if (mTransactionActive) {
+        // The SDK still owns this descriptor and its DMA storage. Destruction
+        // cannot return safely after a failed final wait, even in release builds.
+        __builtin_abort();
+    }
 }
 
 bool SPISingleESP32::begin(const SpiHw1::Config& config) FL_NO_EXCEPT {
@@ -215,7 +220,7 @@ DMABuffer SPISingleESP32::acquireDMABuffer(size_t bytes_per_lane) FL_NO_EXCEPT {
 }
 
 bool SPISingleESP32::transmit(TransmitMode mode) FL_NO_EXCEPT {
-    if (!mInitialized || !mBufferAcquired) {
+    if (!mInitialized || !mBufferAcquired || mTransactionActive) {
         return false;
     }
 
