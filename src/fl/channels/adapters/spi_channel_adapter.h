@@ -130,6 +130,8 @@ private:
         fl::string name;                       ///< Name (e.g., "SPI2", "SPI3", "I2S0")
         fl::vector<int> assignedClockPins;     ///< Clock pins assigned to this controller
         bool isInitialized;                    ///< Whether begin() has been called
+        int configuredDataPin = -1;
+        u32 configuredClockSpeedHz = 0;
 
         ControllerInfo(fl::shared_ptr<SpiHwBase> ctrl, int prio, const char* n)
             FL_NO_EXCEPT : controller(ctrl), priority(prio), name(n), isInitialized(false) {}
@@ -156,26 +158,29 @@ private:
     /// @param ctrl Controller to initialize
     /// @param clockPin Clock pin for configuration
     /// @param dataPin Data pin for configuration
+    /// @param clockSpeedHz Requested SPI clock rate
     /// @returns true on success, false on error
-    bool initializeControllerIfNeeded(ControllerInfo& ctrl, int clockPin, int dataPin) FL_NO_EXCEPT;
+    bool initializeControllerIfNeeded(ControllerInfo& ctrl, int clockPin, int dataPin,
+                                      u32 clockSpeedHz) FL_NO_EXCEPT;
 
-    /// @brief Group data structure for channels with same clock pin
+    /// @brief Channels sharing one SPI bus configuration
     struct ClockPinGroup {
         int clockPin;
+        int dataPin;
+        u32 clockSpeedHz;
         Esp32SpiBus requestedBus = Esp32SpiBus::AUTO;
         fl::vector<ChannelDataPtr> channels;
     };
 
-    /// @brief Group channels by clock pin for efficient transmission
+    /// @brief Group adjacent channels with matching pins, host, and clock rate
     /// @param channels Span of channel data to group
-    /// @return Vector of groups (clock pin + channels)
-    /// @note Channels with same clock pin can share SPI bus configuration
+    /// @return Vector of groups in enqueue order
     fl::vector<ClockPinGroup> groupByClockPin(
         fl::span<const ChannelDataPtr> channels
     ) FL_NO_EXCEPT;
 
-    /// @brief Transmit a batch of channels (all same clock pin)
-    /// @param channels Channels to transmit (must have same clock pin)
+    /// @brief Transmit a batch of channels sharing one SPI configuration
+    /// @param channels Channels to transmit (must have matching pins, host, and rate)
     /// @return true on success, false on error
     bool transmitBatch(fl::span<const ChannelDataPtr> channels) FL_NO_EXCEPT;
 
