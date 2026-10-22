@@ -1,6 +1,7 @@
-# AVR8JS Docker Emulator for FastLED Testing
+# Legacy AVR8JS Docker Emulator
 
-This directory contains a Docker-based AVR8JS emulator setup for testing Arduino firmware in CI/CD pipelines.
+This directory contains the older Docker-based AVR8JS setup for manual use.
+Maintained local tests and CI use native fbuild through `bash test --run uno Test`.
 
 ## Supported Platforms
 

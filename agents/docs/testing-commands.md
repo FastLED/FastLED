@@ -274,15 +274,21 @@ FastLED supports fast host-based compilation of `.ino` examples using Meson buil
 
 ## AVR8JS Emulator
 
-The maintained AVR8JS runner compiles with fbuild, locates the generated
-firmware, and runs the AVR emulator in its dedicated Docker image:
+The AVR8JS runner stages the example, then uses native `fbuild test-emu` for
+compilation and emulation. fbuild sets up its Node/avr8js runtime; Docker is
+not required.
+
+The native AVR8JS model used here supports the Uno's ATmega328P. ATtiny and
+megaAVR targets require a different emulator or physical hardware.
 
 ```bash
-bash test --run uno Blink
+bash test --run uno Test
 ```
 
-This Docker path is AVR8JS-specific. ESP32 QEMU uses fbuild's native runner
-described below.
+`Test` must emit both its setup and loop markers. Other sketches, such as
+`bash test --run uno Blink`, run for a fixed smoke duration without requiring
+serial output. Only the emulator's terminal timeout verdict is accepted for
+those smoke runs; build failures and outer process timeouts still fail.
 
 ## QEMU Commands
 

@@ -1,22 +1,12 @@
-name: AVR8JS Test Template (Docker)
+name: AVR8JS Test Template (fbuild)
 
-# Reusable template: build an Arduino sketch with ci-compile.py, then run
-# the resulting firmware in the niteris/fastled-avr8js Docker image via
-# ci.docker_utils.avr8js_docker.DockerAVR8jsRunner.
-#
-# Bypasses `fbuild test-emu --emulator avr8js` because of FastLED#2645:
-# fbuild 2.2.10+ hangs the daemon's /api/test-emu handler for the avr8js
-# path, and every fbuild call (including `daemon status` / `show daemon`)
-# also hangs once the daemon is wedged. The Docker runner is the same
-# pre-migration path that was working before (ci/runners/avr8js_runner.py
-# for local `bash test --run uno`); restoring it here unbreaks CI while
-# the upstream fbuild regression is being chased.
-
+# The existing template path is retained for workflow callers. fbuild owns
+# compilation, Node/avr8js setup, execution and process-tree shutdown.
 on:
   workflow_call:
     inputs:
       platform:
-        description: 'AVR platform to test (uno, leonardo, etc.)'
+        description: 'AVR8JS target (uno)'
         required: true
         type: string
       platform_display:
@@ -37,12 +27,6 @@ permissions:
 jobs:
   avr8js_test:
     runs-on: ubuntu-latest
-    # The ``FASTLED_FAIL_ON_ROOT_MERGE`` tripwire from #3278 was retired
-    # in #3279 Phase 4 along with the legacy merge code path it guarded.
-    # CI no longer has any code path that can silently inject root
-    # ``platformio.ini`` flags into the build, so the env var is no
-    # longer set by default.
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -68,122 +52,29 @@ jobs:
       - name: Install project dependencies
         run: uv sync
 
-      - name: "Build ${{ inputs.sketch }} for ${{ inputs.platform_display }}"
-        # Stage the sketch into .build/fbuild/<env>/ via ci-compile.py.
-        # fbuild handles the actual compile and writes firmware.elf /
-        # firmware.hex under .fbuild/build/<env>/release/.
-        timeout-minutes: 8
+      - name: "Build and emulate ${{ inputs.sketch }} on ${{ inputs.platform_display }}"
+        timeout-minutes: 20
+        env:
+          BOARD: ${{ inputs.platform }}
+          EXAMPLE: ${{ inputs.sketch }}
         run: |
           set -o pipefail
-          uv run ci/ci-compile.py ${{ inputs.platform }} \
-            --examples ${{ inputs.sketch }} \
-            --verbose
+          bash test --run "$BOARD" "$EXAMPLE" 2>&1 | tee avr8js_output.log
         shell: bash
 
-      - name: "Run firmware in AVR8JS Docker (${{ inputs.platform_display }})"
-        id: avr8js
-        # Use the legacy Docker runner directly. The image pulls itself
-        # on first use (ensure_image_available). 8 min cap covers image
-        # pull + ~30s emulation timeout with comfortable headroom.
-        timeout-minutes: 8
-        run: |
-          set -o pipefail
-          uv run python -c "
-          import sys
-          from pathlib import Path
-          from ci.docker_utils.avr8js_docker import DockerAVR8jsRunner
-
-          mcu_config = {
-              'uno': ('atmega328p', 16_000_000),
-              'leonardo': ('atmega32u4', 16_000_000),
-              'nano_every': ('atmega4809', 16_000_000),
-          }
-          platform = '${{ inputs.platform }}'
-          if platform not in mcu_config:
-              print(f'Unsupported avr8js platform: {platform}')
-              sys.exit(1)
-          mcu, freq = mcu_config[platform]
-
-          build_dir = Path('.build/fbuild/${{ inputs.platform }}')
-          elf_candidates = list(build_dir.rglob('firmware.elf'))
-          if not elf_candidates:
-              print(f'firmware.elf not found under {build_dir}')
-              sys.exit(1)
-          elf_path = elf_candidates[0].resolve()
-          print(f'Using firmware: {elf_path}')
-
-          runner = DockerAVR8jsRunner()
-          if not runner.ensure_image_available():
-              print('Failed to prepare AVR8JS Docker image')
-              sys.exit(1)
-
-          exit_code = runner.run(
-              elf_path=elf_path,
-              mcu=mcu,
-              frequency=freq,
-              timeout=30,
-              output_file='avr8js_output.log',
-          )
-          sys.exit(exit_code)
-          " 2>&1 | tee -a avr8js_output.log
-        shell: bash
-
-      - name: "Validate AVR8JS output for ${{ inputs.sketch }}"
-        # The Docker runner only reports the emulator's exit code; the
-        # Test sketch expects specific serial markers. Mirror the legacy
-        # template's grep gate so we don't pass on an emulator that
-        # silently produced no output.
-        if: steps.avr8js.outcome == 'success' && inputs.sketch == 'Test'
-        run: |
-          if [ ! -f avr8js_output.log ]; then
-            echo "::error::avr8js_output.log missing"
-            exit 1
-          fi
-          if ! grep -q "Test setup starting" avr8js_output.log; then
-            echo "::error::missing 'Test setup starting' marker"
-            exit 1
-          fi
-          if ! grep -q "Test loop" avr8js_output.log; then
-            echo "::error::missing 'Test loop' marker"
-            exit 1
-          fi
-          echo "Test markers present."
-        shell: bash
-
-      - name: Display emulator output
+      - name: Artifact sketch name
         if: always()
-        run: |
-          echo "=== ${{ inputs.platform_display }} AVR8JS Output (first 200 lines) ==="
-          if [ -f avr8js_output.log ]; then
-            head -200 avr8js_output.log
-            echo ""
-            echo "=== Stats ==="
-            echo "Lines: $(wc -l < avr8js_output.log)"
-            echo "Size:  $(stat -c%s avr8js_output.log) bytes"
-          else
-            echo "(no output log produced)"
-          fi
-
-      - name: Generate artifact name
         id: artifact_name
-        if: always()
-        run: |
-          SKETCH_NAME="${{ inputs.sketch }}"
-          echo "sketch=${SKETCH_NAME////-}" >> $GITHUB_OUTPUT
+        env:
+          EXAMPLE: ${{ inputs.sketch }}
+        run: echo "sketch=${EXAMPLE//\//_}" >> "$GITHUB_OUTPUT"
         shell: bash
 
-      - name: Upload output log on failure
-        if: failure()
+      - name: Upload AVR8JS output
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ inputs.platform }}-avr8js-failure-${{ steps.artifact_name.outputs.sketch }}-${{ github.sha }}
+          name: ${{ inputs.platform }}-avr8js-${{ steps.artifact_name.outputs.sketch }}-${{ github.sha }}
           path: avr8js_output.log
           if-no-files-found: warn
-
-      - name: Upload output log on success
-        if: success()
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ inputs.platform }}-avr8js-success-${{ steps.artifact_name.outputs.sketch }}-${{ github.sha }}
-          path: avr8js_output.log
-          if-no-files-found: warn
+          retention-days: 7
