@@ -45,6 +45,43 @@ FL_TEST_CASE("String failed heap growth preserves content and terminator") {
     FL_CHECK_EQ(value.c_str()[value.size()], '\0');
 }
 
+FL_TEST_CASE("String resize materializes short literal and view storage") {
+    const auto verify = [](fl::string value) {
+        value.resize(5, 'x');
+        FL_REQUIRE_EQ(value.size(), 5u);
+        FL_CHECK_EQ(value, "abcxx");
+        FL_CHECK_EQ(value.c_str()[value.size()], '\0');
+    };
+    FL_SUBCASE("literal") {
+        verify(fl::string::from_literal("abc"));
+    }
+    FL_SUBCASE("view") {
+        verify(fl::string::from_view("abc", 3));
+    }
+}
+
+FL_TEST_CASE("String resize preserves heap data when growth fails") {
+    fl::string value(FASTLED_STR_INLINED_SIZE + 20, 'x');
+    const fl::size length = value.size();
+    const fl::size capacity = value.capacity();
+    const char* originalData = value.c_str();
+    {
+        string_growth_failure_test::FailGrowth fail;
+        value.resize(length + 100, 'y');
+        FL_REQUIRE_EQ(value.size(), length);
+        FL_CHECK_EQ(value.capacity(), capacity);
+        FL_CHECK_EQ(value.c_str(), originalData);
+        for (fl::size index = 0; index < length; ++index) {
+            FL_CHECK_EQ(value[index], 'x');
+        }
+        FL_CHECK_EQ(value.c_str()[length], '\0');
+    }
+    value.resize(length + 1, 'z');
+    FL_REQUIRE_EQ(value.size(), length + 1);
+    FL_CHECK_EQ(value[length], 'z');
+    FL_CHECK_EQ(value.c_str()[value.size()], '\0');
+}
+
 //=============================================================================
 // SECTION: Tests from string_memory_bugs.cpp
 //=============================================================================
