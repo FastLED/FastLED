@@ -187,6 +187,84 @@ def test_spilled_sample_product_survives_unrelated_memory_call() -> None:
     assert AUDIT._integer_product_lines(body).values == {"%product"}
 
 
+@pytest.mark.parametrize("overwrite_first", [False, True])
+def test_conditional_spill_overwrite_preserves_reaching_size(
+    overwrite_first: bool,
+) -> None:
+    """Either branch may reach the join; source block order is irrelevant."""
+    overwrite = ["overwrite:", "  store i64 64, ptr %slot", "  br label %join"]
+    preserve = ["preserve:", "  br label %join"]
+    branches = overwrite + preserve if overwrite_first else preserve + overwrite
+    body = [
+        "entry:",
+        "  %count = sext i32 %remaining to i64",
+        "  %bytes = mul i64 %count, 4",
+        "  store i64 %bytes, ptr %slot",
+        "  br i1 %condition, label %overwrite, label %preserve",
+        *branches,
+        "join:",
+        "  %size = load i64, ptr %slot",
+        "  call ptr @memset(ptr %buffer, i32 0, i64 %size)",
+        "  ret void",
+    ]
+    assert AUDIT._integer_product_lines(body).values == set()
+
+
+def test_spill_overwritten_on_every_branch_remains_sample_arithmetic() -> None:
+    body = [
+        "entry:",
+        "  %sample = sext i32 %input to i64",
+        "  %product = mul i64 %sample, 29",
+        "  store i64 %product, ptr %slot",
+        "  br i1 %condition, label %left, label %right",
+        "left:",
+        "  store i64 64, ptr %slot",
+        "  br label %join",
+        "right:",
+        "  store i64 128, ptr %slot",
+        "  br label %join",
+        "join:",
+        "  %size = load i64, ptr %slot",
+        "  call ptr @memset(ptr %buffer, i32 0, i64 %size)",
+        "  ret void",
+    ]
+    assert AUDIT._integer_product_lines(body).values == {"%product"}
+
+
+def test_spilled_size_follows_branch_to_earlier_textual_block() -> None:
+    body = [
+        "entry:",
+        "  br label %producer",
+        "consumer:",
+        "  %size = load i64, ptr %slot",
+        "  call ptr @memset(ptr %buffer, i32 0, i64 %size)",
+        "  ret void",
+        "producer:",
+        "  %count = sext i32 %remaining to i64",
+        "  %bytes = mul i64 %count, 4",
+        "  store i64 %bytes, ptr %slot",
+        "  br label %consumer",
+    ]
+    assert AUDIT._integer_product_lines(body).values == set()
+
+
+def test_spilled_size_reaches_use_before_definition_on_loop_reentry() -> None:
+    body = [
+        "entry:",
+        "  br label %loop",
+        "loop:",
+        "  %size = load i64, ptr %slot",
+        "  call ptr @memset(ptr %buffer, i32 0, i64 %size)",
+        "  %count = sext i32 %remaining to i64",
+        "  %bytes = mul i64 %count, 4",
+        "  store i64 %bytes, ptr %slot",
+        "  br i1 %again, label %loop, label %exit",
+        "exit:",
+        "  ret void",
+    ]
+    assert AUDIT._integer_product_lines(body).values == set()
+
+
 def test_integer_mac_counts_one_accumulate_for_two_products() -> None:
     """Mirrors the float MAC test. Two products feeding one add is two
     multiplies and one multiply-accumulate, not three multiplies."""
