@@ -1,0 +1,286 @@
+#pragma once
+
+// IWYU pragma: private
+
+#include "platforms/esp/is_esp.h"
+
+// ESP32 Hardware SPI implementation using Arduino framework
+// This file requires the Arduino framework and SPI.h
+
+#include "crgb.h"
+#include "fastspi_types.h"
+// IWYU pragma: begin_keep
+#include <SPI.h>
+// IWYU pragma: end_keep
+#include "fl/stl/compiler_control.h"
+#include "fl/stl/static_assert.h"
+#include "fl/stl/noexcept.h"
+
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING_DEPRECATED_REGISTER
+
+// NOTE: FASTLED_ALL_PINS_HARDWARE_SPI is deprecated on ESP32.
+// Hardware SPI is now enabled by default via GPIO matrix.
+// The define is accepted for backwards compatibility but no longer required.
+#ifdef FASTLED_ALL_PINS_HARDWARE_SPI
+// Silently accept for backwards compatibility
+#endif
+
+/*
+ * ESP32 Hardware SPI Driver
+ *
+ * Copyright (c) 2020 Nick Wallace
+ * Derived from code for ESP8266 hardware SPI by Benoit Anastay.
+ *
+ * This hardware SPI implementation can drive clocked LEDs from either the
+ * VSPI or HSPI bus (aka SPI2 & SPI3). No support is provided for SPI1, because it is
+ * shared among devices and the cache for data (code) in the Flash as well as the PSRAM.
+ *
+ * DEPRECATED: The following define is no longer required (hardware SPI is now the default):
+ *
+ * #define FASTLED_ALL_PINS_HARDWARE_SPI
+ *
+ * This driver uses the VSPI bus by default (GPIO 18, 19, 23, & 5). To use the
+ * HSPI bus (GPIO 14, 12, 13, & 15) add the following line *before* including
+ * FastLED.h:
+ *
+ * #define FASTLED_ESP32_SPI_BUS HSPI
+ *
+ */
+/*
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
+namespace fl {
+
+// Conditional compilation for ESP32 variants with different SPI support
+// Handle the transition from old (VSPI/HSPI) to new (SPI2/SPI3) constant names in Arduino framework 3.1.0+
+
+// First, try to detect if we're using new SPI constants or old ones
+// For framework 3.1.0+, SPI2 and SPI3 are defined; for older versions, VSPI and HSPI exist
+#ifdef SPI2
+  #define FASTLED_SPI_USES_NEW_CONSTANTS 1
+#else
+  #define FASTLED_SPI_USES_NEW_CONSTANTS 0
+#endif
+
+#if defined(FL_IS_ESP_32S2)
+    // https://github.com/FastLED/FastLED/issues/1782
+	#undef FASTLED_ESP32_SPI_BUS
+	#define FASTLED_ESP32_SPI_BUS FSPI
+#elif defined(FL_IS_ESP_32S3)
+	// #pragma message "Targeting ESP32S3, which has better SPI support. Configuring for flexible pin assignment."
+	#undef FASTLED_ESP32_SPI_BUS
+	// I *think* we have to "fake" being FSPI... there might be a better way to do this.
+	// whatever the case, this "tricks" the pin assignment defines below into using DATA_PIN & CLOCK_PIN
+	#define FASTLED_ESP32_SPI_BUS FSPI
+#elif defined(FL_IS_ESP_32P4)
+	// #pragma message "Targeting ESP32P4, which has flexible SPI support. Configuring for flexible pin assignment."
+	#undef FASTLED_ESP32_SPI_BUS
+	#define FASTLED_ESP32_SPI_BUS FSPI
+#elif defined(FL_IS_ESP_32C2) || defined(FL_IS_ESP_32C3) || defined(FL_IS_ESP_32C5) || defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2)
+	// #pragma message "Targeting ESP32-C2/C3/C5/C6/H2, using FSPI for hardware SPI support."
+	#undef FASTLED_ESP32_SPI_BUS
+	#define FASTLED_ESP32_SPI_BUS FSPI
+#else // Configuration for standard ESP32 variants
+	#ifndef FASTLED_ESP32_SPI_BUS
+	// #pragma message "Setting ESP32 SPI bus to default"
+	// Use new constant names if available (framework 3.1.0+), otherwise fall back to old names
+	#if FASTLED_SPI_USES_NEW_CONSTANTS
+		#define FASTLED_ESP32_SPI_BUS SPI2
+	#else
+		#define FASTLED_ESP32_SPI_BUS VSPI
+	#endif
+	#endif
+#endif
+
+template <u8 DATA_PIN, u8 CLOCK_PIN, u32 SPI_SPEED>
+class ESP32SPIOutput {
+    // ESP32 classic, ESP32S2/S3/C3/C6/etc. all support GPIO matrix for flexible pin routing
+    // Use template parameters DATA_PIN and CLOCK_PIN instead of hardcoded pins
+    // This enables users to specify custom pins via FastLED.addLeds<APA102, 2, 12>(...)
+    static constexpr i8 spiMosi = DATA_PIN;
+    static constexpr i8 spiClk = CLOCK_PIN;
+    static constexpr i8 spiMiso = -1;
+    static constexpr i8 spiCs = -1;
+
+    SPIClass mLedSPI;
+	Selectable 	*mPSelect;
+
+public:
+	// Verify that the pins are valid
+	FL_STATIC_ASSERT(FastPin<DATA_PIN>::validpin(), "Invalid data pin specified");
+	FL_STATIC_ASSERT(FastPin<CLOCK_PIN>::validpin(), "Invalid clock pin specified");
+
+	ESP32SPIOutput() FL_NO_EXCEPT :
+	  mLedSPI(FASTLED_ESP32_SPI_BUS),
+	  mPSelect(nullptr) {}
+	ESP32SPIOutput(Selectable *pSelect) FL_NO_EXCEPT :
+	  mLedSPI(FASTLED_ESP32_SPI_BUS),
+	  mPSelect(pSelect) {}
+	void setSelect(Selectable *pSelect) FL_NO_EXCEPT { mPSelect = pSelect; }
+
+	void init() FL_NO_EXCEPT {
+		// set the pins to output and make sure the select is released (which apparently means hi?  This is a bit
+		// confusing to me)
+		mLedSPI.begin(spiClk, spiMiso, spiMosi, spiCs);
+		release();
+	}
+
+	// stop the SPI output.  Pretty much a NOP with software, as there's no registers to kick
+	static void stop() FL_NO_EXCEPT { }
+
+	// wait until the SPI subsystem is ready for more data to write.  A NOP when bitbanging
+	static void wait() FL_NO_EXCEPT __attribute__((always_inline)) { }
+	static void waitFully() FL_NO_EXCEPT __attribute__((always_inline)) { wait(); }
+
+	void writeByteNoWait(u8 b) FL_NO_EXCEPT __attribute__((always_inline)) { writeByte(b); }
+	void writeBytePostWait(u8 b) FL_NO_EXCEPT __attribute__((always_inline)) { writeByte(b); wait(); }
+
+	void writeWord(u16 w) FL_NO_EXCEPT __attribute__((always_inline)) {
+		writeByte(static_cast<u8>(w>>8));
+		writeByte(static_cast<u8>(w&0xFF));
+	}
+
+	// naive writeByte implelentation, simply calls writeBit on the 8 bits in the byte.
+	void writeByte(u8 b) FL_NO_EXCEPT {
+		mLedSPI.transfer(b);
+	}
+
+	void writePixelsBulk(const CRGB* pixels, size_t n) FL_NO_EXCEPT {
+		u8* data = reinterpret_cast<u8*>(const_cast<CRGB*>(pixels)); // ok reinterpret cast - Arduino SPI API requires non-const, const_cast needed
+		size_t n_bytes = n * 3;
+		mLedSPI.writePixels(data, n_bytes);
+	}
+
+public:
+
+	// select the SPI output (TODO: research whether this really means hi or lo.  Alt TODO: move select responsibility out of the SPI classes
+	// entirely, make it up to the caller to remember to lock/select the line?)
+	void select() FL_NO_EXCEPT {
+		mLedSPI.beginTransaction(SPISettings(SPI_SPEED, SPI_MSBFIRST, SPI_MODE0));
+		if(mPSelect != nullptr) { mPSelect->select(); }
+	}
+
+	// release the SPI line
+	void release() FL_NO_EXCEPT {
+		if(mPSelect != nullptr) { mPSelect->release(); }
+		mLedSPI.endTransaction();
+	}
+
+	void endTransaction() FL_NO_EXCEPT {
+		waitFully();
+		release();
+	}
+
+	// Write out len bytes of the given value out over mLedSPI.  Useful for quickly flushing, say, a line of 0's down the line.
+	void writeBytesValue(u8 value, int len) FL_NO_EXCEPT {
+		select();
+		writeBytesValueRaw(value, len);
+		release();
+	}
+
+	void writeBytesValueRaw(u8 value, int len) FL_NO_EXCEPT {
+		while(len--) {
+			mLedSPI.transfer(value);
+		}
+	}
+
+	// write a block of len uint8_ts out.  Need to type this better so that explicit casts into the call aren't required.
+	// note that this template version takes a class parameter for a per-byte modifier to the data.
+	template <class D> void writeBytes(FASTLED_REGISTER u8 *data, int len) FL_NO_EXCEPT {
+		select();
+		u8 *end = data + len;
+		while(data != end) {
+			writeByte(D::adjust(*data++));
+		}
+		D::postBlock(len, &mLedSPI);
+		release();
+	}
+
+	// default version of writing a block of data out to the SPI port, with no data modifications being made
+	void writeBytes(FASTLED_REGISTER u8 *data, int len) FL_NO_EXCEPT { writeBytes<DATA_NOP>(data, len); }
+
+	/// Finalize transmission (no-op for standard ESP32 SPI)
+	/// This method exists for compatibility with Quad-SPI implementations
+	/// For standard single-line SPI, no additional operations are needed
+	static void finalizeTransmission() FL_NO_EXCEPT { }
+
+	// write a single bit out, which bit from the passed in byte is determined by template parameter
+	template <u8 BIT> inline void writeBit(u8 b) FL_NO_EXCEPT {
+		// Test bit BIT in value b, send 0xFF if set, 0x00 if clear
+		// This matches the behavior of other platforms (AVR, ARM, etc.)
+		mLedSPI.transfer((b & (1 << BIT)) ? 0xFF : 0x00);
+	}
+
+	// write a block of uint8_ts out in groups of three.  len is the total number of uint8_ts to write out.  The template
+	// parameters indicate how many uint8_ts to skip at the beginning of each grouping, as well as a class specifying a per
+	// byte of data modification to be made.  (See DATA_NOP above)
+	template <u8 FLAGS, class D, EOrder RGB_ORDER>  FL_NO_INLINE void writePixels(PixelController<RGB_ORDER> pixels, void* context) FL_NO_EXCEPT {
+		#if FASTLED_ESP32_SPI_BULK_TRANSFER
+		select();
+		int len = pixels.mLen;
+		CRGB data_block[FASTLED_ESP32_SPI_BULK_TRANSFER_SIZE] = {0};
+		size_t data_block_index = 0;
+
+		while(pixels.has(1)) {
+			if(FLAGS & FLAG_START_BIT) {
+				writeBit<0>(1);
+			}
+			if (data_block_index >= FASTLED_ESP32_SPI_BULK_TRANSFER_SIZE) {
+				writePixelsBulk(data_block, data_block_index);
+				data_block_index = 0;
+			}
+			CRGB rgb(
+				D::adjust(pixels.loadAndScale0()),
+				D::adjust(pixels.loadAndScale1()),
+				D::adjust(pixels.loadAndScale2())
+			);
+			data_block[data_block_index++] = rgb;
+			pixels.advanceData();
+			pixels.stepDithering();
+		}
+		if (data_block_index > 0) {
+			writePixelsBulk(data_block, data_block_index);
+			data_block_index = 0;
+		}
+		D::postBlock(len, context);
+		release();
+		#else
+		select();
+		int len = pixels.mLen;
+		while(pixels.has(1)) {
+			if(FLAGS & FLAG_START_BIT) {
+				writeBit<0>(1);
+			}
+			writeByte(D::adjust(pixels.loadAndScale0()));
+			writeByte(D::adjust(pixels.loadAndScale1()));
+			writeByte(D::adjust(pixels.loadAndScale2()));
+			pixels.advanceData();
+			pixels.stepDithering();
+		}
+		D::postBlock(len, context);
+		release();
+		#endif
+	}
+};
+
+}  // namespace fl
+
+FL_DISABLE_WARNING_POP

@@ -69,10 +69,10 @@ public:
     // One lock and one Arduino transaction for the entire span, including
     // optional application-wired CS/gating. No begin/end or pin takeover.
     // Arduino's void writeBytes cannot report a hardware partial transfer.
-    bool write(fl::span<const u8> bytes, u32 clockHz, u8 bitOrder = MSBFIRST,
+    bool write(fl::span<const u8> bytes, u32 clockHz, u8 bitOrder = SPI_MSBFIRST,
                u8 mode = SPI_MODE0,
                fl::shared_ptr<Selectable> select = {}) FL_NO_EXCEPT {
-        if (!valid() || !clockHz || (bitOrder != MSBFIRST && bitOrder != LSBFIRST) ||
+        if (!valid() || !clockHz || (bitOrder != SPI_MSBFIRST && bitOrder != SPI_LSBFIRST) ||
             (mode != SPI_MODE0 && mode != SPI_MODE1 && mode != SPI_MODE2 && mode != SPI_MODE3)) return false;
         if (!bytes.empty() && !bytes.data()) return false;
         return withBus([&](SPIClass& bus) FL_NO_EXCEPT -> bool {
@@ -134,7 +134,7 @@ public:
         if (!mInitialized || !mBufferReady) return false;
         mBufferReady = false;
         return mOwner->write(mBuffer.data(), mConfig.clock_speed_hz,
-                             MSBFIRST, SPI_MODE0, mSelect);
+                             SPI_MSBFIRST, SPI_MODE0, mSelect);
     }
     bool waitComplete(u32 timeout = (fl::numeric_limits<u32>::max)()) FL_NO_EXCEPT override {
         (void)timeout;

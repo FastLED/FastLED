@@ -10,6 +10,8 @@ include!("lint_core/path_helpers.rs");
 include!("lint_core/analysis_helpers.rs");
 include!("checkers/basic.rs");
 include!("checkers/preprocessor.rs");
+include!("checkers/esp_architecture.rs");
+include!("checkers/esp_dependencies.rs");
 include!("checkers/macro_prefix.rs");
 include!("checkers/runtime.rs");
 include!("checkers/style.rs");

@@ -17,6 +17,7 @@
 #pragma once
 
 #include <FastLED.h>
+#include "fl/stl/chrono.h"
 #include "fl/fx/2d/animartrix_detail/perlin_float.h"
 #include "fl/fx/2d/animartrix_detail/perlin_i16_optimized.h"
 #include "fl/math/fixed_point/s16x16.h"
@@ -74,7 +75,7 @@ inline PerlinBenchResult runPerlinBenchmark(int iters) {
     {
         float ax = 0.0f, ay = 0.0f;
         int32_t sink = 0;
-        uint32_t t0 = micros();
+        uint32_t t0 = fl::micros();
         for (int it = 0; it < iters; it++) {
             // Slowly drift the origin across the iter so the compiler
             // can't pre-compute. Same pattern Animartrix uses (the
@@ -92,7 +93,7 @@ inline PerlinBenchResult runPerlinBenchmark(int iters) {
                 }
             }
         }
-        uint32_t t1 = micros();
+        uint32_t t1 = fl::micros();
         state.sink = sink;
         r.pnoise_float_us = static_cast<int64_t>(t1 - t0);
     }
@@ -104,7 +105,7 @@ inline PerlinBenchResult runPerlinBenchmark(int iters) {
         constexpr int32_t DRIFT_X = static_cast<int32_t>(0.011f * 65536.0f);
         constexpr int32_t DRIFT_Y = static_cast<int32_t>(0.013f * 65536.0f);
         int32_t sink = 0;
-        uint32_t t0 = micros();
+        uint32_t t0 = fl::micros();
         for (int it = 0; it < iters; it++) {
             ax_i += DRIFT_X;
             ay_i += DRIFT_Y;
@@ -122,7 +123,7 @@ inline PerlinBenchResult runPerlinBenchmark(int iters) {
                 }
             }
         }
-        uint32_t t1 = micros();
+        uint32_t t1 = fl::micros();
         state.sink = sink;
         r.pnoise_i16_us = static_cast<int64_t>(t1 - t0);
     }

@@ -10,15 +10,11 @@
 #include "fl/system/dll.h"  // Will optionally compile in.
 #include "platforms/is_platform.h"
 
-// Include Arduino.h early and immediately normalize its math macros (min, max, abs,
-// round, radians, degrees, map). On Arduino platforms the IDE injects Arduino.h
-// before the sketch, so those macros are already active by the time FastLED.h is
-// processed. Pulling fl/system/arduino.h in here — before any internal FastLED headers —
-// ensures all subsequent headers see a clean, macro-free environment.
-// fl/stl/undef.h (included by fl/system/arduino.h) is intentionally re-includable, so a
-// second cleanup in fl/math/math.h (included later, after platform headers) will
-// catch any macros re-introduced by those platform headers.
-#if defined(ARDUINO)
+// Other Arduino platforms need framework declarations before platform headers.
+// ESP32 supplies those declarations through native SDK headers; an application's
+// Arduino includes remain application-owned. fl/math/math.h below normalizes
+// any math macros introduced by application or platform headers.
+#if defined(ARDUINO) && !defined(FL_IS_ESP32)
 #include "fl/system/arduino.h"
 #endif
 
@@ -227,10 +223,8 @@
 // MATH FUNCTION USING DECLARATIONS
 // ============================================================================
 
-// Arduino macros (min, max, abs, etc.) are cleaned up in two passes:
-//   Pass 1 — top of FastLED.h (above): fl/system/arduino.h cleans up before internal headers.
-//   Pass 2 — fl/math/math.h (below): cleans up any macros re-introduced by platform headers.
-// fl/stl/undef.h is intentionally re-includable to support both passes.
+// fl/math/math.h normalizes macros introduced by application/platform headers.
+// fl/stl/undef.h is intentionally re-includable for later normalization.
 
 #include "controller.h"
 #include "fastpin.h"

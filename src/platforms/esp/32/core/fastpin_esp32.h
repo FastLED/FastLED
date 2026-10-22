@@ -6,6 +6,9 @@
 
 #include "fl/stl/stdint.h"
 #include "fl/stl/static_assert.h"
+// IWYU pragma: begin_keep
+#include "soc/gpio_reg.h"
+// IWYU pragma: end_keep
 
 #include "fl/stl/compiler_control.h"
 #include "platforms/esp/esp_version.h"
