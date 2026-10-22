@@ -1491,6 +1491,9 @@ void basic_string::resize(fl::size count, char ch) FL_NO_EXCEPT {
         fl::size additional_chars = count - mLength;
         reserve(count);
         char* data_ptr = c_str_mutable();
+        // Materialize literal/view storage before checking its writable space.
+        // A failed heap growth must leave the existing bytes and length intact.
+        if (capacity() <= count) { return; }
         for (fl::size i = 0; i < additional_chars; ++i) {
             data_ptr[mLength + i] = ch;
         }
