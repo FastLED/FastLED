@@ -10,7 +10,7 @@
 #include "fl/system/engine_events.h"
 #include <Arduino.h> // digitalRead observes the actual output pad.
 
-#if AUTORESEARCH_LEGACY_OBSERVES_RMT4_FRAMES
+#if AUTORESEARCH_LEGACY_OBSERVES_RMT4_FRAMES // ok platform specific - this fixture requires RMT4-only worker diagnostics or fault-test configuration, with no neutral equivalent.
 #include "platforms/esp/32/drivers/rmt/rmt_4/bus_traits.h" // ok platform headers; ok platform specific - RMT4 worker stack has no generic driver diagnostic API.
 #endif
 
@@ -47,7 +47,7 @@ inline unsigned sampleLegacyAsyncPad(int pin, fl::u32 durationUs) {
     return samples;
 }
 
-#if AUTORESEARCH_LEGACY_OBSERVES_RMT4_FRAMES
+#if AUTORESEARCH_LEGACY_OBSERVES_RMT4_FRAMES // ok platform specific - this fixture requires RMT4-only worker diagnostics or fault-test configuration, with no neutral equivalent.
 // These probes inspect the existing RMT4 bridge's real retained frame. Other
 // backends do not expose that ownership observation and must not fake it.
 inline bool legacyFrameMatches(const fl::weak_ptr<fl::ChannelData> &observer,
@@ -273,42 +273,42 @@ inline fl::json legacyAsyncMixedProbe(int pin, int count,
 }
 #endif
 
-#if AUTORESEARCH_LEGACY_OBSERVES_RMT4_FRAMES
+#if AUTORESEARCH_LEGACY_OBSERVES_RMT4_FRAMES // ok platform specific - this fixture requires RMT4-only worker diagnostics or fault-test configuration, with no neutral equivalent.
 inline void setLegacyTxDiagnostics(fl::json &result,
-                                  const fl::Rmt4TxDiagnostics &diagnostics) {
-    result.set("translatedBytes", static_cast<int>(diagnostics.translatedBytes));
-    result.set("cumulativeTranslatedBytes", static_cast<int64_t>(diagnostics.cumulativeTranslatedBytes));
-    result.set("latchChecks", static_cast<int>(diagnostics.latchChecks));
-    result.set("latchViolations", static_cast<int>(diagnostics.latchViolations));
-    result.set("minimumLatchHeldUs", static_cast<int>(diagnostics.minLatchHeldUs));
-    result.set("maximumRequiredResetUs", static_cast<int>(diagnostics.maxRequiredResetUs));
-    result.set("lateAborts", static_cast<int>(diagnostics.lateAborts));
-    result.set("maxRefillDeltaCycles", static_cast<int64_t>(diagnostics.maxDeltaCycles));
-    result.set("abortDeltaCycles", static_cast<int64_t>(diagnostics.abortDeltaCycles));
-    result.set("allowedDeltaCycles", static_cast<int64_t>(diagnostics.allowedDeltaCycles));
-    result.set("preloadCycles", static_cast<int64_t>(diagnostics.preloadCycles));
-    result.set("firstIsrCycles", static_cast<int64_t>(diagnostics.firstIsrCycles));
-    result.set("postStartCycles", static_cast<int64_t>(diagnostics.postStartCycles));
-    result.set("postStartUs", static_cast<int64_t>(diagnostics.postStartUs));
-    result.set("firstIsrUs", static_cast<int64_t>(diagnostics.firstIsrUs));
-    result.set("maxRefillDeltaUs", static_cast<int>(diagnostics.maxDeltaUs));
-    result.set("abortDeltaUs", static_cast<int>(diagnostics.abortDeltaUs));
-    result.set("allowedDeltaUs", static_cast<int>(diagnostics.allowedDeltaUs));
-    result.set("preloadCore", diagnostics.preloadCore);
-    result.set("isrCore", diagnostics.isrCore);
+                                  const fl::Rmt4TxDiagnostics &diagnostics) { // ok platform specific - RMT4 ISR timing counters have no platform-neutral diagnostic API.
+    result.set("translatedBytes", static_cast<int>(diagnostics.translatedBytes)); // ok platform specific - RMT4 ISR timing counters have no platform-neutral diagnostic API.
+    result.set("cumulativeTranslatedBytes", static_cast<int64_t>(diagnostics.cumulativeTranslatedBytes)); // ok platform specific - RMT4 ISR timing counters have no platform-neutral diagnostic API.
+    result.set("latchChecks", static_cast<int>(diagnostics.latchChecks)); // ok platform specific - RMT4 ISR timing counters have no platform-neutral diagnostic API.
+    result.set("latchViolations", static_cast<int>(diagnostics.latchViolations)); // ok platform specific - RMT4 ISR timing counters have no platform-neutral diagnostic API.
+    result.set("minimumLatchHeldUs", static_cast<int>(diagnostics.minLatchHeldUs)); // ok platform specific - RMT4 ISR timing counters have no platform-neutral diagnostic API.
+    result.set("maximumRequiredResetUs", static_cast<int>(diagnostics.maxRequiredResetUs)); // ok platform specific - RMT4 ISR timing counters have no platform-neutral diagnostic API.
+    result.set("lateAborts", static_cast<int>(diagnostics.lateAborts)); // ok platform specific - RMT4 ISR timing counters have no platform-neutral diagnostic API.
+    result.set("maxRefillDeltaCycles", static_cast<int64_t>(diagnostics.maxDeltaCycles)); // ok platform specific - RMT4 ISR timing counters have no platform-neutral diagnostic API.
+    result.set("abortDeltaCycles", static_cast<int64_t>(diagnostics.abortDeltaCycles)); // ok platform specific - RMT4 ISR timing counters have no platform-neutral diagnostic API.
+    result.set("allowedDeltaCycles", static_cast<int64_t>(diagnostics.allowedDeltaCycles)); // ok platform specific - RMT4 ISR timing counters have no platform-neutral diagnostic API.
+    result.set("preloadCycles", static_cast<int64_t>(diagnostics.preloadCycles)); // ok platform specific - RMT4 ISR timing counters have no platform-neutral diagnostic API.
+    result.set("firstIsrCycles", static_cast<int64_t>(diagnostics.firstIsrCycles)); // ok platform specific - RMT4 ISR timing counters have no platform-neutral diagnostic API.
+    result.set("postStartCycles", static_cast<int64_t>(diagnostics.postStartCycles)); // ok platform specific - RMT4 ISR timing counters have no platform-neutral diagnostic API.
+    result.set("postStartUs", static_cast<int64_t>(diagnostics.postStartUs)); // ok platform specific - RMT4 ISR timing counters have no platform-neutral diagnostic API.
+    result.set("firstIsrUs", static_cast<int64_t>(diagnostics.firstIsrUs)); // ok platform specific - RMT4 ISR timing counters have no platform-neutral diagnostic API.
+    result.set("maxRefillDeltaUs", static_cast<int>(diagnostics.maxDeltaUs)); // ok platform specific - RMT4 ISR timing counters have no platform-neutral diagnostic API.
+    result.set("abortDeltaUs", static_cast<int>(diagnostics.abortDeltaUs)); // ok platform specific - RMT4 ISR timing counters have no platform-neutral diagnostic API.
+    result.set("allowedDeltaUs", static_cast<int>(diagnostics.allowedDeltaUs)); // ok platform specific - RMT4 ISR timing counters have no platform-neutral diagnostic API.
+    result.set("preloadCore", diagnostics.preloadCore); // ok platform specific - RMT4 ISR timing counters have no platform-neutral diagnostic API.
+    result.set("isrCore", diagnostics.isrCore); // ok platform specific - RMT4 ISR timing counters have no platform-neutral diagnostic API.
 }
 
-inline fl::Rmt4TxDiagnostics legacyTxDiagnostics(int channel = -1) {
-    auto &selected = static_cast<fl::detail::Rmt4LegacyDriver &>(fl::BusTraits<fl::Bus::RMT>::instance());
-    return selected.txDiagnostics(channel);
+inline fl::Rmt4TxDiagnostics legacyTxDiagnostics(int channel = -1) { // ok platform specific - RMT4 ISR timing counters have no platform-neutral diagnostic API.
+    auto &selected = static_cast<fl::detail::Rmt4LegacyDriver &>(fl::BusTraits<fl::Bus::RMT>::instance()); // ok platform specific - observe the selected RMT4 worker internals without adding a generic driver diagnostic API.
+    return selected.txDiagnostics(channel); // ok platform specific - observe the selected RMT4 worker internals without adding a generic driver diagnostic API.
 }
 
 inline void addLegacyTxDiagnostics(fl::json &result) {
-    result.set("translatorDiagnosticsEnabled", FL_RMT4_DIAGNOSTICS != 0);
+    result.set("translatorDiagnosticsEnabled", FL_RMT4_DIAGNOSTICS != 0); // ok platform specific - this fixture requires RMT4-only worker diagnostics or fault-test configuration, with no neutral equivalent.
     setLegacyTxDiagnostics(result, legacyTxDiagnostics());
-#if FL_RMT4_DIAGNOSTICS
+#if FL_RMT4_DIAGNOSTICS // ok platform specific - this fixture requires RMT4-only worker diagnostics or fault-test configuration, with no neutral equivalent.
     fl::json channels = fl::json::array();
-    for (int channel = 0; channel < FASTLED_RMT_MAX_CHANNELS; ++channel) {
+    for (int channel = 0; channel < FASTLED_RMT_MAX_CHANNELS; ++channel) { // ok platform specific - this fixture requires RMT4-only worker diagnostics or fault-test configuration, with no neutral equivalent.
         fl::json entry = fl::json::object();
         entry.set("channel", channel);
         setLegacyTxDiagnostics(entry, legacyTxDiagnostics(channel));
@@ -319,7 +319,7 @@ inline void addLegacyTxDiagnostics(fl::json &result) {
 }
 #endif
 
-#if AUTORESEARCH_LEGACY_OBSERVES_RMT4_FRAMES
+#if AUTORESEARCH_LEGACY_OBSERVES_RMT4_FRAMES // ok platform specific - this fixture requires RMT4-only worker diagnostics or fault-test configuration, with no neutral equivalent.
 // Five strips exceed the four classic ESP32 TX slots with two blocks each.
 // Weak observations do not keep buffers alive after controller destruction.
 inline fl::json legacyAsyncOverflowProbe(int count,
@@ -414,7 +414,7 @@ inline fl::json legacyAsyncOverflowProbe(int count,
     result.set("success", returnedActive && leasedAtReturn == 5 &&
         retainedAfterRemoval == 5 && snapshotsIntact && observedPins == 5 &&
         released == 5 && completed && drained &&
-        (!FL_RMT4_DIAGNOSTICS || (translatedInBatch == static_cast<fl::u32>(count) * 15 &&
+        (!FL_RMT4_DIAGNOSTICS || (translatedInBatch == static_cast<fl::u32>(count) * 15 && // ok platform specific - this fixture requires RMT4-only worker diagnostics or fault-test configuration, with no neutral equivalent.
             latchChecks == 5 && latchViolations == 0)));
     return result;
 }
@@ -455,7 +455,7 @@ inline fl::json legacyAsyncProbe(const fl::json& args) {
         return result;
     }
     LegacyAsyncManagerScope managerScope(legacyOnly);
-#if AUTORESEARCH_LEGACY_OBSERVES_RMT4_FRAMES
+#if AUTORESEARCH_LEGACY_OBSERVES_RMT4_FRAMES // ok platform specific - this fixture requires RMT4-only worker diagnostics or fault-test configuration, with no neutral equivalent.
     if (scenario == "standalone" || scenario == "enable" || scenario == "backpressure") {
         if (count < 1000) { count = 1000; }
         result = legacyAsyncControllerProbe(scenario, pin, count, driver);
@@ -497,7 +497,7 @@ inline fl::json legacyAsyncProbe(const fl::json& args) {
                                 stateAtReturn == fl::IChannelDriver::DriverState::DRAINING;
     size_t encodedBytes = 0;
     int firstEncodedByte = -1;
-#if AUTORESEARCH_LEGACY_OBSERVES_RMT4_FRAMES
+#if AUTORESEARCH_LEGACY_OBSERVES_RMT4_FRAMES // ok platform specific - this fixture requires RMT4-only worker diagnostics or fault-test configuration, with no neutral equivalent.
     {
         auto frame = proxy.frameData().lock();
         if (frame) {
@@ -532,12 +532,12 @@ inline fl::json legacyAsyncProbe(const fl::json& args) {
     result.set("padHighSamplesAfterReturn", static_cast<int>(highSamples));
     result.set("completedWithoutApplicationPolling", completedIndependently);
     result.set("waitSucceeded", drained);
-#if AUTORESEARCH_LEGACY_OBSERVES_RMT4_FRAMES
+#if AUTORESEARCH_LEGACY_OBSERVES_RMT4_FRAMES // ok platform specific - this fixture requires RMT4-only worker diagnostics or fault-test configuration, with no neutral equivalent.
     addLegacyTxDiagnostics(result);
 #endif
 #if AUTORESEARCH_LEGACY_OBSERVES_RMT4_FRAMES && FL_RMT4_ASYNC // ok platform specific - measure the RMT4 worker's stack without adding a cross-platform virtual API.
-    auto& selected = static_cast<fl::Rmt4AsyncDriver&>(fl::BusTraits<fl::Bus::RMT>::instance());
-    result.set("workerStackUnusedBytes", static_cast<int>(selected.workerStackHighWaterBytes()));
+    auto& selected = static_cast<fl::Rmt4AsyncDriver&>(fl::BusTraits<fl::Bus::RMT>::instance()); // ok platform specific - observe the selected RMT4 worker internals without adding a generic driver diagnostic API.
+    result.set("workerStackUnusedBytes", static_cast<int>(selected.workerStackHighWaterBytes())); // ok platform specific - observe the selected RMT4 worker internals without adding a generic driver diagnostic API.
 #endif
     result.set("success", returnedActive && highSamples > 0 && completedIndependently && drained);
     return result;
