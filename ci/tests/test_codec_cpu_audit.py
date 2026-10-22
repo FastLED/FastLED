@@ -173,6 +173,20 @@ def test_integer_memset_size_through_inline_wrapper_is_not_sample_arithmetic() -
     assert AUDIT._integer_product_lines(body).values == set()
 
 
+def test_spilled_sample_product_survives_unrelated_memory_call() -> None:
+    body = [
+        "  %sample = sext i32 %input to i64",
+        "  %product = mul nsw i64 %sample, 29",
+        "  store i64 %product, ptr %slot, align 8",
+        "  %saved = load i64, ptr %slot, align 8",
+        "  store i64 64, ptr %slot, align 8",
+        "  %size = load i64, ptr %slot, align 8",
+        "  call ptr @memset(ptr %buffer, i32 0, i64 %size)",
+        "  %sum = add nsw i64 %saved, 17",
+    ]
+    assert AUDIT._integer_product_lines(body).values == {"%product"}
+
+
 def test_integer_mac_counts_one_accumulate_for_two_products() -> None:
     """Mirrors the float MAC test. Two products feeding one add is two
     multiplies and one multiply-accumulate, not three multiplies."""

@@ -199,6 +199,30 @@ class IntegerProducts:
     values: set[str]
 
 
+def _feeds_address_or_call(body: list[str], product: str) -> bool:
+    """Follow unchanged products through O0 spills, including inline wrappers."""
+    aliases = {product}
+    slots: set[str] = set()
+    for line in body:
+        if re.search(r"\b(?:call|getelementptr)\b", line) and any(
+            re.search(rf"{re.escape(value)}(?![-\w.$])", line) for value in aliases
+        ):
+            return True
+        store = re.search(r"\bstore i64 ([^,]+), ptr (%[-\w.$]+)", line)
+        if store:
+            value, slot = store.groups()
+            if value in aliases:
+                slots.add(slot)
+            else:
+                slots.discard(slot)
+        load = re.match(
+            r"\s*(%[-\w.$]+) = load i64, ptr (%[-\w.$]+)(?:,|$)", line
+        )
+        if load and load.group(2) in slots:
+            aliases.add(load.group(1))
+    return False
+
+
 def _integer_product_lines(body: list[str]) -> IntegerProducts:
     """Q-format multiplies in the fixed-point pipeline, and the values they
     define.
@@ -249,7 +273,6 @@ def _integer_product_lines(body: list[str]) -> IntegerProducts:
                 if operands and all(value in widened for value in operands):
                     widened.add(result)
 
-    joined = "\n".join(body)
     lines: set[int] = set()
     values: set[str] = set()
     for index, line in enumerate(body):
@@ -262,15 +285,7 @@ def _integer_product_lines(body: list[str]) -> IntegerProducts:
         result, left, right = match.group(1), match.group(2), match.group(3)
         if left not in widened and right not in widened:
             continue
-        # Negative lookahead on word characters rather than a positive one on
-        # separators: `(?=[\s,)])` needs a *following* character, so a value at
-        # the end of the last line -- a getelementptr closing a block, say --
-        # slipped past the exclusion and got counted as arithmetic. This still
-        # keeps %off from matching inside %offset.
-        used = re.escape(result) + r"(?![\w.])"
-        if re.search(r"getelementptr[^\n]*" + used, joined):
-            continue
-        if re.search(r"\bcall\b[^\n]*" + used, joined):
+        if _feeds_address_or_call(body[index + 1 :], result):
             continue
         lines.add(index)
         values.add(result)
