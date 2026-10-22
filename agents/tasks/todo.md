@@ -814,3 +814,12 @@ Implementation/local validation is published; stack/master CI is pending.
 Policy/limits: docs/ESP32_ARDUINO_DEPENDENCY_LINT.md. Local evidence is in
 `.build/4891/evidence/` and `.build/4891/bloat/`. Physical USB evidence is
 separate child #4893. Next implementation child after publication is #4892.
+
+## PR #4706 cache policy continuation
+
+- [x] Refresh live cache and writer inventory.
+- [x] Restrict consumer cache saves to master push/schedule; preserve PR restores where supported.
+- [x] Land fbuild install-cache restore-only fix (FastLED/fbuild#1687).
+- [ ] Verify the consumer writer controls in hosted CI and merge this separate fix.
+- [ ] Bound generation overlap and model every family from real measurements.
+- [ ] Validate budget and complete required CI before merge.
