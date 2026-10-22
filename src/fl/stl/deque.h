@@ -5,6 +5,7 @@
 #include "fl/stl/deque_basic.h"  // detail::deque_grow_map_capacity (#3270)
 #include "fl/stl/move.h"
 #include "fl/stl/iterator.h"
+#include "fl/stl/align.h"
 #include "fl/stl/memory_resource.h"
 #include "fl/stl/new.h"  // IWYU pragma: keep
 #include "fl/stl/noexcept.h"
@@ -128,44 +129,60 @@ private:
     }
 
     // Ensure the chunk that will hold the next push_back exists. May grow
-    // the map if the back chunk lies past mMapCapacity.
-    void ensure_back_room() FL_NO_EXCEPT {
+    // the map if the back chunk lies past mMapCapacity. Returns false when
+    // allocation failed; the caller must drop the element (FastLED #4899).
+    bool ensure_back_room() FL_NO_EXCEPT {
         fl::size global = mFrontOffset + mSize;
         fl::size need_chunk_idx = mFrontMapIdx + global / kChunkSize;
         if (need_chunk_idx >= mMapCapacity) {
             grow_map(0, 1);
             global = mFrontOffset + mSize;
             need_chunk_idx = mFrontMapIdx + global / kChunkSize;
-            if (need_chunk_idx >= mMapCapacity) return;  // grow failed
+            if (need_chunk_idx >= mMapCapacity) return false;  // grow failed
         }
         if (mMap[need_chunk_idx] == nullptr) {
             mMap[need_chunk_idx] = allocate_chunk();
         }
+        return mMap[need_chunk_idx] != nullptr;
     }
 
     // Ensure the chunk that will hold the next push_front exists. May grow
-    // the map if push_front would step before mMap[0].
-    void ensure_front_room() FL_NO_EXCEPT {
+    // the map if push_front would step before mMap[0]. Returns false when
+    // allocation failed; the caller must drop the element (FastLED #4899).
+    bool ensure_front_room() FL_NO_EXCEPT {
         if (mFrontOffset > 0) {
             // Stays within current front chunk; that chunk is guaranteed
             // allocated when mSize > 0, and allocated below for empty deque.
             if (mMapCapacity == 0) {
                 grow_map(1, 0);
-                if (mMapCapacity == 0) return;
+                if (mMapCapacity == 0) return false;
             }
             if (mMap[mFrontMapIdx] == nullptr) {
                 mMap[mFrontMapIdx] = allocate_chunk();
             }
-            return;
+            return mMap[mFrontMapIdx] != nullptr;
         }
         // mFrontOffset == 0: need the previous chunk.
         if (mFrontMapIdx == 0) {
             grow_map(1, 0);
-            if (mFrontMapIdx == 0) return;  // grow failed
+            if (mFrontMapIdx == 0) return false;  // grow failed
         }
         if (mMap[mFrontMapIdx - 1] == nullptr) {
             mMap[mFrontMapIdx - 1] = allocate_chunk();
         }
+        return mMap[mFrontMapIdx - 1] != nullptr;
+    }
+
+    // emplace_* must return a reference even when allocation fails. The
+    // element is constructed into a per-type discard slot instead of the
+    // deque, which is left unchanged (FastLED #4899).
+    template<typename... Args>
+    static T& discard_slot(Args&&... args) FL_NO_EXCEPT {
+        FL_ALIGN_AS(T) static unsigned char storage[sizeof(T)];
+        static T* live = nullptr;
+        if (live) live->~T();
+        live = new (static_cast<void*>(storage)) T(fl::forward<Args>(args)...);
+        return *live;
     }
 
 public:
@@ -600,7 +617,7 @@ public:
     }
 
     void push_back(const T& value) FL_NO_EXCEPT {
-        ensure_back_room();
+        if (!ensure_back_room()) return;
         fl::size global = mFrontOffset + mSize;
         fl::size c = mFrontMapIdx + global / kChunkSize;
         fl::size o = global % kChunkSize;
@@ -609,7 +626,7 @@ public:
     }
 
     void push_back(T&& value) FL_NO_EXCEPT {
-        ensure_back_room();
+        if (!ensure_back_room()) return;
         fl::size global = mFrontOffset + mSize;
         fl::size c = mFrontMapIdx + global / kChunkSize;
         fl::size o = global % kChunkSize;
@@ -618,7 +635,7 @@ public:
     }
 
     void push_front(const T& value) FL_NO_EXCEPT {
-        ensure_front_room();
+        if (!ensure_front_room()) return;
         if (mFrontOffset == 0) {
             --mFrontMapIdx;
             mFrontOffset = kChunkSize - 1;
@@ -630,7 +647,7 @@ public:
     }
 
     void push_front(T&& value) FL_NO_EXCEPT {
-        ensure_front_room();
+        if (!ensure_front_room()) return;
         if (mFrontOffset == 0) {
             --mFrontMapIdx;
             mFrontOffset = kChunkSize - 1;
@@ -664,7 +681,11 @@ public:
     }
 
     void resize(fl::size new_size, const T& value) FL_NO_EXCEPT {
-        while (mSize < new_size) push_back(value);
+        while (mSize < new_size) {
+            fl::size before = mSize;
+            push_back(value);
+            if (mSize == before) return;  // allocation failed (FastLED #4899)
+        }
         while (mSize > new_size) pop_back();
     }
 
@@ -709,8 +730,11 @@ public:
             return iterator(this, idx);
         }
         // Push a copy of the current back to extend by one; chunk alloc
-        // is handled inside push_back.
+        // is handled inside push_back. On allocation failure leave the
+        // contents unchanged and return end() (FastLED #4899).
+        fl::size old_size = mSize;
         push_back((*this)[mSize - 1]);
+        if (mSize == old_size) return end();
         for (fl::size i = mSize - 1; i > idx + 1; --i) {
             (*this)[i - 1] = fl::move((*this)[i - 2]);
         }
@@ -726,7 +750,10 @@ public:
         }
         // Move-extend at the back so move-only T works. The moved-from
         // slot at old logical mSize-1 is overwritten by the shift loop.
+        // A failed push does not move from the back (FastLED #4899).
+        fl::size old_size = mSize;
         push_back(fl::move((*this)[mSize - 1]));
+        if (mSize == old_size) return end();
         for (fl::size i = mSize - 1; i > idx + 1; --i) {
             (*this)[i - 1] = fl::move((*this)[i - 2]);
         }
@@ -743,8 +770,14 @@ public:
         // whatever's at the back now. All these copies will be overwritten
         // by the shift + fill below.
         for (fl::size k = 0; k < count; ++k) {
+            fl::size before = mSize;
             if (mSize == 0) push_back(value);
             else push_back((*this)[mSize - 1]);
+            if (mSize == before) {
+                // Allocation failed: drop the partial extension (FastLED #4899).
+                while (mSize > old_size) pop_back();
+                return end();
+            }
         }
         // Shift elements [idx .. old_size) right by `count` slots.
         for (fl::size i = old_size; i > idx; --i) {
@@ -788,7 +821,10 @@ public:
         }
         // Move-extend at the back so move-only T works. The moved-from
         // slot at old logical mSize-1 is overwritten by the shift loop.
+        // A failed push does not move from the back (FastLED #4899).
+        fl::size old_size = mSize;
         push_back(fl::move((*this)[mSize - 1]));
+        if (mSize == old_size) return end();
         for (fl::size i = mSize - 1; i > idx + 1; --i) {
             (*this)[i - 1] = fl::move((*this)[i - 2]);
         }
@@ -798,7 +834,7 @@ public:
 
     template<typename... Args>
     T& emplace_back(Args&&... args) FL_NO_EXCEPT {
-        ensure_back_room();
+        if (!ensure_back_room()) return discard_slot(fl::forward<Args>(args)...);
         fl::size global = mFrontOffset + mSize;
         fl::size c = mFrontMapIdx + global / kChunkSize;
         fl::size o = global % kChunkSize;
@@ -809,7 +845,7 @@ public:
 
     template<typename... Args>
     T& emplace_front(Args&&... args) FL_NO_EXCEPT {
-        ensure_front_room();
+        if (!ensure_front_room()) return discard_slot(fl::forward<Args>(args)...);
         if (mFrontOffset == 0) {
             --mFrontMapIdx;
             mFrontOffset = kChunkSize - 1;

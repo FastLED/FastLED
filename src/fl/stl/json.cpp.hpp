@@ -4,7 +4,6 @@
 #include "fl/system/sketch_macros.h"  // FL_PLATFORM_HAS_LARGE_MEMORY -- gates ieee754_format_decimal
 #include "fl/stl/string.h"
 #include "fl/stl/vector.h"
-#include "fl/stl/deque.h"
 #include "fl/stl/span.h"
 #include "fl/stl/charconv.h"
 #include "fl/stl/ieee754_string.h"  // FastLED #3022 phase 2 -- integer-only IEEE 754 codec
@@ -1151,10 +1150,24 @@ fl::string json_value::to_string() const FL_NO_EXCEPT {
     return temp.to_string_native();
 }
 
+// Output sinks for SerializerVisitor. Serialization runs twice: once into
+// a counting sink to size the result exactly, then once into the reserved
+// string. Peak heap is the final string alone (FastLED #4899).
+struct JsonCountSink {
+    fl::size count = 0;
+    void push_back(char) FL_NO_EXCEPT { ++count; }
+};
+
+struct JsonStringSink {
+    fl::string& str;
+    void push_back(char c) FL_NO_EXCEPT { str.push_back(c); }
+};
+
 // Recursive serializer visitor - declared and defined at file scope
 // Receives direct references to variant data (no copies) and handles serialization recursively
+template <typename Sink>
 struct SerializerVisitor {
-    fl::deque<char>& out;
+    Sink& out;
 
     void append(const char* str) FL_NO_EXCEPT {
         while (*str) { out.push_back(*str++); }
@@ -1306,26 +1319,24 @@ fl::string json::to_string_native() const FL_NO_EXCEPT {
         return "null";
     }
 
-    // Use fl::deque for memory-efficient JSON serialization
-    fl::deque<char> json_chars;
+    // Pass 1: measure the exact serialized length without allocating it.
+    JsonCountSink counter;
+    SerializerVisitor<JsonCountSink> measure{counter};
+    measure.serialize_value(mValue.get());
 
-    // Use the visitor to serialize the value recursively
-    SerializerVisitor visitor{json_chars};
-    visitor.serialize_value(mValue.get());
-
-    // Convert deque to fl::string. With FastLED #3270 the deque is chunked,
-    // so its storage is no longer contiguous -- treating `&json_chars[0]`
-    // as a buffer would walk off the first chunk. Reserve + per-element
-    // append is correct for the chunked layout (and was correct for the
-    // pre-#3270 layout too whenever a wraparound occurred).
+    // Pass 2: write into one exactly-sized buffer. If that buffer cannot be
+    // allocated, return an empty string rather than a truncated document.
     fl::string result;
-    if (!json_chars.empty()) {
-        result.reserve(json_chars.size());
-        for (fl::size i = 0; i < json_chars.size(); ++i) {
-            result.push_back(json_chars[i]);
-        }
+    result.reserve(counter.count);
+    if (result.capacity() < counter.count) {
+        return fl::string();
     }
-
+    JsonStringSink sink{result};
+    SerializerVisitor<JsonStringSink> write{sink};
+    write.serialize_value(mValue.get());
+    if (result.size() != counter.count) {
+        return fl::string();
+    }
     return result;
 }
 

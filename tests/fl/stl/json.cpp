@@ -2715,4 +2715,42 @@ FL_TEST_CASE("Const json operator[] with multiple keys") {
     FL_CHECK(boolVal == true);
 }
 
+// FastLED #4899: serialization sizes its output exactly before writing.
+// A large, nested, escape-heavy document must serialize byte-for-byte and
+// round-trip unchanged.
+FL_TEST_CASE("json serializes large nested escaped documents exactly") {
+    json root = json::array();
+    fl::string expected = "[";
+    for (int i = 0; i < 300; ++i) {
+        json flags = json::array();
+        flags.push_back(true);
+        flags.push_back(false);
+        json fields = json::array();
+        fl::string name = "n\"\\\n\r\t\b\f";
+        name.append(i);
+        fields.push_back(name);
+        fields.push_back(i);
+        fields.push_back(flags);
+        json entry = json::object();
+        entry.set("m", fields);
+        root.push_back(entry);
+
+        if (i > 0) expected += ",";
+        expected += "{\"m\":[\"n\\\"\\\\\\n\\r\\t\\b\\f";
+        expected.append(i);
+        expected += "\",";
+        expected.append(i);
+        expected += ",[true,false]]}";
+    }
+    expected += "]";
+
+    fl::string out = root.to_string();
+    FL_CHECK_EQ(out.size(), expected.size());
+    FL_CHECK(out == expected);
+
+    json reparsed = json::parse(out);
+    FL_CHECK(reparsed.to_string() == expected);
+}
+
 } // FL_TEST_FILE
+
