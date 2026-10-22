@@ -57,11 +57,17 @@ def test_embedded_fs_dependencies_preserve_board_configuration(tmp_path: Path) -
 @pytest.mark.parametrize(
     "timeout,expected_seconds", [(None, 30.0), ("5s", 30.0), ("2m", 120.0)]
 )
+@pytest.mark.parametrize(
+    "deployed_port,expected_port",
+    [(None, "/dev/test"), ("/dev/application", "/dev/application")],
+)
 def test_embedded_fs_pipeline_timeout(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
     timeout: str | None,
     expected_seconds: float,
+    deployed_port: str | None,
+    expected_port: str,
 ) -> None:
     import asyncio
     from unittest.mock import AsyncMock, Mock
@@ -74,7 +80,9 @@ def test_embedded_fs_pipeline_timeout(
     stage = Mock(return_value=project)
     inject = Mock()
     dependencies = Mock()
-    deploy = Mock(return_value=FbuildCommandResult(success=True, output=""))
+    deploy = Mock(
+        return_value=FbuildCommandResult(success=True, output="", port=deployed_port)
+    )
     client = Mock()
     client.connect = AsyncMock()
     client.close = AsyncMock()
@@ -109,7 +117,7 @@ def test_embedded_fs_pipeline_timeout(
         project, environment="esp32dev_idf44", upload_port="/dev/test", timeout=1800
     )
     factory.assert_called_once_with(
-        "/dev/test", timeout=expected_seconds, verbose=args.verbose
+        expected_port, timeout=expected_seconds, verbose=args.verbose
     )
     client.connect.assert_awaited_once()
     assert client.send.await_count == 2

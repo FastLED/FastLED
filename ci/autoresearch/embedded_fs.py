@@ -138,7 +138,7 @@ async def run_embedded_fs(args: Args) -> int:
         print(deployed.output)
         return 1
     client = RpcClient(
-        args.upload_port,
+        deployed.port or args.upload_port,
         timeout=max(
             30.0, parse_timeout(args.timeout) if args.timeout is not None else 30.0
         ),
