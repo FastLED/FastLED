@@ -690,7 +690,7 @@ active in 7,062 us and completes autonomously.
 - [x] Verify explicit Arduino Serial coexistence and baud changes on device.
 - [x] Integrate ESP Arduino dependency policy into existing lint and tests.
 - [x] Measure final footprint and complete independent production review.
-- [ ] Publish the stacked PR; require full CI and physical USB validation before merge.
+- [x] Publish stacked PR #4887; full CI and physical USB validation remain required before merge.
 
 Final verification: native sanitizer suite passes 326 units / 95 examples;
 normal lint and focused Python board/transport tests pass. Old dispatcher
