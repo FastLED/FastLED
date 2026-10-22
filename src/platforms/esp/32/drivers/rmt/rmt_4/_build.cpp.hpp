@@ -9,6 +9,7 @@
 #include "platforms/esp/32/drivers/rmt/rmt_4/rmt4_async_driver.cpp.hpp"
 #include "platforms/esp/32/drivers/rmt/rmt_4/rmt4_peripheral_esp.cpp.hpp"
 #include "platforms/esp/32/drivers/rmt/rmt_4/rmt_memory_manager_4.cpp.hpp"
+#include "platforms/esp/32/drivers/rmt/rmt_4/rmt_memory_manager_4_shared.cpp.hpp"
 
 // BusTraits<Bus::RMT> specialization (RMT4 path, mutually exclusive with RMT5).
 #include "platforms/esp/32/drivers/rmt/rmt_4/bus_traits.h"

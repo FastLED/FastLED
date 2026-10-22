@@ -103,6 +103,13 @@ def test_console_dispatch(
             ["ARDUINO_USB_MODE=1", "ARDUINO_USB_CDC_ON_BOOT=1"],
             True,
             (0, 0),
+            None,
+        ),
+        (
+            "ESP32S3",
+            ["FASTLED_ESP_FORCE_USB_SERIAL_JTAG=1", "ARDUINO_USB_CDC_ON_BOOT=1"],
+            True,
+            (0, 0),
             "Native USB console requires",
         ),
         ("ESP32S3", ["FL_ESP_USE_TINYUSB_CDC=1"], True, (1, 0), None),
@@ -113,7 +120,7 @@ def test_console_dispatch(
             ["ARDUINO_USB_MODE=0", "ARDUINO_USB_CDC_ON_BOOT=1"],
             True,
             (0, 0),
-            "Native USB console requires",
+            None,
         ),
         (
             "ESP32S3",
@@ -184,3 +191,18 @@ def test_native_console_transport(
         assert error in result.stdout
     else:
         assert result.returncode == 0, result.stdout
+
+
+@pytest.mark.parametrize("target", ["ESP32S2", "ESP32S3", "ESP32C3", "ESP32P4"])
+@pytest.mark.parametrize("usb_mode", [0, 1])
+@pytest.mark.parametrize("force_uart", [False, True])
+def test_stock_arduino_cdc_keeps_framework_owner(
+    tmp_path: Path, target: str, usb_mode: int, force_uart: bool
+) -> None:
+    """Stock CDC startup must compile without selecting a competing USB owner."""
+    flags = [f"ARDUINO_USB_MODE={usb_mode}", "ARDUINO_USB_CDC_ON_BOOT=1"]
+    if force_uart:
+        flags.append("FASTLED_ESP_FORCE_UART_SERIAL=1")
+    test_native_console_transport(
+        tmp_path, target, flags, target != "ESP32S2", (0, 0), None
+    )

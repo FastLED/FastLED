@@ -11,6 +11,26 @@ Review: classic ESP32 Channel and legacy API byte loopback pass; 35-LED
 functional refill smoke completes 418 shows. The repaired reporter is 295,670
 flash / 23,844 physical static RAM bytes. S2/C3 legacy builds expose existing
 fbuild SDK/toolchain mismatches; do not claim those target builds passed.
+## Open PR completion sweep (stock SDK requirement)
+
+- [x] Inventory open PRs; leave reciprocal license #4049 untouched.
+- [x] Reject patched-framework dependency and close #4898.
+- [ ] Refresh, validate and merge #4873, #4877 and #4886.
+- [ ] Integrate stock-compatible stack prerequisites and land #4894, #4896 and #4897.
+- [ ] Replace stale #4706 policy claims with an enforced, measured policy and finish its review.
+- [ ] Verify final PR states, reviews, CI and checkout.
+
+## Eliminate unused flash dependencies (#4870 follow-up)
+
+- [x] Remove linker roots for unused PWM teardown and vector initialization without changing features.
+- [x] Measure the unchanged reporter sketch before/after and verify explicit feature consumers.
+- [x] Run native tests, lint and code review; publish measured implementation.
+
+Validation: clean reporter 272,434/23,292 -> 270,414/23,148 flash/static RAM;
+Blink budget rejects the previous report and accepts the new image. Real SDK
+PWM/Serial/UCS7604 consumer links; native debug passes 321 units + 95 examples;
+full lint and code review pass. Published on #4873 (after documentation #4872 merged); hosted CI is separate from
+these local validation results.
 
 ## Native ESP-IDF console footprint (#4870)
 
