@@ -67,11 +67,30 @@ fn esp_dependency_include_dirs(root: &Path) -> Vec<Vec<EspIncludePath>> {
             let mut index = 0;
             while index < args.len() {
                 let arg = args[index];
-                let include = if ["-I", "-isystem", "-iquote"].contains(&arg) {
+                let (include, quoted_only, system) = if ["-I", "-isystem", "-iquote"].contains(&arg)
+                {
                     index += 1;
-                    args.get(index).copied()
+                    (
+                        args.get(index).copied(),
+                        arg == "-iquote",
+                        arg == "-isystem",
+                    )
+                } else if let Some(include) = arg
+                    .strip_prefix("-isystem")
+                    .filter(|value| !value.is_empty())
+                {
+                    (Some(include), false, true)
+                } else if let Some(include) = arg
+                    .strip_prefix("-iquote")
+                    .filter(|value| !value.is_empty())
+                {
+                    (Some(include), true, false)
                 } else {
-                    arg.strip_prefix("-I").filter(|value| !value.is_empty())
+                    (
+                        arg.strip_prefix("-I").filter(|value| !value.is_empty()),
+                        false,
+                        false,
+                    )
                 };
                 if let Some(include) = include {
                     let path = PathBuf::from(include);
@@ -80,6 +99,7 @@ fn esp_dependency_include_dirs(root: &Path) -> Vec<Vec<EspIncludePath>> {
                     } else {
                         directory.join(path)
                     };
+                    let path = path.canonicalize().unwrap_or(path);
                     // Inspect current sources in place of fbuild's staged copy,
                     // retaining its position in the compiler's search order.
                     let staged = path.strip_prefix(root.join(".build/fbuild")).ok();
@@ -99,8 +119,8 @@ fn esp_dependency_include_dirs(root: &Path) -> Vec<Vec<EspIncludePath>> {
                     };
                     let include = EspIncludePath {
                         path,
-                        quoted_only: arg == "-iquote",
-                        system: arg == "-isystem",
+                        quoted_only,
+                        system,
                     };
                     if include.path.is_dir() && !dirs.contains(&include) {
                         dirs.push(include);
@@ -227,6 +247,20 @@ fn esp_arduino_dependency_pass(
     root: &Path,
     cache: &mut HashMap<PathBuf, std::sync::Arc<FileContent>>,
 ) -> Vec<LintViolation> {
+    // Resolved includes use canonical paths, including Windows verbatim prefixes.
+    // Keep this traversal's root and cache keys in that same representation.
+    let canonical_root = root.canonicalize().unwrap_or_else(|_| root.to_path_buf());
+    let root = canonical_root.as_path();
+    let mut canonical_cache: HashMap<PathBuf, std::sync::Arc<FileContent>> = cache
+        .iter()
+        .map(|(path, content)| {
+            (
+                path.canonicalize().unwrap_or_else(|_| path.clone()),
+                std::sync::Arc::clone(content),
+            )
+        })
+        .collect();
+    let cache = &mut canonical_cache;
     let mut roots: Vec<PathBuf> = cache
         .keys()
         .filter(|path| {
@@ -404,6 +438,7 @@ mod esp_compile_command_tests {
         ));
         let sdk = root.join("vendor sdk");
         fs::create_dir_all(&sdk).unwrap();
+        let sdk = sdk.canonicalize().unwrap();
         for command_only in [false, true] {
             let mut entry = serde_json::json!({"directory": root, "file": "native.cpp"});
             if command_only {
@@ -428,5 +463,119 @@ mod esp_compile_command_tests {
             );
         }
         fs::remove_dir_all(root).unwrap();
+    }
+
+    #[test]
+    fn esp_compile_database_preserves_joined_include_classes() {
+        let unique = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .as_nanos();
+        let root = std::env::temp_dir().join(format!(
+            "fastled_esp_joined_includes_{}_{}",
+            std::process::id(),
+            unique
+        ));
+        for name in ["regular", "system", "quoted"] {
+            fs::create_dir_all(root.join(name)).unwrap();
+        }
+        for joined in [false, true] {
+            let args = if joined {
+                vec![
+                    "c++",
+                    "-DESP32",
+                    "-isystemsystem",
+                    "-Iregular",
+                    "-iquotequoted",
+                ]
+            } else {
+                vec![
+                    "c++",
+                    "-DESP32",
+                    "-isystem",
+                    "system",
+                    "-Iregular",
+                    "-iquote",
+                    "quoted",
+                ]
+            };
+            fs::write(
+                root.join("compile_commands.json"),
+                serde_json::to_string(&serde_json::json!([
+                    {"directory": root, "arguments": args}
+                ]))
+                .unwrap(),
+            )
+            .unwrap();
+            let expected = vec![
+                EspIncludePath {
+                    path: root.join("quoted").canonicalize().unwrap(),
+                    quoted_only: true,
+                    system: false,
+                },
+                EspIncludePath {
+                    path: root.join("regular").canonicalize().unwrap(),
+                    quoted_only: false,
+                    system: false,
+                },
+                EspIncludePath {
+                    path: root.join("system").canonicalize().unwrap(),
+                    quoted_only: false,
+                    system: true,
+                },
+            ];
+            assert!(
+                esp_dependency_include_dirs(&root).contains(&expected),
+                "include search classes missing/reordered for joined={joined}"
+            );
+        }
+        fs::remove_dir_all(root).unwrap();
+    }
+
+    #[test]
+    fn esp_dependency_checks_repository_wrappers_through_noncanonical_roots() {
+        let unique = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .as_nanos();
+        let base = std::env::temp_dir().join(format!(
+            "fastled_esp_canonical_roots_{}_{}",
+            std::process::id(),
+            unique
+        ));
+        let actual = base.join("project");
+        let relative = Path::new("src/platforms/esp/32/native.h");
+        fs::create_dir_all(actual.join(relative).parent().unwrap()).unwrap();
+        fs::write(actual.join(relative), "#include \"wrapper.h\"\n").unwrap();
+        fs::write(
+            actual.join("src/platforms/esp/32/wrapper.h"),
+            "#include HEADER_CHOSEN_BY_MACRO\n",
+        )
+        .unwrap();
+        let forms = vec![actual.join("..").join("project")];
+        #[cfg(unix)]
+        let forms = {
+            let mut forms = forms;
+            let alias = base.join("checkout");
+            std::os::unix::fs::symlink(&actual, &alias).unwrap();
+            forms.push(alias);
+            forms
+        };
+        for root in forms {
+            let source = root.join(relative);
+            let mut cache = HashMap::new();
+            cache.insert(
+                source.clone(),
+                std::sync::Arc::new(FileContent::read(&source).unwrap()),
+            );
+            let hits = esp_arduino_dependency_pass(&root, &mut cache);
+            assert!(
+                hits.iter().any(|hit| Path::new(&hit.path) == relative
+                    && hit.message.contains("unresolved macro-generated include")),
+                "repository wrapper escaped checking through {}",
+                root.display()
+            );
+        }
+        fs::remove_dir_all(base).unwrap();
     }
 }

@@ -49,7 +49,10 @@ array, or shell-word-parsed `command` when the array is absent, and deduplicates
 include-path profiles. Quoted includes search their containing directory first;
 angle includes use configured search paths.
 Compiler include-class precedence (quote, regular, then system paths) and
-directory order within each class are preserved. A fbuild-staged
+directory order within each class are preserved, including joined and separate
+`-isystem` and `-iquote` flags. Repository and resolved header paths share one
+canonical filesystem representation, including symlinked checkouts and Windows
+verbatim prefixes. A fbuild-staged
 `<environment>/lib/FastLED` path is replaced at that same position by current
 `src/`, so lint examines current sources instead of an old staged snapshot.
 
