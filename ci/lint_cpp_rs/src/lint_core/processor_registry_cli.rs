@@ -267,6 +267,7 @@ pub fn supported_checker_names() -> &'static [&'static str] {
         "em_asm_clang_format",
         "enum_class",
         "esp_rom_printf",
+        "esp_arduino_header",
         "fastled_header_usage",
         "file_legal",
         "fl_is_defined",
@@ -326,6 +327,7 @@ pub fn supported_checker_names() -> &'static [&'static str] {
 pub fn supported_python_checker_names() -> &'static [&'static str] {
     &[
         "EspNoexceptChecker",
+        "EspArduinoHeaderChecker",
         "ArduinoMacroUsageChecker",
         "AsmJsLocationChecker",
         "AttributeChecker",
@@ -504,6 +506,7 @@ pub fn create_checkers(
         ("em_asm_clang_format", Box::new(EmAsmClangFormatChecker)),
         ("enum_class", Box::new(EnumClassChecker)),
         ("esp_rom_printf", Box::new(EspRomPrintfChecker)),
+        ("esp_arduino_header", Box::new(EspArduinoHeaderChecker)),
         ("example_serial", Box::new(ExampleSerialChecker)),
         ("fastled_header_usage", Box::new(FastLEDHeaderUsageChecker)),
         ("file_legal", Box::new(FileLegalChecker::today())),
