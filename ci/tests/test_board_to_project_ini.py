@@ -135,15 +135,16 @@ class TestEspNativeConsoleProfiles(unittest.TestCase):
                     self.assertNotIn("-DFL_ESP_USE_TINYUSB_CDC=1", flags)
                     self.assertIn("-DARDUINO_USB_CDC_ON_BOOT=0", flags)
 
-    def test_s2_uses_native_tinyusb_without_arduino_auto_start(self) -> None:
+    def test_s2_preserves_arduino_usb_startup_without_native_opt_in(self) -> None:
         board = ESP32_S2_DEVKITM_1
         project = ProjectIni.parseString(board.to_project_ini())
         flags = project.get_build_flags(board.board_name)
-        self.assertIn("-DFL_ESP_USE_TINYUSB_CDC=1", flags)
+        self.assertNotIn("-DFL_ESP_USE_TINYUSB_CDC=1", flags)
         self.assertNotIn("-DFASTLED_ESP_FORCE_USB_SERIAL_JTAG=1", flags)
-        for name in ("CDC", "MSC", "DFU"):
-            self.assertIn(f"-DARDUINO_USB_{name}_ON_BOOT=0", flags)
-        self.assertIn("-DARDUINO_USB_ON_BOOT=0", flags)
+        for name in ("CDC", "MSC", "DFU", ""):
+            macro = f"ARDUINO_USB_{name + '_' if name else ''}ON_BOOT"
+            self.assertFalse(any(macro in flag for flag in flags))
+            self.assertFalse(any(macro in flag for flag in (board.build_unflags or [])))
         self.assertEqual(board.get_real_board_name(), "lolin_s2_mini")
 
 

@@ -52,10 +52,12 @@ namespace native_cdc_detail {
 static constexpr u8 kInterface = 0;
 #if defined(CONFIG_IDF_TARGET_ESP32P4)
 static constexpr u8 kRhport = 1;
+static constexpr usb_phy_target_t kPhyTarget = USB_PHY_TARGET_UTMI;
 static constexpr usb_phy_speed_t kPhySpeed = USB_PHY_SPEED_HIGH;
 static constexpr tusb_speed_t kUsbSpeed = TUSB_SPEED_HIGH;
 #else
 static constexpr u8 kRhport = 0;
+static constexpr usb_phy_target_t kPhyTarget = USB_PHY_TARGET_INT;
 static constexpr usb_phy_speed_t kPhySpeed = USB_PHY_SPEED_FULL;
 static constexpr tusb_speed_t kUsbSpeed = TUSB_SPEED_FULL;
 #endif
@@ -127,11 +129,6 @@ extern "C" void tud_hid_set_report_cb(uint8_t instance, uint8_t report, hid_repo
     (void)instance; (void)report; (void)type; (void)data; (void)length;
 }
 #endif
-
-extern "C" bool tud_vendor_control_xfer_cb(uint8_t rhport, uint8_t stage, const tusb_control_request_t* request) { // ok no noexcept - TinyUSB C callback contract
-    (void)rhport; (void)stage; (void)request;
-    return false;
-}
 
 #if CFG_TUD_ECM_RNDIS || CFG_TUD_NCM
 extern "C" bool tud_network_recv_cb(const uint8_t* data, uint16_t length) { // ok no noexcept - TinyUSB C callback contract
@@ -305,7 +302,7 @@ UsbCdcEsp32::UsbCdcEsp32() FL_NO_EXCEPT {
     if (!mTxMutex) return;
     usb_phy_config_t config = {};
     config.controller = USB_PHY_CTRL_OTG;
-    config.target = USB_PHY_TARGET_INT;
+    config.target = native_cdc_detail::kPhyTarget;
     config.otg_mode = USB_OTG_MODE_DEVICE;
     config.otg_speed = native_cdc_detail::kPhySpeed;
     usb_phy_handle_t phy = nullptr;

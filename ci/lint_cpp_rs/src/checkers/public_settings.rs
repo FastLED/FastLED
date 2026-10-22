@@ -124,9 +124,7 @@ impl FileContentChecker for PublicSettingsPatternChecker {
             if opens > 0 {
                 let first_kind = classify_scope_open(code.trim(), &scope_stack);
                 scope_stack.push(first_kind);
-                for _ in 0..opens - 1 {
-                    scope_stack.push("other");
-                }
+                scope_stack.extend(std::iter::repeat_n("other", opens - 1));
             }
             for _ in 0..closes {
                 scope_stack.pop();

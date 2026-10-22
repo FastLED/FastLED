@@ -1016,20 +1016,9 @@ ESP32_S2_DEVKITM_1 = Board(
     real_board_name="lolin_s2_mini",
     board_build_mcu="esp32s2",
     platform=ESP32_IDF_5_3_PIOARDUINO,
-    build_unflags=[
-        "-DARDUINO_USB_CDC_ON_BOOT=1",
-        "-DARDUINO_USB_CDC_ON_BOOT",
-        "-DARDUINO_USB_MSC_ON_BOOT=1",
-        "-DARDUINO_USB_DFU_ON_BOOT=1",
-        "-DARDUINO_USB_ON_BOOT=1",
-    ],
-    build_flags=[
-        "-DFL_ESP_USE_TINYUSB_CDC=1",
-        "-DARDUINO_USB_CDC_ON_BOOT=0",
-        "-DARDUINO_USB_MSC_ON_BOOT=0",
-        "-DARDUINO_USB_DFU_ON_BOOT=0",
-        "-DARDUINO_USB_ON_BOOT=0",
-    ],
+    # FastLED defaults to SDK UART. Leave the application's Arduino USB
+    # startup unchanged; native TinyUSB remains opt-in until #4893 verifies
+    # physical enumeration, RPC and reconnect on the actual USB route.
 )
 
 ESP32_UPESY_WROOM = Board(

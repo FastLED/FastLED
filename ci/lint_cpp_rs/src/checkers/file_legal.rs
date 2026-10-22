@@ -487,7 +487,9 @@ fn collect_file_legal_history_for_paths(
                 .filter(|field| !field.is_empty())
                 .collect();
             let created = fields
-                .chunks_exact(2)
+                .as_chunks::<2>()
+                .0
+                .iter()
                 .map(|pair| String::from_utf8_lossy(pair[0]).trim().to_string())
                 .min()
                 .unwrap_or_else(today_iso_date);
@@ -495,7 +497,7 @@ fn collect_file_legal_history_for_paths(
                 created,
                 authors: Vec::new(),
             };
-            for pair in fields.chunks_exact(2) {
+            for pair in fields.as_chunks::<2>().0.iter() {
                 let date = String::from_utf8_lossy(pair[0]);
                 let author = String::from_utf8_lossy(pair[1]);
                 history.touch(author.trim(), date.trim(), policy);
@@ -590,7 +592,7 @@ mod history_tests {
             &history,
             "2026-08-25",
             policy,
-            &blake3::hash(b"").to_hex().to_string(),
+            blake3::hash(b"").to_hex().as_ref(),
         );
         assert!(rendered.contains("name: \"Daniel Garcia\""));
         assert!(rendered.contains("name: \"Mark Kriegsman\""));

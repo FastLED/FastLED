@@ -29,6 +29,8 @@
 #include "platforms/arm/teensy/teensy4_common/drivers/objectfled/objectfled_diagnostics.h"
 #include <FastLED.h>
 #include "fl/stl/cstdio.h"
+#include "fl/stl/chrono.h"
+#include "fl/system/delay.h"
 #include "fl/stl/sstream.h"
 
 // PR #3421 framework-hang fix:
@@ -1614,7 +1616,7 @@ void autoResearchChipsetTiming(fl::AutoResearchConfig& config,
     // CRITICAL: Wait for PARLIO streaming transmission to complete before starting tests
     // Without this delay, the RX will capture the pre-initialization BLACK frame instead of the test pattern
     // PARLIO is a streaming engine with ring buffers - need time to drain the initial frame
-    delay(5);  // Reduced from 100ms - just enough for buffer drain
+    fl::delay(5);  // Reduced from 100ms - just enough for buffer drain
 
     // Run test patterns (mixed bit patterns to test MSB vs LSB handling)
     int total = 0;
@@ -1631,7 +1633,7 @@ void autoResearchChipsetTiming(fl::AutoResearchConfig& config,
     multi_config.max_errors_per_run = 10;  // Store first 10 errors for JSON response
 
     // Measure show-only duration (excludes setup/teardown overhead)
-    uint32_t show_start_ms = millis();
+    uint32_t show_start_ms = fl::millis();
 
     // Test all 4 bit patterns (0-3)
     for (int pattern_id = 0; pattern_id < 4; pattern_id++) {
@@ -1646,7 +1648,7 @@ void autoResearchChipsetTiming(fl::AutoResearchConfig& config,
         runMultiTest(getBitPatternName(pattern_id), config, multi_config, total, passed, out_results);
     }
 
-    out_show_duration_ms += millis() - show_start_ms;
+    out_show_duration_ms += fl::millis() - show_start_ms;
 
     // Results reported via JSON-RPC (verbose logging silenced for speed)
 
@@ -1725,7 +1727,7 @@ void autoResearchChipsetTimingLegacy(fl::AutoResearchConfig& config,
         return;  // vector destructor cleans up proxies
     }
 
-    delay(5);  // Buffer drain (same as autoResearchChipsetTiming)
+    fl::delay(5);  // Buffer drain (same as autoResearchChipsetTiming)
 
     // Run test patterns (identical to autoResearchChipsetTiming)
     int total = 0;
@@ -1738,7 +1740,7 @@ void autoResearchChipsetTimingLegacy(fl::AutoResearchConfig& config,
     multi_config.max_errors_per_run = 10;
 
     // Measure show-only duration (excludes setup/teardown overhead)
-    uint32_t show_start_ms = millis();
+    uint32_t show_start_ms = fl::millis();
 
     const bool ws2814_visual_validation =
         !config.legacy_chipsets.empty() &&
@@ -1758,11 +1760,11 @@ void autoResearchChipsetTimingLegacy(fl::AutoResearchConfig& config,
             // Leave each isolated R/G/B/W frame visible long enough for the
             // attached physical strip to be checked while RX independently
             // verifies the exact four-byte frame.
-            delay(250);
+            fl::delay(250);
         }
     }
 
-    out_show_duration_ms += millis() - show_start_ms;
+    out_show_duration_ms += fl::millis() - show_start_ms;
 
     driver_total += total;
     driver_passed += passed;

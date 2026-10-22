@@ -305,6 +305,11 @@ extern FL_MAYBE_UNUSED SerialPort fl_serial;
 // Define Serial as fl::fl_serial ONLY when Arduino is not available
 // When Arduino.h exists, Serial remains the Arduino Serial object
 // When Arduino.h doesn't exist, Serial is defined as fl::fl_serial for convenience
-#if !FL_HAS_INCLUDE(<Arduino.h>)
+#if defined(FL_IS_ESP32)
+// Select native SDK behavior from the framework contract, not installed headers.
+#if !defined(ARDUINO)
+#define Serial fl::fl_serial
+#endif
+#elif !FL_HAS_INCLUDE(<Arduino.h>)
 #define Serial fl::fl_serial
 #endif

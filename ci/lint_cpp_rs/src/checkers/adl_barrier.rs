@@ -99,7 +99,7 @@ fn adl_namespace_functions(src: &str) -> Vec<(Vec<String>, String, usize)> {
             && !is_macro
             && !ADL_NOT_FUNCTION_NAMES.contains(&tok.text.as_str())
             && !matches!(prev, "::" | "." | "->" | "~" | "operator")
-            && libc_mirror_in_template_head(&stmt) == false
+            && !libc_mirror_in_template_head(&stmt)
         {
             let body = &stmt[libc_mirror_after_templates(&stmt)..];
             let declares = !body.is_empty()

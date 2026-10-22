@@ -725,8 +725,8 @@ USB/HAL callback roots. Physical USB enumeration/reconnect remains unverified.
 ## #4888 optional Arduino integration goal (sequential)
 
 - [x] #4889: implementation, review and local validation complete; published PR #4894 with ci-full attached. Master integration/full CI remains pending for the stack.
-- [ ] #4890: complete SPI transaction provider; preserve native default, contention HIL and bloat before/after. Factory selection/null ownership has hardware RED -> GREEN; actual Arduino adapter and frame validation remain in progress.
-- [ ] #4891: transitive Arduino-header enforcement in existing lint, regression fixtures and real SDK probes.
+- [x] #4890: implementation, contention HIL, matched bloat and local review complete; published PR #4896 with ci-full requested. Stack/master integration remains pending.
+- [x] #4891: implementation, regression/SDK/HIL/bloat validation and review complete; published PR #4897 with full CI requested. Stack/master integration pending.
 - [ ] #4892: eliminate framework startup Serial0 retention from this repository while preserving application Serial APIs; measured maps and HIL.
 - [ ] #4893: physical native USB matrix, RPC/reconnect/ownership/LED and recovery checks; document any unavailable routes without claiming them validated.
 
@@ -787,7 +787,33 @@ absolute heap totals. Contended show is about 6.2ms including peer traffic.
 Docs: docs/ESP32_SPI_PROVIDER.md. Measurements: .build/4890/bloat/report.md.
 No workflows added. PR: https://github.com/FastLED/FastLED/pull/4896.
 Implementation/local validation is published; stack/master CI is pending.
-#4891 is the next sequential implementation task.
+#4891 implementation/local verification is published in PR #4897 on
+`feat/esp32-transitive-arduino-lint`, based on `b58cf683f`.
+
+### #4891 verification
+
+- [x] Production Rust include-graph pass integrated into existing whole-project
+      lint; direct save-time checker preserved. No new workflow.
+- [x] Original wrapper/FS.h transitive regression RED -> GREEN. Review added
+      all-entry metadata, compiler search precedence and outside-src wrappers;
+      focused suite passes 26 tests, with genuine RED evidence for each gap.
+- [x] Rust suite: 171 passed, 2 ignored. Full native debug: 326 unit targets
+      and 95 examples passed. Independent review reports no remaining blocker.
+- [x] Real SDK classic/P4 legacy SPI and explicit adapter probes; canonical
+      S3 native USB Serial/JTAG compile/link after explicit SDK/timing imports.
+- [x] Matched fbuild bloat: no SPI 231094 flash/21000 static before and after;
+      native explicit HOST2 APA102 304154/23040 before and after. Attributed
+      symbols identical; equal-length staging paths avoid filename artifacts.
+- [x] Physical canonical AutoResearch classic ESP32 IDF4.4: all 3 RMT scenarios
+      pass, both payload checks 4/4. Canonical image remains on device.
+- [x] Normal `bash lint --cpp` rejects selectively restoring the old FastLED.h
+      Arduino import, reporting the real transitive compile_test.hpp chain.
+      Corrected source restored; full final `bash lint` passes.
+- [x] Publish reviewed stacked PR #4897, request full CI, update issue evidence.
+
+Policy/limits: docs/ESP32_ARDUINO_DEPENDENCY_LINT.md. Local evidence is in
+`.build/4891/evidence/` and `.build/4891/bloat/`. Physical USB evidence is
+separate child #4893. Next implementation child after publication is #4892.
 
 ## PR #4706 cache policy continuation
 

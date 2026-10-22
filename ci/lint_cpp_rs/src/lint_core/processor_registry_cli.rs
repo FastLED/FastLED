@@ -667,6 +667,7 @@ where
     if config.paths.is_empty() {
         let t = std::time::Instant::now();
         let mut structural = run_structural_passes(&config.project_root);
+        structural.extend(esp_arduino_dependency_pass(&config.project_root, &mut processor.file_cache));
         if profile {
             eprintln!(
                 "[PROFILE] run_structural_passes: {:?} ({} violations)",
@@ -707,6 +708,7 @@ fn selected_contains_structural_alias(selected: &HashSet<String>, checker_name: 
     // the alias and the class name should activate them.
     match checker_name {
         "PchFileChecker" => selected.contains("pch_file"),
+        "EspArduinoHeaderChecker" => selected.contains("esp_arduino_header"),
         _ => false,
     }
 }

@@ -4,6 +4,7 @@
 #define __INC_LED_SYSDEFS_H
 
 #include "fastled_config.h"
+#include "platforms/is_platform.h"
 
 // Include ARM platform detection before any ARM headers
 #include "platforms/arm/is_arm.h"  // ok platform headers
@@ -13,7 +14,7 @@
 #include "fl/stl/stdint.h"  // IWYU pragma: keep
 
 // Arduino.h needed for convenience functions digitalPinToPort/BitMask/portOutputRegister and the pinMode methods.
-#if defined(ARDUINO) && !defined(__EMSCRIPTEN__)
+#if defined(ARDUINO) && !defined(__EMSCRIPTEN__) && !defined(FL_IS_ESP32)
 // IWYU pragma: begin_keep
 #include "fl/system/arduino.h"
 // IWYU pragma: end_keep  // ok include

@@ -9,20 +9,9 @@
 #include "fl/stl/noexcept.h"
 #if defined(FL_IS_ESP32)
 
-#include "fl/stl/has_include.h"
-
-#if FL_HAS_INCLUDE("driver/ledc.h")
-    // IWYU pragma: begin_keep
-    #include "driver/ledc.h"
-    // IWYU pragma: end_keep
-    #define FL_CLED_HAS_LEDC 1
-#else
-    // No driver/ledc.h on this toolchain (very old Arduino-ESP32 core) —
-    // fall back to the Arduino LEDC wrapper API.
-    // IWYU pragma: begin_keep
-    #include "fl/system/arduino.h"
-    // IWYU pragma: end_keep
-#endif
+// IWYU pragma: begin_keep
+#include "driver/ledc.h"
+// IWYU pragma: end_keep
 
 #include "platforms/esp/32/feature_flags/enabled.h"
 #include "platforms/esp/esp_version.h"
@@ -56,7 +45,6 @@ bool CLED::begin(const CLEDConfig& config) FL_NO_EXCEPT {
         return false;
     }
 
-#ifdef FL_CLED_HAS_LEDC
     // Native ESP-IDF LEDC setup — identical under Arduino-ESP32 (which
     // bundles driver/ledc.h) and bare ESP-IDF builds. CLED models its
     // channel space the same way write16() below does: group = channel/8
@@ -98,38 +86,7 @@ bool CLED::begin(const CLEDConfig& config) FL_NO_EXCEPT {
     }
 
     FL_DBG("CLED: Initialized channel " << config.channel << " at " << config.frequency << " Hz, " << config.resolution_bits << " bits");
-#else
-    // No driver/ledc.h on this toolchain — fall back to the Arduino LEDC
-    // wrapper API, which differs between Arduino Core 2.x and 3.x.
-#ifndef ESP_ARDUINO_VERSION_MAJOR
-    #define ESP_ARDUINO_VERSION_MAJOR 2  // Assume old API if not defined
-#endif
 
-#if ESP_ARDUINO_VERSION_MAJOR >= 3
-    // New API (Arduino Core 3.x): ledcAttach auto-assigns channel
-    u8 assigned_channel = ledcAttach(config.pin, config.frequency, config.resolution_bits);
-    if (assigned_channel == 0) {
-        FL_WARN("CLED: LEDC attach failed for pin " << config.pin);
-        return false;
-    }
-
-    // Update internal state with auto-assigned channel
-    mConfig.channel = assigned_channel;
-
-    FL_DBG("CLED: Initialized pin " << config.pin << " with auto-assigned channel " << (static_cast<int>(assigned_channel)) << " at " << config.frequency << " Hz, " << config.resolution_bits << " bits");
-#else
-    // Old API (Arduino Core 2.x): ledcSetup + ledcAttachPin with explicit channel
-    ledcAttachPin(config.pin, config.channel);
-    u32 freq = ledcSetup(config.channel, config.frequency, config.resolution_bits);
-
-    if (freq == 0) {
-        FL_WARN("CLED: LEDC setup failed for channel " << config.channel);
-        return false;
-    }
-
-    FL_DBG("CLED: Initialized channel " << config.channel << " at " << freq << " Hz, " << config.resolution_bits << " bits");
-#endif
-#endif  // FL_CLED_HAS_LEDC
 
     mInitialized = true;
 
@@ -144,7 +101,7 @@ void CLED::end() FL_NO_EXCEPT {
         return;
     }
 
-    // TODO: Add LEDC cleanup (ledcDetach?) when available in Arduino core
+    // TODO: Release native LEDC channel/timer resources on end.
 
     mInitialized = false;
 }
@@ -164,7 +121,6 @@ void CLED::write16(u16 value) FL_NO_EXCEPT {
         duty = mMaxDuty;
     }
 
-#ifdef FL_CLED_HAS_LEDC
     // For full-on condition with LEDC, add 1 to duty to get true 100%
     // This is an ESP32 LEDC quirk where max_duty gives 99.998% duty cycle
     if (duty == mMaxDuty && mMaxDuty != 1) {
@@ -176,10 +132,7 @@ void CLED::write16(u16 value) FL_NO_EXCEPT {
 
     ledc_set_duty(ledc_mode_t(group), ledc_channel_t(channel), duty);
     ledc_update_duty(ledc_mode_t(group), ledc_channel_t(channel));
-#else
-    // Fallback to Arduino API
-    ledcWrite(mConfig.channel, duty);
-#endif
+
 }
 
 u32 CLED::getMaxDuty() const FL_NO_EXCEPT {

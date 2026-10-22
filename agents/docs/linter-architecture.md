@@ -21,6 +21,11 @@ The Python orchestrator is still the entrypoint `bash lint --cpp` calls, but the
 
 ## Single-File Mode
 
+Native ESP32 Arduino dependency policy also has a whole-project include-graph
+pass in Rust. It uses available fbuild compilation metadata and reports
+transitive include chains; direct checks still run in single-file mode.
+See [policy, scope and validation](../../docs/ESP32_ARDUINO_DEPENDENCY_LINT.md).
+
 - **Usage**: `uv run python ci/lint_cpp/run_all_checkers.py <file_path>`
 - Runs all applicable checkers (Rust + Python holdover) on a single file in well under a second.
 - Used by `ci/hooks/lint-on-save.py` for save-time validation and by IDE integrations.

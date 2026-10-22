@@ -30,7 +30,7 @@ fn test_aggregation_pass(project_root: &Path, violations: &mut Vec<LintViolation
     //     point inside the excluded dir → emit "should use .hpp" violation.
     let root_prefix = normalize_path(&path_to_string(project_root));
 
-    let mut sorted_dirs: Vec<&'static str> = TEST_AGGREGATED_DIRS.iter().copied().collect();
+    let mut sorted_dirs: Vec<&'static str> = TEST_AGGREGATED_DIRS.to_vec();
     sorted_dirs.sort();
 
     for excluded_rel in sorted_dirs {
