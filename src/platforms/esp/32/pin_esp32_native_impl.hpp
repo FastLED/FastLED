@@ -160,7 +160,12 @@ namespace {
         if (adc1_initialized) {
             return;
         }
+#if defined(SOC_ADC_MAX_BITWIDTH) && SOC_ADC_MAX_BITWIDTH == 13
+        // The legacy ESP32-S2 SDK exposes only its native 13-bit width.
+        adc1_config_width(ADC_WIDTH_BIT_13);
+#else
         adc1_config_width(ADC_WIDTH_BIT_12);
+#endif
         adc1_initialized = true;
     }
 }

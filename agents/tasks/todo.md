@@ -1,5 +1,16 @@
 # Task Tracker
 
+## Restore legacy ESP32 RMT selection
+
+- [x] Reproduce missing SDK capability selection with regression tests.
+- [x] Repair RMT4 TX/RX build compatibility, interrupt ownership and memory spans.
+- [x] Validate classic legacy/modern builds, host tests, lint and connected ESP32 behavior.
+- [x] Review and publish the fix with hardware, size evidence and cross-target build limitations.
+
+Review: classic ESP32 Channel and legacy API byte loopback pass; 35-LED
+functional refill smoke completes 418 shows. The repaired reporter is 295,670
+flash / 23,844 physical static RAM bytes. S2/C3 legacy builds expose existing
+fbuild SDK/toolchain mismatches; do not claim those target builds passed.
 ## Open PR completion sweep (stock SDK requirement)
 
 - [x] Inventory open PRs; leave reciprocal license #4049 untouched.
@@ -647,6 +658,19 @@ timed out on both versions while direct ownership accounting passed.
   or physical hardware run is claimed. Logs and scripts: `.build/4826/`.
 - Repository code review found no blocking issues.
 
+## Slim legacy RMT4 channel path
+
+- [x] Test batched direct-show lifecycle and completion before changing production.
+- [x] Reuse slim bridge with direct RMT4 legacy default and managed override.
+- [x] Measure matched flash/RAM; validate host suite and physical loopback.
+- [x] Review and publish the measured change and API tradeoffs.
+
+Review: RMT4 legacy default saves 6,244 flash / 208 static RAM bytes versus
+#4877 (289,426 / 23,636). Channel API remains managed. Batched completion is
+RMT4-only; immediate direct backends retain their existing lifecycle. Full
+lint, clean sanitizer run (322 unit / 95 example targets), and physical legacy
+and Channel byte loopback pass. The 35-LED refill smoke completes 553 shows.
+Managed override remains available for registry controls.
 ## PR #4706 cache policy continuation
 
 - [x] Refresh live cache and writer inventory.

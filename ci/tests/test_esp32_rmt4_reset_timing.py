@@ -22,20 +22,23 @@ CLOCKLESS = HEADER.parent / "idf4_clockless_rmt_esp32.h"
 def test_rmt4_keeps_idle_low_until_chipset_reset_time_elapses() -> None:
     header = HEADER.read_text(encoding="utf-8")
     implementation = IMPLEMENTATION.read_text(encoding="utf-8")
-    tx_done = header[
-        header.index("FL_NO_INLINE IRAM_ATTR void onTxDoneInterrupt") : header.index(
-            "FL_NO_INLINE IRAM_ATTR void fillNextBuffer"
+    poll = implementation[implementation.index("ChannelEngineRMT4Impl::poll()") :]
+    completion = poll[
+        poll.index("if (!state.resetWaitStarted") : poll.index(
+            "#if FASTLED_RMT4_TRANSMISSION_TIMEOUT_MS"
         )
     ]
 
     assert "resetStartTimeUs" in header
     assert "resetDurationUs" in header
-    assert "fl::atomic_bool transmissionComplete" in header
-    assert "gpio_matrix_out" not in tx_done
-    assert "transmissionComplete.store(true, fl::memory_order_release)" in tx_done
+    assert "gpio_matrix_out" not in completion
+    assert "rmt_wait_tx_done(state.channel, 0) == ESP_OK" in completion
+    assert "state.resetStartTimeUs = fl::micros();" in completion
     assert "state->resetDurationUs = data->getTiming().reset_us;" in implementation
-    assert "transmissionComplete.load(fl::memory_order_acquire)" in implementation
-    assert "resetElapsedUs < state.resetDurationUs" in implementation
+    assert (
+        "fl::micros() - state.resetStartTimeUs >= state.resetDurationUs" in completion
+    )
+    assert "releaseChannel(&state);" in completion
 
 
 SLIM_BRIDGE = ROOT / "src" / "fl" / "channels" / "slim_bridge_controller.h"
@@ -47,7 +50,7 @@ def test_rmt4_legacy_wait_time_can_only_extend_trait_reset_time() -> None:
     clockless = CLOCKLESS.read_text(encoding="utf-8")
     assert (
         "public SlimBridgeController<DATA_PIN, TIMING, RGB_ORDER, WAIT_TIME, "
-        "BusTraits<Bus::RMT>>" in clockless
+        "BusTraits<Bus::RMT>, 0," in " ".join(clockless.split())
     )
     bridge = SLIM_BRIDGE.read_text(encoding="utf-8")
     assert "static_cast<u32>(WAIT_TIME) > timing.reset_us" in bridge

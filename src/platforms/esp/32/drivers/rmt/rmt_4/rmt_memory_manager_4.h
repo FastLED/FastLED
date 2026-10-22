@@ -15,13 +15,10 @@
 /// adaptive-buffer recommendation used by TX during network-active
 /// windows. Wiring the recommendation into `rmt_config.mem_block_num`
 /// gives TX more headroom before the ISR misses its refill deadline
-/// — the reactive `checkTime` truncation in
-/// `channel_driver_rmt4.h::fillNextBuffer` stays as a belt-and-braces
-/// safety net.
+/// while the SDK byte translator retains a late-refill deadline check.
 ///
-/// **The class body is header-inline** on purpose — it's a pure
-/// accounting ledger with no ESP-IDF dependencies. Host unit tests
-/// build it from the test TU directly (see
+/// The accounting ledger has no ESP-IDF dependencies. Shared physical-span
+/// helpers live in the companion `_shared.cpp.hpp`, also included by host tests (see
 /// `tests/platforms/esp/32/drivers/rmt/rmt_4/rmt_memory_manager_4.cpp`).
 /// Only the platform-default `instance()` singleton constructor lives
 /// out-of-line in the `.cpp.hpp` behind the usual `FL_IS_ESP32 &&
@@ -80,9 +77,10 @@ class RmtMemoryManager4 {
     static RmtMemoryManager4 &instance() FL_NO_EXCEPT;
 
     /// @brief Test-only constructor to inject a custom pool size.
-    explicit RmtMemoryManager4(size_t total_words) FL_NO_EXCEPT
-        : mPoolWords(total_words),
-          mAllocatedWords(0),
+    explicit RmtMemoryManager4(size_t total_words,
+                              size_t words_per_block = detail::kRmt4WordsPerBlock) FL_NO_EXCEPT
+        : mPoolWords(total_words), mWordsPerBlock(words_per_block),
+          mAllocatedWords(0), mReservedBlocks(0),
           mAllocations() {
         mAllocations.reserve(8);
     }
@@ -105,13 +103,12 @@ class RmtMemoryManager4 {
             }
         }
 
-        size_t desired = network_active ? detail::kRmt4TxNetworkActiveWords
-                                        : detail::kRmt4TxIdleWords;
+        size_t desired = (network_active ? 3 : 2) * mWordsPerBlock;
 
         if (desired > availableWords()) {
             if (network_active &&
-                detail::kRmt4TxIdleWords <= availableWords()) {
-                desired = detail::kRmt4TxIdleWords; // Graceful demotion.
+                2 * mWordsPerBlock <= availableWords()) {
+                desired = 2 * mWordsPerBlock; // Graceful demotion.
             } else {
                 FL_WARN("RmtMemoryManager4: TX allocation refused, pool exhausted (want " << desired << ", have " << availableWords() << " / " << mPoolWords << ")");
                 return false;
@@ -175,8 +172,14 @@ class RmtMemoryManager4 {
     // Queries
     //=========================================================================
 
+    /// Reserve the actual contiguous hardware blocks, independently of the
+    /// word ledger. RX and TX must both claim before configuring hardware.
+    bool tryReserveBlocks(int first, u8 count) FL_NO_EXCEPT;
+    void releaseBlocks(int first, u8 count) FL_NO_EXCEPT;
+
     size_t allocatedWords() const FL_NO_EXCEPT { return mAllocatedWords; }
     size_t poolSize() const FL_NO_EXCEPT { return mPoolWords; }
+    size_t wordsPerBlock() const FL_NO_EXCEPT;
     size_t availableWords() const FL_NO_EXCEPT {
         return (mPoolWords > mAllocatedWords) ? (mPoolWords - mAllocatedWords)
                                               : 0;
@@ -199,8 +202,7 @@ class RmtMemoryManager4 {
         if (!network_active) {
             return 2;
         }
-        constexpr size_t kExtraBlockWords = detail::kRmt4WordsPerBlock;
-        if (availableWords() >= kExtraBlockWords) {
+        if (availableWords() >= mWordsPerBlock) {
             return 3;
         }
         return 2;
@@ -213,11 +215,14 @@ class RmtMemoryManager4 {
     void reset() FL_NO_EXCEPT {
         mAllocations.clear();
         mAllocatedWords = 0;
+        mReservedBlocks = 0;
     }
 
   private:
     size_t mPoolWords;
+    size_t mWordsPerBlock;
     size_t mAllocatedWords;
+    u32 mReservedBlocks;
     fl::vector<RmtAllocation4> mAllocations;
 };
 

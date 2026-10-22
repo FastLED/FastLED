@@ -2,8 +2,8 @@
 /// @brief RMT4 interface for ChannelEngine (ESP32 IDF 4.x)
 ///
 /// This header defines both the public interface and implementation for RMT4
-/// ChannelEngine. IRAM_ATTR functions are inlined here to avoid duplicate
-/// attribute warnings.
+/// ChannelEngine. The SDK owns the shared RX/TX ISR and invokes an IRAM
+/// byte translator for buffered asynchronous output.
 
 #pragma once
 
@@ -37,6 +37,7 @@
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/span.h"
 #include "fl/stl/vector.h"
+#include "fl/stl/unique_ptr.h"
 #include "platforms/esp/32/core/clock_cycles.h"
 #include "platforms/esp/32/drivers/rmt/rmt_4/irmt4_peripheral.h"
 
@@ -179,11 +180,10 @@ FASTLED_SHARED_PTR(ChannelEngineRMT4);
 /// Use create() to instantiate the concrete implementation.
 ///
 /// Key Features:
-/// - Double-buffer ISR-driven refill (WiFi interference resistant)
+/// - SDK-managed ISR-driven refill with bounded symbol buffers
 /// - Time-multiplexing support (>8 strips via channel sharing)
 /// - Direct hardware memory access for performance
-/// - Lifecycle calls routed through `IRMT4Peripheral` (#3458) — the
-///   ISR hot path stays inline IRAM and is not virtualised.
+/// - Lifecycle calls routed through `IRMT4Peripheral` (#3458)
 class ChannelEngineRMT4 : public IChannelDriver {
   public:
     /// @brief Create RMT4 driver instance with the default real-hardware
@@ -210,6 +210,10 @@ class ChannelEngineRMT4 : public IChannelDriver {
         return fl::string::from_literal("RMT");
     }
 
+    Capabilities getCapabilities() const FL_NO_EXCEPT override {
+        return Capabilities(true, false);
+    }
+
   protected:
     ChannelEngineRMT4() = default;
 };
@@ -222,8 +226,8 @@ class ChannelEngineRMT4 : public IChannelDriver {
 ///
 /// This class contains all implementation details including:
 /// - Channel state tracking
-/// - ISR handlers (IRAM attributes)
-/// - Double-buffer management
+/// - SDK-managed buffered transmission
+/// - Source buffer lifetime management
 /// - Time-multiplexing queue
 class ChannelEngineRMT4Impl final : public ChannelEngineRMT4 {
   public:
@@ -240,6 +244,8 @@ class ChannelEngineRMT4Impl final : public ChannelEngineRMT4 {
 
     ~ChannelEngineRMT4Impl() override;
 
+    bool canHandle(const ChannelDataPtr &data) const FL_NO_EXCEPT override;
+
     /// @brief Enqueue channel data for transmission
     void enqueue(ChannelDataPtr channelData) FL_NO_EXCEPT override;
 
@@ -250,418 +256,46 @@ class ChannelEngineRMT4Impl final : public ChannelEngineRMT4 {
     DriverState poll() FL_NO_EXCEPT override;
 
   private:
-    // ═══════════════════════════════════════════════════════════════════════════
-    // Channel State Structure
-    // ═══════════════════════════════════════════════════════════════════════════
+    struct InternalSourceDeleter {
+        void operator()(u8 *pointer) const FL_NO_EXCEPT;
+    };
+    using InternalSource = fl::unique_ptr<u8, InternalSourceDeleter>;
+
     struct ChannelState {
-        ChannelState() FL_NO_EXCEPT
-            : channel(static_cast<rmt_channel_t>(0)),
-              pin(static_cast<gpio_num_t>(0)), inUse(false), zero{}, one{},
-              transmissionComplete(false), resetWaitStarted(false),
-              resetStartTimeUs(0), resetDurationUs(0), whichHalf(0),
-              memPtr(nullptr), memStart(nullptr), pixelData(nullptr),
-              pixelDataSize(0), pixelDataPos(0), cyclesPerFill(0),
-              maxCyclesPerFill(0), lastFill(0), transmissionStartTime(0),
-              sourceData() {}
-
-        ChannelState(const ChannelState& other) FL_NO_EXCEPT
-            : channel(other.channel), pin(other.pin), inUse(other.inUse),
-              zero(other.zero), one(other.one),
-              transmissionComplete(other.transmissionComplete.load(
-                  fl::memory_order_acquire)),
-              resetWaitStarted(other.resetWaitStarted),
-              resetStartTimeUs(other.resetStartTimeUs),
-              resetDurationUs(other.resetDurationUs), whichHalf(other.whichHalf),
-              memPtr(other.memPtr), memStart(other.memStart),
-              pixelData(other.pixelData), pixelDataSize(other.pixelDataSize),
-              pixelDataPos(other.pixelDataPos),
-              cyclesPerFill(other.cyclesPerFill),
-              maxCyclesPerFill(other.maxCyclesPerFill), lastFill(other.lastFill),
-              transmissionStartTime(other.transmissionStartTime),
-              sourceData(other.sourceData) {}
-
-        ChannelState& operator=(const ChannelState& other) FL_NO_EXCEPT {
-            if (this != &other) {
-                channel = other.channel;
-                pin = other.pin;
-                inUse = other.inUse;
-                zero = other.zero;
-                one = other.one;
-                transmissionComplete.store(
-                    other.transmissionComplete.load(fl::memory_order_acquire),
-                    fl::memory_order_release);
-                resetWaitStarted = other.resetWaitStarted;
-                resetStartTimeUs = other.resetStartTimeUs;
-                resetDurationUs = other.resetDurationUs;
-                whichHalf = other.whichHalf;
-                memPtr = other.memPtr;
-                memStart = other.memStart;
-                pixelData = other.pixelData;
-                pixelDataSize = other.pixelDataSize;
-                pixelDataPos = other.pixelDataPos;
-                cyclesPerFill = other.cyclesPerFill;
-                maxCyclesPerFill = other.maxCyclesPerFill;
-                lastFill = other.lastFill;
-                transmissionStartTime = other.transmissionStartTime;
-                sourceData = other.sourceData;
-            }
-            return *this;
-        }
-
-        ChannelState(ChannelState&& other) FL_NO_EXCEPT
-            : ChannelState(static_cast<const ChannelState&>(other)) {}
-
-        ChannelState& operator=(ChannelState&& other) FL_NO_EXCEPT {
-            return operator=(static_cast<const ChannelState&>(other));
-        }
-
-        // Hardware Configuration
-        rmt_channel_t channel;
-        gpio_num_t pin;
-        bool inUse;
-
-        // Timing Symbols
-        rmt_item32_t zero;
-        rmt_item32_t one;
-
-        // Transmission State
-        fl::atomic_bool transmissionComplete;
-        bool resetWaitStarted;
-        u32 resetStartTimeUs;
-        u32 resetDurationUs;
-
-        // Double-Buffer State
-        int whichHalf;
-        volatile rmt_item32_t *memPtr;
-        volatile rmt_item32_t *memStart;
-
-        // Pixel Data Buffer
-        const u8 *pixelData;
-        size_t pixelDataSize;
-        volatile size_t pixelDataPos;
-
-        // Performance Monitoring
-        u32 cyclesPerFill;
-        u32 maxCyclesPerFill;
-        volatile u32 lastFill;
-
-        // Timeout Detection
-        u32 transmissionStartTime; // millis() when transmission started
-
-        // Source reference
+        rmt_channel_t channel = static_cast<rmt_channel_t>(0);
+        gpio_num_t pin = static_cast<gpio_num_t>(0);
+        u8 memBlocks = 0;
+        bool configured = false;
+        bool inUse = false;
+        bool resetWaitStarted = false;
+        u32 resetStartTimeUs = 0;
+        u32 resetDurationUs = 0;
+        u32 transmissionStartTime = 0;
         ChannelDataPtr sourceData;
+        fl::shared_ptr<InternalSource> internalSource;
     };
 
-    // ═══════════════════════════════════════════════════════════════════════════
-    // Member Variables
-    // ═══════════════════════════════════════════════════════════════════════════
-
     fl::vector_inlined<ChannelState, FASTLED_RMT_MAX_CHANNELS> mChannels;
-    fl::vector_inlined<ChannelDataPtr, 16>
-        mEnqueuedChannels; // Batched between enqueue() and show()
-    fl::vector_inlined<ChannelDataPtr, 16>
-        mPendingChannels; // Awaiting HW channels
-    fl::shared_ptr<detail::IRMT4Peripheral>
-        mPeripheral; // Hardware lifecycle wrapper (#3458)
-    void
-        *mRMT_intr_handle; // intr_handle_t, opaque via the peripheral interface
-    portMUX_TYPE mRmtSpinlock;
-    bool mInitialized;
+    fl::vector_inlined<ChannelDataPtr, 16> mEnqueuedChannels;
+    fl::vector_inlined<ChannelDataPtr, 16> mPendingChannels;
+    fl::shared_ptr<detail::IRMT4Peripheral> mPeripheral;
+    bool mError = false;
+    bool mFlashLocked = false;
 
-    // ═══════════════════════════════════════════════════════════════════════════
-    // ISR Handlers (IRAM) - noinline to prevent GCC 14+ literal pool
-    // reordering on Xtensa (l32r: literal placed after use)
-    // ═══════════════════════════════════════════════════════════════════════════
+    void lockFlash() FL_NO_EXCEPT;
+    void unlockFlash() FL_NO_EXCEPT;
 
-    static FL_NO_INLINE IRAM_ATTR void handleInterrupt(void *arg) FL_NO_EXCEPT {
-        // Main ISR dispatcher
-        auto *driver = static_cast<ChannelEngineRMT4Impl *>(arg);
-
-        // Enter critical section and read interrupt status
-        portENTER_CRITICAL_ISR(&driver->mRmtSpinlock);
-        u32 intr_st = RMT.int_st.val;
-        portEXIT_CRITICAL_ISR(&driver->mRmtSpinlock);
-
-        // Check each channel for interrupts
-        for (u8 channel = 0; channel < FASTLED_RMT_MAX_CHANNELS; channel++) {
-#if defined(FL_IS_ESP_32S2)
-            int tx_done_bit = channel * 3;
-            int tx_next_bit = channel + 12;
-#elif defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32C3)
-            int tx_done_bit = channel;
-            int tx_next_bit = channel + 8;
-#elif defined(FL_IS_ESP_32H2)
-            int tx_done_bit = channel;
-            int tx_next_bit = channel + 8;
-#elif defined(FL_IS_ESP_32C6)
-            int tx_done_bit = channel;
-            int tx_next_bit = channel + 8;
-#elif defined(FL_IS_ESP_32DEV)
-            int tx_done_bit = channel * 3;
-            int tx_next_bit = channel + 24;
-#else
-#error "Unknown ESP32 target for RMT interrupt bit positions"
-#endif
-
-            // Check if this channel is active
-            ChannelState *state = driver->findChannelByNumber(channel);
-            if (state != nullptr && state->inUse) {
-                // Handle threshold interrupt (half-buffer empty, needs refill)
-                if (intr_st & BIT(tx_next_bit)) {
-                    driver->onThresholdInterrupt(channel);
-                    RMT.int_clr.val = BIT(tx_next_bit);
-                }
-
-                // Handle TX done interrupt (transmission complete)
-                if (intr_st & BIT(tx_done_bit)) {
-                    driver->onTxDoneInterrupt(channel);
-                    RMT.int_clr.val = BIT(tx_done_bit);
-                }
-            }
-        }
-    }
-
-    FL_NO_INLINE IRAM_ATTR void
-    onThresholdInterrupt(int channelNum) FL_NO_EXCEPT {
-        // Threshold interrupt: Half of the RMT buffer has been transmitted
-        ChannelState *state = findChannelByNumber(channelNum);
-        if (state == nullptr || !state->inUse) {
-            return;
-        }
-
-        // Fill the next buffer half (with WiFi interference check enabled)
-        fillNextBuffer(state, true);
-    }
-
-    FL_NO_INLINE IRAM_ATTR void onTxDoneInterrupt(int channelNum) FL_NO_EXCEPT {
-        // TX done interrupt: Transmission is complete on this channel
-        ChannelState *state = findChannelByNumber(channelNum);
-        if (state == nullptr || !state->inUse) {
-            return;
-        }
-
-        // Disable TX interrupts for this channel (platform-specific)
-#if defined(FL_IS_ESP_32C3)
-        RMT.int_ena.val &= ~(1 << channelNum);
-#elif defined(FL_IS_ESP_32H2)
-        RMT.int_ena.val &= ~(1 << channelNum);
-#elif defined(FL_IS_ESP_32S3)
-        RMT.int_ena.val &= ~(1 << channelNum);
-#elif defined(FL_IS_ESP_32C6)
-        RMT.int_ena.val &= ~(1 << channelNum);
-#elif defined(FL_IS_ESP_32S2)
-        RMT.int_ena.val &= ~(1 << (channelNum * 3));
-#elif defined(FL_IS_ESP_32DEV)
-        RMT.int_ena.val &= ~(1 << (channelNum * 3));
-#else
-#error "Unknown ESP32 target for RMT interrupt disable"
-#endif
-
-        // Keep the RMT signal connected after TX-done. The channel is
-        // configured idle-low, so poll() can enforce the chipset reset time
-        // before disconnecting and releasing this hardware channel.
-        state->transmissionComplete.store(true, fl::memory_order_release);
-    }
-
-    FL_NO_INLINE IRAM_ATTR void fillNextBuffer(ChannelState *state,
-                                               bool checkTime) FL_NO_EXCEPT {
-        // Fill the next half of the RMT double-buffer with pixel data
-        if (!state) {
-            return;
-        }
-
-        // WiFi interference detection: Measure time between buffer refills
-        u32 now = __clock_cycles();
-        if (checkTime && state->lastFill != 0) {
-            i32 delta = static_cast<i32>(now - state->lastFill);
-            if (delta > static_cast<i32>(state->maxCyclesPerFill)) {
-                // Too much time elapsed - WiFi interrupt interference detected
-                state->pixelDataPos = state->pixelDataSize;
-            }
-        }
-        state->lastFill = now;
-
-        // Get timing symbols into local registers (fast access)
-        FASTLED_REGISTER u32 one_val = state->one.val;
-        FASTLED_REGISTER u32 zero_val = state->zero.val;
-
-        // Calculate pointer to current buffer half
-        volatile FASTLED_REGISTER rmt_item32_t *pItem = state->memPtr;
-
-        // Fill one half of the buffer
-        for (FASTLED_REGISTER int i = 0; i < PULSES_PER_FILL_RMT4 / 8; i++) {
-            if (state->pixelDataPos < state->pixelDataSize) {
-                // Convert next byte to 8 RMT symbols
-                u8 byteval = state->pixelData[state->pixelDataPos];
-                convertByteToRMT(byteval, state->zero, state->one, pItem);
-                pItem += 8;
-                state->pixelDataPos++;
-            } else {
-                // No more data - fill rest of buffer with zeros
-                pItem->val = 0;
-                pItem++;
-            }
-        }
-
-        // Toggle to the other buffer half for next refill
-        state->whichHalf++;
-        if (state->whichHalf == 2) {
-            pItem = state->memStart;
-            state->whichHalf = 0;
-        }
-
-        // Update pointer for next refill
-        state->memPtr = pItem;
-    }
-
-    static FL_NO_INLINE IRAM_ATTR void
-    convertByteToRMT(u8 byteval, const rmt_item32_t &zero,
-                     const rmt_item32_t &one,
-                     volatile rmt_item32_t *pItem) FL_NO_EXCEPT {
-        // Convert 1 byte → 8 RMT symbols (MSB first)
-        u32 pixel_u32 = byteval;
-        pixel_u32 <<= 24; // Shift to MSB position for bit extraction
-
-        u32 tmp[8];
-        for (u32 j = 0; j < 8; j++) {
-            // Extract MSB and select symbol
-            u32 new_val = (pixel_u32 & 0x80000000L) ? one.val : zero.val;
-            pixel_u32 <<= 1;
-
-            // Write to non-volatile buffer (compiler can optimize)
-            tmp[j] = new_val;
-        }
-
-        // Copy to volatile hardware memory (unrolled for performance)
-        pItem[0].val = tmp[0];
-        pItem[1].val = tmp[1];
-        pItem[2].val = tmp[2];
-        pItem[3].val = tmp[3];
-        pItem[4].val = tmp[4];
-        pItem[5].val = tmp[5];
-        pItem[6].val = tmp[6];
-        pItem[7].val = tmp[7];
-    }
-
-    static FL_NO_INLINE IRAM_ATTR void
-    tx_start(ChannelState *state) FL_NO_EXCEPT {
-        // Start RMT transmission by setting hardware flag
-        if (!state) {
-            return;
-        }
-
-        rmt_channel_t channel = state->channel;
-
-        // Platform-specific register access
-#if defined(FL_IS_ESP_32C3)
-        RMT.tx_conf[channel].mem_rd_rst = 1;
-        RMT.tx_conf[channel].mem_rd_rst = 0;
-        RMT.tx_conf[channel].mem_rst = 1;
-        RMT.tx_conf[channel].mem_rst = 0;
-        RMT.int_clr.val = (1 << channel);
-        RMT.int_ena.val |= (1 << channel);
-        RMT.tx_conf[channel].conf_update = 1;
-        RMT.tx_conf[channel].tx_start = 1;
-
-#elif defined(FL_IS_ESP_32H2)
-        RMT.chnconf0[channel].mem_rd_rst_chn = 1;
-        RMT.chnconf0[channel].mem_rd_rst_chn = 0;
-        RMT.chnconf0[channel].apb_mem_rst_chn = 1;
-        RMT.chnconf0[channel].apb_mem_rst_chn = 0;
-        RMT.int_clr.val = (1 << channel);
-        RMT.int_ena.val |= (1 << channel);
-        RMT.chnconf0[channel].conf_update_chn = 1;
-        RMT.chnconf0[channel].tx_start_chn = 1;
-
-#elif defined(FL_IS_ESP_32S3)
-#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
-        RMT.chnconf0[channel].mem_rd_rst_chn = 1;
-        RMT.chnconf0[channel].mem_rd_rst_chn = 0;
-        RMT.chnconf0[channel].apb_mem_rst_chn = 1;
-        RMT.chnconf0[channel].apb_mem_rst_chn = 0;
-        RMT.int_clr.val = (1 << channel);
-        RMT.int_ena.val |= (1 << channel);
-        RMT.chnconf0[channel].conf_update_chn = 1;
-        RMT.chnconf0[channel].tx_start_chn = 1;
-#else
-        RMT.chnconf0[channel].mem_rd_rst_n = 1;
-        RMT.chnconf0[channel].mem_rd_rst_n = 0;
-        RMT.chnconf0[channel].apb_mem_rst_n = 1;
-        RMT.chnconf0[channel].apb_mem_rst_n = 0;
-        RMT.int_clr.val = (1 << channel);
-        RMT.int_ena.val |= (1 << channel);
-        RMT.chnconf0[channel].conf_update_n = 1;
-        RMT.chnconf0[channel].tx_start_n = 1;
-#endif
-
-#elif defined(FL_IS_ESP_32C6)
-        RMT.chnconf0[channel].mem_rd_rst_chn = 1;
-        RMT.chnconf0[channel].mem_rd_rst_chn = 0;
-        RMT.chnconf0[channel].apb_mem_rst_chn = 1;
-        RMT.chnconf0[channel].apb_mem_rst_chn = 0;
-        RMT.int_clr.val = (1 << channel);
-        RMT.int_ena.val |= (1 << channel);
-        RMT.chnconf0[channel].conf_update_chn = 1;
-        RMT.chnconf0[channel].tx_start_chn = 1;
-
-#elif defined(FL_IS_ESP_32S2)
-        RMT.conf_ch[channel].conf1.mem_rd_rst = 1;
-        RMT.conf_ch[channel].conf1.mem_rd_rst = 0;
-        RMT.conf_ch[channel].conf1.apb_mem_rst = 1;
-        RMT.conf_ch[channel].conf1.apb_mem_rst = 0;
-        RMT.int_clr.val = (1 << (channel * 3));
-        RMT.int_ena.val |= (1 << (channel * 3));
-        RMT.conf_ch[channel].conf1.tx_start = 1;
-
-#else
-        // ESP32 (original)
-        RMT.conf_ch[channel].conf1.mem_rd_rst = 1;
-        RMT.conf_ch[channel].conf1.mem_rd_rst = 0;
-        RMT.conf_ch[channel].conf1.apb_mem_rst = 1;
-        RMT.conf_ch[channel].conf1.apb_mem_rst = 0;
-        RMT.int_clr.val = (1 << (channel * 3));
-        RMT.int_ena.val |= (1 << (channel * 3));
-        RMT.conf_ch[channel].conf1.tx_start = 1;
-#endif
-    }
-
-    FL_NO_INLINE IRAM_ATTR ChannelState *
-    findChannelByNumber(int channelNum) FL_NO_EXCEPT {
-        // Linear search through active channels
-        for (auto &state : mChannels) {
-            if (state.inUse && state.channel == channelNum) {
-                return &state;
-            }
-        }
-        return nullptr;
-    }
-
-    // ═══════════════════════════════════════════════════════════════════════════
-    // Channel Management
-    // ═══════════════════════════════════════════════════════════════════════════
-
-    /// @brief Begin LED data transmission for all channels (internal helper)
-    void
-    beginTransmission(fl::span<const ChannelDataPtr> channelData) FL_NO_EXCEPT;
-
-    ChannelState *
-    acquireChannel(gpio_num_t pin,
-                   const ChipsetTimingConfig &timing) FL_NO_EXCEPT;
+    ChannelState *acquireChannel(gpio_num_t pin,
+                                const ChipsetTimingConfig &timing) FL_NO_EXCEPT;
     void releaseChannel(ChannelState *state) FL_NO_EXCEPT;
+    void destroyChannel(ChannelState *state) FL_NO_EXCEPT;
     bool configureChannel(ChannelState *state, gpio_num_t pin,
                           const ChipsetTimingConfig &timing) FL_NO_EXCEPT;
     void processPendingChannels() FL_NO_EXCEPT;
     void startTransmission(ChannelState *state,
                            const ChannelDataPtr &data) FL_NO_EXCEPT;
-
-    // ═══════════════════════════════════════════════════════════════════════════
-    // Helpers
-    // ═══════════════════════════════════════════════════════════════════════════
-
-    static rmt_item32_t
-    makeZeroSymbol(const ChipsetTimingConfig &timing) FL_NO_EXCEPT;
-    static rmt_item32_t
-    makeOneSymbol(const ChipsetTimingConfig &timing) FL_NO_EXCEPT;
+    static rmt_item32_t makeZeroSymbol(const ChipsetTimingConfig &timing) FL_NO_EXCEPT;
+    static rmt_item32_t makeOneSymbol(const ChipsetTimingConfig &timing) FL_NO_EXCEPT;
 };
 
 } // namespace fl

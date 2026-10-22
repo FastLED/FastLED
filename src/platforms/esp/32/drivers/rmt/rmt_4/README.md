@@ -1,405 +1,127 @@
-# ESP32 RMT4 Driver (IDF 4.x) - ChannelManager Architecture
+# ESP32 RMT4 driver
 
-## Overview
+The IDF 4.x backend implements `IChannelDriver` for clockless LED output.
+`ChannelEngineRMT4Impl` queues source `ChannelData`, starts asynchronous SDK
+transfers and polls their completion. IDF 5.x uses the separate RMT5 backend.
 
-This directory contains the **ChannelManager-based RMT4 driver** for ESP32 platforms using ESP-IDF 4.x. It replaces the legacy global-state implementation (`idf4_rmt_impl.cpp`) with a modern, encapsulated architecture that integrates seamlessly with FastLED's unified channel management system.
+## Legacy API footprint
 
-**Key Features:**
-- ✅ **Zero global state** - All state encapsulated in `ChannelEngineRMT4` class
-- ✅ **Double-buffer ISR-driven refill** - WiFi interference resistant
-- ✅ **Time-multiplexing support** - Handle >8 LED strips via channel sharing
-- ✅ **Direct hardware memory access** - High-performance pixel transmission
-- ✅ **Polling-based architecture** - Compatible with ChannelManager pattern
-- ✅ **Identical timing characteristics** - Drop-in replacement for legacy RMT4
-- ✅ **`IRMT4Peripheral` lifecycle wrapper** (#3458) - ESP-IDF API surface is
-   isolated behind a virtual interface mirroring `IUartPeripheral` /
-   `IRMT5Peripheral`. The ISR hot path stays inline IRAM and is **not**
-   virtualised (see `irmt4_peripheral.h` for the interface scope).
+`FastLED.addLeds<>()` uses the existing slim bridge in direct mode by default.
+All legacy strips enqueue before `endShowLeds()` flushes their shared driver
+and waits for completion. Strips still transmit in parallel when hardware
+capacity allows; polling also advances strips waiting for a hardware channel.
+Standalone `controller.showLeds()` uses the same completion hook.
 
----
+A legacy-only sketch therefore does not retain `ChannelManager` just to render
+its LEDs. `FastLED.add()` continues to use the Channel API and its manager.
+Mixed sketches retain that manager as required by their Channel API calls.
 
-## Architecture
+Direct legacy controllers use their controller's `setEnabled()` setting. They
+do not participate in the ChannelManager registry's runtime driver enable,
+disable, exclusive selection or enumeration. Sketches needing those controls
+for legacy controllers can build with `FL_SLIM_BRIDGE_DIRECT_SHOW=0` to restore
+the managed bridge. This choice does not change RMT4's translator, allocation,
+reset timing or transmission timeout handling.
 
-### Class Structure
+Matched 96-RGB-LED Lolin D32 reporter (espressif32 6.13.0, Arduino 2.0.17,
+IDF 4.4.7), compared with PR #4877 at `b8ae6a398`:
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                   ChannelManager                          │
-│  (Singleton - manages all transmission drivers)             │
-└────────────────────────┬────────────────────────────────────┘
-                         │
-                         │ registers driver
-                         ▼
-┌─────────────────────────────────────────────────────────────┐
-│                  ChannelEngineRMT4                           │
-│  (RMT4 hardware abstraction layer)                          │
-│                                                              │
-│  • Manages up to 8 RMT channels (platform-dependent)        │
-│  • Implements ISR handlers for double-buffer refill         │
-│  • Queues pending transmissions (time-multiplexing)         │
-│  • Polls for transmission completion                        │
-└────────────────────────┬────────────────────────────────────┘
-                         │
-                         │ uses
-                         ▼
-┌─────────────────────────────────────────────────────────────┐
-│                 ChannelState (per channel)                   │
-│  • Hardware configuration (pin, RMT channel)                │
-│  • Timing symbols (zero, one)                               │
-│  • Double-buffer state (memPtr, whichHalf)                  │
-│  • Pixel data reference (owned by ChannelData)              │
-│  • Transmission state flags                                 │
-└─────────────────────────────────────────────────────────────┘
-```
+| Build | Flash bytes | Static RAM bytes |
+|---|---:|---:|
+| Managed legacy bridge before this change | 295,670 | 23,844 |
+| Direct legacy bridge with completion polling | 289,426 | 23,636 |
+| Saving | 6,244 | 208 |
 
-### Component Files
+`bash bloat` confirms no executable `ChannelManager` symbols in the direct
+reporter. This is static memory accounting; the SDK translator and frame
+storage still allocate heap. The managed override on the new code measures
+295,686 flash / 23,844 static RAM bytes.
+
+## Interrupt ownership
+
+TX and RX both use the SDK's RMT driver and its single shared ISR. TX installs
+an IRAM byte translator with `rmt_translator_init` and starts a transfer with
+`rmt_write_sample(..., false)`. It does not install a competing custom ISR.
+
+The translator converts bytes into MSB-first RMT symbols using the original
+chipset timing conversion. Per-channel timing symbols and refill timestamps
+live in internal DRAM. Explicit out-of-line IRAM callbacks avoid the Xtensa
+literal-pool placement failures of inline class methods. No virtual calls or
+SDK context lookup occur in the translator. The legacy late-refill check
+ends a frame if more than 1.5 times its expected half-buffer duration elapses.
+
+The SDK owns the refill buffer, threshold interrupts and stop symbol. This
+requires a bounded heap buffer of `blocks * words_per_block * 4` bytes per
+configured TX channel, plus SDK bookkeeping; it does not pre-encode the whole
+LED strip. A classic ESP32 channel using two blocks needs 512 bytes for that
+buffer. Internal-DRAM source data is passed directly to the SDK. A PSRAM source
+requires an additional internal-DRAM copy of the raw bytes for cache-safe ISR
+access; allocation failure returns `ERROR`. The channel retains its source
+`ChannelData` and any internal copy until transmission has completed or the SDK
+driver has been stopped and uninstalled.
+
+## Memory ownership and channel reuse
+
+`RmtMemoryManager4` tracks both aggregate symbol-word allocations and actual
+contiguous hardware-block reservations. TX and RX must reserve their physical
+span before hardware configuration and release it on failure or destruction.
+A two-block channel at hardware channel zero therefore excludes channel one.
+The manager takes the SoC's block size and channel geometry from the SDK.
+
+TX normally receives two blocks. The existing network tracker remains a stub;
+if it eventually requests three blocks, the SDK derives its refill halves
+from the actual configured size. Concurrent capacity depends on these block
+reservations and any RX allocations; extra strips wait for a TX channel.
+
+Idle TX channels retain their SDK driver and memory reservation for reuse.
+Every reuse reconnects the GPIO, even for the same pin. GPIO inputs remain
+enabled alongside TX output so an RMT RX channel can observe a same-pin
+loopback. Configuring another pin disconnects the previous output first.
+
+## Completion and failure
+
+`poll()` uses `rmt_wait_tx_done(channel, 0)` without blocking. After completion,
+the output stays connected at the configured idle-low level for at least the
+chipset's `reset_us` before the channel is released for reuse. The legacy
+`WAIT_TIME` setting can extend that interval through `SlimBridgeController`.
+
+`FASTLED_RMT4_TRANSMISSION_TIMEOUT_MS` defaults to 2000 milliseconds; zero
+disables the timeout. A timeout stops and uninstalls the SDK driver before
+releasing the source buffer. This also resets the SDK semaphore, preventing a
+later transfer from blocking on the timed-out transfer. Setup failures and a
+fully unavailable physical pool return `ERROR` instead of an endless pending
+queue.
+
+IRAM interrupt flags request cache-safe SDK handling, but behavior also depends
+on the SDK build configuration and on the first RMT channel installed. Device
+loopback checks do not establish reliability under Wi-Fi or flash-cache stress;
+those require separate measurements. The existing IDF 3-only
+`FASTLED_ESP32_FLASH_LOCK=1` setting holds the flash-operation lock until all
+active transmissions finish. IDF 4 has no implementation of that setting.
+
+## RX validation limits
+
+The legacy RX adapter captures one hardware block per frame (64 symbols on
+classic ESP32). Its bounded SDK ring buffer includes item-header headroom;
+larger software requests do not increase physical capture capacity. All SDK
+items, including empty idle packets, are returned to the ring buffer. A completed
+capture stops RX; rearming discards stale packets. The decoder joins HIGH/LOW
+durations across SDK symbol boundaries and rejects physical overflow before
+allowing an SDK-omitted final LOW. Injected edge streams are independent of that
+physical capacity check.
+
+Short same-pin loopback validates byte correctness. Longer-strip refill smoke
+validates forward progress, without establishing full waveform or stress parity.
+
+## Files
 
 | File | Purpose |
-|------|---------|
-| `channel_engine_rmt4.h` | Header with class definition, ~260 lines |
-| `channel_engine_rmt4.cpp` | Implementation with ISR handlers, ~885 lines |
-| `idf4_clockless_rmt_esp32.h` | Strip driver (simplified to ~95 lines) |
-| `idf4_rmt_impl.{h,cpp}` | **DEPRECATED** - Legacy global-state implementation |
-| `idf4_rmt.{h,cpp}` | **DEPRECATED** - Old RMT controller wrapper |
-
----
-
-## Migration from Legacy RMT4
-
-### What Changed
-
-| Legacy (idf4_rmt_impl.cpp) | New (ChannelEngineRMT4) |
-|----------------------------|-------------------------|
-| `gControllers[]` global array | `mChannels` member vector |
-| `gOnChannel[]` lookup table | `findChannelByNumber()` method |
-| `gTX_sem` semaphore blocking | `pollDerived()` polling |
-| `gRMT_intr_handle` global | `mRMT_intr_handle` member |
-| `rmt_spinlock` global | `mRmtSpinlock` member |
-| `ESP32RMTController` class | Replaced by `ChannelState` struct |
-| Manual ISR registration per controller | Single ISR for all channels |
-| Semaphore-based wait | Non-blocking enqueue/poll pattern |
-
-### Key Architectural Improvements
-
-1. **Encapsulation**
-   - All global state moved into `ChannelEngineRMT4` class
-   - No static variables or global mutexes
-   - Multiple driver instances possible (though not used)
-
-2. **Lifecycle Management**
-   - Constructor registers ISR, destructor cleans up all resources
-   - Channels reused across transmissions (fast reacquisition)
-   - RAII pattern prevents resource leaks
-
-3. **Separation of Concerns**
-   - Strip driver (`idf4_clockless_rmt_esp32.h`) only encodes pixels
-   - Engine handles all transmission, ISR logic, and hardware management
-   - Clear interface via `ChannelEngine` base class
-
-4. **Time-Multiplexing**
-   - Pending queue allows >8 strips with automatic channel reuse
-   - Channels released immediately after completion
-   - Next pending strip starts as soon as channel available
-
----
-
-## Double-Buffer Mechanism
-
-The RMT4 driver uses a **double-buffer refill strategy** to achieve glitch-free LED updates even under WiFi interference:
-
-```
-RMT Hardware Memory (2 memory blocks = 128 words = 256 bytes)
-┌──────────────────┬──────────────────┐
-│   Buffer Half 0  │   Buffer Half 1  │
-│   (64 words)     │   (64 words)     │
-└──────────────────┴──────────────────┘
-        ▲                    ▲
-        │                    │
-   Hardware reads      ISR refills
-   (currently sending)  (next data)
-```
-
-**Flow:**
-1. Initial fill: ISR fills both halves before transmission starts
-2. Hardware reads from half 0, sends to LEDs
-3. When half 0 depleted, **threshold interrupt** fires
-4. ISR refills half 0 with next data (while hardware reads half 1)
-5. Process repeats until all pixel data transmitted
-6. **TX done interrupt** fires when complete
-
-**WiFi Interference Detection:**
-- ISR measures time between refills (`lastFill` timestamp)
-- If time > 1.5× expected, WiFi interrupt likely delayed ISR
-- Abort transmission to prevent LED glitches (preferable to garbled colors)
-
----
-
-## ISR Safety
-
-All interrupt handlers are marked `IRAM_ATTR` to ensure flash-safe execution:
-
-| Function | Purpose | IRAM? |
-|----------|---------|-------|
-| `handleInterrupt()` | Main ISR dispatcher | ✅ |
-| `onThresholdInterrupt()` | Half-buffer refill trigger | ✅ |
-| `onTxDoneInterrupt()` | Transmission complete handler | ✅ |
-| `fillNextBuffer()` | Double-buffer refill logic | ✅ |
-| `convertByteToRMT()` | Byte → 8 RMT symbols | ✅ |
-| `tx_start()` | Hardware kickoff | ✅ |
-
-**Critical Sections:**
-- Spinlock (`mRmtSpinlock`) protects RMT register access
-- `portENTER_CRITICAL_ISR` used in ISR context
-- `portENTER_CRITICAL` used in main thread context
-
-**Volatile Variables:**
-- `transmissionComplete` - ISR sets, main thread reads
-- `memPtr` - ISR advances during buffer fill
-- `pixelDataPos` - ISR increments as data consumed
-- `lastFill` - ISR updates for WiFi interference detection
-
----
-
-## Platform Support
-
-Channel and memory-block figures describe the silicon. This driver itself
-builds only on ESP-IDF 4.x — see the note under *Conditional Compilation*.
-
-| Platform | RMT Channels | Memory Blocks | RMT4 driver | Status |
-|----------|--------------|---------------|-------------|--------|
-| ESP32 (original) | 8 | 64 words/channel | ✅ IDF 4.x | ✅ Tested |
-| ESP32-S2 | 4 | 64 words/channel | ✅ IDF 4.x | ✅ Tested |
-| ESP32-S3 | 4 | 48 words/channel | ✅ IDF 4.x | ✅ Tested |
-| ESP32-C3 | 2 | 48 words/channel | ✅ IDF 4.x | ⚠️ Untested |
-| ESP32-C6 | 2 | 48 words/channel | ❌ RMT5-only silicon | n/a |
-| ESP32-H2 | 2 | 48 words/channel | ❌ RMT5-only silicon | n/a |
-
-ESP32-C6 and ESP32-H2 have a newer RMT architecture that the legacy driver does
-not target; `FASTLED_ESP32_RMT5_ONLY_PLATFORM` forces `FASTLED_RMT5=1` there
-regardless of IDF version.
-
-**Conditional Compilation:**
-- RMT4 driver used when `FASTLED_RMT5=0` (IDF 4.x default)
-- RMT5 driver used when `FASTLED_RMT5=1` (IDF 5.x with new RMT API)
-- Both drivers are mutually exclusive (compile-time selection)
-
-> **IDF 4.x only.** Setting `FASTLED_RMT5=0` on ESP‑IDF 5.x or newer is rejected
-> by `FastLED.h` with a compile-time diagnostic. This driver does not build
-> against IDF 5 headers — `RMTMEM` is not exposed publicly there, and the TX/RX
-> engines predate the current `IChannelDriver` / `RmtRxChannel` contracts. See
-> FastLED#3936.
-
----
-
-## Configuration Macros
-
-### Memory Configuration
-
-```cpp
-// Memory blocks per channel (default: 2 = 128 words)
-#define FASTLED_RMT_MEM_BLOCKS 2
-
-// Words per channel (auto-detected from platform)
-#define FASTLED_RMT_MEM_WORDS_PER_CHANNEL 64  // ESP32, ESP32-S2
-#define FASTLED_RMT_MEM_WORDS_PER_CHANNEL 48  // ESP32-S3, C3, C6, H2
-```
-
-### Timing Configuration
-
-```cpp
-// Clock divider (2 = 40MHz RMT clock on 80MHz APB)
-#define DIVIDER_RMT4 2
-
-// Total buffer capacity
-#define MAX_PULSES_RMT4 (FASTLED_RMT_MEM_WORDS_PER_CHANNEL * FASTLED_RMT_MEM_BLOCKS)
-
-// Half-buffer size for double-buffering
-#define PULSES_PER_FILL_RMT4 (MAX_PULSES_RMT4 / 2)
-```
-
-### Platform-Specific Channels
-
-```cpp
-// Max TX channels (auto-detected from platform)
-#define FASTLED_RMT_MAX_CHANNELS 8  // ESP32
-#define FASTLED_RMT_MAX_CHANNELS 4  // ESP32-S2, S3
-#define FASTLED_RMT_MAX_CHANNELS 2  // ESP32-C3, C6, H2
-```
-
----
-
-## Usage Example
-
-```cpp
-#include <FastLED.h>
-
-#define NUM_LEDS 100
-#define DATA_PIN 5
-
-CRGB leds[NUM_LEDS];
-
-void setup() {
-    // Automatically uses ChannelEngineRMT4 on IDF 4.x platforms
-    FastLED.addLeds<WS2812, DATA_PIN, GRB>(leds, NUM_LEDS);
-}
-
-void loop() {
-    fill_rainbow(leds, NUM_LEDS, 0, 7);
-    FastLED.show();  // Non-blocking enqueue + polling
-    delay(20);
-}
-```
-
-**Multi-Strip Example:**
-
-```cpp
-// More than 8 strips: Time-multiplexing automatically enabled
-FastLED.addLeds<WS2812, 5, GRB>(leds1, 100);
-FastLED.addLeds<WS2812, 6, GRB>(leds2, 100);
-// ... (up to 16 strips queued)
-FastLED.addLeds<WS2812, 21, GRB>(leds10, 100);
-
-FastLED.show();  // Queues all 10 strips, sends 8 at once, remaining 2 wait
-```
-
----
-
-## Performance Characteristics
-
-### Timing Accuracy
-
-| Metric | Value | Notes |
-|--------|-------|-------|
-| RMT Clock | 40 MHz | With `DIVIDER_RMT4=2` on 80MHz APB |
-| Timing Resolution | 25 ns | 1 RMT cycle = 25 nanoseconds |
-| WS2812 T0H | 400 ns | ±150ns tolerance |
-| WS2812 T0L | 850 ns | ±150ns tolerance |
-| WS2812 T1H | 800 ns | ±150ns tolerance |
-| WS2812 T1L | 450 ns | ±150ns tolerance |
-
-### Throughput
-
-| Configuration | Throughput | Notes |
-|---------------|------------|-------|
-| Single strip | ~800 kHz | Hardware-limited, no software overhead |
-| 8 concurrent strips | ~6.4 MHz aggregate | Full hardware utilization |
-| >8 strips (time-mux) | ~800 kHz per strip | Sequential transmission |
-
-### ISR Latency
-
-| Interrupt Type | Max Latency | Notes |
-|----------------|-------------|-------|
-| Threshold (refill) | <10 µs | Critical path, must complete before next half |
-| TX Done | <5 µs | Non-critical, just sets flag |
-| WiFi Interference | Detected if >1.5× expected | Aborts to prevent glitches |
-
----
-
-## Debugging
-
-### Enable Debug Output
-
-```cpp
-// Before including FastLED.h
-#define FASTLED_DEBUG_ENABLED 1
-#include <FastLED.h>
-```
-
-### Debug Messages
-
-The driver emits `FL_LOG_RMT()` messages for key events:
-- Channel acquisition: `"acquireChannel: Reusing channel N for pin P"`
-- Transmission start: `"startTransmission: Started channel N on pin P, X bytes"`
-- Completion: `"pollDerived: Channel N completed"`
-- Time-multiplexing: `"processPendingChannels: All N channels busy, deferring X pending strips"`
-
-### Common Issues
-
-**Problem:** LEDs flicker or show wrong colors
-- **Cause:** WiFi interference delaying ISR refills
-- **Solution:** Increase `FASTLED_RMT_MEM_BLOCKS` to 3 or 4 (more buffering)
-
-**Problem:** Only first 8 strips work
-- **Cause:** Time-multiplexing not enabled or polling not called
-- **Solution:** Ensure `FastLED.show()` returns quickly and is called in loop
-
-**Problem:** Compilation errors about `ChannelDataPtr`
-- **Cause:** Old FastLED version without ChannelManager support
-- **Solution:** Update to FastLED 3.7+ or rebuild from latest source
-
----
-
-## Performance Comparison
-
-### Before (Legacy RMT4)
-
-```cpp
-// Old implementation (idf4_rmt_impl.cpp)
-- 800+ lines of implementation
-- 10 global variables
-- Semaphore blocking on FastLED.show()
-- Manual channel management per strip
-- Complex ISR state tracking
-```
-
-### After (ChannelEngineRMT4)
-
-```cpp
-// New implementation (channel_engine_rmt4.cpp)
-- 885 lines (includes extensive documentation)
-- Zero global variables
-- Non-blocking enqueue/poll pattern
-- Unified channel management
-- Clean ISR dispatch via class methods
-```
-
-**Strip Driver Simplification:**
-
-| Metric | Legacy | New | Change |
-|--------|--------|-----|--------|
-| Lines of code | ~120 | ~95 | -21% |
-| Responsibilities | Encode + transmit + manage | Encode only | Simplified |
-| RMT-specific code | ~60 lines | 0 lines | -100% |
-| Global dependencies | 3 | 0 | -100% |
-
----
-
-## Future Work
-
-### Planned Improvements
-
-1. **DMA Support** - Offload buffer refill to DMA controller (ESP32-S3+)
-2. **Adaptive Timing** - Auto-tune timing based on measured LED response
-3. **Multi-Channel Sync** - Synchronized start for multiple strips
-4. **Power Management** - Integrate with ESP32 power-saving modes
-
-### Migration to RMT5
-
-For users on ESP-IDF 5.x, consider migrating to `ChannelEngineRMT` (RMT5 driver):
-- Simpler API (no manual memory management)
-- Better interrupt handling
-- Official ESP-IDF support
-
-Set `FASTLED_RMT5=1` in platformio.ini or build flags.
-
----
-
-## References
-
-- [ESP32 RMT Peripheral Documentation](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/peripherals/rmt.html)
-- [FastLED ChannelManager Architecture](../../../../fl/channels/README.md)
-- [WS2812 Timing Specification](https://cdn-shop.adafruit.com/datasheets/WS2812.pdf)
-
----
-
-## Credits
-
-**Original RMT4 Implementation:** FastLED contributors (idf4_rmt_impl.cpp)
-**ChannelManager Migration:** FastLED core team (2024)
-**Architecture Reference:** RMT5 implementation (channel_engine_rmt.cpp)
-
----
-
-**Last Updated:** 2024-11-21
-**Tested With:** ESP-IDF 4.4.x, 5.3.x, 5.4.x
-**Status:** Production-ready, backward-compatible with legacy RMT4
+|---|---|
+| `channel_driver_rmt4.h` | Engine interface and per-channel task state |
+| `channel_driver_rmt4.cpp.hpp` | Byte translators, queueing and polling |
+| `irmt4_peripheral.h` | Peripheral lifecycle interface |
+| `rmt4_peripheral_esp.cpp.hpp` | ESP-IDF lifecycle implementation |
+| `rmt_memory_manager_4.h` | Word ledger and physical-span reservations |
+| `idf4_clockless_rmt_esp32.h` | Legacy `FastLED.addLeds` bridge |
+
+Reference: [Espressif IDF 4.4 RMT documentation](https://docs.espressif.com/projects/esp-idf/en/v4.4.7/esp32/api-reference/peripherals/rmt.html).

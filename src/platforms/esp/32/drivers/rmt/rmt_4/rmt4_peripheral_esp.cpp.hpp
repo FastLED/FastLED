@@ -27,6 +27,8 @@ FL_EXTERN_C_BEGIN
 // IWYU pragma: begin_keep
 #include "driver/gpio.h"
 #include "driver/rmt.h"
+#include "soc/gpio_periph.h"
+#include "soc/io_mux_reg.h"
 #if defined(ESP_IDF_VERSION_MAJOR) && ESP_IDF_VERSION_MAJOR > 3
 #include "esp_intr_alloc.h"
 #else
@@ -56,12 +58,16 @@ bool Rmt4PeripheralESP::configureChannel(const detail::Rmt4ChannelConfig &cfg)
         FL_WARN("Rmt4PeripheralESP: rmt_config failed on channel " << cfg.mChannel << ", error=" << err);
         return false;
     }
+    // Enable only the input stage: gpio_set_direction(INPUT_OUTPUT) also
+    // reconnects the output to ordinary GPIO, disconnecting the RMT signal.
+    PIN_INPUT_ENABLE(GPIO_PIN_MUX_REG[rmt_tx.gpio_num]);
     return true;
 }
 
 bool Rmt4PeripheralESP::installDriver(int channel) FL_NO_EXCEPT {
     esp_err_t err =
-        rmt_driver_install(static_cast<rmt_channel_t>(channel), 0, 0);
+        rmt_driver_install(static_cast<rmt_channel_t>(channel), 0,
+                           ESP_INTR_FLAG_IRAM | ESP_INTR_FLAG_LEVEL3);
     if (err != ESP_OK) {
         FL_WARN("Rmt4PeripheralESP: rmt_driver_install failed on channel " << channel << ", error=" << err);
         return false;
@@ -110,6 +116,7 @@ bool Rmt4PeripheralESP::setGpio(int channel, int gpio_pin,
         FL_WARN("Rmt4PeripheralESP: rmt_set_gpio/rmt_set_pin failed on channel " << channel << " pin " << gpio_pin << ", error=" << err);
         return false;
     }
+    PIN_INPUT_ENABLE(GPIO_PIN_MUX_REG[gpio_pin]);
     return true;
 }
 

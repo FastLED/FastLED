@@ -8,10 +8,58 @@
 
 #include "platforms/esp/32/drivers/rmt/rmt_4/rmt_memory_manager_4.h"
 
+#include "platforms/esp/32/drivers/rmt/rmt_4/rmt4_refill_timing.h"
+
 #include "fl/stl/cstddef.h"
 #include "test.h"
 
 using namespace fl;
+
+FL_TEST_CASE("RmtMemoryManager4 - contiguous TX spans exclude neighboring RX") {
+    RmtMemoryManager4 mgr(512);
+    FL_CHECK(mgr.tryReserveBlocks(0, 2));
+    FL_CHECK_FALSE(mgr.tryReserveBlocks(1, 1));
+    FL_CHECK(mgr.tryReserveBlocks(7, 1));
+    FL_CHECK_FALSE(mgr.tryReserveBlocks(6, 2));
+    FL_CHECK(mgr.tryReserveBlocks(2, 3));
+    FL_CHECK_FALSE(mgr.tryReserveBlocks(4, 1));
+    mgr.releaseBlocks(0, 2);
+    FL_CHECK(mgr.tryReserveBlocks(1, 1));
+}
+
+FL_TEST_CASE("RmtMemoryManager4 - RX reservation excludes later TX span") {
+    RmtMemoryManager4 mgr(512);
+    FL_CHECK(mgr.tryReserveBlocks(3, 1));
+    FL_CHECK_FALSE(mgr.tryReserveBlocks(2, 2));
+    FL_CHECK_FALSE(mgr.tryReserveBlocks(3, 2));
+    FL_CHECK(mgr.tryReserveBlocks(4, 2));
+    mgr.releaseBlocks(3, 1);
+    FL_CHECK(mgr.tryReserveBlocks(2, 2));
+}
+
+FL_TEST_CASE("RmtMemoryManager4 - reservation validates geometry and reset") {
+    RmtMemoryManager4 mgr(256);
+    FL_CHECK_FALSE(mgr.tryReserveBlocks(-1, 1));
+    FL_CHECK_FALSE(mgr.tryReserveBlocks(0, 0));
+    FL_CHECK_FALSE(mgr.tryReserveBlocks(4, 1));
+    FL_CHECK_FALSE(mgr.tryReserveBlocks(3, 2));
+    FL_CHECK_FALSE(mgr.tryReserveBlocks(0, 255));
+    FL_CHECK(mgr.tryReserveBlocks(0, 4));
+    mgr.reset();
+    FL_CHECK(mgr.tryReserveBlocks(0, 4));
+}
+
+FL_TEST_CASE("RmtMemoryManager4 - 48 word SoC geometry") {
+    RmtMemoryManager4 mgr(8 * 48, 48);
+    size_t words = 0;
+    FL_CHECK(mgr.tryAllocateTx(0, false, words));
+    FL_CHECK(words == 96u);
+    FL_CHECK(mgr.tryReserveBlocks(0, 2));
+    FL_CHECK(mgr.tryReserveBlocks(7, 1));
+    FL_CHECK_FALSE(mgr.tryReserveBlocks(6, 2));
+    FL_CHECK(mgr.tryAllocateTx(2, true, words));
+    FL_CHECK(words == 144u);
+}
 
 FL_TEST_CASE("RmtMemoryManager4 - pool starts empty") {
     RmtMemoryManager4 mgr(/*total_words=*/512);
@@ -192,4 +240,25 @@ FL_TEST_CASE(
     FL_CHECK(mgr.allocatedWords() == 512u);
     FL_CHECK(mgr.availableWords() == 0u);
     FL_CHECK_FALSE(mgr.tryAllocateTx(4, false, got)); // fifth doesn't fit
+}
+
+FL_TEST_CASE("RMT4 refill deadline excludes delay before hardware starts") {
+    fl::detail::Rmt4RefillTiming timing;
+    timing.reset();
+    FL_REQUIRE(timing.allowFill(100, 150)); // SDK initial fill before TX starts.
+    FL_REQUIRE(timing.allowFill(10000, 150)); // First hardware ISR establishes time.
+    FL_CHECK(timing.allowFill(10100, 150)); // Normal refill cadence.
+    FL_CHECK_FALSE(timing.allowFill(10300, 150)); // Missed hardware deadline.
+}
+
+FL_TEST_CASE("RMT4 refill timing resets between frames and handles counter wrap") {
+    fl::detail::Rmt4RefillTiming timing;
+    timing.reset();
+    FL_REQUIRE(timing.allowFill(50, 150));
+    FL_REQUIRE(timing.allowFill(10000, 150));
+    timing.reset();
+    FL_REQUIRE(timing.allowFill(20000, 150));
+    FL_REQUIRE(timing.allowFill(0xFFFFFFF0u, 150));
+    FL_CHECK(timing.allowFill(0x20u, 150));
+    FL_CHECK_FALSE(timing.allowFill(0x200u, 150));
 }

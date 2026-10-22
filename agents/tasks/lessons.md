@@ -1,5 +1,15 @@
 # Lessons Learned
 
+- GPIO direction helpers can reset peripheral output routing. On legacy ESP32,
+  enabling output via gpio_set_direction reconnects SIG_GPIO_OUT_IDX. Preserve
+  RMT routing with vendor input/output-enable operations that only change the
+  enable bits, and verify actual loopback bytes after lifecycle changes.
+
+- Treat questions about an unexpected backend as questions first. Confirm the
+  selected implementation and cause before interpreting them as scope changes.
+  A hardware-backed driver silently falling back deserves explicit investigation
+  when the user expects that peripheral to be used.
+
 - Verify the selected peripheral backend in the actual ELF before describing
   size parity as preserving hardware-driver quality. Older ESP32 SDKs can
   expose RMT geometry without `SOC_RMT_SUPPORTED`; silently selecting a
@@ -531,4 +541,12 @@
 
 - A native-console hardware test must use the selected backend for both directions. AutoResearch formerly read through fl I/O but replied through Arduino Serial; raw RPC output must use fl::write_bytes to bypass log filtering while honoring console selection. Compare failing hardware behavior with a selective revert before attributing it to an optimization.
 
+- "Legacy-only" means sketches using `FastLED.addLeds<>()`, not
+  `FastLED.add()`. Select the smaller bridge at that API boundary; do not
+  infer legacy use from the ESP32 memory tier or remove Channel API behavior.
+
+- Before changing a shared direct-driver flush policy, audit whether every
+  backend consumes a queue or only its first strip. LPC SCT requires immediate
+  per-strip flushing; opt RMT4 into batched completion with a separate template
+  policy and test both lifecycles.
 - Library footprint changes must work with unmodified supported SDKs. Do not rely on forked framework startup patches or custom package pins for a claimed FastLED saving; stock framework-owned references remain outside the library's control.

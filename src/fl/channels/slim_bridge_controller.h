@@ -26,42 +26,63 @@
 #include "fl/log/log.h"
 #include "fl/system/sketch_macros.h"
 
-/// Small-memory tier: the bridge drives its driver directly instead of
-/// through ChannelManager, so the registry (~3 KB) is not linked. Measured on
-/// the LPC845, where it decides whether AutoResearch fits in 64 KB
-/// (FastLED#4671). Override with -DFL_SLIM_BRIDGE_DIRECT_SHOW=0/1.
-#ifndef FL_SLIM_BRIDGE_DIRECT_SHOW
-#define FL_SLIM_BRIDGE_DIRECT_SHOW (!FL_PLATFORM_HAS_LARGE_MEMORY)
-#endif
-
 namespace fl {
+
+/// Preserve explicit build overrides while allowing a backend to choose its
+/// legacy default without changing other drivers or depending on include order.
+template <bool PLATFORM_DEFAULT = !FL_PLATFORM_HAS_LARGE_MEMORY>
+struct SlimBridgeDirectShow {
+#ifdef FL_SLIM_BRIDGE_DIRECT_SHOW
+    static constexpr bool value = (FL_SLIM_BRIDGE_DIRECT_SHOW != 0);
+#else
+    static constexpr bool value = PLATFORM_DEFAULT;
+#endif
+};
 
 /// How a SlimBridgeController reaches its driver. Specialized (not an
 /// `if`) so the direct variant never names ChannelManager at all.
-template <bool DIRECT_SHOW>
+template <bool DIRECT_SHOW, bool BATCHED = false>
 struct SlimBridgeShowPolicy;
 
 /// Default: registered with ChannelManager, which owns enable/disable and
 /// flushes every registered driver once at the end of FastLED.show().
-template <>
-struct SlimBridgeShowPolicy<false> {
+template <bool BATCHED>
+struct SlimBridgeShowPolicy<false, BATCHED> {
     template <typename DriverTraits>
     static void attach() FL_NO_EXCEPT { DriverTraits::registerWithManager(); }
     static bool enabled(IChannelDriver& driver) FL_NO_EXCEPT {
         return ChannelManager::registry().isDriverEnabled(driver);
     }
     static void afterEnqueue(IChannelDriver&) FL_NO_EXCEPT {}
+    template <typename DriverTraits>
+    static void endShow() FL_NO_EXCEPT {}
 };
 
-/// Direct: no registry, so there is no runtime enable/disable or
-/// exclusive-driver selection, and no end-of-show flush -- the controller
-/// shows its own frame, as the pre-bridge LPC controllers did.
+/// Immediate direct mode preserves backends that accept only one strip per
+/// show(). There is no registry or runtime driver selection.
 template <>
-struct SlimBridgeShowPolicy<true> {
+struct SlimBridgeShowPolicy<true, false> {
     template <typename DriverTraits>
     static void attach() FL_NO_EXCEPT {}
     static bool enabled(IChannelDriver&) FL_NO_EXCEPT { return true; }
     static void afterEnqueue(IChannelDriver& driver) FL_NO_EXCEPT { driver.show(); }
+    template <typename DriverTraits>
+    static void endShow() FL_NO_EXCEPT {}
+};
+
+/// Batched direct mode is opt-in for drivers that consume a queued batch.
+/// Flush after all strips enqueue and poll async completion before returning.
+template <>
+struct SlimBridgeShowPolicy<true, true> : SlimBridgeShowPolicy<true, false> {
+    static void afterEnqueue(IChannelDriver&) FL_NO_EXCEPT {}
+    template <typename DriverTraits>
+    static void endShow() FL_NO_EXCEPT {
+        IChannelDriver& driver = DriverTraits::instance();
+        driver.show();
+        // Poll through completion: async drivers release frame ownership and
+        // advance strips beyond hardware capacity only while being polled.
+        driver.waitForReady();
+    }
 };
 
 /// @brief Shared legacy `addLeds<>()` bridge controller over an `IChannelDriver`.
@@ -97,12 +118,15 @@ struct SlimBridgeShowPolicy<true> {
 /// @tparam XTRA0       Legacy clockless trailing zero bits per byte, stored
 ///                     on the ChannelData for engines that honour it.
 /// @tparam DIRECT_SHOW Bypass ChannelManager (see SlimBridgeShowPolicy).
-///                     Defaults to the platform tier via
-///                     FL_SLIM_BRIDGE_DIRECT_SHOW.
+///                     Defaults to the platform memory tier. Build overrides
+///                     use FL_SLIM_BRIDGE_DIRECT_SHOW=0/1.
+/// @tparam BATCHED_DIRECT_SHOW Flush direct drivers at endShowLeds(). Only
+///                     enable for drivers that consume multiple queued strips.
 template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER, int WAIT_TIME, typename DriverTraits,
-          int XTRA0 = 0, bool DIRECT_SHOW = (FL_SLIM_BRIDGE_DIRECT_SHOW != 0)>
+          int XTRA0 = 0, bool DIRECT_SHOW = SlimBridgeDirectShow<>::value,
+          bool BATCHED_DIRECT_SHOW = false>
 class SlimBridgeController : public CPixelLEDController<RGB_ORDER> {
-    using Policy = SlimBridgeShowPolicy<DIRECT_SHOW>;
+    using Policy = SlimBridgeShowPolicy<DIRECT_SHOW, BATCHED_DIRECT_SHOW>;
 
 public:
     SlimBridgeController() FL_NO_EXCEPT {
@@ -128,6 +152,13 @@ public:
     }
 
     void init() FL_NO_EXCEPT override {}
+
+    void endShowLeds(void* data) FL_NO_EXCEPT override {
+        CPixelLEDController<RGB_ORDER>::endShowLeds(data);
+        // FastLED enqueues every controller before calling any endShowLeds,
+        // so the first direct controller flushes the complete parallel batch.
+        Policy::template endShow<DriverTraits>();
+    }
 
     /// @brief Expose the underlying `ChannelDataPtr` for conformance tests.
     const ChannelDataPtr& channelData() const FL_NO_EXCEPT { return mData; }
