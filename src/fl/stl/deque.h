@@ -5,7 +5,6 @@
 #include "fl/stl/deque_basic.h"  // detail::deque_grow_map_capacity (#3270)
 #include "fl/stl/move.h"
 #include "fl/stl/iterator.h"
-#include "fl/stl/align.h"
 #include "fl/stl/memory_resource.h"
 #include "fl/stl/new.h"  // IWYU pragma: keep
 #include "fl/stl/noexcept.h"
@@ -173,16 +172,12 @@ private:
         return mMap[mFrontMapIdx - 1] != nullptr;
     }
 
-    // emplace_* must return a reference even when allocation fails. The
-    // element is constructed into a per-type discard slot instead of the
-    // deque, which is left unchanged (FastLED #4899).
-    template<typename... Args>
-    static T& discard_slot(Args&&... args) FL_NO_EXCEPT {
-        FL_ALIGN_AS(T) static unsigned char storage[sizeof(T)];
-        static T* live = nullptr;
-        if (live) live->~T();
-        live = new (static_cast<void*>(storage)) T(fl::forward<Args>(args)...);
-        return *live;
+    // Bulk fills stop at the first failed allocation instead of retrying
+    // every remaining element (FastLED #4899).
+    bool try_push_back(const T& value) FL_NO_EXCEPT {
+        fl::size before = mSize;
+        push_back(value);
+        return mSize != before;
     }
 
 public:
@@ -418,7 +413,7 @@ public:
 
     deque(fl::initializer_list<T> init) FL_NO_EXCEPT : deque() {
         for (const auto& value : init) {
-            push_back(value);
+            if (!try_push_back(value)) break;
         }
     }
 
@@ -437,7 +432,7 @@ public:
         if (this != &other) {
             clear();
             for (fl::size i = 0; i < other.size(); ++i) {
-                push_back(other[i]);
+                if (!try_push_back(other[i])) break;
             }
         }
         return *this;
@@ -682,9 +677,7 @@ public:
 
     void resize(fl::size new_size, const T& value) FL_NO_EXCEPT {
         while (mSize < new_size) {
-            fl::size before = mSize;
-            push_back(value);
-            if (mSize == before) return;  // allocation failed (FastLED #4899)
+            if (!try_push_back(value)) return;
         }
         while (mSize > new_size) pop_back();
     }
@@ -817,7 +810,7 @@ public:
         fl::size idx = pos.mIndex;
         if (idx == mSize) {
             emplace_back(fl::forward<Args>(args)...);
-            return iterator(this, idx);
+            return idx < mSize ? iterator(this, idx) : end();
         }
         // Move-extend at the back so move-only T works. The moved-from
         // slot at old logical mSize-1 is overwritten by the shift loop.
@@ -832,20 +825,21 @@ public:
         return iterator(this, idx);
     }
 
+    // Returns void like fl::vector::emplace_back: on allocation failure the
+    // element is not constructed and size() is unchanged (FastLED #4899).
     template<typename... Args>
-    T& emplace_back(Args&&... args) FL_NO_EXCEPT {
-        if (!ensure_back_room()) return discard_slot(fl::forward<Args>(args)...);
+    void emplace_back(Args&&... args) FL_NO_EXCEPT {
+        if (!ensure_back_room()) return;
         fl::size global = mFrontOffset + mSize;
         fl::size c = mFrontMapIdx + global / kChunkSize;
         fl::size o = global % kChunkSize;
         new (&mMap[c][o]) T(fl::forward<Args>(args)...);
         ++mSize;
-        return mMap[c][o];
     }
 
     template<typename... Args>
-    T& emplace_front(Args&&... args) FL_NO_EXCEPT {
-        if (!ensure_front_room()) return discard_slot(fl::forward<Args>(args)...);
+    void emplace_front(Args&&... args) FL_NO_EXCEPT {
+        if (!ensure_front_room()) return;
         if (mFrontOffset == 0) {
             --mFrontMapIdx;
             mFrontOffset = kChunkSize - 1;
@@ -854,13 +848,12 @@ public:
         }
         new (&mMap[mFrontMapIdx][mFrontOffset]) T(fl::forward<Args>(args)...);
         ++mSize;
-        return mMap[mFrontMapIdx][mFrontOffset];
     }
 
     void assign(fl::size count, const T& value) FL_NO_EXCEPT {
         clear();
         for (fl::size i = 0; i < count; ++i) {
-            push_back(value);
+            if (!try_push_back(value)) break;
         }
     }
 

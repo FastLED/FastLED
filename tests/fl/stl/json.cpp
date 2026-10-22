@@ -2752,5 +2752,27 @@ FL_TEST_CASE("json serializes large nested escaped documents exactly") {
     FL_CHECK(reparsed.to_string() == expected);
 }
 
+FL_TEST_CASE("json escapes remaining control characters as \\u00XX") {
+    fl::string raw;
+    raw.push_back('\x01');
+    raw.push_back('\x1b');
+    raw.push_back('\x1f');
+    json arr = json::array();
+    arr.push_back(raw);
+    FL_CHECK(arr.to_string() == "[\"\\u0001\\u001b\\u001f\"]");
+
+    json reparsed = json::parse(arr.to_string());
+    FL_REQUIRE(reparsed.is_array());
+    fl::string back = reparsed[0] | fl::string();
+    FL_CHECK(back == raw);
+}
+
+FL_TEST_CASE("json parses \\u escapes as UTF-8") {
+    json doc = json::parse("[\"\\u00e9\\u20ac\\ud83d\\ude00\\u0041\"]");
+    FL_REQUIRE(doc.is_array());
+    fl::string s = doc[0] | fl::string();
+    FL_CHECK(s == "\xC3\xA9\xE2\x82\xAC\xF0\x9F\x98\x80" "A");
+}
+
 } // FL_TEST_FILE
 

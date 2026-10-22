@@ -700,11 +700,10 @@ FL_TEST_CASE("fl::deque - emplace_back") {
     };
 
     deque<TestObj> dq;
-    auto& obj = dq.emplace_back(10, 20);
+    dq.emplace_back(10, 20);
     FL_CHECK_EQ(dq.size(), 1u);
     FL_CHECK_EQ(dq[0].x, 10);
     FL_CHECK_EQ(dq[0].y, 20);
-    FL_CHECK_EQ(obj.x, 10);
 }
 
 FL_TEST_CASE("fl::deque - emplace_front") {
@@ -715,12 +714,11 @@ FL_TEST_CASE("fl::deque - emplace_front") {
 
     deque<TestObj> dq;
     dq.push_back(TestObj(5, 6));
-    auto& obj = dq.emplace_front(10, 20);
+    dq.emplace_front(10, 20);
     FL_CHECK_EQ(dq.size(), 2u);
     FL_CHECK_EQ(dq[0].x, 10);
     FL_CHECK_EQ(dq[0].y, 20);
     FL_CHECK_EQ(dq[1].x, 5);
-    FL_CHECK_EQ(obj.x, 10);
 }
 
 FL_TEST_CASE("fl::deque - emplace at position") {
@@ -1126,8 +1124,14 @@ FL_TEST_CASE("fl::deque - push fails safely when allocation fails") {
         FL_CHECK(dq.insert(dq.begin() + 1, SmallChunkTag(7)) == dq.end());
         FL_CHECK(dq.insert(dq.begin() + 1, 3, SmallChunkTag(7)) == dq.end());
         FL_CHECK(dq.emplace(dq.begin() + 1, 7) == dq.end());
-        FL_CHECK_EQ(dq.emplace_back(8).v, 8);
-        FL_CHECK_EQ(dq.emplace_front(9).v, 9);
+        dq.emplace_back(8);
+        dq.emplace_front(9);
+        FL_CHECK(dq.emplace(dq.end(), 7) == dq.end());
+        deque<SmallChunkTag> copy(&resource);
+        copy = dq;
+        FL_CHECK(copy.empty());
+        copy.assign(8, SmallChunkTag(5));
+        FL_CHECK(copy.empty());
         FL_REQUIRE_EQ(dq.size(), 4u);
         for (int i = 0; i < 4; ++i) {
             FL_CHECK_EQ(dq[i].v, i);
