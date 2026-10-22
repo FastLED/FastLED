@@ -55,6 +55,11 @@
 #include "fl/log/log.h"
 
 namespace fl {
+#if defined(FL_IS_ESP32)
+namespace platforms {
+void registerNativeSpiDriver() FL_NO_EXCEPT;
+}
+#endif
 
 /// @brief Shared legacy `addLeds<ESPIChipsets ...>()` bridge controller over
 ///        an `IChannelDriver`, for chipsets whose encoding never needs the
@@ -82,8 +87,18 @@ public:
         BusSupports<kBus, SpiChipsetConfig, B_WHICH>::value,
         "SlimSpiBridgeController: Bus does not support SpiChipsetConfig");
 
-    explicit SlimSpiBridgeController(const SpiChipsetConfig& cfg) FL_NO_EXCEPT {
+    explicit SlimSpiBridgeController(const SpiChipsetConfig& cfg) FL_NO_EXCEPT
+#if defined(FL_IS_ESP32)
+        : mExplicitSpiHost(cfg.spiBus != Esp32SpiBus::AUTO)
+#endif
+    {
         mData = ChannelData::create(ChipsetVariant(cfg));
+#if defined(FL_IS_ESP32)
+        if (mExplicitSpiHost) {
+            platforms::registerNativeSpiDriver();
+            return;
+        }
+#endif
         // Idempotent by contract -- safe to call from every instantiation's
         // constructor (mirrors TypedChannel::create()'s registerWithManager() call).
         BusTraits<kBus, B_WHICH>::registerWithManager();
@@ -161,6 +176,15 @@ private:
 #if defined(FASTLED_DISABLE_DYNAMIC_DRIVER) && FASTLED_DISABLE_DYNAMIC_DRIVER
         return {};
 #else
+#if defined(FL_IS_ESP32)
+        if (mExplicitSpiHost) {
+            // A requested SPI host cannot be honored by the LCD_CAM driver.
+            // Do not fall through to priority selection if the native adapter
+            // is unavailable.
+            return ChannelManager::registry().findDriverByName(
+                fl::string::from_literal("SPI_UNIFIED"));
+        }
+#endif
         // Build busKey only when we actually need it (kBus != AUTO).
         fl::string busKey;
         if (kBus != Bus::AUTO) {
@@ -233,6 +257,9 @@ private:
     }
 
     ChannelDataPtr mData;
+#if defined(FL_IS_ESP32)
+    bool mExplicitSpiHost;
+#endif
     u8 mDitherPhase = 0;
 #if FASTLED_LOG_RUNTIME_ENABLED
     bool mBusWarned = false;

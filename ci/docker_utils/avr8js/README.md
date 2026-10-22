@@ -1,6 +1,7 @@
-# AVR8JS Docker Emulator for FastLED Testing
+# Legacy AVR8JS Docker Emulator
 
-This directory contains a Docker-based AVR8JS emulator setup for testing Arduino firmware in CI/CD pipelines.
+This directory contains the older Docker-based AVR8JS setup for manual use.
+Maintained local tests and CI use native fbuild through `bash test --run uno Test`.
 
 ## Supported Platforms
 
@@ -46,12 +47,12 @@ Test validation
 - `Dockerfile.avr8js` - Docker image definition
 - `main.ts` - CLI entry point and test validation
 - `execute.ts` - AVR8JS runner with USART capture
-- `avr8js_docker.py` - Python wrapper for CI integration
+- `avr8js_docker.py` - Python wrapper for manual runs
 - `package.json` - Node.js dependencies
 
 ## Usage
 
-### From Python (CI)
+### From Python (manual)
 ```python
 from ci.docker_utils.avr8js_docker import DockerAVR8jsRunner
 
@@ -77,8 +78,8 @@ docker run --rm -v /path/to/firmware:/firmware:ro \
 To add a new platform, ensure:
 1. **Hardware USART peripheral** is present
 2. **avr8js supports the MCU** (check https://github.com/wokwi/avr8js)
-3. Update `avr8js_docker_template.yml` with MCU mapping
-4. Test locally before adding to CI
+3. Update the manual wrapper with the MCU mapping
+4. Test locally; the maintained native runner currently supports Uno only
 
 ## References
 

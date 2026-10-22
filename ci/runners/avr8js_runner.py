@@ -7,226 +7,116 @@ from ci.util.timestamp_print import ts_print
 from ci.util.zccache_config import show_zccache_stats
 
 
+def avr8js_run_succeeded(example: str, returncode: int, output: str) -> bool:
+    """Require Test's serial markers; other sketches are bounded smoke runs."""
+    if example == "Test":
+        return (
+            returncode == 0
+            and "Test setup starting" in output
+            and "Test loop!" in output
+        )
+    if returncode == 0:
+        return True
+    # fbuild reports reaching an emulator duration as a failure. For sketches
+    # without a completion protocol that is the intended smoke-run endpoint.
+    # Accept only its terminal timeout verdict, never a build error or an
+    # outer process timeout (124).
+    return returncode == 1 and output.rstrip().endswith("test-emu failed: timed out")
+
+
 def run_avr8js_tests(args: TestArgs) -> None:
-    """Build AVR examples with fbuild and emulate them using Docker."""
-    from running_process import RunningProcess
+    """Stage AVR examples and let fbuild build and emulate each project."""
+    from running_process import PIPE, RunningProcess
 
-    from ci.docker_utils.avr8js_docker import DockerAVR8jsRunner
-    from ci.util.output_formatter import TimestampFormatter
+    from ci.stage_fbuild_project import stage_fbuild_project
+    from ci.util.fbuild_runner import fbuild_child_env, get_fbuild_executable
+    from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
-    if not args.run or len(args.run) < 1:
+    if not args.run:
         ts_print("Error: --run requires a board (e.g., uno)")
         sys.exit(1)
-    assert args.run is not None
 
     board = args.run[0].lower()
-    supported_boards = ["uno", "attiny85", "attiny88", "nano_every"]
+    supported_boards = ["uno"]
     if board not in supported_boards:
-        ts_print(
-            f"Error: Unsupported avr8js board: {board}. Supported boards: {', '.join(supported_boards)}"
-        )
+        ts_print(f"Unsupported AVR8JS board: {board}")
         sys.exit(1)
 
-    ts_print(f"Running {board.upper()} avr8js tests using Docker...")
+    examples = args.run[1:] or ["Test"]
+    fbuild_executable = get_fbuild_executable()
+    if fbuild_executable is None:
+        ts_print("Error: fbuild is not installed; run uv sync")
+        sys.exit(1)
+    child_env = fbuild_child_env()
+    ts_print(f"Running {board.upper()} AVR8JS tests through fbuild: {examples}")
 
-    # Determine which examples to test (skip the board argument)
-    examples_to_test = args.run[1:] if len(args.run) > 1 else ["Test"]
-    if not examples_to_test:  # Empty list means test Test example
-        examples_to_test = ["Test"]
-
-    ts_print(f"Testing examples: {examples_to_test}")
-
-    # Quick test mode - just validate the setup
     if os.getenv("FASTLED_AVR8JS_QUICK_TEST") == "true":
-        ts_print("Quick test mode - validating Docker avr8js setup only")
-        ts_print("avr8js AVR Docker option is working correctly!")
+        ts_print("Quick setup check: fbuild version only; firmware is not emulated")
+        result = RunningProcess.run(
+            [fbuild_executable, "--version"], timeout=30, env=child_env
+        )
+        if result.returncode != 0:
+            sys.exit(result.returncode)
         return
 
-    # Initialize Docker avr8js runner
-    docker_runner = DockerAVR8jsRunner()
-
-    # Check if Docker is available
-    if not docker_runner.check_docker_available():
-        ts_print("❌ ERROR: Docker is not available or not running")
-        ts_print()
-        ts_print("Please install Docker Desktop and ensure it's running:")
-        ts_print("  https://www.docker.com/products/docker-desktop")
-        ts_print()
-        sys.exit(1)
-
-    # Check if avr8js Docker image exists
-    avr8js_image = docker_runner.docker_image
-    image_exists = docker_runner.check_image_exists(avr8js_image)
-
-    if not image_exists:
-        ts_print(f"❌ Docker avr8js image not found locally: {avr8js_image}")
-        ts_print()
-        ts_print("Attempting to pull avr8js image from Docker Hub...")
+    failures = 0
+    for example in examples:
         try:
-            docker_runner.pull_image()
-            ts_print(f"✅ Successfully pulled {avr8js_image}")
-            ts_print()
-        except KeyboardInterrupt as ki:
-            from ci.util.global_interrupt_handler import (
-                handle_keyboard_interrupt,
-            )
+            staged = stage_fbuild_project(board_name=board, example=example)
+            if not staged.success:
+                ts_print(staged.output)
+                failures += 1
+                continue
 
-            handle_keyboard_interrupt(ki)
-            raise
-        except Exception as e:
-            ts_print(f"❌ Failed to pull avr8js image: {e}")
-            ts_print()
-            ts_print("Please build the image manually:")
-            ts_print(
-                f"  docker build -f ci/docker_utils/Dockerfile.avr8js -t {avr8js_image} ."
-            )
-            ts_print()
-            sys.exit(1)
-
-    # Get MCU type and frequency based on board
-    mcu_config = {
-        "uno": {"mcu": "atmega328p", "frequency": 16000000},
-        "attiny85": {"mcu": "attiny85", "frequency": 8000000},
-        "attiny88": {"mcu": "attiny88", "frequency": 8000000},
-        "nano_every": {"mcu": "atmega4809", "frequency": 16000000},
-    }
-    config = mcu_config.get(board, {"mcu": "atmega328p", "frequency": 16000000})
-
-    success_count = 0
-    failure_count = 0
-
-    # Test each example
-    for example in examples_to_test:
-        ts_print(f"\n{'=' * 70}")
-        ts_print(f"Testing: {example}")
-        ts_print(f"{'=' * 70}")
-
-        try:
-            # Step 1: Show what we're compiling
-            example_ino_path = Path("examples") / example / f"{example}.ino"
-            ts_print("\n[STEP 1/3] Compiling Arduino Sketch")
-            ts_print(f"  Source file: {example_ino_path}")
-            ts_print(
-                f"  Target board: {board} ({config['mcu']} @ {config['frequency']}Hz)"
-            )
-            ts_print("  Compiler: fbuild via ci/ci-compile.py")
-            ts_print()
-
-            # Build the example for the specified board
-            build_cmd = [
-                "uv",
-                "run",
-                "ci/ci-compile.py",
+            command = [
+                fbuild_executable,
+                "test-emu",
+                "--emulator",
+                "avr8js",
+                "--environment",
                 board,
-                "--examples",
-                example,
+                "--timeout",
+                "15",
             ]
-            build_proc = RunningProcess(
-                build_cmd,
-                timeout=300,
-                auto_run=True,
-                output_formatter=TimestampFormatter(),
-            )
-
-            # Stream build output
-            with build_proc.line_iter(timeout=None) as it:
-                for line in it:
-                    ts_print(line)
-
-            build_returncode = build_proc.wait()
-            if build_returncode != 0:
-                ts_print(
-                    f"\n❌ Build failed for {example} with exit code: {build_returncode}"
+            if example == "Test":
+                command.extend(
+                    [
+                        "--expect",
+                        "Test setup starting",
+                        "--halt-on-success",
+                        "Test loop!",
+                        "--halt-on-error",
+                        "legacy libc copy mismatch",
+                    ]
                 )
-                failure_count += 1
-                continue
-
-            ts_print(f"\n✅ Build successful for {example}")
-
-            # Step 2: Locate compiled firmware
-            ts_print("\n[STEP 2/3] Locating Compiled Firmware")
-            build_dir = Path(".build")
-            elf_files = list(build_dir.rglob("*.elf"))
-            if not elf_files:
-                ts_print(f"  ❌ ELF file not found in {build_dir}")
-                failure_count += 1
-                continue
-
-            elf_path = elf_files[0]
-            hex_path = elf_path.with_suffix(".hex")
-            ts_print(f"  ELF file: {elf_path}")
-            ts_print(f"  HEX file: {hex_path}")
-            ts_print("  (avr8js requires HEX format for execution)")
-
-            if not hex_path.exists():
-                ts_print(f"  ❌ HEX file not found: {hex_path}")
-                failure_count += 1
-                continue
-
-            # Step 3: Run in avr8js Docker
-            ts_print("\n[STEP 3/3] Running in AVR8JS Docker Emulator")
-            ts_print(f"  Docker image: {docker_runner.docker_image}")
-            ts_print(f"  Firmware: {hex_path}")
-            ts_print("  Timeout: 15 seconds")
-            ts_print()
-
-            # Set up output file
-            output_file = "avr8js_output.txt"
-
-            # Run avr8js in Docker
-            avr8js_returncode = docker_runner.run(
-                elf_path=elf_path,
-                mcu=str(config["mcu"]),
-                frequency=int(config["frequency"]),
-                timeout=15,
-                output_file=output_file,
+            command.append(str(staged.build_dir))
+            process = RunningProcess(
+                command,
+                timeout=900,
+                capture=True,
+                stderr=PIPE,
+                encoding="utf-8",
+                errors="replace",
+                env=child_env,
             )
-
-            # Validate output for Test example
-            if example == "Test" and Path(output_file).exists():
-                output_content = Path(output_file).read_text(
-                    encoding="utf-8", errors="replace"
-                )
-
-                # Check for test completion
-                if (
-                    "Test Summary:" in output_content
-                    and "All tests PASSED!" in output_content
-                ):
-                    ts_print(f"SUCCESS: {example} tests passed in Docker avr8js")
-                    success_count += 1
-                else:
-                    ts_print(f"FAILED: {example} tests did not pass in Docker avr8js")
-                    failure_count += 1
-            elif avr8js_returncode == 0:
-                ts_print(f"SUCCESS: {example} ran successfully in Docker avr8js")
-                success_count += 1
+            returncode = process.wait(echo=ts_print, timeout=900)
+            output = process.stdout + process.stderr
+            Path("avr8js_output.txt").write_text(output, encoding="utf-8")
+            # Judge stdout separately: the emulator's stderr diagnostics may
+            # be delivered after fbuild's terminal verdict.
+            if avr8js_run_succeeded(example, returncode, process.stdout):
+                ts_print(f"SUCCESS: {example} ran in native fbuild AVR8JS")
             else:
-                ts_print(
-                    f"FAILED: {example} failed in Docker avr8js with exit code: {avr8js_returncode}"
-                )
-                failure_count += 1
-
-        except KeyboardInterrupt:
-            import _thread
-
-            _thread.interrupt_main()
+                ts_print(f"FAILED: {example} (fbuild exit code {returncode})")
+                failures += 1
+        except KeyboardInterrupt as interrupt:
+            handle_keyboard_interrupt(interrupt)
             raise
-        except Exception as e:
-            ts_print(f"ERROR: {example} failed with exception: {e}")
-            failure_count += 1
+        except Exception as exc:
+            ts_print(f"ERROR: {example}: {exc}")
+            failures += 1
 
-    # Summary
-    ts_print(f"\n=== avr8js {board.upper()} Test Summary ===")
-    ts_print(f"Examples tested: {len(examples_to_test)}")
-    ts_print(f"Successful: {success_count}")
-    ts_print(f"Failed: {failure_count}")
-
-    # Show zccache statistics
+    ts_print(f"AVR8JS: {len(examples) - failures} passed, {failures} failed")
     show_zccache_stats()
-
-    if failure_count > 0:
-        ts_print("Some tests failed. See output above for details.")
+    if failures:
         sys.exit(1)
-    else:
-        ts_print("All avr8js tests passed!")

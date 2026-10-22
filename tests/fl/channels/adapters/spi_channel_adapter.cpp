@@ -13,6 +13,7 @@
 #include "fl/stl/vector.h"
 #include "fl/stl/shared_ptr.h"
 #include "platforms/shared/spi_hw_base.h"
+#include "platforms/shared/spi_hw_1.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
 
@@ -32,6 +33,8 @@ public:
     // SpiHwBase interface
     bool begin(const void* config) override {
         mBeginCalled = true;
+        mClockSpeedHz = static_cast<const SpiHw1::Config*>(config)->clock_speed_hz;
+        mClockSpeeds.push_back(mClockSpeedHz);
         mInitialized = true;
         return mBeginReturnValue;
     }
@@ -98,6 +101,8 @@ public:
     bool wasTransmitCalled() const { return mTransmitCalled; }
     bool wasWaitCompleteCalled() const { return mWaitCompleteCalled; }
     int getTransmitCount() const { return mTransmitCount; }
+    u32 getClockSpeedHz() const { return mClockSpeedHz; }
+    const fl::vector<u32>& getClockSpeeds() const { return mClockSpeeds; }
     TransmitMode getLastTransmitMode() const { return mTransmitMode; }
 
     void reset() {
@@ -125,6 +130,8 @@ private:
     bool mTransmitCalled = false;
     bool mWaitCompleteCalled = false;
     int mTransmitCount = 0;
+    u32 mClockSpeedHz = 0;
+    fl::vector<u32> mClockSpeeds;
 
     // Configurable return values
     bool mBeginReturnValue = true;
@@ -138,8 +145,9 @@ private:
 
 /// @brief Create SPI channel data (APA102, SK9822, etc.)
 ChannelDataPtr createSpiChannelData(int dataPin = 5, int clockPin = 18,
-                                    Esp32SpiBus spiBus = Esp32SpiBus::AUTO) {
-    SpiEncoder encoder = SpiEncoder::apa102();
+                                    Esp32SpiBus spiBus = Esp32SpiBus::AUTO,
+                                    u32 clockSpeedHz = 6000000) {
+    SpiEncoder encoder = SpiEncoder::apa102(clockSpeedHz);
     SpiChipsetConfig spiConfig{dataPin, clockPin, encoder, spiBus};
     fl::vector_psram<uint8_t> data = {0x00, 0xFF, 0xAA, 0x55};
     return ChannelData::create(spiConfig, fl::move(data));
@@ -556,6 +564,57 @@ FL_TEST_CASE("SpiChannelEngineAdapter - explicit SPI host selects matching contr
 
     FL_CHECK_FALSE(spi2->wasTransmitCalled());
     FL_CHECK_TRUE(spi3->wasTransmitCalled());
+}
+
+FL_TEST_CASE("SpiChannelEngineAdapter - distinct SPI hosts work in either registration order") {
+    for (bool host3First : {false, true}) {
+        auto spi2 = fl::make_shared<MockSpiHw>(1, "SPI2", 5);
+        auto spi3 = fl::make_shared<MockSpiHw>(1, "SPI3", 5);
+        spi2->setBusId(2);
+        spi3->setBusId(3);
+
+        fl::vector<fl::shared_ptr<SpiHwBase>> controllers = host3First
+            ? fl::vector<fl::shared_ptr<SpiHwBase>>{spi3, spi2}
+            : fl::vector<fl::shared_ptr<SpiHwBase>>{spi2, spi3};
+        fl::vector<int> priorities = {5, 5};
+        fl::vector<const char*> names = host3First
+            ? fl::vector<const char*>{"SPI3", "SPI2"}
+            : fl::vector<const char*>{"SPI2", "SPI3"};
+        auto adapter = SpiChannelEngineAdapter::create(
+            controllers, priorities, names, "SPI_UNIFIED");
+
+        auto stripA = createSpiChannelData(1, 3, Esp32SpiBus::HOST2, 8000000);
+        auto stripB = createSpiChannelData(5, 7, Esp32SpiBus::HOST3, 12000000);
+        adapter->enqueue(host3First ? stripB : stripA);
+        adapter->enqueue(host3First ? stripA : stripB);
+        adapter->show();
+
+        FL_CHECK_EQ(spi2->getTransmitCount(), 1);
+        FL_CHECK_EQ(spi3->getTransmitCount(), 1);
+        FL_CHECK_EQ(spi2->getClockSpeedHz(), 8000000);
+        FL_CHECK_EQ(spi3->getClockSpeedHz(), 12000000);
+    }
+}
+
+FL_TEST_CASE("SpiChannelEngineAdapter - reconfigures explicit host between rates") {
+    auto spi2 = fl::make_shared<MockSpiHw>(1, "SPI2", 5);
+    spi2->setBusId(2);
+    fl::vector<fl::shared_ptr<SpiHwBase>> controllers = {spi2};
+    fl::vector<int> priorities = {5};
+    fl::vector<const char*> names = {"SPI2"};
+    auto adapter = SpiChannelEngineAdapter::create(
+        controllers, priorities, names, "SPI_UNIFIED");
+
+    adapter->enqueue(createSpiChannelData(1, 3, Esp32SpiBus::HOST2, 8000000));
+    adapter->enqueue(createSpiChannelData(1, 3, Esp32SpiBus::HOST2, 12000000));
+    adapter->enqueue(createSpiChannelData(1, 3, Esp32SpiBus::HOST2, 8000000));
+    adapter->show();
+
+    FL_CHECK_EQ(spi2->getTransmitCount(), 3);
+    FL_CHECK_EQ(spi2->getClockSpeeds().size(), 3);
+    FL_CHECK_EQ(spi2->getClockSpeeds()[0], 8000000);
+    FL_CHECK_EQ(spi2->getClockSpeeds()[1], 12000000);
+    FL_CHECK_EQ(spi2->getClockSpeeds()[2], 8000000);
 }
 
 FL_TEST_CASE("SpiChannelEngineAdapter - AUTO preserves controller priority") {

@@ -34,6 +34,8 @@
 #include "fl/stl/optional.h"
 #include "fl/stl/json.h"
 #include "fl/stl/cstring.h"
+#include "fl/stl/cstdio.h"
+#include "fl/stl/string_view.h"
 #include "fl/task/task.h"
 #include "fl/task/executor.h"
 #include <Arduino.h>
@@ -68,33 +70,47 @@
 // Raw Serial Output Functions (bypass fl::println and ScopedLogDisable)
 // ============================================================================
 
+namespace {
+
+// RPC output must use the selected console and bypass log-level filtering.
+void writeRaw(fl::string_view text) {
+    fl::write_bytes(reinterpret_cast<const fl::u8*>(text.data()), text.size()); // ok autoresearch rpc serial - selected console RPC transport boundary
+}
+
+void writeRawLine(fl::string_view text) {
+    writeRaw(text);
+    writeRaw("\r\n");
+}
+
+} // namespace
+
 void printJsonRaw(const fl::json& json, const char* prefix) {
     // Serialize and print response
     fl::string formatted = fl::formatJsonResponse(json, prefix);
-    Serial.println(formatted.c_str());  // ok serial - ok autoresearch rpc serial - RPC response boundary
-    Serial.flush();                     // ok serial - ok autoresearch rpc serial - host waits for RPC boundary
+    writeRawLine(formatted);
+    fl::flush(); // ok autoresearch rpc serial - host waits for RPC response completion
 }
 
 namespace {
 
 void printRemoteResponseRaw(const fl::json& response) {
     fl::string formatted = fl::formatJsonResponse(response, "REMOTE: ");
-    Serial.println(formatted.c_str());  // ok serial - ok autoresearch rpc serial - RPC response boundary
-    Serial.flush();                     // ok serial - ok autoresearch rpc serial - host waits for RPC boundary
+    writeRawLine(formatted);
+    fl::flush(); // ok autoresearch rpc serial - host waits for RPC response completion
 }
 
 void printRemoteStreamRaw(fl::JsonStreamCallback writeJson) {
-    Serial.print("REMOTE: ");  // ok serial - ok autoresearch rpc serial - RPC response boundary
+    writeRaw("REMOTE: ");
 
     fl::JsonStreamWriter writer([](const char* data, fl::size len) {
-        Serial.write(reinterpret_cast<const uint8_t*>(data), static_cast<size_t>(len));  // ok serial - ok autoresearch rpc serial - streamed JSON bytes
+        writeRaw(fl::string_view(data, len));
     });
     if (writeJson) {
         writeJson(writer);
     }
     writer.flush();
-    Serial.println();  // ok serial - ok autoresearch rpc serial - RPC response boundary
-    Serial.flush();    // ok serial - ok autoresearch rpc serial - host waits for RPC boundary
+    writeRaw("\r\n");
+    fl::flush(); // ok autoresearch rpc serial - host waits for RPC response completion
 }
 
 }  // namespace
@@ -114,7 +130,7 @@ void printStreamRaw(const char* messageType, const fl::json& data) {
 
     // Use fl:: serial transport for consistent formatting
     fl::string formatted = fl::formatJsonResponse(output, "RESULT: ");
-    Serial.println(formatted.c_str());  // ok serial - ok autoresearch rpc serial - stream response boundary
+    writeRawLine(formatted);
 }
 
 // ============================================================================

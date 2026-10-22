@@ -1,5 +1,14 @@
 # Task Tracker
 
+## Open PR completion sweep (stock SDK requirement)
+
+- [x] Inventory open PRs; leave reciprocal license #4049 untouched.
+- [x] Reject patched-framework dependency and close #4898.
+- [ ] Refresh, validate and merge #4873, #4877 and #4886.
+- [ ] Integrate stock-compatible stack prerequisites and land #4894, #4896 and #4897.
+- [ ] Replace stale #4706 policy claims with an enforced, measured policy and finish its review.
+- [ ] Verify final PR states, reviews, CI and checkout.
+
 ## Eliminate unused flash dependencies (#4870 follow-up)
 
 - [x] Remove linker roots for unused PWM teardown and vector initialization without changing features.
@@ -11,6 +20,17 @@ Blink budget rejects the previous report and accepts the new image. Real SDK
 PWM/Serial/UCS7604 consumer links; native debug passes 321 units + 95 examples;
 full lint and code review pass. Published on #4873 (after documentation #4872 merged); hosted CI is separate from
 these local validation results.
+
+## Native ESP-IDF console footprint (#4870)
+
+- [x] Trace native UART/ring-buffer retention and measure pinned controls.
+- [x] Specialize fixed console initialization without removing configurable UART features.
+- [x] Verify image savings, explicit native/general UART consumers, tests, lint and review.
+- [x] Publish the focused implementation and its limitations.
+
+Review: native console saves 2,524 bytes flash with unchanged static RAM; both
+console backends pass physical ESP32 RPC smoke. Clean debug validation passes
+321 unit tests and 95 examples; modern ESP32-S3 AutoResearch and lint pass.
 
 ## Merge and remaining flash investigation (#4870)
 
