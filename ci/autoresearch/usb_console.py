@@ -70,14 +70,19 @@ def check_ownership(elf: Path, backend: str) -> dict[str, int]:
     if not addr2line:
         raise UsbConsoleError("toolchain addr2line (for nm) not found")
     nm = addr2line.with_name(addr2line.name.replace("addr2line", "nm"))
-    result = RunningProcess.run(
-        [str(nm), "-C", str(elf)],
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-        errors="replace",
-        timeout=120,
-    )
+    if not nm.is_file():
+        raise UsbConsoleError(f"toolchain nm not found next to {addr2line}")
+    try:
+        result = RunningProcess.run(
+            [str(nm), "-C", str(elf)],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=120,
+        )
+    except (OSError, RuntimeError) as exc:
+        raise UsbConsoleError(f"nm could not run: {exc}") from exc
     if result.returncode:
         raise UsbConsoleError(f"nm failed: {result.stderr}")
     symbols = result.stdout
@@ -283,8 +288,12 @@ async def run_usb_console(args: Args) -> int:
         if lint.returncode:
             return lint.returncode
 
-    project = synthesise_autoresearch_project(environment, root, args.verbose)
-    ini = ProjectIni.parseFile(project / "platformio.ini")
+    try:
+        project = synthesise_autoresearch_project(environment, root, args.verbose)
+        ini = ProjectIni.parseFile(project / "platformio.ini")
+    except (RuntimeError, OSError) as exc:
+        print(f"USB console AutoResearch FAILED: {exc}", file=sys.stderr)
+        return 1
     build_flags = ini.get_option(f"env:{environment}", "build_flags", "") or ""
     backend = selected_backend(build_flags)
     if backend is None:
@@ -324,7 +333,7 @@ async def run_usb_console(args: Args) -> int:
             raise UsbConsoleError(f"firmware.elf not found under {build}")
         ownership = check_ownership(elf, backend)
         summary = await run_validation(port, args.verbose)
-    except UsbConsoleError as exc:
+    except (UsbConsoleError, RpcError, TimeoutError) as exc:
         print(f"USB console AutoResearch FAILED: {exc}", file=sys.stderr)
         return 1
     summary = {

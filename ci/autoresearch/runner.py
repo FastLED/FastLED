@@ -84,6 +84,11 @@ async def run(args: Args | None = None) -> int:
     args = args or Args.parse_args()
     assert args is not None
 
+    if args.usb_console:
+        from ci.autoresearch.usb_console import run_usb_console
+
+        return await run_usb_console(args)
+
     if args.spi_provider:
         from ci.autoresearch.spi_provider import run_spi_provider
 
@@ -91,11 +96,6 @@ async def run(args: Args | None = None) -> int:
     if args.spi_provider_native:
         print("--spi-provider-native requires --spi-provider", file=sys.stderr)
         return 1
-
-    if args.usb_console:
-        from ci.autoresearch.usb_console import run_usb_console
-
-        return await run_usb_console(args)
 
     if args.embedded_fs:
         from ci.autoresearch.embedded_fs import run_embedded_fs
