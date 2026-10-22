@@ -14,6 +14,7 @@
 #if defined(FL_IS_ESP32)
 
 #include "platforms/shared/spi_hw_1.h"
+#include "platforms/esp/32/drivers/spi/spi_provider.h"
 #include "platforms/shared/spi_manager.h"  // For DMABuffer, TransmitMode, SPIError
 #include "platforms/esp/32/drivers/spi/spi_hw_base.h"  // Common ESP32 SPI definitions
 #include "fl/stl/cstring.h"
@@ -309,14 +310,28 @@ void SPISingleESP32::cleanup() FL_NO_EXCEPT {
 // Singleton getters for controller instances (Meyer's Singleton pattern)
 // These are called from the centralized registration in spi_esp32_init.cpp
 // Return as SpiHw1 base class pointer to avoid forward declaration issues
+namespace platforms {
+FL_LINK_WEAK fl::shared_ptr<SpiHw1> fastled_spi_provider(u8 bus) FL_NO_EXCEPT {
+    if (bus == 2) {
+        return fl::make_shared<SPISingleESP32>(2, "SPI2");
+    }
+#if SOC_SPI_PERIPH_NUM > 2
+    if (bus == 3) {
+        return fl::make_shared<SPISingleESP32>(3, "SPI3");
+    }
+#endif
+    return {};
+}
+} // namespace platforms
+
 fl::shared_ptr<SpiHw1>& getController2() FL_NO_EXCEPT {
-    static fl::shared_ptr<SpiHw1> instance = fl::make_shared<SPISingleESP32>(2, "SPI2");
+    static fl::shared_ptr<SpiHw1> instance = platforms::fastled_spi_provider(2);
     return instance;
 }
 
 #if SOC_SPI_PERIPH_NUM > 2
 fl::shared_ptr<SpiHw1>& getController3() FL_NO_EXCEPT {
-    static fl::shared_ptr<SpiHw1> instance = fl::make_shared<SPISingleESP32>(3, "SPI3");
+    static fl::shared_ptr<SpiHw1> instance = platforms::fastled_spi_provider(3);
     return instance;
 }
 #endif

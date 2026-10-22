@@ -705,7 +705,7 @@ USB/HAL callback roots. Physical USB enumeration/reconnect remains unverified.
 ## #4888 optional Arduino integration goal (sequential)
 
 - [x] #4889: implementation, review and local validation complete; published PR #4894 with ci-full attached. Master integration/full CI remains pending for the stack.
-- [ ] #4890: complete SPI transaction provider; preserve native default, contention HIL and bloat before/after.
+- [ ] #4890: complete SPI transaction provider; preserve native default, contention HIL and bloat before/after. Factory selection/null ownership has hardware RED -> GREEN; actual Arduino adapter and frame validation remain in progress.
 - [ ] #4891: transitive Arduino-header enforcement in existing lint, regression fixtures and real SDK probes.
 - [ ] #4892: eliminate framework startup Serial0 retention from this repository while preserving application Serial APIs; measured maps and HIL.
 - [ ] #4893: physical native USB matrix, RPC/reconnect/ownership/LED and recovery checks; document any unavailable routes without claiming them validated.
@@ -728,3 +728,23 @@ tests passing on debug rerun. Registry storage is now in the isolated .cpp.hpp.
 Full lint and independent production review pass. Details and lifecycle limits:
 docs/ESP32_EMBEDDED_FS.md. Canonical AutoResearch image restored; final GPIO
 and legacy RMT checks pass (3/3 scenarios, both LED payload captures 4/4).
+
+#4890 starts from `47ad6f04c142fb6bf0df69554b89e8573f2252e5`, integrating
+current master host/frequency fixes into the new isolated SPI branch. The
+physical RED uses real legacy APA102 (HOST2, 500kHz, 32 LEDs) and an application
+Arduino SPI owner/second client: ownerReady=true, completed=true, providerCalls=0,
+success=false. Baseline SDK sources are preserved under .build/4890/baseline.
+After the factory change, the same real-device selection fixture reports
+providerCalls=2 and nativeUnclaimed=true (SDK add-device witness returns
+invalid-state). This intentional null provider disables that host without
+native takeover; it does not prove LED output. Normal lint and the current
+SPI adapter debug target pass. The device currently runs this SPI selection
+fixture; restore canonical AutoResearch when #4890 hardware work finishes.
+Reuse SpiHw1's complete lifecycle at getController2/3 before native acquisition;
+do not patch only the older ESP32SPIOutput escape hatch. Next: checked shared
+application guard and borrowed Arduino adapter, provider/null/archive tests,
+complete-frame physical capture with a second SPI client, SDK mode/clock/CS
+witnesses, native timeout-buffer retention regression, matched fbuild bloat,
+tests/review/publication. Arduino writeBytes is void: report only observable
+failures. APA102 has no CS: a mutex prevents interleaving but does not isolate
+an ungated strip from unrelated bus traffic. Keep that electrical limit explicit.
