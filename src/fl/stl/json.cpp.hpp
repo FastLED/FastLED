@@ -705,6 +705,10 @@ fl::string unescape_string(const fl::span<const char>& span) FL_NO_EXCEPT {
                             consumed = 11;
                         }
                     }
+                    // An unpaired surrogate has no UTF-8 encoding; emit U+FFFD.
+                    if (cp >= 0xD800 && cp <= 0xDFFF) {
+                        cp = 0xFFFD;
+                    }
                     append_utf8(result, static_cast<unsigned long>(cp));
                     i += consumed;
                     break;

@@ -2809,5 +2809,13 @@ FL_TEST_CASE("json parses \\u escapes as UTF-8") {
     FL_CHECK(s == "\xC3\xA9\xE2\x82\xAC\xF0\x9F\x98\x80" "A");
 }
 
+
+FL_TEST_CASE("json parse - unpaired surrogates become U+FFFD") {
+    json doc = json::parse("[\"\\ud800x\\udc00\"]");
+    FL_REQUIRE(doc.is_array());
+    fl::string s = doc[0] | fl::string();
+    FL_CHECK(s == "\xEF\xBF\xBD" "x" "\xEF\xBF\xBD");
+}
+
 } // FL_TEST_FILE
 
