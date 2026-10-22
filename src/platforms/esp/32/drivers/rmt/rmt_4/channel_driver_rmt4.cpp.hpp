@@ -463,6 +463,17 @@ ChannelEngineRMT4Impl::ChannelState *ChannelEngineRMT4Impl::acquireChannel(
 
     auto &manager = RmtMemoryManager4::instance();
     for (int channel = 0; channel < FASTLED_RMT_MAX_CHANNELS; ++channel) {
+        bool owned = false;
+        for (const auto &existing : mChannels) {
+            if (existing.configured &&
+                static_cast<int>(existing.channel) == channel) {
+                owned = true;
+                break;
+            }
+        }
+        if (owned) {
+            continue;
+        }
         size_t allocatedWords = 0;
         const bool networkActive = NetworkStateTracker4::instance().isActive();
         // The ledger chooses two or three blocks, including demotion when the
