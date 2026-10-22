@@ -116,3 +116,23 @@ FL_TEST_CASE("Rpc: rpc.discover streams the same schema as schema()") {
     FL_CHECK(parsed["result"].to_string() == remote.schema().to_string());
     FL_CHECK_EQ(parsed["result"]["schema"].size(), 2u);
 }
+
+FL_TEST_CASE("Rpc: streamed responses echo a non-integer id exactly") {
+    fl::string streamed;
+    Remote remote(
+        []() { return fl::optional<fl::json>(); },
+        [](const fl::json&) {},
+        [&streamed](fl::JsonStreamCallback writeJson) {
+            fl::JsonStreamWriter writer([&streamed](const char* data, fl::size len) {
+                streamed.append(data, len);
+            });
+            writeJson(writer);
+            writer.flush();
+        });
+    fl::json request = fl::json::parse(
+        "{\"jsonrpc\":\"2.0\",\"method\":\"rpc.discover\",\"params\":[],\"id\":1.5}");
+    remote.processRpc(request);
+    fl::json parsed = fl::json::parse(streamed);
+    FL_REQUIRE(parsed.contains("id"));
+    FL_CHECK(parsed["id"].to_string() == request["id"].to_string());
+}

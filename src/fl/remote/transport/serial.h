@@ -200,8 +200,7 @@ createSerialResponseSink(const char* prefix = "REMOTE: ") FL_NO_EXCEPT {
                 static_cast<SerialWriter*>(ctx)->write(data, len);
             },
             &serial);
-        serial.write("\n", 1);
-        fl::flush();
+        serial.println("");
     };
 }
 

@@ -810,7 +810,7 @@ public:
         fl::size idx = pos.mIndex;
         if (idx == mSize) {
             emplace_back(fl::forward<Args>(args)...);
-            return idx < mSize ? iterator(this, idx) : end();
+            return iterator(this, idx);  // end() if the append failed
         }
         // Move-extend at the back so move-only T works. The moved-from
         // slot at old logical mSize-1 is overwritten by the shift loop.

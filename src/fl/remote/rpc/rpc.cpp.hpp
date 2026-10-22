@@ -154,8 +154,12 @@ json Rpc::handle(const json& request) FL_NO_EXCEPT {
     // See FastLED #3081.
     if (methodName == "rpc.discover") {
         // Stream when possible: the schema tree for a large registry can
-        // exceed the free heap on ESP32-S3 (FastLED #4899).
-        if (mResponseStreamSink &&
+        // exceed the free heap on ESP32-S3 (FastLED #4899). Scheduled calls
+        // (non-zero timestamp) keep the inline result so it is recorded.
+        // Stream sinks run the callback synchronously, so `self` outlives it.
+        const bool scheduled = request.contains("timestamp") &&
+                               request["timestamp"].as_int().value_or(0) != 0;
+        if (!scheduled && mResponseStreamSink &&
             (!mResponseStreamAvailable || mResponseStreamAvailable())) {
             fl::json requestId = request.contains("id") ? request["id"] : json(nullptr);
             const bool includeId = request.contains("id");
