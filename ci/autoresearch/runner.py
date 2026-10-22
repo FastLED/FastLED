@@ -84,6 +84,11 @@ async def run(args: Args | None = None) -> int:
     args = args or Args.parse_args()
     assert args is not None
 
+    if args.serial_startup:
+        from ci.autoresearch.serial_startup import run_serial_startup
+
+        return await run_serial_startup(args)
+
     if args.spi_provider:
         from ci.autoresearch.spi_provider import run_spi_provider
 

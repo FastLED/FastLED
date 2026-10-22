@@ -18,6 +18,13 @@ ESP32_IDF_5_4_PIOARDUINO = "https://github.com/pioarduino/platform-espressif32/r
 ESP32_IDF_5_5_PIOARDUINO = "https://github.com/pioarduino/platform-espressif32/releases/download/55.03.34/platform-espressif32.zip"
 ESP32_IDF_5_5_1_PIOARDUINO = "https://github.com/pioarduino/platform-espressif32/releases/download/55.03.35/platform-espressif32.zip"
 ESP32_IDF_5_5_5_PIOARDUINO = "https://github.com/pioarduino/platform-espressif32/releases/download/55.03.311/platform-espressif32.zip"
+# Arduino 3.3.11 plus the two-file optional UART0 startup hook (#4892).
+# Keep this paired with IDF 5.5.5; never inject it into legacy IDF 4.4 builds.
+ESP32_ARDUINO_3_3_11_SERIAL_FRAMEWORK = (
+    "framework-arduinoespressif32@https://github.com/zackees/arduino-esp32/archive/"
+    "8ec18a5aee996356e906a759dbcc1e12b46fb0aa.tar.gz"
+    "#8ec18a5aee996356e906a759dbcc1e12b46fb0aa"
+)
 # Arduino 4 on ESP-IDF 6: pioarduino 61.04.00-RC1 release (FastLED#4827,
 # FastLED#3516). Bump to the final 61.04.x tag when pioarduino cuts it.
 ESP32_IDF_6_PIOARDUINO = "https://github.com/pioarduino/platform-espressif32/releases/download/61.04.00-RC1/platform-espressif32.zip"
@@ -786,6 +793,7 @@ ESP32DEV = Board(
     # resolved 3.1.0 and put both Blink and Apa102 over their frozen caps;
     # the 5.5.5 platform restores the documented framework baseline (#4690).
     platform=ESP32_IDF_5_5_5_PIOARDUINO,
+    platform_packages=ESP32_ARDUINO_3_3_11_SERIAL_FRAMEWORK,
     board_partitions="huge_app.csv",
     # Size-strip flags for the CI binary-size reference target
     # (check_esp32_size.yml — 330 KB ceiling). Previously these lived in
@@ -987,6 +995,7 @@ ESP32_S3_DEVKITC_1 = Board(
     board_name="esp32s3",
     real_board_name="esp32-s3-devkitc-1",
     platform=ESP32_IDF_5_5_5_PIOARDUINO,
+    platform_packages=ESP32_ARDUINO_3_3_11_SERIAL_FRAMEWORK,
     framework="arduino",
     board_build_flash_size="4MB",  # Set to 4MB for QEMU compatibility (default is 8MB)
     board_partitions="huge_app.csv",  # 3MB app partition (default.csv only has 1.25MB, too small for Validation)
@@ -1048,7 +1057,8 @@ ESP32H2 = Board(
 ESP32_P4 = Board(
     board_name="esp32p4",
     real_board_name="esp32-p4-evboard",
-    platform=ESP32_IDF_5_5_1_PIOARDUINO,
+    platform=ESP32_IDF_5_5_5_PIOARDUINO,
+    platform_packages=ESP32_ARDUINO_3_3_11_SERIAL_FRAMEWORK,
     board_partitions="huge_app.csv",
     parlio_capable=True,  # SOC_PARLIO_SUPPORTED=1 — flags auto-emitted by to_project_ini()
     # Native SDK USB Serial/JTAG matches the physical upload port. Disable

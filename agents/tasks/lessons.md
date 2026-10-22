@@ -582,3 +582,15 @@
 - Check framework lifecycle as well as SDK behavior: Arduino 2.0.3 can crash
   when Serial.begin replaces a native driver before its HAL mutex exists.
   Test both initialization orders; preserve native-only fallback behavior.
+- Startup HIL must preserve the generated AutoResearch aggregate and instrument
+  setup before canonical initialization. RPC suppresses normal log output, so
+  serial ownership probes must use the actual raw writer. When a probe moves
+  console RX to an unwired pin, settle and discard transition noise before the
+  next RPC request; record the discard rather than masking transport failures.
+- Record counts do not prove ordering. Validate the complete expected sequence
+  and reject unexpected provider records in native-only fixtures. Generate the
+  staged build's metadata before bloat, check its provenance ELF, and verify the
+  ELF hash before and after deployment so link evidence covers the tested image.
+- Keep fbuild build-summary, symbol-attributed, ELF image-flash and padded binary
+  size measurements separate. Report matched before/after values within each
+  accounting method; their absolute totals need not agree.

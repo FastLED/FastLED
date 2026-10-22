@@ -156,6 +156,7 @@ class Args:
     embedded_fs_format_fixture: bool = False
     spi_provider: bool = False
     spi_provider_native: bool = False
+    serial_startup: str | None = None
 
     @staticmethod
     def parse_args(argv: list[str] | None = None) -> "Args":
@@ -383,6 +384,11 @@ See Also:
             "--spi-provider",
             action="store_true",
             help="Test optional Arduino SPI sharing through staged ESP32 AutoResearch",
+        )
+        driver_group.add_argument(
+            "--serial-startup",
+            choices=("native-only", "native-first", "arduino-first"),
+            help="Verify patched classic ESP32 UART startup using GPIO4 loopback and GPIO16/17 pin changes",
         )
         driver_group.add_argument(
             "--spi-provider-native",
@@ -939,6 +945,7 @@ See Also:
             embedded_fs_format_fixture=parsed.embedded_fs_format_fixture,
             spi_provider=parsed.spi_provider,
             spi_provider_native=parsed.spi_provider_native,
+            serial_startup=parsed.serial_startup,
             rpc_smoke=parsed.rpc_smoke,
             watchdog_soak=parsed.watchdog_soak,
             perf_wave2d=parsed.perf_wave2d,

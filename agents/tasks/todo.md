@@ -707,7 +707,24 @@ USB/HAL callback roots. Physical USB enumeration/reconnect remains unverified.
 - [x] #4889: implementation, review and local validation complete; published PR #4894 with ci-full attached. Master integration/full CI remains pending for the stack.
 - [x] #4890: implementation, contention HIL, matched bloat and local review complete; published PR #4896 with ci-full requested. Stack/master integration remains pending.
 - [x] #4891: implementation, regression/SDK/HIL/bloat validation and review complete; published PR #4897 with full CI requested. Stack/master integration pending.
-- [ ] #4892: eliminate framework startup Serial0 retention from this repository while preserving application Serial APIs; measured maps and HIL.
+- [x] #4892: implementation, matched maps/bloat/runtime heap, review and local HIL validation complete; publication and full stack/master CI pending.
+  - Framework patch published upstream as espressif/arduino-esp32#13010;
+    immutable downstream source pin integrated locally for matching Arduino
+    3.3.11 / IDF 5.5.5 profiles (esp32dev, esp32s3, esp32p4).
+  - Six matched public-source P4 builds and bloat reports complete. Native UART
+    saves 22,040 build-summary flash bytes / 1,096 static RAM bytes; native USB
+    saves 28,418 / 1,128. Explicit Serial0 costs 26 flash bytes, unchanged RAM.
+  - Durable native-first and Arduino-first AutoResearch each pass five cycles
+    on classic ESP32 with pin transitions, ordered records and zero warm heap
+    retention. Native-only durable run also passes all five cycles. Matched
+    native-only runtime controls recover 612 heap bytes (71,512 → 72,124), with
+    zero per-cycle retention in both images. Consolidated fixture HIL and matched
+    explicit Serial0 runtime controls complete: 71,468 free heap bytes in both
+    images, zero per-cycle retention in all five cycles. Consolidated
+    native-first, Arduino-first and native-only HIL each pass all five cycles.
+  - Review findings fixed: exact output order and staged ELF provenance/hash.
+    Focused Python tests: 15 pass. Full Python: 2,022 pass, 47 skipped,
+    two expected failures. Full lint passes. Primary PR and full CI still pending.
 - [ ] #4893: physical native USB matrix, RPC/reconnect/ownership/LED and recovery checks; document any unavailable routes without claiming them validated.
 
 Each child is completed and verified before implementation starts on the next.

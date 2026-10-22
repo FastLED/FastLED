@@ -59,6 +59,7 @@ Driver Selection (optional - omit for GPIO-only mode):
   --embedded-fs-format-fixture  Allow formatting an unmountable test volume
   --spi-provider      Test Arduino SPI provider (explicit classic ESP32 env and port)
   --spi-provider-native  With --spi-provider, test native SPI timeout/ownership faults
+  --serial-startup MODE  Test UART startup: native-only, native-first, arduino-first
   --simd              Test SIMD operations only (no LED drivers needed)
   --coroutine         Test coroutine/task creation, stop, await (no LED drivers needed)
   --parallel          Test multiple drivers simultaneously (requires 2+ drivers)
