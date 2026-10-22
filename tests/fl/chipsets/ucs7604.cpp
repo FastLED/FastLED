@@ -15,6 +15,7 @@
 #include "cpixel_ledcontroller.h"
 #include "dither_mode.h"
 #include "test.h"
+#include "fl/stl/static_assert.h"
 #include "eorder.h"
 #include "fl/channels/channel.h"
 #include "fl/channels/channel_events.h"
@@ -40,6 +41,18 @@ FL_TEST_FILE(FL_FILEPATH) {
 using namespace fl;
 
 namespace {
+
+// These values must need no startup constructor when the chipset is unused.
+constexpr fl::UCS7604CurrentControl kDefaultCurrent;
+constexpr fl::UCS7604CurrentControl kUniformCurrent(0xAB);
+constexpr fl::UCS7604CurrentControl kChannelCurrent(0x12, 0x23, 0x34, 0x45);
+FL_STATIC_ASSERT(kDefaultCurrent.r == 0xF && kDefaultCurrent.w == 0xF,
+              "Default current must be constant initialized");
+FL_STATIC_ASSERT(kUniformCurrent.r == 0xB && kUniformCurrent.w == 0xB,
+              "Uniform current must mask to four bits at compile time");
+FL_STATIC_ASSERT(kChannelCurrent.r == 2 && kChannelCurrent.g == 3 &&
+              kChannelCurrent.b == 4 && kChannelCurrent.w == 5,
+              "Channel currents must mask to four bits at compile time");
 
 /// RGB16 color structure for 16-bit color values (test-only)
 /// Similar to CRGB but uses uint16_t for each channel
