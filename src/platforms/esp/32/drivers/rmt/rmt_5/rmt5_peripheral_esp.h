@@ -99,6 +99,8 @@ public:
     bool syncCache(void* buffer, size_t size) FL_NO_EXCEPT override = 0;
     u8* allocateDmaBuffer(size_t size) FL_NO_EXCEPT override = 0;
     void freeDmaBuffer(u8* buffer) FL_NO_EXCEPT override = 0;
+    u32 getPinRouting(int pin) FL_NO_EXCEPT override = 0;
+    bool rebindTxPin(void* channel_handle, int pin) FL_NO_EXCEPT override = 0;
 
 protected:
     /// @brief Protected constructor for singleton

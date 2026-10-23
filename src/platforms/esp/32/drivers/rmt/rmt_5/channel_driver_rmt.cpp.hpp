@@ -433,7 +433,8 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
               useDMA(false),
               reset_us(0),
               pooledBuffer(),
-              memoryChannelId(0) {}
+              memoryChannelId(0),
+              pinRouting(IRMT5Peripheral::kPinRoutingUnknown) {}
 
         ChannelState(const ChannelState& other) FL_NO_EXCEPT
             : owner(other.owner),
@@ -446,7 +447,8 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
               useDMA(other.useDMA),
               reset_us(other.reset_us),
               pooledBuffer(other.pooledBuffer),
-              memoryChannelId(other.memoryChannelId) {}
+              memoryChannelId(other.memoryChannelId),
+              pinRouting(other.pinRouting) {}
 
         ChannelState& operator=(const ChannelState& other) FL_NO_EXCEPT {
             if (this != &other) {
@@ -463,6 +465,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
                 reset_us = other.reset_us;
                 pooledBuffer = other.pooledBuffer;
                 memoryChannelId = other.memoryChannelId;
+                pinRouting = other.pinRouting;
             }
             return *this;
         }
@@ -487,6 +490,8 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
                                         // released on complete)
         u8 memoryChannelId;        // Virtual channel ID for memory manager
                                         // accounting (vector index)
+        u32 pinRouting;            // Pin routing captured when the channel
+                                        // took the pin (FastLED#4905)
     };
 
     /// @brief Pending channel data to be transmitted when HW channels become
@@ -869,6 +874,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
                 }
 
                 FL_LOG_RMT("TX Channel #" << ((mChannels.size() + 1)) << ": DMA enabled on GPIO " << (static_cast<int>(pin)) << " (" << dma_mem_block_symbols << " symbols)");
+                state->pinRouting = mPeripheral.getPinRouting(pin);
                 return true;
             } else {
                 // DMA FAILED - free memory and fall through to non-DMA
@@ -992,7 +998,25 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
         }
 
         FL_LOG_RMT("[RMT TX] Channel created on GPIO " << (static_cast<int>(pin)) << " (" << mem_block_symbols << " symbols, non-DMA)");
+        state->pinRouting = mPeripheral.getPinRouting(pin);
         return true;
+    }
+
+    /// @brief Route the pin back to an idle channel being reused
+    ///
+    /// FastLED#4905: while the channel sat idle, another peripheral (or
+    /// pinMode()) could take its pin. The channel kept transmitting into a
+    /// pin that no longer carried its signal, so every later frame on that
+    /// pin was lost.
+    void reclaimPin(ChannelState *state) FL_NO_EXCEPT {
+        if (state->pinRouting == IRMT5Peripheral::kPinRoutingUnknown ||
+            mPeripheral.getPinRouting(state->pin) == state->pinRouting) {
+            return;
+        }
+        FL_LOG_RMT("GPIO " << state->pin << " was rerouted while idle - reclaiming it");
+        if (mPeripheral.rebindTxPin(state->channel, state->pin)) {
+            state->pinRouting = mPeripheral.getPinRouting(state->pin);
+        }
     }
 
     /// @brief Register ISR callback for channel (must be called AFTER
@@ -1527,6 +1551,7 @@ ChannelEngineRMTImpl::ChannelState *ChannelEngineRMTImpl::acquireChannel(
 #else
             configureChannel(&ch, pin, timing, dataSize);
 #endif
+            reclaimPin(&ch);
             FL_LOG_RMT("Reusing " << ((ch.useDMA ? "DMA" : "non-DMA")) << " channel for pin " << (static_cast<int>(pin)));
             return &ch;
         }

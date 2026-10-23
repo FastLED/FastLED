@@ -402,6 +402,27 @@ public:
     ///
     /// Safe to call with nullptr (no-op).
     virtual void freeDmaBuffer(u8* buffer) FL_NO_EXCEPT = 0;
+
+    //=========================================================================
+    // Pin Routing (FastLED#4905)
+    //=========================================================================
+
+    /// @brief Snapshot of how @p pin is routed: output signal, output
+    /// enable and IOMUX function, or kPinRoutingUnknown when it cannot be read
+    ///
+    /// Another peripheral (or pinMode()) can take the pin of an idle channel.
+    /// Comparing snapshots detects that without knowing the channel's signal.
+    ///
+    /// Maps to ESP-IDF: gpio_get_io_config() (IDF 5.5+)
+    virtual u32 getPinRouting(int pin) FL_NO_EXCEPT = 0;
+
+    /// @brief Route @p pin back to this TX channel
+    /// @return true on success, false on failure or when unsupported
+    ///
+    /// Maps to ESP-IDF: rmt_disable() + rmt_tx_switch_gpio() + rmt_enable()
+    virtual bool rebindTxPin(void* channel_handle, int pin) FL_NO_EXCEPT = 0;
+
+    static constexpr u32 kPinRoutingUnknown = 0xFFFFFFFFu;
 };
 
 } // namespace detail

@@ -93,6 +93,8 @@ public:
     bool syncCache(void* buffer, size_t size) FL_NO_EXCEPT override;
     u8* allocateDmaBuffer(size_t size) FL_NO_EXCEPT override;
     void freeDmaBuffer(u8* buffer) FL_NO_EXCEPT override;
+    u32 getPinRouting(int pin) FL_NO_EXCEPT override;
+    bool rebindTxPin(void* channel_handle, int pin) FL_NO_EXCEPT override;
 
     //=========================================================================
     // Mock-Specific API
@@ -101,6 +103,8 @@ public:
     void simulateTransmitDone(void* channel_handle) FL_NO_EXCEPT override;
     void setTransmitFailure(bool should_fail) FL_NO_EXCEPT override;
     void setMaxChannels(size_t max_channels) FL_NO_EXCEPT override;
+    void simulatePinReroute(int pin) FL_NO_EXCEPT override;
+    size_t getPinRebindCount() const FL_NO_EXCEPT override;
     const fl::vector<TransmissionRecord>& getTransmissionHistory() const FL_NO_EXCEPT override;
     void clearTransmissionHistory() FL_NO_EXCEPT override;
     fl::span<const u8> getLastTransmissionData() const FL_NO_EXCEPT override;
@@ -124,6 +128,11 @@ private:
     // Simulation settings
     bool mShouldFailTransmit;
     size_t mMaxChannels;  // 0 = unlimited
+
+    // Pin routing: the channel id that owns each pin, or kOtherPeripheral
+    fl::flat_map<fl::i32, u32> mPinRouting;
+    size_t mPinRebindCount;
+    static constexpr u32 kOtherPeripheral = 0x8000u;
 
     // Waveform capture
     fl::vector<TransmissionRecord> mHistory;
@@ -155,6 +164,8 @@ Rmt5PeripheralMockImpl::Rmt5PeripheralMockImpl()
       mNextEncoderId(1),
       mShouldFailTransmit(false),
       mMaxChannels(0),
+      mPinRouting(),
+      mPinRebindCount(0),
       mHistory(),
       mTransmissionCount(0) {
 }
@@ -253,6 +264,7 @@ bool Rmt5PeripheralMockImpl::createTxChannel(const Rmt5ChannelConfig& config,
     channel->user_ctx = nullptr;
 
     mChannels[channel_id] = channel;
+    mPinRouting[config.gpio_num] = static_cast<u32>(channel_id);
 
     // Return opaque handle
     *out_handle = fl::bit_cast<void*>(static_cast<intptr_t>(channel_id));
@@ -495,6 +507,22 @@ void Rmt5PeripheralMockImpl::freeDmaBuffer(u8* buffer) FL_NO_EXCEPT {
     FL_DBG("RMT5_MOCK: Freed DMA buffer");
 }
 
+u32 Rmt5PeripheralMockImpl::getPinRouting(int pin) FL_NO_EXCEPT {
+    auto it = mPinRouting.find(pin);
+    return it == mPinRouting.end() ? kPinRoutingUnknown : it->second;
+}
+
+bool Rmt5PeripheralMockImpl::rebindTxPin(void* channel_handle, int pin) FL_NO_EXCEPT {
+    MockChannel* channel = findChannel(channel_handle);
+    if (channel == nullptr) {
+        return false;
+    }
+    channel->config.gpio_num = pin;
+    mPinRouting[pin] = static_cast<u32>(channel->id);
+    mPinRebindCount++;
+    return true;
+}
+
 //=============================================================================
 // Mock-Specific API
 //=============================================================================
@@ -523,6 +551,14 @@ void Rmt5PeripheralMockImpl::setTransmitFailure(bool should_fail) FL_NO_EXCEPT {
 
 void Rmt5PeripheralMockImpl::setMaxChannels(size_t max_channels) FL_NO_EXCEPT {
     mMaxChannels = max_channels;
+}
+
+void Rmt5PeripheralMockImpl::simulatePinReroute(int pin) FL_NO_EXCEPT {
+    mPinRouting[pin] = kOtherPeripheral;
+}
+
+size_t Rmt5PeripheralMockImpl::getPinRebindCount() const FL_NO_EXCEPT {
+    return mPinRebindCount;
 }
 
 const fl::vector<Rmt5PeripheralMock::TransmissionRecord>&
@@ -581,6 +617,8 @@ void Rmt5PeripheralMockImpl::reset() FL_NO_EXCEPT {
     mNextEncoderId = 1;
     mShouldFailTransmit = false;
     mMaxChannels = 0;
+    mPinRouting.clear();
+    mPinRebindCount = 0;
     mTransmissionCount = 0;
 
     FL_DBG("RMT5_MOCK: Reset to initial state");

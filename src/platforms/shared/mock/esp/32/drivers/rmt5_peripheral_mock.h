@@ -127,6 +127,8 @@ public:
     bool syncCache(void* buffer, size_t size) FL_NO_EXCEPT override = 0;
     u8* allocateDmaBuffer(size_t size) FL_NO_EXCEPT override = 0;
     void freeDmaBuffer(u8* buffer) FL_NO_EXCEPT override = 0;
+    u32 getPinRouting(int pin) FL_NO_EXCEPT override = 0;
+    bool rebindTxPin(void* channel_handle, int pin) FL_NO_EXCEPT override = 0;
 
     //=========================================================================
     // Mock-Specific API (for unit tests)
@@ -177,6 +179,15 @@ public:
     /// Models hardware with fewer RMT TX channels than strips, so
     /// createTxChannel() fails once the limit is reached.
     virtual void setMaxChannels(size_t max_channels) FL_NO_EXCEPT = 0;
+
+    /// @brief Hand @p pin to another peripheral (FastLED#4905)
+    ///
+    /// Models pinMode() or another driver routing the pin of an idle channel
+    /// elsewhere; getPinRouting() reports the change until rebindTxPin().
+    virtual void simulatePinReroute(int pin) FL_NO_EXCEPT = 0;
+
+    /// @brief Number of successful rebindTxPin() calls
+    virtual size_t getPinRebindCount() const FL_NO_EXCEPT = 0;
 
     //-------------------------------------------------------------------------
     // Waveform Capture (for validation)
