@@ -1536,7 +1536,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
         // capture stayed at the 100-symbol GPIO baseline: 200 edges). Bound
         // the request by the largest block that can actually be allocated.
         const size_t largest_block =
-            heap_caps_get_largest_free_block(MALLOC_CAP_8BIT) / 2;
+            heap_caps_get_largest_free_block(MALLOC_CAP_8BIT);
         if (largest_block < max_alloc) {
             max_alloc = largest_block;
         }

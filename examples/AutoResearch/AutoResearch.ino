@@ -10,6 +10,7 @@
 // `FL_PLATFORM_HAS_LARGE_MEMORY == 0`.
 
 #include "fl/system/sketch_macros.h"
+#include "fl/system/heap.h"
 
 #if !FL_PLATFORM_HAS_LARGE_MEMORY
 #include "AutoResearchLowMemory.h"
@@ -312,19 +313,30 @@ constexpr int RX_BUFFER_SIZE = 1000 * 32 + 100;
 #elif defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2) || \
     defined(FL_IS_ESP_32C5) || defined(FL_IS_RP)
 constexpr int RX_BUFFER_SIZE = 100 * 32 + 100;  // Memory-constrained: 100 LEDs max for autoresearch
-#elif defined(FL_IS_ESP_32DEV) || (defined(FL_IS_ESP32) && !defined(CONFIG_SPIRAM))
+#elif defined(FL_IS_ESP_32DEV)
 // FastLED#3569 — classic ESP32-WROOM (~320 KB DRAM, no PSRAM) ran out
 // of heap during runSingleTest with the 96 KB tier: `fl::aligned_alloc`
 // returned null inside fl::json::set (StoreProhibited @ 0x400d2ece).
 // 1000 LEDs × 32 symbols covers every bench scenario and frees 64 KB
 // for the 16 KB loop stack + result-JSON building.
-// FastLED#4903 — the same applies to any ESP32 built without PSRAM: on a
-// XIAO ESP32-S3 the 96 KB tier left 30 KB of heap, so the RMT RX capture
-// could not allocate and every loopback decode stopped at 200 edges.
 constexpr int RX_BUFFER_SIZE = 1000 * 32 + 100;
 #else
 constexpr int RX_BUFFER_SIZE = 3000 * 32 + 100;  // LEDs × 32:1 expansion + headroom
 #endif
+// FastLED#4903 — the 3000-LED tier assumes PSRAM. A board that reports heap
+// but no PSRAM (a XIAO ESP32-S3 here) was left with 30 KB of heap, so the RX
+// capture could not allocate and every loopback decode stopped at 200 edges.
+// Such boards use the 1000-LED tier, as classic ESP32 does above (#3569).
+constexpr int RX_BUFFER_SIZE_NO_PSRAM = 1000 * 32 + 100;
+
+static int rxBufferSize() {
+    const fl::HeapInfo heap = fl::getFreeHeap();
+    if (RX_BUFFER_SIZE > RX_BUFFER_SIZE_NO_PSRAM && heap.total() > 0 &&
+        !heap.has_psram()) {
+        return RX_BUFFER_SIZE_NO_PSRAM;
+    }
+    return RX_BUFFER_SIZE;
+}
 
 // Factory function for creating RxChannel instances
 // This allows AutoResearchRemoteControl to recreate the RX channel when the pin changes
@@ -474,7 +486,7 @@ void setup() {
     // src/platforms/*/watchdog_*.impl.hpp.
 
     // Initialize RX buffer dynamically (uses PSRAM if available, falls back to heap)
-    g_rx_buffer_storage.resize(RX_BUFFER_SIZE);
+    g_rx_buffer_storage.resize(rxBufferSize());
 
     // Initialize global autoresearch state
     g_autoresearch_state = fl::make_shared<AutoResearchState>();
@@ -504,7 +516,7 @@ void setup() {
     ss << "  RX Device: " << fl::toString(RX_BACKEND) << "\n";
     ss << "  Loopback Mode: " << loop_back_mode << "\n";
     ss << "  Color Order: RGB\n";
-    ss << "  RX Buffer Size: " << RX_BUFFER_SIZE << " bytes";
+    ss << "  RX Buffer Size: " << g_rx_buffer_storage.size() << " bytes";
 
     // SIMD validation suite, Wave8 expansion micro-bench, and full PARLIO
     // encode bench are RPC-driven — invoke via the `testSimd`,
@@ -537,7 +549,7 @@ void setup() {
     ss.clear();
     ss << "\n[RX SETUP] Creating RX channel for LED autoresearch\n";
     ss << "[RX CREATE] Creating RX channel on PIN " << PIN_RX
-       << " (" << (40000000 / 1000000) << "MHz, " << RX_BUFFER_SIZE << " symbols)";
+       << " (" << (40000000 / 1000000) << "MHz, " << g_rx_buffer_storage.size() << " symbols)";
 
     g_autoresearch_state->rx_channel = createRxDevice(PIN_RX);
 
@@ -596,7 +608,7 @@ void setup() {
     readyData.set("chip", autoresearch::chipName());
     readyData.set("rxBackend", fl::toString(RX_BACKEND));
     readyData.set("loopbackMode", loop_back_mode);
-    readyData.set("rxBufferSize", static_cast<int64_t>(RX_BUFFER_SIZE));
+    readyData.set("rxBufferSize", static_cast<int64_t>(g_rx_buffer_storage.size()));
     printStreamRaw("ready", readyData);
 
     delay(2000);
