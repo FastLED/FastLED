@@ -140,6 +140,53 @@ def test_compile_timeout_is_a_nonretryable_failure(
     assert attempted == ["first"]
 
 
+@pytest.mark.parametrize(
+    "diagnostic,retry",
+    [
+        ("FAILED: object.o\nzccache[err]: PCH alias validation failed", False),
+        ("source.cpp:5: error: invalid conversion", False),
+        ("undefined reference to setup", False),
+        ("unexpected build backend failure", False),
+        ("error: unknown target triple 'bad-target'", False),
+        ("error: unknown target CPU 'bad-cpu'", False),
+        ("ERROR: Can't invoke target `missing`: target not found", True),
+        ("ERROR: Can't invoke target `json`: ambiguous name", True),
+        ("ninja: error: unknown target 'missing'", True),
+        ("ERROR: Can't invoke target `json`: ambiguous name\nFAILED: object.o", False),
+    ],
+)
+def test_fuzzy_target_fallback_cannot_hide_compiler_failure(
+    diagnostic: str, retry: bool, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    attempted: list[str] = []
+
+    def compile_candidate(_build_dir: Path, target: str, **_kwargs: object):
+        attempted.append(target)
+        return compile_mod.CompileResult(
+            success=target == "second", error_output=diagnostic, suppressed_errors=[]
+        )
+
+    monkeypatch.setattr(sequential_runner, "compile_meson", compile_candidate)
+    monkeypatch.setattr(sequential_runner, "_print_compile_failure", lambda **_: None)
+    ctx = SimpleNamespace(
+        source_dir=tmp_path,
+        build_mode="debug",
+        build_dir=tmp_path,
+        phase_tracker=SimpleNamespace(set_phase=lambda *_args, **_kw: None),
+        test_name="first",
+        meson_test_name="first",
+        fallback_test_name="second",
+        fuzzy_candidates=["second"],
+        verbose=False,
+        log_failures=None,
+        build_timer=SimpleNamespace(checkpoint=lambda *_args: None),
+        start_time=time.time(),
+    )
+    outcome = sequential_runner.run_sequential_compile(ctx)
+    assert outcome.success is retry
+    assert attempted == (["first", "second"] if retry else ["first"])
+
+
 def test_retry_deadline_after_tee_closes_returns_timeout(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
