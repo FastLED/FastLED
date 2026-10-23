@@ -807,6 +807,13 @@ class RmtRxChannelImpl : public RmtRxChannel {
                    << ", resolution_hz=" << mResolutionHz);
         }
 
+        // Every capture sizes its own buffer: a re-arm must not inherit the
+        // size of an earlier, smaller capture (FastLED#4903 — a 100-symbol
+        // GPIO baseline capped later LED captures at 200 edges).
+        if (config.buffer_size != 0) {
+            mBufferSize = config.buffer_size;
+        }
+
         // Store configuration parameters
         mSignalRangeMinNs = config.signal_range_min_ns;
         mSignalRangeMaxNs = config.signal_range_max_ns;
@@ -1523,6 +1530,16 @@ class RmtRxChannelImpl : public RmtRxChannel {
         size_t target_size = mBufferSize;
         size_t free_heap = esp_get_free_heap_size();
         size_t max_alloc = free_heap / 4;  // Use at most 25% of free heap
+        // FastLED#4903: the free-heap total includes PSRAM and fragments, so
+        // it can promise far more than one allocation can get. A reserve()
+        // that fails keeps the previous, possibly tiny, capacity (an S3
+        // capture stayed at the 100-symbol GPIO baseline: 200 edges). Bound
+        // the request by the largest block that can actually be allocated.
+        const size_t largest_block =
+            heap_caps_get_largest_free_block(MALLOC_CAP_8BIT);
+        if (largest_block < max_alloc) {
+            max_alloc = largest_block;
+        }
         size_t target_bytes = target_size * sizeof(RmtSymbol);
         if (target_bytes > max_alloc && max_alloc > hw_buffer_size * sizeof(RmtSymbol)) {
             target_size = max_alloc / sizeof(RmtSymbol);
