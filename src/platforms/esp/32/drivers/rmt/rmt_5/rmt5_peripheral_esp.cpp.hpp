@@ -535,12 +535,12 @@ bool Rmt5PeripheralESPImpl::rebindTxPin(void* channel_handle, int pin) FL_NO_EXC
     // channels disabled and enables them per transmission, so leave it so.
     esp_err_t err = rmt_disable(channel);
     if (err != ESP_OK && err != ESP_ERR_INVALID_STATE) {
-        FL_WARN("RMT5_PERIPH: rebind GPIO " << pin << ": rmt_disable failed: " << esp_err_to_name(err));
+        FL_WARN_ONCE("RMT5_PERIPH: rebind GPIO " << pin << ": rmt_disable failed: " << esp_err_to_name(err));
         return false;
     }
     err = rmt_tx_switch_gpio(channel, static_cast<gpio_num_t>(pin), false);
     if (err != ESP_OK) {
-        FL_WARN("RMT5_PERIPH: rebind GPIO " << pin << " failed: " << esp_err_to_name(err));
+        FL_WARN_ONCE("RMT5_PERIPH: rebind GPIO " << pin << " failed: " << esp_err_to_name(err));
         return false;
     }
     return true;

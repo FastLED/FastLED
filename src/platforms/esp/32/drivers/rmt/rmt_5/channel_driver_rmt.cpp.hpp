@@ -1014,10 +1014,12 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
             return;
         }
         FL_LOG_RMT("GPIO " << state->pin << " was rerouted while idle - reclaiming it");
-        // Whether or not the rebind worked, take the current routing as the
-        // new baseline: a failed rebind warns once instead of every frame.
-        mPeripheral.rebindTxPin(state->channel, state->pin);
-        state->pinRouting = mPeripheral.getPinRouting(state->pin);
+        // Keep the original baseline when the rebind fails, so a later frame
+        // retries instead of accepting the stolen routing (the peripheral
+        // warns only once).
+        if (mPeripheral.rebindTxPin(state->channel, state->pin)) {
+            state->pinRouting = mPeripheral.getPinRouting(state->pin);
+        }
     }
 
     /// @brief Register ISR callback for channel (must be called AFTER
