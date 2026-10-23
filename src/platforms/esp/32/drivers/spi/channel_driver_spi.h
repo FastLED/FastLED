@@ -296,6 +296,7 @@ private:
         // Debug capture (diagnostics)
         bool debugTxCaptured;              ///< First TX buffer bytes captured for diagnostics
         u8 debugTxBuffer[8];               ///< Captured first 8 bytes of TX buffer
+        u32 pinRouting;                    ///< Pin routing captured at init (FastLED#4907)
     };
 
     /// @brief DMA pipeline state for poll()-driven async transmission

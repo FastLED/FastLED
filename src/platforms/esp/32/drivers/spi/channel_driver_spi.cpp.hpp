@@ -31,6 +31,7 @@
 #if FASTLED_ESP32_HAS_CLOCKLESS_SPI
 
 #include "platforms/esp/32/drivers/spi/channel_driver_spi.h"
+#include "platforms/esp/32/drivers/pin_routing_esp32.h"
 #include "platforms/memory_barrier.h"
 #include "platforms/esp/32/drivers/spi/wave8_encoder_spi.h"
 #include "fl/chipsets/led_timing.h"
@@ -667,6 +668,23 @@ ChannelEngineSpi::acquireChannel(gpio_num_t pin, const ChipsetTimingConfig &timi
             channel.transmissionComplete = false;
             channel.ledBytesRemaining = 0;
 
+            // FastLED#4907: while this channel sat idle, another driver (or
+            // pinMode()) could take its pin, and the bus would keep shifting
+            // into a pin that no longer carries MOSI. Rerouting MOSI alone is
+            // not enough on ESP32-C6 (see below), so release the host and let
+            // the reinit path rebuild the bus on this pin.
+            if (channel.spi_host != SPI_HOST_MAX &&
+                channel.pinRouting != fl::esp32::kPinRoutingUnknown &&
+                fl::esp32::pinRoutingSnapshot(pin) != channel.pinRouting) {
+                FL_DBG("ChannelEngineSpi: GPIO " << pin << " was rerouted while idle - rebuilding its SPI bus");
+                if (channel.spi_device) {
+                    spi_bus_remove_device(channel.spi_device);
+                    channel.spi_device = nullptr;
+                }
+                releaseSpiHost(channel.spi_host);
+                channel.spi_host = SPI_HOST_MAX;
+            }
+
             if (channel.spi_host != SPI_HOST_MAX) {
                 // SPI hardware still allocated - reuse directly (same pin + timing).
                 // Reallocate LED source buffer if the new data is larger
@@ -874,6 +892,7 @@ bool ChannelEngineSpi::reinitSpiHardware(SpiChannelState *state, gpio_num_t pin,
 
     // NOTE: Do NOT call gpio_set_drive_capability() here (see createChannel())
 
+    state->pinRouting = fl::esp32::pinRoutingSnapshot(pin);
     FL_DBG_EVERY(100, "ChannelEngineSpi: Reinit SPI hardware for pin " << pin << " host=" << (static_cast<int>(state->spi_host)));
     return true;
 }
@@ -1020,6 +1039,7 @@ bool ChannelEngineSpi::createChannel(SpiChannelState *state, gpio_num_t pin,
         state->spi_host = SPI_HOST_MAX;
         return false;
     }
+    state->pinRouting = fl::esp32::pinRoutingSnapshot(pin);
 
     // Verify actual clock frequency (tolerance: +/-500 kHz for wave8)
     int actual_freq_khz = 0;
