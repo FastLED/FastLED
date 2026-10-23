@@ -467,6 +467,14 @@ to validate a driver, subsystem, or special mode:
 - `--ieee754` - Special mode: run integer IEEE 754 decimal codec verification without LED driver loopback
 - `--simd`, `--coroutine`, `--net`, `--ota`, `--ble`, `--decode` - Special
   feature validation modes
+- `--usb-console` - ESP32 native USB console validation (explicit environment
+  and `--upload-port`; run alone). Checks the linked firmware for the
+  profile-selected backend and no Arduino HWCDC/USBCDC owner, then over the
+  real USB route: repeated RPC, payloads up to 3 KB, recovery after an
+  oversize request, sustained traffic, host disconnect/reconnect, RPC during
+  RMT output (decode reported, not gated), watchdog reset re-enumeration and
+  heap integrity. Requests must fit the console RX ring (4096 B on USB
+  Serial/JTAG, envelope included); the SDK drops bytes beyond it. See #4893.
 
 ### Usage Examples
 ```bash

@@ -138,7 +138,10 @@ int read() FL_NO_EXCEPT {
 }
 
 bool readStringUntil(sstream& out, char delimiter, char skipChar, fl::optional<u32> timeoutMs) FL_NO_EXCEPT {
-    // Follows Arduino Serial.readStringUntil() API - blocks until delimiter found
+    // Follows Arduino Serial.readStringUntil() API - blocks until delimiter
+    // found. Like Arduino's timedRead(), the timeout measures inactivity: it
+    // restarts on every received byte, so a long line arriving steadily over
+    // a slow link is not discarded midway (FastLED #4893).
     u32 startTime = fl::millis();
 
     // Read characters until we find delimiter or timeout
@@ -164,6 +167,8 @@ bool readStringUntil(sstream& out, char delimiter, char skipChar, fl::optional<u
             fl::delayMicroseconds(1);
             continue;
         }
+
+        startTime = fl::millis();
 
         // Found delimiter - complete
         if (c == delimiter) {

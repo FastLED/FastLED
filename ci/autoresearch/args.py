@@ -152,6 +152,7 @@ class Args:
     watchdog_soak: bool = False
     mp3: bool = False
     embedded_fs: bool = False
+    usb_console: bool = False
     embedded_fs_provider: bool = False
     embedded_fs_format_fixture: bool = False
     spi_provider: bool = False
@@ -388,6 +389,11 @@ See Also:
             "--spi-provider-native",
             action="store_true",
             help="Test native SPI DMA lifetime instead; requires --spi-provider",
+        )
+        driver_group.add_argument(
+            "--usb-console",
+            action="store_true",
+            help="Validate the ESP32 native USB console route on hardware (explicit env and port)",
         )
         driver_group.add_argument(
             "--embedded-fs",
@@ -935,6 +941,7 @@ See Also:
             fft=parsed.fft,
             mp3=parsed.mp3,
             embedded_fs=parsed.embedded_fs,
+            usb_console=parsed.usb_console,
             embedded_fs_provider=parsed.embedded_fs_provider,
             embedded_fs_format_fixture=parsed.embedded_fs_format_fixture,
             spi_provider=parsed.spi_provider,

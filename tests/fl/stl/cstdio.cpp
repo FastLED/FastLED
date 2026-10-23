@@ -483,4 +483,48 @@ FL_TEST_CASE("fl::write_bytes round-trips raw bytes including 0x00 and 0xFF") {
     fl::clear_io_handlers();
 }
 
+// FastLED #4893: the timeout is per-character inactivity, like Arduino's
+// readStringUntil. A long request that arrives steadily over a slow link must
+// not be discarded just because the whole line takes longer than the timeout.
+FL_TEST_CASE("fl::readStringUntil timeout resets on each received byte") {
+    fl::MockTimeProvider mock(1000);
+    fl::inject_time_provider([&mock]() { return mock(); });
+    fl::string line(2000, 'x');
+    line += '\n';
+    size_t pos = 0;
+    fl::inject_available_handler([&]() { return pos < line.size() ? 1 : 0; });
+    fl::inject_read_handler([&]() {
+        mock.advance(1);  // one byte per millisecond: 2 s for the whole line
+        return pos < line.size() ? line[pos++] : -1;
+    });
+
+    fl::sstream buffer;
+    bool success = fl::readStringUntil(buffer, '\n', '\r', fl::optional<fl::u32>(1000));
+    FL_CHECK(success);
+    FL_CHECK_EQ(buffer.str().size(), 2000u);
+
+    fl::clear_io_handlers();
+    fl::clear_time_provider();
+}
+
+FL_TEST_CASE("fl::readStringUntil times out after inactivity") {
+    fl::MockTimeProvider mock(1000);
+    fl::inject_time_provider([&mock]() { return mock(); });
+    const char* partial = "abc";
+    size_t pos = 0;
+    fl::inject_available_handler([&]() { return 1; });
+    fl::inject_read_handler([&]() {
+        mock.advance(10);
+        return pos < 3 ? partial[pos++] : -1;  // then the link goes quiet
+    });
+
+    fl::sstream buffer;
+    bool success = fl::readStringUntil(buffer, '\n', '\r', fl::optional<fl::u32>(100));
+    FL_CHECK_FALSE(success);
+
+    fl::clear_io_handlers();
+    fl::clear_time_provider();
+}
+
 } // FL_TEST_FILE
+
