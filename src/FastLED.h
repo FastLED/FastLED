@@ -84,6 +84,7 @@
 #if defined(FL_IS_ESP32)
 #include "platforms/esp/esp_version.h"  // ok platform headers
 #include "platforms/esp/32/feature_flags/enabled.h"  // ok platform headers
+#include "platforms/esp/32/esp32_lazy_serial0_main.h"  // ok platform headers
 #if FASTLED_RMT5 == 0 && FASTLED_ESP32_HAS_RMT && ESP_IDF_VERSION_5_OR_HIGHER
 #error "FASTLED_RMT5=0 (legacy RMT4 backend) is not supported on ESP-IDF 5.x or newer. Remove -DFASTLED_RMT5=0 to use the RMT5 backend, which is the default on this IDF. RMT4 remains available only when building against ESP-IDF 4.x. See https://github.com/FastLED/FastLED/issues/3936"
 #endif
