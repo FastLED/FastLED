@@ -656,6 +656,30 @@ void ChannelEngineSpi::beginTransmission(
     }
 }
 
+namespace {
+
+constexpr u32 kPinRoutingUnknown = 0xFFFFFFFFu;
+
+// FastLED#4907: output signal, output enable and IOMUX function of @p pin, so
+// a reuse can tell that another driver (or pinMode()) took the pin. Needs
+// gpio_get_io_config() (IDF 5.5); older cores report unknown and keep the
+// previous behaviour.
+u32 pinRoutingSnapshot(gpio_num_t pin) FL_NO_EXCEPT {
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 5, 0)
+    gpio_io_config_t io = {};
+    if (gpio_get_io_config(pin, &io) != ESP_OK) {
+        return kPinRoutingUnknown;
+    }
+    return (io.sig_out & 0xFFFFu) | (io.oe ? (1u << 16) : 0u) |
+           ((io.fun_sel & 0xFFu) << 20);
+#else
+    (void)pin;
+    return kPinRoutingUnknown;
+#endif
+}
+
+} // namespace
+
 ChannelEngineSpi::SpiChannelState *
 ChannelEngineSpi::acquireChannel(gpio_num_t pin, const ChipsetTimingConfig &timing,
                                  size_t dataSize) FL_NO_EXCEPT {
@@ -666,6 +690,23 @@ ChannelEngineSpi::acquireChannel(gpio_num_t pin, const ChipsetTimingConfig &timi
             channel.inUse = true;
             channel.transmissionComplete = false;
             channel.ledBytesRemaining = 0;
+
+            // FastLED#4907: while this channel sat idle, another driver (or
+            // pinMode()) could take its pin, and the bus would keep shifting
+            // into a pin that no longer carries MOSI. Rerouting MOSI alone is
+            // not enough on ESP32-C6 (see below), so release the host and let
+            // the reinit path rebuild the bus on this pin.
+            if (channel.spi_host != SPI_HOST_MAX &&
+                channel.pinRouting != kPinRoutingUnknown &&
+                pinRoutingSnapshot(pin) != channel.pinRouting) {
+                FL_DBG("ChannelEngineSpi: GPIO " << pin << " was rerouted while idle - rebuilding its SPI bus");
+                if (channel.spi_device) {
+                    spi_bus_remove_device(channel.spi_device);
+                    channel.spi_device = nullptr;
+                }
+                releaseSpiHost(channel.spi_host);
+                channel.spi_host = SPI_HOST_MAX;
+            }
 
             if (channel.spi_host != SPI_HOST_MAX) {
                 // SPI hardware still allocated - reuse directly (same pin + timing).
@@ -874,6 +915,7 @@ bool ChannelEngineSpi::reinitSpiHardware(SpiChannelState *state, gpio_num_t pin,
 
     // NOTE: Do NOT call gpio_set_drive_capability() here (see createChannel())
 
+    state->pinRouting = pinRoutingSnapshot(pin);
     FL_DBG_EVERY(100, "ChannelEngineSpi: Reinit SPI hardware for pin " << pin << " host=" << (static_cast<int>(state->spi_host)));
     return true;
 }
@@ -1020,6 +1062,7 @@ bool ChannelEngineSpi::createChannel(SpiChannelState *state, gpio_num_t pin,
         state->spi_host = SPI_HOST_MAX;
         return false;
     }
+    state->pinRouting = pinRoutingSnapshot(pin);
 
     // Verify actual clock frequency (tolerance: +/-500 kHz for wave8)
     int actual_freq_khz = 0;
