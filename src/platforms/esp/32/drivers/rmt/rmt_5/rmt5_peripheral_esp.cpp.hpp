@@ -105,6 +105,8 @@ public:
     bool syncCache(void* buffer, size_t size) FL_NO_EXCEPT override;
     u8* allocateDmaBuffer(size_t size) FL_NO_EXCEPT override;
     void freeDmaBuffer(u8* buffer) FL_NO_EXCEPT override;
+    u32 getPinRouting(int pin) FL_NO_EXCEPT override;
+    bool rebindTxPin(void* channel_handle, int pin) FL_NO_EXCEPT override;
 
 private:
     /// @brief Disable cache sync after ESP_ERR_INVALID_ARG error
@@ -499,6 +501,54 @@ void Rmt5PeripheralESPImpl::freeDmaBuffer(u8* buffer) FL_NO_EXCEPT {
 
     heap_caps_free(buffer);
     FL_LOG_RMT("RMT5_PERIPH: Freed DMA buffer");
+}
+
+//=============================================================================
+// Pin Routing (FastLED#4905)
+//=============================================================================
+
+// gpio_get_io_config() and rmt_tx_switch_gpio() both ship in the IDF 5.5
+// bundled with Arduino-ESP32 3.3; older cores keep the previous behaviour.
+#define FL_RMT5_CAN_REBIND_PIN (ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 5, 0))
+
+u32 Rmt5PeripheralESPImpl::getPinRouting(int pin) FL_NO_EXCEPT {
+#if FL_RMT5_CAN_REBIND_PIN
+    gpio_io_config_t io = {};
+    if (gpio_get_io_config(static_cast<gpio_num_t>(pin), &io) != ESP_OK) {
+        return kPinRoutingUnknown;
+    }
+    return (io.sig_out & 0xFFFFu) | (io.oe ? (1u << 16) : 0u) |
+           ((io.fun_sel & 0xFFu) << 20);
+#else
+    (void)pin;
+    return kPinRoutingUnknown;
+#endif
+}
+
+bool Rmt5PeripheralESPImpl::rebindTxPin(void* channel_handle, int pin) FL_NO_EXCEPT {
+#if FL_RMT5_CAN_REBIND_PIN
+    if (channel_handle == nullptr) {
+        return false;
+    }
+    rmt_channel_handle_t channel = static_cast<rmt_channel_handle_t>(channel_handle);
+    // rmt_tx_switch_gpio() requires a disabled channel. The engine keeps idle
+    // channels disabled and enables them per transmission, so leave it so.
+    esp_err_t err = rmt_disable(channel);
+    if (err != ESP_OK && err != ESP_ERR_INVALID_STATE) {
+        FL_WARN_ONCE("RMT5_PERIPH: rebind GPIO " << pin << ": rmt_disable failed: " << esp_err_to_name(err));
+        return false;
+    }
+    err = rmt_tx_switch_gpio(channel, static_cast<gpio_num_t>(pin), false);
+    if (err != ESP_OK) {
+        FL_WARN_ONCE("RMT5_PERIPH: rebind GPIO " << pin << " failed: " << esp_err_to_name(err));
+        return false;
+    }
+    return true;
+#else
+    (void)channel_handle;
+    (void)pin;
+    return false;
+#endif
 }
 
 //=============================================================================

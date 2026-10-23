@@ -260,6 +260,40 @@ FL_TEST_CASE("RMT5 driver - same pin sequential frames") {
     }
 }
 
+// FastLED#4905: another peripheral (or pinMode) can take the pin of an idle
+// cached channel. Reusing that channel must route the pin back to it, and
+// must leave an untouched pin alone.
+FL_TEST_CASE("RMT5 driver - reused channel reclaims a rerouted pin") {
+    resetMock();
+    auto& mock = Rmt5PeripheralMock::instance();
+    auto driver = ChannelEngineRMT::create();
+    uint8_t red[] = {0xFF, 0x00, 0x00};
+    void* channel_handle = reinterpret_cast<void*>(1);
+
+    auto showFrame = [&]() {
+        auto ch = createChannelData(18, 1, red);
+        driver->enqueue(ch);
+        driver->show();
+        mock.simulateTransmitDone(channel_handle);
+        for (int i = 0; i < 10 && ch->isInUse(); i++) {
+            driver->poll();
+        }
+    };
+
+    showFrame();
+    FL_REQUIRE(mock.getChannelCount() == 1);
+    showFrame();
+    FL_CHECK(mock.getPinRebindCount() == 0);
+
+    mock.simulatePinReroute(18);
+    showFrame();
+    FL_CHECK(mock.getPinRebindCount() == 1);
+    FL_CHECK(mock.getChannelCount() == 1);
+
+    showFrame();
+    FL_CHECK(mock.getPinRebindCount() == 1);
+}
+
 //=============================================================================
 // Test Suite: State Machine
 //=============================================================================
