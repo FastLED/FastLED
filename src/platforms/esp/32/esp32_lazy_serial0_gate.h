@@ -31,11 +31,17 @@
 #define FL_ESP32_ARDUINO_LAZY_SERIAL0 0
 
 #if defined(FL_IS_ESP32) && defined(ARDUINO_ARCH_ESP32) && !FL_ESP32_STOCK_ARDUINO_MAIN
-#if FL_HAS_INCLUDE(<esp_arduino_version.h>) && FL_HAS_INCLUDE(<sdkconfig.h>)
+// Canary: an Arduino.h on the include path proves nothing (FastLED and other
+// projects ship compatibility shims). Require several headers that only the
+// real Arduino-ESP32 core ships, plus its version macros below.
+#if FL_HAS_INCLUDE(<esp_arduino_version.h>) && FL_HAS_INCLUDE(<esp32-hal.h>) && \
+    FL_HAS_INCLUDE(<esp32-hal-uart.h>) && FL_HAS_INCLUDE(<chip-debug-report.h>) && \
+    FL_HAS_INCLUDE(<io_pin_remap.h>) && FL_HAS_INCLUDE(<sdkconfig.h>)
 // IWYU pragma: begin_keep
 #include <sdkconfig.h>             // ok include
 #include <esp_arduino_version.h>   // ok include
 // IWYU pragma: end_keep
+#if defined(ESP_ARDUINO_VERSION) && defined(ESP_ARDUINO_VERSION_VAL)
 #if defined(CONFIG_AUTOSTART_ARDUINO) && CONFIG_AUTOSTART_ARDUINO && \
     !defined(NO_GLOBAL_INSTANCES) && !defined(NO_GLOBAL_SERIAL) && \
     !((ARDUINO_USB_CDC_ON_BOOT || ARDUINO_USB_MSC_ON_BOOT || \
@@ -44,6 +50,7 @@
     ESP_ARDUINO_VERSION <= ESP_ARDUINO_VERSION_VAL(3, 3, 12)
 #undef FL_ESP32_ARDUINO_LAZY_SERIAL0
 #define FL_ESP32_ARDUINO_LAZY_SERIAL0 1
+#endif
 #endif
 #endif
 #endif
