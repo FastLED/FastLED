@@ -335,6 +335,11 @@ class RpcClient:
                         f"falling back to timeout behavior."
                     )
 
+            if matched is None:
+                from ci.util.boot_wait import raise_if_boot_looping
+
+                raise_if_boot_looping(poll_drained_lines)
+
         if drain_boot:
             if self.verbose:
                 print(f"📥 [RPC] Draining boot output...")
