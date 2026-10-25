@@ -43,6 +43,10 @@
 #if defined(FL_IS_ESP8266) && !defined(FASTLED_AUTORESEARCH_IEEE754_MODE)
 #define FASTLED_AUTORESEARCH_IEEE754_MODE 1
 #endif
+// The clockless bench reports the driver's frame/retry counters.
+#if defined(FL_IS_ESP8266) && !defined(FASTLED_DEBUG_COUNT_FRAME_RETRIES)
+#define FASTLED_DEBUG_COUNT_FRAME_RETRIES 1
+#endif
 
 #if !defined(FASTLED_AUTORESEARCH_LPC_UART_DMA)
 #define FASTLED_AUTORESEARCH_LPC_UART_DMA 0

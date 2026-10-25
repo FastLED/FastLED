@@ -15,6 +15,12 @@
 // uartWs2812Show: [nLeds] -> json
 //   Runs the same driver through FastLED.addLeds + FastLED.show().
 //
+// clocklessShow / apa102Show: [nLeds, frames] -> json
+//   Run the default bit-banged WS2812 controller (GPIO4) and the APA102
+//   controller (data GPIO13, clock GPIO14) through FastLED.show() and report
+//   min/max frame time. A frame near twice the floor means the clockless
+//   driver aborted and retried after an interrupt overran its timing window.
+//
 
 #include "platforms/esp/is_esp.h"  // ok platform headers - ESP8266 bench gate
 
@@ -202,7 +208,7 @@ inline fl::json uartWs2812Show(int nLeds) {
         leds[i] = CRGB(patternByte(i * 3), patternByte(i * 3 + 1), patternByte(i * 3 + 2));
     }
     const fl::u32 t0 = micros();
-    FastLED.show();
+    st.controller.showLeds(255);
     const fl::u32 elapsed = micros() - t0;
     fl::json r = fl::json::object();
     r.set("success", true);
@@ -213,7 +219,99 @@ inline fl::json uartWs2812Show(int nLeds) {
     return r;
 }
 
+constexpr int kClocklessPin = 4;
+constexpr int kApaDataPin = 13;
+constexpr int kApaClockPin = 14;
+
+struct DriverShowState {
+    CRGB leds[64];
+    CLEDController* clockless = nullptr;
+    CLEDController* apa102 = nullptr;
+};
+
+inline DriverShowState& driverShowState() {
+    return fl::SingletonShared<DriverShowState>::instance();
+}
+
+// Show one controller for `frames` frames and report frame-time spread.
+inline fl::json timeFrames(CLEDController* controller, int nLeds, int frames,
+                           fl::i64 floorUs) {
+    DriverShowState& st = driverShowState();
+    if (nLeds < 1) nLeds = 1;
+    if (nLeds > 64) nLeds = 64;
+    if (frames < 1) frames = 1;
+    if (frames > 200) frames = 200;
+    controller->setLeds(fl::span<CRGB>(st.leds, nLeds));
+    fl::u32 minUs = 0xFFFFFFFF, maxUs = 0;
+    USIE(0) = 0;  // EXPERIMENT
+    const fl::u32 frames0 = fl::_frame_cnt, retries0 = fl::_retry_cnt;
+    int truncated = 0;  // finished faster than the wire allows: frame dropped
+    int firstTruncated = -1;
+    for (int f = 0; f < frames; ++f) {
+        for (int i = 0; i < nLeds; ++i) {
+            st.leds[i] = CHSV(static_cast<fl::u8>(f * 7 + i * 13), 255, 255);
+        }
+        const fl::u32 t0 = micros();
+        controller->showLeds(255);
+        const fl::u32 us = micros() - t0;
+        if (us < minUs) minUs = us;
+        if (us > maxUs) maxUs = us;
+        if (static_cast<fl::i64>(us) < floorUs) {
+            if (firstTruncated < 0) firstTruncated = f;
+            ++truncated;
+        }
+    }
+    fl::json r = fl::json::object();
+    r.set("success", truncated == 0);
+    r.set("truncated", static_cast<fl::i64>(truncated));
+    r.set("first_truncated_frame", static_cast<fl::i64>(firstTruncated));
+    r.set("driver_frames_ok", static_cast<fl::i64>(fl::_frame_cnt - frames0));
+    r.set("driver_retries", static_cast<fl::i64>(fl::_retry_cnt - retries0));
+    r.set("uptime_ms", static_cast<fl::i64>(millis()));
+    r.set("wifi_opmode", static_cast<fl::i64>(wifi_get_opmode()));
+    r.set("leds", static_cast<fl::i64>(nLeds));
+    r.set("frames", static_cast<fl::i64>(frames));
+    r.set("min_us", static_cast<fl::i64>(minUs));
+    r.set("max_us", static_cast<fl::i64>(maxUs));
+    r.set("floor_us", floorUs);
+    return r;
+}
+
+inline fl::json clocklessShow(int nLeds, int frames) {
+    DriverShowState& st = driverShowState();
+    if (!st.clockless) {
+        st.clockless = &FastLED.addLeds<WS2812B, kClocklessPin, GRB>(st.leds, 64);
+    }
+    const int n = nLeds < 1 ? 1 : (nLeds > 64 ? 64 : nLeds);
+    return timeFrames(st.clockless, n, frames, static_cast<fl::i64>(n) * 30);
+}
+
+inline fl::json apa102Show(int nLeds, int frames) {
+    DriverShowState& st = driverShowState();
+    if (!st.apa102) {
+        st.apa102 = &FastLED.addLeds<APA102, kApaDataPin, kApaClockPin, BGR>(st.leds, 64);
+    }
+    // Start frame + 4 bytes per LED + end frame; no fixed timing floor.
+    return timeFrames(st.apa102, nLeds, frames, 0);
+}
+
+// Turn the radio off so its MAC NMIs stop preempting bit-banged output.
+inline fl::json wifiOff() {
+    wifi_set_opmode_current(NULL_MODE);
+    fl::json r = fl::json::object();
+    r.set("success", wifi_get_opmode() == NULL_MODE);
+    r.set("wifi_opmode", static_cast<fl::i64>(wifi_get_opmode()));
+    return r;
+}
+
 inline void bindEsp8266Benches(fl::Remote& remote) {
+    remote.bind("wifiOff", []() -> fl::json { return wifiOff(); });
+    remote.bind("clocklessShow", [](int nLeds, int frames) -> fl::json {
+        return clocklessShow(nLeds, frames);
+    });
+    remote.bind("apa102Show", [](int nLeds, int frames) -> fl::json {
+        return apa102Show(nLeds, frames);
+    });
     remote.bind("uartWs2812Loopback", [](int nLeds, int rxPin) -> fl::json {
         return uartWs2812Loopback(nLeds, rxPin);
     });

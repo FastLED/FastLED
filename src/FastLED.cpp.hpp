@@ -98,13 +98,16 @@ FL_DISABLE_WARNING_POP
 CLEDController *CLEDController::mPHead = nullptr;
 static fl::u32 lastshow = 0;
 
-/// Global frame counter, used for debugging ESP implementations
-/// @todo Include in FASTLED_DEBUG_COUNT_FRAME_RETRIES block?
-fl::u32 _frame_cnt=0;
+namespace fl {
+/// Frame counter for ESP8266 clockless drivers (FASTLED_DEBUG_COUNT_FRAME_RETRIES).
+/// Declared as fl::_frame_cnt in platforms/esp/8266/clockless*_esp8266.h.
+// FL_LINT_ALLOW_GLOBAL(mutable counter written by the driver via extern)
+u32 _frame_cnt=0;
 
-/// Global frame retry counter, used for debugging ESP implementations
-/// @todo Include in FASTLED_DEBUG_COUNT_FRAME_RETRIES block?
-fl::u32 _retry_cnt=0;
+/// Frame retry counter for ESP8266 clockless drivers (FASTLED_DEBUG_COUNT_FRAME_RETRIES).
+// FL_LINT_ALLOW_GLOBAL(mutable counter written by the driver via extern)
+u32 _retry_cnt=0;
+}  // namespace fl
 
 // uint32_t CRGB::Squant = ((uint32_t)((__TIME__[4]-'0') * 28))<<16 | ((__TIME__[6]-'0')*50)<<8 | ((__TIME__[7]-'0')*28);
 

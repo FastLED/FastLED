@@ -517,6 +517,16 @@ FL_DISABLE_WARNING_POP
 //
 // Platform-specific definitions are in led_sysdefs_*.h headers.
 // This fallback applies only to platforms that don't define FL_IRAM.
+//
+// ESP8266 defines it here as well: this header is usually included before
+// led_sysdefs_esp8266.h, so the no-op fallback won and every FL_IRAM
+// function silently landed in flash (the core's irom0 rule takes .text*).
+#if !defined(FL_IRAM) && defined(ESP8266)
+  #define _FL_IRAM_STRINGIFY2(x) #x
+  #define _FL_IRAM_STRINGIFY(x) _FL_IRAM_STRINGIFY2(x)
+  #define _FL_IRAM_SECTION_NAME(counter) ".iram.text." _FL_IRAM_STRINGIFY(counter)
+  #define FL_IRAM __attribute__((section(_FL_IRAM_SECTION_NAME(__COUNTER__))))
+#endif
 #ifndef FL_IRAM
   #define FL_IRAM  // No-op on platforms without IRAM support
 #endif
