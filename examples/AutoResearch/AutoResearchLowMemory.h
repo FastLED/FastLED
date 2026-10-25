@@ -37,6 +37,13 @@
 #define FASTLED_AUTORESEARCH_IEEE754_MODE 1
 #endif
 
+// ESP8266 has 4 MB of flash but too little DRAM for the full harness, so its
+// low-memory build always carries the IEEE754 codec check next to echo.
+#include "platforms/esp/is_esp.h"  // ok platform headers - ESP8266 surface gate
+#if defined(FL_IS_ESP8266) && !defined(FASTLED_AUTORESEARCH_IEEE754_MODE)
+#define FASTLED_AUTORESEARCH_IEEE754_MODE 1
+#endif
+
 #if !defined(FASTLED_AUTORESEARCH_LPC_UART_DMA)
 #define FASTLED_AUTORESEARCH_LPC_UART_DMA 0
 #endif
@@ -137,6 +144,11 @@
 #endif
 #if defined(FL_IS_ARM_LPC_845) && FASTLED_AUTORESEARCH_LPC_UART_DMA
 #include "AutoResearchUartDma.h"
+#endif
+
+// ESP8266 UART WS2812 driver benches (pad self-capture, no jumper needed).
+#if defined(FL_IS_ESP8266)
+#include "AutoResearchEsp8266.h"
 #endif
 
 namespace autoresearch {
@@ -299,6 +311,10 @@ inline void autoResearchLowMemorySetup() {
         return false;
     });
 #endif  // FL_IS_ARM_LPC_845 && FASTLED_AUTORESEARCH_FAULT_TEST
+
+#if defined(FL_IS_ESP8266)
+    autoresearch::esp8266::bindEsp8266Benches(remote);
+#endif
 
 #if defined(FASTLED_AUTORESEARCH_IEEE754_MODE)
     remote.bind("ieee754CodecTest", [](const fl::json& args) -> fl::json {

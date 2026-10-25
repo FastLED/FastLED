@@ -5,13 +5,24 @@
 // Opt-in UART WS2812 driver for ESP8266 (UART1 / GPIO2).
 // Requires: #define FASTLED_ESP8266_UART before including <FastLED.h>
 // or add the controller explicitly via FastLED.addLeds<UARTController_ESP8266<GRB>>(...) .
+//
+// Wire format: UART1 runs 6N1 with TX inverted at 3.2 Mbaud, so one UART
+// frame is 8 slots of 312.5 ns and carries two LED bits:
+//
+//   slot:  start  d0  d1  d2 | d3  d4  d5  stop
+//   wire:    H   ~d0 ~d1 ~d2 |~d3 ~d4 ~d5   L
+//
+// The inverted start bit opens the first LED bit high and the inverted stop
+// bit closes the second one low; the line idles low between frames, which
+// is also the WS2812 latch level. LED '0' = H L L L (T0H 312 ns), LED '1' =
+// H H H L (T1H 937 ns), both inside the WS2812B datasheet windows.
 
 #include "platforms/esp/is_esp.h"
 
 #if defined(FL_IS_ESP8266)
 
 #ifndef FASTLED_ESP8266_UART_BAUD
-#define FASTLED_ESP8266_UART_BAUD 3200000UL  // 3.2 Mbps (4 UART bits = 1.25us LED bit)
+#define FASTLED_ESP8266_UART_BAUD 3200000UL  // 4 UART slots = one 1.25 us LED bit
 #endif
 
 #ifndef FASTLED_ESP8266_UART_RESET_US
@@ -24,15 +35,70 @@
 #include "eorder.h"
 #include "fl/stl/stdint.h"
 #include "fl/stl/noexcept.h"
+#include "fl/system/delay.h"
 
-// Forward declarations for ESP8266 Arduino core functions
-// These are provided by the ESP8266 Arduino framework
-class HardwareSerial;
-extern HardwareSerial Serial1;
-extern "C" void delayMicroseconds(unsigned int us);
+// IWYU pragma: begin_keep
+#include <esp8266_peri.h>  // SDK UART/GPIO register map
+// IWYU pragma: end_keep
+
 namespace fl {
+namespace esp8266_uart {
+
+constexpr int kUart = 1;
+constexpr u8 kTxPin = 2;         // U1TXD is only routed to GPIO2
+constexpr u8 kFifoDepth = 128;
+
+// UART byte for an MSB-first pair of LED bits, (first << 1) | second.
+inline u8 encodeBitPair(u8 twoBits) FL_NO_EXCEPT {
+    static const u8 kLut[4] = {0x37, 0x07, 0x34, 0x04};
+    return kLut[twoBits & 0x03];
+}
+
+// One LED byte (MSB first) becomes four UART bytes.
+inline void encodeByte(u8 b, u8* out4) FL_NO_EXCEPT {
+    out4[0] = encodeBitPair(static_cast<u8>(b >> 6));
+    out4[1] = encodeBitPair(static_cast<u8>(b >> 4));
+    out4[2] = encodeBitPair(static_cast<u8>(b >> 2));
+    out4[3] = encodeBitPair(b);
+}
+
+inline void begin(u32 baud) FL_NO_EXCEPT {
+    GPC(kTxPin) = (GPC(kTxPin) & (0xFu << GPCI));
+    GPEC = (1u << kTxPin);
+    GPF(kTxPin) = GPFFS(GPFFS_BUS(kTxPin));
+    USD(kUart) = ESP8266_CLOCK / baud;
+    // 6 data bits, 1 stop bit, no parity, TX inverted so the idle line is low.
+    USC0(kUart) = (1u << UCBN) | (1u << UCSBN) | (1u << UCTXI);
+    USC0(kUart) |= (1u << UCTXRST);
+    USC0(kUart) &= ~(1u << UCTXRST);
+    USIE(kUart) = 0;
+}
+
+inline u8 txFifoCount() FL_NO_EXCEPT {
+    return static_cast<u8>((USS(kUart) >> USTXC) & 0xFF);
+}
+
+inline void write(const u8* data, u16 len) FL_NO_EXCEPT {
+    for (u16 i = 0; i < len; ++i) {
+        while (txFifoCount() >= kFifoDepth - 1) {
+        }
+        USF(kUart) = data[i];
+    }
+}
+
+// Spin until the last frame has left the shift register.
+inline void flush() FL_NO_EXCEPT {
+    while (txFifoCount() != 0) {
+    }
+    // The FIFO count drops when the shifter takes the last byte; give that
+    // frame (8 slots) time to reach the wire.
+    fl::delayMicroseconds(4);
+}
+
+}  // namespace esp8266_uart
+
 // UART-based WS2812/WS2811 driver for ESP8266 (UART1, TX on GPIO2).
-// Initial implementation: RGB only; RGBW can be added by extending encode loop.
+// RGB only; RGBW can be added by extending the encode loop.
 template<EOrder RGB_ORDER = GRB>
 class UARTController_ESP8266 : public CPixelLEDController<RGB_ORDER> {
 public:
@@ -40,10 +106,10 @@ public:
         FL_NO_EXCEPT : mDataPin(dataPin), mBaud(FASTLED_ESP8266_UART_BAUD) {}
 
     // Optional: allow runtime override of baud/reset.
-    void setBaud(u32 baud) FL_NO_EXCEPT { mBaud = baud; }
+    void setBaud(u32 baud) FL_NO_EXCEPT { mBaud = baud; mBegunBaud = 0; }
     void setResetTimeUs(u16 us) FL_NO_EXCEPT { mResetUs = us; }
 
-    virtual void init() FL_NO_EXCEPT override;
+    virtual void init() FL_NO_EXCEPT override { beginUartIfNeeded(); }
     virtual void clearLeds(int nLeds) FL_NO_EXCEPT override;
     virtual u16 getMaxRefreshRate() const FL_NO_EXCEPT override { return 400; }
 
@@ -51,87 +117,31 @@ protected:
     virtual void showPixels(PixelController<RGB_ORDER> &pixels) FL_NO_EXCEPT override;
 
 private:
-    int mDataPin;
+    int mDataPin;  // informational: UART1 TX cannot leave GPIO2
     u32 mBaud;
+    u32 mBegunBaud = 0;
     u16 mResetUs = FASTLED_ESP8266_UART_RESET_US;
 
-    // Encodes two WS2812 bits into one UART byte using 4-bit symbols:
-    // 0 -> 1000, 1 -> 1100 ; packed as pairs: 00->0x88, 01->0x8C, 10->0xC8, 11->0xCC.
-    static inline u8 encode2Bits(u8 twoBits) FL_NO_EXCEPT;
-
-    // Encode one 8-bit color to 4 UART bytes (MSB first).
-    static inline void encodeByte(u8 b, u8* out4) FL_NO_EXCEPT;
-
-    // Block until UART TX finishes.
-    static inline void uartFlush() FL_NO_EXCEPT;
-
-    // Setup Serial1 safely (TX-only).
-    void beginUartIfNeeded() FL_NO_EXCEPT;
+    void beginUartIfNeeded() FL_NO_EXCEPT {
+        if (mBegunBaud != mBaud) {
+            esp8266_uart::begin(mBaud);
+            mBegunBaud = mBaud;
+        }
+    }
 };
 
 // ---- Template Implementation -----------------------------------------------
 
-// Helper to extract a 2-bit group from a byte, MSB-first.
-// group 0: bits 7..6, group 1: 5..4, group 2: 3..2, group 3: 1..0
-static inline u8 _pair_from_byte(u8 b, u8 groupIdx) FL_NO_EXCEPT {
-    u8 shift = 6 - (groupIdx * 2);
-    return (b >> shift) & 0x03;
-}
-
-template<EOrder RGB_ORDER>
-inline u8 UARTController_ESP8266<RGB_ORDER>::encode2Bits(u8 twoBits) FL_NO_EXCEPT {
-    // twoBits layout: bit1 (MSB) | bit0 (LSB)
-    // Map: 00->0x88, 01->0x8C, 10->0xC8, 11->0xCC
-    static const u8 LUT[4] = { 0x88, 0x8C, 0xC8, 0xCC };
-    return LUT[twoBits & 0x03];
-}
-
-template<EOrder RGB_ORDER>
-inline void UARTController_ESP8266<RGB_ORDER>::encodeByte(u8 b, u8* out4) FL_NO_EXCEPT {
-    out4[0] = encode2Bits(_pair_from_byte(b, 0));
-    out4[1] = encode2Bits(_pair_from_byte(b, 1));
-    out4[2] = encode2Bits(_pair_from_byte(b, 2));
-    out4[3] = encode2Bits(_pair_from_byte(b, 3));
-}
-
-template<EOrder RGB_ORDER>
-inline void UARTController_ESP8266<RGB_ORDER>::uartFlush() FL_NO_EXCEPT {
-    Serial1.flush(); // blocks until TX buffer drained
-}
-
-template<EOrder RGB_ORDER>
-void UARTController_ESP8266<RGB_ORDER>::beginUartIfNeeded() FL_NO_EXCEPT {
-    // Re-init every show() is unnecessary; only if not begun or baud changed.
-    static u32 s_currentBaud = 0;
-    if (s_currentBaud != mBaud) {
-        // UART1 on ESP8266 is TX-only on GPIO2.
-        Serial1.begin(mBaud);
-        // Optional: invert if experimenting with different encodings
-        // Serial1.set_tx_invert(false);
-        s_currentBaud = mBaud;
-    }
-}
-
-template<EOrder RGB_ORDER>
-void UARTController_ESP8266<RGB_ORDER>::init() FL_NO_EXCEPT {
-    beginUartIfNeeded();
-}
-
 template<EOrder RGB_ORDER>
 void UARTController_ESP8266<RGB_ORDER>::clearLeds(int nLeds) FL_NO_EXCEPT {
-    // Send zeros as a quick clear.
-    // Build a tiny zero frame for one LED and reuse.
-    const int bytesPerLed = 12; // 24 bits -> 12 UART bytes
-    u8 zeroEncoded[bytesPerLed];
-    // 0x00 encodes to 0x88,0x88,0x88,0x88
-    for (int i = 0; i < bytesPerLed; ++i) zeroEncoded[i] = 0x88;
-
+    u8 zero[4];
+    esp8266_uart::encodeByte(0, zero);
     beginUartIfNeeded();
-    for (int i = 0; i < nLeds; ++i) {
-        Serial1.write(zeroEncoded, bytesPerLed);
+    for (int i = 0; i < nLeds * 3; ++i) {
+        esp8266_uart::write(zero, sizeof(zero));
     }
-    uartFlush();
-    delayMicroseconds(mResetUs);
+    esp8266_uart::flush();
+    fl::delayMicroseconds(mResetUs);
 }
 
 template<EOrder RGB_ORDER>
@@ -141,30 +151,22 @@ void UARTController_ESP8266<RGB_ORDER>::showPixels(PixelController<RGB_ORDER> &p
     const int n = pixels.mLen;
     if (n <= 0) return;
 
-    // Temporary buffer for one LED (3 colors * 4 UART bytes each = 12)
+    // One LED = 3 colour bytes * 4 UART bytes.
     u8 enc[12];
 
-    // Iterate pixels; encode and stream out.
     pixels.preStepFirstByteDithering();
     for (int i = 0; i < n; ++i) {
-        // Fetch pixel in wire order with FastLED's scaling/dithering applied
-        // loadAndScale0/1/2() already handle RGB_ORDER reordering
-        u8 b0 = pixels.loadAndScale0();
-        u8 b1 = pixels.loadAndScale1();
-        u8 b2 = pixels.loadAndScale2();
-
-        // Encode each byte into 4 UART bytes (MSB-first)
-        encodeByte(b0, &enc[0]);
-        encodeByte(b1, &enc[4]);
-        encodeByte(b2, &enc[8]);
-
-        Serial1.write(enc, sizeof(enc));
+        // loadAndScale0/1/2() return wire order with scaling/dithering applied.
+        esp8266_uart::encodeByte(pixels.loadAndScale0(), &enc[0]);
+        esp8266_uart::encodeByte(pixels.loadAndScale1(), &enc[4]);
+        esp8266_uart::encodeByte(pixels.loadAndScale2(), &enc[8]);
+        esp8266_uart::write(enc, sizeof(enc));
         pixels.stepDithering();
         pixels.advanceData();
     }
 
-    uartFlush();
-    delayMicroseconds(mResetUs);
+    esp8266_uart::flush();
+    fl::delayMicroseconds(mResetUs);
 }
 }  // namespace fl
 #endif // FL_IS_ESP8266
