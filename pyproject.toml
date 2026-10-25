@@ -5,10 +5,13 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-    # Pin to fbuild 2.5.42 so digispark-tiny builds (FastLED/fbuild#1679,
-    # FastLED#4846).
+    # Require fbuild >= 2.5.44 so deploys to an ESP32-S2/S3 running TinyUSB
+    # CDC firmware enter ROM download mode via a 1200-bps touch
+    # (FastLED/fbuild#1703).
     #
-    # Pin history:
+    # Version history:
+    #   2.5.44 -- 1200-bps touch + re-enumeration for ESP32-S2/S3 TinyUSB CDC
+    #              app ports before flashing (FastLED/fbuild#1703).
     #   2.5.42 -- validates the registry digistump repack against
     #              cores/dtiny (FastLED/fbuild#1679); moves the zip crate to
     #              9.0.3 after crates.io yanked every older release
@@ -305,7 +308,7 @@ dependencies = [
     # (FastLED/fbuild#573).
     # 2.5.43 resolves native Node behind nodejs-wheel's launcher so AVR8JS
     # exits on success and timeout (FastLED/fbuild#1697).
-    "fbuild==2.5.43",
+    "fbuild>=2.5.44",
     # Decodes the FastLED/boards `usb-vids.proto.zstd` registry artifact in
     # ci/util/audit_usb_registry.py. Declared explicitly rather than relied on
     # transitively (clang-tool-chain-bins pulls it in today) so the documented

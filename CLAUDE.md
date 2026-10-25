@@ -107,7 +107,7 @@ See `agents/docs/build-system.md` for full command execution rules and forbidden
 
 ### USB VID/PID identities live in FastLED/boards — ALWAYS
 - **Never introduce a board/device USB VID:PID into this repo as the place it first exists.** [FastLED/boards](https://github.com/FastLED/boards) is the source of truth; it publishes a zstd-compressed protobuf (`usb-vids.proto.zstd`) that fbuild ingests at build time and falls back to from its cache root. FastLED consumes it through `fbuild port scan` / `fbuild deploy`.
-- **Missing identity ⇒ fix the registry, then cascade.** Add it on the FastLED/boards data branch, let the `site.yml` workflow republish, cut an fbuild release, then move the `fbuild==X.Y.Z` pin in `pyproject.toml` and run `uv sync` to pick it up. `uv.lock` is gitignored here, so the pin is the only committed half of the cascade — but you must still relock/sync locally or you keep running the old wheel.
+- **Missing identity ⇒ fix the registry, then cascade.** Add it on the FastLED/boards data branch, let the `site.yml` workflow republish, cut an fbuild release, then raise the `fbuild>=X.Y.Z` floor in `pyproject.toml` and run `uv sync` to pick it up. `uv.lock` is gitignored here, so the floor is the only committed half of the cascade — but you must still relock/sync locally or you keep running the old wheel.
 - **The legacy tables are retired.** Runtime USB identities and environment-aware port selection come from FastLED/boards through fbuild. Test fixtures may use concrete literals; they must never become runtime defaults.
 - Full rule, pipeline diagram, and cascade procedure: `agents/docs/usb-vid-pid-registry.md`. fbuild mirrors it in its own `CLAUDE.md` → "USB VID/PID source of truth" and `docs/usb-vidpid-audit.md`.
 
