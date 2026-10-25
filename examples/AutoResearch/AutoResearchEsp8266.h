@@ -36,6 +36,7 @@
 // IWYU pragma: begin_keep
 #include <esp8266_peri.h>     // GPI, ESP8266_CLOCK
 #include <user_interface.h>   // system_update_cpu_freq
+#include <cont.h>             // cont_get_free_stack (loop-stack headroom)
 // IWYU pragma: end_keep
 
 namespace autoresearch {
@@ -305,7 +306,52 @@ inline fl::json wifiOff() {
     return r;
 }
 
-inline void bindEsp8266Benches(fl::Remote& remote) {
+// UART1 internal loopback (UCLBE): TX feeds the RX FIFO inside the
+// peripheral, so this proves the encoder, 6N1 framing and 3.2 Mbaud timing
+// without a jumper. It does not see the GPIO2 pad.
+inline fl::json uartWs2812InternalLoopback(fl::u32 baud) {
+    namespace u = fl::esp8266_uart;
+    u::begin(baud ? baud : FASTLED_ESP8266_UART_BAUD);
+    // The loopback taps the line after TX inversion and RX inversion does
+    // not apply to it, so drop TX inversion for the self-test: RX then sees
+    // ordinary 6N1 frames. The inversion itself is one register bit.
+    USC0(u::kUart) &= ~(1u << UCTXI);
+    USC0(u::kUart) |= (1u << UCLBE);
+    USC0(u::kUart) |= (1u << UCRXRST);
+    USC0(u::kUart) &= ~(1u << UCRXRST);
+    const fl::u8 pixel[3] = {0xA5, 0x0F, 0xC3};
+    fl::u8 sent[12];
+    for (int i = 0; i < 3; ++i) {
+        u::encodeByte(pixel[i], &sent[i * 4]);
+    }
+    u::write(sent, sizeof(sent));
+    u::flush();
+    fl::delayMicroseconds(20 + 9000000 / (baud ? baud : FASTLED_ESP8266_UART_BAUD));
+    const fl::u32 got = (USS(u::kUart) >> USRXC) & 0xFF;
+    fl::u32 matched = 0;
+    fl::json rx = fl::json::array();
+    for (fl::u32 i = 0; i < got && i < sizeof(sent); ++i) {
+        const fl::u8 c = static_cast<fl::u8>(USF(u::kUart) & 0x3F);
+        rx.push_back(static_cast<fl::i64>(c));
+        if (c == (sent[i] & 0x3F)) {
+            ++matched;
+        }
+    }
+    USC0(u::kUart) &= ~(1u << UCLBE);
+    USC0(u::kUart) |= (1u << UCTXI);
+    fl::json r = fl::json::object();
+    r.set("sent", static_cast<fl::i64>(sizeof(sent)));
+    r.set("received", static_cast<fl::i64>(got));
+    r.set("matched", static_cast<fl::i64>(matched));
+    r.set("rx", rx);
+    r.set("success", got == sizeof(sent) && matched == sizeof(sent));
+    return r;
+}
+
+// Each bind instantiates sizeable temporaries; split the bindings across
+// non-inlined functions so their frames do not add up on the 4 KB loop
+// stack (one combined frame overflowed it).
+__attribute__((noinline)) inline void bindEsp8266WatchdogRpcs(fl::Remote& remote) {
     // Watchdog bring-up: read why the chip last reset, or stop feeding the
     // watchdog (while still yielding) so the user timeout must fire.
     remote.bind("resetCause", []() -> fl::json {
@@ -313,6 +359,8 @@ inline void bindEsp8266Benches(fl::Remote& remote) {
         fl::json r = fl::json::object();
         r.set("cause", fl::string(fl::resetCauseName(wdt.lastResetCause())));
         r.set("crash_count", static_cast<fl::i64>(wdt.consecutiveCrashCount()));
+        // Loop-stack headroom (4 KB total); the bind/dispatch path runs close.
+        r.set("cont_stack_free", static_cast<fl::i64>(cont_get_free_stack(g_pcont)));
         return r;
     });
     remote.bind("watchdogStall", [](int ms) -> fl::json {
@@ -324,6 +372,23 @@ inline void bindEsp8266Benches(fl::Remote& remote) {
         r.set("survived_ms", static_cast<fl::i64>(fl::millis() - start));
         return r;
     });
+}
+
+__attribute__((noinline)) inline void bindEsp8266UartRpcs(fl::Remote& remote) {
+    // rxPin < 0 runs the jumper-free internal loopback instead, with nLeds
+    // as the rate in kbaud (0 = the driver's 3.2 Mbaud).
+    remote.bind("uartWs2812Loopback", [](int nLeds, int rxPin) -> fl::json {
+        if (rxPin < 0) {
+            return uartWs2812InternalLoopback(static_cast<fl::u32>(nLeds) * 1000u);
+        }
+        return uartWs2812Loopback(nLeds, rxPin);
+    });
+    remote.bind("uartWs2812Show", [](int nLeds) -> fl::json {
+        return uartWs2812Show(nLeds);
+    });
+}
+
+__attribute__((noinline)) inline void bindEsp8266DriverRpcs(fl::Remote& remote) {
     remote.bind("wifiOff", []() -> fl::json { return wifiOff(); });
     remote.bind("clocklessShow", [](int nLeds, int frames) -> fl::json {
         return clocklessShow(nLeds, frames);
@@ -331,12 +396,12 @@ inline void bindEsp8266Benches(fl::Remote& remote) {
     remote.bind("apa102Show", [](int nLeds, int frames) -> fl::json {
         return apa102Show(nLeds, frames);
     });
-    remote.bind("uartWs2812Loopback", [](int nLeds, int rxPin) -> fl::json {
-        return uartWs2812Loopback(nLeds, rxPin);
-    });
-    remote.bind("uartWs2812Show", [](int nLeds) -> fl::json {
-        return uartWs2812Show(nLeds);
-    });
+}
+
+inline void bindEsp8266Benches(fl::Remote& remote) {
+    bindEsp8266WatchdogRpcs(remote);
+    bindEsp8266UartRpcs(remote);
+    bindEsp8266DriverRpcs(remote);
 }
 
 }  // namespace esp8266
