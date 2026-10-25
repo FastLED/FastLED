@@ -336,9 +336,14 @@ class RpcClient:
                     )
 
             if matched is None:
-                from ci.util.boot_wait import raise_if_boot_looping
+                from ci.util.boot_wait import BootLoopError, raise_if_boot_looping
 
-                raise_if_boot_looping(poll_drained_lines)
+                try:
+                    raise_if_boot_looping(poll_drained_lines)
+                except BootLoopError:
+                    # Release the port so a retry (or another tool) can open it.
+                    await self.close()
+                    raise
 
         if drain_boot:
             if self.verbose:

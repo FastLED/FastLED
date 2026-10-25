@@ -243,7 +243,6 @@ inline fl::json timeFrames(CLEDController* controller, int nLeds, int frames,
     if (frames > 200) frames = 200;
     controller->setLeds(fl::span<CRGB>(st.leds, nLeds));
     fl::u32 minUs = 0xFFFFFFFF, maxUs = 0;
-    USIE(0) = 0;  // EXPERIMENT
     const fl::u32 frames0 = fl::_frame_cnt, retries0 = fl::_retry_cnt;
     int truncated = 0;  // finished faster than the wire allows: frame dropped
     int firstTruncated = -1;

@@ -92,7 +92,10 @@ inline void putByte(u8 c) FL_NO_EXCEPT {
 }  // namespace esp8266_console
 
 void begin(u32 baudRate) FL_NO_EXCEPT {
-    esp8266_console::ensureStarted(baudRate ? baudRate : 115200);
+    const u32 baud = baudRate ? baudRate : 115200;
+    esp8266_console::ensureStarted(baud);
+    // An earlier print may have started the UART at the default rate.
+    USD(esp8266_console::kUart) = ESP8266_CLOCK / baud;
 }
 
 void print(const char* str) FL_NO_EXCEPT {
@@ -106,6 +109,9 @@ void print(const char* str) FL_NO_EXCEPT {
 }
 
 void println(const char* str) FL_NO_EXCEPT {
+    if (!str) {
+        return;
+    }
     print(str);
     esp8266_console::putByte('\n');
 }
