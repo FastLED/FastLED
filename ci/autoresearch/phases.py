@@ -495,6 +495,10 @@ LPC_BRING_UP_ENVS = {
     "lpcxpresso845max",
     "lpcxpresso804",
 }
+# Every board whose AutoResearch build takes the low-memory sketch path
+# (FL_PLATFORM_HAS_LARGE_MEMORY == 0), which binds `echo` instead of the
+# pin-discovery / driver-matrix RPCs.
+LOW_MEMORY_BRING_UP_ENVS = LPC_BRING_UP_ENVS | {"esp8266"}
 LPC_WS2812_ENVS = {"lpc845brk", "lpc845", "lpcxpresso845max"}
 # SPI+DMA harness (#3456) — LPC845 only. LPC804 has no DMA peripheral
 # (see agents/docs/peripheral-existence.md); the earlier LPC804 widening
@@ -2004,9 +2008,9 @@ async def _run_schema_and_pin_setup(ctx: RunContext) -> int | None:
     # so pin discovery would hang. Skip it for those boards — the bring-up
     # short-circuit later in `_run_full_autoresearch_pipeline` will run
     # `_run_bring_up_tests` directly against the configured upload port.
-    if final_environment in LPC_BRING_UP_ENVS:
+    if final_environment in LOW_MEMORY_BRING_UP_ENVS:
         print(
-            f"\n\U0001f4cc LPC bring-up mode ({ctx.final_environment}): "
+            f"\n\U0001f4cc Low-memory bring-up mode ({ctx.final_environment}): "
             "skipping pin discovery and GPIO pre-test"
         )
     elif ctx.simd_test_mode:
@@ -2106,8 +2110,8 @@ async def _run_schema_and_pin_setup(ctx: RunContext) -> int | None:
         _ensure_leading_set_pins_command(ctx)
 
     # GPIO connectivity pre-test
-    if final_environment in LPC_BRING_UP_ENVS:
-        # LPC bring-up: no jumper wire / pin loop, the bring-up RPC test
+    if final_environment in LOW_MEMORY_BRING_UP_ENVS:
+        # Low-memory bring-up: no jumper wire / pin loop, the bring-up RPC test
         # itself is the only check we run.
         pass
     elif ctx.simd_test_mode:
@@ -2620,7 +2624,7 @@ async def _run_tests_or_special_mode(ctx: RunContext, qctx: QuietContext) -> int
     if getattr(ctx.args, "rp_spi_public_api", False):
         return await _run_rp_spi_public_api_tests(ctx)
 
-    if final_environment in LPC_BRING_UP_ENVS:
+    if final_environment in LOW_MEMORY_BRING_UP_ENVS:
         if ctx.ieee754_test_mode:
             return await _run_ieee754_tests(ctx)
         # FastLED #3021 Phase 1: --pin-toggle-rx runs the SCT-RX

@@ -42,8 +42,9 @@ enum class LegacyClocklessChipset : uint8_t {
 // the prior #3447 attempt used `FL_IS_ESP_32` which is not a real macro,
 // so the gate never fired and esp32dev compile still hit the
 // static_assert. LegacyClocklessProxy iterates pins 0-8 so all three
-// of 6/7/8 must be excluded for the classic ESP32 build.
-#if defined(FL_IS_ESP_32DEV) // ok platform specific - safe output pins 18/19 provide five strips without instantiating flash pins or invalid pins on other boards.
+// of 6/7/8 must be excluded for the classic ESP32 build. ESP8266 wires
+// GPIO6-11 to the SPI flash too, so it takes the same exclusion.
+#if defined(FL_IS_ESP_32DEV) || defined(FL_IS_ESP8266) // ok platform specific - classic ESP32 and ESP8266 wire GPIO6-11 to SPI flash; safe output pins 18/19 provide five strips on classic ESP32.
 #define AUTORESEARCH_LEGACY_SUPPORTS_PIN_6 0
 #define AUTORESEARCH_LEGACY_SUPPORTS_PIN_7 0
 #define AUTORESEARCH_LEGACY_SUPPORTS_PIN_8 0
