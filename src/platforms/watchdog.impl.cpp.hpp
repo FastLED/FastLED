@@ -13,6 +13,7 @@
 ///   - Host / stub      → `platforms/stub/watchdog_stub.impl.hpp` (thread timer)
 ///   - WASM             → `platforms/wasm/watchdog_wasm.impl.hpp` (routes to noop)
 ///   - ESP32 family     → `platforms/esp/32/watchdog_esp32.impl.hpp` (wraps fl::watchdog_setup)
+///   - ESP8266          → `platforms/esp/8266/watchdog_esp8266.impl.hpp` (os_timer + RTC mem)
 ///   - Teensy 4 (T4.x)  → `platforms/arm/mxrt1062/watchdog_mxrt1062.impl.hpp` (WDT_T4<WDT3>)
 ///   - Teensy 3 (T3.x)  → `platforms/arm/k20/watchdog_k20.impl.hpp` (direct WDOG regs)
 ///   - RP2040 / RP2350  → `platforms/arm/rp/watchdog_rp.impl.hpp` (Pico SDK)
@@ -46,6 +47,8 @@
     #include "platforms/stub/watchdog_stub.impl.hpp"
 #elif defined(FL_IS_ESP32)
     #include "platforms/esp/32/watchdog_esp32.impl.hpp"
+#elif defined(FL_IS_ESP8266)
+    #include "platforms/esp/8266/watchdog_esp8266.impl.hpp"
 #elif defined(FL_IS_TEENSY_4X) && FL_HAS_INCLUDE(<imxrt.h>)
     #include "platforms/arm/mxrt1062/watchdog_mxrt1062.impl.hpp"
 #elif (defined(FL_IS_TEENSY_3X) || defined(FL_IS_TEENSY_LC)) && FL_HAS_INCLUDE(<kinetis.h>)

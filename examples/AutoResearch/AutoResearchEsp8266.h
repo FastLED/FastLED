@@ -29,6 +29,8 @@
 #include "FastLED.h"
 #include "fl/stl/json.h"
 #include "fl/stl/stdint.h"
+#include "fl/stl/string.h"
+#include "fl/wdt/watchdog.h"
 #include "platforms/esp/8266/fastled_esp8266_uart.h"  // ok platform headers - driver under test
 
 // IWYU pragma: begin_keep
@@ -304,6 +306,24 @@ inline fl::json wifiOff() {
 }
 
 inline void bindEsp8266Benches(fl::Remote& remote) {
+    // Watchdog bring-up: read why the chip last reset, or stop feeding the
+    // watchdog (while still yielding) so the user timeout must fire.
+    remote.bind("resetCause", []() -> fl::json {
+        auto& wdt = fl::Watchdog::instance();
+        fl::json r = fl::json::object();
+        r.set("cause", fl::string(fl::resetCauseName(wdt.lastResetCause())));
+        r.set("crash_count", static_cast<fl::i64>(wdt.consecutiveCrashCount()));
+        return r;
+    });
+    remote.bind("watchdogStall", [](int ms) -> fl::json {
+        const fl::u32 start = fl::millis();
+        while (fl::millis() - start < static_cast<fl::u32>(ms)) {
+            fl::delay(10);  // yields, so only fl::Watchdog can fire
+        }
+        fl::json r = fl::json::object();
+        r.set("survived_ms", static_cast<fl::i64>(fl::millis() - start));
+        return r;
+    });
     remote.bind("wifiOff", []() -> fl::json { return wifiOff(); });
     remote.bind("clocklessShow", [](int nLeds, int frames) -> fl::json {
         return clocklessShow(nLeds, frames);
