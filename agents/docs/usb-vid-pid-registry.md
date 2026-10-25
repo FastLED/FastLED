@@ -78,7 +78,7 @@ temporary exception looks like three months later.
 
 ## Cascading an fbuild version bump into FastLED
 
-The registry reaches this repo only through the fbuild pin. When fbuild
+The registry reaches this repo only through the fbuild version floor. When fbuild
 publishes a release carrying new USB identities:
 
 ```bash
