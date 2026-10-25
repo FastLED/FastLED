@@ -69,7 +69,7 @@ design.
    bare chip or debug probe; `platformio` / `arduino` for a board). The
    `site.yml` workflow republishes the artifact on push.
 3. **Let fbuild ingest it** and cut an fbuild release.
-4. **Cascade the version into this repo** — see below. Until the pin moves,
+4. **Cascade the version into this repo** — see below. Until the floor is raised,
    FastLED still resolves against the older artifact.
 
 Never short-circuit steps 1–3 by adding the literal here "temporarily". The
