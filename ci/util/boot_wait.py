@@ -131,3 +131,36 @@ async def wait_for_signal(
         await asyncio.sleep(0)
 
     return (None, drained)
+
+
+# ROM reset banners. ESP8266 prints "ets Jan  8 2013,rst cause:2, ..." and
+# ESP32-class ROMs print "rst:0xc (SW_CPU_RESET),boot:0x13 ...". Seeing several
+# in one boot window means the firmware is resetting before it can answer RPC.
+_RESET_BANNERS: tuple[str, ...] = ("rst cause:", "rst:0x")
+
+BOOT_LOOP_THRESHOLD = 3
+
+
+class BootLoopError(RuntimeError):
+    """The device reset repeatedly while we waited for it to boot."""
+
+
+def count_reset_banners(lines: Iterable[str]) -> int:
+    """Count ROM reset banners in ``lines``."""
+    return sum(1 for line in lines if any(b in line for b in _RESET_BANNERS))
+
+
+def raise_if_boot_looping(
+    lines: list[str], threshold: int = BOOT_LOOP_THRESHOLD
+) -> None:
+    """Raise ``BootLoopError`` when ``lines`` hold ``threshold`` or more resets."""
+    resets = count_reset_banners(lines)
+    if resets < threshold:
+        return
+    raise BootLoopError(
+        f"Device is boot-looping: {resets} ROM reset banners in {len(lines)} "
+        "boot line(s), so it never reached setup(). Look at the lines just "
+        "before each reset. A crash with no dump can mean the core muted "
+        "its postmortem (ESP8266 prints it only after Serial.begin / "
+        "setDebugOutput) or the reset happened before the console started."
+    )

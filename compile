@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e
+. "$(dirname "$0")/ci/util/keep_editable_fbuild.sh"
 
 # Function to find Python executable
 find_python() {

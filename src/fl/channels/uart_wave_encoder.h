@@ -210,7 +210,7 @@ void encodeUartByte(u8 led_byte, u8* output) FL_NO_EXCEPT {
 /// @param output_capacity Output buffer size in bytes
 /// @param lut Wave10 lookup table for encoding
 /// @return Number of encoded bytes written, or 0 if insufficient capacity
-FL_IRAM FL_OPTIMIZE_FUNCTION
+FL_OPTIMIZE_FUNCTION
 size_t encodeLedsToUart(const u8* input,
                         size_t input_size,
                         u8* output,
@@ -218,7 +218,7 @@ size_t encodeLedsToUart(const u8* input,
                         const Wave10Lut& lut) FL_NO_EXCEPT;
 
 /// @brief Legacy encoding using hardcoded WS2812 LUT (backward compat)
-FL_IRAM FL_OPTIMIZE_FUNCTION
+FL_OPTIMIZE_FUNCTION
 size_t encodeLedsToUart(const u8* input,
                         size_t input_size,
                         u8* output,

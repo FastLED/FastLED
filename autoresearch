@@ -147,4 +147,5 @@ for arg in "$@"; do
 done
 
 # Run the Python autoresearch script with all arguments
+. "$(dirname "$0")/ci/util/keep_editable_fbuild.sh"
 exec uv run -m ci.autoresearch "$@"

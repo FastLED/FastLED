@@ -308,7 +308,9 @@ dependencies = [
     # (FastLED/fbuild#573).
     # 2.5.43 resolves native Node behind nodejs-wheel's launcher so AVR8JS
     # exits on success and timeout (FastLED/fbuild#1697).
-    "fbuild>=2.5.44",
+    # 2.5.45 adds the Espressif8266 deployer used by ESP8266 AutoResearch
+    # (FastLED/fbuild#1738).
+    "fbuild>=2.5.45",
     # Decodes the FastLED/boards `usb-vids.proto.zstd` registry artifact in
     # ci/util/audit_usb_registry.py. Declared explicitly rather than relied on
     # transitively (clang-tool-chain-bins pulls it in today) so the documented

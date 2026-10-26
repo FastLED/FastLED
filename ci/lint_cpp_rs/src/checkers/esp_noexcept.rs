@@ -62,7 +62,9 @@ impl FileContentChecker for EspNoexceptChecker {
                 // Report one diagnostic per broken region, not every child.
                 continue;
             }
-            if matches!(node.kind(), "function_declarator" | "operator_cast") {
+            if matches!(node.kind(), "function_declarator" | "operator_cast")
+                && !esp_noexcept_misparsed_assignment(node, &source)
+            {
                 if let Some(hit) = esp_noexcept_function(node, &source, &file.content) {
                     hits.push(hit);
                 }
@@ -400,6 +402,25 @@ fn esp_noexcept_source(content: &str) -> String {
     String::from_utf8(bytes).expect("ASCII macro replacement preserves UTF-8")
 }
 
+/// Inside a function body, tree-sitter reads a register-macro store such as
+/// `USIE(kUart) = 0;` as a function declarator with a pure-specifier. A
+/// pure-specifier is only legal on a class member, so a `= ...` declarator
+/// whose nearest scope is a block is an assignment, not a function.
+fn esp_noexcept_misparsed_assignment(node: tree_sitter::Node<'_>, source: &str) -> bool {
+    if !source[node.end_byte()..].trim_start().starts_with('=') {
+        return false;
+    }
+    let mut parent = node.parent();
+    while let Some(p) = parent {
+        match p.kind() {
+            "compound_statement" => return true,
+            "field_declaration_list" | "translation_unit" => return false,
+            _ => parent = p.parent(),
+        }
+    }
+    false
+}
+
 fn esp_noexcept_function(
     mut node: tree_sitter::Node<'_>,
     source: &str,
@@ -549,6 +570,13 @@ mod esp_noexcept_tests {
         let hits = check("#if ESP32\nvoid foo(\nvoid (*handler)() noexcept\n) {}\n#else\nvoid foo() {}\n#endif\n");
         assert_eq!(hits.len(), 2, "{hits:?}");
         assert!(hits.iter().all(|hit| hit.1.starts_with("Missing")));
+    }
+
+    #[test]
+    fn esp_noexcept_ignores_register_macro_stores_in_function_bodies() {
+        assert!(check("void f() FL_NO_EXCEPT { USIE(kUart) = 0; USC0(kUart) = 1; }\n").is_empty());
+        // Local class members are still checked.
+        assert_eq!(check("void f() FL_NO_EXCEPT { struct L { virtual void go() = 0; }; }\n").len(), 1);
     }
 
     #[test]

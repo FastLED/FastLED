@@ -517,6 +517,51 @@ build injects `FL_ESP32_LEGACY_CLOCKLESS_USE_RMT=1`. This binds the public
 legacy chipset template to the existing RMT controller for that validation
 run; ordinary ESP32-C6 sketches retain their PARLIO default.
 
+### ESP8266 Bring-up
+
+ESP8266 builds take the low-memory sketch path (80 KB DRAM cannot hold the
+full harness; a forced large-memory build overflows `.bss`). The host routes
+`esp8266` through `LOW_MEMORY_BRING_UP_ENVS` in `ci/autoresearch/phases.py`.
+
+```bash
+bash autoresearch esp8266 --upload-port /dev/ttyUSB0            # echo + FL_WARN bring-up
+bash autoresearch esp8266 --upload-port /dev/ttyUSB0 --ieee754  # 35-check codec test
+```
+
+The low-memory ESP8266 build also binds `uartWs2812Show [nLeds]` (UART1
+driver through `FastLED.addLeds`/`show`, returns `show_us` against the
+wire-time floor) and `uartWs2812Loopback [nLeds, rxPin]` (byte-exact decode
+of the UART1 stream). The loopback needs a jumper from GPIO2 to `rxPin`
+(0, 4, 5, 12-15): `GPIO_IN` does not see GPIO2's pad while UART1 drives it.
+
+Traps found during bring-up:
+
+- The core mutes its crash postmortem until `Serial.begin()` /
+  `setDebugOutput()`, so a crash before that is a silent `rst cause:2` loop.
+  The RPC client now raises `BootLoopError` when the boot window holds three
+  or more ROM reset banners.
+- The core's linker script puts `__PRETTY_FUNCTION__` in flash, which only
+  allows aligned 32-bit loads. Byte-wise reads of such strings fault with
+  Exception 3 (`LoadStoreErrorCause`); read them with `FL_PGM_READ_BYTE_NEAR`.
+- GPIO1/GPIO3 are only muxed to UART0 when something configures them; the
+  native console in `src/platforms/esp/8266/io_esp8266.cpp.hpp` does it.
+
+### Testing an Unreleased fbuild
+
+To run AutoResearch against an fbuild checkout before it ships:
+
+```bash
+uv pip install -e ../fbuild --reinstall-package fbuild
+uv run --no-sync fbuild daemon restart
+```
+
+A plain `uv run` re-syncs the venv and swaps the editable install back to the
+PyPI wheel. The `test`, `compile`, `autoresearch`, `debug` and `bloat`
+wrappers source `ci/util/keep_editable_fbuild.sh`, which sets `UV_NO_SYNC=1`
+while fbuild is installed editable; call other tools with `uv run --no-sync`.
+Check `ls -l .venv/bin/fbuild` against the checkout's `ci/bin/fbuild` if a
+deploy reports a backend the checkout already has.
+
 ### LPC845 Fault-Emit Validation
 
 Use this mode when validating the LPC845 crash diagnostics tracked by

@@ -2,4 +2,5 @@
 # FastLED Debug Attached Device wrapper script
 # Uploads firmware to attached device and monitors serial output
 
+. "$(dirname "$0")/ci/util/keep_editable_fbuild.sh"
 uv run ci/debug_attached.py --check-usage "$@"
