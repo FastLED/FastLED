@@ -22,6 +22,8 @@ and removals.
 #include "fl/stl/optional.h"
 #include "fl/stl/pair.h"
 #include "fl/stl/type_traits.h"
+#include "fl/stl/new.h"  // placement new for the rehash scratch  // IWYU pragma: keep
+#include "fl/system/sketch_macros.h"  // FL_PLATFORM_HAS_LARGE_MEMORY
 #include "fl/stl/vector.h"
 #include "fl/stl/unordered_map_basic.h"  // type-erased probing helper (#3235 Tier 1C)
 #include "fl/stl/initializer_list.h"  // IWYU pragma: keep
@@ -913,8 +915,35 @@ class FL_ALIGN unordered_map {
 
     void rehash_internal(fl::size new_cap) FL_NO_EXCEPT {
         new_cap = next_power_of_two(new_cap);
+#if FL_PLATFORM_HAS_LARGE_MEMORY
+        // Large stacks: keep the scratch local and skip a heap round trip.
         fl::vector_inlined<Entry, INLINED_COUNT> old(_buckets.get_resource());
         fl::bitset<1024> old_occupied = _occupied;
+#else
+        // Small stacks: the old buckets (an inline Entry buffer) and the
+        // 1024-bit occupancy copy cost about 1 KB on the stack, which
+        // overflowed ESP8266's 4 KB loop stack when an RPC registry grew
+        // during setup(), so they come from the map's memory resource.
+        struct Scratch {
+            explicit Scratch(fl::memory_resource* r) FL_NO_EXCEPT : buckets(r) {}
+            fl::vector_inlined<Entry, INLINED_COUNT> buckets;
+            fl::bitset<1024> occupied;
+        };
+        fl::memory_resource* resource = _buckets.get_resource();
+        if (resource == nullptr) {
+            resource = fl::default_memory_resource();
+        }
+        void* mem = resource->allocate(sizeof(Scratch));
+        if (mem == nullptr) {
+            // Out of memory: stay at the current size. The table is at most
+            // 70% full, so inserts still find a slot and retry the grow.
+            return;
+        }
+        Scratch* scratch = new (mem) Scratch(resource);
+        fl::vector_inlined<Entry, INLINED_COUNT>& old = scratch->buckets;
+        fl::bitset<1024>& old_occupied = scratch->occupied;
+        old_occupied = _occupied;
+#endif
 
         _buckets.swap(old);
         _buckets.clear();
@@ -931,6 +960,10 @@ class FL_ALIGN unordered_map {
             if (old_occupied.test(i))
                 insert(fl::move(old[i].key), fl::move(old[i].value));
         }
+#if !FL_PLATFORM_HAS_LARGE_MEMORY
+        scratch->~Scratch();
+        resource->deallocate(mem, sizeof(Scratch));
+#endif
     }
 
     // Rehash the inline buckets without resizing
