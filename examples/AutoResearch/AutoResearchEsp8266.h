@@ -21,6 +21,13 @@
 //   min/max frame time. A frame near twice the floor means the clockless
 //   driver aborted and retried after an interrupt overran its timing window.
 //
+// apa102ShowMhz: [nLeds, mhz] -> json (20 frames)
+//   APA102 on native HSPI (GPIO13/14) at 6/10/20/40/80 MHz; min_us against
+//   wire_bytes_est * 8 / mhz shows how close the ping-pong buffer gets.
+//
+// apa102HspiLoopback: [] -> json
+//   Pin-level HSPI check; needs jumpers D7->D6 and D5->D1 (see the function).
+//
 
 #include "platforms/esp/is_esp.h"  // ok platform headers // ok platform specific - ESP8266 bench gate
 
@@ -316,6 +323,127 @@ inline fl::json apa102Show(int nLeds, int frames) {
     return timeFrames(st.apa102, nLeds, frames, 0);
 }
 
+// One APA102 controller per clock rate: HSPI reprograms its clock on every
+// frame, so several strips on GPIO13/14 at different rates coexist.
+template <int MHZ>
+inline CLEDController* apa102At(CRGB* leds) {
+    static CLEDController* c = &FastLED.addLeds<APA102, kApaDataPin, kApaClockPin, BGR, DATA_RATE_MHZ(MHZ)>(leds, 64);
+    return c;
+}
+
+inline fl::json apa102ShowMhz(int nLeds, int frames, int mhz) {
+    DriverShowState& st = driverShowState();
+    CLEDController* c = nullptr;
+    switch (mhz) {
+        case 6: c = apa102At<6>(st.leds); break;
+        case 10: c = apa102At<10>(st.leds); break;
+        case 20: c = apa102At<20>(st.leds); break;
+        case 40: c = apa102At<40>(st.leds); break;
+        case 80: c = apa102At<80>(st.leds); break;
+        default: {
+            fl::json r = fl::json::object();
+            r.set("success", false);
+            r.set("error", "mhz must be 6, 10, 20, 40 or 80");
+            return r;
+        }
+    }
+    const int n = nLeds < 1 ? 1 : (nLeds > 64 ? 64 : nLeds);
+    fl::json r = timeFrames(c, n, frames, 0);
+    // Start frame + 4 bytes per LED + end frame (>= n/2 clocks, 4-byte units).
+    const fl::i64 bytes = 4 + 4 * n + 4 * ((n / 2 + 31) / 32 + 1);
+    r.set("mhz", static_cast<fl::i64>(mhz));
+    r.set("cpu_mhz", static_cast<fl::i64>(system_get_cpu_freq()));
+    r.set("wire_bytes_est", bytes);
+    return r;
+}
+
+// apa102HspiLoopback: [] -> json
+//   Drives HSPI at 250 kHz and reads MOSI and SCK back through jumpers
+//   D7->D6 (GPIO13->12) and D5->D1 (GPIO14->5) via GPIO_IN while the
+//   driver streams 96 bytes through its ping-pong halves (W0-7 / W8-15) in
+//   4, 8, 16, 32, 32 and 4-byte chunks, then decodes MOSI on every SCK
+//   rising edge (mode 0). The bench feeds bytes from the sampling loop only
+//   when doing so would not block, so the capture sees every half switch.
+constexpr int kHspiLoopBytes = 96;
+// GPIO_IN does not see GPIO13/14 once HSPI owns the pads (measured: zero SCK
+// edges while frames went out), so read them through jumpers instead.
+constexpr int kHspiMosiSense = 12;  // jumper D7 (GPIO13) -> D6 (GPIO12)
+constexpr int kHspiSckSense = 5;    // jumper D5 (GPIO14) -> D1 (GPIO5)
+
+struct HspiCapture {
+    fl::u8 got[kHspiLoopBytes];
+    int bits;
+    int sckEdges;
+    bool sckIdleLow;
+};
+
+inline fl::u8 hspiPattern(int i) { return static_cast<fl::u8>(i * 37 + 11); }
+
+__attribute__((noinline)) static FL_IRAM void captureHspi(HspiCapture& cap, fl::u32 timeoutCycles) {
+    using fl::esp8266_hspi::State;
+    State& s = fl::esp8266_hspi::state();
+    const fl::u32 mosi = 1u << kHspiMosiSense, sck = 1u << kHspiSckSense;
+    fl::u32 prev = GPI;  // ok platform specific - raw pad sampling for the HSPI pin-level loopback
+    cap.sckIdleLow = (prev & sck) == 0;
+    int fed = 0;
+    const fl::u32 t0 = cycles();
+    while (cycles() - t0 < timeoutCycles) {
+        const fl::u32 now = GPI;  // ok platform specific - raw pad sampling for the HSPI pin-level loopback
+        if ((now & sck) && !(prev & sck)) {
+            ++cap.sckEdges;
+            if (cap.bits < kHspiLoopBytes * 8) {
+                if (now & mosi) {
+                    cap.got[cap.bits >> 3] |= static_cast<fl::u8>(0x80 >> (cap.bits & 7));
+                }
+                ++cap.bits;
+            }
+        }
+        prev = now;
+        const bool busy = (SPI1CMD & SPIBUSY) != 0;  // ok platform specific - HSPI busy flag, so the feed never blocks the sampler
+        if (fed < kHspiLoopBytes && !(busy && s.ptr + 1 == s.end)) {
+            fl::esp8266_hspi::push(hspiPattern(fed++));
+        } else if (fed == kHspiLoopBytes && !busy) {
+            if (s.ptr != s.stage.bytes) {
+                fl::esp8266_hspi::flush();  // the tail chunk; does not wait
+            } else if (cap.bits >= kHspiLoopBytes * 8) {
+                break;
+            }
+        }
+    }
+}
+
+inline fl::json apa102HspiLoopback() {
+    fl::SPIOutput<kApaDataPin, kApaClockPin, DATA_RATE_KHZ(250)> spi;
+    spi.init();
+    pinMode(kHspiMosiSense, INPUT);
+    pinMode(kHspiSckSense, INPUT);
+    spi.select();
+    HspiCapture cap = {};
+    const fl::u32 savedPs = xt_rsil(15);  // ok platform specific - GPI polling must not miss a 2 us half-bit
+    captureHspi(cap, system_get_cpu_freq() * 20000u);  // 20 ms
+    xt_wsr_ps(savedPs);  // ok platform specific - restores IRQ level from xt_rsil
+    spi.endTransaction();
+    int badBytes = 0, firstBad = -1;
+    for (int i = 0; i < kHspiLoopBytes; ++i) {
+        if (cap.got[i] != hspiPattern(i)) {
+            if (firstBad < 0) firstBad = i;
+            ++badBytes;
+        }
+    }
+    fl::json r = fl::json::object();
+    r.set("success", cap.bits == kHspiLoopBytes * 8 && badBytes == 0 && cap.sckIdleLow);
+    r.set("bits", static_cast<fl::i64>(cap.bits));
+    r.set("sck_rising_edges", static_cast<fl::i64>(cap.sckEdges));
+    r.set("sck_idle_low", cap.sckIdleLow);
+    r.set("bad_bytes", static_cast<fl::i64>(badBytes));
+    r.set("first_bad", static_cast<fl::i64>(firstBad));
+    if (firstBad >= 0) {
+        r.set("first_bad_got", static_cast<fl::i64>(cap.got[firstBad]));
+        r.set("first_bad_want", static_cast<fl::i64>(hspiPattern(firstBad)));
+    }
+    return r;
+}
+
 // Turn the radio off so its MAC NMIs stop preempting bit-banged output.
 inline fl::json wifiOff() {
     wifi_set_opmode_current(NULL_MODE);  // ok platform specific - ESP8266 bring-up bench measures raw SoC behavior; no core API exposes it
@@ -458,10 +586,20 @@ __attribute__((noinline)) inline void bindEsp8266DriverRpcs(fl::Remote& remote) 
     });
 }
 
+// Own frame: every bind's temporaries get a stack slot in the caller, and
+// one more bind in bindEsp8266DriverRpcs overflowed the 4 KB loop stack.
+__attribute__((noinline)) inline void bindEsp8266HspiRpcs(fl::Remote& remote) {
+    remote.bind("apa102ShowMhz", [](int nLeds, int mhz) -> fl::json {
+        return apa102ShowMhz(nLeds, 20, mhz);
+    });
+    remote.bind("apa102HspiLoopback", []() -> fl::json { return apa102HspiLoopback(); });
+}
+
 inline void bindEsp8266Benches(fl::Remote& remote) {
     bindEsp8266WatchdogRpcs(remote);
     bindEsp8266UartRpcs(remote);
     bindEsp8266DriverRpcs(remote);
+    bindEsp8266HspiRpcs(remote);
 }
 
 }  // namespace esp8266
