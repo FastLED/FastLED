@@ -160,21 +160,47 @@ class ESP32SPIOutput {
     uint32_t mWallMicrosMax = 0;
 #endif
 
-    // Drains any outstanding transaction for each allocated buffer (so we
-    // never free DMA memory the hardware might still be reading from) and
-    // frees the buffers themselves. Safe to call unconditionally - whether
+    // Drains every outstanding queued transaction, matching each one back to
+    // the buffer it actually belongs to by comparing the descriptor pointer
+    // ESP-IDF hands back against &mTrans[i] - spi_device_get_trans_result()
+    // returns transactions in actual hardware-completion order, which is NOT
+    // necessarily the same as buffer index order, so looping "if
+    // mPending[i], wait for one result" by ascending i (as an earlier
+    // version of this function did) can wait for buffer 1's completion
+    // while mistakenly crediting it to buffer 0 - freeing buffer 0's memory
+    // while its own transaction is still genuinely in flight. Also used by
+    // writePixelsBulk() below, which must not mix a polling transmit with
+    // any still-queued transaction.
+    void drainAllPending() FL_NO_EXCEPT {
+        if (mSPIHandle == nullptr) {
+            return;
+        }
+        int pendingCount = 0;
+        for (int i = 0; i < NUM_BUFFERS; i++) {
+            if (mPending[i]) pendingCount++;
+        }
+        for (int n = 0; n < pendingCount; n++) {
+            spi_transaction_t* rtrans = nullptr;
+            spi_device_get_trans_result(mSPIHandle, &rtrans, portMAX_DELAY);
+            for (int i = 0; i < NUM_BUFFERS; i++) {
+                if (&mTrans[i] == rtrans) {
+                    mPending[i] = false;
+                    break;
+                }
+            }
+        }
+    }
+
+    // Drains every outstanding transaction (see drainAllPending() above) and
+    // frees every allocated buffer. Safe to call unconditionally - whether
     // called after a partial allocation failure (mSPIHandle is still
-    // nullptr, mPending[] all false, so this just frees whatever succeeded)
-    // or from the destructor (drains for real). Leaves mBuffer[] all
-    // nullptr, so a later init() retry allocates cleanly from scratch.
+    // nullptr, so drainAllPending() is a no-op and this just frees whatever
+    // succeeded) or from the destructor (drains for real). Leaves mBuffer[]
+    // all nullptr.
     void freeBuffers() FL_NO_EXCEPT {
+        drainAllPending();
         for (int i = 0; i < NUM_BUFFERS; i++) {
             if (mBuffer[i] != nullptr) {
-                if (mPending[i] && mSPIHandle != nullptr) {
-                    spi_transaction_t* rtrans;
-                    spi_device_get_trans_result(mSPIHandle, &rtrans, portMAX_DELAY);
-                    mPending[i] = false;
-                }
                 heap_caps_free(mBuffer[i]);
                 mBuffer[i] = nullptr;
             }
@@ -252,6 +278,12 @@ public:
             return;
         }
 
+        // Reset at the start of each attempt (not just after a failure):
+        // a prior call may have left this true, and a genuinely successful
+        // allocation this time must be allowed to clear it - writeByte()'s
+        // guard needs this to end up false on an attempt that truly
+        // succeeded, and true for the whole duration of one that didn't.
+        mAllocFailed = false;
         for (int i = 0; i < NUM_BUFFERS; i++) {
             mBuffer[i] = (uint8_t*) heap_caps_malloc(FL_ESP32_SPI_DMA_BUFFER_BYTES, MALLOC_CAP_DMA);
             if (mBuffer[i] == nullptr) {
@@ -272,11 +304,17 @@ public:
                     << FL_ESP32_SPI_DMA_BUFFER_BYTES << " bytes each, "
                     << (NUM_BUFFERS * FL_ESP32_SPI_DMA_BUFFER_BYTES)
                     << " bytes total) - LED output disabled for this boot.");
-            // Free whatever subset DID succeed, and allow a future init()
-            // call (e.g. after memory pressure clears) to retry cleanly
-            // rather than being permanently wedged with mAllocFailed set.
+            // Free whatever subset DID succeed - but mAllocFailed stays
+            // true. writeByte()'s guard is `!mAllocFailed && ...`: clearing
+            // it here (to "allow a retry") would let writeByte() pass again
+            // even though mBuffer[] is now all nullptr (just freed above),
+            // and callers like APA102Controller::showPixelsDefault() call
+            // writeByte()/writeWord() unconditionally every frame regardless
+            // of whether init() ever succeeds - a guaranteed null-pointer
+            // write. mInitialized also stays false, so init() itself can
+            // still be called again safely; mAllocFailed only gets cleared
+            // by a FUTURE successful allocation path, not preemptively here.
             freeBuffers();
-            mAllocFailed = false;
             return;
         }
 
@@ -377,14 +415,20 @@ public:
         }
     }
 
-    // Unaffected by this change - still a single immediate polling transmit
-    // against mSPIHandle, used only by the generic writePixels<>() bulk
-    // path below (FASTLED_ESP32_SPI_BULK_TRANSFER), not by chipsets that
-    // write via select()/writeByte()/writeWord()/release() directly.
+    // Still a single immediate polling transmit against mSPIHandle, used
+    // only by the generic writePixels<>() bulk path below
+    // (FASTLED_ESP32_SPI_BULK_TRANSFER), not by chipsets that write via
+    // select()/writeByte()/writeWord()/release() directly. ESP-IDF does not
+    // support a polling transmit while any queued (spi_device_queue_trans())
+    // transaction against the same device is still outstanding, so this
+    // drains every pending ring-buffer transaction first - select() only
+    // drains the ONE slot it's about to reuse, which isn't enough here.
     void writePixelsBulk(const CRGB* pixels, size_t n) FL_NO_EXCEPT {
         if (!mInitialized || !mSPIHandle || n == 0) {
             return;
         }
+
+        drainAllPending();
 
         const u8* data = fl::bit_cast<const u8*>(pixels);
         size_t n_bytes = n * 3;
