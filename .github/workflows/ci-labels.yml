@@ -13,7 +13,40 @@ permissions:
   actions: read
   pull-requests: read
 
+# Label consumption gets its own group so a burst of label events cannot
+# cancel the removal before it runs (GEN-031 clauses 2 and 4).
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event.action == 'labeled' && github.event.label.name == 'ci-full' && 'consume' || 'validate' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
+  # GEN-031 clause 2 (forge-ci/ci.yml#476): `ci-full` buys exactly one full
+  # matrix. The label-gated workflows also run on `synchronize`, so a sticky
+  # label would re-run the whole matrix on every later push. This job removes
+  # the label as soon as it is applied; the `labeled` event has already started
+  # the full run in every gated workflow. The removal uses GITHUB_TOKEN, whose
+  # events start no new workflow runs, so the resulting `unlabeled` event does
+  # not cancel the full run through its concurrency group. Re-add the label to
+  # request another full run (at most two per PR, GEN-031 clause 3).
+  # Fork PRs get a read-only token, but the gated jobs already refuse fork
+  # heads, so no full run starts there and nothing needs removing.
+  consume-ci-full:
+    if: >-
+      github.event_name == 'pull_request' &&
+      github.event.action == 'labeled' &&
+      github.event.label.name == 'ci-full' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Remove the consumed ci-full label
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+        run: gh pr edit "$PR" --repo "$GITHUB_REPOSITORY" --remove-label ci-full
+
   validate:
     if: github.event.pull_request == null || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest

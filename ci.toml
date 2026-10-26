@@ -83,6 +83,8 @@ tools = []
 secrets = []
 platform-selector = ".github/workflows/ci-labels.yml"
 platform-code = []
+[allow.permissions]
+"pull-requests: write" = ["consume-ci-full"]
 [allow.workflows]
 "ci-labels.yml" = ["cache-audit"]
 [allow.setup-soldr]
