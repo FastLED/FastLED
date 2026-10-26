@@ -11,6 +11,7 @@
 #include "crgb.h"
 #include "fastspi_types.h"
 #include "fl/stl/bit_cast.h"
+#include "fl/stl/int.h"
 #include "fl/stl/static_assert.h"
 #include "fl/stl/cstring.h"  // For fl::memset
 #include "fl/log/log.h"  // For FL_WARN macro
@@ -141,7 +142,7 @@ class ESP32SPIOutput {
 
     // Ping-pong DMA buffer ring - see the file-level comment above for why.
     static const int NUM_BUFFERS = FL_ESP32_SPI_NUM_BUFFERS;
-    uint8_t* mBuffer[NUM_BUFFERS] = {};
+    u8* mBuffer[NUM_BUFFERS] = {};
     size_t mBufferLen = 0;              // fill position in the buffer CURRENTLY being written (between select() and release())
     int mCurrentBuffer = 0;             // which of mBuffer[] is being written - cycles 0..NUM_BUFFERS-1, see select()
     spi_transaction_t mTrans[NUM_BUFFERS] = {};  // one persistent transaction descriptor per buffer - must outlive the queued transaction
@@ -149,14 +150,14 @@ class ESP32SPIOutput {
     bool mOverflowDropped = false;      // true if writeByte() had to drop a byte since the last select() - see writeByte()/release()
 
 #ifdef FL_ESP32_SPI_DMA_TIMING
-    uint32_t mSelectMicros = 0;
-    uint32_t mFrameCount = 0;
-    uint64_t mWaitMicrosSum = 0;
-    uint32_t mWaitMicrosMax = 0;
-    uint64_t mQueueMicrosSum = 0;
-    uint32_t mQueueMicrosMax = 0;
-    uint64_t mWallMicrosSum = 0;
-    uint32_t mWallMicrosMax = 0;
+    u32 mSelectMicros = 0;
+    u32 mFrameCount = 0;
+    u64 mWaitMicrosSum = 0;
+    u32 mWaitMicrosMax = 0;
+    u64 mQueueMicrosSum = 0;
+    u32 mQueueMicrosMax = 0;
+    u64 mWallMicrosSum = 0;
+    u32 mWallMicrosMax = 0;
 #endif
 
     // Drains every outstanding queued transaction, matching each one back to
@@ -291,7 +292,7 @@ public:
         // removes any chance of that mismatch recurring.
         bool allocFailed = false;
         for (int i = 0; i < NUM_BUFFERS; i++) {
-            mBuffer[i] = (uint8_t*) heap_caps_malloc(FL_ESP32_SPI_DMA_BUFFER_BYTES, MALLOC_CAP_DMA);
+            mBuffer[i] = (u8*) heap_caps_malloc(FL_ESP32_SPI_DMA_BUFFER_BYTES, MALLOC_CAP_DMA);
             if (mBuffer[i] == nullptr) {
                 allocFailed = true;
             }
@@ -452,7 +453,7 @@ public:
         }
         mCurrentBuffer = (mCurrentBuffer + 1) % NUM_BUFFERS;
 #ifdef FL_ESP32_SPI_DMA_TIMING
-        uint32_t waitT0 = micros();
+        u32 waitT0 = micros();
 #endif
         if (mPending[mCurrentBuffer]) {
             spi_transaction_t* rtrans;
@@ -460,8 +461,8 @@ public:
             mPending[mCurrentBuffer] = false;
         }
 #ifdef FL_ESP32_SPI_DMA_TIMING
-        uint32_t waitT1 = micros();
-        uint32_t waitUs = waitT1 - waitT0;
+        u32 waitT1 = micros();
+        u32 waitUs = waitT1 - waitT0;
         mWaitMicrosSum += waitUs;
         if (waitUs > mWaitMicrosMax) mWaitMicrosMax = waitUs;
         mSelectMicros = waitT1;
@@ -490,11 +491,11 @@ public:
             trans.tx_buffer = mBuffer[mCurrentBuffer];
             trans.rx_buffer = nullptr;
 #ifdef FL_ESP32_SPI_DMA_TIMING
-            uint32_t t0 = micros();
+            u32 t0 = micros();
             esp_err_t err = spi_device_queue_trans(mSPIHandle, &trans, portMAX_DELAY);
-            uint32_t t1 = micros();
-            uint32_t queueUs = t1 - t0;
-            uint32_t wallUs = t1 - mSelectMicros;
+            u32 t1 = micros();
+            u32 queueUs = t1 - t0;
+            u32 wallUs = t1 - mSelectMicros;
             mPending[mCurrentBuffer] = (err == ESP_OK);
             mFrameCount++;
             mQueueMicrosSum += queueUs;
