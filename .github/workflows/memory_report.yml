@@ -1,0 +1,125 @@
+name: memory_report
+
+# Posts one sticky PR comment comparing Blink's image flash and RAM per target
+# against the PR's merge base (#4920). Report only; the size gates stay in
+# check_uno_size.yml and bloat_regression_esp32s3.yml.
+#
+# AVR boards run on every PR that touches src/: their toolchain is small and
+# the build takes seconds. The other targets download large toolchains, so they
+# join only with `ci-full`, `ci-test:bloat`, or their own `ci-platform:<board>`.
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled]
+    branches: [master]
+    paths:
+      - 'src/**'
+      - 'ci/memory_report.py'
+      - '.github/workflows/memory_report.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  plan:
+    # Hard-block external-fork pull requests, like the other board jobs (#2757).
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    outputs:
+      boards: ${{ steps.pick.outputs.boards }}
+    steps:
+      - name: Pick targets
+        id: pick
+        env:
+          LABELS: ${{ toJSON(github.event.pull_request.labels.*.name) }}
+        run: |
+          set -euo pipefail
+          optional="esp32dev esp32s3 esp32c3 esp32c6 teensy41 rp2040 nrf52840_dk stm32f103c8"
+          boards="uno attiny85"
+          for b in $optional; do
+            if jq -e --arg b "$b" 'index("ci-full") or index("ci-test:bloat") or index("ci-platform:" + $b)' <<<"$LABELS" >/dev/null; then
+              boards="$boards $b"
+            fi
+          done
+          echo "boards=$(jq -cn --arg s "$boards" '$s | split(" ")')" >> "$GITHUB_OUTPUT"
+
+  measure:
+    needs: plan
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        board: ${{ fromJSON(needs.plan.outputs.boards) }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Measure merge base and PR head
+        env:
+          BOARD: ${{ matrix.board }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -euo pipefail
+          # The merge base may predate this script, so run the PR's copy.
+          cp ci/memory_report.py "$RUNNER_TEMP/memory_report.py"
+          mkdir -p out
+          git checkout --quiet "$(git merge-base "$HEAD_SHA" "$BASE_SHA")"
+          uv run python "$RUNNER_TEMP/memory_report.py" collect --out "out/base-$BOARD.json" "$BOARD"
+          git checkout --quiet "$HEAD_SHA"
+          uv run python "$RUNNER_TEMP/memory_report.py" collect --out "out/head-$BOARD.json" "$BOARD"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: memory-${{ matrix.board }}
+          path: out/*.json
+
+  comment:
+    needs: measure
+    if: always() && needs.measure.result != 'skipped'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v6
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: memory-*
+          merge-multiple: true
+          path: out
+
+      - name: Render and post
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          uv run ci/memory_report.py render --base out/base-*.json --head out/head-*.json > body.md
+          cat body.md >> "$GITHUB_STEP_SUMMARY"
+          marker='<!-- fastled-memory-report -->'
+          id="$(gh api --paginate "repos/$REPO/issues/$PR/comments" \
+            --jq ".[] | select(.user.login == \"github-actions[bot]\" and (.body | startswith(\"$marker\"))) | .id" | head -n1)"
+          if [ -n "$id" ]; then
+            gh api -X PATCH "repos/$REPO/issues/comments/$id" -F body=@body.md >/dev/null
+          else
+            gh api "repos/$REPO/issues/$PR/comments" -F body=@body.md >/dev/null
+          fi
