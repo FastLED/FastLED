@@ -308,6 +308,9 @@ class RpcClient:
             # the fallback — see issue #2265), preserving the original
             # "waited N seconds then moved on" behavior.
             assert self._serial is not None
+            # One deadline bounds the first poll and every follow-up poll so
+            # the whole boot wait never exceeds ``boot_wait``.
+            deadline = time.monotonic() + boot_wait
             try:
                 matched, poll_drained_lines = await wait_for_signal(
                     self._serial,
@@ -323,18 +326,23 @@ class RpcClient:
 
             # A reset banner ("rst:0x...") also matches the default "rst:"
             # boot signal, so the first match may just be the first of many
-            # resets. Keep reading while the latest match is a reset banner
-            # so a boot loop accumulates enough banners to be detected.
+            # resets. Once a reset has been seen, keep reading while the
+            # latest match is still a ROM-stage line (rst:, ESP-ROM:, boot:)
+            # so a boot loop that interleaves banners accumulates enough
+            # resets to be detected. "entry 0x" (ROM hands off to the app)
+            # and setup-stage signals confirm startup and end the wait.
             from ci.util.boot_wait import (
                 BOOT_LOOP_THRESHOLD,
+                BOOT_SIGNALS_ROM,
                 count_reset_banners,
             )
 
-            deadline = time.monotonic() + boot_wait
+            def _rom_stage(m: str | None) -> bool:
+                return m is not None and m in BOOT_SIGNALS_ROM and m != "entry 0x"
+
             while (
-                matched is not None
-                and poll_drained_lines
-                and count_reset_banners(poll_drained_lines[-1:]) > 0
+                _rom_stage(matched)
+                and count_reset_banners(poll_drained_lines) > 0
                 and count_reset_banners(poll_drained_lines) < BOOT_LOOP_THRESHOLD
             ):
                 remaining = deadline - time.monotonic()

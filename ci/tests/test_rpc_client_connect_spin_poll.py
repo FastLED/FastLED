@@ -129,3 +129,32 @@ def test_connect_detects_boot_loop_when_reset_banner_matches_signal() -> None:
 
     with pytest.raises(BootLoopError):
         asyncio.run(_run())
+
+
+class _InterleavedLoopingSerial(_FakeSerial):
+    """Boot loop whose resets interleave ESP-ROM: and rst: banners."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self._n = 0
+
+    async def read_lines(self, timeout: float) -> AsyncIterator[str]:  # noqa: ARG002
+        await asyncio.sleep(0.001)
+        self._n += 1
+        if self._n % 2 == 0:
+            yield "ESP-ROM:esp32s3-20210327"
+        else:
+            yield "rst:0xc (SW_CPU_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)"
+
+
+def test_connect_detects_boot_loop_with_interleaved_esp_rom_lines() -> None:
+    """An ESP-ROM: match between resets must not end boot-loop detection."""
+    from ci.util.boot_wait import BootLoopError
+
+    client = RpcClient("FAKE_PORT", serial_interface=_InterleavedLoopingSerial())
+
+    async def _run() -> None:
+        await client.connect(boot_wait=2.0, drain_boot=False)
+
+    with pytest.raises(BootLoopError):
+        asyncio.run(_run())
