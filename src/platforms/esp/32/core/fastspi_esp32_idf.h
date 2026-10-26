@@ -53,7 +53,7 @@ FL_EXTERN_C_END
 // into one of several DMA-capable RAM buffers, and release() fires it as a
 // single spi_device_queue_trans() call - one real DMA transaction per frame
 // instead of one blocking transaction per byte. Buffers are ping-ponged
-// (FASTLED_ESP32_SPI_NUM_BUFFERS deep, default 2): select() advances to the
+// (FL_ESP32_SPI_NUM_BUFFERS deep, default 2): select() advances to the
 // next buffer and waits only if THAT buffer's own prior transaction hasn't
 // completed yet, so the CPU can fill buffer N+1 while buffer N's DMA
 // transfer is still running in hardware - removing fill time from the
@@ -75,30 +75,32 @@ FL_EXTERN_C_END
 // single frame - for APA102/SK9822, that is 4 start-frame bytes + 4
 // bytes/LED + ~4 bytes per 32 LEDs of end-frame clock-out. Default covers
 // roughly 1000 LEDs; override before #include <FastLED.h> if you need more.
-#ifndef FASTLED_ESP32_SPI_DMA_BUFFER_BYTES
-#define FASTLED_ESP32_SPI_DMA_BUFFER_BYTES 4096
+// A frame that exceeds this is truncated (and warned about once per
+// occurrence - see release()), not silently dropped without any indication.
+#ifndef FL_ESP32_SPI_DMA_BUFFER_BYTES
+#define FL_ESP32_SPI_DMA_BUFFER_BYTES 4096
 #endif
 
 // How many buffers (= how many frames/transactions deep) to pre-allocate.
 // Default of 2 matches a simple double-buffered design; override before
 // #include <FastLED.h> to go deeper (trades DMA-capable RAM - this many
-// buffers times FASTLED_ESP32_SPI_DMA_BUFFER_BYTES - for more tolerance of
+// buffers times FL_ESP32_SPI_DMA_BUFFER_BYTES - for more tolerance of
 // scheduling delays between fills, e.g. under a busy WiFi/BLE radio task).
-#ifndef FASTLED_ESP32_SPI_NUM_BUFFERS
-#define FASTLED_ESP32_SPI_NUM_BUFFERS 2
+#ifndef FL_ESP32_SPI_NUM_BUFFERS
+#define FL_ESP32_SPI_NUM_BUFFERS 2
 #endif
 
 // Uncomment (or -D) to have release() track how long spi_device_queue_trans()
 // itself takes vs. the whole select()-to-release() window, printing a summary
-// every FASTLED_ESP32_SPI_DMA_TIMING_PERIOD frames. Lets you tell apart "DMA
+// every FL_ESP32_SPI_DMA_TIMING_PERIOD frames. Lets you tell apart "DMA
 // transfer is slow" (bus/hardware contention) from "something outside the
 // transfer call is slow" (task scheduling / other work stealing CPU time
 // between frames).
-#ifndef FASTLED_ESP32_SPI_DMA_TIMING_PERIOD
-#define FASTLED_ESP32_SPI_DMA_TIMING_PERIOD 640
+#ifndef FL_ESP32_SPI_DMA_TIMING_PERIOD
+#define FL_ESP32_SPI_DMA_TIMING_PERIOD 640
 #endif
 
-// Where FASTLED_ESP32_SPI_DMA_DEBUG/_TIMING output goes - both are opt-in
+// Where FL_ESP32_SPI_DMA_DEBUG/_TIMING output goes - both are opt-in
 // and off by default, so this has no effect until one of them is defined.
 // Defaults to a no-op rather than Serial directly: this header is compiled
 // into the ESP32 lazy-Serial0 unity build (src/platforms/esp/32), where any
@@ -107,9 +109,9 @@ FL_EXTERN_C_END
 // at runtime (see ci/tests/test_esp32_lazy_serial0.py). Override this
 // before #include <FastLED.h> - from your own sketch, not from a file in
 // this unity build - to actually see DMA_DEBUG/DMA_TIMING output, e.g.
-// `#define FASTLED_ESP32_SPI_DMA_LOG(...) Serial.printf(__VA_ARGS__)`.
-#ifndef FASTLED_ESP32_SPI_DMA_LOG
-#define FASTLED_ESP32_SPI_DMA_LOG(...) ((void)0)
+// `#define FL_ESP32_SPI_DMA_LOG(...) Serial.printf(__VA_ARGS__)`.
+#ifndef FL_ESP32_SPI_DMA_LOG
+#define FL_ESP32_SPI_DMA_LOG(...) ((void)0)
 #endif
 
 namespace fl {
@@ -138,15 +140,16 @@ class ESP32SPIOutput {
     bool mInitialized;
 
     // Ping-pong DMA buffer ring - see the file-level comment above for why.
-    static const int NUM_BUFFERS = FASTLED_ESP32_SPI_NUM_BUFFERS;
+    static const int NUM_BUFFERS = FL_ESP32_SPI_NUM_BUFFERS;
     uint8_t* mBuffer[NUM_BUFFERS] = {};
     size_t mBufferLen = 0;              // fill position in the buffer CURRENTLY being written (between select() and release())
     int mCurrentBuffer = 0;             // which of mBuffer[] is being written - cycles 0..NUM_BUFFERS-1, see select()
     spi_transaction_t mTrans[NUM_BUFFERS] = {};  // one persistent transaction descriptor per buffer - must outlive the queued transaction
     bool mPending[NUM_BUFFERS] = {};    // does mBuffer[i] have a transaction still queued/in-flight?
     bool mAllocFailed = false;          // true if any heap_caps_malloc() in init() returned nullptr - see init()'s own check and writeByte()'s guard
+    bool mOverflowDropped = false;      // true if writeByte() had to drop a byte since the last select() - see writeByte()/release()
 
-#ifdef FASTLED_ESP32_SPI_DMA_TIMING
+#ifdef FL_ESP32_SPI_DMA_TIMING
     uint32_t mSelectMicros = 0;
     uint32_t mFrameCount = 0;
     uint64_t mWaitMicrosSum = 0;
@@ -156,6 +159,27 @@ class ESP32SPIOutput {
     uint64_t mWallMicrosSum = 0;
     uint32_t mWallMicrosMax = 0;
 #endif
+
+    // Drains any outstanding transaction for each allocated buffer (so we
+    // never free DMA memory the hardware might still be reading from) and
+    // frees the buffers themselves. Safe to call unconditionally - whether
+    // called after a partial allocation failure (mSPIHandle is still
+    // nullptr, mPending[] all false, so this just frees whatever succeeded)
+    // or from the destructor (drains for real). Leaves mBuffer[] all
+    // nullptr, so a later init() retry allocates cleanly from scratch.
+    void freeBuffers() FL_NO_EXCEPT {
+        for (int i = 0; i < NUM_BUFFERS; i++) {
+            if (mBuffer[i] != nullptr) {
+                if (mPending[i] && mSPIHandle != nullptr) {
+                    spi_transaction_t* rtrans;
+                    spi_device_get_trans_result(mSPIHandle, &rtrans, portMAX_DELAY);
+                    mPending[i] = false;
+                }
+                heap_caps_free(mBuffer[i]);
+                mBuffer[i] = nullptr;
+            }
+        }
+    }
 
 public:
     // Verify that the pins are valid
@@ -177,6 +201,11 @@ public:
     {}
 
     ~ESP32SPIOutput() {
+        // Unconditional - covers both a fully-initialized instance and one
+        // left with allocated-but-unused buffers after a failed init()
+        // (which returns before setting mInitialized, so the old version of
+        // this destructor never freed them).
+        freeBuffers();
         if (mInitialized) {
             if (mSPIHandle) {
                 spi_bus_remove_device(mSPIHandle);
@@ -224,7 +253,7 @@ public:
         }
 
         for (int i = 0; i < NUM_BUFFERS; i++) {
-            mBuffer[i] = (uint8_t*) heap_caps_malloc(FASTLED_ESP32_SPI_DMA_BUFFER_BYTES, MALLOC_CAP_DMA);
+            mBuffer[i] = (uint8_t*) heap_caps_malloc(FL_ESP32_SPI_DMA_BUFFER_BYTES, MALLOC_CAP_DMA);
             if (mBuffer[i] == nullptr) {
                 mAllocFailed = true;
             }
@@ -235,14 +264,19 @@ public:
             // writeByte()'s own guard means no caller can crash from this,
             // but there's no point initializing a SPI bus we already know
             // can't be fed safely. Always-on (unlike the opt-in
-            // FASTLED_ESP32_SPI_DMA_LOG diagnostics below), so this goes
+            // FL_ESP32_SPI_DMA_LOG diagnostics below), so this goes
             // through FL_WARN rather than that macro, which defaults to a
-            // no-op - see FASTLED_ESP32_SPI_DMA_LOG's own comment.
+            // no-op - see FL_ESP32_SPI_DMA_LOG's own comment.
             FL_WARN("ESP32SPIOutput: failed to allocate one or more of "
                     << NUM_BUFFERS << " DMA buffers ("
-                    << FASTLED_ESP32_SPI_DMA_BUFFER_BYTES << " bytes each, "
-                    << (NUM_BUFFERS * FASTLED_ESP32_SPI_DMA_BUFFER_BYTES)
+                    << FL_ESP32_SPI_DMA_BUFFER_BYTES << " bytes each, "
+                    << (NUM_BUFFERS * FL_ESP32_SPI_DMA_BUFFER_BYTES)
                     << " bytes total) - LED output disabled for this boot.");
+            // Free whatever subset DID succeed, and allow a future init()
+            // call (e.g. after memory pressure clears) to retry cleanly
+            // rather than being permanently wedged with mAllocFailed set.
+            freeBuffers();
+            mAllocFailed = false;
             return;
         }
 
@@ -253,7 +287,7 @@ public:
         bus_config.sclk_io_num = CLOCK_PIN;
         bus_config.quadwp_io_num = -1;
         bus_config.quadhd_io_num = -1;
-        bus_config.max_transfer_sz = FASTLED_ESP32_SPI_DMA_BUFFER_BYTES;
+        bus_config.max_transfer_sz = FL_ESP32_SPI_DMA_BUFFER_BYTES;
         bus_config.flags = SPICOMMON_BUSFLAG_MASTER;
 
         // Initialize bus with auto DMA
@@ -265,10 +299,23 @@ public:
         const int dma_channel = static_cast<i32>(mHost);
 #endif
         esp_err_t ret = spi_bus_initialize(mHost, &bus_config, dma_channel);
-        // ESP_ERR_INVALID_STATE means some other device already initialized
-        // this bus (e.g. a second strip sharing the pins) - fine, attach to it.
-        if (ret != ESP_OK && ret != ESP_ERR_INVALID_STATE) {
+        if (ret == ESP_ERR_INVALID_STATE) {
+            // Some other device already initialized this bus (e.g. a second
+            // strip sharing the clock pin) - fine, attach to it, but that
+            // first initializer is also the one whose DATA_PIN/CLOCK_PIN
+            // actually won: if this instance's pins differ, its output
+            // silently goes to the WRONG pins. Not something this class can
+            // detect on its own (the bus config that "won" isn't exposed
+            // back to us), so just make the shared-bus assumption visible
+            // rather than silent.
+            FL_WARN("SPI bus already initialized by another device - "
+                    "attaching to the existing bus. If this strip's "
+                    "DATA_PIN/CLOCK_PIN differ from whichever controller "
+                    "initialized the bus first, its output will go to the "
+                    "wrong pins.");
+        } else if (ret != ESP_OK) {
             FL_WARN("SPI bus init failed: " << ret);
+            freeBuffers();
             return;
         }
 
@@ -289,6 +336,7 @@ public:
         ret = spi_bus_add_device(mHost, &dev_config, &mSPIHandle);
         if (ret != ESP_OK) {
             FL_WARN("SPI add device failed: " << ret);
+            freeBuffers();
             return;
         }
 
@@ -316,10 +364,16 @@ public:
     // Buffers a byte into the current frame - actual SPI write happens in
     // release(). mAllocFailed guard: without this, a failed init()
     // allocation would leave mBuffer[i] null and this would be a
-    // null-pointer write on the very first byte.
+    // null-pointer write on the very first byte. If the frame is bigger
+    // than FL_ESP32_SPI_DMA_BUFFER_BYTES, bytes past that are dropped (the
+    // alternative - growing the buffer or splitting into extra
+    // transactions mid-frame - isn't attempted here) but release() warns
+    // once per occurrence rather than truncating silently.
     void writeByte(u8 b) FL_NO_EXCEPT __attribute__((always_inline)) {
-        if (!mAllocFailed && mBufferLen < FASTLED_ESP32_SPI_DMA_BUFFER_BYTES) {
+        if (!mAllocFailed && mBufferLen < FL_ESP32_SPI_DMA_BUFFER_BYTES) {
             mBuffer[mCurrentBuffer][mBufferLen++] = b;
+        } else if (!mAllocFailed) {
+            mOverflowDropped = true;
         }
     }
 
@@ -355,7 +409,7 @@ public:
             return;
         }
         mCurrentBuffer = (mCurrentBuffer + 1) % NUM_BUFFERS;
-#ifdef FASTLED_ESP32_SPI_DMA_TIMING
+#ifdef FL_ESP32_SPI_DMA_TIMING
         uint32_t waitT0 = micros();
 #endif
         if (mPending[mCurrentBuffer]) {
@@ -363,7 +417,7 @@ public:
             spi_device_get_trans_result(mSPIHandle, &rtrans, portMAX_DELAY);
             mPending[mCurrentBuffer] = false;
         }
-#ifdef FASTLED_ESP32_SPI_DMA_TIMING
+#ifdef FL_ESP32_SPI_DMA_TIMING
         uint32_t waitT1 = micros();
         uint32_t waitUs = waitT1 - waitT0;
         mWaitMicrosSum += waitUs;
@@ -381,13 +435,19 @@ public:
     // finish (that wait, for THIS buffer, happens at the top of its next
     // select() call instead - see above).
     void release() FL_NO_EXCEPT {
+        if (mOverflowDropped) {
+            FL_WARN("ESP32SPIOutput: frame exceeded FL_ESP32_SPI_DMA_BUFFER_BYTES ("
+                    << FL_ESP32_SPI_DMA_BUFFER_BYTES << " bytes) - truncated. "
+                    "Increase FL_ESP32_SPI_DMA_BUFFER_BYTES to fit your strip length.");
+            mOverflowDropped = false;
+        }
         if (mInitialized && mSPIHandle != nullptr && mBufferLen > 0) {
             spi_transaction_t& trans = mTrans[mCurrentBuffer];
             trans = {};
             trans.length = mBufferLen * 8;
             trans.tx_buffer = mBuffer[mCurrentBuffer];
             trans.rx_buffer = nullptr;
-#ifdef FASTLED_ESP32_SPI_DMA_TIMING
+#ifdef FL_ESP32_SPI_DMA_TIMING
             uint32_t t0 = micros();
             esp_err_t err = spi_device_queue_trans(mSPIHandle, &trans, portMAX_DELAY);
             uint32_t t1 = micros();
@@ -399,8 +459,8 @@ public:
             if (queueUs > mQueueMicrosMax) mQueueMicrosMax = queueUs;
             mWallMicrosSum += wallUs;
             if (wallUs > mWallMicrosMax) mWallMicrosMax = wallUs;
-            if (mFrameCount >= FASTLED_ESP32_SPI_DMA_TIMING_PERIOD) {
-                FASTLED_ESP32_SPI_DMA_LOG("[ESP32SPIOutput] timing over %u frames: wait avg=%uus max=%uus | queue avg=%uus max=%uus | wall (select-to-release, i.e. per-frame period) avg=%uus max=%uus\n",
+            if (mFrameCount >= FL_ESP32_SPI_DMA_TIMING_PERIOD) {
+                FL_ESP32_SPI_DMA_LOG("[ESP32SPIOutput] timing over %u frames: wait avg=%uus max=%uus | queue avg=%uus max=%uus | wall (select-to-release, i.e. per-frame period) avg=%uus max=%uus\n",
                     (unsigned)mFrameCount,
                     (unsigned)(mWaitMicrosSum / mFrameCount), (unsigned)mWaitMicrosMax,
                     (unsigned)(mQueueMicrosSum / mFrameCount), (unsigned)mQueueMicrosMax,
@@ -417,12 +477,12 @@ public:
             esp_err_t err = spi_device_queue_trans(mSPIHandle, &trans, portMAX_DELAY);
             mPending[mCurrentBuffer] = (err == ESP_OK);
 #endif
-#ifdef FASTLED_ESP32_SPI_DMA_DEBUG
+#ifdef FL_ESP32_SPI_DMA_DEBUG
             static size_t s_lastLoggedLen = (size_t)-1;
             static int s_framesLogged = 0;
             if (mBufferLen != s_lastLoggedLen) {
                 if (s_framesLogged < 20) {
-                    FASTLED_ESP32_SPI_DMA_LOG("[ESP32SPIOutput] release(): buffer=%d bufferLen=%u bits=%u\n",
+                    FL_ESP32_SPI_DMA_LOG("[ESP32SPIOutput] release(): buffer=%d bufferLen=%u bits=%u\n",
                         mCurrentBuffer, (unsigned)mBufferLen, (unsigned)trans.length);
                     s_framesLogged++;
                 }
