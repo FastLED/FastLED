@@ -348,6 +348,32 @@ inline fl::json uartWs2812InternalLoopback(fl::u32 baud) {
     return r;
 }
 
+// Drive GPIO2 as a plain GPIO high then low and read rxPin each time, so a
+// missing jumper is told apart from a UART1 pin-mux fault. The next UART call
+// re-runs esp8266_uart::begin(), which hands GPIO2 back to UART1.
+inline fl::json jumperCheck(int rxPin) {
+    fl::json r = fl::json::object();
+    if (!isUsableRxPin(rxPin)) {
+        r.set("success", false);
+        r.set("error", "rxPin must be one of 0,4,5,12,13,14,15");
+        return r;
+    }
+    pinMode(rxPin, INPUT);
+    pinMode(2, OUTPUT);
+    const fl::u32 mask = 1u << rxPin;
+    GPOS = 1u << 2;
+    fl::delayMicroseconds(50);
+    const bool seenHigh = (GPI & mask) != 0;
+    GPOC = 1u << 2;
+    fl::delayMicroseconds(50);
+    const bool seenLow = (GPI & mask) == 0;
+    r.set("rx_pin", static_cast<fl::i64>(rxPin));
+    r.set("rx_high_when_tx_high", seenHigh);
+    r.set("rx_low_when_tx_low", seenLow);
+    r.set("success", seenHigh && seenLow);
+    return r;
+}
+
 // Each bind instantiates sizeable temporaries; split the bindings across
 // non-inlined functions so their frames do not add up on the 4 KB loop
 // stack (one combined frame overflowed it).
@@ -391,6 +417,10 @@ __attribute__((noinline)) inline void bindEsp8266UartRpcs(fl::Remote& remote) {
                 return e;
             }
             return uartWs2812InternalLoopback(static_cast<fl::u32>(nLeds) * 1000u);
+        }
+        // nLeds == 0 checks the jumper itself: GPIO2 as plain GPIO.
+        if (nLeds == 0) {
+            return jumperCheck(rxPin);
         }
         return uartWs2812Loopback(nLeds, rxPin);
     });
