@@ -32,7 +32,7 @@
 #include "fl/stl/stdint.h"
 #include "fl/stl/string.h"
 #include "fl/wdt/watchdog.h"
-#include "platforms/esp/8266/fastled_esp8266_uart.h"  // ok platform headers - driver under test
+#include "platforms/esp/8266/fastled_esp8266_uart.h"  // ok platform headers // ok platform specific - ESP8266 UART driver under test
 
 // IWYU pragma: begin_keep
 #include <esp8266_peri.h>     // ok platform specific - GPI, ESP8266_CLOCK for raw loopback sampling
@@ -82,21 +82,21 @@ inline EdgeCapture& edgeCapture() {
 __attribute__((noinline)) static FL_IRAM void captureEdges(
         const fl::u8* encoded, int nEncoded, fl::u32 mask, fl::u32 idleCycles,
         EdgeCapture& cap) {
-    bool level = (GPI & mask) != 0;
+    bool level = (GPI & mask) != 0;  // ok platform specific - raw GPIO sampling / UART1 FIFO feed for the pin-level loopback
     cap.firstLevel = level;
-    USF(fl::esp8266_uart::kUart) = encoded[0];
-    USF(fl::esp8266_uart::kUart) = encoded[1];
+    USF(fl::esp8266_uart::kUart) = encoded[0];  // ok platform specific - raw GPIO sampling / UART1 FIFO feed for the pin-level loopback
+    USF(fl::esp8266_uart::kUart) = encoded[1];  // ok platform specific - raw GPIO sampling / UART1 FIFO feed for the pin-level loopback
     int fed = 2;
     fl::u32 lastEdge = cycles();
     while (cap.count < kMaxEdges) {
-        const bool now = (GPI & mask) != 0;
+        const bool now = (GPI & mask) != 0;  // ok platform specific - raw GPIO sampling / UART1 FIFO feed for the pin-level loopback
         const fl::u32 t = cycles();
         if (now != level) {
             cap.edges[cap.count++] = t;
             level = now;
             lastEdge = t;
             if (!now && fed < nEncoded) {
-                USF(fl::esp8266_uart::kUart) = encoded[fed++];
+                USF(fl::esp8266_uart::kUart) = encoded[fed++];  // ok platform specific - raw GPIO sampling / UART1 FIFO feed for the pin-level loopback
             }
         } else if (t - lastEdge > idleCycles) {
             break;
@@ -334,10 +334,10 @@ inline fl::json uartWs2812InternalLoopback(fl::u32 baud) {
     // The loopback taps the line after TX inversion and RX inversion does
     // not apply to it, so drop TX inversion for the self-test: RX then sees
     // ordinary 6N1 frames. The inversion itself is one register bit.
-    USC0(u::kUart) &= ~(1u << UCTXI);
-    USC0(u::kUart) |= (1u << UCLBE);
-    USC0(u::kUart) |= (1u << UCRXRST);
-    USC0(u::kUart) &= ~(1u << UCRXRST);
+    USC0(u::kUart) &= ~(1u << UCTXI);  // ok platform specific - UART1 internal-loopback registers; no core API
+    USC0(u::kUart) |= (1u << UCLBE);  // ok platform specific - UART1 internal-loopback registers; no core API
+    USC0(u::kUart) |= (1u << UCRXRST);  // ok platform specific - UART1 internal-loopback registers; no core API
+    USC0(u::kUart) &= ~(1u << UCRXRST);  // ok platform specific - UART1 internal-loopback registers; no core API
     const fl::u8 pixel[3] = {0xA5, 0x0F, 0xC3};
     fl::u8 sent[12];
     for (int i = 0; i < 3; ++i) {
@@ -346,18 +346,18 @@ inline fl::json uartWs2812InternalLoopback(fl::u32 baud) {
     u::write(sent, sizeof(sent));
     u::flush();
     fl::delayMicroseconds(20 + 9000000 / (baud ? baud : FASTLED_ESP8266_UART_BAUD));
-    const fl::u32 got = (USS(u::kUart) >> USRXC) & 0xFF;
+    const fl::u32 got = (USS(u::kUart) >> USRXC) & 0xFF;  // ok platform specific - UART1 internal-loopback registers; no core API
     fl::u32 matched = 0;
     fl::json rx = fl::json::array();
     for (fl::u32 i = 0; i < got && i < sizeof(sent); ++i) {
-        const fl::u8 c = static_cast<fl::u8>(USF(u::kUart) & 0x3F);
+        const fl::u8 c = static_cast<fl::u8>(USF(u::kUart) & 0x3F);  // ok platform specific - UART1 internal-loopback registers; no core API
         rx.push_back(static_cast<fl::i64>(c));
         if (c == (sent[i] & 0x3F)) {
             ++matched;
         }
     }
-    USC0(u::kUart) &= ~(1u << UCLBE);
-    USC0(u::kUart) |= (1u << UCTXI);
+    USC0(u::kUart) &= ~(1u << UCLBE);  // ok platform specific - UART1 internal-loopback registers; no core API
+    USC0(u::kUart) |= (1u << UCTXI);  // ok platform specific - UART1 internal-loopback registers; no core API
     fl::json r = fl::json::object();
     r.set("sent", static_cast<fl::i64>(sizeof(sent)));
     r.set("received", static_cast<fl::i64>(got));
@@ -380,12 +380,12 @@ inline fl::json jumperCheck(int rxPin) {
     pinMode(rxPin, INPUT);
     pinMode(2, OUTPUT);
     const fl::u32 mask = 1u << rxPin;
-    GPOS = 1u << 2;
+    GPOS = 1u << 2;  // ok platform specific - plain-GPIO jumper check on raw GPIO registers
     fl::delayMicroseconds(50);
-    const bool seenHigh = (GPI & mask) != 0;
-    GPOC = 1u << 2;
+    const bool seenHigh = (GPI & mask) != 0;  // ok platform specific - plain-GPIO jumper check on raw GPIO registers
+    GPOC = 1u << 2;  // ok platform specific - plain-GPIO jumper check on raw GPIO registers
     fl::delayMicroseconds(50);
-    const bool seenLow = (GPI & mask) == 0;
+    const bool seenLow = (GPI & mask) == 0;  // ok platform specific - plain-GPIO jumper check on raw GPIO registers
     r.set("rx_pin", static_cast<fl::i64>(rxPin));
     r.set("rx_high_when_tx_high", seenHigh);
     r.set("rx_low_when_tx_low", seenLow);
@@ -405,7 +405,7 @@ __attribute__((noinline)) inline void bindEsp8266WatchdogRpcs(fl::Remote& remote
         r.set("cause", fl::string(fl::resetCauseName(wdt.lastResetCause())));
         r.set("crash_count", static_cast<fl::i64>(wdt.consecutiveCrashCount()));
         // Loop-stack headroom (4 KB total); the bind/dispatch path runs close.
-        r.set("cont_stack_free", static_cast<fl::i64>(cont_get_free_stack(g_pcont)));
+        r.set("cont_stack_free", static_cast<fl::i64>(cont_get_free_stack(g_pcont)));  // ok platform specific - loop-stack headroom diagnostic
         return r;
     });
     remote.bind("watchdogStall", [](int ms) -> fl::json {
