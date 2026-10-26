@@ -329,8 +329,9 @@ class RpcClient:
             # resets. Once a reset has been seen, keep reading while the
             # latest match is still a ROM-stage line (rst:, ESP-ROM:, boot:)
             # so a boot loop that interleaves banners accumulates enough
-            # resets to be detected. "entry 0x" (ROM hands off to the app)
-            # and setup-stage signals confirm startup and end the wait.
+            # resets to be detected. "entry 0x" only means the ROM handed off
+            # to the app, which can still crash and reset, so it keeps the
+            # wait going too; only a setup-stage signal confirms startup.
             from ci.util.boot_wait import (
                 BOOT_LOOP_THRESHOLD,
                 BOOT_SIGNALS_ROM,
@@ -338,7 +339,7 @@ class RpcClient:
             )
 
             def _rom_stage(m: str | None) -> bool:
-                return m is not None and m in BOOT_SIGNALS_ROM and m != "entry 0x"
+                return m is not None and m in BOOT_SIGNALS_ROM
 
             while (
                 _rom_stage(matched)

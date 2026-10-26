@@ -158,3 +158,32 @@ def test_connect_detects_boot_loop_with_interleaved_esp_rom_lines() -> None:
 
     with pytest.raises(BootLoopError):
         asyncio.run(_run())
+
+
+class _EntryThenCrashSerial(_FakeSerial):
+    """Boot loop that reaches the ROM handoff ("entry 0x") and then resets."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self._n = 0
+
+    async def read_lines(self, timeout: float) -> AsyncIterator[str]:  # noqa: ARG002
+        await asyncio.sleep(0.001)
+        self._n += 1
+        if self._n % 2 == 0:
+            yield "entry 0x40080000"
+        else:
+            yield "rst:0xc (SW_CPU_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)"
+
+
+def test_connect_detects_boot_loop_after_entry_handoff() -> None:
+    """The ROM handoff is not startup: resets after "entry 0x" still count."""
+    from ci.util.boot_wait import BootLoopError
+
+    client = RpcClient("FAKE_PORT", serial_interface=_EntryThenCrashSerial())
+
+    async def _run() -> None:
+        await client.connect(boot_wait=2.0, drain_boot=False)
+
+    with pytest.raises(BootLoopError):
+        asyncio.run(_run())
