@@ -27,6 +27,7 @@
 #if defined(FL_IS_ESP8266)  // ok platform specific - ESP8266-only bench file
 
 #include "FastLED.h"
+#include "fl/stl/compiler_control.h"
 #include "fl/stl/json.h"
 #include "fl/stl/stdint.h"
 #include "fl/stl/string.h"
@@ -45,7 +46,8 @@ namespace esp8266 {
 constexpr int kMaxLoopbackLeds = 10;  // 120 UART bytes fit the 128-byte FIFO
 constexpr int kMaxEdges = kMaxLoopbackLeds * 24 * 2 + 4;
 
-inline fl::u32 cycles() {
+// Always inlined: the IRAM capture loop must not call back into flash.
+__attribute__((always_inline)) inline fl::u32 cycles() {
     fl::u32 c;
     __asm__ __volatile__("rsr %0,ccount" : "=a"(c));  // ok platform specific - cycle-accurate edge timestamps; no core cycle counter
     return c;
@@ -67,6 +69,39 @@ struct EdgeCapture {
 
 inline EdgeCapture& edgeCapture() {
     return fl::SingletonShared<EdgeCapture>::instance();
+}
+
+// Streams `encoded` out of UART1 while timestamping every rxPin edge. Runs
+// from IRAM: from flash, the cold instruction cache on the first call after
+// boot stalled the loop past the first pulses (measured: 4 bits lost).
+// A FIFO write stalls the CPU for ~115 ns. Filling all 120 bytes up front let
+// the UART shift out 11 bits before sampling began, and writing once per
+// sample missed short T0H pulses. So prime two bytes, then write one just
+// after each falling edge, where the line stays low for >= 300 ns. Two edges
+// fall per UART byte, so the FIFO stays ahead of the shifter.
+__attribute__((noinline)) static FL_IRAM void captureEdges(
+        const fl::u8* encoded, int nEncoded, fl::u32 mask, fl::u32 idleCycles,
+        EdgeCapture& cap) {
+    bool level = (GPI & mask) != 0;
+    cap.firstLevel = level;
+    USF(fl::esp8266_uart::kUart) = encoded[0];
+    USF(fl::esp8266_uart::kUart) = encoded[1];
+    int fed = 2;
+    fl::u32 lastEdge = cycles();
+    while (cap.count < kMaxEdges) {
+        const bool now = (GPI & mask) != 0;
+        const fl::u32 t = cycles();
+        if (now != level) {
+            cap.edges[cap.count++] = t;
+            level = now;
+            lastEdge = t;
+            if (!now && fed < nEncoded) {
+                USF(fl::esp8266_uart::kUart) = encoded[fed++];
+            }
+        } else if (t - lastEdge > idleCycles) {
+            break;
+        }
+    }
 }
 
 inline bool isUsableRxPin(int pin) {
@@ -104,23 +139,7 @@ inline fl::json uartWs2812Loopback(int nLeds, int rxPin) {
     const fl::u32 mask = 1u << rxPin;
 
     const fl::u32 savedPs = xt_rsil(15);  // ok platform specific - masks all IRQs for cycle-exact sampling
-    bool level = (GPI & mask) != 0;
-    cap.firstLevel = level;
-    for (int i = 0; i < nLeds * 12; ++i) {
-        USF(fl::esp8266_uart::kUart) = encoded[i];
-    }
-    fl::u32 lastEdge = cycles();
-    while (cap.count < kMaxEdges) {
-        const bool now = (GPI & mask) != 0;
-        const fl::u32 t = cycles();
-        if (now != level) {
-            cap.edges[cap.count++] = t;
-            level = now;
-            lastEdge = t;
-        } else if (t - lastEdge > idleCycles) {
-            break;
-        }
-    }
+    captureEdges(encoded, nLeds * 12, mask, idleCycles, cap);
     xt_wsr_ps(savedPs);  // ok platform specific - restores IRQ level from xt_rsil
     system_update_cpu_freq(prevMhz);  // ok platform specific - ESP8266 bring-up bench measures raw SoC behavior; no core API exposes it
 
