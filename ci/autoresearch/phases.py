@@ -2630,6 +2630,12 @@ async def _run_tests_or_special_mode(ctx: RunContext, qctx: QuietContext) -> int
         # FastLED #3021 Phase 1: --pin-toggle-rx runs the SCT-RX
         # loopback bench instead of the default echo bring-up.
         if getattr(ctx.args, "pin_toggle_rx", False):
+            if final_environment not in LPC_WS2812_ENVS:
+                print(
+                    "--pin-toggle-rx is only supported on LPC845 boards "
+                    f"(got {final_environment!r})"
+                )
+                return 1
             return await _run_lpc_pin_toggle_rx_tests(ctx)
         # FastLED #3021 Phase 2: --ws2812-loopback runs the WS2812
         # byte-match loopback bench. LPC845 low-memory builds bind the

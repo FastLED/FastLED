@@ -321,6 +321,38 @@ class RpcClient:
 
             self._check_interrupt()
 
+            # A reset banner ("rst:0x...") also matches the default "rst:"
+            # boot signal, so the first match may just be the first of many
+            # resets. Keep reading while the latest match is a reset banner
+            # so a boot loop accumulates enough banners to be detected.
+            from ci.util.boot_wait import (
+                BOOT_LOOP_THRESHOLD,
+                count_reset_banners,
+            )
+
+            deadline = time.monotonic() + boot_wait
+            while (
+                matched is not None
+                and poll_drained_lines
+                and count_reset_banners(poll_drained_lines[-1:]) > 0
+                and count_reset_banners(poll_drained_lines) < BOOT_LOOP_THRESHOLD
+            ):
+                remaining = deadline - time.monotonic()
+                if remaining <= 0:
+                    break
+                try:
+                    matched, more_lines = await wait_for_signal(
+                        self._serial,
+                        effective_signals,
+                        timeout=remaining,
+                        on_line=_mirror if self.verbose else None,
+                    )
+                except KeyboardInterrupt:
+                    notify_main_thread()
+                    raise
+                self._check_interrupt()
+                poll_drained_lines.extend(more_lines)
+
             if self.verbose:
                 if matched is not None:
                     print(
@@ -335,15 +367,14 @@ class RpcClient:
                         f"falling back to timeout behavior."
                     )
 
-            if matched is None:
-                from ci.util.boot_wait import BootLoopError, raise_if_boot_looping
+            from ci.util.boot_wait import BootLoopError, raise_if_boot_looping
 
-                try:
-                    raise_if_boot_looping(poll_drained_lines)
-                except BootLoopError:
-                    # Release the port so a retry (or another tool) can open it.
-                    await self.close()
-                    raise
+            try:
+                raise_if_boot_looping(poll_drained_lines)
+            except BootLoopError:
+                # Release the port so a retry (or another tool) can open it.
+                await self.close()
+                raise
 
         if drain_boot:
             if self.verbose:

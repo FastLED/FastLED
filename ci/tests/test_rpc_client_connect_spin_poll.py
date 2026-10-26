@@ -107,3 +107,25 @@ def test_connect_respects_empty_boot_signals_opts_out_of_spin_poll() -> None:
     assert elapsed >= 0.2, (
         f"connect() returned too early ({elapsed:.2f}s) with boot_signals=[]"
     )
+
+
+class _LoopingSerial(_FakeSerial):
+    """Fake that prints a reset banner on every read (a boot loop)."""
+
+    async def read_lines(self, timeout: float) -> AsyncIterator[str]:  # noqa: ARG002
+        await asyncio.sleep(0.001)
+        yield "rst:0xc (SW_CPU_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)"
+
+
+def test_connect_detects_boot_loop_when_reset_banner_matches_signal() -> None:
+    """Repeated rst:0x banners raise BootLoopError even though rst: matches."""
+    from ci.util.boot_wait import BootLoopError
+
+    fake = _LoopingSerial()
+    client = RpcClient("FAKE_PORT", serial_interface=fake)
+
+    async def _run() -> None:
+        await client.connect(boot_wait=2.0, drain_boot=False)
+
+    with pytest.raises(BootLoopError):
+        asyncio.run(_run())

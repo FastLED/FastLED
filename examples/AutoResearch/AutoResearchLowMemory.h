@@ -39,12 +39,12 @@
 
 // ESP8266 has 4 MB of flash but too little DRAM for the full harness, so its
 // low-memory build always carries the IEEE754 codec check next to echo.
-#include "platforms/esp/is_esp.h"  // ok platform headers - ESP8266 surface gate
-#if defined(FL_IS_ESP8266) && !defined(FASTLED_AUTORESEARCH_IEEE754_MODE)
+#include "platforms/esp/is_esp.h"  // ok platform headers // ok platform specific - ESP8266 surface gate
+#if defined(FL_IS_ESP8266) && !defined(FASTLED_AUTORESEARCH_IEEE754_MODE)  // ok platform specific - ESP8266 low-DRAM build always carries IEEE754 check
 #define FASTLED_AUTORESEARCH_IEEE754_MODE 1
 #endif
 // The clockless bench reports the driver's frame/retry counters.
-#if defined(FL_IS_ESP8266) && !defined(FASTLED_DEBUG_COUNT_FRAME_RETRIES)
+#if defined(FL_IS_ESP8266) && !defined(FASTLED_DEBUG_COUNT_FRAME_RETRIES)  // ok platform specific - clockless bench reads ESP8266 retry counters
 #define FASTLED_DEBUG_COUNT_FRAME_RETRIES 1
 #endif
 
@@ -151,7 +151,7 @@
 #endif
 
 // ESP8266 UART WS2812 driver benches (pad self-capture, no jumper needed).
-#if defined(FL_IS_ESP8266)
+#if defined(FL_IS_ESP8266)  // ok platform specific - ESP8266 bring-up benches
 #include "AutoResearchEsp8266.h"
 #endif
 
@@ -316,7 +316,7 @@ inline void autoResearchLowMemorySetup() {
     });
 #endif  // FL_IS_ARM_LPC_845 && FASTLED_AUTORESEARCH_FAULT_TEST
 
-#if defined(FL_IS_ESP8266)
+#if defined(FL_IS_ESP8266)  // ok platform specific - ESP8266 bring-up benches
     autoresearch::esp8266::bindEsp8266Benches(remote);
 #endif
 

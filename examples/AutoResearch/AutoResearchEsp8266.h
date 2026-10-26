@@ -22,9 +22,9 @@
 //   driver aborted and retried after an interrupt overran its timing window.
 //
 
-#include "platforms/esp/is_esp.h"  // ok platform headers - ESP8266 bench gate
+#include "platforms/esp/is_esp.h"  // ok platform headers // ok platform specific - ESP8266 bench gate
 
-#if defined(FL_IS_ESP8266)
+#if defined(FL_IS_ESP8266)  // ok platform specific - ESP8266-only bench file
 
 #include "FastLED.h"
 #include "fl/stl/json.h"
@@ -34,9 +34,9 @@
 #include "platforms/esp/8266/fastled_esp8266_uart.h"  // ok platform headers - driver under test
 
 // IWYU pragma: begin_keep
-#include <esp8266_peri.h>     // GPI, ESP8266_CLOCK
-#include <user_interface.h>   // system_update_cpu_freq
-#include <cont.h>             // cont_get_free_stack (loop-stack headroom)
+#include <esp8266_peri.h>     // ok platform specific - GPI, ESP8266_CLOCK for raw loopback sampling
+#include <user_interface.h>   // ok platform specific - system_update_cpu_freq, wifi_* for bench setup
+#include <cont.h>             // ok platform specific - cont_get_free_stack (loop-stack headroom)
 // IWYU pragma: end_keep
 
 namespace autoresearch {
@@ -47,7 +47,7 @@ constexpr int kMaxEdges = kMaxLoopbackLeds * 24 * 2 + 4;
 
 inline fl::u32 cycles() {
     fl::u32 c;
-    __asm__ __volatile__("rsr %0,ccount" : "=a"(c));
+    __asm__ __volatile__("rsr %0,ccount" : "=a"(c));  // ok platform specific - cycle-accurate edge timestamps; no core cycle counter
     return c;
 }
 
@@ -94,8 +94,8 @@ inline fl::json uartWs2812Loopback(int nLeds, int rxPin) {
     fl::esp8266_uart::begin(FASTLED_ESP8266_UART_BAUD);
     fl::delayMicroseconds(100);  // line settles low (latch)
 
-    const fl::u8 prevMhz = system_get_cpu_freq();
-    system_update_cpu_freq(160);
+    const fl::u8 prevMhz = system_get_cpu_freq();  // ok platform specific - ESP8266 bring-up bench measures raw SoC behavior; no core API exposes it
+    system_update_cpu_freq(160);  // ok platform specific - ESP8266 bring-up bench measures raw SoC behavior; no core API exposes it
     const fl::u32 cyclesPerUs = 160;
     const fl::u32 idleCycles = 20 * cyclesPerUs;  // 20 us of silence ends it
 
@@ -103,7 +103,7 @@ inline fl::json uartWs2812Loopback(int nLeds, int rxPin) {
     cap.count = 0;
     const fl::u32 mask = 1u << rxPin;
 
-    const fl::u32 savedPs = xt_rsil(15);
+    const fl::u32 savedPs = xt_rsil(15);  // ok platform specific - masks all IRQs for cycle-exact sampling
     bool level = (GPI & mask) != 0;
     cap.firstLevel = level;
     for (int i = 0; i < nLeds * 12; ++i) {
@@ -121,8 +121,8 @@ inline fl::json uartWs2812Loopback(int nLeds, int rxPin) {
             break;
         }
     }
-    xt_wsr_ps(savedPs);
-    system_update_cpu_freq(prevMhz);
+    xt_wsr_ps(savedPs);  // ok platform specific - restores IRQ level from xt_rsil
+    system_update_cpu_freq(prevMhz);  // ok platform specific - ESP8266 bring-up bench measures raw SoC behavior; no core API exposes it
 
     // Pair rising/falling edges into high pulses; classify by width.
     fl::u32 t0hMin = 0xFFFFFFFF, t0hMax = 0, t1hMin = 0xFFFFFFFF, t1hMax = 0;
@@ -270,7 +270,7 @@ inline fl::json timeFrames(CLEDController* controller, int nLeds, int frames,
     r.set("driver_frames_ok", static_cast<fl::i64>(fl::_frame_cnt - frames0));
     r.set("driver_retries", static_cast<fl::i64>(fl::_retry_cnt - retries0));
     r.set("uptime_ms", static_cast<fl::i64>(millis()));
-    r.set("wifi_opmode", static_cast<fl::i64>(wifi_get_opmode()));
+    r.set("wifi_opmode", static_cast<fl::i64>(wifi_get_opmode()));  // ok platform specific - ESP8266 bring-up bench measures raw SoC behavior; no core API exposes it
     r.set("leds", static_cast<fl::i64>(nLeds));
     r.set("frames", static_cast<fl::i64>(frames));
     r.set("min_us", static_cast<fl::i64>(minUs));
@@ -299,10 +299,10 @@ inline fl::json apa102Show(int nLeds, int frames) {
 
 // Turn the radio off so its MAC NMIs stop preempting bit-banged output.
 inline fl::json wifiOff() {
-    wifi_set_opmode_current(NULL_MODE);
+    wifi_set_opmode_current(NULL_MODE);  // ok platform specific - ESP8266 bring-up bench measures raw SoC behavior; no core API exposes it
     fl::json r = fl::json::object();
-    r.set("success", wifi_get_opmode() == NULL_MODE);
-    r.set("wifi_opmode", static_cast<fl::i64>(wifi_get_opmode()));
+    r.set("success", wifi_get_opmode() == NULL_MODE);  // ok platform specific - ESP8266 bring-up bench measures raw SoC behavior; no core API exposes it
+    r.set("wifi_opmode", static_cast<fl::i64>(wifi_get_opmode()));  // ok platform specific - ESP8266 bring-up bench measures raw SoC behavior; no core API exposes it
     return r;
 }
 
@@ -364,6 +364,11 @@ __attribute__((noinline)) inline void bindEsp8266WatchdogRpcs(fl::Remote& remote
         return r;
     });
     remote.bind("watchdogStall", [](int ms) -> fl::json {
+        if (ms < 0) {
+            fl::json e = fl::json::object();
+            e.set("error", "ms must be >= 0");
+            return e;
+        }
         const fl::u32 start = fl::millis();
         while (fl::millis() - start < static_cast<fl::u32>(ms)) {
             fl::delay(10);  // yields, so only fl::Watchdog can fire
@@ -379,6 +384,12 @@ __attribute__((noinline)) inline void bindEsp8266UartRpcs(fl::Remote& remote) {
     // as the rate in kbaud (0 = the driver's 3.2 Mbaud).
     remote.bind("uartWs2812Loopback", [](int nLeds, int rxPin) -> fl::json {
         if (rxPin < 0) {
+            // kbaud; 0 = default. USD = ESP8266_CLOCK / baud must stay >= 1.
+            if (nLeds < 0 || nLeds > 80000) {
+                fl::json e = fl::json::object();
+                e.set("error", "kbaud must be in [0, 80000]");
+                return e;
+            }
             return uartWs2812InternalLoopback(static_cast<fl::u32>(nLeds) * 1000u);
         }
         return uartWs2812Loopback(nLeds, rxPin);
