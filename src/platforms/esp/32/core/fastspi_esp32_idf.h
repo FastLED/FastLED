@@ -146,7 +146,6 @@ class ESP32SPIOutput {
     int mCurrentBuffer = 0;             // which of mBuffer[] is being written - cycles 0..NUM_BUFFERS-1, see select()
     spi_transaction_t mTrans[NUM_BUFFERS] = {};  // one persistent transaction descriptor per buffer - must outlive the queued transaction
     bool mPending[NUM_BUFFERS] = {};    // does mBuffer[i] have a transaction still queued/in-flight?
-    bool mAllocFailed = false;          // true if any heap_caps_malloc() in init() returned nullptr - see init()'s own check and writeByte()'s guard
     bool mOverflowDropped = false;      // true if writeByte() had to drop a byte since the last select() - see writeByte()/release()
 
 #ifdef FL_ESP32_SPI_DMA_TIMING
@@ -164,13 +163,16 @@ class ESP32SPIOutput {
     // the buffer it actually belongs to by comparing the descriptor pointer
     // ESP-IDF hands back against &mTrans[i] - spi_device_get_trans_result()
     // returns transactions in actual hardware-completion order, which is NOT
-    // necessarily the same as buffer index order, so looping "if
-    // mPending[i], wait for one result" by ascending i (as an earlier
-    // version of this function did) can wait for buffer 1's completion
-    // while mistakenly crediting it to buffer 0 - freeing buffer 0's memory
-    // while its own transaction is still genuinely in flight. Also used by
-    // writePixelsBulk() below, which must not mix a polling transmit with
-    // any still-queued transaction.
+    // necessarily the same as buffer index order (it only matches index
+    // order within one uninterrupted ping-pong cycle - it breaks at the
+    // wrap-around point, buffer NUM_BUFFERS-1 back to buffer 0, which
+    // select() itself never has to worry about since it only ever waits on
+    // the one slot it's about to reuse, but any caller scanning every index
+    // in ascending order - as an earlier version of this function did - can
+    // wait for buffer 1's completion while mistakenly crediting it to buffer
+    // 0, freeing buffer 0's memory while its own transaction is still
+    // genuinely in flight. Also used by writePixelsBulk() below, which must
+    // not mix a polling transmit with any still-queued transaction.
     void drainAllPending() FL_NO_EXCEPT {
         if (mSPIHandle == nullptr) {
             return;
@@ -278,42 +280,33 @@ public:
             return;
         }
 
-        // Reset at the start of each attempt (not just after a failure):
-        // a prior call may have left this true, and a genuinely successful
-        // allocation this time must be allowed to clear it - writeByte()'s
-        // guard needs this to end up false on an attempt that truly
-        // succeeded, and true for the whole duration of one that didn't.
-        mAllocFailed = false;
+        // Local, not a member: the only state any OTHER method needs to
+        // check is mInitialized (false until every step below - allocation,
+        // bus init, device add - has succeeded). An earlier version of this
+        // code kept this as a member (mAllocFailed) and had writeByte() key
+        // off it instead of mInitialized - which missed that the bus-init
+        // and device-add failure paths below also null out mBuffer[]
+        // without ever touching that flag, so writeByte() would still pass
+        // its guard and write through a null pointer. Making this local
+        // removes any chance of that mismatch recurring.
+        bool allocFailed = false;
         for (int i = 0; i < NUM_BUFFERS; i++) {
             mBuffer[i] = (uint8_t*) heap_caps_malloc(FL_ESP32_SPI_DMA_BUFFER_BYTES, MALLOC_CAP_DMA);
             if (mBuffer[i] == nullptr) {
-                mAllocFailed = true;
+                allocFailed = true;
             }
         }
-        if (mAllocFailed) {
+        if (allocFailed) {
             // Loud and impossible to miss - bail out here rather than
             // continuing into spi_bus_initialize()/spi_bus_add_device().
-            // writeByte()'s own guard means no caller can crash from this,
-            // but there's no point initializing a SPI bus we already know
-            // can't be fed safely. Always-on (unlike the opt-in
-            // FL_ESP32_SPI_DMA_LOG diagnostics below), so this goes
-            // through FL_WARN rather than that macro, which defaults to a
-            // no-op - see FL_ESP32_SPI_DMA_LOG's own comment.
+            // mInitialized stays false, so writeByte()/select()/release()/
+            // writePixelsBulk() all correctly no-op until a later init()
+            // call succeeds.
             FL_WARN("ESP32SPIOutput: failed to allocate one or more of "
                     << NUM_BUFFERS << " DMA buffers ("
                     << FL_ESP32_SPI_DMA_BUFFER_BYTES << " bytes each, "
                     << (NUM_BUFFERS * FL_ESP32_SPI_DMA_BUFFER_BYTES)
                     << " bytes total) - LED output disabled for this boot.");
-            // Free whatever subset DID succeed - but mAllocFailed stays
-            // true. writeByte()'s guard is `!mAllocFailed && ...`: clearing
-            // it here (to "allow a retry") would let writeByte() pass again
-            // even though mBuffer[] is now all nullptr (just freed above),
-            // and callers like APA102Controller::showPixelsDefault() call
-            // writeByte()/writeWord() unconditionally every frame regardless
-            // of whether init() ever succeeds - a guaranteed null-pointer
-            // write. mInitialized also stays false, so init() itself can
-            // still be called again safely; mAllocFailed only gets cleared
-            // by a FUTURE successful allocation path, not preemptively here.
             freeBuffers();
             return;
         }
@@ -400,17 +393,22 @@ public:
     }
 
     // Buffers a byte into the current frame - actual SPI write happens in
-    // release(). mAllocFailed guard: without this, a failed init()
-    // allocation would leave mBuffer[i] null and this would be a
-    // null-pointer write on the very first byte. If the frame is bigger
-    // than FL_ESP32_SPI_DMA_BUFFER_BYTES, bytes past that are dropped (the
-    // alternative - growing the buffer or splitting into extra
-    // transactions mid-frame - isn't attempted here) but release() warns
-    // once per occurrence rather than truncating silently.
+    // release(). mInitialized guard: this is the one flag that's false in
+    // every case where mBuffer[] might not be safely writable - a failed
+    // allocation, a failed spi_bus_initialize()/spi_bus_add_device(), or
+    // init() simply never having been called - all of them leave
+    // mInitialized false. Without this guard, a chipset controller calling
+    // writeByte()/writeWord() unconditionally every frame regardless of
+    // whether init() ever succeeded would otherwise hit a null-pointer
+    // write. If the frame is bigger than FL_ESP32_SPI_DMA_BUFFER_BYTES,
+    // bytes past that are dropped (the alternative - growing the buffer or
+    // splitting into extra transactions mid-frame - isn't attempted here)
+    // but release() warns once per occurrence rather than truncating
+    // silently.
     void writeByte(u8 b) FL_NO_EXCEPT __attribute__((always_inline)) {
-        if (!mAllocFailed && mBufferLen < FL_ESP32_SPI_DMA_BUFFER_BYTES) {
+        if (mInitialized && mBufferLen < FL_ESP32_SPI_DMA_BUFFER_BYTES) {
             mBuffer[mCurrentBuffer][mBufferLen++] = b;
-        } else if (!mAllocFailed) {
+        } else if (mInitialized) {
             mOverflowDropped = true;
         }
     }
