@@ -519,6 +519,17 @@ public:
             esp_err_t err = spi_device_queue_trans(mSPIHandle, &trans, portMAX_DELAY);
             mPending[mCurrentBuffer] = (err == ESP_OK);
 #endif
+            // A software-driven chip-select (mPSelect, as opposed to the
+            // hardware CS this class disables via spics_io_num = -1) has to
+            // stay asserted for the WHOLE transfer, not just until it's
+            // queued - a peripheral using it to know when to listen can
+            // otherwise stop partway through a still-in-flight async
+            // transaction. Only drains (blocks) when a software select is
+            // actually configured; the normal case (mPSelect == nullptr)
+            // stays fully async exactly as before.
+            if (mPSelect != nullptr) {
+                drainAllPending();
+            }
 #ifdef FL_ESP32_SPI_DMA_DEBUG
             static size_t s_lastLoggedLen = (size_t)-1;
             static int s_framesLogged = 0;
