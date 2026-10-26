@@ -13,6 +13,9 @@ concurrency:
   cancel-in-progress: true
 
 on:
+  # A manual run measures every target, HEAD against its parent, into the
+  # job summary; only pull requests get a comment.
+  workflow_dispatch:
   pull_request:
     types: [opened, synchronize, reopened, labeled]
     branches: [master]
@@ -27,7 +30,9 @@ permissions:
 jobs:
   plan:
     # Hard-block external-fork pull requests, like the other board jobs (#2757).
-    if: github.event.pull_request.head.repo.full_name == github.repository
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     outputs:
       boards: ${{ steps.pick.outputs.boards }}
@@ -35,7 +40,7 @@ jobs:
       - name: Pick targets
         id: pick
         env:
-          LABELS: ${{ toJSON(github.event.pull_request.labels.*.name) }}
+          LABELS: ${{ github.event_name == 'workflow_dispatch' && '["ci-full"]' || toJSON(github.event.pull_request.labels.*.name) }}
         run: |
           set -euo pipefail
           optional="esp32dev esp32s3 esp32c3 esp32c6 teensy41 rp2040 nrf52840_dk stm32f103c8"
@@ -58,7 +63,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
           fetch-depth: 0
 
       - name: Set up uv
@@ -67,14 +72,15 @@ jobs:
       - name: Measure merge base and PR head
         env:
           BOARD: ${{ matrix.board }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha || '' }}
         run: |
           set -euo pipefail
           # The merge base may predate this script, so run the PR's copy.
           cp ci/memory_report.py "$RUNNER_TEMP/memory_report.py"
           mkdir -p out
-          git checkout --quiet "$(git merge-base "$HEAD_SHA" "$BASE_SHA")"
+          if [ -n "$BASE_SHA" ]; then base="$(git merge-base "$HEAD_SHA" "$BASE_SHA")"; else base="$HEAD_SHA~1"; fi
+          git checkout --quiet "$base"
           uv run python "$RUNNER_TEMP/memory_report.py" collect --out "out/base-$BOARD.json" "$BOARD"
           git checkout --quiet "$HEAD_SHA"
           uv run python "$RUNNER_TEMP/memory_report.py" collect --out "out/head-$BOARD.json" "$BOARD"
@@ -95,7 +101,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
       - name: Set up uv
         uses: astral-sh/setup-uv@v6
@@ -115,6 +121,7 @@ jobs:
           set -euo pipefail
           uv run ci/memory_report.py render --base out/base-*.json --head out/head-*.json > body.md
           cat body.md >> "$GITHUB_STEP_SUMMARY"
+          [ -n "$PR" ] || exit 0
           marker='<!-- fastled-memory-report -->'
           id="$(gh api --paginate "repos/$REPO/issues/$PR/comments" \
             --jq ".[] | select(.user.login == \"github-actions[bot]\" and (.body | startswith(\"$marker\"))) | .id" | head -n1)"
