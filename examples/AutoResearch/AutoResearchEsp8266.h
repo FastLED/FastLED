@@ -349,8 +349,11 @@ inline fl::json apa102ShowMhz(int nLeds, int frames, int mhz) {
     }
     const int n = nLeds < 1 ? 1 : (nLeds > 64 ? 64 : nLeds);
     fl::json r = timeFrames(c, n, frames, 0);
-    // Start frame + 4 bytes per LED + end frame (>= n/2 clocks, 4-byte units).
-    const fl::i64 bytes = 4 + 4 * n + 4 * ((n / 2 + 31) / 32 + 1);
+    // Start frame + 4 bytes per LED + APA102Controller::endBoundary's
+    // (n / 32 + 1) end dwords. showLeds() returns once the tail chunk is on
+    // the hardware, but each frame's select() waits for the previous tail,
+    // so steady-state min_us is throughput, not one frame's latency.
+    const fl::i64 bytes = 4 + 4 * n + 4 * (n / 32 + 1);
     r.set("mhz", static_cast<fl::i64>(mhz));
     r.set("cpu_mhz", static_cast<fl::i64>(system_get_cpu_freq()));
     r.set("wire_bytes_est", bytes);

@@ -16,8 +16,13 @@
 /// overlap transmission instead of adding to it.
 ///
 /// SPI_SPEED keeps the ESP8266's software-SPI meaning (CPU cycles per bit,
-/// from DATA_RATE_MHZ), so the same controller template works on any pins;
-/// it is converted to the nearest HSPI clock at or below the requested rate.
+/// from DATA_RATE_MHZ), so the same controller template works on any pins.
+/// HSPI runs at the fastest clock not above F_CPU / SPI_SPEED, the rate the
+/// divider describes (DATA_RATE_MHZ(6) at 80 MHz: 80 / 13 = 6.15 MHz).
+///
+/// This driver owns HSPI's mode registers. A sketch that also drives HSPI
+/// through Arduino <SPI.h> (an SD card, say) should define
+/// FASTLED_ALL_PINS_HARDWARE_SPI so FastLED uses SPI.h too.
 
 #include "fl/stl/int.h"
 #include "fl/stl/noexcept.h"
@@ -55,7 +60,8 @@ inline u32 clockRegister(u32 hz) FL_NO_EXCEPT {
     u32 best_hz = 0;
     for (u32 n = 1; n <= 63; ++n) {
         // Smallest prescaler that keeps the clock at or below `hz`.
-        u32 pre = (kApbHz + hz * (n + 1) - 1) / (hz * (n + 1));
+        const u64 step = u64(hz) * (n + 1);  // u64: hz * 64 overflows u32 above 67 MHz
+        u32 pre = u32((kApbHz + step - 1) / step);
         if (pre < 1) {
             pre = 1;
         }
@@ -89,7 +95,7 @@ struct State {
 };
 
 FASTLED_FORCE_INLINE State& state() FL_NO_EXCEPT {
-    static State s = {{{0}}, nullptr, nullptr, 0};
+    static State s = {{{0}}, s.stage.bytes, s.stage.bytes + 4, 0};
     return s;
 }
 
@@ -202,15 +208,25 @@ public:
     // different rate: program the clock at the start of every transfer.
     void select() FL_NO_EXCEPT {
         esp8266_hspi::waitIdle();
-        SPI1CLK = clockValue();
+        const u32 clk = clockValue();
+        // The undivided 80 MHz clock also needs the pad mux bit, as in the
+        // Arduino core's SPIClass::setClockDivider.
+        if (clk == 0x80000000) {
+            GPMUX |= (1u << 9);
+        } else {
+            GPMUX &= ~(1u << 9);
+        }
+        SPI1CLK = clk;
         esp8266_hspi::begin();
         if (mPSelect != nullptr) {
             mPSelect->select();
         }
     }
 
+    // A chip select must stay asserted until the tail chunk has shifted out.
     void release() FL_NO_EXCEPT {
         if (mPSelect != nullptr) {
+            esp8266_hspi::waitIdle();
             mPSelect->release();
         }
     }
