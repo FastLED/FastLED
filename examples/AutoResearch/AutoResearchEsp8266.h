@@ -27,8 +27,13 @@
 //   the bench re-inits before timing. Reports achievable_hz (decoded from the
 //   SPI1CLK the driver just wrote), expected_us from it, and the measured
 //   min_us; `success` is the frame time landing in
-//   [expected_us, expected_us + 400 us] -- tight enough to reject a bus running
-//   at half the programmed rate.
+//   [expected_us, expected_us + 400 us]. The 400 us covers the ~250 us
+//   per-show cost plus jitter, so this band only rejects a bus running at half
+//   the programmed rate where the wire time is large next to that cost (6 MHz
+//   here: 762 us of wire time vs a 781 us bound). At 20 MHz and above the wire
+//   time shrinks under the slack and the band cannot see a halved bus -- there
+//   `achievable_hz` (read back from SPI1CLK) is the evidence that the divider
+//   took effect, not `success`.
 //
 // apa102ShowBitbang: [nLeds, frames] -> json
 //   The same chipset on GPIO4/GPIO16, i.e. the generic software SPI fallback,
