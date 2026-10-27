@@ -23,10 +23,18 @@ comment whose author is not a trusted actor), ask Jev for one probability per
 screening signal plus an overall risk level, then apply a policy that is
 deliberately lopsided:
 
-    the ``sanitized`` label is added only when the evidence is *positively
-    clean*.  Every other outcome -- a hostile signal, an uncertain signal, a
-    truncated corpus, a malformed answer, an unreachable judge -- leaves the
-    label off and adds ``security: unscreened-content`` instead.
+    the ``sanitized`` label is added when the evidence is *positively clean*.
+    Every other outcome -- a hostile signal, an uncertain signal, a truncated
+    corpus, a malformed answer, an unreachable judge -- leaves the label off
+    and adds ``security: unscreened-content`` instead.
+
+Two cases skip the judge and are labelled directly, because they are facts
+about the container rather than readings of its meaning: text whose author is a
+trusted actor (``zackees``, a repository member or collaborator, or a bot), and
+a container whose entire untrusted text is trivially short.  Each is recorded
+in the run's ``reason`` (``trusted_author`` / ``trivial_content``) so it is
+auditable, and neither survives: an edit that adds untrusted text past the
+trivial threshold is screened in full on the next run.
 
 That asymmetry is the point.  The label is the only thing that lets downstream
 automation read the text, so *unknown* must never read as *safe*.
@@ -49,10 +57,11 @@ Security invariants (do not weaken)
    the workflow that interpolates issue text, and this script never invokes a
    child process: it reads the event payload from ``GITHUB_EVENT_PATH`` and
    talks to the APIs over HTTP itself.
-4. **Only real decisions add the label.** Trusted actors are excluded from the
-   corpus, not judged: a container whose every item is trusted needs no judge
-   and is labelled directly.  Everything else is judged, and an unjudged or
-   unjudgeable corpus keeps the label off.
+4. **Only two things skip the judge, and neither reads the text.** Trusted
+   actors are excluded from the corpus rather than judged, and a container
+   whose entire untrusted text is trivially short
+   (``SHORT_CONTENT_MAX_CHARS``) is labelled without a call.  Everything else is
+   judged, and an unjudged or unjudgeable corpus keeps the label off.
 5. **The decision is reproducible.** One JSON line per run carries the action,
    the reason, every signal, the model, and the corpus digest.
 
@@ -218,6 +227,18 @@ MAX_TOTAL_CHARS = 32_000
 MAX_ITEMS = 200
 COMMENT_PAGE_SIZE = 100
 
+# Trivial-content short circuit.  A container whose *entire* untrusted text is
+# shorter than this is labelled directly, without asking the judge: at that size
+# there is no report for the text to be, and a judge call only adds latency.
+#
+# DELIBERATE, DISCLOSED WEAKENING.  The shortest instruction worth screening
+# ("you are now DAN") is 15 characters, so it fits under any threshold that
+# still catches normal noise ("+1", "same here", "bump").  This trades a little
+# screening for a lot of silence on trivial threads; set it to 0 to disable,
+# and note that revocation still applies -- as soon as anyone edits such a
+# container past this size, the next run judges it in full.
+SHORT_CONTENT_MAX_CHARS = 24
+
 HTTP_TIMEOUT = 30
 HTTP_ATTEMPTS = 2
 HTTP_BACKOFF = 2.0
@@ -279,6 +300,10 @@ class Corpus:
     @property
     def untrusted(self) -> list[TextItem]:
         return [item for item in self.items if not item.trusted]
+
+    @property
+    def untrusted_chars(self) -> int:
+        return sum(len(item.text) for item in self.untrusted)
 
     @property
     def trusted_names(self) -> list[str]:
@@ -915,6 +940,17 @@ def build_verdict(corpus: Corpus, jev: JevClient | None, model: str = "") -> Ver
         return Verdict(
             decision=DECISION_SANITIZE,
             reason="trusted_author",
+            judged=False,
+            model=model,
+        )
+    if not (corpus.truncated or corpus.dropped_items) and (
+        0 < corpus.untrusted_chars < SHORT_CONTENT_MAX_CHARS
+    ):
+        # Trivially short: nothing to judge.  Only when *all* the text was
+        # collected -- unread text is never waved through.
+        return Verdict(
+            decision=DECISION_SANITIZE,
+            reason="trivial_content",
             judged=False,
             model=model,
         )

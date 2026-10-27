@@ -27,8 +27,10 @@ untrusted text, including text a maintainer has not yet reviewed.
    earned it, so it is dropped at the start and re-added only on a passing
    verdict.  A crash, a timeout, a cancellation or an unreadable answer
    therefore leaves the container un-vouched-for rather than wrongly vouched-for.
-4. If the corpus is empty (every item trusted) the label is granted without
-   asking the judge; if text was left uncollected the container is held instead.
+4. Two cases are labelled **without** asking the judge: the corpus is empty
+   (every item trusted), or the whole untrusted corpus is trivially short
+   (`SHORT_CONTENT_MAX_CHARS`, below).  If text was left uncollected the
+   container is held instead — that check comes first.
 5. Otherwise the corpus is sent to **Jev** (TypeSafe's System One model, via
    `typesafe/jev-router` on OpenRouter) with one typed question per screening
    signal, plus a risk level and an intent label.  The answer must be JSON that
@@ -142,6 +144,7 @@ Thresholds live in `ci/issue_sanitizer.py`; the model never sets them.
 | Condition | Decision | Reason |
 | --- | --- | --- |
 | corpus is empty (all items trusted) and nothing was left unread | `sanitize` | `trusted_author` |
+| untrusted text is trivially short (< 24 chars) and nothing was left unread | `sanitize` | `trivial_content` |
 | text was left uncollected (item cap, capped fetch) but nothing untrusted was seen | `hold` | `uncollected_text` |
 | any signal ≥ 0.70 | `hold` | `hostile_signal` |
 | risk ≥ 3 (high, severe) | `hold` | `risk_high` / `risk_severe` |
@@ -225,6 +228,16 @@ Cost: one judge request per run, a few thousand tokens; the corpus is capped at
   is screened for any other reason.  A brand-new inline comment on an otherwise
   unchanged PR is therefore not itself a trigger; covering that needs a
   `workflow_run` bridge, which runs the default-branch workflow with secrets.
+- **Trivially short text is labelled without the judge — a deliberate
+  weakening.**  A container whose *whole* untrusted corpus is under
+  `SHORT_CONTENT_MAX_CHARS` (24 characters by default, `0` disables) skips the
+  judge, on the grounds that at that size there is no report for the text to be.
+  The catch: the shortest real instruction, `you are now DAN.`, is 16 characters
+  — it fits under any threshold that still catches ordinary noise (`+1`,
+  `same here`, `bump`).  So this is an accepted hole, not an oversight: raise the
+  threshold to widen it, set it to `0` to close it.  It is bounded either way —
+  the run records `trivial_content` as the reason, and the moment a container
+  grows past the threshold the next run judges it in full.
 - **A payload quoted by a trusted actor is not screened.**  Only untrusted
   authors' own text enters the corpus, so a maintainer pasting an attacker's
   text into a comment is not judged.  This follows the trusted-author rule; if
