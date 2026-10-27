@@ -16,6 +16,13 @@
 /// cycle the Arduino core programs. The SPI peripheral is clocked from the
 /// fixed 80 MHz source, independent of the CPU frequency setting.
 ///
+/// CLKCNT_L is the clock's high phase, so it must never be zero: with
+/// CLKCNT_N = 1 it is 0, and SCK then stays low for the whole transfer while
+/// the shifter runs for the programmed time. Measured on an ESP8266 -- a 25 kHz
+/// transfer with CLKCNT_N = CLKCNT_L = 0 showed 0 edges and 0 high samples over
+/// 4691 polls of the pad. Divisors are therefore split over CLKCNT_N >= 2
+/// (ESP-IDF's own search starts at 2 for the same reason).
+///
 /// Kept C++11-constexpr clean (single-return functions, no local variables):
 /// the host test build rejects C++14 constexpr extensions with -Werror.
 
@@ -40,6 +47,10 @@ constexpr fl::u32 kHspiMaxPreDivider = 8192UL;
 /// Largest CLKCNT_N + 1 (6-bit field).
 constexpr fl::u32 kHspiMaxNDivider = 64UL;
 
+/// Smallest usable CLKCNT_N + 1: CLKCNT_L is half of it, and a zero high phase
+/// never clocks the pad.
+constexpr fl::u32 kHspiMinNDivider = 2UL;
+
 /// SPICLK_EQU_SYSCLK: clock the SPI bus directly from the system clock.
 constexpr fl::u32 kHspiEquSysClk = 0x80000000UL;
 
@@ -51,7 +62,8 @@ constexpr fl::u32 hspiCeilDiv(fl::u32 a, fl::u32 b) FL_NO_EXCEPT {
 /// Build the SPI1CLK value for one (pre, n) divider pair.
 constexpr HspiClock hspiCandidate(fl::u32 pre, fl::u32 n) FL_NO_EXCEPT {
     // CLKCNT_L = (CLKCNT_N + 1) / 2 with CLKCNT_H = 0 (50% duty).
-    // Fields store (divider - 1).
+    // Fields store (divider - 1). n must be >= kHspiMinNDivider: at n = 1 the
+    // high phase is 0 and the pad never rises, so hspiSearch never tries it.
     return HspiClock{
         (n / 2) | ((n - 1) << 12) | ((pre - 1) << 18),
         kHspiSourceHz / (pre * n)};
@@ -67,7 +79,8 @@ constexpr HspiClock hspiSlowest() FL_NO_EXCEPT {
     return hspiCandidate(kHspiMaxPreDivider, kHspiMaxNDivider);
 }
 
-/// Search n = 1..kHspiMaxNDivider for the smallest divider >= kMinDiv.
+/// Search n = kHspiMinNDivider..kHspiMaxNDivider for the smallest divider >=
+/// kMinDiv.
 constexpr HspiClock hspiSearch(fl::u32 min_div, fl::u32 n) FL_NO_EXCEPT {
     return (n > kHspiMaxNDivider)
         ? HspiClock{0, 0}
@@ -80,9 +93,9 @@ constexpr HspiClock hspiSearch(fl::u32 min_div, fl::u32 n) FL_NO_EXCEPT {
 
 /// Resolve a minimum divider to the best available setting.
 constexpr HspiClock hspiResolve(fl::u32 min_div) FL_NO_EXCEPT {
-    return (hspiSearch(min_div, 1).actual_hz == 0)
+    return (hspiSearch(min_div, kHspiMinNDivider).actual_hz == 0)
         ? hspiSlowest()
-        : hspiSearch(min_div, 1);
+        : hspiSearch(min_div, kHspiMinNDivider);
 }
 
 /// Convert the software path's CPU-cycles-per-bit value to a minimum total

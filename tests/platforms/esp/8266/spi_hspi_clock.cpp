@@ -119,6 +119,33 @@ FL_TEST_CASE("ESP8266 HSPI clock - 50 percent duty encoding") {
     }
 }
 
+FL_TEST_CASE("ESP8266 HSPI clock - CLKCNT_L is never zero") {
+    // CLKCNT_L is the clock's high phase, so a zero leaves SCK parked low for
+    // the whole transfer. Measured on an ESP8266: 25 kHz resolved to
+    // CLKDIV_PRE = 3201 with CLKCNT_N = CLKCNT_L = 0, and a 64-bit HSPI
+    // transfer drove the SCK pad for 0 of 4691 samples -- the frame took the
+    // programmed 2.6 ms while nothing reached the wire. Re-splitting the same
+    // divider with CLKCNT_N = 1 (CLKCNT_L = 1) produced 128 edges. ESP-IDF's
+    // own divider search starts at n = 2 for this reason.
+    const fl::u32 rates[] = {1,      100,    1000,     25000,
+                             50000,  100000, 1000000,  3200000,
+                             6000000, 12000000, 40000000};
+    for (fl::u32 rate : rates) {
+        const HspiClock clk = hspiClockFor(rate);
+        FL_CHECK((clk.reg_value & 0x3F) >= 1);
+        FL_CHECK_EQ(clk.actual_hz, decodeHz(clk.reg_value));
+    }
+
+    // The minimum-divider entry point is what the driver actually calls, so it
+    // gets the same guarantee across the whole usable divider range.
+    for (fl::u32 min_div = 1; min_div <= 4096; min_div = min_div * 2) {
+        const HspiClock clk = hspiClockForMinDivider(min_div);
+        FL_CHECK((clk.reg_value & 0x3F) >= 1);
+        FL_CHECK_EQ(clk.actual_hz, decodeHz(clk.reg_value));
+        FL_CHECK(clk.actual_hz <= kHspiSourceHz / min_div);
+    }
+}
+
 FL_TEST_CASE("ESP8266 HSPI clock - degenerate inputs") {
     // Zero is clamped instead of dividing by zero.
     const HspiClock zero = hspiClockFor(0);
