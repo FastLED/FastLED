@@ -155,6 +155,9 @@ jobs:
           SKIPPED: ${{ needs.measure.result == 'skipped' }}
         run: |
           set -euo pipefail
+          shopt -s nullglob
+          bases=(out/base-*.json)
+          heads=(out/head-*.json)
           if [ "$SKIPPED" = "true" ]; then
             {
               echo '<!-- fastled-memory-report -->'
@@ -163,8 +166,16 @@ jobs:
               echo 'No measurement: this change only touches platform code that is'
               echo 'not a size target (stub/WASM).'
             } > body.md
+          elif [ "${#bases[@]}" -eq 0 ] || [ "${#heads[@]}" -eq 0 ]; then
+            {
+              echo '<!-- fastled-memory-report -->'
+              echo '### Memory usage'
+              echo
+              echo 'No measurement: the build for the selected target(s) failed.'
+              echo 'See the `measure` job for the failing target.'
+            } > body.md
           else
-            uv run ci/memory_report.py render --base out/base-*.json --head out/head-*.json > body.md
+            uv run ci/memory_report.py render --base "${bases[@]}" --head "${heads[@]}" > body.md
           fi
           cat body.md >> "$GITHUB_STEP_SUMMARY"
           [ -n "$PR" ] || exit 0

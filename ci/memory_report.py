@@ -19,8 +19,6 @@ from pathlib import Path
 
 from running_process import RunningProcess
 
-from ci.changed_targets import affected
-
 
 MARKER = "<!-- fastled-memory-report -->"
 METRICS = (("image_flash", "FLASH"), ("total_ram", "RAM"))
@@ -69,6 +67,11 @@ def plan(changed: list[str], labels: list[str], everything: bool) -> list[str]:
     measures only that platform; a mixed change measures both. WASM and stub
     changes measure nothing.
     """
+    # Imported lazily: the measure job runs a copy of this file against the
+    # merge base, which predates ci/changed_targets.py, and only needs
+    # `collect` there.
+    from ci.changed_targets import affected
+
     if everything:
         return list(ALL_BOARDS)
     boards: set[str] = set()
