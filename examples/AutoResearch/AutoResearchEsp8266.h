@@ -51,9 +51,9 @@
 //   the level and counts the edges, which separates a missing jumper from a
 //   dead ISR; run it before the loopback.
 //
-// Both accept sense pins only from 0, 4, 5, 12 and 15 (the rest are the console,
-// the UART bench, the flash pads, or the HSPI pads pinMode would unmux), and the
-// loopback rejects two equal pins.
+// Both accept sense pins only from 0, 5, 12 and 15 (the rest are the console,
+// the UART bench, the clockless controller's pad, the flash pads, or the HSPI
+// pads pinMode would unmux), and the loopback rejects two equal pins.
 //
 
 #include "platforms/esp/is_esp.h"  // ok platform headers // ok platform specific - ESP8266 bench gate
@@ -369,11 +369,11 @@ constexpr fl::i64 kApa102FrameSlackUs = 1000;
 // the rate is already Hz, otherwise it is the software path's cycles per bit.
 template <int MHZ>
 inline fl::u32 achievableHz() {
-#if defined(FASTLED_ALL_PINS_HARDWARE_SPI)  // ok platform specific - the ESP8266 rate domain depends on this build switch
-    return fl::esp8266::hspiClockFor(DATA_RATE_MHZ(MHZ)).actual_hz;  // ok platform specific - resolves the ESP8266 HSPI divider
+#if defined(FASTLED_ALL_PINS_HARDWARE_SPI)  // ok platform specific - the ESP8266 rate domain depends on this build switch; no core API reports it
+    return fl::esp8266::hspiClockFor(DATA_RATE_MHZ(MHZ)).actual_hz;  // ok platform specific - resolves the ESP8266 HSPI divider; no core API exposes it
 #else
-    return fl::esp8266::hspiClockForMinDivider(  // ok platform specific - resolves the ESP8266 HSPI divider
-               fl::esp8266::hspiDividerForCpuCycles(DATA_RATE_MHZ(MHZ) + 1, FL_CPU_FREQUENCY()))  // ok platform specific - cycles-per-bit to divider
+    return fl::esp8266::hspiClockForMinDivider(  // ok platform specific - resolves the ESP8266 HSPI divider; no core API exposes it
+               fl::esp8266::hspiDividerForCpuCycles(DATA_RATE_MHZ(MHZ) + 1, FL_CPU_FREQUENCY()))  // ok platform specific - cycles-per-bit to HSPI divider; no core API exposes it
         .actual_hz;
 #endif
 }
@@ -422,13 +422,13 @@ inline fl::json hspiPinError(const char* what) {
 //
 // 4/16 are only GPIO4/GPIO16 in raw pin order, and D1/NodeMCU numbering has no
 // FastPin<16> at all, so the baseline is defined for the default order only.
-#if defined(FASTLED_ESP8266_RAW_PIN_ORDER)  // ok platform specific - pin keys 4/16 name GPIO4/GPIO16 only in raw order
+#if defined(FASTLED_ESP8266_RAW_PIN_ORDER)  // ok platform specific - keys 4/16 are GPIO4/16 only in raw order; no API maps a real pad back to a key
 constexpr int kBitbangDataPin = 4;
 constexpr int kBitbangClockPin = 16;
 #endif
 
 inline fl::json apa102ShowBitbang(int nLeds, int frames) {
-#if !defined(FASTLED_ESP8266_RAW_PIN_ORDER)  // ok platform specific - the bit-bang baseline pins only exist in raw order
+#if !defined(FASTLED_ESP8266_RAW_PIN_ORDER)  // ok platform specific - those keys exist only in raw order; no core API can express the pair portably
     (void)nLeds;
     (void)frames;
     return hspiPinError("the bit-bang baseline is only defined in raw pin order");
@@ -447,7 +447,7 @@ inline fl::json apa102ShowBitbang(int nLeds, int frames) {
     // FASTLED_ALL_PINS_HARDWARE_SPI every non-HSPI pair goes to the legacy
     // Arduino-SPI shim, which drives GPIO13/14 -- so there the timing here is
     // that shim's, not a software bit-bang, and it is not a baseline.
-#if defined(FASTLED_ALL_PINS_HARDWARE_SPI)  // ok platform specific - this build resolves the pair to the Arduino-SPI shim
+#if defined(FASTLED_ALL_PINS_HARDWARE_SPI)  // ok platform specific - this build resolves the pair to the Arduino-SPI shim; no API reports the backend
     r.set("generic_bitbang", false);
 #else
     r.set("generic_bitbang", true);
@@ -607,13 +607,13 @@ inline fl::json apa102HspiLoopbackAt(int mosiPin, int sckPin) {
 
 // A sense pin has to be one of the pins that stay usable while the RPC console
 // and the bus under test are busy: 1 and 3 are UART0 (the console), 2 is the
-// UART bench's TX pad, 6-11 are the flash pads (pinMode on them resets the
-// board), and 13/14 are the HSPI pads the transfer is driving -- pinMode there
-// would undo the bus mux. GPIO16 is absent from GPI, so it needs GP16I. `other`
+// UART bench's TX pad, 4 carries clocklessShow's WS2812 output, 6-11 are the
+// flash pads (pinMode on them resets the board), and 13/14 are the HSPI pads the
+// transfer is driving -- pinMode there would undo the bus mux. GPIO16 is absent from GPI, so it needs GP16I. `other`
 // excludes the pin already used for the other signal, so a self-loop cannot
 // pass with no jumper fitted.
 inline bool hspiSensePinOk(int pin, int other) {
-    const bool usable = pin == 0 || pin == 4 || pin == 5 || pin == 12 || pin == 15;  // ok platform specific - the ESP8266 pads left usable on a NodeMCU
+    const bool usable = pin == 0 || pin == 5 || pin == 12 || pin == 15;  // ok platform specific - the ESP8266 pads left usable on a NodeMCU
     return usable && pin != other;
 }
 
@@ -623,7 +623,7 @@ inline bool hspiSensePinOk(int pin, int other) {
 // from a dead ISR. Only meaningful with the SCK jumper fitted.
 inline fl::json apa102HspiJumperCheck(int sckPin) {
     if (!hspiSensePinOk(sckPin, -1)) {
-        return hspiPinError("sckPin must be one of 0, 4, 5, 12, 15");
+        return hspiPinError("sckPin must be one of 0, 5, 12, 15");
     }
     HspiLoopbackState& s = hspiLoopbackState();
     hspiLoopbackActive() = &s;
@@ -671,7 +671,7 @@ inline fl::json apa102HspiJumperCheck(int sckPin) {
 inline fl::json apa102HspiLoopback(int khz, int mosiPin, int sckPin) {
     if (!hspiSensePinOk(mosiPin, sckPin) || !hspiSensePinOk(sckPin, mosiPin)) {
         return hspiPinError(
-            "sense pins must be two different pins from 0, 4, 5, 12, 15");
+            "sense pins must be two different pins from 0, 5, 12, 15");
     }
     // Rates the driver resolves cleanly with a divider the ISR can keep up
     // with: at 25 kHz a bit lasts 40 us, so even the core's generic ISR
