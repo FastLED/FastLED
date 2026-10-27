@@ -6,7 +6,7 @@ def test_platform_directories_select_their_family() -> None:
     assert classify("src/platforms/esp/32/rmt/rmt_5.h") == "esp32"
     assert classify("src/platforms/avr/fastpin_avr.h") == "avr"
     assert classify("src/platforms/arm/teensy/fastpin_teensy.h") == "teensy"
-    assert classify("src/platforms/arm/rp/rp2040/pio.h") == "rp"
+    assert classify("src/platforms/arm/rp/rp2040/fastpin_rp2040.h") == "rp"
     assert classify("src/platforms/arm/nrf52/clock.h") == "nrf52"
     assert classify("src/platforms/arm/stm32/clock.h") == "stm32"
 
