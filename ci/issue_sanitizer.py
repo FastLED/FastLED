@@ -1115,7 +1115,10 @@ def resolve_target(args: argparse.Namespace, github: GitHubClient) -> tuple[str,
         container = github.container(args.issue)
         kind = "pull request" if container.get("pull_request") else "issue"
         return kind, args.issue
-    event_path = os.environ.get("GITHUB_EVENT_PATH") or args.event_path
+    # An explicit --event-path wins over the ambient Actions payload: in CI the
+    # environment always carries *some* event, and a caller who names a file
+    # means that file.
+    event_path = args.event_path or os.environ.get("GITHUB_EVENT_PATH")
     if not event_path:
         raise SanitizerError("no --issue and no GITHUB_EVENT_PATH to read")
     event = as_dict(json.loads(Path(event_path).read_text(encoding="utf-8")))

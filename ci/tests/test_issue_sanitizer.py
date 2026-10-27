@@ -575,6 +575,28 @@ class TestEvents(unittest.TestCase):
     def test_unrelated_event_has_no_target(self) -> None:
         self.assertIsNone(event_target({"action": "created", "comment": {}}))
 
+    def test_explicit_event_path_beats_the_environment(self) -> None:
+        # In Actions GITHUB_EVENT_PATH is always set (to the run's own event,
+        # often `synchronize`); an explicit --event-path must still win.
+        args = build_parser().parse_args(["--repo", "FastLED/FastLED"])
+        with tempfile.TemporaryDirectory() as tmp:
+            chosen = Path(tmp) / "chosen.json"
+            chosen.write_text(
+                json.dumps({"action": "opened", "issue": {"number": 7}}),
+                encoding="utf-8",
+            )
+            ambient = Path(tmp) / "ambient.json"
+            ambient.write_text(
+                json.dumps({"action": "synchronize", "pull_request": {"number": 9}}),
+                encoding="utf-8",
+            )
+            args.event_path = str(chosen)
+            with mock.patch.dict(os.environ, {"GITHUB_EVENT_PATH": str(ambient)}):
+                self.assertEqual(
+                    resolve_target(args, FakeGitHub(fake_container(), [])),
+                    ("issue", 7),
+                )
+
     def test_unscreened_action_is_refused(self) -> None:
         args = build_parser().parse_args(["--repo", "FastLED/FastLED"])
         with tempfile.TemporaryDirectory() as tmp:
@@ -718,6 +740,7 @@ class TestRun(unittest.TestCase):
                 "GH_TOKEN": "",
                 "GITHUB_REPOSITORY": "FastLED/FastLED",
                 "GITHUB_STEP_SUMMARY": "",
+                "GITHUB_EVENT_PATH": "",
             },
         )
         patcher.start()
@@ -1050,6 +1073,7 @@ class TestCli(unittest.TestCase):
                 "GH_TOKEN": "",
                 "GITHUB_REPOSITORY": "FastLED/FastLED",
                 "GITHUB_STEP_SUMMARY": "",
+                "GITHUB_EVENT_PATH": "",
             },
         )
         patcher.start()
