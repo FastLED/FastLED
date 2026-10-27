@@ -156,6 +156,13 @@ inline u16 (analogRead)(int pin) FL_NO_EXCEPT {
 namespace {
     bool adc1_initialized = false;
 
+    // ADC attenuation 3 is the 11 dB setting. Newer SDKs spell it
+    // ADC_ATTEN_DB_12 and mark ADC_ATTEN_DB_11 deprecated, but IDF 4.4 SDKs in
+    // the wild (including this repo's esp32dev_idf44 environment) do not
+    // define ADC_ATTEN_DB_12, so name the stable underlying value instead of
+    // either spelling.
+    constexpr adc_atten_t kAdcAtten11Db = static_cast<adc_atten_t>(3);
+
     void initADC1() FL_NO_EXCEPT {
         if (adc1_initialized) {
             return;
@@ -176,7 +183,7 @@ inline u16 (analogRead)(int pin) FL_NO_EXCEPT {
     // Note: This is a stub implementation. Real implementation would need
     // proper GPIO-to-ADC channel mapping based on ESP32 variant
     adc1_channel_t channel = ADC1_CHANNEL_0;  // Placeholder
-    adc1_config_channel_atten(channel, ADC_ATTEN_DB_11);
+    adc1_config_channel_atten(channel, kAdcAtten11Db);
 
     int raw_value = adc1_get_raw(channel);
     if (raw_value < 0) {
