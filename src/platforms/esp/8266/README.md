@@ -47,4 +47,13 @@ Notes:
 - **Debugging / diagnostics**
   - **`FASTLED_DEBUG_COUNT_FRAME_RETRIES`**: When defined, counts and reports frame retries due to timing interference during show(). Helpful for diagnosing ISR contention.
 
+- **OTA (#4946)**: ESP8266 OTA is supported through the Arduino core's verified
+  `ArduinoOTA` library (Arduino-IDE OTA on port 3232), selected automatically —
+  `fl::net::OTA` / `IOTA::create()` resolves to the ESP8266 backend when
+  `<ArduinoOTA.h>` is on the include path. It lives in its own component TU
+  (`fl/build/platforms.esp.8266.ota+.cpp`), so a sketch that does not use OTA
+  links no `ArduinoOTA`/WiFi code. There is no web-OTA HTTP server on ESP8266
+  (`getFailedServices()` reports `HTTP_FAILED`); Wi-Fi setup, progress/error/state
+  callbacks and `onBeforeReboot` all work. See `examples/OTA/OTA.ino`.
+
 Place these defines before including `FastLED.h` in your sketch.

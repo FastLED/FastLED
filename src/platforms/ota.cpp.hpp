@@ -6,17 +6,21 @@
 #include "platforms/esp/is_esp.h"
 #include "platforms/esp/esp_version.h"
 #include "fl/log/log.h"
+#include "fl/stl/has_include.h"
 #include "fl/stl/noexcept.h"
 
-// Skip the null stub and the factory when the real ESP32 OTA implementation
-// is compiled (platforms/esp/32/ota/ota_impl.cpp.hpp, which defines both).
-// Must match FL_ESP_OTA_SUPPORTED there. The ESP32 backend lives in its own
-// translation unit (fl/build/platforms.esp.32.ota+.cpp) so the WiFi stack it
-// references links only when a sketch uses fl::net::OTA (FastLED #4726);
-// IOTA::create() is the strong reference that pulls that unit in.
+// Skip the null stub and the factory when a real platform OTA implementation
+// is compiled (platforms/esp/32/ota/ota_impl.cpp.hpp or
+// platforms/esp/8266/ota/ota_impl.cpp.hpp, which each define both). Must match
+// the backend's own support check. Each backend lives in its own translation
+// unit (fl/build/platforms.esp.*.ota+.cpp) so the WiFi/OTA stack it references
+// links only when a sketch uses fl::net::OTA (FastLED #4726); IOTA::create() is
+// the strong reference that pulls that unit in.
 #if defined(FL_IS_ESP32) && ESP_IDF_VERSION_4_OR_HIGHER && \
     !ESP_IDF_VERSION_6_OR_HIGHER && \
     !defined(FL_IS_ESP_32H2) && !defined(FL_IS_ESP_32P4)
+#define FL_OTA_HAS_PLATFORM_IMPL 1
+#elif defined(FL_IS_ESP8266) && FL_HAS_INCLUDE(<ArduinoOTA.h>)
 #define FL_OTA_HAS_PLATFORM_IMPL 1
 #else
 #define FL_OTA_HAS_PLATFORM_IMPL 0
