@@ -43,7 +43,10 @@ def _code(text: str) -> str:
     text = re.sub(
         r"/\*.*?\*/", lambda m: "\n" * m.group(0).count("\n"), text, flags=re.S
     )
-    return re.sub(r"//[^\n]*", "", text)
+    text = re.sub(r"//[^\n]*", "", text)
+    # A backslash-newline splices the next line, so the preprocessor sees one
+    # logical line. Blank the backslash but keep the newline for line numbers.
+    return re.sub(r"\\(?=\s*\n)", " ", text)
 
 
 def test_fastled_spells_remapped_pin_names_in_parentheses() -> None:
