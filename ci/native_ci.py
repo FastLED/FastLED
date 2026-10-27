@@ -36,6 +36,9 @@ PY_SMOKE = (
     # PCH staleness: real-clang e2e (~15s) plus the WASM reuse paths. See
     # agents/docs/testing-commands.md -> "Precompiled Header Invariant".
     "ci/tests/test_pch_e2e.py",
+    # Guard for the driver-enable-define lint (#4940 / #4949): the amnesty must
+    # keep covering the tree, and new opt-in driver defines must fail.
+    "ci/tests/test_driver_enable_define_checker.py",
 )
 
 
