@@ -54,10 +54,19 @@
 //   on every rising edge (mode 0) and the 96 decoded bytes must match. Run
 //   wifiOff first: the ISR budget is one SCK period, and MAC interrupts eat it.
 //
-// apa102HspiJumperCheck: [sckPin] -> json
-//   Drives the SCK pad as a plain GPIO and reports whether sckPin both follows
-//   the level and counts the edges, which separates a missing jumper from a
-//   dead ISR; run it before the loopback.
+// apa102HspiWatch: [sensePin, nBytes, nField] -> json
+//   Starts a 25 kHz HSPI transfer by hand and polls sensePin through GPI for the
+//   whole of it, so it counts the edges on the wire without relying on an ISR
+//   (the driver's kick() only watches SPIBUSY, which runs for the programmed
+//   time whether or not the pad is driven). nField >= 0 re-splits the same
+//   total divider across CLKCNT_N/CLKDIV_PRE before the transfer, which is how
+//   a zero CLKCNT_L was isolated; -1 runs whatever the driver installed.
+//
+// apa102HspiJumperCheck: [sensePin, txPin] -> json
+//   Drives one HSPI output pad (txPin: 13 = MOSI/D7, 14 = SCK/D5) as a plain
+//   GPIO and reports whether sensePin both follows the level and counts the
+//   edges, which separates a missing jumper from a dead ISR; run it once per
+//   signal before the loopback.
 //
 // Both accept sense pins only from 0, 5, 12 and 15 (the rest are the console,
 // the UART bench, the clockless controller's pad, the flash pads, or the HSPI
@@ -286,10 +295,12 @@ inline fl::json uartWs2812Show(int nLeds) {
 constexpr int kClocklessPin = FL_PIN_CLOCKLESS_1;
 // The platform's declared hardware-SPI pair in the active pin order -- the same
 // key the native-HSPI specialization uses -- so the bench cannot silently
-// measure the generic bit-bang under D1/NodeMCU numbering. kApaClockRealPin is
-// the fixed GPIO pad behind it, which is what pinMode() and GPI take.
+// measure the generic bit-bang under D1/NodeMCU numbering. The *RealPin
+// constants are the fixed GPIO pads behind them, which is what pinMode() and
+// GPI take.
 constexpr int kApaDataPin = FL_PIN_SPI_DATA_1;
 constexpr int kApaClockPin = FL_PIN_SPI_CLOCK_1;
+constexpr int kApaDataRealPin = fl::FastPin<FL_PIN_SPI_DATA_1>::kRealPin;
 constexpr int kApaClockRealPin = fl::FastPin<FL_PIN_SPI_CLOCK_1>::kRealPin;
 
 struct DriverShowState {
@@ -584,6 +595,13 @@ inline fl::json apa102HspiLoopbackAt(int mosiPin, int sckPin) {
 
     fl::SPIOutput<kApaDataPin, kApaClockPin, DATA_RATE_KHZ(KHZ)> spi;
     spi.init();
+    // Snapshot the pad mux the driver just installed. If GPF14 is not the BUS
+    // function, the peripheral shifts the frame internally and nothing reaches
+    // the wire -- which the frame time alone cannot tell you, because the shift
+    // takes exactly as long either way.
+    const fl::u32 gpf13 = GPF13;  // ok platform specific - reads back the pad function just installed; no core API reports it
+    const fl::u32 gpf14 = GPF14;  // ok platform specific - reads back the pad function just installed; no core API reports it
+    const fl::u32 gpe = GPE;      // ok platform specific - reads back the GPIO output enables; no core API reports them
     pinMode(mosiPin, INPUT);
     pinMode(sckPin, INPUT);
     spi.select();
@@ -592,11 +610,11 @@ inline fl::json apa102HspiLoopbackAt(int mosiPin, int sckPin) {
     spi.writeBytes(tx, kHspiLoopBytes);
     const fl::u32 elapsed = micros() - t0;
     // writeBytes blocks in kick() until SPIBUSY clears, but stay attached
-    // through endTransaction() so no tail edge can be missed, then give the
-    // pads back to plain GPIO so the next bench starts from a known state.
+    // through endTransaction() so no tail edge can be missed.
     spi.endTransaction();
-    detachInterrupt(digitalPinToInterrupt(sckPin));
-    spi.stop();
+    const int risingAfter = s.rising;
+    const int fallingAfter = s.falling;
+    const int bitsAfter = s.bits;
 
     int badBytes = 0, firstBad = -1;
     for (int i = 0; i < kHspiLoopBytes; ++i) {
@@ -605,12 +623,37 @@ inline fl::json apa102HspiLoopbackAt(int mosiPin, int sckPin) {
             ++badBytes;
         }
     }
+
+    // Was that ISR live for the whole transfer? Drive the SCK pad from the CPU
+    // now, with the same ISR still attached: if these edges are counted but the
+    // transfer's were not, the attach held and the peripheral never drove the
+    // pad -- as opposed to a dead ISR or a missing jumper. Runs after the
+    // measurements so its edges cannot leak into bits/got[].
+    pinMode(kApaClockRealPin, OUTPUT);
+    for (int i = 0; i < 3; ++i) {
+        digitalWrite(kApaClockRealPin, LOW);
+        fl::delayMicroseconds(50);
+        digitalWrite(kApaClockRealPin, HIGH);
+        fl::delayMicroseconds(50);
+    }
+    const int probeEdges = s.rising - risingAfter;
+    detachInterrupt(digitalPinToInterrupt(sckPin));
+    spi.stop();
+
     fl::json r = fl::json::object();
-    r.set("success", s.bits == kHspiLoopBytes * 8 && badBytes == 0);
+    r.set("success", bitsAfter == kHspiLoopBytes * 8 && badBytes == 0);
     r.set("bytes", static_cast<fl::i64>(kHspiLoopBytes));
-    r.set("bits", static_cast<fl::i64>(s.bits));
-    r.set("sck_rising_edges", static_cast<fl::i64>(s.rising));
-    r.set("sck_falling_edges", static_cast<fl::i64>(s.falling));
+    r.set("bits", static_cast<fl::i64>(bitsAfter));
+    r.set("sck_rising_edges", static_cast<fl::i64>(risingAfter));
+    r.set("sck_falling_edges", static_cast<fl::i64>(fallingAfter));
+    // The pad mux the driver installed, and whether the ISR was still live when
+    // the CPU drove the pad: together these separate "no clock reached the pad"
+    // from "no jumper" and from "dead ISR".
+    r.set("gpf13", static_cast<fl::i64>(gpf13));
+    r.set("gpf14", static_cast<fl::i64>(gpf14));
+    r.set("gpe", static_cast<fl::i64>(gpe));
+    r.set("probe_edges", static_cast<fl::i64>(probeEdges));
+    r.set("isr_live_after_transfer", probeEdges == 3);
     r.set("bad_bytes", static_cast<fl::i64>(badBytes));
     r.set("first_bad", static_cast<fl::i64>(firstBad));
     if (firstBad >= 0) {
@@ -637,14 +680,23 @@ inline bool hspiSensePinOk(int pin, int other) {
     return usable && pin != other;
 }
 
-// Drives the SCK pad as a plain GPIO and both counts interrupts and samples the
-// level on sckPin, so "no jumper fitted" (level never follows, no edges) is
-// told apart from "the HSPI path never clocked" (level follows, no edges) and
-// from a dead ISR. Only meaningful with the SCK jumper fitted.
-inline fl::json apa102HspiJumperCheck(int sckPin) {
-    if (!hspiSensePinOk(sckPin, -1)) {
-        return hspiPinError("sckPin must be one of 0, 5, 12, 15");
+// Drives an HSPI output pad as a plain GPIO and both counts interrupts and
+// samples the level on sensePin, so "no jumper fitted" (level never follows, no
+// edges) is told apart from "the HSPI path never drove the pad" (level follows,
+// no edges) and from a dead ISR. Only meaningful with that jumper fitted.
+//
+// txPin is the pad to drive (13 = MOSI/D7, 14 = SCK/D5); sensePin is where the
+// jumper takes it (12 = D6, 5 = D1). Checking both signals separately is what
+// tells a quiet data line from a missing data jumper.
+inline fl::json apa102HspiJumperCheck(int sensePin, int txPin) {
+    if (!hspiSensePinOk(sensePin, -1)) {
+        return hspiPinError("sensePin must be one of 0, 5, 12, 15");
     }
+    if (txPin != kApaDataRealPin && txPin != kApaClockRealPin) {
+        return hspiPinError("txPin must be 13 (MOSI/D7) or 14 (SCK/D5)");
+    }
+    const int sckPin = sensePin;
+    const int drivePin = txPin;
     HspiLoopbackState& s = hspiLoopbackState();
     hspiLoopbackActive() = &s;
     s.mosiMask = 0;  // this check samples SCK only; no stale mask from a loopback
@@ -653,19 +705,19 @@ inline fl::json apa102HspiJumperCheck(int sckPin) {
     s.rising = 0;
     s.falling = 0;
     pinMode(sckPin, INPUT);
-    pinMode(kApaClockRealPin, OUTPUT);
+    pinMode(drivePin, OUTPUT);
     // pinMode(OUTPUT) does not clear the output latch, so start from a known
     // low: a high latch would swallow the first rising edge.
-    digitalWrite(kApaClockRealPin, LOW);
+    digitalWrite(drivePin, LOW);
     attachInterrupt(digitalPinToInterrupt(sckPin), hspiSckSample, CHANGE);
     bool seenHigh = false, seenLow = false;
     for (int i = 0; i < 10; ++i) {
-        digitalWrite(kApaClockRealPin, HIGH);
+        digitalWrite(drivePin, HIGH);
         fl::delayMicroseconds(50);
         if (GPI & s.sckMask) {  // ok platform specific - raw pad level tells a missing jumper from a dead ISR
             seenHigh = true;
         }
-        digitalWrite(kApaClockRealPin, LOW);
+        digitalWrite(drivePin, LOW);
         fl::delayMicroseconds(50);
         if ((GPI & s.sckMask) == 0) {  // ok platform specific - raw pad level, as above
             seenLow = true;
@@ -675,7 +727,7 @@ inline fl::json apa102HspiJumperCheck(int sckPin) {
     // Give the pad back to HSPI, not to the GPIO output register: a later
     // apa102Show that skipped init() would otherwise clock internally with the
     // pad held low and still report normal timing.
-    pinMode(kApaClockRealPin, SPECIAL);  // ok platform specific - SPECIAL is the Arduino-core spelling of "restore this pad's BUS function", i.e. give GPIO14 back to HSPI; no core API restores a bus function
+    pinMode(drivePin, SPECIAL);  // ok platform specific - SPECIAL is the Arduino-core spelling of "restore this pad's BUS function", i.e. give the pad back to HSPI; no core API restores a bus function
     const bool levelFollows = seenHigh && seenLow;
     const bool isrCounted = s.rising == 10 && s.falling == 10;
     fl::json r = fl::json::object();
@@ -686,8 +738,8 @@ inline fl::json apa102HspiJumperCheck(int sckPin) {
     r.set("isr_counted_edges", isrCounted);
     r.set("rising", static_cast<fl::i64>(s.rising));
     r.set("falling", static_cast<fl::i64>(s.falling));
-    r.set("sck_pin", static_cast<fl::i64>(sckPin));
-    r.set("tx_pin", static_cast<fl::i64>(kApaClockRealPin));
+    r.set("sense_pin", static_cast<fl::i64>(sensePin));
+    r.set("tx_pin", static_cast<fl::i64>(txPin));
     return r;
 }
 
@@ -709,6 +761,95 @@ inline fl::json apa102HspiLoopback(int khz, int mosiPin, int sckPin) {
             return e;
         }
     }
+}
+
+// Watch the wire from inside the transfer instead of from an ISR.
+//
+// kick() only ever looks at SPIBUSY, so on its own it cannot tell a transfer
+// that drove the pads from one that only shifted internally -- both take the
+// same time. This stages and starts the transfer by hand and polls the sense
+// pin in the wait loop, so a count of zero here means the pad really was quiet
+// (and not merely that no interrupt happened to run).
+inline fl::json apa102HspiWatch(int sckPin, int nBytes, int nField) {
+    if (!hspiSensePinOk(sckPin, -1)) {
+        return hspiPinError("sckPin must be one of 0, 5, 12, 15");
+    }
+    const int n = nBytes < 1 ? 1 : (nBytes > 64 ? 64 : nBytes);
+    fl::SPIOutput<kApaDataPin, kApaClockPin, DATA_RATE_KHZ(25)> spi;
+    spi.init();
+    // nField >= 0 re-splits the same total divider across CLKCNT_N and
+    // CLKDIV_PRE. The driver resolves 25 kHz to CLKDIV_PRE = 3201 with
+    // CLKCNT_N = 1, and the clock's high phase is a fraction of CLKCNT_N, so a
+    // divider packed into PRE may leave the pad with nothing to show. The core
+    // library does the opposite: it drives CLKCNT_N to its 64 maximum and puts
+    // the rest in PRE.
+    const fl::u32 clkBefore = SPI1CLK;  // ok platform specific - reads back the divider the driver installed
+    if (nField >= 0) {
+        const fl::u32 pre1 = ((clkBefore >> 18) & 0x1FFFUL) + 1;
+        const fl::u32 n1 = ((clkBefore >> 12) & 0x3FUL) + 1;
+        const fl::u32 divider = pre1 * n1;
+        const fl::u32 nNew = (static_cast<fl::u32>(nField) & 0x3FUL) + 1;
+        const fl::u32 preNew = divider / nNew == 0 ? 1 : divider / nNew;
+        // Same field layout the driver uses, plus a half-period low phase.
+        SPI1CLK = ((nNew / 2) & 0x3FUL) | ((nNew - 1) << 12) | ((preNew - 1) << 18);  // ok platform specific - rebuilds SPI1CLK by hand; no core API exposes it
+    }
+    pinMode(sckPin, INPUT);
+    const fl::u32 mask = 1u << sckPin;
+    // Same staging as the driver's flush(): length in SPI1U1, bytes packed
+    // little-endian into the FIFO words.
+    const fl::u32 bits = static_cast<fl::u32>(n) * 8 - 1;
+    const fl::u32 lenMask = (static_cast<fl::u32>(SPIMMOSI) << SPILMOSI) |
+                            (static_cast<fl::u32>(SPIMMISO) << SPILMISO);
+    while (SPI1CMD & SPIBUSY) {}
+    SPI1U1 = (SPI1U1 & ~lenMask) | (bits << SPILMOSI) | (bits << SPILMISO);
+    volatile fl::u32* fifo = &SPI1W0;
+    for (int i = 0; i < (n + 3) / 4; ++i) {
+        const int b = i * 4;
+        fl::u32 word = static_cast<fl::u32>(hspiPattern(b));
+        if (b + 1 < n) word |= static_cast<fl::u32>(hspiPattern(b + 1)) << 8;
+        if (b + 2 < n) word |= static_cast<fl::u32>(hspiPattern(b + 2)) << 16;
+        if (b + 3 < n) word |= static_cast<fl::u32>(hspiPattern(b + 3)) << 24;
+        fifo[i] = word;
+    }
+    int transitions = 0, highSamples = 0, samples = 0;
+    fl::u32 last = GPI & mask;  // ok platform specific - raw pad level while the bus runs; no core API reports it
+    const fl::u32 t0 = micros();
+    SPI1CMD |= SPIBUSY;
+    while (SPI1CMD & SPIBUSY) {
+        const fl::u32 now = GPI & mask;  // ok platform specific - raw pad level while the bus runs
+        ++samples;
+        if (now != last) {
+            ++transitions;
+            last = now;
+        }
+        if (now != 0) {
+            ++highSamples;
+        }
+    }
+    const fl::u32 elapsed = micros() - t0;
+    spi.stop();
+
+    fl::json r = fl::json::object();
+    r.set("success", transitions > 0);
+    r.set("khz", static_cast<fl::i64>(25));
+    r.set("bytes", static_cast<fl::i64>(n));
+    r.set("bits", static_cast<fl::i64>(n) * 8);
+    r.set("sck_pin", static_cast<fl::i64>(sckPin));
+    r.set("transitions", static_cast<fl::i64>(transitions));
+    r.set("high_samples", static_cast<fl::i64>(highSamples));
+    r.set("samples", static_cast<fl::i64>(samples));
+    r.set("elapsed_us", static_cast<fl::i64>(elapsed));
+    // SPI1CLK: [5:0] CLKCNT_L, [11:6] CLKCNT_H, [17:12] CLKCNT_N, [30:18] PRE.
+    // Reported after the override, so these are the fields the transfer ran
+    // with rather than a mirror of what init() left behind.
+    const fl::u32 clkRan = SPI1CLK;  // ok platform specific - reads back the divider the transfer actually ran with
+    r.set("clk_cnt_l", static_cast<fl::i64>(clkRan & 0x3FUL));
+    r.set("clk_cnt_h", static_cast<fl::i64>((clkRan >> 6) & 0x3FUL));
+    r.set("clk_cnt_n", static_cast<fl::i64>((clkRan >> 12) & 0x3FUL));
+    r.set("clk_pre", static_cast<fl::i64>((clkRan >> 18) & 0x1FFFUL));
+    r.set("clk_before_pre", static_cast<fl::i64>((clkBefore >> 18) & 0x1FFFUL));
+    r.set("n_field", static_cast<fl::i64>(nField));
+    return r;
 }
 
 // Turn the radio off so its MAC NMIs stop preempting bit-banged output.
@@ -862,8 +1003,11 @@ __attribute__((noinline)) inline void bindEsp8266HspiRpcs(fl::Remote& remote) {
     remote.bind("apa102HspiLoopback", [](int khz, int mosiPin, int sckPin) -> fl::json {
         return apa102HspiLoopback(khz, mosiPin, sckPin);
     });
-    remote.bind("apa102HspiJumperCheck", [](int sckPin) -> fl::json {
-        return apa102HspiJumperCheck(sckPin);
+    remote.bind("apa102HspiJumperCheck", [](int sensePin, int txPin) -> fl::json {
+        return apa102HspiJumperCheck(sensePin, txPin);
+    });
+    remote.bind("apa102HspiWatch", [](int sckPin, int nBytes, int nField) -> fl::json {
+        return apa102HspiWatch(sckPin, nBytes, nField);
     });
 }
 
