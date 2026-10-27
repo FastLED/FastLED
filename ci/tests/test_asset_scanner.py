@@ -450,7 +450,7 @@ def test_undeclared_storage_is_not_an_error() -> None:
     assert embedded_fs_defines(scan) == []
 
 
-def test_on_chip_target_enables_the_filesystem() -> None:
+def test_on_chip_target_no_longer_forces_a_define() -> None:
     scan = AssetScanResult(
         manifest={
             "data/v.rgb": AssetEntry(url="u", storage="littlefs"),
@@ -458,17 +458,18 @@ def test_on_chip_target_enables_the_filesystem() -> None:
         }
     )
     assert scan.embedded_fs_assets() == ["data/v.rgb"]
-    assert embedded_fs_defines(scan) == ["FL_ESP8266_EMBEDDED_FS"]
+    # #4947: the ESP8266 backend is selected automatically, so no define.
+    assert embedded_fs_defines(scan) == []
 
 
-def test_announcement_does_not_claim_work_it_did_not_do(
+def test_announcement_reports_automatic_selection(
     capsys: "pytest.CaptureFixture[str]",
 ) -> None:
-    """No build consumes embedded_fs_defines yet (FastLED#4020).
+    """The report must name the requirement and the automatic satisfaction.
 
-    So the report must name the requirement, not claim it was satisfied --
-    "enabled automatically" would send an ESP8266 user off looking elsewhere
-    for a failure whose cause is the missing define.
+    Since #4947 both ESP32 and ESP8266 select their embedded filesystem
+    automatically, so the report says so and no longer names a define the
+    user would have to add.
     """
     scan = AssetScanResult(
         manifest={"data/v.rgb": AssetEntry(url="u", storage="littlefs")}
@@ -477,8 +478,8 @@ def test_announcement_does_not_claim_work_it_did_not_do(
 
     out = capsys.readouterr().out
     assert "data/v.rgb" in out
-    assert "enabled automatically" not in out
-    assert "FL_ESP8266_EMBEDDED_FS" in out
+    assert "automatically" in out
+    assert "FL_ESP8266_EMBEDDED_FS" not in out
 
 
 def test_sdcard_alone_does_not_enable_the_filesystem() -> None:
