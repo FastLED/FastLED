@@ -24,9 +24,11 @@
 // apa102ShowMhz: [nLeds, mhz] -> json (20 frames)
 //   APA102 on native HSPI (GPIO13/14) at 6/10/20/40/80 MHz. The driver
 //   programs SPI1CLK in init() only, so each rate gets its own controller and
-//   the bench re-inits before timing. Reports achievable_hz (the divider the
-//   driver resolves), expected_us from it, and the measured min_us; `success`
-//   is the measured frame time landing in [expected_us, expected_us + 1 ms].
+//   the bench re-inits before timing. Reports achievable_hz (decoded from the
+//   SPI1CLK the driver just wrote), expected_us from it, and the measured
+//   min_us; `success` is the frame time landing in
+//   [expected_us, expected_us + 400 us] -- tight enough to reject a bus running
+//   at half the programmed rate.
 //
 // apa102ShowBitbang: [nLeds, frames] -> json
 //   The same chipset on GPIO4/GPIO16, i.e. the generic software SPI fallback,
@@ -42,7 +44,8 @@
 // apa102HspiLoopback: [khz, mosiPin, sckPin] -> json
 //   Pin-level HSPI check at 25 or 50 kHz. GPIO_IN does not see GPIO13/14 while
 //   HSPI owns the pads, so jumper D7 (GPIO13, MOSI) to mosiPin and D5 (GPIO14,
-//   SCK) to sckPin (defaults 12 and 5 -- D6 and D1). The SCK ISR samples MOSI
+//   SCK) to sckPin (12 and 5 are D6 and D1; both arguments are required). The
+//   SCK ISR samples MOSI
 //   on every rising edge (mode 0) and the 96 decoded bytes must match. Run
 //   wifiOff first: the ISR budget is one SCK period, and MAC interrupts eat it.
 //
@@ -275,7 +278,7 @@ inline fl::json uartWs2812Show(int nLeds) {
     return r;
 }
 
-constexpr int kClocklessPin = 4;
+constexpr int kClocklessPin = FL_PIN_CLOCKLESS_1;
 // The platform's declared hardware-SPI pair in the active pin order -- the same
 // key the native-HSPI specialization uses -- so the bench cannot silently
 // measure the generic bit-bang under D1/NodeMCU numbering. kApaClockRealPin is
@@ -283,7 +286,6 @@ constexpr int kClocklessPin = 4;
 constexpr int kApaDataPin = FL_PIN_SPI_DATA_1;
 constexpr int kApaClockPin = FL_PIN_SPI_CLOCK_1;
 constexpr int kApaClockRealPin = fl::FastPin<FL_PIN_SPI_CLOCK_1>::kRealPin;
-constexpr int kApaDataRealPin = fl::FastPin<FL_PIN_SPI_DATA_1>::kRealPin;
 
 struct DriverShowState {
     CRGB leds[64];
@@ -357,25 +359,32 @@ inline fl::i64 apa102WireBytes(int nLeds) {
     return 4 + 4 * n + 4 * (n / 32 + 1);
 }
 
-// Frame time against the wire time the resolved divider implies. A frame also
-// carries FastLED's fixed per-show cost (250 us on this board, identical on the
-// bit-bang path), so the pass band is the wire time plus that slack. It is
-// needed because these benches pass floorUs = 0: timeFrames can never see a
-// truncated frame here, so its own `success` is unconditional.
-constexpr fl::i64 kApa102FrameSlackUs = 1000;
+// Frame time against the wire time the programmed divider implies. A frame also
+// carries FastLED's fixed per-show cost (~250 us on this board, identical on the
+// bit-bang path) plus up to ~120 us of scheduling jitter, so the pass band is
+// the wire time plus that slack. It is needed because these benches pass
+// floorUs = 0: timeFrames can never see a truncated frame here, so its own
+// `success` is unconditional.
+//
+// 400 us still rejects a bus running at half the programmed rate: at 6 MHz that
+// would take 762 us of wire time, i.e. 1012 us per frame against a 781 us bound.
+// A single divider step (~7% here) is inside this band by construction -- the
+// band exists to catch a rate that never took effect, not to fine-tune it.
+constexpr fl::i64 kApa102FrameSlackUs = 400;
 
-// The SPI1CLK divider the driver resolves for this compile-time rate. Mirrors
-// ESP8266HSPIOutput::clock()'s two branches: with FASTLED_ALL_PINS_HARDWARE_SPI
-// the rate is already Hz, otherwise it is the software path's cycles per bit.
-template <int MHZ>
-inline fl::u32 achievableHz() {
-#if defined(FASTLED_ALL_PINS_HARDWARE_SPI)  // ok platform specific - the ESP8266 rate domain depends on this build switch; no core API reports it
-    return fl::esp8266::hspiClockFor(DATA_RATE_MHZ(MHZ)).actual_hz;  // ok platform specific - resolves the ESP8266 HSPI divider; no core API exposes it
-#else
-    return fl::esp8266::hspiClockForMinDivider(  // ok platform specific - resolves the ESP8266 HSPI divider; no core API exposes it
-               fl::esp8266::hspiDividerForCpuCycles(DATA_RATE_MHZ(MHZ) + 1, FL_CPU_FREQUENCY()))  // ok platform specific - cycles-per-bit to HSPI divider; no core API exposes it
-        .actual_hz;
-#endif
+// The divider the driver actually programmed, decoded from SPI1CLK:
+//   f_spi = 80 MHz / ((CLKDIV_PRE + 1) * (CLKCNT_N + 1))
+// Reading the register back is deliberate -- mirroring the driver's private
+// clock() arithmetic would keep compiling (and keep reporting) after the driver
+// changed, and expected_us would then describe a divider never programmed.
+inline fl::u32 hspiAppliedHz() {
+    const fl::u32 reg = SPI1CLK;  // ok platform specific - reads back the divider ESP8266HSPIOutput::init() just wrote
+    if (reg & fl::esp8266::kHspiEquSysClk) {
+        return fl::esp8266::kHspiSourceHz;
+    }
+    const fl::u32 pre = ((reg >> 18) & 0x1FFFUL) + 1;
+    const fl::u32 n = ((reg >> 12) & 0x3FUL) + 1;
+    return fl::esp8266::kHspiSourceHz / (pre * n);
 }
 
 inline fl::json apa102RateReport(fl::json r, fl::i64 minUs, int nLeds, int mhz,
@@ -403,10 +412,13 @@ inline fl::json apa102Show(int nLeds, int frames) {
     // another bench may have left the bus at its own divider or taken the pads
     // back as plain GPIO, so re-init rather than trust the addLeds-time setup.
     st.apa102->init();
+    const fl::u32 hz = hspiAppliedHz();
     const int n = nLeds < 1 ? 1 : (nLeds > 64 ? 64 : nLeds);
+    // Two statements, not one: reading minUs in the same call that fills it in
+    // leaves the order unspecified.
     fl::i64 minUs = 0;
-    return apa102RateReport(timeFrames(st.apa102, n, frames, 0, &minUs), minUs, n, 6,
-                            achievableHz<6>());
+    fl::json r = timeFrames(st.apa102, n, frames, 0, &minUs);
+    return apa102RateReport(r, minUs, n, 6, hz);
 }
 
 inline fl::json hspiPinError(const char* what) {
@@ -438,6 +450,9 @@ inline fl::json apa102ShowBitbang(int nLeds, int frames) {
     if (c == nullptr) {
         c = &FastLED.addLeds<APA102, kBitbangDataPin, kBitbangClockPin, BGR>(st.leds, 64);
     }
+    // Another bench may have taken these pads as inputs (uartWs2812Loopback's
+    // rxPin accepts 4), and addLeds() only initialises once.
+    c->init();
     const int n = nLeds < 1 ? 1 : (nLeds > 64 ? 64 : nLeds);
     fl::json r = timeFrames(c, n, frames, 0);
     r.set("data_pin", static_cast<fl::i64>(kBitbangDataPin));
@@ -469,13 +484,12 @@ inline CLEDController* apa102At(CRGB* leds) {
 inline fl::json apa102ShowMhz(int nLeds, int frames, int mhz) {
     DriverShowState& st = driverShowState();
     CLEDController* c = nullptr;
-    fl::u32 hz = 0;
     switch (mhz) {
-        case 6: c = apa102At<6>(st.leds); hz = achievableHz<6>(); break;
-        case 10: c = apa102At<10>(st.leds); hz = achievableHz<10>(); break;
-        case 20: c = apa102At<20>(st.leds); hz = achievableHz<20>(); break;
-        case 40: c = apa102At<40>(st.leds); hz = achievableHz<40>(); break;
-        case 80: c = apa102At<80>(st.leds); hz = achievableHz<80>(); break;
+        case 6: c = apa102At<6>(st.leds); break;
+        case 10: c = apa102At<10>(st.leds); break;
+        case 20: c = apa102At<20>(st.leds); break;
+        case 40: c = apa102At<40>(st.leds); break;
+        case 80: c = apa102At<80>(st.leds); break;
         default: {
             fl::json e = fl::json::object();
             e.set("success", false);
@@ -485,8 +499,11 @@ inline fl::json apa102ShowMhz(int nLeds, int frames, int mhz) {
     }
     const int n = nLeds < 1 ? 1 : (nLeds > 64 ? 64 : nLeds);
     c->init();
+    // After init(): the divider under test is the one in the register.
+    const fl::u32 hz = hspiAppliedHz();
     fl::i64 minUs = 0;
-    fl::json r = apa102RateReport(timeFrames(c, n, frames, 0, &minUs), minUs, n, mhz, hz);
+    fl::json r = timeFrames(c, n, frames, 0, &minUs);
+    r = apa102RateReport(r, minUs, n, mhz, hz);
     r.set("cpu_mhz", static_cast<fl::i64>(system_get_cpu_freq()));  // ok platform specific - the bench reports the raw SoC clock; no core API exposes it
     return r;
 }
@@ -498,8 +515,6 @@ inline fl::json apa102ShowMhz(int nLeds, int frames, int mhz) {
 // are arguments, so a board where those pads are hard to reach can use any two
 // of the pins hspiSensePinOk() allows.
 constexpr int kHspiLoopBytes = 96;
-constexpr int kHspiMosiSenseDefault = 12;  // D6
-constexpr int kHspiSckSenseDefault = 5;    // D1
 
 struct HspiLoopbackState {
     fl::u8 got[kHspiLoopBytes];
@@ -613,7 +628,7 @@ inline fl::json apa102HspiLoopbackAt(int mosiPin, int sckPin) {
 // excludes the pin already used for the other signal, so a self-loop cannot
 // pass with no jumper fitted.
 inline bool hspiSensePinOk(int pin, int other) {
-    const bool usable = pin == 0 || pin == 5 || pin == 12 || pin == 15;  // ok platform specific - the ESP8266 pads left usable on a NodeMCU
+    const bool usable = pin == 0 || pin == 5 || pin == 12 || pin == 15;  // ok platform specific - the ESP8266 pads left usable on a NodeMCU; no core API reports which real pads the active pin order leaves free
     return usable && pin != other;
 }
 
@@ -634,6 +649,9 @@ inline fl::json apa102HspiJumperCheck(int sckPin) {
     s.falling = 0;
     pinMode(sckPin, INPUT);
     pinMode(kApaClockRealPin, OUTPUT);
+    // pinMode(OUTPUT) does not clear the output latch, so start from a known
+    // low: a high latch would swallow the first rising edge.
+    digitalWrite(kApaClockRealPin, LOW);
     attachInterrupt(digitalPinToInterrupt(sckPin), hspiSckSample, CHANGE);
     bool seenHigh = false, seenLow = false;
     for (int i = 0; i < 10; ++i) {
@@ -652,7 +670,7 @@ inline fl::json apa102HspiJumperCheck(int sckPin) {
     // Give the pad back to HSPI, not to the GPIO output register: a later
     // apa102Show that skipped init() would otherwise clock internally with the
     // pad held low and still report normal timing.
-    pinMode(kApaClockRealPin, SPECIAL);
+    pinMode(kApaClockRealPin, SPECIAL);  // ok platform specific - SPECIAL is the Arduino-core spelling of "restore this pad's BUS function", i.e. give GPIO14 back to HSPI; no core API restores a bus function
     const bool levelFollows = seenHigh && seenLow;
     const bool isrCounted = s.rising == 10 && s.falling == 10;
     fl::json r = fl::json::object();
