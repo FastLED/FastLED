@@ -4,6 +4,12 @@
 //
 // ESP8266 driver benches for the low-memory AutoResearch surface.
 //
+// Every bench takes a single `const fl::json&` parameter and reads its fields
+// positionally out of the JSON array the host sends, so
+// `ci.rpc_client.RpcClient.send(name, args=[...])` drives it directly: that
+// client frames one JSON `params` value (params:[args]), and it cannot express a
+// bind of arity 0 or 2+. The `[a, b, c]` lines below are that array.
+//
 // uartWs2812Loopback: [nLeds, rxPin] -> json
 //   Encodes a known pattern with the UART WS2812 driver's encoder, streams it
 //   out of UART1 (GPIO2) and samples rxPin through GPIO_IN while the hardware
@@ -957,13 +963,29 @@ inline fl::json jumperCheck(int rxPin) {
     return r;
 }
 
+// ESP8266 RPC argument reader. Each bench below is bound with one
+// `const fl::json&` parameter -- the JSON array the host passes -- instead of
+// C++ positional parameters, because ci.rpc_client.RpcClient frames every call
+// as a single `params` value (params:[args]): a raw bind of arity 0 or 2+ is
+// unreachable through that client. Returns `fallback` for an absent, short, or
+// non-numeric field.
+inline int rpcArgInt(const fl::json& args, fl::size index, int fallback) {
+    if (args.is_array() && index < args.size() && args[index].is_number()) {
+        const fl::optional<fl::i64> value = args[index].as_int();
+        if (value.has_value()) {
+            return static_cast<int>(value.value());
+        }
+    }
+    return fallback;
+}
+
 // Each bind instantiates sizeable temporaries; split the bindings across
 // non-inlined functions so their frames do not add up on the 4 KB loop
 // stack (one combined frame overflowed it).
 __attribute__((noinline)) inline void bindEsp8266WatchdogRpcs(fl::Remote& remote) {
     // Watchdog bring-up: read why the chip last reset, or stop feeding the
     // watchdog (while still yielding) so the user timeout must fire.
-    remote.bind("resetCause", []() -> fl::json {
+    remote.bind("resetCause", [](const fl::json& /*args*/) -> fl::json {
         auto& wdt = fl::Watchdog::instance();
         fl::json r = fl::json::object();
         r.set("cause", fl::string(fl::resetCauseName(wdt.lastResetCause())));
@@ -972,7 +994,8 @@ __attribute__((noinline)) inline void bindEsp8266WatchdogRpcs(fl::Remote& remote
         r.set("cont_stack_free", static_cast<fl::i64>(cont_get_free_stack(g_pcont)));  // ok platform specific - loop-stack headroom diagnostic
         return r;
     });
-    remote.bind("watchdogStall", [](int ms) -> fl::json {
+    remote.bind("watchdogStall", [](const fl::json& args) -> fl::json {
+        const int ms = rpcArgInt(args, 0, -1);
         if (ms < 0) {
             fl::json e = fl::json::object();
             e.set("error", "ms must be >= 0");
@@ -991,7 +1014,9 @@ __attribute__((noinline)) inline void bindEsp8266WatchdogRpcs(fl::Remote& remote
 __attribute__((noinline)) inline void bindEsp8266UartRpcs(fl::Remote& remote) {
     // rxPin < 0 runs the jumper-free internal loopback instead, with nLeds
     // as the rate in kbaud (0 = the driver's 3.2 Mbaud).
-    remote.bind("uartWs2812Loopback", [](int nLeds, int rxPin) -> fl::json {
+    remote.bind("uartWs2812Loopback", [](const fl::json& args) -> fl::json {
+        const int nLeds = rpcArgInt(args, 0, -1);
+        const int rxPin = rpcArgInt(args, 1, -1);
         if (rxPin < 0) {
             // kbaud; 0 = default. USD = ESP8266_CLOCK / baud must stay >= 1.
             if (nLeds < 0 || nLeds > 80000) {
@@ -1007,43 +1032,45 @@ __attribute__((noinline)) inline void bindEsp8266UartRpcs(fl::Remote& remote) {
         }
         return uartWs2812Loopback(nLeds, rxPin);
     });
-    remote.bind("uartWs2812Show", [](int nLeds) -> fl::json {
-        return uartWs2812Show(nLeds);
+    remote.bind("uartWs2812Show", [](const fl::json& args) -> fl::json {
+        return uartWs2812Show(rpcArgInt(args, 0, 0));
     });
 }
 
 __attribute__((noinline)) inline void bindEsp8266DriverRpcs(fl::Remote& remote) {
-    remote.bind("wifiOff", []() -> fl::json { return wifiOff(); });
-    remote.bind("clocklessShow", [](int nLeds, int frames) -> fl::json {
-        return clocklessShow(nLeds, frames);
+    remote.bind("wifiOff", [](const fl::json& /*args*/) -> fl::json { return wifiOff(); });
+    remote.bind("clocklessShow", [](const fl::json& args) -> fl::json {
+        return clocklessShow(rpcArgInt(args, 0, 0), rpcArgInt(args, 1, 1));
     });
-    remote.bind("apa102Show", [](int nLeds, int frames) -> fl::json {
-        return apa102Show(nLeds, frames);
+    remote.bind("apa102Show", [](const fl::json& args) -> fl::json {
+        return apa102Show(rpcArgInt(args, 0, 0), rpcArgInt(args, 1, 1));
     });
 }
 
 // Own frame: every bind's temporaries get a stack slot in the caller, and one
 // more bind in bindEsp8266DriverRpcs overflowed the 4 KB loop stack.
 __attribute__((noinline)) inline void bindEsp8266HspiRpcs(fl::Remote& remote) {
-    remote.bind("apa102ShowMhz", [](int nLeds, int mhz) -> fl::json {
-        return apa102ShowMhz(nLeds, 20, mhz);
+    remote.bind("apa102ShowMhz", [](const fl::json& args) -> fl::json {
+        return apa102ShowMhz(rpcArgInt(args, 0, 0), 20, rpcArgInt(args, 1, 6));
     });
-    remote.bind("apa102HspiLoopback", [](int khz, int mosiPin, int sckPin) -> fl::json {
-        return apa102HspiLoopback(khz, mosiPin, sckPin);
+    remote.bind("apa102HspiLoopback", [](const fl::json& args) -> fl::json {
+        return apa102HspiLoopback(rpcArgInt(args, 0, 0), rpcArgInt(args, 1, -1),
+                                  rpcArgInt(args, 2, -1));
     });
-    remote.bind("apa102HspiJumperCheck", [](int sensePin, int txPin) -> fl::json {
-        return apa102HspiJumperCheck(sensePin, txPin);
+    remote.bind("apa102HspiJumperCheck", [](const fl::json& args) -> fl::json {
+        return apa102HspiJumperCheck(rpcArgInt(args, 0, -1), rpcArgInt(args, 1, -1));
     });
-    remote.bind("apa102HspiWatch", [](int sckPin, int nBytes, int nField) -> fl::json {
-        return apa102HspiWatch(sckPin, nBytes, nField);
+    remote.bind("apa102HspiWatch", [](const fl::json& args) -> fl::json {
+        return apa102HspiWatch(rpcArgInt(args, 0, -1), rpcArgInt(args, 1, 1),
+                               rpcArgInt(args, 2, -1));
     });
 }
 
 // A third frame for the same reason: keep every bind's temporaries in a frame
 // small enough for the 4 KB loop stack.
 __attribute__((noinline)) inline void bindEsp8266HspiBenchRpcs(fl::Remote& remote) {
-    remote.bind("apa102ShowBitbang", [](int nLeds, int frames) -> fl::json {
-        return apa102ShowBitbang(nLeds, frames);
+    remote.bind("apa102ShowBitbang", [](const fl::json& args) -> fl::json {
+        return apa102ShowBitbang(rpcArgInt(args, 0, 0), rpcArgInt(args, 1, 1));
     });
 }
 
