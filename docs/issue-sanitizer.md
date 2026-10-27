@@ -15,20 +15,28 @@ untrusted text, including text a maintainer has not yet reviewed.
 
 ## How a container is screened
 
-1. The workflow fires on issue open/edit/reopen, on issue and PR comments, on
-   PR bodies, and on PR review comments — plus `workflow_dispatch` for a manual
-   re-screen.
+1. The workflow fires on issue open/edit/reopen, on issue and PR conversation
+   comments, and on PR bodies — plus `workflow_dispatch` for a manual re-screen.
+   (Why *not* on `pull_request_review_comment`: see the limits below.)
 2. The script collects the **title, body and every comment** of that one
-   container.  Items written by a trusted actor are excluded; everything else
+   container — and, for a pull request, its inline review comments and review
+   bodies too.  Items written by a trusted actor are excluded; everything else
    forms the corpus.
-3. If the corpus is empty (every item trusted) the label is granted without
-   asking the judge.
-4. Otherwise the corpus is sent to **Jev** (TypeSafe's System One model, via
+3. **The gate label is revoked first.**  `sanitized` is a claim about the text
+   as it stands right now, and a run that has not finished screening has not
+   earned it, so it is dropped at the start and re-added only on a passing
+   verdict.  A crash, a timeout, a cancellation or an unreadable answer
+   therefore leaves the container un-vouched-for rather than wrongly vouched-for.
+4. If the corpus is empty (every item trusted) the label is granted without
+   asking the judge; if text was left uncollected the container is held instead.
+5. Otherwise the corpus is sent to **Jev** (TypeSafe's System One model, via
    `typesafe/jev-router` on OpenRouter) with one typed question per screening
    signal, plus a risk level and an intent label.  The answer must be JSON that
    satisfies a strict schema; a missing or non-numeric signal is a failure, not
-   a zero.
-5. `ci/issue_sanitizer.py` — never the model — applies the thresholds.
+   a zero.  The corpus is wrapped in a fresh random nonce and the judge must
+   **echo that nonce** in its answer — a quoted reply inside the text cannot
+   guess a value minted microseconds earlier, so it cannot pass as the judge's.
+6. `ci/issue_sanitizer.py` — never the model — applies the thresholds.
 
 ### Who counts as trusted
 
@@ -133,15 +141,16 @@ Thresholds live in `ci/issue_sanitizer.py`; the model never sets them.
 
 | Condition | Decision | Reason |
 | --- | --- | --- |
-| corpus is empty (all items trusted) | `sanitize` | `trusted_author` |
+| corpus is empty (all items trusted) and nothing was left unread | `sanitize` | `trusted_author` |
+| text was left uncollected (item cap, capped fetch) but nothing untrusted was seen | `hold` | `uncollected_text` |
 | any signal ≥ 0.70 | `hold` | `hostile_signal` |
 | risk ≥ 3 (high, severe) | `hold` | `risk_high` / `risk_severe` |
 | `intent = injection_or_abuse` with probability ≥ 0.5 | `hold` | `intent_injection(…)` |
 | corpus truncated by a size cap | `hold` | `content_truncated` |
-| more than 200 items | `hold` | `too_many_items` |
+| more than 200 items, counting only untrusted ones dropped | `hold` | `too_many_items` |
 | every signal ≤ 0.30, `legitimate_report` ≥ 0.60, risk ≤ 2 | `sanitize` | `clean` |
 | anything else | `hold` | `uncertain` |
-| judge unreachable, answer unusable, key absent | `hold` | `judge_unavailable` / `judge_unconfigured` |
+| judge unreachable, answer unusable, nonce not echoed, key absent | `hold` | `judge_unavailable` |
 
 The asymmetry is deliberate: **`sanitized` requires positive evidence of
 harmlessness**, and every ambiguous or broken outcome is a hold.  Truncation is
@@ -163,8 +172,10 @@ An **outage** is handled differently from a **verdict**: when the judge never
 answered, `sanitized` is still revoked (the tool can no longer vouch for the
 text) but `security: unscreened-content` is neither added nor removed — a
 transient failure must not spray labels across the tracker or clear a real
-warning.  When no key is in scope at all (a fork-event trigger), the run writes
-nothing and exits 0 with a notice.
+warning.  A **missing key is an outage, not an exemption**: every trigger this
+workflow uses carries the secret, so no key means the judge is down and the run
+holds.  A label write that GitHub refuses is likewise an error, never a silent
+success.
 
 ## Operating it
 
@@ -172,7 +183,7 @@ nothing and exits 0 with a notice.
 # re-screen one issue or PR by hand, no writes
 uv run ci/issue_sanitizer.py --issue 4912 --dry-run --verbose
 
-# same, with the full decision as JSON
+# same, with the full decision as JSON: one object on stdout, prose on stderr
 uv run ci/issue_sanitizer.py --issue 4912 --json
 
 # actually write the labels, and leave an audit comment when it holds
@@ -205,10 +216,22 @@ Cost: one judge request per run, a few thousand tokens; the corpus is capped at
   does not send them.  Screenshot-only payloads are out of scope today.
 - **Links are not followed.**  A report can point at a page holding the real
   instructions; `obfuscated_payload` is asked to catch the *ask*, not the page.
-- **Inline review comments on fork PRs are not judged** — no secret reaches
-  that trigger, so the run exits 0 with a notice.  Covering them needs a
-  `workflow_run` bridge.  Issue bodies, issue comments, PR bodies, PR
-  conversation comments and same-repo review comments *are* screened.
+- **Inline review comments are screened only as part of a PR**, not on their
+  own arrival.  `pull_request_review_comment` cannot be triggered here: GitHub
+  runs the workflow file for that event *from the pull request's merge commit*,
+  so a same-repo PR could supply the workflow that then runs with the judge key
+  (and `pull_request_review` has the same problem).  Instead, a PR's inline
+  review comments and review bodies are folded into its corpus whenever the PR
+  is screened for any other reason.  A brand-new inline comment on an otherwise
+  unchanged PR is therefore not itself a trigger; covering that needs a
+  `workflow_run` bridge, which runs the default-branch workflow with secrets.
+- **A payload quoted by a trusted actor is not screened.**  Only untrusted
+  authors' own text enters the corpus, so a maintainer pasting an attacker's
+  text into a comment is not judged.  This follows the trusted-author rule; if
+  it turns out to matter, the fix is to include trusted text as context.
+- **`sanitized` is about text, not code.**  It says the *prose* on the container
+  passed the screen.  It says nothing about whether a PR's diff is safe — that
+  is CI's job, and this tool never executes or trusts the checked-out code.
 - **The judge is a router.**  `typesafe/jev-router` picks a model per request,
   so the answer comes from a routed model with Jev's framing rather than from
   Jev's calibrated System One endpoint.  Point `JEV_MODEL` at a pinned route, or

@@ -29,10 +29,15 @@ name: sanitize-issues
 #      ``contents: write``, no ``id-token``, no repository secret beyond the
 #      judge key.
 #
-#   4. FAILING CLOSED MUST NOT FAIL LOUDLY FOR EXPECTED CASES.  A fork-event
-#      trigger (``pull_request_review_comment``) gets no secret in scope; the
-#      script exits 0 with a notice and writes nothing rather than turning
-#      every external review comment into a red run.
+#   4. NO TRIGGER RUNS THE WORKFLOW DEFINITION FROM A PULL REQUEST.  ``pull_request``,
+#      ``pull_request_review`` and ``pull_request_review_comment`` all execute
+#      the workflow file taken from the pull request's merge commit (GitHub's
+#      own docs), which a same-repo PR can rewrite to run with the judge key.
+#      Those events are therefore deliberately NOT triggered here: PR bodies
+#      arrive via ``pull_request_target`` (base context) and PR conversation
+#      comments via ``issue_comment``.  Inline review comments are folded into
+#      the corpus whenever a PR is screened for some other reason; a run that
+#      cannot read them holds the container rather than sanitizing it.
 #
 #   5. THIS WORKFLOW NEVER TOUCHES ISSUE CONTENT.  It adds/removes two labels
 #      and, only when asked (``--comment``), one audit comment.  It does not
@@ -49,10 +54,6 @@ on:
   # invariant #2.  PR conversation comments arrive through issue_comment.
   pull_request_target:
     types: [opened, edited]
-  # Inline review comments on same-repo PRs carry the secret; on fork PRs they
-  # do not, and the run exits 0 with a notice (invariant #4).
-  pull_request_review_comment:
-    types: [created, edited]
   workflow_dispatch:
     inputs:
       issue:
@@ -91,6 +92,8 @@ jobs:
       - name: Screen the submission with Jev
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Required: with no key the judge cannot run and the script holds
+          # (and revokes) rather than skipping.  Set it in repo secrets.
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           JEV_MODEL: typesafe/jev-router
           # `type: number` on the dispatch input -- digits only, never text.
