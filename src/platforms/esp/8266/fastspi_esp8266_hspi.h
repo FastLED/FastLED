@@ -63,10 +63,14 @@ struct State {
     u8 high;  // 1 when the next half to send is W8..W15
 };
 
-// Defined in fastspi_esp8266_hspi.cpp.hpp: the plain functions that touch the
-// HSPI registers stay out of the header, which keeps only the state they share.
-State& state() FL_NO_EXCEPT;
+/// The one staging buffer, defined in fastspi_esp8266_hspi.cpp.hpp. push()
+/// reads it directly: a per-byte path cannot afford a call to fetch it.
+extern State gHspiState;
 
+/// Accessor for the same object, for callers that just want the state.
+inline State& state() FL_NO_EXCEPT { return gHspiState; }
+
+// The rest of the register-level helpers live in fastspi_esp8266_hspi.cpp.hpp.
 void waitIdle() FL_NO_EXCEPT;
 
 /// Copy `nbytes` staged bytes into the idle half, then wait for the half on
@@ -75,7 +79,7 @@ void waitIdle() FL_NO_EXCEPT;
 void commit(State& s, u32 nbytes) FL_NO_EXCEPT;
 
 FASTLED_FORCE_INLINE void push(u8 b) FL_NO_EXCEPT {
-    State& s = state();
+    State& s = gHspiState;
     *s.ptr++ = b;
     if (s.ptr == s.end) {
         commit(s, u32(s.end - s.stage.bytes));

@@ -17,10 +17,9 @@
 namespace fl {
 namespace esp8266_hspi {
 
-State& state() FL_NO_EXCEPT {
-    static State s = {{{0}}, s.stage.bytes, s.stage.bytes + 4, 0};
-    return s;
-}
+// Constant-initialized: both pointers are address constants of this object,
+// so there is no dynamic initializer and no thread-safe-init guard.
+State gHspiState = {{{0}}, gHspiState.stage.bytes, gHspiState.stage.bytes + 4, 0};
 
 void waitIdle() FL_NO_EXCEPT {
     while (SPI1CMD & SPIBUSY) {
@@ -49,13 +48,13 @@ void commit(State& s, u32 nbytes) FL_NO_EXCEPT {
 }
 
 void begin() FL_NO_EXCEPT {
-    State& s = state();
+    State& s = gHspiState;
     s.ptr = s.stage.bytes;
     s.end = s.stage.bytes + 4;
 }
 
 void flush() FL_NO_EXCEPT {
-    State& s = state();
+    State& s = gHspiState;
     const u32 nbytes = u32(s.ptr - s.stage.bytes);
     if (nbytes != 0) {
         commit(s, nbytes);
