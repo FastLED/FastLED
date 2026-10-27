@@ -51,8 +51,9 @@
 //   the level and counts the edges, which separates a missing jumper from a
 //   dead ISR; run it before the loopback.
 //
-// Both reject sense pins outside 0-15, the two of them equal, and either HSPI
-// pad: pinMode on 13/14 would undo the bus mux the driver installed.
+// Both accept sense pins only from 0, 4, 5, 12 and 15 (the rest are the console,
+// the UART bench, the flash pads, or the HSPI pads pinMode would unmux), and the
+// loopback rejects two equal pins.
 //
 
 #include "platforms/esp/is_esp.h"  // ok platform headers // ok platform specific - ESP8266 bench gate
@@ -368,11 +369,11 @@ constexpr fl::i64 kApa102FrameSlackUs = 1000;
 // the rate is already Hz, otherwise it is the software path's cycles per bit.
 template <int MHZ>
 inline fl::u32 achievableHz() {
-#if defined(FASTLED_ALL_PINS_HARDWARE_SPI)
-    return fl::esp8266::hspiClockFor(DATA_RATE_MHZ(MHZ)).actual_hz;
+#if defined(FASTLED_ALL_PINS_HARDWARE_SPI)  // ok platform specific - the ESP8266 rate domain depends on this build switch
+    return fl::esp8266::hspiClockFor(DATA_RATE_MHZ(MHZ)).actual_hz;  // ok platform specific - resolves the ESP8266 HSPI divider
 #else
-    return fl::esp8266::hspiClockForMinDivider(
-               fl::esp8266::hspiDividerForCpuCycles(DATA_RATE_MHZ(MHZ) + 1, FL_CPU_FREQUENCY()))
+    return fl::esp8266::hspiClockForMinDivider(  // ok platform specific - resolves the ESP8266 HSPI divider
+               fl::esp8266::hspiDividerForCpuCycles(DATA_RATE_MHZ(MHZ) + 1, FL_CPU_FREQUENCY()))  // ok platform specific - cycles-per-bit to divider
         .actual_hz;
 #endif
 }
@@ -468,8 +469,7 @@ inline fl::json apa102ShowMhz(int nLeds, int frames, int mhz) {
     c->init();
     fl::i64 minUs = 0;
     fl::json r = apa102RateReport(timeFrames(c, n, frames, 0, &minUs), minUs, n, mhz, hz);
-    // ok platform specific - the bench reports the raw SoC clock; no core API exposes it
-    r.set("cpu_mhz", static_cast<fl::i64>(system_get_cpu_freq()));
+    r.set("cpu_mhz", static_cast<fl::i64>(system_get_cpu_freq()));  // ok platform specific - the bench reports the raw SoC clock; no core API exposes it
     return r;
 }
 
@@ -477,8 +477,8 @@ inline fl::json apa102ShowMhz(int nLeds, int frames, int mhz) {
 // pads, so read MOSI and SCK back through jumpers: SCK (D5, GPIO14) to sckPin
 // and MOSI (D7, GPIO13) to mosiPin. The ISR has to
 // sample the data, because the driver's flush() blocks on the wire. Sense pins
-// are arguments, so a board where those pads are hard to reach can use any
-// two free GPIOs below 16 (GPI covers 0-15; GPIO16 needs GP16I).
+// are arguments, so a board where those pads are hard to reach can use any two
+// of the pins hspiSensePinOk() allows.
 constexpr int kHspiLoopBytes = 96;
 constexpr int kHspiMosiSenseDefault = 12;  // D6
 constexpr int kHspiSckSenseDefault = 5;    // D1
@@ -552,10 +552,13 @@ inline fl::json apa102HspiLoopbackAt(int mosiPin, int sckPin) {
     const fl::u32 t0 = micros();
     attachInterrupt(digitalPinToInterrupt(sckPin), hspiSckSample, CHANGE);
     spi.writeBytes(tx, kHspiLoopBytes);
-    detachInterrupt(digitalPinToInterrupt(sckPin));
     const fl::u32 elapsed = micros() - t0;
+    // writeBytes blocks in kick() until SPIBUSY clears, but stay attached
+    // through endTransaction() so no tail edge can be missed, then give the
+    // pads back to plain GPIO so the next bench starts from a known state.
     spi.endTransaction();
-    spi.stop();  // pads back to plain GPIO: leave no bus state for the next bench
+    detachInterrupt(digitalPinToInterrupt(sckPin));
+    spi.stop();
 
     int badBytes = 0, firstBad = -1;
     for (int i = 0; i < kHspiLoopBytes; ++i) {
@@ -584,13 +587,16 @@ inline fl::json apa102HspiLoopbackAt(int mosiPin, int sckPin) {
     return r;
 }
 
-// A sense pin has to be a plain GPIO other than the two HSPI pads: pinMode on
-// 13/14 would undo the bus mux the driver just installed, and a self-loop
-// through the pin the bench drives (or senses) would pass with no jumper at
-// all. GPI covers 0-15; GPIO16 would need GP16I.
+// A sense pin has to be one of the pins that stay usable while the RPC console
+// and the bus under test are busy: 1 and 3 are UART0 (the console), 2 is the
+// UART bench's TX pad, 6-11 are the flash pads (pinMode on them resets the
+// board), and 13/14 are the HSPI pads the transfer is driving -- pinMode there
+// would undo the bus mux. GPIO16 is absent from GPI, so it needs GP16I. `other`
+// excludes the pin already used for the other signal, so a self-loop cannot
+// pass with no jumper fitted.
 inline bool hspiSensePinOk(int pin, int other) {
-    return pin >= 0 && pin <= 15 && pin != other &&
-           pin != kApaDataRealPin && pin != kApaClockRealPin;
+    const bool usable = pin == 0 || pin == 4 || pin == 5 || pin == 12 || pin == 15;
+    return usable && pin != other;
 }
 
 inline fl::json hspiPinError(const char* what) {
@@ -606,7 +612,7 @@ inline fl::json hspiPinError(const char* what) {
 // from a dead ISR. Only meaningful with the SCK jumper fitted.
 inline fl::json apa102HspiJumperCheck(int sckPin) {
     if (!hspiSensePinOk(sckPin, -1)) {
-        return hspiPinError("sckPin must be GPIO 0-15 and not 13/14");
+        return hspiPinError("sckPin must be one of 0, 4, 5, 12, 15");
     }
     HspiLoopbackState& s = hspiLoopbackState();
     hspiLoopbackActive() = &s;
@@ -654,7 +660,7 @@ inline fl::json apa102HspiJumperCheck(int sckPin) {
 inline fl::json apa102HspiLoopback(int khz, int mosiPin, int sckPin) {
     if (!hspiSensePinOk(mosiPin, sckPin) || !hspiSensePinOk(sckPin, mosiPin)) {
         return hspiPinError(
-            "sense pins must be two distinct GPIOs in [0, 15], neither 13 nor 14");
+            "sense pins must be two different pins from 0, 4, 5, 12, 15");
     }
     // Rates the driver resolves cleanly with a divider the ISR can keep up
     // with: at 25 kHz a bit lasts 40 us, so even the core's generic ISR
