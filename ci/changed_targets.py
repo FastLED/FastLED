@@ -103,9 +103,15 @@ def affected(paths: list[str]) -> tuple[bool, frozenset[str]]:
 
 
 def affects_platform(paths: list[str], platform: str) -> bool:
-    """True when the change can move `platform`'s build (common code counts)."""
+    """True when the change can move `platform`'s build (common code counts).
+
+    A shared ESP header classifies as the `esp` family, which moves both the
+    ESP32 and the ESP8266 builds.
+    """
     common, platforms = affected(paths)
-    return common or platform in platforms
+    if common or platform in platforms:
+        return True
+    return "esp" in platforms and platform in ("esp32", "esp8266")
 
 
 def _read_changed(path: Path) -> list[str]:

@@ -145,17 +145,27 @@ def render(base: Sizes, head: Sizes, example: str) -> str:
         "|---|---:|---:|",
     ]
     missing: list[str] = []
+    compared = 0
     for board in sorted(set(base) | set(head)):
         if board not in base or board not in head:
             missing.append(board)
             continue
+        compared += 1
         b, h = base[board], head[board]
         cells = [board]
         for key, _ in METRICS:
             cells.append(_cell(h[key], b[key]))
         lines.append("| " + " | ".join(cells) + " |")
 
-    if missing:
+    if compared == 0:
+        # Both sides collected nothing, which means every selected target
+        # failed to build; an empty table would read as "no change".
+        lines += [
+            "",
+            "No comparison: none of the selected targets built on both sides "
+            "of the change. See the `measure` job for the failing target.",
+        ]
+    elif missing:
         lines += [
             "",
             "No comparison (build missing on one side): "

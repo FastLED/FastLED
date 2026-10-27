@@ -48,3 +48,10 @@ def test_affects_platform_counts_common_code() -> None:
     # Common code can move any platform's image.
     assert affects_platform(["src/fl/chipsets/apa102.h"], "esp32")
     assert not affects_platform(["src/platforms/wasm/x.h"], "esp32")
+
+
+def test_shared_esp_header_affects_both_esp_platforms() -> None:
+    shared = ["src/platforms/esp/clockless.h"]
+    assert affects_platform(shared, "esp32")
+    assert affects_platform(shared, "esp8266")
+    assert not affects_platform(shared, "rp")

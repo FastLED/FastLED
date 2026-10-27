@@ -81,3 +81,8 @@ def test_plan_labels_are_additive() -> None:
 
 def test_plan_everything_is_the_dispatch_path() -> None:
     assert plan([], [], True) == list(ALL_BOARDS)
+
+
+def test_render_reports_a_failure_when_nothing_built() -> None:
+    out = render({}, {}, "Blink")
+    assert "No comparison: none of the selected targets built" in out
