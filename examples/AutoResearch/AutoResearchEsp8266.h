@@ -423,6 +423,13 @@ inline fl::json apa102RateReport(fl::json r, fl::i64 minUs, int nLeds, int mhz,
     r.set("achievable_hz", static_cast<fl::i64>(hz));
     r.set("wire_bytes_est", bytes);
     r.set("expected_us", expected);
+    // The 80 MHz setting is the system-clock bypass, and the bypass is a GPMUX
+    // mux bit as much as SPI1CLK bit 31. Report both, so a hardware-SPI build
+    // at 80 MHz can show the driver paired them and a divider build can show it
+    // did not touch the mux.
+    const fl::u32 reg = SPI1CLK;  // ok platform specific - reads back the clock-source selection init() just wrote
+    r.set("reg_equ", static_cast<fl::i64>((reg >> 31) & 1UL));
+    r.set("gpmux_equ", static_cast<fl::i64>((GPMUX >> 9) & 1UL));  // ok platform specific - the bypass mux bit; no core API reports it
     return r;
 }
 

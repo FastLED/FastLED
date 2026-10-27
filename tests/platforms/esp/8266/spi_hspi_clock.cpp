@@ -140,7 +140,12 @@ FL_TEST_CASE("ESP8266 HSPI clock - CLKCNT_L is never zero") {
     // gets the same guarantee across the whole usable divider range.
     for (fl::u32 min_div = 1; min_div <= 4096; min_div = min_div * 2) {
         const HspiClock clk = hspiClockForMinDivider(min_div);
-        FL_CHECK((clk.reg_value & 0x3F) >= 1);
+        // Divider 1 has no CLKCNT_L encoding; it is the system-clock bypass.
+        if (min_div == 1) {
+            FL_CHECK_EQ(clk.reg_value, kHspiEquSysClk);
+        } else {
+            FL_CHECK((clk.reg_value & 0x3F) >= 1);
+        }
         FL_CHECK_EQ(clk.actual_hz, decodeHz(clk.reg_value));
         FL_CHECK(clk.actual_hz <= kHspiSourceHz / min_div);
     }
@@ -152,6 +157,28 @@ FL_TEST_CASE("ESP8266 HSPI clock - CLKCNT_L is never zero") {
     FL_CHECK((clamped.reg_value & 0x3F) >= 1);
     FL_CHECK_EQ(clamped.actual_hz, decodeHz(clamped.reg_value));
     FL_CHECK_EQ(clamped.actual_hz, kHspiSourceHz / kHspiMinNDivider);
+}
+
+FL_TEST_CASE("ESP8266 HSPI clock - divider 1 is the system-clock bypass") {
+    // The divider fields cannot express divider 1 (CLKCNT_L would be zero), so
+    // the fastest setting is the SPICLK_EQU_SYSCLK bypass -- the same value the
+    // Arduino core's setFrequency() uses for any request at or above 80 MHz.
+    // The driver turns that into the GPMUX mux bit, exactly as the core does.
+    const HspiClock min1 = hspiClockForMinDivider(1);
+    FL_CHECK_EQ(min1.reg_value, kHspiEquSysClk);
+    FL_CHECK_EQ(min1.actual_hz, kHspiSourceHz);
+
+    // Both entry points agree, and 0 keeps its "slowest possible request"
+    // meaning by selecting the bypass rather than dividing by zero.
+    FL_CHECK_EQ(hspiClockForMinDivider(0).reg_value, kHspiEquSysClk);
+    FL_CHECK_EQ(hspiClockFor(kHspiSourceHz).reg_value, min1.reg_value);
+    FL_CHECK_EQ(hspiClockFor(120000000).reg_value, min1.reg_value);
+
+    // One step slower is a real divider with a nonzero high phase.
+    const HspiClock min2 = hspiClockForMinDivider(2);
+    FL_CHECK((min2.reg_value & kHspiEquSysClk) == 0);
+    FL_CHECK((min2.reg_value & 0x3F) >= 1);
+    FL_CHECK_EQ(min2.actual_hz, kHspiSourceHz / 2);
 }
 
 FL_TEST_CASE("ESP8266 HSPI clock - degenerate inputs") {

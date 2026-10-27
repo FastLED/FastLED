@@ -132,10 +132,17 @@ constexpr fl::u32 hspiDividerForCpuCycles(fl::u32 cycles, fl::u32 cpu_hz) FL_NO_
 /// Picks the smallest achievable divider that is at least @p min_div, so the
 /// bus never clocks faster than the rate that divider stands for.
 ///
-/// @param min_div minimum (CLKDIV_PRE + 1) * (CLKCNT_N + 1); 0 is treated as 1
+/// A minimum divider of 1 is the bare 80 MHz source, which the divider fields
+/// cannot express (CLKCNT_L would be zero). That setting is the system-clock
+/// bypass instead, and the driver selects it through GPMUX exactly as the
+/// Arduino core's setClockDivider() does.
+///
+/// @param min_div minimum (CLKDIV_PRE + 1) * (CLKCNT_N + 1); 0 and 1 both
+///        select the system-clock bypass
 /// @return the register value and the frequency it produces
 constexpr HspiClock hspiClockForMinDivider(fl::u32 min_div) FL_NO_EXCEPT {
-    return hspiResolve((min_div == 0) ? 1 : min_div);
+    return (min_div <= 1) ? HspiClock{kHspiEquSysClk, kHspiSourceHz}
+                          : hspiResolve(min_div);
 }
 
 /// Compute the SPI1CLK value for a target frequency.
