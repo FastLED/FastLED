@@ -355,6 +355,7 @@ inline fl::json apa102ShowMhz(int nLeds, int frames, int mhz) {
     // so steady-state min_us is throughput, not one frame's latency.
     const fl::i64 bytes = 4 + 4 * n + 4 * (n / 32 + 1);
     r.set("mhz", static_cast<fl::i64>(mhz));
+    // ok platform specific - ESP8266 bench reports the raw SoC clock; no core API exposes it
     r.set("cpu_mhz", static_cast<fl::i64>(system_get_cpu_freq()));
     r.set("wire_bytes_est", bytes);
     return r;
@@ -384,6 +385,8 @@ inline fl::u8 hspiPattern(int i) { return static_cast<fl::u8>(i * 37 + 11); }
 
 __attribute__((noinline)) static FL_IRAM void captureHspi(HspiCapture& cap, fl::u32 timeoutCycles) {
     using fl::esp8266_hspi::State;
+    // ok platform specific - the bench feeds the HSPI staging buffer directly to
+    // overlap the sampler with the wire; SPIOutput only exposes whole frames
     State& s = fl::esp8266_hspi::state();
     const fl::u32 mosi = 1u << kHspiMosiSense, sck = 1u << kHspiSckSense;
     fl::u32 prev = GPI;  // ok platform specific - raw pad sampling for the HSPI pin-level loopback
@@ -403,6 +406,8 @@ __attribute__((noinline)) static FL_IRAM void captureHspi(HspiCapture& cap, fl::
         }
         prev = now;
         const bool busy = (SPI1CMD & SPIBUSY) != 0;  // ok platform specific - HSPI busy flag, so the feed never blocks the sampler
+        // ok platform specific - byte-at-a-time feeding is what lets the sampler
+        // stay in the loop across a half switch; SPIOutput would block per frame
         if (fed < kHspiLoopBytes && !(busy && s.ptr + 1 == s.end)) {
             fl::esp8266_hspi::push(hspiPattern(fed++));
         } else if (fed == kHspiLoopBytes && !busy) {
@@ -423,7 +428,7 @@ inline fl::json apa102HspiLoopback() {
     spi.select();
     HspiCapture cap = {};
     const fl::u32 savedPs = xt_rsil(15);  // ok platform specific - GPI polling must not miss a 2 us half-bit
-    captureHspi(cap, system_get_cpu_freq() * 20000u);  // 20 ms
+    captureHspi(cap, system_get_cpu_freq() * 20000u);  // 20 ms; ok platform specific - cycles from the raw SoC clock
     xt_wsr_ps(savedPs);  // ok platform specific - restores IRQ level from xt_rsil
     spi.endTransaction();
     int badBytes = 0, firstBad = -1;
