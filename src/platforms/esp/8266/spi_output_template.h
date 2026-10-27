@@ -20,32 +20,22 @@
 ///   FASTLED_ESP8266_D1_PIN_ORDER            ->  7 / 5   (GPIO13 / GPIO14)
 ///   FASTLED_ESP8266_NODEMCU_PIN_ORDER       ->  7 / 5   (GPIO13 / GPIO14)
 ///
-/// With FASTLED_ALL_PINS_HARDWARE_SPI the legacy Arduino-SPI shim is kept for
-/// non-HSPI pin pairs so existing sketches that opted in keep compiling; the
-/// native HSPI driver still wins on the HSPI pair because it is the only path
-/// that can actually drive those pads at the requested rate without <SPI.h>.
+/// The legacy `FASTLED_ALL_PINS_HARDWARE_SPI` opt-in (an Arduino-SPI shim for
+/// non-HSPI pin pairs) was retired in #4942: the shared software bit-bang now
+/// covers every non-HSPI pair, and the channel API reaches the hardware HSPI
+/// pair through `Bus::SPI` (`hspi_bus_traits.h`) rather than a define.
 
 #include "fl/stl/int.h"
 #include "platforms/esp/8266/fastpin_esp8266.h"  // FastPin<>::kRealPin  // IWYU pragma: keep
 #include "platforms/esp/8266/fastspi_esp8266_hspi.h"
 #include "platforms/shared/spi_bitbang/generic_software_spi.h"
 
-#if defined(FASTLED_ALL_PINS_HARDWARE_SPI)
-#include "platforms/esp/8266/fastspi_esp8266.h"
-#endif
-
 namespace fl {
 
-#if defined(FASTLED_ALL_PINS_HARDWARE_SPI)
-/// Legacy opt-in: Arduino-SPI shim for arbitrary pin numbers.
-template <u8 _DATA_PIN, u8 _CLOCK_PIN, u32 _SPI_SPEED>
-class SPIOutput : public ESP8266SPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_SPEED> {};
-#else
 /// Default: generic software SPI bit-bang (SPI_SPEED is cycles per bit here,
 /// matching fastspi.h's software-path FL_DATA_RATE_MHZ).
 template <u8 _DATA_PIN, u8 _CLOCK_PIN, u32 _SPI_SPEED>
 class SPIOutput : public fl::GenericSoftwareSPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_SPEED> {};
-#endif
 
 /// The platform's declared hardware-SPI pair always uses the HSPI peripheral.
 /// Mapping through kRealPin keeps D1/NodeMCU pin-order modes on the same pads.
