@@ -46,6 +46,9 @@ ALLOWED_PATHS: frozenset[str] = frozenset(
         "SLIDE.md",
         "release_notes.md",
         "CLAUDE.md",  # one sentence explaining the ban
+        # ...and its mirror: AGENTS.md ships as a relative symlink to CLAUDE.md
+        # so non-Claude agents read the same file, so it carries that sentence too.
+        "AGENTS.md",
         "examples/README.md",
         # Names an external data branch of FastLED/boards that is literally
         # called `platformio`; the registry doc has to spell it.

@@ -93,7 +93,9 @@ def test_scan_skips_allowed_paths_and_binaries(tmp_path: Path) -> None:
 
 def test_allowlist_is_small_and_explicit() -> None:
     # Growth here means the tool is creeping back in; every entry needs a reason.
-    assert len(ALLOWED_PATHS) <= 14
+    # 15 since AGENTS.md joined as the symlink mirror of the allow-listed
+    # CLAUDE.md (same content, second door).
+    assert len(ALLOWED_PATHS) <= 15
     assert len(ALLOWED_PREFIXES) <= 6
     assert "src/platforms/arm/rp/" in ALLOWED_PREFIXES
 
