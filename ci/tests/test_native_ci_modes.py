@@ -20,7 +20,9 @@ def workflow(name: str) -> dict:
 def test_smoke_manifest_sources_exist_and_is_small() -> None:
     assert 1 <= len(CPP_SMOKE) <= 5
     # 9th entry: ci/tests/test_pch_e2e.py (stale-PCH regression, ~15s).
-    assert 1 <= len(PY_SMOKE) <= 9
+    # 10th entry: ci/tests/test_issue_sanitizer.py (Jev content gate, hermetic
+    # ~0.3s); registered so the gate's policy tests run on every PR.
+    assert 1 <= len(PY_SMOKE) <= 10
     for target, source in CPP_SMOKE.items():
         assert target
         assert (ROOT / source).is_file(), target
