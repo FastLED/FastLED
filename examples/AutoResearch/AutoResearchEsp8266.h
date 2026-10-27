@@ -25,22 +25,34 @@
 //   APA102 on native HSPI (GPIO13/14) at 6/10/20/40/80 MHz. The driver
 //   programs SPI1CLK in init() only, so each rate gets its own controller and
 //   the bench re-inits before timing. Reports achievable_hz (the divider the
-//   driver resolves), expected_us from it, and the measured min_us.
+//   driver resolves), expected_us from it, and the measured min_us; `success`
+//   is the measured frame time landing in [expected_us, expected_us + 1 ms].
 //
 // apa102ShowBitbang: [nLeds, frames] -> json
 //   The same chipset on GPIO4/GPIO16, i.e. the generic software SPI fallback,
-//   for a same-run comparison against apa102Show.
+//   for a same-run comparison against apa102Show. generic_bitbang is false in a
+//   FASTLED_ALL_PINS_HARDWARE_SPI build, where that pair resolves to the legacy
+//   Arduino-SPI shim and is therefore not a bit-bang baseline.
+//
+// The benches name the HSPI pair as FL_PIN_SPI_DATA_1 / FL_PIN_SPI_CLOCK_1, the
+// same key the native-HSPI specialization uses, so D1/NodeMCU pin orders
+// (7/5) select the same GPIO13/14 pads instead of quietly falling back to the
+// bit-bang. The sense-pin arguments are always raw GPIO numbers.
 //
 // apa102HspiLoopback: [khz, mosiPin, sckPin] -> json
 //   Pin-level HSPI check at 25 or 50 kHz. GPIO_IN does not see GPIO13/14 while
 //   HSPI owns the pads, so jumper D7 (GPIO13, MOSI) to mosiPin and D5 (GPIO14,
 //   SCK) to sckPin (defaults 12 and 5 -- D6 and D1). The SCK ISR samples MOSI
-//   on every rising edge (mode 0) and the 96 decoded bytes must match.
+//   on every rising edge (mode 0) and the 96 decoded bytes must match. Run
+//   wifiOff first: the ISR budget is one SCK period, and MAC interrupts eat it.
 //
 // apa102HspiJumperCheck: [sckPin] -> json
 //   Drives the SCK pad as a plain GPIO and reports whether sckPin both follows
 //   the level and counts the edges, which separates a missing jumper from a
 //   dead ISR; run it before the loopback.
+//
+// Both reject sense pins outside 0-15, the two of them equal, and either HSPI
+// pad: pinMode on 13/14 would undo the bus mux the driver installed.
 //
 
 #include "platforms/esp/is_esp.h"  // ok platform headers // ok platform specific - ESP8266 bench gate
@@ -263,8 +275,14 @@ inline fl::json uartWs2812Show(int nLeds) {
 }
 
 constexpr int kClocklessPin = 4;
-constexpr int kApaDataPin = 13;
-constexpr int kApaClockPin = 14;
+// The platform's declared hardware-SPI pair in the active pin order -- the same
+// key the native-HSPI specialization uses -- so the bench cannot silently
+// measure the generic bit-bang under D1/NodeMCU numbering. kApaClockRealPin is
+// the fixed GPIO pad behind it, which is what pinMode() and GPI take.
+constexpr int kApaDataPin = FL_PIN_SPI_DATA_1;
+constexpr int kApaClockPin = FL_PIN_SPI_CLOCK_1;
+constexpr int kApaClockRealPin = fl::FastPin<FL_PIN_SPI_CLOCK_1>::kRealPin;
+constexpr int kApaDataRealPin = fl::FastPin<FL_PIN_SPI_DATA_1>::kRealPin;
 
 struct DriverShowState {
     CRGB leds[64];
@@ -278,7 +296,7 @@ inline DriverShowState& driverShowState() {
 
 // Show one controller for `frames` frames and report frame-time spread.
 inline fl::json timeFrames(CLEDController* controller, int nLeds, int frames,
-                           fl::i64 floorUs) {
+                           fl::i64 floorUs, fl::i64* minUsOut = nullptr) {
     DriverShowState& st = driverShowState();
     if (nLeds < 1) nLeds = 1;
     if (nLeds > 64) nLeds = 64;
@@ -302,6 +320,9 @@ inline fl::json timeFrames(CLEDController* controller, int nLeds, int frames,
             if (firstTruncated < 0) firstTruncated = f;
             ++truncated;
         }
+    }
+    if (minUsOut != nullptr) {
+        *minUsOut = static_cast<fl::i64>(minUs);
     }
     fl::json r = fl::json::object();
     r.set("success", truncated == 0);
@@ -328,20 +349,63 @@ inline fl::json clocklessShow(int nLeds, int frames) {
     return timeFrames(st.clockless, n, frames, static_cast<fl::i64>(n) * 30);
 }
 
-inline fl::json apa102Show(int nLeds, int frames) {
-    DriverShowState& st = driverShowState();
-    if (!st.apa102) {
-        st.apa102 = &FastLED.addLeds<APA102, kApaDataPin, kApaClockPin, BGR>(st.leds, 64);
-    }
-    // Start frame + 4 bytes per LED + end frame; no fixed timing floor.
-    return timeFrames(st.apa102, nLeds, frames, 0);
-}
-
 // Start frame + 4 bytes per LED + APA102Controller::endBoundary's
 // (n / 32 + 1) end dwords.
 inline fl::i64 apa102WireBytes(int nLeds) {
     const fl::i64 n = nLeds;
     return 4 + 4 * n + 4 * (n / 32 + 1);
+}
+
+// Frame time against the wire time the resolved divider implies. A frame also
+// carries FastLED's fixed per-show cost (250 us on this board, identical on the
+// bit-bang path), so the pass band is the wire time plus that slack. It is
+// needed because these benches pass floorUs = 0: timeFrames can never see a
+// truncated frame here, so its own `success` is unconditional.
+constexpr fl::i64 kApa102FrameSlackUs = 1000;
+
+// The SPI1CLK divider the driver resolves for this compile-time rate. Mirrors
+// ESP8266HSPIOutput::clock()'s two branches: with FASTLED_ALL_PINS_HARDWARE_SPI
+// the rate is already Hz, otherwise it is the software path's cycles per bit.
+template <int MHZ>
+inline fl::u32 achievableHz() {
+#if defined(FASTLED_ALL_PINS_HARDWARE_SPI)
+    return fl::esp8266::hspiClockFor(DATA_RATE_MHZ(MHZ)).actual_hz;
+#else
+    return fl::esp8266::hspiClockForMinDivider(
+               fl::esp8266::hspiDividerForCpuCycles(DATA_RATE_MHZ(MHZ) + 1, FL_CPU_FREQUENCY()))
+        .actual_hz;
+#endif
+}
+
+inline fl::json apa102RateReport(fl::json r, fl::i64 minUs, int nLeds, int mhz,
+                                 fl::u32 hz) {
+    const fl::i64 bytes = apa102WireBytes(nLeds);
+    const fl::i64 bits = bytes * 8;
+    const fl::i64 expected = hz ? (bits * 1000000 + hz - 1) / static_cast<fl::i64>(hz) : -1;
+    r.set("success", expected > 0 && minUs >= expected &&
+                         minUs <= expected + kApa102FrameSlackUs);
+    r.set("mhz", static_cast<fl::i64>(mhz));
+    r.set("requested_hz", static_cast<fl::i64>(mhz) * 1000000);
+    r.set("achievable_hz", static_cast<fl::i64>(hz));
+    r.set("wire_bytes_est", bytes);
+    r.set("expected_us", expected);
+    return r;
+}
+
+// The chipset default: DATA_RATE_MHZ(6) (fl/chipsets/apa102.h).
+inline fl::json apa102Show(int nLeds, int frames) {
+    DriverShowState& st = driverShowState();
+    if (!st.apa102) {
+        st.apa102 = &FastLED.addLeds<APA102, kApaDataPin, kApaClockPin, BGR>(st.leds, 64);
+    }
+    // init() is the only writer of SPI1CLK, and it re-installs the pad mux:
+    // another bench may have left the bus at its own divider or taken the pads
+    // back as plain GPIO, so re-init rather than trust the addLeds-time setup.
+    st.apa102->init();
+    const int n = nLeds < 1 ? 1 : (nLeds > 64 ? 64 : nLeds);
+    fl::i64 minUs = 0;
+    return apa102RateReport(timeFrames(st.apa102, n, frames, 0, &minUs), minUs, n, 6,
+                            achievableHz<6>());
 }
 
 // The same chipset on a pin pair HSPI cannot reach: the generic software SPI
@@ -361,6 +425,15 @@ inline fl::json apa102ShowBitbang(int nLeds, int frames) {
     r.set("data_pin", static_cast<fl::i64>(kBitbangDataPin));
     r.set("clock_pin", static_cast<fl::i64>(kBitbangClockPin));
     r.set("wire_bytes_est", apa102WireBytes(n));
+    // This pair is only the generic bit-bang in the default build. Under
+    // FASTLED_ALL_PINS_HARDWARE_SPI every non-HSPI pair goes to the legacy
+    // Arduino-SPI shim, which drives GPIO13/14 -- so there the timing here is
+    // that shim's, not a software bit-bang, and it is not a baseline.
+#if defined(FASTLED_ALL_PINS_HARDWARE_SPI)
+    r.set("generic_bitbang", false);
+#else
+    r.set("generic_bitbang", true);
+#endif
     return r;
 }
 
@@ -372,20 +445,6 @@ inline CLEDController* apa102At(CRGB* leds) {
     static CLEDController* c =
         &FastLED.addLeds<APA102, kApaDataPin, kApaClockPin, BGR, DATA_RATE_MHZ(MHZ)>(leds, 64);
     return c;
-}
-
-// The SPI1CLK divider the driver resolves for this compile-time rate. Mirrors
-// ESP8266HSPIOutput::clock()'s two branches: with FASTLED_ALL_PINS_HARDWARE_SPI
-// the rate is already Hz, otherwise it is the software path's cycles per bit.
-template <int MHZ>
-inline fl::u32 achievableHz() {
-#if defined(FASTLED_ALL_PINS_HARDWARE_SPI)
-    return fl::esp8266::hspiClockFor(DATA_RATE_MHZ(MHZ)).actual_hz;
-#else
-    return fl::esp8266::hspiClockForMinDivider(
-               fl::esp8266::hspiDividerForCpuCycles(DATA_RATE_MHZ(MHZ) + 1, FL_CPU_FREQUENCY()))
-        .actual_hz;
-#endif
 }
 
 inline fl::json apa102ShowMhz(int nLeds, int frames, int mhz) {
@@ -407,18 +466,10 @@ inline fl::json apa102ShowMhz(int nLeds, int frames, int mhz) {
     }
     const int n = nLeds < 1 ? 1 : (nLeds > 64 ? 64 : nLeds);
     c->init();
-    fl::json r = timeFrames(c, n, frames, 0);
-    // Start frame + 4 bytes per LED + APA102Controller::endBoundary's
-    // (n / 32 + 1) end dwords.
-    const fl::i64 bytes = 4 + 4 * static_cast<fl::i64>(n) + 4 * (n / 32 + 1);
-    const fl::i64 bits = bytes * 8;
-    r.set("mhz", static_cast<fl::i64>(mhz));
-    r.set("requested_hz", static_cast<fl::i64>(mhz) * 1000000);
-    r.set("achievable_hz", static_cast<fl::i64>(hz));
+    fl::i64 minUs = 0;
+    fl::json r = apa102RateReport(timeFrames(c, n, frames, 0, &minUs), minUs, n, mhz, hz);
     // ok platform specific - the bench reports the raw SoC clock; no core API exposes it
     r.set("cpu_mhz", static_cast<fl::i64>(system_get_cpu_freq()));
-    r.set("wire_bytes_est", bytes);
-    r.set("expected_us", hz ? (bits * 1000000 + hz - 1) / static_cast<fl::i64>(hz) : -1);
     return r;
 }
 
@@ -504,6 +555,7 @@ inline fl::json apa102HspiLoopbackAt(int mosiPin, int sckPin) {
     detachInterrupt(digitalPinToInterrupt(sckPin));
     const fl::u32 elapsed = micros() - t0;
     spi.endTransaction();
+    spi.stop();  // pads back to plain GPIO: leave no bus state for the next bench
 
     int badBytes = 0, firstBad = -1;
     for (int i = 0; i < kHspiLoopBytes; ++i) {
@@ -526,7 +578,26 @@ inline fl::json apa102HspiLoopbackAt(int mosiPin, int sckPin) {
     }
     r.set("khz", static_cast<fl::i64>(KHZ));
     r.set("elapsed_us", static_cast<fl::i64>(elapsed));
+    // The ISR budget is one SCK period, and the radio's MAC interrupts eat it:
+    // a run with the radio up mis-times edges and reads as a wiring failure.
+    r.set("wifi_opmode", static_cast<fl::i64>(wifi_get_opmode()));  // ok platform specific - ESP8266 bring-up bench measures raw SoC behavior; no core API exposes it
     return r;
+}
+
+// A sense pin has to be a plain GPIO other than the two HSPI pads: pinMode on
+// 13/14 would undo the bus mux the driver just installed, and a self-loop
+// through the pin the bench drives (or senses) would pass with no jumper at
+// all. GPI covers 0-15; GPIO16 would need GP16I.
+inline bool hspiSensePinOk(int pin, int other) {
+    return pin >= 0 && pin <= 15 && pin != other &&
+           pin != kApaDataRealPin && pin != kApaClockRealPin;
+}
+
+inline fl::json hspiPinError(const char* what) {
+    fl::json e = fl::json::object();
+    e.set("success", false);
+    e.set("error", what);
+    return e;
 }
 
 // Drives the SCK pad as a plain GPIO and both counts interrupts and samples the
@@ -534,29 +605,37 @@ inline fl::json apa102HspiLoopbackAt(int mosiPin, int sckPin) {
 // told apart from "the HSPI path never clocked" (level follows, no edges) and
 // from a dead ISR. Only meaningful with the SCK jumper fitted.
 inline fl::json apa102HspiJumperCheck(int sckPin) {
+    if (!hspiSensePinOk(sckPin, -1)) {
+        return hspiPinError("sckPin must be GPIO 0-15 and not 13/14");
+    }
     HspiLoopbackState& s = hspiLoopbackState();
     hspiLoopbackActive() = &s;
+    s.mosiMask = 0;  // this check samples SCK only; no stale mask from a loopback
     s.sckMask = 1u << sckPin;
     s.bits = 0;
     s.rising = 0;
     s.falling = 0;
     pinMode(sckPin, INPUT);
-    pinMode(kApaClockPin, OUTPUT);
+    pinMode(kApaClockRealPin, OUTPUT);
     attachInterrupt(digitalPinToInterrupt(sckPin), hspiSckSample, CHANGE);
     bool seenHigh = false, seenLow = false;
     for (int i = 0; i < 10; ++i) {
-        digitalWrite(kApaClockPin, HIGH);
+        digitalWrite(kApaClockRealPin, HIGH);
         fl::delayMicroseconds(50);
         if (GPI & s.sckMask) {  // ok platform specific - raw pad level tells a missing jumper from a dead ISR
             seenHigh = true;
         }
-        digitalWrite(kApaClockPin, LOW);
+        digitalWrite(kApaClockRealPin, LOW);
         fl::delayMicroseconds(50);
         if ((GPI & s.sckMask) == 0) {  // ok platform specific - raw pad level, as above
             seenLow = true;
         }
     }
     detachInterrupt(digitalPinToInterrupt(sckPin));
+    // Give the pad back to HSPI, not to the GPIO output register: a later
+    // apa102Show that skipped init() would otherwise clock internally with the
+    // pad held low and still report normal timing.
+    pinMode(kApaClockRealPin, SPECIAL);
     const bool levelFollows = seenHigh && seenLow;
     const bool isrCounted = s.rising == 10 && s.falling == 10;
     fl::json r = fl::json::object();
@@ -568,17 +647,14 @@ inline fl::json apa102HspiJumperCheck(int sckPin) {
     r.set("rising", static_cast<fl::i64>(s.rising));
     r.set("falling", static_cast<fl::i64>(s.falling));
     r.set("sck_pin", static_cast<fl::i64>(sckPin));
-    r.set("tx_pin", static_cast<fl::i64>(kApaClockPin));
+    r.set("tx_pin", static_cast<fl::i64>(kApaClockRealPin));
     return r;
 }
 
 inline fl::json apa102HspiLoopback(int khz, int mosiPin, int sckPin) {
-    if (mosiPin < 0 || mosiPin > 15 || sckPin < 0 || sckPin > 15 ||
-        mosiPin == sckPin) {
-        fl::json e = fl::json::object();
-        e.set("success", false);
-        e.set("error", "sense pins must be two distinct GPIOs in [0, 15]");
-        return e;
+    if (!hspiSensePinOk(mosiPin, sckPin) || !hspiSensePinOk(sckPin, mosiPin)) {
+        return hspiPinError(
+            "sense pins must be two distinct GPIOs in [0, 15], neither 13 nor 14");
     }
     // Rates the driver resolves cleanly with a divider the ISR can keep up
     // with: at 25 kHz a bit lasts 40 us, so even the core's generic ISR
