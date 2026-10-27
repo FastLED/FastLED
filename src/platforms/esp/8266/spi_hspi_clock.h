@@ -85,13 +85,29 @@ constexpr HspiClock hspiResolve(fl::u32 min_div) FL_NO_EXCEPT {
         : hspiSearch(min_div, 1);
 }
 
+/// Convert the software path's CPU-cycles-per-bit value to a minimum total
+/// HSPI divider.
+///
+/// FL_DATA_RATE_MHZ(X) on ESP8266 is `(F_CPU / 1 MHz) / X` truncated, so the
+/// sketch's original request is strictly above `F_CPU / cycles` (where
+/// `cycles` is the truncated value plus one). A total hardware divider of at
+/// least `ceil(cycles * 80 MHz / F_CPU)` therefore never clocks the bus faster
+/// than the rate that was actually requested. The conversion is needed because
+/// the HSPI source is fixed at 80 MHz while the CPU may run at 80 or 160 MHz.
+///
+/// @param cycles CPU cycles per bit from FL_DATA_RATE_MHZ (0 is treated as 1)
+/// @param cpu_hz CPU frequency the divider was computed against
+/// @return minimum total divider for hspiClockForMinDivider()
+constexpr fl::u32 hspiDividerForCpuCycles(fl::u32 cycles, fl::u32 cpu_hz) FL_NO_EXCEPT {
+    return static_cast<fl::u32>(
+        (static_cast<fl::u64>((cycles == 0) ? 1 : cycles) * kHspiSourceHz + cpu_hz - 1) /
+        cpu_hz);
+}
+
 /// Compute the SPI1CLK value for a minimum total divider.
 ///
-/// The software path's FL_DATA_RATE_MHZ(X) is `F_CPU / X` truncated to whole
-/// CPU cycles per bit, so the sketch's original request lies in
-/// (F_CPU / (divider + 1), F_CPU / divider]. A total hardware divider of at
-/// least `divider + 1` therefore never clocks the bus faster than the rate
-/// that was actually requested.
+/// Picks the smallest achievable divider that is at least @p min_div, so the
+/// bus never clocks faster than the rate that divider stands for.
 ///
 /// @param min_div minimum (CLKDIV_PRE + 1) * (CLKCNT_N + 1); 0 is treated as 1
 /// @return the register value and the frequency it produces

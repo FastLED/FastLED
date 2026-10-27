@@ -40,7 +40,7 @@ Notes:
   - **`FASTLED_ESP8266_D1_PIN_ORDER`**: Legacy Wemos D1-style mapping for bare numeric pins.
 
 - **SPI backend**
-  - **GPIO13/GPIO14 (MOSI/SCK)**: clocked chipsets such as APA102 use the native register-level HSPI driver (`fastspi_esp8266_hspi.h`) by default. It writes `SPI1W0..15`/`SPI1CMD` directly, honors the chipset's `SPI_SPEED`, and does not depend on Arduino `<SPI.h>`. The pads are fixed by the peripheral, so the dispatch resolves the active pin-order mode first: 13/14 in raw order, 7/5 in NodeMCU and D1 order (those are GPIO13/GPIO14). Using GPIO13/14 this way takes the pads away from Arduino `SPI`; call `FastLED.end()` (or avoid mixing) if a sketch needs `SPI` on those pins.
+  - **GPIO13/GPIO14 (MOSI/SCK)**: clocked chipsets such as APA102 use the native register-level HSPI driver (`fastspi_esp8266_hspi.h`) by default. It writes `SPI1W0..15`/`SPI1CMD` directly, honors the chipset's `SPI_SPEED`, and does not depend on Arduino `<SPI.h>`. The pads are fixed by the peripheral, so the dispatch resolves the active pin-order mode first: 13/14 in raw order, 7/5 in NodeMCU and D1 order (those are GPIO13/GPIO14). Using GPIO13/14 this way takes the pads away from Arduino `SPI`, so a sketch cannot also run `SPI` on those pins while FastLED drives them.
   - **Any other pin pair**: falls back to the shared software SPI bit-bang.
   - **`FASTLED_ALL_PINS_HARDWARE_SPI`**: legacy opt-in that routes non-HSPI pin pairs through the Arduino-SPI shim (`fastspi_esp8266.h`). It is no longer needed for GPIO13/14; the shim now also honors `SPI_SPEED` instead of a hard-coded 3.2 MHz.
 

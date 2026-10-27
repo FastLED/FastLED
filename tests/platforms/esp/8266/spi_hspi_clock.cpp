@@ -52,25 +52,46 @@ FL_TEST_CASE("ESP8266 HSPI clock - never exceeds the requested rate") {
 }
 
 FL_TEST_CASE("ESP8266 HSPI clock - software divider converts without overclocking") {
-    // FL_DATA_RATE_MHZ(12) on the software path is 80 MHz / 12 truncated to 6
-    // CPU cycles per bit, so the real request lies in (80/7, 80/6] MHz.
-    // Requiring a total divider of 6 + 1 resolves to 11.43 MHz: at or below
-    // the SK9822 request, not the 13.33 MHz a naive re-derivation gives.
-    const fl::u32 divider = 80000000UL / 12000000UL;  // == 6
-    const HspiClock clk = hspiClockForMinDivider(divider + 1);
+    // FL_DATA_RATE_MHZ(12) on the software path is (F_CPU / 1 MHz) / 12
+    // truncated to whole CPU cycles per bit, so the real request lies above
+    // F_CPU / (cycles + 1). The conversion into the 80 MHz HSPI domain must
+    // land at or below the request for both 80 MHz and 160 MHz CPUs.
+    const fl::u32 sk9822_80 = hspiDividerForCpuCycles(80000000UL / 12000000UL + 1,
+                                                     80000000UL);  // 7
+    FL_CHECK_EQ(sk9822_80, 7);
+    const HspiClock clk = hspiClockForMinDivider(sk9822_80);
     FL_CHECK(clk.actual_hz <= 12000000UL);
     FL_CHECK(clk.actual_hz > 11000000UL);
     FL_CHECK_EQ(clk.actual_hz, decodeHz(clk.reg_value));
     FL_CHECK_EQ(clk.actual_hz, 80000000UL / 7);
 
-    // Same for the 6 MHz APA102 default (80 / 6 == 13 cycles per bit).
-    const HspiClock clk6 = hspiClockForMinDivider(80000000UL / 6000000UL + 1);
+    // At 160 MHz the same request is 13 CPU cycles per bit; the hardware
+    // divider is 7, not 14 (which would halve the bus rate).
+    const fl::u32 sk9822_160 = hspiDividerForCpuCycles(160000000UL / 12000000UL + 1,
+                                                       160000000UL);
+    FL_CHECK_EQ(sk9822_160, 7);
+    FL_CHECK_EQ(hspiClockForMinDivider(sk9822_160).actual_hz, 80000000UL / 7);
+
+    // Same for the 6 MHz APA102 default, at both CPU speeds: the divider is 14
+    // (5.71 MHz), at or below the request.
+    const fl::u32 apa102_80 = hspiDividerForCpuCycles(80000000UL / 6000000UL + 1,
+                                                      80000000UL);
+    FL_CHECK_EQ(apa102_80, 14);
+    const HspiClock clk6 = hspiClockForMinDivider(apa102_80);
     FL_CHECK(clk6.actual_hz <= 6000000UL);
     FL_CHECK(clk6.actual_hz > 5000000UL);
     FL_CHECK_EQ(clk6.actual_hz, 80000000UL / 14);
 
-    // A zero divider cannot happen from FL_DATA_RATE_MHZ, but must not divide
-    // by zero.
+    const fl::u32 apa102_160 = hspiDividerForCpuCycles(160000000UL / 6000000UL + 1,
+                                                       160000000UL);
+    FL_CHECK_EQ(apa102_160, 14);
+    FL_CHECK_EQ(hspiClockForMinDivider(apa102_160).actual_hz, 80000000UL / 14);
+
+    // A CPU running slower than the HSPI source still yields a divider >= 1.
+    FL_CHECK(hspiDividerForCpuCycles(1, 16000000UL) >= 1);
+
+    // Degenerate inputs cannot divide by zero and never overclock.
+    FL_CHECK(hspiDividerForCpuCycles(0, 80000000UL) >= 1);
     FL_CHECK(hspiClockForMinDivider(0).actual_hz > 0);
 }
 

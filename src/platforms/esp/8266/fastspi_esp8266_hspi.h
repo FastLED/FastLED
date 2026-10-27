@@ -55,15 +55,15 @@ class ESP8266HSPIOutput {
     ///
     /// FL_DATA_RATE_MHZ() is a frequency in Hz on ESP8266 only when the user
     /// opted into hardware SPI; otherwise it is the software path's
-    /// CPU-cycles-per-bit divider (see fastspi.h), and the request it came
-    /// from was strictly larger than F_CPU / (SPI_SPEED + 1). Requiring a
-    /// total divider of SPI_SPEED + 1 keeps the bus at or below that request
-    /// instead of re-deriving (and overclocking past) a truncated frequency.
+    /// CPU-cycles-per-bit value (see fastspi.h). Convert that into the HSPI
+    /// clock domain, which is fixed at 80 MHz regardless of whether the CPU
+    /// runs at 80 or 160 MHz, so the bus stays at or below the request.
     static constexpr esp8266::HspiClock clock() FL_NO_EXCEPT {
 #if defined(FASTLED_ALL_PINS_HARDWARE_SPI)
         return esp8266::hspiClockFor(SPI_SPEED);
 #else
-        return esp8266::hspiClockForMinDivider(SPI_SPEED + 1);
+        return esp8266::hspiClockForMinDivider(
+            esp8266::hspiDividerForCpuCycles(SPI_SPEED + 1, FL_CPU_FREQUENCY()));
 #endif
     }
 
