@@ -29,6 +29,7 @@
 #include "fl/stl/static_assert.h"
 #include "fl/stl/compiler_control.h"
 #include "platforms/cpu_frequency.h"
+#include "platforms/esp/8266/hspi_clock.h"
 #include "fastspi_types.h"
 #include "fl/system/fastpin_base.h"
 
@@ -44,38 +45,7 @@ namespace fl {
 
 namespace esp8266_hspi {
 
-/// HSPI's source clock: the 80 MHz APB clock, also at 160 MHz CPU.
-constexpr u32 kApbHz = 80000000;
 constexpr u8 kHalfWords = 8;  // 32 bytes per ping-pong half
-
-/// SPI1CLK value for the fastest clock that does not exceed `hz`.
-inline u32 clockRegister(u32 hz) FL_NO_EXCEPT {
-    if (hz >= kApbHz) {
-        return 0x80000000;  // SPI_CLK_EQU_SYSCLK
-    }
-    if (hz == 0) {
-        hz = 1;
-    }
-    u32 best_reg = (0x1FFFu << 18) | (63u << 12) | (31u << 6) | 63u;  // slowest
-    u32 best_hz = 0;
-    for (u32 n = 1; n <= 63; ++n) {
-        // Smallest prescaler that keeps the clock at or below `hz`.
-        const u64 step = u64(hz) * (n + 1);  // u64: hz * 64 overflows u32 above 67 MHz
-        u32 pre = u32((kApbHz + step - 1) / step);
-        if (pre < 1) {
-            pre = 1;
-        }
-        if (pre > 0x2000) {
-            continue;
-        }
-        const u32 f = kApbHz / (pre * (n + 1));
-        if (f > best_hz) {
-            best_hz = f;
-            best_reg = ((pre - 1) << 18) | (n << 12) | ((((n + 1) / 2) - 1) << 6) | n;
-        }
-    }
-    return best_reg;
-}
 
 constexpr u8 kHalfBytes = kHalfWords * 4;
 
@@ -154,6 +124,20 @@ inline void flush() FL_NO_EXCEPT {
     }
 }
 
+/// Send a single bit. writeBit<>() is a one-clock operation that cannot ride
+/// the byte staging buffer, so flush what is staged and run a one-bit HSPI
+/// command; MSB first, so the bit is the MSB of the data register.
+inline void sendBit(u8 bit) FL_NO_EXCEPT {
+    flush();
+    waitIdle();  // nothing may be on the wire: this command reuses W0
+    SPI1U = SPIUMOSI;
+    SPI1U1 = 0;  // one bit
+    SPI1W0 = bit ? 0x80000000u : 0u;
+    SPI1CMD = SPIBUSY;
+    waitIdle();
+    begin();
+}
+
 }  // namespace esp8266_hspi
 
 template <u8 DATA_PIN, u8 CLOCK_PIN, u32 SPI_SPEED>
@@ -164,8 +148,13 @@ class ESP8266HspiOutput {
     Selectable* mPSelect;
 
     static u32 clockValue() FL_NO_EXCEPT {
+        // Ceiling division: SPI_SPEED is itself a floored rate (DATA_RATE_MHZ(6)
+        // is 80 / 6 = 13 cycles, i.e. 6.15 MHz), and flooring again here would
+        // ask for a hair under the rate the divider can actually reach, costing
+        // a whole divider step (6.15 -> 5.71 MHz).
         static const u32 reg = esp8266_hspi::clockRegister(
-            SPI_SPEED == 0 ? esp8266_hspi::kApbHz : u32(FL_CPU_FREQUENCY() / SPI_SPEED));
+            SPI_SPEED == 0 ? esp8266_hspi::kApbHz
+                           : u32((u64(FL_CPU_FREQUENCY()) + SPI_SPEED - 1) / SPI_SPEED));
         return reg;
     }
 
@@ -202,6 +191,10 @@ public:
     FASTLED_FORCE_INLINE static void writeWord(u16 w) FL_NO_EXCEPT {
         writeByte(u8(w >> 8));
         writeByte(u8(w & 0xFF));
+    }
+    // One clock of the given bit (SM16716 and the FLAG_START_BIT writers).
+    template <u8 BIT> static void writeBit(u8 b) FL_NO_EXCEPT {
+        esp8266_hspi::sendBit(u8((b >> BIT) & 1u));
     }
 
     // HSPI is shared, so another strip on these pins may have set a
