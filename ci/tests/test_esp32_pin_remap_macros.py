@@ -38,7 +38,11 @@ SCANNED: tuple[str, ...] = (
 
 
 def _code(text: str) -> str:
-    text = re.sub(r"/\*.*?\*/", "", text, flags=re.S)
+    # Blank comments but keep every newline, so a match offset still maps to
+    # the line the reader sees.
+    text = re.sub(
+        r"/\*.*?\*/", lambda m: "\n" * m.group(0).count("\n"), text, flags=re.S
+    )
     return re.sub(r"//[^\n]*", "", text)
 
 
@@ -48,11 +52,15 @@ def test_fastled_spells_remapped_pin_names_in_parentheses() -> None:
     for path in paths:
         if path.suffix not in {".h", ".hpp", ".cpp"}:
             continue
-        for number, line in enumerate(
-            _code(path.read_text(errors="ignore")).splitlines(), 1
-        ):
-            if UNSHIELDED.search(line):
-                offenders.append(f"{path.relative_to(ROOT)}:{number}: {line.strip()}")
+        # Scan the whole file: a macro expands even when `(` lands on the next
+        # line, so a line-at-a-time search would miss a split declaration.
+        code = _code(path.read_text(errors="ignore"))
+        lines = code.split("\n")
+        for match in UNSHIELDED.finditer(code):
+            number = code.count("\n", 0, match.start()) + 1
+            offenders.append(
+                f"{path.relative_to(ROOT)}:{number}: {lines[number - 1].strip()}"
+            )
     assert not offenders, (
         "io_pin_remap.h macros would rewrite these (see #4914):\n"
         + "\n".join(offenders)
