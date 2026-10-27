@@ -68,9 +68,9 @@
 //   edges, which separates a missing jumper from a dead ISR; run it once per
 //   signal before the loopback.
 //
-// Both accept sense pins only from 0, 5, 12 and 15 (the rest are the console,
-// the UART bench, the clockless controller's pad, the flash pads, or the HSPI
-// pads pinMode would unmux), and the loopback rejects two equal pins.
+// All three accept sense pins only from 0, 5, 12 and 15 (the rest are the
+// console, the UART bench, the clockless controller's pad, the flash pads, or
+// the HSPI pads pinMode would unmux), and the loopback rejects two equal pins.
 //
 
 #include "platforms/esp/is_esp.h"  // ok platform headers // ok platform specific - ESP8266 bench gate
@@ -314,6 +314,12 @@ inline DriverShowState& driverShowState() {
 }
 
 // Show one controller for `frames` frames and report frame-time spread.
+//
+// `controller->showLeds()` and not FastLED.show(): each bench times its own
+// driver, so registering several controllers on overlapping pads across a
+// session (apa102ShowMhz adds one per rate, and the bit-bang baseline shares
+// GPIO4 with clocklessShow) cannot make two drivers write the same pin in one
+// frame, and FastLED's global refresh-rate clamp never enters these numbers.
 inline fl::json timeFrames(CLEDController* controller, int nLeds, int frames,
                            fl::i64 floorUs, fl::i64* minUsOut = nullptr) {
     DriverShowState& st = driverShowState();
@@ -368,11 +374,13 @@ inline fl::json clocklessShow(int nLeds, int frames) {
     return timeFrames(st.clockless, n, frames, static_cast<fl::i64>(n) * 30);
 }
 
-// Start frame + 4 bytes per LED + APA102Controller::endBoundary's
-// (n / 32 + 1) end dwords.
+// The chipset's own frame-length formula, so the expectation cannot drift from
+// the length the controller actually emits.
 inline fl::i64 apa102WireBytes(int nLeds) {
-    const fl::i64 n = nLeds;
-    return 4 + 4 * n + 4 * (n / 32 + 1);
+    // APA102Controller is declared at global scope (legacy naming).
+    return static_cast<fl::i64>(
+        ::APA102Controller<kApaDataPin, kApaClockPin, BGR>::calculateBytes(
+            static_cast<fl::size>(nLeds)));
 }
 
 // Frame time against the wire time the programmed divider implies. A frame also
@@ -534,6 +542,10 @@ constexpr int kHspiLoopBytes = 96;
 
 struct HspiLoopbackState {
     fl::u8 got[kHspiLoopBytes];
+    // Staged here rather than on the handler's stack: this file already split
+    // its bind functions to stay inside 4 KB of loop stack, and the pattern is
+    // fully derivable, so the bytes cost nothing in .bss.
+    fl::u8 tx[kHspiLoopBytes];
     int bits;
     int rising;
     int falling;
@@ -587,10 +599,7 @@ inline fl::json apa102HspiLoopbackAt(int mosiPin, int sckPin) {
     s.falling = 0;
     for (int i = 0; i < kHspiLoopBytes; ++i) {
         s.got[i] = 0;
-    }
-    fl::u8 tx[kHspiLoopBytes];
-    for (int i = 0; i < kHspiLoopBytes; ++i) {
-        tx[i] = hspiPattern(i);
+        s.tx[i] = hspiPattern(i);
     }
 
     fl::SPIOutput<kApaDataPin, kApaClockPin, DATA_RATE_KHZ(KHZ)> spi;
@@ -607,7 +616,7 @@ inline fl::json apa102HspiLoopbackAt(int mosiPin, int sckPin) {
     spi.select();
     const fl::u32 t0 = micros();
     attachInterrupt(digitalPinToInterrupt(sckPin), hspiSckSample, CHANGE);
-    spi.writeBytes(tx, kHspiLoopBytes);
+    spi.writeBytes(s.tx, kHspiLoopBytes);
     const fl::u32 elapsed = micros() - t0;
     // writeBytes blocks in kick() until SPIBUSY clears, but stay attached
     // through endTransaction() so no tail edge can be missed.
@@ -617,9 +626,15 @@ inline fl::json apa102HspiLoopbackAt(int mosiPin, int sckPin) {
     const int bitsAfter = s.bits;
 
     int badBytes = 0, firstBad = -1;
+    fl::u8 firstBadGot = 0;
     for (int i = 0; i < kHspiLoopBytes; ++i) {
         if (s.got[i] != hspiPattern(i)) {
-            if (firstBad < 0) firstBad = i;
+            if (firstBad < 0) {
+                firstBad = i;
+                // Read now: the probe below drives SCK through this same ISR,
+                // and when the transfer was short it keeps filling got[].
+                firstBadGot = s.got[i];
+            }
             ++badBytes;
         }
     }
@@ -657,7 +672,7 @@ inline fl::json apa102HspiLoopbackAt(int mosiPin, int sckPin) {
     r.set("bad_bytes", static_cast<fl::i64>(badBytes));
     r.set("first_bad", static_cast<fl::i64>(firstBad));
     if (firstBad >= 0) {
-        r.set("first_bad_got", static_cast<fl::i64>(s.got[firstBad]));
+        r.set("first_bad_got", static_cast<fl::i64>(firstBadGot));
         r.set("first_bad_want", static_cast<fl::i64>(hspiPattern(firstBad)));
     }
     r.set("khz", static_cast<fl::i64>(KHZ));
@@ -778,11 +793,12 @@ inline fl::json apa102HspiWatch(int sckPin, int nBytes, int nField) {
     fl::SPIOutput<kApaDataPin, kApaClockPin, DATA_RATE_KHZ(25)> spi;
     spi.init();
     // nField >= 0 re-splits the same total divider across CLKCNT_N and
-    // CLKDIV_PRE. The driver resolves 25 kHz to CLKDIV_PRE = 3201 with
-    // CLKCNT_N = 1, and the clock's high phase is a fraction of CLKCNT_N, so a
-    // divider packed into PRE may leave the pad with nothing to show. The core
-    // library does the opposite: it drives CLKCNT_N to its 64 maximum and puts
-    // the rest in PRE.
+    // CLKDIV_PRE. Before kHspiMinNDivider the driver resolved 25 kHz to
+    // CLKDIV_PRE = 3201 with CLKCNT_N = CLKCNT_L = 0, and CLKCNT_L is the
+    // clock's high phase, so the pad had nothing to show; re-splitting the same
+    // divider with CLKCNT_N = 1 (CLKCNT_L = 1) is how that was confirmed on the
+    // wire. -1 runs whatever the driver installed, which is what a fixed build
+    // should be measured with.
     const fl::u32 clkBefore = SPI1CLK;  // ok platform specific - reads back the divider the driver installed
     if (nField >= 0) {
         const fl::u32 pre1 = ((clkBefore >> 18) & 0x1FFFUL) + 1;
@@ -814,6 +830,11 @@ inline fl::json apa102HspiWatch(int sckPin, int nBytes, int nField) {
     int transitions = 0, highSamples = 0, samples = 0;
     fl::u32 last = GPI & mask;  // ok platform specific - raw pad level while the bus runs; no core API reports it
     const fl::u32 t0 = micros();
+    // The same barrier the driver's kick() issues: the SPI1U1 length and FIFO
+    // writes above must be visible before the peripheral is told to start, or
+    // the transfer runs with init()'s leftover length and the counts describe
+    // the wrong frame.
+    __sync_synchronize();
     SPI1CMD |= SPIBUSY;
     while (SPI1CMD & SPIBUSY) {
         const fl::u32 now = GPI & mask;  // ok platform specific - raw pad level while the bus runs
