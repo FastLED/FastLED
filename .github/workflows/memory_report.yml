@@ -4,9 +4,10 @@ name: memory_report
 # against the PR's merge base (#4920). Report only; the size gates stay in
 # check_uno_size.yml and bloat_regression_esp32s3.yml.
 #
-# AVR boards run on every PR that touches src/: their toolchain is small and
-# the build takes seconds. The other targets download large toolchains, so they
-# join only with `ci-full`, `ci-test:bloat`, or their own `ci-platform:<board>`.
+# Which targets run follows the changed files (ci/changed_targets.py):
+# platform-only changes measure that platform, common code measures the cheap
+# AVR target, and WASM/stub-only changes measure nothing. The labels
+# `ci-full`, `ci-test:bloat` and `ci-platform:<board>` remain additive.
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -22,6 +23,7 @@ on:
     paths:
       - 'src/**'
       - 'ci/memory_report.py'
+      - 'ci/changed_targets.py'
       - '.github/workflows/memory_report.yml'
 
 permissions:
@@ -37,23 +39,47 @@ jobs:
     outputs:
       boards: ${{ steps.pick.outputs.boards }}
     steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          # [cache.pr] mode "none": restore on PRs, save only from master.
+          save-cache: false
+
       - name: Pick targets
         id: pick
         env:
-          LABELS: ${{ github.event_name == 'workflow_dispatch' && '["ci-full"]' || toJSON(github.event.pull_request.labels.*.name) }}
+          LABELS: ${{ github.event_name == 'workflow_dispatch' && '[]' || toJSON(github.event.pull_request.labels.*.name) }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha || '' }}
+          DISPATCH: ${{ github.event_name == 'workflow_dispatch' }}
         run: |
           set -euo pipefail
-          optional="esp32dev esp32s3 esp32c3 esp32c6 teensy41 rp2040 nrf52840_dk stm32f103c8"
-          boards="uno attiny85"
-          for b in $optional; do
-            if jq -e --arg b "$b" 'index("ci-full") or index("ci-test:bloat") or index("ci-platform:" + $b)' <<<"$LABELS" >/dev/null; then
-              boards="$boards $b"
-            fi
-          done
-          echo "boards=$(jq -cn --arg s "$boards" '$s | split(" ")')" >> "$GITHUB_OUTPUT"
+          : > changed.txt
+          if [ -n "$BASE_SHA" ]; then
+            base="$(git merge-base "$HEAD_SHA" "$BASE_SHA")"
+            git diff --name-only "$base" "$HEAD_SHA" > changed.txt
+          elif git rev-parse --verify --quiet "$HEAD_SHA~1" >/dev/null; then
+            git diff --name-only "$HEAD_SHA~1" "$HEAD_SHA" > changed.txt
+          fi
+          labels="$(jq -r 'join(",")' <<<"$LABELS")"
+          if [ "$DISPATCH" = "true" ]; then
+            boards="$(uv run ci/memory_report.py plan --changed-file changed.txt --all)"
+          else
+            boards="$(uv run ci/memory_report.py plan --changed-file changed.txt --labels "$labels")"
+          fi
+          echo "boards=$boards" >> "$GITHUB_OUTPUT"
+          echo "targets: $boards" >> "$GITHUB_STEP_SUMMARY"
 
   measure:
     needs: plan
+    # Nothing to measure for WASM/stub-only changes.
+    if: needs.plan.outputs.boards != '[]'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -94,8 +120,10 @@ jobs:
           path: out/*.json
 
   comment:
-    needs: measure
-    if: always() && needs.measure.result != 'skipped'
+    needs: [plan, measure]
+    # Still run when nothing was measured, so the sticky comment reports the
+    # skip instead of leaving the previous push's numbers in place.
+    if: always() && needs.plan.result == 'success'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -113,6 +141,7 @@ jobs:
           save-cache: ${{ github.ref == 'refs/heads/master' && (github.event_name == 'push' || github.event_name == 'schedule') }}
 
       - uses: actions/download-artifact@v4
+        continue-on-error: true
         with:
           pattern: memory-*
           merge-multiple: true
@@ -123,9 +152,31 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           PR: ${{ github.event.pull_request.number }}
           REPO: ${{ github.repository }}
+          SKIPPED: ${{ needs.measure.result == 'skipped' }}
         run: |
           set -euo pipefail
-          uv run ci/memory_report.py render --base out/base-*.json --head out/head-*.json > body.md
+          shopt -s nullglob
+          bases=(out/base-*.json)
+          heads=(out/head-*.json)
+          if [ "$SKIPPED" = "true" ]; then
+            {
+              echo '<!-- fastled-memory-report -->'
+              echo '### Memory usage'
+              echo
+              echo 'No measurement: this change only touches platform code that is'
+              echo 'not a size target (stub/WASM).'
+            } > body.md
+          elif [ "${#bases[@]}" -eq 0 ] || [ "${#heads[@]}" -eq 0 ]; then
+            {
+              echo '<!-- fastled-memory-report -->'
+              echo '### Memory usage'
+              echo
+              echo 'No measurement: the build for the selected target(s) failed.'
+              echo 'See the `measure` job for the failing target.'
+            } > body.md
+          else
+            uv run ci/memory_report.py render --base "${bases[@]}" --head "${heads[@]}" > body.md
+          fi
           cat body.md >> "$GITHUB_STEP_SUMMARY"
           [ -n "$PR" ] || exit 0
           marker='<!-- fastled-memory-report -->'
