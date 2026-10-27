@@ -412,7 +412,9 @@ __attribute__((noinline)) static FL_IRAM void captureHspi(HspiCapture& cap, fl::
             fl::esp8266_hspi::push(hspiPattern(fed++));
         } else if (fed == kHspiLoopBytes && !busy) {
             if (s.ptr != s.stage.bytes) {
-                fl::esp8266_hspi::flush();  // the tail chunk; does not wait
+                // ok platform specific - hands the tail chunk to HSPI without
+                // waiting, which SPIOutput cannot express
+                fl::esp8266_hspi::flush();
             } else if (cap.bits >= kHspiLoopBytes * 8) {
                 break;
             }
