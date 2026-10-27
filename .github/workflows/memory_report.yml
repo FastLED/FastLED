@@ -23,6 +23,7 @@ on:
     paths:
       - 'src/**'
       - 'ci/memory_report.py'
+      - 'ci/changed_targets.py'
       - '.github/workflows/memory_report.yml'
 
 permissions:
