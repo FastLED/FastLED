@@ -113,6 +113,22 @@ template<> struct DefaultBus<SpiChipsetConfig> {
     static constexpr Bus value = Bus::SPI;
 };
 
+#elif defined(FL_IS_ESP8266)
+
+// ESP8266 has no peripheral engine wired through the channel API yet, so both
+// chipset families resolve to the shared GPIO bit-bang driver
+// (`src/platforms/shared/bitbang/bus_traits.h`). A native engine (I2S, see
+// #4943) can replace the clockless default later. This is a template selection,
+// not a code-enabling define: naming `Bus::AUTO` is what keeps the driver's
+// translation unit, and the selection is fully type-checked either way.
+template<> struct DefaultBus<ClocklessChipset> {
+    static constexpr Bus value = Bus::BIT_BANG;
+};
+
+template<> struct DefaultBus<SpiChipsetConfig> {
+    static constexpr Bus value = Bus::BIT_BANG;
+};
+
 #endif
 
 template<Bus B> struct BusInstanceCount {

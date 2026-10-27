@@ -64,6 +64,22 @@ void esp8266_compile_tests() FL_NO_EXCEPT {
     FL_STATIC_ASSERT(FastPin<14>::validpin(),
                      "NodeMCU D5 (GPIO 14) must be a valid FastLED pin");
 #endif
+
+// #4941: `fl::Bus::AUTO` (and any `fl::Channel<>` named without an explicit
+// bus) resolves through `DefaultBus<Chipset>::value`. ESP8266 has no peripheral
+// engine wired through the channel API yet, so both chipset families select the
+// shared GPIO bit-bang driver. This is a template selection, not a
+// code-enabling define: the driver's translation unit is retained only because
+// naming `Bus::AUTO` / `Bus::BIT_BANG` references it, and the selection is
+// fully type-checked either way.
+FL_STATIC_ASSERT(DefaultBus<ClocklessChipset>::value == Bus::BIT_BANG,
+                 "ESP8266 default clockless bus must be BIT_BANG");
+FL_STATIC_ASSERT(DefaultBus<SpiChipsetConfig>::value == Bus::BIT_BANG,
+                 "ESP8266 default SPI bus must be BIT_BANG");
+FL_STATIC_ASSERT(BusSupports<Bus::BIT_BANG, ClocklessChipset>::value,
+                 "ESP8266 default clockless driver must accept ClocklessChipset");
+FL_STATIC_ASSERT(BusSupports<Bus::BIT_BANG, SpiChipsetConfig>::value,
+                 "ESP8266 default SPI driver must accept SpiChipsetConfig");
 }
 #endif // FL_IS_ESP8266
 
