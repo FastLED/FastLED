@@ -26,7 +26,7 @@
 /// that can actually drive those pads at the requested rate without <SPI.h>.
 
 #include "fl/stl/int.h"
-#include "platforms/esp/8266/fastpin_esp8266.h"  // FastPin<>::kRealPin
+#include "platforms/esp/8266/fastpin_esp8266.h"  // FastPin<>::kRealPin  // IWYU pragma: keep
 #include "platforms/esp/8266/fastspi_esp8266_hspi.h"
 #include "platforms/shared/spi_bitbang/generic_software_spi.h"
 
