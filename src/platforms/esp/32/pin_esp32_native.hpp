@@ -35,11 +35,11 @@
     namespace platforms {
 
     // Stub implementations - all operations are no-ops
-    inline void pinMode(int, PinMode) FL_NO_EXCEPT {}
-    inline void digitalWrite(int, PinValue) FL_NO_EXCEPT {}
-    inline PinValue digitalRead(int) FL_NO_EXCEPT { return static_cast<PinValue>(0); }
-    inline u16 analogRead(int) FL_NO_EXCEPT { return 0; }
-    inline void analogWrite(int, u16) FL_NO_EXCEPT {}
+    inline void (pinMode)(int, PinMode) FL_NO_EXCEPT {}
+    inline void (digitalWrite)(int, PinValue) FL_NO_EXCEPT {}
+    inline PinValue (digitalRead)(int) FL_NO_EXCEPT { return static_cast<PinValue>(0); }
+    inline u16 (analogRead)(int) FL_NO_EXCEPT { return 0; }
+    inline void (analogWrite)(int, u16) FL_NO_EXCEPT {}
     inline void setPwm16(int, u16) FL_NO_EXCEPT {}
     inline void setAdcRange(AdcRange) FL_NO_EXCEPT {}
     inline bool needsPwmIsrFallback(int, u32) FL_NO_EXCEPT { return true; }

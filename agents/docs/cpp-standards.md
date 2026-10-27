@@ -63,6 +63,34 @@ src/fl/stl/fixed_point/          ← implementation directory
     - `header.cpp`: Has platform guards (e.g., `#ifdef ESP32 ... #endif`)
   - Avoid: Adding `#ifdef ESP32` to both header and implementation files (degrades IDE experience)
 
+## Pin Function Names: Parenthesize `pinMode`/`digitalWrite`/`digitalRead`/`analogRead`/`analogWrite` (REQUIRED)
+
+Arduino-ESP32 boards that set `BOARD_HAS_PIN_REMAP` (Arduino Nano ESP32) get
+function-like macros named exactly `pinMode`, `digitalWrite`, `digitalRead`,
+`analogRead` and `analogWrite` from `cores/esp32/io_pin_remap.h`. A
+function-like macro expands wherever its name is followed by `(`, so it
+rewrites declarations, definitions, `fl::`-qualified calls, and even
+`platforms::`-qualified calls. Arduino's macro maps Arduino D-numbers to GPIO
+numbers; FastLED's pin numbers are always raw GPIO numbers, so applying the
+remap would be silently wrong, not just noisy.
+
+Spell the name in parentheses everywhere FastLED owns it — declaration,
+definition, and call site:
+
+```cpp
+void (pinMode)(int pin, PinMode mode) FL_NO_EXCEPT;         // pin.h
+void (pinMode)(int pin, PinMode mode) FL_NO_EXCEPT { ... }  // pin.cpp.hpp
+(fl::pinMode)(pin, PinMode::Output);                        // call site
+```
+
+Parenthesizing a *call* disables argument-dependent lookup, so every call site
+states its namespace: `(fl::pinMode)(...)` or `(platforms::pinMode)(...)`,
+never a bare `(pinMode)(...)`. `ci/tests/test_esp32_pin_remap_macros.py`
+enforces this across `src/fl`, `src/platforms/esp/32` and
+`src/platforms/shared` (see #4914). Arduino-API implementations that
+deliberately use Arduino pin numbers — `src/platforms/arduino`, and the host
+Arduino shim in `src/platforms/stub` — are exempt.
+
 ## Select Types at the Preprocessor Boundary (REQUIRED)
 
 When behavior is selected at compile time, keep platform/capability `#if`
