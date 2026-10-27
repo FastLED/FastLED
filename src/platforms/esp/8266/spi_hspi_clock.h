@@ -16,12 +16,13 @@
 /// cycle the Arduino core programs. The SPI peripheral is clocked from the
 /// fixed 80 MHz source, independent of the CPU frequency setting.
 ///
-/// CLKCNT_L is the clock's high phase, so it must never be zero: with
-/// CLKCNT_N = 1 it is 0, and SCK then stays low for the whole transfer while
-/// the shifter runs for the programmed time. Measured on an ESP8266 -- a 25 kHz
-/// transfer with CLKCNT_N = CLKCNT_L = 0 showed 0 edges and 0 high samples over
-/// 4691 polls of the pad. Divisors are therefore split over CLKCNT_N >= 2
-/// (ESP-IDF's own search starts at 2 for the same reason).
+/// CLKCNT_L is the clock's high phase, so it must never be zero: with the
+/// CLKCNT_N *field* at 0 (a CLKCNT_N + 1 divider of 1) it is 0, and SCK then
+/// stays low for the whole transfer while the shifter runs for the programmed
+/// time. Measured on an ESP8266 -- a 25 kHz transfer with CLKCNT_N = CLKCNT_L =
+/// 0 showed 0 edges and 0 high samples over 4691 polls of the pad. The
+/// CLKCNT_N + 1 divider is therefore at least 2 (encoded CLKCNT_N = 1); ESP-IDF
+/// starts its own search at 2 for the same reason.
 ///
 /// Kept C++11-constexpr clean (single-return functions, no local variables):
 /// the host test build rejects C++14 constexpr extensions with -Werror.

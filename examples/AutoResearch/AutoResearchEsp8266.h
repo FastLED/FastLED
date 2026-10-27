@@ -403,12 +403,12 @@ constexpr fl::i64 kApa102FrameSlackUs = 400;
 // changed, and expected_us would then describe a divider never programmed.
 inline fl::u32 hspiAppliedHz() {
     const fl::u32 reg = SPI1CLK;  // ok platform specific - reads back the divider ESP8266HSPIOutput::init() just wrote
-    if (reg & fl::esp8266::kHspiEquSysClk) {
-        return fl::esp8266::kHspiSourceHz;
+    if (reg & fl::esp8266::kHspiEquSysClk) {  // ok platform specific - SPI1CLK bit 31; no core API reports the bus clock
+        return fl::esp8266::kHspiSourceHz;  // ok platform specific - SPI1's fixed 80 MHz source; no core API exposes it
     }
     const fl::u32 pre = ((reg >> 18) & 0x1FFFUL) + 1;
     const fl::u32 n = ((reg >> 12) & 0x3FUL) + 1;
-    return fl::esp8266::kHspiSourceHz / (pre * n);
+    return fl::esp8266::kHspiSourceHz / (pre * n);  // ok platform specific - the same fixed-source decode; no core API exposes it
 }
 
 inline fl::json apa102RateReport(fl::json r, fl::i64 minUs, int nLeds, int mhz,
@@ -814,11 +814,11 @@ inline fl::json apa102HspiWatch(int sckPin, int nBytes, int nField) {
     // Same staging as the driver's flush(): length in SPI1U1, bytes packed
     // little-endian into the FIFO words.
     const fl::u32 bits = static_cast<fl::u32>(n) * 8 - 1;
-    const fl::u32 lenMask = (static_cast<fl::u32>(SPIMMOSI) << SPILMOSI) |
-                            (static_cast<fl::u32>(SPIMMISO) << SPILMISO);
-    while (SPI1CMD & SPIBUSY) {}
-    SPI1U1 = (SPI1U1 & ~lenMask) | (bits << SPILMOSI) | (bits << SPILMISO);
-    volatile fl::u32* fifo = &SPI1W0;
+    const fl::u32 lenMask = (static_cast<fl::u32>(SPIMMOSI) << SPILMOSI) |  // ok platform specific - SPI1U field masks/shifts; no core API exposes them
+                            (static_cast<fl::u32>(SPIMMISO) << SPILMISO);  // ok platform specific - SPI1U field masks/shifts; no core API exposes them
+    while (SPI1CMD & SPIBUSY) {}  // ok platform specific - waits out a previous transfer; no core API polls SPI1CMD
+    SPI1U1 = (SPI1U1 & ~lenMask) | (bits << SPILMOSI) | (bits << SPILMISO);  // ok platform specific - sets the SPI1 transfer length, as the driver's flush() does
+    volatile fl::u32* fifo = &SPI1W0;  // ok platform specific - SPI1 FIFO staging; no core API exposes it
     for (int i = 0; i < (n + 3) / 4; ++i) {
         const int b = i * 4;
         fl::u32 word = static_cast<fl::u32>(hspiPattern(b));
@@ -835,8 +835,8 @@ inline fl::json apa102HspiWatch(int sckPin, int nBytes, int nField) {
     // the transfer runs with init()'s leftover length and the counts describe
     // the wrong frame.
     __sync_synchronize();
-    SPI1CMD |= SPIBUSY;
-    while (SPI1CMD & SPIBUSY) {
+    SPI1CMD |= SPIBUSY;  // ok platform specific - starts the hand-staged transfer; no core API starts a raw SPI1 run
+    while (SPI1CMD & SPIBUSY) {  // ok platform specific - polls the bus while sampling the pad; no core API exposes SPI1CMD
         const fl::u32 now = GPI & mask;  // ok platform specific - raw pad level while the bus runs
         ++samples;
         if (now != last) {
