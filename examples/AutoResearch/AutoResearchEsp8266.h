@@ -409,13 +409,30 @@ inline fl::json apa102Show(int nLeds, int frames) {
                             achievableHz<6>());
 }
 
+inline fl::json hspiPinError(const char* what) {
+    fl::json e = fl::json::object();
+    e.set("success", false);
+    e.set("error", what);
+    return e;
+}
+
 // The same chipset on a pin pair HSPI cannot reach: the generic software SPI
 // bit-bang this platform used for every APA102 before the native path. D2/D0,
 // not the loopback sense pins, so a fitted jumper never has two outputs on it.
+//
+// 4/16 are only GPIO4/GPIO16 in raw pin order, and D1/NodeMCU numbering has no
+// FastPin<16> at all, so the baseline is defined for the default order only.
+#if defined(FASTLED_ESP8266_RAW_PIN_ORDER)  // ok platform specific - pin keys 4/16 name GPIO4/GPIO16 only in raw order
 constexpr int kBitbangDataPin = 4;
 constexpr int kBitbangClockPin = 16;
+#endif
 
 inline fl::json apa102ShowBitbang(int nLeds, int frames) {
+#if !defined(FASTLED_ESP8266_RAW_PIN_ORDER)  // ok platform specific - the bit-bang baseline pins only exist in raw order
+    (void)nLeds;
+    (void)frames;
+    return hspiPinError("the bit-bang baseline is only defined in raw pin order");
+#else
     DriverShowState& st = driverShowState();
     static CLEDController* c = nullptr;
     if (c == nullptr) {
@@ -430,12 +447,13 @@ inline fl::json apa102ShowBitbang(int nLeds, int frames) {
     // FASTLED_ALL_PINS_HARDWARE_SPI every non-HSPI pair goes to the legacy
     // Arduino-SPI shim, which drives GPIO13/14 -- so there the timing here is
     // that shim's, not a software bit-bang, and it is not a baseline.
-#if defined(FASTLED_ALL_PINS_HARDWARE_SPI)
+#if defined(FASTLED_ALL_PINS_HARDWARE_SPI)  // ok platform specific - this build resolves the pair to the Arduino-SPI shim
     r.set("generic_bitbang", false);
 #else
     r.set("generic_bitbang", true);
 #endif
     return r;
+#endif  // FASTLED_ESP8266_RAW_PIN_ORDER
 }
 
 // One APA102 controller per clock rate. SPI1CLK is written by init() alone, so
@@ -595,15 +613,8 @@ inline fl::json apa102HspiLoopbackAt(int mosiPin, int sckPin) {
 // excludes the pin already used for the other signal, so a self-loop cannot
 // pass with no jumper fitted.
 inline bool hspiSensePinOk(int pin, int other) {
-    const bool usable = pin == 0 || pin == 4 || pin == 5 || pin == 12 || pin == 15;
+    const bool usable = pin == 0 || pin == 4 || pin == 5 || pin == 12 || pin == 15;  // ok platform specific - the ESP8266 pads left usable on a NodeMCU
     return usable && pin != other;
-}
-
-inline fl::json hspiPinError(const char* what) {
-    fl::json e = fl::json::object();
-    e.set("success", false);
-    e.set("error", what);
-    return e;
 }
 
 // Drives the SCK pad as a plain GPIO and both counts interrupts and samples the
