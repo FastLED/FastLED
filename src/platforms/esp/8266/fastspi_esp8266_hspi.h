@@ -216,8 +216,11 @@ public:
         }
     }
 
-    // A chip select must stay asserted until the tail chunk has shifted out.
+    // Hand the tail to the hardware: writePixelsToSPI() (WS2801, LPD8806,
+    // SM16716) ends with release() and no waitFully(), and a chip select must
+    // stay asserted until the tail chunk has shifted out.
     void release() FL_NO_EXCEPT {
+        esp8266_hspi::flush();
         if (mPSelect != nullptr) {
             esp8266_hspi::waitIdle();
             mPSelect->release();
