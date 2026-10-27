@@ -59,14 +59,23 @@ constexpr fl::u32 hspiCeilDiv(fl::u32 a, fl::u32 b) FL_NO_EXCEPT {
     return (a + b - 1) / b;
 }
 
+/// Lift a CLKCNT_N + 1 divider into the usable range.
+constexpr fl::u32 hspiClampN(fl::u32 n) FL_NO_EXCEPT {
+    return (n < kHspiMinNDivider) ? kHspiMinNDivider : n;
+}
+
 /// Build the SPI1CLK value for one (pre, n) divider pair.
 constexpr HspiClock hspiCandidate(fl::u32 pre, fl::u32 n) FL_NO_EXCEPT {
-    // CLKCNT_L = (CLKCNT_N + 1) / 2 with CLKCNT_H = 0 (50% duty).
-    // Fields store (divider - 1). n must be >= kHspiMinNDivider: at n = 1 the
-    // high phase is 0 and the pad never rises, so hspiSearch never tries it.
+    // CLKCNT_L = (CLKCNT_N + 1) / 2 with CLKCNT_H = 0 (50% duty). Fields store
+    // (divider - 1).
+    //
+    // n is clamped to kHspiMinNDivider because CLKCNT_L is half of it: at n = 1
+    // the high phase is 0 and the pad never rises. Clamping here rather than
+    // only in the search keeps the register value and the reported frequency
+    // consistent for every way of building a candidate.
     return HspiClock{
-        (n / 2) | ((n - 1) << 12) | ((pre - 1) << 18),
-        kHspiSourceHz / (pre * n)};
+        (hspiClampN(n) / 2) | ((hspiClampN(n) - 1) << 12) | ((pre - 1) << 18),
+        kHspiSourceHz / (pre * hspiClampN(n))};
 }
 
 /// Prefer the faster candidate (smaller total divider); keep the first on ties.

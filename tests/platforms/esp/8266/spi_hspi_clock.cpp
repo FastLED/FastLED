@@ -144,6 +144,14 @@ FL_TEST_CASE("ESP8266 HSPI clock - CLKCNT_L is never zero") {
         FL_CHECK_EQ(clk.actual_hz, decodeHz(clk.reg_value));
         FL_CHECK(clk.actual_hz <= kHspiSourceHz / min_div);
     }
+
+    // The invariant belongs to the arithmetic, not to one caller: a candidate
+    // built directly with the forbidden n = 1 is clamped, so its register value
+    // and its reported frequency still agree.
+    const HspiClock clamped = hspiCandidate(1, 1);
+    FL_CHECK((clamped.reg_value & 0x3F) >= 1);
+    FL_CHECK_EQ(clamped.actual_hz, decodeHz(clamped.reg_value));
+    FL_CHECK_EQ(clamped.actual_hz, kHspiSourceHz / kHspiMinNDivider);
 }
 
 FL_TEST_CASE("ESP8266 HSPI clock - degenerate inputs") {
