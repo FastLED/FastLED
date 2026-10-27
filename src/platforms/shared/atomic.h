@@ -91,16 +91,30 @@ public:
     bool compare_exchange_weak(T& expected, T desired, int order = memory_order_acq_rel) FL_NO_EXCEPT {
         return __atomic_compare_exchange_n(&mValue, &expected, desired,
                                           true, // weak
-                                          order, order);
+                                          order, failure_order(order));
     }
 
     bool compare_exchange_strong(T& expected, T desired, int order = memory_order_acq_rel) FL_NO_EXCEPT {
         return __atomic_compare_exchange_n(&mValue, &expected, desired,
                                           false, // strong
-                                          order, order);
+                                          order, failure_order(order));
     }
 
 private:
+    // A failed compare-exchange performs no store, so GCC/Clang reject
+    // release and acq_rel as the failure memory order (-Winvalid-memory-model).
+    // Derive the strongest legal order that adds no release semantics, as
+    // std::atomic implementations do: acq_rel -> acquire, release -> relaxed.
+    static int failure_order(int order) FL_NO_EXCEPT {
+        if (order == memory_order_acq_rel) {
+            return memory_order_acquire;
+        }
+        if (order == memory_order_release) {
+            return memory_order_relaxed;
+        }
+        return order;
+    }
+
     mutable T mValue;  // mutable to allow load() on const objects
 };
 
