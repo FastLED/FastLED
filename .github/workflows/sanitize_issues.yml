@@ -1,0 +1,110 @@
+name: sanitize-issues
+
+# ─────────────────────────────────────────────────────────────────────────────
+# WHAT THIS IS
+#
+# Nobody outside the project authors trusted text, and issue/PR text is read by
+# automation (agents, triage bots, triagers' own tools).  This workflow screens
+# that text with Jev before the ``sanitized`` label -- the gate downstream
+# automation must require -- is granted.  ``ci/issue_sanitizer.py`` holds the
+# policy; ``docs/issue-sanitizer.md`` explains it and lists the scenarios it
+# was built for.
+#
+# SECURITY INVARIANTS -- every future editor must preserve these:
+#
+#   1. NO ``run:`` BLOCK MAY INTERPOLATE EVENT TEXT.  Issue titles, bodies,
+#      comments, branch names, author logins and labels are attacker-controlled.
+#      The script reads them from ``GITHUB_EVENT_PATH`` and the API; they never
+#      reach this file's shell.
+#
+#   2. THE CHECKOUT IS THE BASE REF AND NOTHING ELSE.  ``pull_request_target``
+#      is used here because a plain ``pull_request`` from a fork has no secrets,
+#      and the judge call needs one.  Per project_automation.yml invariant #1,
+#      there is deliberately no ``ref:`` and no ``head_ref``: the script that
+#      runs with the API key is base-controlled.  ``sparse-checkout: ci``
+#      shrinks the surface to the directory that holds it.
+#
+#   3. PERMISSIONS STAY MINIMAL.  ``contents: read`` only; ``issues`` and
+#      ``pull-requests`` write are needed to set the two labels.  No
+#      ``contents: write``, no ``id-token``, no repository secret beyond the
+#      judge key.
+#
+#   4. NO TRIGGER RUNS THE WORKFLOW DEFINITION FROM A PULL REQUEST.  ``pull_request``,
+#      ``pull_request_review`` and ``pull_request_review_comment`` all execute
+#      the workflow file taken from the pull request's merge commit (GitHub's
+#      own docs), which a same-repo PR can rewrite to run with the judge key.
+#      Those events are therefore deliberately NOT triggered here: PR bodies
+#      arrive via ``pull_request_target`` (base context) and PR conversation
+#      comments via ``issue_comment``.  Inline review comments are folded into
+#      the corpus whenever a PR is screened for some other reason; a run that
+#      cannot read them holds the container rather than sanitizing it.
+#
+#   5. THIS WORKFLOW NEVER TOUCHES ISSUE CONTENT.  It adds/removes two labels
+#      and, only when asked (``--comment``), one audit comment.  It does not
+#      edit titles or bodies, does not close anything, and does not run
+#      anything the text suggests.
+# ─────────────────────────────────────────────────────────────────────────────
+
+on:
+  issues:
+    types: [opened, edited, reopened]
+  issue_comment:
+    types: [created, edited]
+  # PR *bodies* from forks need secrets, hence pull_request_target; see
+  # invariant #2.  PR conversation comments arrive through issue_comment.
+  pull_request_target:
+    types: [opened, edited]
+  workflow_dispatch:
+    inputs:
+      issue:
+        description: "Issue or pull request number to re-screen"
+        required: true
+        type: number
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+concurrency:
+  # One run per container: an edit that lands while a run is in flight would
+  # otherwise race the label writes with a stale corpus.
+  group: sanitize-${{ github.event.issue.number || github.event.pull_request.number || inputs.issue }}
+  cancel-in-progress: true
+
+jobs:
+  sanitize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # A fork of the repository has no reason to screen anything, and its runs
+    # would only burn minutes.
+    if: github.repository == 'FastLED/FastLED'
+    steps:
+      # SECURITY: no `ref:` here, ever -- see invariant #2.
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: ci
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Screen the submission with Jev
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Required: with no key the judge cannot run and the script holds
+          # (and revokes) rather than skipping.  Set it in repo secrets.
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          JEV_MODEL: typesafe/jev-router
+          # `type: number` on the dispatch input -- digits only, never text.
+          DISPATCH_ISSUE: ${{ inputs.issue }}
+        run: |
+          if [ -n "${DISPATCH_ISSUE}" ]; then
+            python ci/issue_sanitizer.py --issue "${DISPATCH_ISSUE}" --verbose
+          else
+            python ci/issue_sanitizer.py --event --verbose
+          fi
+
+      # The decision matrix is already in the run summary (the script writes
+      # GITHUB_STEP_SUMMARY).  Nothing is published to the issue itself unless
+      # the script was invoked with --comment.
