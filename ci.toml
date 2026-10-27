@@ -3,7 +3,7 @@
 # Pinned checker schema 3; no fleet-wide precheck/adoption is claimed.
 schema = 3
 profile = "fastled-cache-retention"
-linter = "zackees/ci.yml@dfc7e7d8e0e266db5b71355b281220ab3b0c563f"
+linter = "zackees/ci.yml@5ac6eed923bbc6c78c088b96e5ffcc977ad20701"
 
 # Minimal honest context required by schema 3. These cache-only flows do not
 # select, skip, or otherwise replace FastLED's native/board validation jobs.
@@ -33,7 +33,9 @@ never = []
 retired = []
 # #4886 restricts all current shared-cache producers to master push/schedule.
 # Existing historical PR entries can remain until the janitor handles them.
-pr = { mode = "none", families = [], max-per-pr = "0MB", budget = "0MB", trim = "on-close" }
+# mode "none" implies a 0 PR budget and a gated setup-uv save-cache (CACHE-003),
+# so neither is restated here (forge-ci/ci.yml#495).
+pr = { mode = "none", families = [], trim = "on-close" }
 
 # Read-only complete paginated audit 2026-10-22: 45 entries, 15,117,797,637 B.
 # family         entries       total B       largest B

@@ -78,12 +78,12 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         run: >-
           uv tool run --python 3.12
-          --from git+https://github.com/zackees/ci.yml@dfc7e7d8e0e266db5b71355b281220ab3b0c563f
+          --from git+https://github.com/zackees/ci.yml@5ac6eed923bbc6c78c088b96e5ffcc977ad20701
           ci-lint cache audit --repo "$GITHUB_WORKSPACE" --default-branch master
       - name: Check live cache retention target (read only)
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: >-
           uv tool run --python 3.12
-          --from git+https://github.com/zackees/ci.yml@dfc7e7d8e0e266db5b71355b281220ab3b0c563f
+          --from git+https://github.com/zackees/ci.yml@5ac6eed923bbc6c78c088b96e5ffcc977ad20701
           ci-lint cache budget --repo "$GITHUB_WORKSPACE" --default-branch master

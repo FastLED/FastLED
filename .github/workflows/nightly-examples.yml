@@ -47,7 +47,7 @@ jobs:
         continue-on-error: true
         run: >-
           uv tool run --python 3.12
-          --from git+https://github.com/zackees/ci.yml@dfc7e7d8e0e266db5b71355b281220ab3b0c563f
+          --from git+https://github.com/zackees/ci.yml@5ac6eed923bbc6c78c088b96e5ffcc977ad20701
           ci-lint cache audit --repo "$GITHUB_WORKSPACE" --default-branch master --json > cache-before.json
       - name: Apply or preview scoped cache retention
         run: |
@@ -56,7 +56,7 @@ jobs:
             args+=(--dry-run)
           fi
           uv tool run --python 3.12 \
-            --from git+https://github.com/zackees/ci.yml@dfc7e7d8e0e266db5b71355b281220ab3b0c563f \
+            --from git+https://github.com/zackees/ci.yml@5ac6eed923bbc6c78c088b96e5ffcc977ad20701 \
             ci-lint cache janitor --repo "$GITHUB_WORKSPACE" --default-branch master --max-deletes 100 \
             --json "${args[@]}" > cache-maintenance.json
       - name: Classify after cleanup
@@ -64,13 +64,13 @@ jobs:
         continue-on-error: true
         run: >-
           uv tool run --python 3.12
-          --from git+https://github.com/zackees/ci.yml@dfc7e7d8e0e266db5b71355b281220ab3b0c563f
+          --from git+https://github.com/zackees/ci.yml@5ac6eed923bbc6c78c088b96e5ffcc977ad20701
           ci-lint cache audit --repo "$GITHUB_WORKSPACE" --default-branch master --json > cache-after.json
       - name: Enforce post-cleanup retention target
         if: ${{ !cancelled() && env.CACHE_DRY_RUN != 'true' }}
         run: >-
           uv tool run --python 3.12
-          --from git+https://github.com/zackees/ci.yml@dfc7e7d8e0e266db5b71355b281220ab3b0c563f
+          --from git+https://github.com/zackees/ci.yml@5ac6eed923bbc6c78c088b96e5ffcc977ad20701
           ci-lint cache budget --repo "$GITHUB_WORKSPACE" --default-branch master
       - name: Retain cleanup evidence
         if: always()
