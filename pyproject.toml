@@ -399,8 +399,20 @@ dependencies = [
     # `FileNotFoundError: meson_native.txt` / `ninja: error: rebuilding
     # 'build.ninja': subcommand failed` cascade we hit during long-session
     # `bash test --cpp` cycles.
+    # 1.15.8 (released 2026-10-27): latest published release (PyPI and
+    # crates.io). Windows CI still logs
+    # `zccache[warn][S]: cannot connect to daemon at
+    # \\.\pipe\zccache-runneradmin-v1.15.8: ... retrying via ephemeral
+    # session` before the first parallel compile of a step. That warning is
+    # the wrapper's cold-start fallback: the compile still succeeds through
+    # the ephemeral session. The related Windows daemon-pipe failure class
+    # is tracked upstream (zackees/zccache#1976) and has no released fix, so
+    # this floor does not silence the warning -- it keeps environments off
+    # 1.15.6, the version named in that report, and picks up 1.15.7's
+    # same-size-edit stale-hit fix (zackees/zccache#1935/#1947) plus 1.15.8's
+    # Windows destination-delivery retry (zackees/zccache#1757).
     # Private, content-verified PCH input snapshots preserve shared source mtimes.
-    "zccache>=1.15.6",
+    "zccache>=1.15.8",
     "ninja",
     "meson>=1.11.0",
     "download",
