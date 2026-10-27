@@ -14,8 +14,8 @@
 
 namespace fl {
 
-u16 analogRead(int pin) FL_NO_EXCEPT {
-    return platforms::analogRead(pin);
+u16 (analogRead)(int pin) FL_NO_EXCEPT {
+    return (platforms::analogRead)(pin);
 }
 
 }  // namespace fl

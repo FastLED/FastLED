@@ -253,10 +253,10 @@ void DigitalMultiWrite8::buildNibbleLut(u8 bit_offset, PinList (&set_lut)[16],
 
 void DigitalMultiWrite8::applyNibble(const PinList &set, const PinList &clr) FL_NO_EXCEPT {
     for (u8 i = 0; i < set.count; ++i) {
-        fl::digitalWrite(set.pins[i], PinValue::High);
+        (fl::digitalWrite)(set.pins[i], PinValue::High);
     }
     for (u8 i = 0; i < clr.count; ++i) {
-        fl::digitalWrite(clr.pins[i], PinValue::Low);
+        (fl::digitalWrite)(clr.pins[i], PinValue::Low);
     }
 }
 
@@ -370,10 +370,10 @@ void DigitalMultiWrite16::buildNibbleLut(u8 bit_offset,
 
 void DigitalMultiWrite16::applyNibble(const PinList &set, const PinList &clr) FL_NO_EXCEPT {
     for (u8 i = 0; i < set.count; ++i) {
-        fl::digitalWrite(set.pins[i], PinValue::High);
+        (fl::digitalWrite)(set.pins[i], PinValue::High);
     }
     for (u8 i = 0; i < clr.count; ++i) {
-        fl::digitalWrite(clr.pins[i], PinValue::Low);
+        (fl::digitalWrite)(clr.pins[i], PinValue::Low);
     }
 }
 

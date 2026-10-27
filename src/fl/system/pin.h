@@ -69,30 +69,39 @@ enum class AdcRange {
 // Function declarations (implementations in platform-specific .hpp files)
 // ============================================================================
 
+// These five names are spelled with parentheses, e.g. `void (pinMode)(...)`.
+// A function-like macro expands wherever its name is followed by `(`, even
+// after `fl::` or in a declaration, and parentheses are the only way to opt
+// out. Arduino-ESP32 boards with BOARD_HAS_PIN_REMAP (Arduino Nano ESP32)
+// define exactly these names as macros in io_pin_remap.h, remapping Arduino
+// D-numbers to GPIO numbers. FastLED's pin numbers are always raw GPIO
+// numbers, so that remap must never reach them. Every declaration, definition
+// and FastLED-side call site uses the same spelling (see #4914).
+
 /// Set pin mode (input, output, pull-up, pull-down)
 /// @param pin Pin number (platform-specific numbering)
 /// @param mode Pin mode configuration
-void pinMode(int pin, PinMode mode) FL_NO_EXCEPT;
+void (pinMode)(int pin, PinMode mode) FL_NO_EXCEPT;
 
 /// Write digital value to pin
 /// @param pin Pin number (platform-specific numbering)
 /// @param val Pin value (Low or High)
-void digitalWrite(int pin, PinValue val) FL_NO_EXCEPT;
+void (digitalWrite)(int pin, PinValue val) FL_NO_EXCEPT;
 
 /// Read digital value from pin
 /// @param pin Pin number (platform-specific numbering)
 /// @return Pin value (Low or High)
-PinValue digitalRead(int pin) FL_NO_EXCEPT;
+PinValue (digitalRead)(int pin) FL_NO_EXCEPT;
 
 /// Read analog value from pin
 /// @param pin Pin number (platform-specific numbering)
 /// @return Analog value (0-1023 for 10-bit ADC, 0-4095 for 12-bit ADC)
-u16 analogRead(int pin) FL_NO_EXCEPT;
+u16 (analogRead)(int pin) FL_NO_EXCEPT;
 
 /// Write analog value to pin (PWM)
 /// @param pin Pin number (platform-specific numbering)
 /// @param val PWM duty cycle (0-255 typical, platform-specific maximum)
-void analogWrite(int pin, u16 val) FL_NO_EXCEPT;
+void (analogWrite)(int pin, u16 val) FL_NO_EXCEPT;
 
 /// Set PWM duty cycle with 16-bit resolution
 /// @param pin Pin number (platform-specific numbering)

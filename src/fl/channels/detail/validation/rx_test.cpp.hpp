@@ -23,8 +23,8 @@ bool testRxChannel(
     FL_WARN("[RX TEST] Testing RX channel with manual GPIO toggle on PIN " << pin_tx);
 
     // Configure PIN_TX as output using fl::pin functions (temporarily take ownership from FastLED)
-    fl::pinMode(pin_tx, fl::PinMode::Output);
-    fl::digitalWrite(pin_tx, fl::PinValue::Low);  // Start LOW
+    (fl::pinMode)(pin_tx, fl::PinMode::Output);
+    (fl::digitalWrite)(pin_tx, fl::PinValue::Low);  // Start LOW
 
     // Toggle parameters (generous timing works across all platforms)
     const int num_toggles = 16;
@@ -41,7 +41,7 @@ bool testRxChannel(
 
     if (!rx_channel->begin(rx_config)) {
         FL_ERROR("[RX TEST]: Failed to begin RX channel");
-        fl::pinMode(pin_tx, fl::PinMode::Input);  // Release pin
+        (fl::pinMode)(pin_tx, fl::PinMode::Input);  // Release pin
         return false;
     }
 
@@ -49,10 +49,10 @@ bool testRxChannel(
 
     // Generate toggle pattern: HIGH -> LOW -> HIGH -> LOW ...
     for (int i = 0; i < num_toggles; i++) {
-        fl::digitalWrite(pin_tx, fl::PinValue::High);
+        (fl::digitalWrite)(pin_tx, fl::PinValue::High);
         fl::delayMicroseconds(toggle_delay_us);
 
-        fl::digitalWrite(pin_tx, fl::PinValue::Low);
+        (fl::digitalWrite)(pin_tx, fl::PinValue::Low);
         fl::delayMicroseconds(toggle_delay_us);
     }
 
@@ -61,7 +61,7 @@ bool testRxChannel(
     fl::RxWaitResult wait_result = rx_channel->wait(timeout_ms);
 
     // Release PIN_TX for FastLED use using fl::pin functions
-    fl::pinMode(pin_tx, fl::PinMode::Input);
+    (fl::pinMode)(pin_tx, fl::PinMode::Input);
 
     // Check if we successfully captured data
     if (wait_result != fl::RxWaitResult::SUCCESS) {

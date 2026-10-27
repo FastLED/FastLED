@@ -20,7 +20,7 @@ PotentiometerLowLevel::PotentiometerLowLevel(int pin)
 PotentiometerLowLevel::~PotentiometerLowLevel() FL_NO_EXCEPT {}
 
 u16 PotentiometerLowLevel::read() FL_NO_EXCEPT {
-    return fl::analogRead(mPin);
+    return (fl::analogRead)(mPin);
 }
 
 // ============================================================================

@@ -49,7 +49,7 @@ namespace platforms {
 // Digital Pin Functions
 // ============================================================================
 
-inline void pinMode(int pin, PinMode mode) FL_NO_EXCEPT {
+inline void (pinMode)(int pin, PinMode mode) FL_NO_EXCEPT {
     if (pin < 0 || pin >= GPIO_NUM_MAX) {
         return;  // Invalid pin
     }
@@ -86,7 +86,7 @@ inline void pinMode(int pin, PinMode mode) FL_NO_EXCEPT {
     gpio_config(&io_conf);
 }
 
-inline void digitalWrite(int pin, PinValue val) FL_NO_EXCEPT {
+inline void (digitalWrite)(int pin, PinValue val) FL_NO_EXCEPT {
     if (pin < 0 || pin >= GPIO_NUM_MAX) {
         return;  // Invalid pin
     }
@@ -94,7 +94,7 @@ inline void digitalWrite(int pin, PinValue val) FL_NO_EXCEPT {
                    val == PinValue::High ? 1 : 0);
 }
 
-inline PinValue digitalRead(int pin) FL_NO_EXCEPT {
+inline PinValue (digitalRead)(int pin) FL_NO_EXCEPT {
     if (pin < 0 || pin >= GPIO_NUM_MAX) {
         return PinValue::Low;  // Invalid pin
     }
@@ -125,7 +125,7 @@ namespace {
     }
 }
 
-inline u16 analogRead(int pin) FL_NO_EXCEPT {
+inline u16 (analogRead)(int pin) FL_NO_EXCEPT {
     // Map GPIO pin to ADC channel (ESP32-specific mapping)
     // This is a simplified mapping - real implementation would need
     // platform-specific channel detection
@@ -170,7 +170,7 @@ namespace {
     }
 }
 
-inline u16 analogRead(int pin) FL_NO_EXCEPT {
+inline u16 (analogRead)(int pin) FL_NO_EXCEPT {
     initADC1();
 
     // Note: This is a stub implementation. Real implementation would need
@@ -401,7 +401,7 @@ inline void ledcWriteScaledDuty(int pin, u32 val, u32 in_max) FL_NO_EXCEPT {
     // No LEDC allocation for this pin (setPwmFrequency was not called): no-op.
 }
 
-inline void analogWrite(int pin, u16 val) FL_NO_EXCEPT {
+inline void (analogWrite)(int pin, u16 val) FL_NO_EXCEPT {
     // Arduino-style 8-bit duty input (0-255) onto the LEDC channel that
     // setPwmFrequencyNative() configured for this pin.
     ledcWriteScaledDuty(pin, val, 255);
