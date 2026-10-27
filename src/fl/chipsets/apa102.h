@@ -21,7 +21,7 @@
 /// @tparam DATA_PIN the data pin for these LEDs
 /// @tparam CLOCK_PIN the clock pin for these LEDs
 /// @tparam RGB_ORDER the RGB ordering for these LEDs
-/// @tparam SPI_SPEED the clock divider used for these LEDs.  Set using the ::DATA_RATE_MHZ / ::DATA_RATE_KHZ macros.  Defaults to ::DATA_RATE_MHZ(12)
+/// @tparam SPI_SPEED the clock divider used for these LEDs.  Set using the ::DATA_RATE_MHZ / ::DATA_RATE_KHZ macros.  Defaults to ::DATA_RATE_MHZ(6)
 template <
 	fl::u8 DATA_PIN, fl::u8 CLOCK_PIN,
 	EOrder RGB_ORDER = RGB,
@@ -289,7 +289,7 @@ public:
 /// @tparam DATA_PIN the data pin for these LEDs
 /// @tparam CLOCK_PIN the clock pin for these LEDs
 /// @tparam RGB_ORDER the RGB ordering for these LEDs
-/// @tparam SPI_SPEED the clock divider used for these LEDs.  Set using the ::DATA_RATE_MHZ / ::DATA_RATE_KHZ macros.  Defaults to ::DATA_RATE_MHZ(24)
+/// @tparam SPI_SPEED the clock divider used for these LEDs.  Set using the ::DATA_RATE_MHZ / ::DATA_RATE_KHZ macros.  Defaults to ::DATA_RATE_MHZ(6)
 template <
 	fl::u8 DATA_PIN,
 	fl::u8 CLOCK_PIN,
@@ -318,7 +318,7 @@ public:
 /// @tparam DATA_PIN the data pin for these LEDs
 /// @tparam CLOCK_PIN the clock pin for these LEDs
 /// @tparam RGB_ORDER the RGB ordering for these LEDs
-/// @tparam SPI_SPEED the clock divider used for these LEDs.  Set using the ::DATA_RATE_MHZ / ::DATA_RATE_KHZ macros.  Defaults to ::DATA_RATE_MHZ(24)
+/// @tparam SPI_SPEED the clock divider used for these LEDs.  Set using the ::DATA_RATE_MHZ / ::DATA_RATE_KHZ macros.  Defaults to ::DATA_RATE_MHZ(12)
 template <
 	fl::u8 DATA_PIN,
 	fl::u8 CLOCK_PIN,
@@ -340,7 +340,7 @@ class SK9822Controller : public APA102Controller<
 /// @tparam DATA_PIN the data pin for these LEDs
 /// @tparam CLOCK_PIN the clock pin for these LEDs
 /// @tparam RGB_ORDER the RGB ordering for these LEDs
-/// @tparam SPI_SPEED the clock divider used for these LEDs.  Set using the ::DATA_RATE_MHZ / ::DATA_RATE_KHZ macros.  Defaults to ::DATA_RATE_MHZ(24)
+/// @tparam SPI_SPEED the clock divider used for these LEDs.  Set using the ::DATA_RATE_MHZ / ::DATA_RATE_KHZ macros.  Defaults to ::DATA_RATE_MHZ(12)
 template <
 	fl::u8 DATA_PIN,
 	fl::u8 CLOCK_PIN,

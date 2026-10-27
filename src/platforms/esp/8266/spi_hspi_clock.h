@@ -1,0 +1,118 @@
+#pragma once
+
+// IWYU pragma: private
+
+/// @file platforms/esp/8266/spi_hspi_clock.h
+/// @brief ESP8266 SPI1 (HSPI) clock divider computation
+///
+/// Pure compile-time arithmetic, deliberately free of SDK headers so it can be
+/// unit tested on the host. The register layout and the frequency formula match
+/// the ESP8266 Arduino core's SPI library:
+///
+///   SPI1CLK: [31] EQU | [30:18] CLKDIV_PRE | [17:12] CLKCNT_N | [11:6] CLKCNT_H | [5:0] CLKCNT_L
+///   f_spi = 80 MHz / ((CLKDIV_PRE + 1) * (CLKCNT_N + 1))
+///
+/// CLKCNT_H stays zero and CLKCNT_L is (CLKCNT_N + 1) / 2, giving the 50% duty
+/// cycle the Arduino core programs. The SPI peripheral is clocked from the
+/// fixed 80 MHz source, independent of the CPU frequency setting.
+///
+/// Kept C++11-constexpr clean (single-return functions, no local variables):
+/// the host test build rejects C++14 constexpr extensions with -Werror.
+
+#include "fl/stl/int.h"
+#include "fl/stl/noexcept.h"
+
+namespace fl {
+namespace esp8266 {
+
+/// Computed SPI1CLK register value and the frequency it actually produces.
+struct HspiClock {
+    fl::u32 reg_value;  ///< Value to write to SPI1CLK
+    fl::u32 actual_hz;  ///< Resulting clock frequency (0 = no valid divider)
+};
+
+/// SPI1 peripheral source clock (fixed, independent of the CPU frequency).
+constexpr fl::u32 kHspiSourceHz = 80000000UL;
+
+/// Largest CLKDIV_PRE + 1 (13-bit field).
+constexpr fl::u32 kHspiMaxPreDivider = 8192UL;
+
+/// Largest CLKCNT_N + 1 (6-bit field).
+constexpr fl::u32 kHspiMaxNDivider = 64UL;
+
+/// SPICLK_EQU_SYSCLK: clock the SPI bus directly from the system clock.
+constexpr fl::u32 kHspiEquSysClk = 0x80000000UL;
+
+/// Ceiling division for unsigned values (b must be non-zero).
+constexpr fl::u32 hspiCeilDiv(fl::u32 a, fl::u32 b) FL_NO_EXCEPT {
+    return (a + b - 1) / b;
+}
+
+/// Build the SPI1CLK value for one (pre, n) divider pair.
+constexpr HspiClock hspiCandidate(fl::u32 pre, fl::u32 n) FL_NO_EXCEPT {
+    // CLKCNT_L = (CLKCNT_N + 1) / 2 with CLKCNT_H = 0 (50% duty).
+    // Fields store (divider - 1).
+    return HspiClock{
+        (n / 2) | ((n - 1) << 12) | ((pre - 1) << 18),
+        kHspiSourceHz / (pre * n)};
+}
+
+/// Prefer the faster candidate (smaller total divider); keep the first on ties.
+constexpr HspiClock hspiFaster(HspiClock a, HspiClock b) FL_NO_EXCEPT {
+    return (b.actual_hz > a.actual_hz) ? b : a;
+}
+
+/// Slowest possible setting, used when no divider reaches the requested rate.
+constexpr HspiClock hspiSlowest() FL_NO_EXCEPT {
+    return hspiCandidate(kHspiMaxPreDivider, kHspiMaxNDivider);
+}
+
+/// Search n = 1..kHspiMaxNDivider for the smallest divider >= kMinDiv.
+constexpr HspiClock hspiSearch(fl::u32 min_div, fl::u32 n) FL_NO_EXCEPT {
+    return (n > kHspiMaxNDivider)
+        ? HspiClock{0, 0}
+        : hspiFaster(
+              (hspiCeilDiv(min_div, n) > kHspiMaxPreDivider)
+                  ? HspiClock{0, 0}
+                  : hspiCandidate(hspiCeilDiv(min_div, n), n),
+              hspiSearch(min_div, n + 1));
+}
+
+/// Resolve a minimum divider to the best available setting.
+constexpr HspiClock hspiResolve(fl::u32 min_div) FL_NO_EXCEPT {
+    return (hspiSearch(min_div, 1).actual_hz == 0)
+        ? hspiSlowest()
+        : hspiSearch(min_div, 1);
+}
+
+/// Compute the SPI1CLK value for a minimum total divider.
+///
+/// The software path's FL_DATA_RATE_MHZ(X) is `F_CPU / X` truncated to whole
+/// CPU cycles per bit, so the sketch's original request lies in
+/// (F_CPU / (divider + 1), F_CPU / divider]. A total hardware divider of at
+/// least `divider + 1` therefore never clocks the bus faster than the rate
+/// that was actually requested.
+///
+/// @param min_div minimum (CLKDIV_PRE + 1) * (CLKCNT_N + 1); 0 is treated as 1
+/// @return the register value and the frequency it produces
+constexpr HspiClock hspiClockForMinDivider(fl::u32 min_div) FL_NO_EXCEPT {
+    return hspiResolve((min_div == 0) ? 1 : min_div);
+}
+
+/// Compute the SPI1CLK value for a target frequency.
+///
+/// Picks the smallest achievable divider whose resulting frequency does not
+/// exceed @p target_hz, so the bus never runs faster than requested. The one
+/// exception is a request below the hardware floor (80 MHz / (8192 * 64) =
+/// 152 Hz); that returns the slowest possible setting rather than failing.
+///
+/// @param target_hz requested clock frequency in Hz (0 is treated as 1 Hz)
+/// @return the register value and the frequency it produces
+constexpr HspiClock hspiClockFor(fl::u32 target_hz) FL_NO_EXCEPT {
+    return (target_hz >= kHspiSourceHz)
+        ? HspiClock{kHspiEquSysClk, kHspiSourceHz}
+        : hspiResolve(hspiCeilDiv(kHspiSourceHz, (target_hz == 0) ? 1 : target_hz));
+}
+
+}  // namespace esp8266
+}  // namespace fl

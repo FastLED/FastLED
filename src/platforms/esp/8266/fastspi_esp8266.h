@@ -85,7 +85,9 @@ public:
 	// select the SPI output (TODO: research whether this really means hi or lo.  Alt TODO: move select responsibility out of the SPI classes
 	// entirely, make it up to the caller to remember to lock/select the line?)
 	void select() FL_NO_EXCEPT {
-		SPI.beginTransaction(SPISettings(3200000, MSBFIRST, SPI_MODE0));
+		// SPI_SPEED is the requested clock in Hz (see FL_DATA_RATE_MHZ); it used
+		// to be ignored here in favor of a hard-coded 3.2 MHz.
+		SPI.beginTransaction(SPISettings(SPI_SPEED, MSBFIRST, SPI_MODE0));
 		if(mPSelect != nullptr) { mPSelect->select(); } 
 	} 
 
