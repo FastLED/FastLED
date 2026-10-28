@@ -64,6 +64,16 @@ Notes:
   limiting factor — keep the buffer small and expect the main loop to be
   affected. If `<I2S.h>` is absent the input is a no-op (`Null_Audio`).
 
+- **I2S output engine (#4943)**: a native I2S engine for clockless (WS2812-class)
+  strips, selected by template through `fl::Bus::FLEX_IO` (the ESP8266 "I2S" bus)
+  — `add<fl::Bus::FLEX_IO, fl::ClocklessChipset>(...)` or
+  `fl::enableDriver<fl::Bus::FLEX_IO>()`. It streams 16-bit samples at the
+  WS2812 slot rate (4 slots per bit; `i2s_ws2812_codec.h`) over the Arduino
+  core's verified `core_esp8266_i2s.h`, so the CPU is free during the DMA
+  transfer. It is **not** the clockless default (that stays `Bus::BIT_BANG`), so
+  a sketch that does not name it is unaffected and links no I2S code. The RX
+  path of the same peripheral validates the emitted waveform on-device (capture
+  + `decodeFrame`, the inverse of `encodeFrame`).
 - **OTA (#4946)**: ESP8266 OTA is supported through the Arduino core's verified
   `ArduinoOTA` library (Arduino-IDE OTA on port 3232), selected automatically —
   `fl::net::OTA` / `IOTA::create()` resolves to the ESP8266 backend when
