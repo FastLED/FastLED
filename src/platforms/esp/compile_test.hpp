@@ -15,6 +15,7 @@
 // `BusTraits<Bus::SPI>` / `BusTraits<Bus::UART>` specializations must be
 // visible to the compile test.
 #include "platforms/esp/8266/hspi_bus_traits.h"  // ok platform headers
+#include "platforms/esp/8266/i2s_bus_traits.h"   // ok platform headers
 #include "platforms/esp/8266/uart_bus_traits.h"  // ok platform headers
 #endif
 
@@ -108,6 +109,13 @@ FL_STATIC_ASSERT(BusSupports<Bus::UART, ClocklessChipset>::value,
                  "ESP8266 Bus::UART must accept ClocklessChipset");
 FL_STATIC_ASSERT(TypedChannel<Bus::UART, ClocklessChipset>::kBus == Bus::UART,
                  "ESP8266 TypedChannel<Bus::UART, ClocklessChipset> must resolve to UART");
+
+// #4943: the native I2S output engine is selectable by template through
+// `Bus::FLEX_IO` (the ESP8266 "I2S" bus).
+FL_STATIC_ASSERT(BusSupports<Bus::FLEX_IO, ClocklessChipset>::value,
+                 "ESP8266 Bus::FLEX_IO must accept ClocklessChipset");
+FL_STATIC_ASSERT(TypedChannel<Bus::FLEX_IO, ClocklessChipset>::kBus == Bus::FLEX_IO,
+                 "ESP8266 TypedChannel<Bus::FLEX_IO, ClocklessChipset> must resolve to FLEX_IO");
 }
 #endif // FL_IS_ESP8266
 

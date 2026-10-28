@@ -189,6 +189,12 @@ inline const char* busDriverName(Bus b, fl::u8 which = 0, bool spi = false) FL_N
 #if defined(FL_IS_TEENSY_4X)
             (void)spi;
             return which == 0 ? "OBJECT_FLED" : "FLEX_IO";
+#elif defined(FL_IS_ESP8266)
+            // ESP8266 has no parallel-I/O bank; `Bus::FLEX_IO` names its native
+            // I2S output engine (#4943), matching ESP32's I2S naming.
+            (void)which;
+            (void)spi;
+            return "I2S";
 #elif defined(FL_IS_RP2040) || defined(FL_IS_RP2350)
             (void)spi;
             if (which == 0) return "PIO0";

@@ -23,6 +23,7 @@
 #include "fl/channels/bus_traits.h"
 #include "fl/stl/compiler_control.h"
 #include "platforms/esp/8266/hspi_bus_traits.h"      // ok platform headers // IWYU pragma: keep
+#include "platforms/esp/8266/i2s_bus_traits.h"       // ok platform headers // IWYU pragma: keep
 #include "platforms/shared/bitbang/bus_traits.h"     // ok platform headers // IWYU pragma: keep
 
 namespace fl {
@@ -31,6 +32,7 @@ namespace platforms {
 inline void enableAllChannelDrivers() FL_NO_EXCEPT {
     fl::enableDriver<fl::Bus::BIT_BANG>();
     fl::enableDriver<fl::Bus::SPI>();
+    fl::enableDriver<fl::Bus::FLEX_IO>();  // the ESP8266 "I2S" engine
 }
 
 }  // namespace platforms
