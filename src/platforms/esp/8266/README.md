@@ -55,4 +55,13 @@ Notes:
   UART baud (default 3.2 Mbaud) and reset/latch time (default 300 µs).
 - **`FASTLED_DEBUG_COUNT_FRAME_RETRIES`**: When defined, counts and reports frame retries due to timing interference during show(). Helpful for diagnosing ISR contention.
 
+- **Audio input (#4948)**: ESP8266 has **no dedicated** audio-input engine.
+  `fl::AudioInput` falls through to the shared Arduino-I2S backend
+  (`platforms/arduino/audio_input.hpp`) whenever `<I2S.h>` is present, which the
+  ESP8266 Arduino core provides. There is no ESP32-style native engine
+  (`platforms/esp/32/audio/`) on this platform, and none is planned for now: the
+  ESP8266 is a low-memory tier, so the shared backend's sample buffer is the
+  limiting factor — keep the buffer small and expect the main loop to be
+  affected. If `<I2S.h>` is absent the input is a no-op (`Null_Audio`).
+
 Place these defines before including `FastLED.h` in your sketch.
