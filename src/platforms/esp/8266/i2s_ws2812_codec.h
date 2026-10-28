@@ -24,8 +24,11 @@
 /// host (see tests/platforms/esp/8266/i2s_ws2812_codec.cpp), mirroring
 /// `spi_hspi_clock.h`.
 
+#include "fl/channels/rx.h"       // EdgeTime (RX capture reconstruction)
+#include "fl/stl/cstddef.h"
 #include "fl/stl/int.h"
 #include "fl/stl/noexcept.h"
+#include "fl/stl/vector.h"
 
 namespace fl {
 namespace esp8266 {
@@ -89,6 +92,48 @@ inline fl::u8 decodeByte(fl::u16 s0, fl::u16 s1) FL_NO_EXCEPT {
 /// 16-bit I2S samples needed to carry @p ledBytes LED bytes of a frame.
 constexpr fl::u32 i2sSamplesForBytes(fl::u32 ledBytes) FL_NO_EXCEPT {
     return ledBytes * kI2sSamplesPerByte;
+}
+
+/// ns per I2S slot (312 ns at 3.2 MHz).
+constexpr fl::u32 kI2sSlotNs = 1000000000UL / kI2sSlotHz;
+
+/// Reconstruct edge timings from captured I2S samples (host-testable).
+///
+/// Expands the 16-bit samples to the slot-level bit stream (MSB first per
+/// sample) and run-length encodes it into high/low `EdgeTime` runs, so an I2S
+/// capture can be decoded with the shared `decodeWs2812Edges` path. This is the
+/// RX half of the TX -> RX loopback used to validate the I2S output engine.
+inline void samplesToEdges(const fl::u16* samples, fl::size sampleCount,
+                           fl::vector<EdgeTime>& out) FL_NO_EXCEPT {
+    if (samples == nullptr || sampleCount == 0) {
+        return;
+    }
+    bool haveLevel = false;
+    bool level = false;
+    fl::u32 runSlots = 0;
+    // Each sample is 16 slots, MSB first.
+    constexpr fl::u32 kSlotsPerSample = 16;
+    const fl::u32 totalSlots =
+        static_cast<fl::u32>(sampleCount) * kSlotsPerSample;
+    for (fl::u32 slot = 0; slot < totalSlots; ++slot) {
+        const fl::size sampleIndex = slot / kSlotsPerSample;
+        const fl::u32 shift = 15u - (slot % kSlotsPerSample);
+        const bool now = ((samples[sampleIndex] >> shift) & 1u) != 0u;
+        if (!haveLevel) {
+            level = now;
+            haveLevel = true;
+            runSlots = 1;
+        } else if (now == level) {
+            ++runSlots;
+        } else {
+            out.push_back(EdgeTime(level, runSlots * kI2sSlotNs));
+            level = now;
+            runSlots = 1;
+        }
+    }
+    if (haveLevel) {
+        out.push_back(EdgeTime(level, runSlots * kI2sSlotNs));
+    }
 }
 
 }  // namespace esp8266

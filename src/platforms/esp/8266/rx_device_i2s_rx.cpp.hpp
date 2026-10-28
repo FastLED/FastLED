@@ -27,9 +27,6 @@ namespace {
 using fl::esp8266::kI2sBitsPerSample;
 using fl::esp8266::kI2sSlotHz;
 
-/// ns per I2S slot (312 ns at 3.2 MHz).
-constexpr fl::u32 kSlotNs = 1000000000UL / kI2sSlotHz;
-
 /// Bound a single capture so a stuck line cannot spin forever.
 constexpr fl::u32 kMaxSamples = 8192;
 }  // namespace
@@ -85,37 +82,8 @@ RxWaitResult Esp8266I2sRxDevice::wait(u32 timeout_ms) FL_NO_EXCEPT {
 void Esp8266I2sRxDevice::samplesToEdges(const fl::u16* samples,
                                         fl::size sampleCount,
                                         fl::vector<EdgeTime>& out) FL_NO_EXCEPT {
-    if (sampleCount == 0 || samples == nullptr) {
-        return;
-    }
-    // Expand the samples to the slot-level bit stream (MSB first per sample)
-    // and run-length encode it into high/low edge durations.
-    bool haveLevel = false;
-    bool level = false;
-    fl::u32 runSlots = 0;
-
-    const fl::u32 totalSlots =
-        static_cast<fl::u32>(sampleCount) * kI2sBitsPerSample;
-    for (fl::u32 slot = 0; slot < totalSlots; ++slot) {
-        const fl::size sampleIndex = slot / kI2sBitsPerSample;
-        // Top four bits of the 16-bit sample, MSB first.
-        const fl::u32 shift = 15u - (slot % kI2sBitsPerSample);
-        const bool now = ((samples[sampleIndex] >> shift) & 1u) != 0u;
-        if (!haveLevel) {
-            level = now;
-            haveLevel = true;
-            runSlots = 1;
-        } else if (now == level) {
-            ++runSlots;
-        } else {
-            out.push_back(EdgeTime(level, runSlots * kSlotNs));
-            level = now;
-            runSlots = 1;
-        }
-    }
-    if (haveLevel) {
-        out.push_back(EdgeTime(level, runSlots * kSlotNs));
-    }
+    // Delegates to the shared, host-testable codec reconstruction.
+    fl::esp8266::samplesToEdges(samples, sampleCount, out);
 }
 
 fl::result<u32, DecodeError> Esp8266I2sRxDevice::decode(
