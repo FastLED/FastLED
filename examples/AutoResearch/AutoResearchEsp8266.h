@@ -38,6 +38,7 @@
 #include <esp8266_peri.h>     // ok platform specific - GPI, ESP8266_CLOCK for raw loopback sampling
 #include <user_interface.h>   // ok platform specific - system_update_cpu_freq, wifi_* for bench setup
 #include "platforms/esp/8266/i2s_ws2812_codec.h"     // ok platform headers - codec + samplesToEdges
+#include "platforms/esp/8266/spi_hspi_clock.h"       // ok platform headers - HSPI clock divider
 #include <core_esp8266_i2s.h>  // ok platform specific - I2S TX/RX registers for the loopback bench
 #include <cont.h>             // ok platform specific - cont_get_free_stack (loop-stack headroom)
 // IWYU pragma: end_keep
@@ -526,11 +527,63 @@ FL_NO_INLINE inline void bindEsp8266I2sRpcs(fl::Remote& remote) {
     });
 }
 
+// HSPI (SPI1) master loopback (#4942): drive bytes out of MOSI (GPIO13) and
+// read them back from MISO (GPIO12), which the ESP8266 HSPI does through the
+// SAME register -- after SPI1CMD/SPIBUSY clears, `SPI1W0 & 0xFF` holds the byte
+// clocked in on MISO. Jumper D7 (GPIO13) -> D6 (GPIO12) and every byte comes
+// back. This captures the real hardware SPI output byte-exactly.
+FL_NO_INLINE inline void bindEsp8266SpiRpcs(fl::Remote& remote) {
+    remote.bind("spiLoopback", [](int nBytes) -> fl::json {
+        fl::json r = fl::json::object();
+        if (nBytes < 1 || nBytes > 64) {
+            r.set("error", "nBytes must be in [1, 64]");
+            return r;
+        }
+        const int n = nBytes;
+        // Pads + SPI1 config, mirroring fastspi_esp8266_hspi.h (MOSI=13, SCK=14).
+        GPC(13) = (GPC(13) & (0xFUL << GPCI));
+        GPC(14) = (GPC(14) & (0xFUL << GPCI));
+        GPEC = (1UL << 13) | (1UL << 14);
+        GPF13 = GPFFS(GPFFS_BUS(13));
+        GPF14 = GPFFS(GPFFS_BUS(14));
+        while (SPI1CMD & SPIBUSY) {
+        }
+        SPI1C = 0;
+        SPI1C1 = 0;
+        GPMUX &= ~(1UL << 9);
+        SPI1CLK = fl::esp8266::hspiClockFor(1000000).reg_value;  // 1 MHz
+        SPI1U = SPIUMOSI | SPIUDUPLEX | SPIUSSE;
+        SPI1U1 = (7UL << SPILMOSI) | (7UL << SPILMISO);
+
+        int firstBad = -1;
+        fl::u8 lastGot = 0;
+        for (int i = 0; i < n; ++i) {
+            const fl::u8 b = static_cast<fl::u8>(i * 37 + 0x1B);
+            while (SPI1CMD & SPIBUSY) {
+            }
+            SPI1W0 = b;
+            SPI1CMD |= SPIBUSY;
+            while (SPI1CMD & SPIBUSY) {
+            }
+            lastGot = static_cast<fl::u8>(SPI1W0 & 0xFF);
+            if (lastGot != b && firstBad < 0) {
+                firstBad = i;
+            }
+        }
+        r.set("success", firstBad < 0);
+        r.set("sent", static_cast<fl::i64>(n));
+        r.set("first_bad", static_cast<fl::i64>(firstBad));
+        r.set("last_got", static_cast<fl::i64>(lastGot));
+        return r;
+    });
+}
+
 inline void bindEsp8266Benches(fl::Remote& remote) {
     bindEsp8266WatchdogRpcs(remote);
     bindEsp8266UartRpcs(remote);
     bindEsp8266DriverRpcs(remote);
     bindEsp8266I2sRpcs(remote);
+    bindEsp8266SpiRpcs(remote);
 }
 
 }  // namespace esp8266
