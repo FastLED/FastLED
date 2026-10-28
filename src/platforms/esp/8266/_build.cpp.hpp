@@ -6,4 +6,5 @@
 
 #include "platforms/esp/8266/clockless_esp8266.cpp.hpp"
 #include "platforms/esp/8266/fastled_esp8266_uart.cpp.hpp"
+#include "platforms/esp/8266/hspi_channel_driver.cpp.hpp"
 #include "platforms/esp/8266/io_esp8266.cpp.hpp"

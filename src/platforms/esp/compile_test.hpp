@@ -6,6 +6,16 @@
 #include "fl/stl/noexcept.h"
 #include "FastLED.h"
 
+#include "fl/channels/bus.h"
+#include "fl/channels/bus_traits.h"
+#include "fl/channels/channel_typed.h"
+
+#ifdef ESP8266
+// #4941 / #4942: the ESP8266 default-bus arm and the hardware HSPI
+// `BusTraits<Bus::SPI>` specialization must be visible to the compile test.
+#include "platforms/esp/8266/hspi_bus_traits.h"  // ok platform headers
+#endif
+
 namespace fl {
 
 #ifdef ESP8266
@@ -80,6 +90,14 @@ FL_STATIC_ASSERT(BusSupports<Bus::BIT_BANG, ClocklessChipset>::value,
                  "ESP8266 default clockless driver must accept ClocklessChipset");
 FL_STATIC_ASSERT(BusSupports<Bus::BIT_BANG, SpiChipsetConfig>::value,
                  "ESP8266 default SPI driver must accept SpiChipsetConfig");
+
+// #4942: the hardware HSPI driver is selectable by template through
+// `Bus::SPI`; naming it here is what keeps `hspi_channel_driver.cpp.hpp`
+// alive on a build that uses it (and it dead-strips when nothing names it).
+FL_STATIC_ASSERT(BusSupports<Bus::SPI, SpiChipsetConfig>::value,
+                 "ESP8266 Bus::SPI must accept SpiChipsetConfig");
+FL_STATIC_ASSERT(TypedChannel<Bus::SPI, SpiChipsetConfig>::kBus == Bus::SPI,
+                 "ESP8266 TypedChannel<Bus::SPI, SpiChipsetConfig> must resolve to SPI");
 }
 #endif // FL_IS_ESP8266
 
