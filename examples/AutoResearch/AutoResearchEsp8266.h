@@ -37,6 +37,8 @@
 // IWYU pragma: begin_keep
 #include <esp8266_peri.h>     // ok platform specific - GPI, ESP8266_CLOCK for raw loopback sampling
 #include <user_interface.h>   // ok platform specific - system_update_cpu_freq, wifi_* for bench setup
+#include "platforms/esp/8266/i2s_ws2812_codec.h"     // ok platform headers - codec + samplesToEdges
+#include <core_esp8266_i2s.h>  // ok platform specific - I2S TX/RX registers for the loopback bench
 #include <cont.h>             // ok platform specific - cont_get_free_stack (loop-stack headroom)
 // IWYU pragma: end_keep
 
@@ -79,7 +81,7 @@ inline EdgeCapture& edgeCapture() {
 // sample missed short T0H pulses. So prime two bytes, then write one just
 // after each falling edge, where the line stays low for >= 300 ns. Two edges
 // fall per UART byte, so the FIFO stays ahead of the shifter.
-__attribute__((noinline)) static FL_IRAM void captureEdges(
+FL_NO_INLINE static FL_IRAM void captureEdges(
         const fl::u8* encoded, int nEncoded, fl::u32 mask, fl::u32 idleCycles,
         EdgeCapture& cap) {
     bool level = (GPI & mask) != 0;  // ok platform specific - raw GPIO sampling / UART1 FIFO feed for the pin-level loopback
@@ -396,7 +398,7 @@ inline fl::json jumperCheck(int rxPin) {
 // Each bind instantiates sizeable temporaries; split the bindings across
 // non-inlined functions so their frames do not add up on the 4 KB loop
 // stack (one combined frame overflowed it).
-__attribute__((noinline)) inline void bindEsp8266WatchdogRpcs(fl::Remote& remote) {
+FL_NO_INLINE inline void bindEsp8266WatchdogRpcs(fl::Remote& remote) {
     // Watchdog bring-up: read why the chip last reset, or stop feeding the
     // watchdog (while still yielding) so the user timeout must fire.
     remote.bind("resetCause", []() -> fl::json {
@@ -424,7 +426,7 @@ __attribute__((noinline)) inline void bindEsp8266WatchdogRpcs(fl::Remote& remote
     });
 }
 
-__attribute__((noinline)) inline void bindEsp8266UartRpcs(fl::Remote& remote) {
+FL_NO_INLINE inline void bindEsp8266UartRpcs(fl::Remote& remote) {
     // rxPin < 0 runs the jumper-free internal loopback instead, with nLeds
     // as the rate in kbaud (0 = the driver's 3.2 Mbaud).
     remote.bind("uartWs2812Loopback", [](int nLeds, int rxPin) -> fl::json {
@@ -448,7 +450,7 @@ __attribute__((noinline)) inline void bindEsp8266UartRpcs(fl::Remote& remote) {
     });
 }
 
-__attribute__((noinline)) inline void bindEsp8266DriverRpcs(fl::Remote& remote) {
+FL_NO_INLINE inline void bindEsp8266DriverRpcs(fl::Remote& remote) {
     remote.bind("wifiOff", []() -> fl::json { return wifiOff(); });
     remote.bind("clocklessShow", [](int nLeds, int frames) -> fl::json {
         return clocklessShow(nLeds, frames);
@@ -458,10 +460,66 @@ __attribute__((noinline)) inline void bindEsp8266DriverRpcs(fl::Remote& remote) 
     });
 }
 
+// I2S TX -> RX loopback (#4943 engine + #4945 capture): encode a known pattern
+// with the I2S codec, stream it out of the I2S peripheral, capture it back
+// through the I2S RX path, decode, and compare -- all in software on-device.
+FL_NO_INLINE inline void bindEsp8266I2sRpcs(fl::Remote& remote) {
+    remote.bind("i2sLoopback", [](int nBytes) -> fl::json {
+        fl::json r = fl::json::object();
+        if (nBytes < 1 || nBytes > 300) {
+            r.set("error", "nBytes must be in [1, 300]");
+            return r;
+        }
+        const int n = nBytes;
+        static fl::u8 tx[300];
+        for (int i = 0; i < n; ++i) {
+            tx[i] = static_cast<fl::u8>(i * 53 + 0x1B);
+        }
+        // Encode as the I2S engine does: two 16-bit samples per LED byte.
+        static fl::u16 samples[600];
+        for (int i = 0; i < n; ++i) {
+            fl::esp8266::encodeByte(tx[i], &samples[i * 2]);
+        }
+        const int nSamples = n * 2;
+        // TX + RX on the one I2S peripheral (internal loopback).
+        (void)i2s_rxtxdrive_begin(true, true, true, true);
+        i2s_set_rate(fl::esp8266::kI2sSlotHz);
+        i2s_set_bits(16);
+        for (int i = 0; i < nSamples; ++i) {
+            (void)i2s_write_sample_nb(samples[i]);
+        }
+        static fl::u16 got[600];
+        int cap = 0;
+        const fl::u32 deadline = fl::millis() + 20;
+        while (cap < nSamples && fl::millis() < deadline) {
+            if (i2s_rx_available() > 0) {
+                fl::i16 l = 0, rr = 0;
+                if (i2s_read_sample(&l, &rr, false)) {
+                    got[cap++] = static_cast<fl::u16>(l);
+                }
+            }
+        }
+        int firstBad = -1;
+        for (int i = 0; i < n; ++i) {
+            if (i * 2 + 1 >= cap) { firstBad = i; break; }
+            if (fl::esp8266::decodeByte(got[i * 2], got[i * 2 + 1]) != tx[i]) {
+                firstBad = i;
+                break;
+            }
+        }
+        r.set("success", firstBad < 0);
+        r.set("sent", static_cast<fl::i64>(n));
+        r.set("captured_samples", static_cast<fl::i64>(cap));
+        r.set("first_bad", static_cast<fl::i64>(firstBad));
+        return r;
+    });
+}
+
 inline void bindEsp8266Benches(fl::Remote& remote) {
     bindEsp8266WatchdogRpcs(remote);
     bindEsp8266UartRpcs(remote);
     bindEsp8266DriverRpcs(remote);
+    bindEsp8266I2sRpcs(remote);
 }
 
 }  // namespace esp8266

@@ -3,6 +3,7 @@
 // for APA102/DOTSTAR LED strips.
 // ok standalone
 
+#include "fl/stl/compiler_control.h"  // FL_NO_INLINE
 #include "FastLED.h"
 #include "fl/gfx/five_bit_hd_gamma.h"
 #include "fl/stl/int.h"
@@ -34,7 +35,7 @@ static void init_test_data() {
     }
 }
 
-__attribute__((noinline)) void benchmark_baseline(int iterations) {
+FL_NO_INLINE void benchmark_baseline(int iterations) {
     CRGB color_scale(255, 200, 180); // Typical color temperature correction
     u8 brightness = 128;            // Mid brightness
 
