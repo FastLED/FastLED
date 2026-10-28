@@ -16,30 +16,37 @@ The driver encodes WS2812 LED data into a UART byte stream at 3.2 Mbps:
 
 ## Usage
 
-### Enable the UART driver
+### Select the UART driver (no define needed)
 
-**Option 1: Define before including FastLED**
-```cpp
-#define FASTLED_ESP8266_UART
-#include <FastLED.h>
+`FASTLED_ESP8266_UART` is **retired (#4944).** The driver is selected by
+template and the header is always available, so no define is required.
 
-CRGB leds[NUM_LEDS];
-
-void setup() {
-    FastLED.addLeds<UARTController_ESP8266<GRB>>(leds, NUM_LEDS);
-}
-```
-
-**Option 2: Explicit controller type**
+**Option 1: Legacy controller type**
 ```cpp
 #include <FastLED.h>
 
 CRGB leds[NUM_LEDS];
 
 void setup() {
-    FastLED.addLeds<UARTController_ESP8266<GRB>>(leds, NUM_LEDS);
+    FastLED.addLeds<fl::UARTController_ESP8266, GRB>(leds, NUM_LEDS);
 }
 ```
+
+**Option 2: Channel API (`Bus::UART`)**
+```cpp
+#include <FastLED.h>
+
+CRGB leds[NUM_LEDS];
+
+void setup() {
+    fl::ClocklessChipset clockless(DATA_PIN, fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>());
+    fl::ChannelConfigOf<fl::ClocklessChipset> cfg{
+        clockless, fl::span<CRGB>(leds, NUM_LEDS), GRB};
+    FastLED.add<fl::Bus::UART, fl::ClocklessChipset>(cfg);
+}
+```
+Selecting `Bus::UART` this way keeps the driver's translation unit; a sketch
+that never names it links no UART-driver symbols.
 
 ## Advantages
 

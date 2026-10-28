@@ -11,9 +11,11 @@
 #include "fl/channels/channel_typed.h"
 
 #ifdef ESP8266
-// #4941 / #4942: the ESP8266 default-bus arm and the hardware HSPI
-// `BusTraits<Bus::SPI>` specialization must be visible to the compile test.
+// #4941 / #4942 / #4944: the ESP8266 default-bus arm and the hardware
+// `BusTraits<Bus::SPI>` / `BusTraits<Bus::UART>` specializations must be
+// visible to the compile test.
 #include "platforms/esp/8266/hspi_bus_traits.h"  // ok platform headers
+#include "platforms/esp/8266/uart_bus_traits.h"  // ok platform headers
 #endif
 
 namespace fl {
@@ -98,6 +100,14 @@ FL_STATIC_ASSERT(BusSupports<Bus::SPI, SpiChipsetConfig>::value,
                  "ESP8266 Bus::SPI must accept SpiChipsetConfig");
 FL_STATIC_ASSERT(TypedChannel<Bus::SPI, SpiChipsetConfig>::kBus == Bus::SPI,
                  "ESP8266 TypedChannel<Bus::SPI, SpiChipsetConfig> must resolve to SPI");
+
+// #4944: the UART1 (GPIO2) WS2812 engine is selectable by template through
+// `Bus::UART`; it is not registered by enableAllDrivers(), so selection is
+// explicit and an ordinary pin-2 clockless strip keeps the bit-bang driver.
+FL_STATIC_ASSERT(BusSupports<Bus::UART, ClocklessChipset>::value,
+                 "ESP8266 Bus::UART must accept ClocklessChipset");
+FL_STATIC_ASSERT(TypedChannel<Bus::UART, ClocklessChipset>::kBus == Bus::UART,
+                 "ESP8266 TypedChannel<Bus::UART, ClocklessChipset> must resolve to UART");
 }
 #endif // FL_IS_ESP8266
 

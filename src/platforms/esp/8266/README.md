@@ -43,7 +43,16 @@ Notes:
   - **Any other pin pair**: falls back to the shared software SPI bit-bang (`Bus::BIT_BANG`).
   - **`FASTLED_ALL_PINS_HARDWARE_SPI`**: **retired (#4942).** The legacy Arduino-SPI shim it enabled (`fastspi_esp8266.h`) is gone; the shared software bit-bang now covers every non-HSPI pin pair, and the hardware HSPI pair is selected by template. The define no longer has any effect on ESP8266.
 
-- **Debugging / diagnostics**
-  - **`FASTLED_DEBUG_COUNT_FRAME_RETRIES`**: When defined, counts and reports frame retries due to timing interference during show(). Helpful for diagnosing ISR contention.
+- **`FASTLED_ESP8266_UART`**: **retired (#4944).** The UART1 (GPIO2) WS2812
+  driver is now available and selectable by template — through the channel API
+  (`fl::Bus::UART`) or the legacy `fl::UARTController_ESP8266` controller — with
+  no define. A sketch that never names the engine links no UART-driver symbols.
+  UART1 TX is fixed to GPIO2, so the channel driver only claims a clockless
+  channel whose data pin is GPIO2; it is not registered by
+  `FastLED.enableAllDrivers()`, so ordinary pin-2 clockless strips keep the
+  bit-bang driver unless you select `Bus::UART` explicitly.
+- **`FASTLED_ESP8266_UART_BAUD`** / **`FASTLED_ESP8266_UART_RESET_US`**: tune the
+  UART baud (default 3.2 Mbaud) and reset/latch time (default 300 µs).
+- **`FASTLED_DEBUG_COUNT_FRAME_RETRIES`**: When defined, counts and reports frame retries due to timing interference during show(). Helpful for diagnosing ISR contention.
 
 Place these defines before including `FastLED.h` in your sketch.

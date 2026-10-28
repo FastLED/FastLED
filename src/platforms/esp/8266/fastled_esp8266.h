@@ -14,6 +14,9 @@
 // `fl::Channel<Bus::AUTO, ...>` / `FastLED.add<Bus::AUTO, ...>()` resolve.
 #include "platforms/shared/bitbang/bus_traits.h"  // ok platform headers
 
-#ifdef FASTLED_ESP8266_UART
-#include "platforms/esp/8266/fastled_esp8266_uart.h"
-#endif
+// The UART1 (GPIO2) WS2812 engine is exposed through the channel API as
+// `Bus::UART` (#4944); its `BusTraits<Bus::UART>` specialization lives in
+// `uart_bus_traits.h`. The legacy `UARTController_ESP8266` template stays
+// available. Neither inclusion links anything unless it is used.
+#include "platforms/esp/8266/fastled_esp8266_uart.h"  // ok platform headers
+#include "platforms/esp/8266/uart_bus_traits.h"       // ok platform headers

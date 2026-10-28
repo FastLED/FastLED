@@ -1,11 +1,14 @@
 // @filter: (platform is esp8266)
 
 // ESP8266 UART Driver Test Example
-// Demonstrates the opt-in UART-based WS2812 driver for ESP8266
-// This driver improves stability under Wi-Fi load by using hardware UART
-// instead of bit-banging.
+// Demonstrates the UART-based WS2812 driver for ESP8266. It improves stability
+// under Wi-Fi load by using hardware UART instead of bit-banging.
+//
+// #4944: FASTLED_ESP8266_UART is retired -- the driver is selected by template
+// and the header is always available, so no define is needed. The legacy
+// controller path below keeps working; the channel API path is shown for
+// reference.
 
-#define FASTLED_ESP8266_UART  // Enable UART driver before including FastLED
 #include <FastLED.h>
 
 #define NUM_LEDS 150
@@ -14,10 +17,14 @@
 CRGB leds[NUM_LEDS];
 
 void setup() {
-    // Initialize UART-based LED controller
-    // Uses hardware UART for stable timing under Wi-Fi load
+    // Legacy controller path (no define needed now).
+    // Uses hardware UART for stable timing under Wi-Fi load.
     FastLED.addLeds<fl::UARTController_ESP8266, GRB>(leds, NUM_LEDS);
     FastLED.setBrightness(50);
+
+    // Channel API alternative -- select the UART engine by template:
+    //   fl::ChannelConfigOf<fl::ClocklessChipset> cfg{clockless, span<CRGB>(leds, NUM_LEDS), GRB};
+    //   FastLED.add<fl::Bus::UART, fl::ClocklessChipset>(cfg);
 }
 
 void loop() {
