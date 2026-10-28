@@ -481,8 +481,9 @@ FL_NO_INLINE inline void bindEsp8266I2sRpcs(fl::Remote& remote) {
             fl::esp8266::encodeByte(tx[i], &samples[i * 2]);
         }
         const int nSamples = n * 2;
-        // TX + RX on the one I2S peripheral (internal loopback).
-        (void)i2s_rxtxdrive_begin(true, true, true, true);
+        // TX + RX on the one I2S peripheral. Only ONE side may drive the clocks
+        // (driving both from the same peripheral conflicts and yields silence).
+        (void)i2s_rxtxdrive_begin(true, true, true, false);
         i2s_set_rate(fl::esp8266::kI2sSlotHz);
         i2s_set_bits(16);
         for (int i = 0; i < nSamples; ++i) {
@@ -495,7 +496,13 @@ FL_NO_INLINE inline void bindEsp8266I2sRpcs(fl::Remote& remote) {
             if (i2s_rx_available() > 0) {
                 fl::i16 l = 0, rr = 0;
                 if (i2s_read_sample(&l, &rr, false)) {
-                    got[cap++] = static_cast<fl::u16>(l);
+                    // The core packs (right<<16)|left; the engine's 16-bit sample
+                    // may land in either half depending on the loopback wiring.
+                    fl::u16 s = static_cast<fl::u16>(l);
+                    if (s == 0) {
+                        s = static_cast<fl::u16>(rr);
+                    }
+                    got[cap++] = s;
                 }
             }
         }
@@ -511,6 +518,10 @@ FL_NO_INLINE inline void bindEsp8266I2sRpcs(fl::Remote& remote) {
         r.set("sent", static_cast<fl::i64>(n));
         r.set("captured_samples", static_cast<fl::i64>(cap));
         r.set("first_bad", static_cast<fl::i64>(firstBad));
+        r.set("s0", static_cast<fl::i64>(samples[0]));
+        r.set("g0", static_cast<fl::i64>(got[0]));
+        r.set("g1", static_cast<fl::i64>(got[1]));
+        r.set("dec0", static_cast<fl::i64>(fl::esp8266::decodeByte(got[0], got[1])));
         return r;
     });
 }
