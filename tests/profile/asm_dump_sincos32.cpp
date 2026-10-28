@@ -1,17 +1,18 @@
 // Generate assembly dumps for sin32 analysis
+#include "fl/stl/compiler_control.h"  // FL_NO_INLINE
 #include "fl/math/sin32_simd.h"
 #include "fl/math/simd.h"
 
 using namespace fl;
 
 // Force noinline to see full function in assembly
-__attribute__((noinline))
+FL_NO_INLINE
 SinCos32 test_scalar(u32 angle) {
     return sincos32(angle);
 }
 
 // Force noinline to see full function in assembly
-__attribute__((noinline))
+FL_NO_INLINE
 SinCos32_simd test_simd(simd::simd_u32x4 angles) {
     return sincos32_simd(angles);
 }
