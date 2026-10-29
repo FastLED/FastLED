@@ -540,12 +540,13 @@ FL_NO_INLINE inline void bindEsp8266SpiRpcs(fl::Remote& remote) {
             return r;
         }
         const int n = nBytes;
-        // Pads + SPI1 config, mirroring fastspi_esp8266_hspi.h (MOSI=13, SCK=14).
-        GPC(13) = (GPC(13) & (0xFUL << GPCI));
-        GPC(14) = (GPC(14) & (0xFUL << GPCI));
-        GPEC = (1UL << 13) | (1UL << 14);
-        GPF13 = GPFFS(GPFFS_BUS(13));
-        GPF14 = GPFFS(GPFFS_BUS(14));
+        // Pads: SPECIAL routes each pad to the SPI1 peripheral function. The
+        // core's SPI.begin() does exactly this for MISO(12)/MOSI(13)/SCK(14);
+        // omitting MISO leaves it as a plain GPIO, so the duplex receive reads 0
+        // even when D7->D6 is wired.
+        pinMode(12, SPECIAL);  // MISO -> SPI1 (data in)
+        pinMode(13, SPECIAL);  // MOSI -> SPI1 (data out)
+        pinMode(14, SPECIAL);  // SCK  -> SPI1
         while (SPI1CMD & SPIBUSY) {
         }
         SPI1C = 0;
