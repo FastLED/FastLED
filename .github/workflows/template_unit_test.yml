@@ -177,6 +177,17 @@ jobs:
           uv run test.py --py --clean
         shell: bash
 
+      - name: Agent doc budget ratchets
+        # `tests/` is collected by neither Python mode in this workflow: the
+        # full suite runs `ci/tests` and the smoke inventory is a fixed `ci/`
+        # list (`ci/native_ci.py` PY_SMOKE, capped at ten entries). A ratchet
+        # that no runner collects is a comment, not a gate - an entry page can
+        # grow past its byte ceiling and still merge green. Cheap: one file of
+        # pure filesystem assertions, Linux only.
+        if: runner.os == 'Linux'
+        run: uv run pytest -q --tb=short tests/test_binary_size_docs.py
+        shell: bash
+
       - name: Python smoke tests
         if: runner.os == 'Linux' && !inputs.full-suite
         run: |

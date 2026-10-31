@@ -28,8 +28,8 @@ above; master after #4788 and its follow-up = 3592 / 118, and 3600 / 118 on
 2026-10-30 master.
 3.10.6 is not measured with the no-Serial sketch; never reuse its old
 Serial-enabled numbers. The regression guard is
-`tests/data/uno_blink_bloat_budget.json`, run with the `bash bloat` command
-above.
+`tests/data/uno_blink_bloat_budget.json`, run with
+`bash bloat uno --build --budget tests/data/uno_blink_bloat_budget.json`.
 
 ### #4765 — attiny85 no-Serial scorecard: attiny85 Blink (`examples/Blink`,
 Serial-free since #4759) on fbuild 2.5.37, AVR GCC 7.3.0-atmel3.6.1-arduino7,

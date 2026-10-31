@@ -67,7 +67,8 @@ The wrapper recognizes fbuild's artifact layout, `.build/fbuild/<board>/.fbuild/
 
 ## Artifacts
 
-Every run writes BOTH files side by side under `.build/symbols/<board>/`:
+Every run writes BOTH files side by side under `.build/symbols/<board>/`, or
+`.build/symbols/<board>-slim/` for a `--profile slim` run (e.g. `esp32s3-slim/`):
 
 | File | What's in it |
 |---|---|

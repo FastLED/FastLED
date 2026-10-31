@@ -46,12 +46,23 @@ def test_entry_page_carries_no_per_issue_scorecard_prose() -> None:
     assert not re.search(r"(?m)^### #\d{4}", entry)
 
 
+def _board_table(entry: str) -> str:
+    """The 'Current per-board readings' table only, not prose elsewhere."""
+    match = re.search(r"(?ms)^## Current per-board readings\n(.*?)(?=^## )", entry)
+    assert match, "entry page has no 'Current per-board readings' section"
+    return match.group(1)
+
+
 def test_every_scorecard_is_reachable_from_the_entry_table() -> None:
-    """A scorecard with no row in the entry table is work an agent cannot find."""
-    entry = _entry()
+    """A scorecard with no row in the entry table is work an agent cannot find.
+
+    Scoped to the table: a bare mention in prose (the Related section, a
+    history note) must not satisfy a row that is not there.
+    """
+    table = _board_table(_entry())
     issues = re.findall(r"(?m)^### #(\d+) ", SCORECARDS.read_text(encoding="utf-8"))
     assert issues, "no scorecards parsed - did the heading format change?"
-    unreachable = [issue for issue in issues if f"#{issue}" not in entry]
+    unreachable = [issue for issue in issues if f"#{issue}" not in table]
     assert not unreachable, (
         "scorecards exist for issues with no row in the entry page's "
         f"'Current per-board readings' table: {unreachable}"

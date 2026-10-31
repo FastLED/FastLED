@@ -52,12 +52,15 @@ Provenance (fbuild version, toolchain, what changed) is in
 |---|---|---:|---:|---|
 | `uno` | #4788 / #4764 | 3592 B | 118 B (physical) | `tests/data/uno_blink_bloat_budget.json` |
 | `attiny85` | #4765 | 2460 B | 136 B | `tests/data/attiny85_bloat_budget.json` |
-| `esp32c6` | #4762 | 402674 B | 29027 B | `tests/data/esp32c6_bloat_budget.json` |
+| `esp32c6` | #4762 | 402674 B | 33478 B | `tests/data/esp32c6_bloat_budget.json` |
 | `esp32dev` | #4766 | 287671 B | 34091 B | `tests/data/esp32dev_bloat_budget.json` |
 | `esp32s3` | #4767 | 325075 B | 39147 B | `tests/data/esp32s3_bloat_budget.json` |
 
 Image flash and attributed RAM are bloat-report metrics, **not** fbuild's board
 flash/RAM totals; the two are not interchangeable for any board in this table.
+Attributed RAM moves with fbuild's attribution, so the table carries the value a
+currently supported fbuild reports (the budget guard's ceiling): the same esp32c6
+ELF reads 29027 B on fbuild 2.5.37 and 33478 B on 2.5.39+, at identical image size.
 
 ## Rules for quoting a number
 
