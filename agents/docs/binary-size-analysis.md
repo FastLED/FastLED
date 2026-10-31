@@ -83,6 +83,20 @@ physical RAM (see the AVR section above). The regression guard is
 `tests/data/attiny85_bloat_budget.json`, run with
 `bash bloat attiny85 --build --budget tests/data/attiny85_bloat_budget.json`.
 
+#4762 esp32c6 no-Serial scorecard: esp32c6 Blink (`examples/Blink`,
+Serial-free since #4759) on Arduino-ESP32 3.3.5 / IDF 5.5.1. Image flash is
+402674 B. Attributed RAM for the same ELF is 29027 B on fbuild 2.5.37 and
+33478 B on fbuild 2.5.39; the increase is fbuild#1663 attributing weak vtable
+owners (#4813 / PR #4814), not a code regression, and the image size is
+identical. The earlier published 359834 / 18460 B (#4738) are board flash/RAM
+from fbuild, not bloat-report image flash / attributed RAM, so they are not
+comparable. 3.10.3 and 3.10.6 esp32c6 numbers are not recorded with the
+no-Serial sketch here; never reuse their old Serial-enabled measurements.
+`total_ram` is attributed RAM and omits singleton storage (ParlioEngine
+enforces its own 2048-byte encoding-storage ceiling at compile time). The
+regression guard is `tests/data/esp32c6_bloat_budget.json`, run with
+`bash bloat esp32c6 --build --budget tests/data/esp32c6_bloat_budget.json`.
+
 Rejected because flash cost outweighed RAM: replacing the `addLeds` static
 guard with a placement-new flag (-7 B RAM, +116 B flash, since the compiler
 loses the controller's dynamic type and divides at runtime) and a power-limit
