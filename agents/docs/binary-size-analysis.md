@@ -152,6 +152,16 @@ sketch here; never reuse their old Serial-enabled measurements. The
 regression guard is `tests/data/stm32f103c8_bloat_budget.json`, run with
 `bash bloat stm32f103c8 --build --budget tests/data/stm32f103c8_bloat_budget.json`.
 
+#4768 teensy40 no-Serial scorecard: teensy40 Blink (`examples/Blink`,
+Serial-free since #4759) on fbuild 2.5.45, Teensy framework 1.160.0, ARM GCC 11.3.1.
+Image flash / attributed RAM is 46080 / 21449 B (re-measured by #4768, supersedes the Serial-enabled #4745 49152 / 22990 B). These are bloat-report image
+flash / attributed RAM; board flash/RAM totals from fbuild are measured
+separately and are not comparable. Attributed RAM is not physical board RAM.
+3.10.3 and 3.10.6 teensy40 no-Serial numbers are not recorded here; never
+reuse their old Serial-enabled measurements. The regression guard is
+`tests/data/teensy40_bloat_budget.json`, run with
+`bash bloat teensy40 --build --budget tests/data/teensy40_bloat_budget.json`.
+
 Rejected because flash cost outweighed RAM: replacing the `addLeds` static
 guard with a placement-new flag (-7 B RAM, +116 B flash, since the compiler
 loses the controller's dynamic type and divides at runtime) and a power-limit
