@@ -58,6 +58,19 @@ no weak `timer_millis` on classic ATmega (4 B). A follow-up reached 118 B /
 virtual on AVR (12 B), no list tail pointer (2 B), a 16-bit FPS timestamp
 (2 B) and the refresh cap stored in Hz (2 B).
 
+#4764 no-Serial scorecard: the earlier published Uno Blink had Serial init and
+a banner; dropping it saves 1208 B flash / 177 B RAM, separate from library
+optimization. No-Serial Blink: 3.10.3 = 3784 B flash / 131 B RAM (matched
+sketch); master a439902 = 3922 / 266, measured with repository
+`examples/Blink` right after #4759 dropped its Serial, not the dashboard's
+matched sketch, which is why it exceeds the 3762 / 168 "before #4788" figure
+above; master after #4788 and its follow-up = 3592 / 118, and 3600 / 118 on
+2026-10-30 master.
+3.10.6 is not measured with the no-Serial sketch; never reuse its old
+Serial-enabled numbers. The regression guard is
+`tests/data/uno_blink_bloat_budget.json`, run with the `bash bloat` command
+above.
+
 Rejected because flash cost outweighed RAM: replacing the `addLeds` static
 guard with a placement-new flag (-7 B RAM, +116 B flash, since the compiler
 loses the controller's dynamic type and divides at runtime) and a power-limit
