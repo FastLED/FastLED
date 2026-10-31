@@ -3,6 +3,6 @@
   "example": "Blink",
   "profile": "default",
   "image_flash": 384692,
-  "total_ram": 26670,
-  "reference": "#4813 / PR #4814: fbuild 2.5.37 -> 2.5.39 attribution re-base. Local sweep: the same esp32c3 Blink ELF measures attributed RAM 24607 B on fbuild 2.5.37 (under the previous 25473 B budget) and 26670 B on 2.5.39 (fbuild#1663 attributes weak vtable owners); image size identical. Re-base authorized by the maintainer. Previous reference: #4739: Arduino-ESP32 3.1.0 / IDF 5.3.2, fbuild 2.5.37; image_flash and attributed RAM, not board totals; #4744 compact configuration ratchet; #4742 compact RGBW selectors/exact adjustment ratchet; #4738 shared RMT/HTTP/SPI storage ratchet, published board402670/68388 B"
+  "total_ram": 27018,
+  "reference": "#4982: native ESP32 console (12b85b405, Arduino Serial -> FastLED UART driver) links fl::Singleton<EspIO> storage (+84 B) and ESP-IDF UART/ringbuf/tlsf diagnostics; ce3eb2e77 measures 26670 B, master a96b4a301 27018 B on fbuild 2.5.45 (2.5.39 attributes the same ELF identically). Image flash unchanged ceiling. Pending maintainer approval per #4760. Previous reference: #4813 / PR #4814: fbuild 2.5.37 -> 2.5.39 attribution re-base. Local sweep: the same esp32c3 Blink ELF measures attributed RAM 24607 B on fbuild 2.5.37 (under the previous 25473 B budget) and 26670 B on 2.5.39 (fbuild#1663 attributes weak vtable owners); image size identical. Re-base authorized by the maintainer. Previous reference: #4739: Arduino-ESP32 3.1.0 / IDF 5.3.2, fbuild 2.5.37; image_flash and attributed RAM, not board totals; #4744 compact configuration ratchet; #4742 compact RGBW selectors/exact adjustment ratchet; #4738 shared RMT/HTTP/SPI storage ratchet, published board402670/68388 B"
 }
