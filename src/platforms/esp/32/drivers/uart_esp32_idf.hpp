@@ -460,12 +460,36 @@ size_t UartEsp32::write(const u8* buffer, size_t size) FL_NO_EXCEPT {
         int written = uart_write_bytes(port, static_cast<const char*>(static_cast<const void*>(buffer)), size);
         return (written < 0) ? 0 : static_cast<size_t>(written);
     } else {
-        // Fallback to ROM UART (byte-by-byte)
-        for (size_t i = 0; i < size; i++) {
-            esp_rom_output_tx_one_char(static_cast<char>(buffer[i]));
-        }
-        return size;
+        return writeRom(buffer, size);
     }
+}
+
+#if ESP_IDF_VERSION_4_OR_HIGHER
+// Weak references: they resolve only when another component (Arduino
+// Serial, a UartEsp32 instance, ...) already links the SDK UART driver, so
+// writeRom() never pulls the driver into a sketch on its own (#4982).
+#pragma weak uart_is_driver_installed
+#pragma weak uart_write_bytes
+#endif
+
+size_t UartEsp32::writeRom(const u8* buffer, size_t size) FL_NO_EXCEPT {
+    if (!buffer)
+        return 0;
+#if ESP_IDF_VERSION_4_OR_HIGHER
+    // An installed console driver owns the TX FIFO; queue behind its ring
+    // buffer so output stays ordered with Serial.write() and friends.
+    if (&uart_is_driver_installed && &uart_write_bytes &&
+        uart_is_driver_installed(UART_NUM_0)) {
+        const int written = uart_write_bytes(
+            UART_NUM_0, static_cast<const char*>(static_cast<const void*>(buffer)), size);
+        return (written < 0) ? 0 : static_cast<size_t>(written);
+    }
+#endif
+    // ROM UART (byte-by-byte, blocks while the FIFO is full)
+    for (size_t i = 0; i < size; i++) {
+        esp_rom_output_tx_one_char(static_cast<char>(buffer[i]));
+    }
+    return size;
 }
 
 void UartEsp32::writeln(const char* str) FL_NO_EXCEPT {

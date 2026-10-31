@@ -389,6 +389,15 @@ public:
     size_t write(const u8* buffer, size_t size) FL_NO_EXCEPT;
 
     /**
+     * @brief Write raw bytes to UART0 without owning or linking its driver
+     *
+     * Queues through an already-installed SDK driver (e.g. Arduino Serial) so
+     * output stays ordered; otherwise blocking ROM FIFO writes. Lets
+     * output-only callers print without linking the SDK UART driver.
+     */
+    static size_t writeRom(const u8* buffer, size_t size) FL_NO_EXCEPT;
+
+    /**
      * @brief Write string with newline to UART
      * @param str Null-terminated string to write
      */
