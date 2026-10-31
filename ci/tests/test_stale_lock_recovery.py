@@ -8,9 +8,9 @@ Uses SQLite-backed lock database for lock state management.
 
 import os
 import tempfile
-import time
 import unittest
 from pathlib import Path
+from unittest import mock
 
 import pytest
 
@@ -91,29 +91,30 @@ class TestStaleLockRecovery(unittest.TestCase):
             is_lock_stale(self.lock_path), "Lock should be stale (fake PID)"
         )
 
-        # Try to acquire lock with timeout - should succeed after breaking stale lock
-        start_time = time.time()
+        # Try to acquire lock with timeout - should succeed after breaking stale lock.
+        # Count FileLock's retry sleeps instead of timing wall-clock duration:
+        # under a loaded ./test run SQLite latency alone can exceed any fixed
+        # bound (#4984), while a correct auto-break never waits a retry cycle.
+        retry_sleeps: list[float] = []
         acquired = False
-        try:
-            with FileLock(
-                self.lock_path, timeout=10.0, operation="test_auto_recovery_2"
-            ):
-                acquired = True
-                duration = time.time() - start_time
-                print(f"Lock acquired after {duration:.2f}s (expected < 1s)")
-        except TimeoutError:
-            self.fail("Failed to acquire lock - auto-recovery did not work")
+        with mock.patch(
+            "ci.util.file_lock_rw.time.sleep", side_effect=retry_sleeps.append
+        ):
+            try:
+                with FileLock(
+                    self.lock_path, timeout=10.0, operation="test_auto_recovery_2"
+                ):
+                    acquired = True
+            except TimeoutError:
+                self.fail("Failed to acquire lock - auto-recovery did not work")
 
         self.assertTrue(
             acquired, "Should successfully acquire lock after auto-recovery"
         )
-
-        # Verify lock was broken and re-acquired quickly
-        duration = time.time() - start_time
-        self.assertLess(
-            duration,
-            2.0,
-            f"Auto-recovery took too long ({duration:.2f}s), should be < 2s",
+        self.assertEqual(
+            retry_sleeps,
+            [],
+            "Stale lock should be broken immediately, without retry sleeps",
         )
 
     @pytest.mark.serial
