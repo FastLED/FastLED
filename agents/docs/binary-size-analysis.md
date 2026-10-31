@@ -141,6 +141,17 @@ Serial-enabled measurements. The regression guard is
 `tests/data/esp32c3_bloat_budget.json`, run with
 `bash bloat esp32c3 --build --budget tests/data/esp32c3_bloat_budget.json`.
 
+#4763 stm32f103c8 no-Serial scorecard: stm32f103c8 Blink (`examples/Blink`,
+Serial-free since #4759) on fbuild 2.5.37, STM32duino 2.9.0, GCC 15.2.1.
+Image flash / attributed RAM is 22904 / 1789 B (re-measured by #4763, supersedes the Serial-enabled #4744 26324 / 1924 B; includes #4742
+compact RGBW selectors / exact adjustment). These are bloat-report image
+flash / attributed RAM; board flash/RAM totals from fbuild are measured
+separately and are not comparable. Attributed RAM is not physical board RAM.
+3.10.3 and 3.10.6 stm32f103c8 numbers are not recorded with the no-Serial
+sketch here; never reuse their old Serial-enabled measurements. The
+regression guard is `tests/data/stm32f103c8_bloat_budget.json`, run with
+`bash bloat stm32f103c8 --build --budget tests/data/stm32f103c8_bloat_budget.json`.
+
 Rejected because flash cost outweighed RAM: replacing the `addLeds` static
 guard with a placement-new flag (-7 B RAM, +116 B flash, since the compiler
 loses the controller's dynamic type and divides at runtime) and a power-limit
