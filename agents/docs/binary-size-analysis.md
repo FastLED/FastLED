@@ -113,6 +113,20 @@ no-Serial sketch here; never reuse their old Serial-enabled measurements.
 `tests/data/esp32dev_bloat_budget.json`, run with
 `bash bloat esp32dev --build --budget tests/data/esp32dev_bloat_budget.json`.
 
+#4767 esp32s3 no-Serial scorecard: esp32s3 Blink (`examples/Blink`,
+Serial-free since #4759) on Arduino-ESP32 3.3.11 / IDF 5.5.5 / Xtensa GCC
+14.2.0. The recorded measurement, fbuild 2.5.43 with stock console
+integration (#4873), is 325075 B image flash / 39147 B attributed RAM. The
+budget ceilings are 325139 B image flash (64 B link-layout slack) and
+40016 B attributed RAM; the separate ratchet
+`tests/data/esp32s3_bloat_baseline.txt` independently pins 325075.
+Attributed RAM is not physical board RAM, and board flash/RAM from fbuild
+are not comparable with bloat-report image flash / attributed RAM. 3.10.3
+and 3.10.6 esp32s3 numbers are not recorded with the no-Serial sketch here;
+never reuse their old Serial-enabled measurements. The regression guard is
+`tests/data/esp32s3_bloat_budget.json`, run with
+`bash bloat esp32s3 --build --budget tests/data/esp32s3_bloat_budget.json`.
+
 Rejected because flash cost outweighed RAM: replacing the `addLeds` static
 guard with a placement-new flag (-7 B RAM, +116 B flash, since the compiler
 loses the controller's dynamic type and divides at runtime) and a power-limit
