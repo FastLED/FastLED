@@ -28,12 +28,9 @@
 #include "fl/system/fastpin_base.h"  // Selectable
 #include "pixel_controller.h"
 #include "platforms/cpu_frequency.h"
+#include "platforms/esp/8266/hspi_regs.h"
 #include "platforms/esp/8266/spi_hspi_clock.h"
 #include "platforms/shared/spi_pixel_writer.h"
-
-// IWYU pragma: begin_keep
-#include <esp8266_peri.h>  // SDK SPI1/GPIO register map
-// IWYU pragma: end_keep
 
 namespace fl {
 
@@ -49,7 +46,7 @@ class ESP8266HSPIOutput {
                      "ESP8266 HSPI is only available on GPIO13 (MOSI) / GPIO14 (SCK)");
 
     /// SPI1W0..15 = 16 words = 512 bits = 64 bytes per transaction.
-    static constexpr u16 kMaxBatchBytes = 64;
+    static constexpr u16 kMaxBatchBytes = esp8266::kHspiMaxBatchBytes;
 
     /// The SPI1CLK value for this chipset's rate.
     ///
@@ -78,45 +75,13 @@ public:
 
     void init() FL_NO_EXCEPT {
         mFill = 0;
-        // Pad setup matching the Arduino core's pinMode(pin, SPECIAL): clear
-        // the GPIO output enable so the peripheral drives the pads, use the
-        // normal drive strength, then select the HSPI function.
-        GPC(13) = (GPC(13) & (0xFUL << GPCI));
-        GPC(14) = (GPC(14) & (0xFUL << GPCI));
-        GPEC = (1UL << 13) | (1UL << 14);
-        GPF13 = GPFFS(GPFFS_BUS(13));
-        GPF14 = GPFFS(GPFFS_BUS(14));
-
-        while (SPI1CMD & SPIBUSY) {}
-        SPI1C = 0;  // MSB-first, no delay chains
-        SPI1C1 = 0;
-        // SPICLK_EQU_SYSCLK is a GPMUX mux bit, not only a bit in SPI1CLK, so
-        // select the divider fields or the system-clock bypass the same way the
-        // Arduino core's setClockDivider() does. Writing the bypass value with
-        // the mux bit clear leaves every divider field at zero, which is the
-        // dead-pad encoding this driver exists to avoid.
-        const esp8266::HspiClock clk = clock();
-        if (clk.reg_value == esp8266::kHspiEquSysClk) {
-            GPMUX |= (1UL << 9);
-        } else {
-            GPMUX &= ~(1UL << 9);
-        }
-        SPI1CLK = clk.reg_value;
-        SPI1U = SPIUMOSI | SPIUDUPLEX | SPIUSSE;
-        // 8-bit MOSI phase; MISO is unused but kept in step with MOSI exactly
-        // as the Arduino core's setDataBits() does.
-        SPI1U1 = (static_cast<u32>(7) << SPILMOSI) | (static_cast<u32>(7) << SPILMISO);
+        esp8266::hspiConfigure(clock());
         release();
     }
 
     /// Return GPIO13/14 to the plain GPIO function so the pads are usable again
     /// (mirrors the core's end(): both pins end up as inputs).
-    static void stop() FL_NO_EXCEPT {
-        while (SPI1CMD & SPIBUSY) {}
-        GPF13 = GPFFS(GPFFS_GPIO(13));
-        GPF14 = GPFFS(GPFFS_GPIO(14));
-        GPEC = (1UL << 13) | (1UL << 14);
-    }
+    static void stop() FL_NO_EXCEPT { esp8266::hspiRelease(); }
 
     /// No-op: there is no asynchronous write queue to drain.
     static void wait() FL_NO_EXCEPT {}
@@ -124,7 +89,7 @@ public:
     /// Shift out any staged bytes and block until the bus is idle.
     void waitFully() FL_NO_EXCEPT {
         flush();
-        while (SPI1CMD & SPIBUSY) {}
+        esp8266::hspiWaitIdle();
     }
 
     void writeByteNoWait(u8 b) FL_NO_EXCEPT { writeByte(b); }
@@ -142,11 +107,7 @@ public:
     /// Write a single bit out, MSB-first (used for chipsets with a start bit).
     template <u8 BIT> void writeBit(u8 b) FL_NO_EXCEPT {
         flush();
-        while (SPI1CMD & SPIBUSY) {}
-        setTransferBits(1);
-        // A one-bit transfer shifts the first bit of word byte 0, i.e. bit 7.
-        SPI1W0 = ((b >> BIT) & 1) ? 0x80UL : 0UL;
-        kick();
+        esp8266::hspiWriteBit(((b >> BIT) & 1) != 0);
     }
 
     void select() FL_NO_EXCEPT {
@@ -207,44 +168,7 @@ private:
         }
         const u16 nbytes = mFill;
         mFill = 0;
-
-        const u32 nbits = static_cast<u32>(nbytes) * 8;
-        while (SPI1CMD & SPIBUSY) {}
-        setTransferBits(nbits);
-
-        // SPI1W0..15 are contiguous; the peripheral emits word byte 0 first,
-        // so pack the staged bytes little-endian into each FIFO word.
-        volatile u32* fifo = &SPI1W0;
-        const u16 nwords = static_cast<u16>((nbytes + 3) / 4);
-        for (u16 i = 0; i < nwords; ++i) {
-            const u16 b = static_cast<u16>(i * 4);
-            u32 word = mBuf[b];
-            if (b + 1 < nbytes) word |= static_cast<u32>(mBuf[b + 1]) << 8;
-            if (b + 2 < nbytes) word |= static_cast<u32>(mBuf[b + 2]) << 16;
-            if (b + 3 < nbytes) word |= static_cast<u32>(mBuf[b + 3]) << 24;
-            fifo[i] = word;
-        }
-        kick();
-    }
-
-    /// Set the transfer length. The duplex MOSI and MISO fields are kept equal,
-    /// matching the Arduino core's setDataBits().
-    static void setTransferBits(u32 nbits) FL_NO_EXCEPT {
-        const u32 bits = nbits - 1;
-        const u32 mask = (static_cast<u32>(SPIMMOSI) << SPILMOSI) |
-                         (static_cast<u32>(SPIMMISO) << SPILMISO);
-        SPI1U1 = (SPI1U1 & ~mask) | (bits << SPILMOSI) | (bits << SPILMISO);
-    }
-
-    /// Start the transfer and wait for the hardware to finish it.
-    ///
-    /// The spin is bounded by the transfer itself: at most 512 bits at the
-    /// configured rate (85 us for a full batch at 6 MHz), so it does not need
-    /// an OS yield. The Arduino core's SPI1 driver waits the same way.
-    static void kick() FL_NO_EXCEPT {
-        __sync_synchronize();
-        SPI1CMD |= SPIBUSY;
-        while (SPI1CMD & SPIBUSY) {}
+        esp8266::hspiWriteChunk(mBuf, nbytes);
     }
 };
 
