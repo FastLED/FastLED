@@ -71,6 +71,18 @@ Serial-enabled numbers. The regression guard is
 `tests/data/uno_blink_bloat_budget.json`, run with the `bash bloat` command
 above.
 
+#4765 attiny85 no-Serial scorecard: attiny85 Blink (`examples/Blink`,
+Serial-free since #4759) on fbuild 2.5.37, AVR GCC 7.3.0-atmel3.6.1-arduino7,
+ATTinyCore 1.5.2, F_CPU=8000000L. Image flash / attributed RAM went from the
+recorded 2638 B flash ceiling (#4743/#4751) to 2574 / 160 after #4788, and to
+2460 / 136 after its follow-up (AVR non-virtual size/begin/endShowLeds, no
+tail pointer, 16-bit FPS timestamp, Hz refresh cap). 3.10.3 and 3.10.6
+attiny85 numbers are not recorded with the no-Serial sketch here; never reuse
+their old Serial-enabled measurements. `total_ram` is attributed RAM, not
+physical RAM (see the AVR section above). The regression guard is
+`tests/data/attiny85_bloat_budget.json`, run with
+`bash bloat attiny85 --build --budget tests/data/attiny85_bloat_budget.json`.
+
 Rejected because flash cost outweighed RAM: replacing the `addLeds` static
 guard with a placement-new flag (-7 B RAM, +116 B flash, since the compiler
 loses the controller's dynamic type and divides at runtime) and a power-limit
