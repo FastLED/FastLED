@@ -37,8 +37,17 @@ void hspiConfigure(fl::u32 clock_hz) FL_NO_EXCEPT {
     while (SPI1CMD & SPIBUSY) {}
     SPI1C = 0;   // MSB-first, no delay chains
     SPI1C1 = 0;
-    GPMUX &= ~(1UL << 9);  // use SPI1CLK's divider fields, not the system clock
-    SPI1CLK = esp8266::hspiClockFor(clock_hz).reg_value;
+    // SPICLK_EQU_SYSCLK is a GPMUX mux bit as much as SPI1CLK bit 31, so
+    // select the divider fields or the system-clock bypass the way the Arduino
+    // core's setClockDivider() does. Writing the bypass value with the mux bit
+    // clear leaves every divider field at zero -- no clock on the pads.
+    const esp8266::HspiClock clk = esp8266::hspiClockFor(clock_hz);
+    if (clk.reg_value == esp8266::kHspiEquSysClk) {
+        GPMUX |= (1UL << 9);
+    } else {
+        GPMUX &= ~(1UL << 9);
+    }
+    SPI1CLK = clk.reg_value;
     SPI1U = SPIUMOSI | SPIUDUPLEX | SPIUSSE;
     // 8-bit phase; MISO is unused but kept in step with MOSI.
     SPI1U1 = (7UL << SPILMOSI) | (7UL << SPILMISO);
