@@ -137,7 +137,13 @@ published 402670 / 68388 B (#4738) are board flash/RAM from fbuild, not
 bloat-report image flash / attributed RAM, so they are not comparable.
 Attributed RAM is not physical board RAM. 3.10.3 and 3.10.6 esp32c3 numbers
 are not recorded with the no-Serial sketch here; never reuse their old
-Serial-enabled measurements. The regression guard is
+Serial-enabled measurements. #4982: master a96b4a301 measures 27018 B
+attributed RAM against the 26670 B of the budget commit ce3eb2e77. The +348 B
+is +412 B of ESP-IDF `__func__` strings in `.flash.rodata` that fbuild labels
+`region: ram` (FastLED/fbuild#1832), linked by the native ESP32 console
+(12b85b405). Physical DRAM (`.dram0.data` + `.dram0.bss`) fell from 13878 B to
+13814 B, and fbuild 2.5.39 attributes the same ELF identically, so the budget
+was re-based to 27018 B. The regression guard is
 `tests/data/esp32c3_bloat_budget.json`, run with
 `bash bloat esp32c3 --build --budget tests/data/esp32c3_bloat_budget.json`.
 
