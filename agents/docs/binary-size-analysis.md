@@ -177,6 +177,26 @@ reuse their old Serial-enabled measurements. The regression guard is
 `tests/data/teensy41_bloat_budget.json`, run with
 `bash bloat teensy41 --build --budget tests/data/teensy41_bloat_budget.json`.
 
+#4770 rp2040 no-Serial scorecard: rp2040 Blink (`examples/Blink`,
+Serial-free since #4759) on fbuild 2.5.45, Arduino-Pico 5.7.0, ARM GCC 14.2.0,
+master a96b4a301. Image flash / attributed RAM is 103212 / 8624 B (re-measured
+by #4770, supersedes the Serial-enabled #4813 135744 / 9474 B). These are
+bloat-report image flash / attributed RAM; board flash/RAM totals from fbuild
+are measured separately and are not comparable. Attributed RAM is not physical
+board RAM. Physical static RAM, measured with `arm-none-eabi-size -A` on the
+same ELF, is 9844 B (`.ram_vector_table` 192 + `.data` 3292 + `.bss` 6360); the
+read-only NOBITS `.heap` (252296 B), `.stack_dummy` and `.stack1_dummy`
+(2048 B each) reservations are excluded. Physical RAM is informational and is
+not enforced by the budget guard. Blink itself has no Serial reference, but the
+ELF still links `Serial`/`SerialUSB` and TinyUSB CDC: the unresolved references
+come from FastLED's platform I/O object (`platforms` translation unit) and the
+Arduino-Pico core `main.cpp` (USB init), not from the sketch, so this linkage
+remains in the baseline.
+3.10.3 and 3.10.6 rp2040 no-Serial numbers are not recorded here; never
+reuse their old Serial-enabled measurements. The regression guard is
+`tests/data/rp2040_bloat_budget.json`, run with
+`bash bloat rp2040 --build --budget tests/data/rp2040_bloat_budget.json`.
+
 Rejected because flash cost outweighed RAM: replacing the `addLeds` static
 guard with a placement-new flag (-7 B RAM, +116 B flash, since the compiler
 loses the controller's dynamic type and divides at runtime) and a power-limit
