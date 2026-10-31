@@ -11,6 +11,7 @@ from pathlib import Path
 from ci.lint.banned_build_tools import (
     ALLOWED_PATHS,
     ALLOWED_PREFIXES,
+    _walk_files,
     find_banned_words,
     run_banned_build_tools_lint,
     scan,
@@ -89,6 +90,19 @@ def test_scan_skips_allowed_paths_and_binaries(tmp_path: Path) -> None:
     ]
 
     assert scan(tmp_path, files=files) == []
+
+
+def test_fallback_walk_prunes_ignored_tool_dirs(tmp_path: Path) -> None:
+    # A non-git checkout falls back to _walk_files, which cannot read
+    # .gitignore -- so the ignored agent-workspace dirs it never sees via git
+    # must be pruned by name, or clud logs fail the lint.
+    (tmp_path / ".clud" / "logs").mkdir(parents=True)
+    (tmp_path / ".clud" / "logs" / "run.jsonl").write_text("pio\n")
+    (tmp_path / ".extern-repos" / "x").mkdir(parents=True)
+    (tmp_path / ".extern-repos" / "x" / "notes.md").write_text("platformio\n")
+    (tmp_path / "notes.md").write_text("fbuild builds everything\n")
+
+    assert _walk_files(tmp_path) == ["notes.md"]
 
 
 def test_allowlist_is_small_and_explicit() -> None:
