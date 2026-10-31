@@ -145,6 +145,66 @@ def stabilize_dll_mtimes(build_dir: Path, verbose: bool = False) -> int:
     return touched
 
 
+# The core library and the symbols file SHSYM derives from it.
+_CORE_OUTPUT_GLOBS: list[str] = []
+for _suffix in _DLL_SUFFIXES:
+    _CORE_OUTPUT_GLOBS.append(f"ci/meson/native/fastled.{_suffix}")
+    _CORE_OUTPUT_GLOBS.append(
+        f"ci/meson/native/fastled.{_suffix}.p/fastled.{_suffix}.symbols"
+    )
+
+
+def refresh_relinked_mtimes(
+    build_dir: Path,
+    build_start: float,
+    core_relinked: bool,
+    relinked: list[Path],
+) -> int:
+    """
+    Refresh outputs Ninja relinked this build that kept a pre-build mtime.
+
+    When the core library's relink is itself a zccache restore, fastled.so
+    and its symbols file come back with old mtimes too. Every DLL then stays
+    newer than the (old) symbols file, so stabilize_dll_mtimes() finds
+    nothing to touch, while Ninja still sees the core library as older than
+    its objects: every later build relinks everything and the #3011 guard
+    rejects each test as stale (FastLED#4991).
+
+    Only outputs Ninja announced as linked in a build that succeeded are
+    touched, so their contents are current. The core outputs are touched
+    first and the DLLs after them, preserving dependency order.
+
+    Returns:
+        Number of files touched.
+    """
+    now = time.time()
+    candidates: list[tuple[Path, float]] = []
+    if core_relinked:
+        for pattern in _CORE_OUTPUT_GLOBS:
+            for core_path in build_dir.glob(pattern):
+                candidates.append((core_path, now))
+    for output_path in relinked:
+        candidates.append((output_path, now + 1))
+
+    touched = 0
+    for output_path, touch_time in candidates:
+        try:
+            if output_path.stat().st_mtime < build_start:
+                os.utime(str(output_path), (touch_time, touch_time))
+                touched += 1
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
+            raise
+        except OSError:
+            pass
+
+    if touched > 0:
+        _ts_print(
+            f"[BUILD] ⚡ Refreshed {touched} relinked output mtimes (zccache restore)"
+        )
+    return touched
+
+
 # Object/library suffixes that are never meant to be executable.
 _NON_EXECUTABLE_SUFFIXES = {".so", ".dylib", ".dll", ".a", ".o", ".obj", ".p"}
 
