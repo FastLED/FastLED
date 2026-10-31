@@ -167,6 +167,11 @@ Serial-free since #4759) on fbuild 2.5.45, Teensy framework 1.160.0, ARM GCC 11.
 Image flash / attributed RAM is 47104 / 21738 B (re-measured by #4769, supersedes the Serial-enabled #4746 50176 / 23279 B). These are bloat-report image
 flash / attributed RAM; board flash/RAM totals from fbuild are measured
 separately and are not comparable. Attributed RAM is not physical board RAM.
+Physical static RAM, measured with `arm-none-eabi-size -A` on the same ELF, is
+21984 B (`.data` 6848 + `.bss` 2688 + `.bss.dma` 12448); this differs from the
+21738 B attributed figure. `.text.itcm` (28800 B of code copied into ITCM at
+boot) is excluded and is not data RAM. Physical RAM is informational and is not
+enforced by the budget guard.
 3.10.3 and 3.10.6 teensy41 no-Serial numbers are not recorded here; never
 reuse their old Serial-enabled measurements. The regression guard is
 `tests/data/teensy41_bloat_budget.json`, run with
