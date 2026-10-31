@@ -1,6 +1,7 @@
 // Profiler for sincos32_simd
 // Customized to benchmark SIMD 4-wide sincos
 
+#include "fl/stl/compiler_control.h"  // FL_NO_INLINE
 #include "FastLED.h"
 #include "fl/math/sin32_simd.h"
 #include "fl/math/simd.h"
@@ -13,7 +14,7 @@ using namespace fl;
 static const int WARMUP_ITERATIONS = 1000;
 static const int PROFILE_ITERATIONS = 100000;
 
-__attribute__((noinline))
+FL_NO_INLINE
 void benchmarkBaseline() {
     // 4 different angles spread across quadrants
     volatile i32 sink = 0;

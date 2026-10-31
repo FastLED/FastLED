@@ -6,6 +6,19 @@
 #include "fl/stl/noexcept.h"
 #include "FastLED.h"
 
+#include "fl/channels/bus.h"
+#include "fl/channels/bus_traits.h"
+#include "fl/channels/channel_typed.h"
+
+#ifdef ESP8266
+// #4941 / #4942 / #4944: the ESP8266 default-bus arm and the hardware
+// `BusTraits<Bus::SPI>` / `BusTraits<Bus::UART>` specializations must be
+// visible to the compile test.
+#include "platforms/esp/8266/hspi_bus_traits.h"  // ok platform headers
+#include "platforms/esp/8266/i2s_bus_traits.h"   // ok platform headers
+#include "platforms/esp/8266/uart_bus_traits.h"  // ok platform headers
+#endif
+
 namespace fl {
 
 #ifdef ESP8266
@@ -64,6 +77,45 @@ void esp8266_compile_tests() FL_NO_EXCEPT {
     FL_STATIC_ASSERT(FastPin<14>::validpin(),
                      "NodeMCU D5 (GPIO 14) must be a valid FastLED pin");
 #endif
+
+// #4941: `fl::Bus::AUTO` (and any `fl::Channel<>` named without an explicit
+// bus) resolves through `DefaultBus<Chipset>::value`. ESP8266 has no peripheral
+// engine wired through the channel API yet, so both chipset families select the
+// shared GPIO bit-bang driver. This is a template selection, not a
+// code-enabling define: the driver's translation unit is retained only because
+// naming `Bus::AUTO` / `Bus::BIT_BANG` references it, and the selection is
+// fully type-checked either way.
+FL_STATIC_ASSERT(DefaultBus<ClocklessChipset>::value == Bus::BIT_BANG,
+                 "ESP8266 default clockless bus must be BIT_BANG");
+FL_STATIC_ASSERT(DefaultBus<SpiChipsetConfig>::value == Bus::BIT_BANG,
+                 "ESP8266 default SPI bus must be BIT_BANG");
+FL_STATIC_ASSERT(BusSupports<Bus::BIT_BANG, ClocklessChipset>::value,
+                 "ESP8266 default clockless driver must accept ClocklessChipset");
+FL_STATIC_ASSERT(BusSupports<Bus::BIT_BANG, SpiChipsetConfig>::value,
+                 "ESP8266 default SPI driver must accept SpiChipsetConfig");
+
+// #4942: the hardware HSPI driver is selectable by template through
+// `Bus::SPI`; naming it here is what keeps `hspi_channel_driver.cpp.hpp`
+// alive on a build that uses it (and it dead-strips when nothing names it).
+FL_STATIC_ASSERT(BusSupports<Bus::SPI, SpiChipsetConfig>::value,
+                 "ESP8266 Bus::SPI must accept SpiChipsetConfig");
+FL_STATIC_ASSERT(TypedChannel<Bus::SPI, SpiChipsetConfig>::kBus == Bus::SPI,
+                 "ESP8266 TypedChannel<Bus::SPI, SpiChipsetConfig> must resolve to SPI");
+
+// #4944: the UART1 (GPIO2) WS2812 engine is selectable by template through
+// `Bus::UART`; it is not registered by enableAllDrivers(), so selection is
+// explicit and an ordinary pin-2 clockless strip keeps the bit-bang driver.
+FL_STATIC_ASSERT(BusSupports<Bus::UART, ClocklessChipset>::value,
+                 "ESP8266 Bus::UART must accept ClocklessChipset");
+FL_STATIC_ASSERT(TypedChannel<Bus::UART, ClocklessChipset>::kBus == Bus::UART,
+                 "ESP8266 TypedChannel<Bus::UART, ClocklessChipset> must resolve to UART");
+
+// #4943: the native I2S output engine is selectable by template through
+// `Bus::FLEX_IO` (the ESP8266 "I2S" bus).
+FL_STATIC_ASSERT(BusSupports<Bus::FLEX_IO, ClocklessChipset>::value,
+                 "ESP8266 Bus::FLEX_IO must accept ClocklessChipset");
+FL_STATIC_ASSERT(TypedChannel<Bus::FLEX_IO, ClocklessChipset>::kBus == Bus::FLEX_IO,
+                 "ESP8266 TypedChannel<Bus::FLEX_IO, ClocklessChipset> must resolve to FLEX_IO");
 }
 #endif // FL_IS_ESP8266
 

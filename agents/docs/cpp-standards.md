@@ -128,6 +128,50 @@ using PlatformComponent = Component<SelectedBackend>;
   instantiations have not duplicated code. This pattern alone does not guarantee
   a smaller binary.
 
+## Driver selection is by template, never a code-enabling define (REQUIRED)
+
+**Do not gate a driver's code behind a `#define` that turns it on.** Select
+drivers by *template*, and let the linker drop the ones nothing references.
+
+FastLED already has the mechanism: `BusTraits<Bus::X>::instance()` /
+`BusSupports<Bus::X, Chipset>` (see `src/fl/channels/bus_traits.h`). Naming
+`BusTraits<Bus::X>::instance()` anywhere in the program is what makes the linker
+keep that driver's translation unit; if no instantiation references it, the TU is
+dead-stripped (#2428). So on a given target the *unused* drivers are eliminated
+automatically — most of them — with no compile-time enable flag, and the whole
+program is still type-checked.
+
+```cpp
+// Yes — a driver is a BusTraits specialization plus a BusSupports capability.
+template<> struct BusTraits<Bus::SPI> {
+    using Driver = Esp8266HspiChannelDriver;
+    static fl::shared_ptr<Driver> instancePtr() FL_NO_EXCEPT { /* ... */ }
+    static Driver& instance() FL_NO_EXCEPT { return *instancePtr(); }
+    static void registerWithManager() FL_NO_EXCEPT { /* ... */ }
+};
+template<> struct BusSupports<Bus::SPI, SpiChipsetConfig> : fl::true_type {};
+
+// No — an opt-in define that turns the driver's code on. It moves the decision
+// to the build system and prevents the driver from being link-eliminated *or*
+// compile-verified. (Retired: FASTLED_ESP8266_UART, FASTLED_ALL_PINS_HARDWARE_SPI,
+// FL_ESP8266_EMBEDDED_FS — FastLED#4940 / #4949.)
+#ifdef MY_DRIVER
+#include "platforms/.../my_driver.h"
+#endif
+```
+
+Consequences when adding or changing a platform driver:
+
+- A new platform driver is a `BusTraits`/`BusSupports` specialization (plus a
+  `DefaultBus<Chipset>` arm when it should be the platform default), **not** an
+  `#ifdef MY_DRIVER` guard.
+- Select the concrete backend at the preprocessor boundary (see the section
+  above); do not repeat `#if defined(MY_DRIVER)` throughout a driver's body.
+- A define may still gate code that is genuinely unavailable (a missing SDK
+  header), or carry platform wiring options (pin order). It must not be the
+  switch that turns a driver's implementation on.
+- Prove elimination with a size diff (`bash bloat`), not by reading the source.
+
 ## Sparse Platform Dispatch Pattern (`.cpp.hpp` files)
 
 A `.cpp.hpp` file is a **compile-time component router** that assembles a complete feature from sparse, per-platform fragments with null/no-op fallbacks.

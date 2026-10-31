@@ -94,6 +94,9 @@
 // IWYU pragma: begin_keep
 #include <esp8266_peri.h>     // ok platform specific - GPI, ESP8266_CLOCK for raw loopback sampling
 #include <user_interface.h>   // ok platform specific - system_update_cpu_freq, wifi_* for bench setup
+#include "platforms/esp/8266/i2s_ws2812_codec.h"     // ok platform headers - codec + samplesToEdges
+#include "platforms/esp/8266/spi_hspi_clock.h"       // ok platform headers - HSPI clock divider
+#include <core_esp8266_i2s.h>  // ok platform specific - I2S TX/RX registers for the loopback bench
 #include <cont.h>             // ok platform specific - cont_get_free_stack (loop-stack headroom)
 // IWYU pragma: end_keep
 
@@ -136,7 +139,7 @@ inline EdgeCapture& edgeCapture() {
 // sample missed short T0H pulses. So prime two bytes, then write one just
 // after each falling edge, where the line stays low for >= 300 ns. Two edges
 // fall per UART byte, so the FIFO stays ahead of the shifter.
-__attribute__((noinline)) static FL_IRAM void captureEdges(
+FL_NO_INLINE static FL_IRAM void captureEdges(
         const fl::u8* encoded, int nEncoded, fl::u32 mask, fl::u32 idleCycles,
         EdgeCapture& cap) {
     bool level = (GPI & mask) != 0;  // ok platform specific - raw GPIO sampling / UART1 FIFO feed for the pin-level loopback
@@ -582,7 +585,7 @@ inline fl::u8 hspiPattern(int i) { return static_cast<fl::u8>(i * 37 + 11); }
 
 // Samples MOSI on every SCK edge and keeps the rising ones (mode 0), so it
 // must stay short: at the bench's clock the ISR gets a few microseconds.
-__attribute__((noinline)) static FL_IRAM void hspiSckSample() {
+FL_NO_INLINE static FL_IRAM void hspiSckSample() {
     HspiLoopbackState& s = *hspiLoopbackActive();
     const fl::u32 gpi = GPI;  // ok platform specific - raw pad sampling for the HSPI pin-level loopback
     if (gpi & s.sckMask) {
@@ -982,7 +985,7 @@ inline int rpcArgInt(const fl::json& args, fl::size index, int fallback) {
 // Each bind instantiates sizeable temporaries; split the bindings across
 // non-inlined functions so their frames do not add up on the 4 KB loop
 // stack (one combined frame overflowed it).
-__attribute__((noinline)) inline void bindEsp8266WatchdogRpcs(fl::Remote& remote) {
+FL_NO_INLINE inline void bindEsp8266WatchdogRpcs(fl::Remote& remote) {
     // Watchdog bring-up: read why the chip last reset, or stop feeding the
     // watchdog (while still yielding) so the user timeout must fire.
     remote.bind("resetCause", [](const fl::json& /*args*/) -> fl::json {
@@ -1011,7 +1014,7 @@ __attribute__((noinline)) inline void bindEsp8266WatchdogRpcs(fl::Remote& remote
     });
 }
 
-__attribute__((noinline)) inline void bindEsp8266UartRpcs(fl::Remote& remote) {
+FL_NO_INLINE inline void bindEsp8266UartRpcs(fl::Remote& remote) {
     // rxPin < 0 runs the jumper-free internal loopback instead, with nLeds
     // as the rate in kbaud (0 = the driver's 3.2 Mbaud).
     remote.bind("uartWs2812Loopback", [](const fl::json& args) -> fl::json {
@@ -1037,7 +1040,7 @@ __attribute__((noinline)) inline void bindEsp8266UartRpcs(fl::Remote& remote) {
     });
 }
 
-__attribute__((noinline)) inline void bindEsp8266DriverRpcs(fl::Remote& remote) {
+FL_NO_INLINE inline void bindEsp8266DriverRpcs(fl::Remote& remote) {
     remote.bind("wifiOff", [](const fl::json& /*args*/) -> fl::json { return wifiOff(); });
     remote.bind("clocklessShow", [](const fl::json& args) -> fl::json {
         return clocklessShow(rpcArgInt(args, 0, 0), rpcArgInt(args, 1, 1));
@@ -1049,7 +1052,7 @@ __attribute__((noinline)) inline void bindEsp8266DriverRpcs(fl::Remote& remote) 
 
 // Own frame: every bind's temporaries get a stack slot in the caller, and one
 // more bind in bindEsp8266DriverRpcs overflowed the 4 KB loop stack.
-__attribute__((noinline)) inline void bindEsp8266HspiRpcs(fl::Remote& remote) {
+FL_NO_INLINE inline void bindEsp8266HspiRpcs(fl::Remote& remote) {
     remote.bind("apa102ShowMhz", [](const fl::json& args) -> fl::json {
         return apa102ShowMhz(rpcArgInt(args, 0, 0), 20, rpcArgInt(args, 1, 6));
     });
@@ -1068,9 +1071,127 @@ __attribute__((noinline)) inline void bindEsp8266HspiRpcs(fl::Remote& remote) {
 
 // A third frame for the same reason: keep every bind's temporaries in a frame
 // small enough for the 4 KB loop stack.
-__attribute__((noinline)) inline void bindEsp8266HspiBenchRpcs(fl::Remote& remote) {
+FL_NO_INLINE inline void bindEsp8266HspiBenchRpcs(fl::Remote& remote) {
     remote.bind("apa102ShowBitbang", [](const fl::json& args) -> fl::json {
         return apa102ShowBitbang(rpcArgInt(args, 0, 0), rpcArgInt(args, 1, 1));
+    });
+}
+
+// I2S TX -> RX loopback (#4943 engine + #4945 capture): encode a known pattern
+// with the I2S codec, stream it out of the I2S peripheral, capture it back
+// through the I2S RX path, decode, and compare -- all in software on-device.
+FL_NO_INLINE inline void bindEsp8266I2sRpcs(fl::Remote& remote) {
+    remote.bind("i2sLoopback", [](int nBytes) -> fl::json {
+        fl::json r = fl::json::object();
+        if (nBytes < 1 || nBytes > 300) {
+            r.set("error", "nBytes must be in [1, 300]");
+            return r;
+        }
+        const int n = nBytes;
+        static fl::u8 tx[300];
+        for (int i = 0; i < n; ++i) {
+            tx[i] = static_cast<fl::u8>(i * 53 + 0x1B);
+        }
+        // Encode as the I2S engine does: two 16-bit samples per LED byte.
+        static fl::u16 samples[600];
+        for (int i = 0; i < n; ++i) {
+            fl::esp8266::encodeByte(tx[i], &samples[i * 2]);
+        }
+        const int nSamples = n * 2;
+        // TX + RX on the one I2S peripheral. Only ONE side may drive the clocks
+        // (driving both from the same peripheral conflicts and yields silence).
+        (void)i2s_rxtxdrive_begin(true, true, true, false);
+        i2s_set_rate(fl::esp8266::kI2sSlotHz);
+        i2s_set_bits(16);
+        for (int i = 0; i < nSamples; ++i) {
+            (void)i2s_write_sample_nb(samples[i]);
+        }
+        static fl::u16 got[600];
+        int cap = 0;
+        const fl::u32 deadline = fl::millis() + 20;
+        while (cap < nSamples && fl::millis() < deadline) {
+            if (i2s_rx_available() > 0) {
+                fl::i16 l = 0, rr = 0;
+                if (i2s_read_sample(&l, &rr, false)) {
+                    // The core packs (right<<16)|left; the engine's 16-bit sample
+                    // may land in either half depending on the loopback wiring.
+                    fl::u16 s = static_cast<fl::u16>(l);
+                    if (s == 0) {
+                        s = static_cast<fl::u16>(rr);
+                    }
+                    got[cap++] = s;
+                }
+            }
+        }
+        int firstBad = -1;
+        for (int i = 0; i < n; ++i) {
+            if (i * 2 + 1 >= cap) { firstBad = i; break; }
+            if (fl::esp8266::decodeByte(got[i * 2], got[i * 2 + 1]) != tx[i]) {
+                firstBad = i;
+                break;
+            }
+        }
+        r.set("success", firstBad < 0);
+        r.set("sent", static_cast<fl::i64>(n));
+        r.set("captured_samples", static_cast<fl::i64>(cap));
+        r.set("first_bad", static_cast<fl::i64>(firstBad));
+        r.set("s0", static_cast<fl::i64>(samples[0]));
+        r.set("g0", static_cast<fl::i64>(got[0]));
+        r.set("g1", static_cast<fl::i64>(got[1]));
+        r.set("dec0", static_cast<fl::i64>(fl::esp8266::decodeByte(got[0], got[1])));
+        return r;
+    });
+}
+
+// HSPI (SPI1) master loopback (#4942): drive bytes out of MOSI (GPIO13) and
+// read them back from MISO (GPIO12), which the ESP8266 HSPI does through the
+// SAME register -- after SPI1CMD/SPIBUSY clears, `SPI1W0 & 0xFF` holds the byte
+// clocked in on MISO. Jumper D7 (GPIO13) -> D6 (GPIO12) and every byte comes
+// back. This captures the real hardware SPI output byte-exactly.
+FL_NO_INLINE inline void bindEsp8266SpiRpcs(fl::Remote& remote) {
+    remote.bind("spiLoopback", [](int nBytes) -> fl::json {
+        fl::json r = fl::json::object();
+        if (nBytes < 1 || nBytes > 64) {
+            r.set("error", "nBytes must be in [1, 64]");
+            return r;
+        }
+        const int n = nBytes;
+        // Pads: SPECIAL routes each pad to the SPI1 peripheral function. The
+        // core's SPI.begin() does exactly this for MISO(12)/MOSI(13)/SCK(14);
+        // omitting MISO leaves it as a plain GPIO, so the duplex receive reads 0
+        // even when D7->D6 is wired.
+        pinMode(12, SPECIAL);  // MISO -> SPI1 (data in)
+        pinMode(13, SPECIAL);  // MOSI -> SPI1 (data out)
+        pinMode(14, SPECIAL);  // SCK  -> SPI1
+        while (SPI1CMD & SPIBUSY) {
+        }
+        SPI1C = 0;
+        SPI1C1 = 0;
+        GPMUX &= ~(1UL << 9);
+        SPI1CLK = fl::esp8266::hspiClockFor(1000000).reg_value;  // 1 MHz
+        SPI1U = SPIUMOSI | SPIUDUPLEX | SPIUSSE;
+        SPI1U1 = (7UL << SPILMOSI) | (7UL << SPILMISO);
+
+        int firstBad = -1;
+        fl::u8 lastGot = 0;
+        for (int i = 0; i < n; ++i) {
+            const fl::u8 b = static_cast<fl::u8>(i * 37 + 0x1B);
+            while (SPI1CMD & SPIBUSY) {
+            }
+            SPI1W0 = b;
+            SPI1CMD |= SPIBUSY;
+            while (SPI1CMD & SPIBUSY) {
+            }
+            lastGot = static_cast<fl::u8>(SPI1W0 & 0xFF);
+            if (lastGot != b && firstBad < 0) {
+                firstBad = i;
+            }
+        }
+        r.set("success", firstBad < 0);
+        r.set("sent", static_cast<fl::i64>(n));
+        r.set("first_bad", static_cast<fl::i64>(firstBad));
+        r.set("last_got", static_cast<fl::i64>(lastGot));
+        return r;
     });
 }
 
@@ -1080,6 +1201,8 @@ inline void bindEsp8266Benches(fl::Remote& remote) {
     bindEsp8266DriverRpcs(remote);
     bindEsp8266HspiRpcs(remote);
     bindEsp8266HspiBenchRpcs(remote);
+    bindEsp8266I2sRpcs(remote);
+    bindEsp8266SpiRpcs(remote);
 }
 
 }  // namespace esp8266

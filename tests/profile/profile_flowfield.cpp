@@ -7,6 +7,7 @@
 //   ./profile_flowfield fp                 # Profile FP only
 //   ./profile_flowfield baseline           # JSON output mode (for profiling pipeline)
 
+#include "fl/stl/compiler_control.h"  // FL_NO_INLINE
 #include "FastLED.h"
 #include "fl/fx/2d/flowfield.h"
 #include "fl/stl/cstring.h"
@@ -22,7 +23,7 @@ static const uint16_t N = W * H;
 static const int WARMUP_FRAMES = 20;
 static const int PROFILE_FRAMES = 200;
 
-__attribute__((noinline))
+FL_NO_INLINE
 void renderFloat(FlowFieldFloat &fx, CRGB *leds, int frames, int start_frame) {
     for (int i = 0; i < frames; i++) {
         uint32_t t = static_cast<uint32_t>((start_frame + i) * 33);
@@ -31,7 +32,7 @@ void renderFloat(FlowFieldFloat &fx, CRGB *leds, int frames, int start_frame) {
     }
 }
 
-__attribute__((noinline))
+FL_NO_INLINE
 void renderFP(FlowFieldFP &fx, CRGB *leds, int frames, int start_frame) {
     for (int i = 0; i < frames; i++) {
         uint32_t t = static_cast<uint32_t>((start_frame + i) * 33);

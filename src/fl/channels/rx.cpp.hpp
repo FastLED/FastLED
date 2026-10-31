@@ -46,6 +46,12 @@
 // IWYU pragma: end_keep
 #endif
 
+#ifdef FL_IS_ESP8266
+// IWYU pragma: begin_keep
+#include "platforms/esp/8266/rx_device_i2s_rx.h"  // ok platform headers
+// IWYU pragma: end_keep
+#endif
+
 namespace fl {
 
 template <>
@@ -373,9 +379,61 @@ fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::PLATFORM_DEFAULT>(int pi
     return RxDevice::create<RxDeviceType::RMT>(pin);
 }
 
-#else
+#elif defined(FL_IS_ESP8266)
 
-// RMT device specialization (dummy for non-ESP32, non-stub)
+// ESP8266 has exactly one hardware receiver: the I2S peripheral's RX path
+// (#4945). PLATFORM_DEFAULT and I2S_RX both map to it. A per-edge GPIO ISR is
+// not feasible here (interrupt latency ~1 us >> the ~350 ns T0H), which is why
+// the AutoResearch benches hand-rolled a synchronous IRAM poll instead.
+template <>
+fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::I2S_RX>(int pin) FL_NO_EXCEPT {
+    return Esp8266I2sRxDevice::create(pin);
+}
+
+template <>
+fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::ISR>(int pin) FL_NO_EXCEPT {
+    (void)pin;
+    return fl::make_shared<DummyRxDevice>(
+        "ESP8266 has no fast GPIO-ISR RX (see #4945); use RxBackend::I2S_RX");
+}
+
+template <>
+fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::RMT>(int pin) FL_NO_EXCEPT {
+    (void)pin;
+    return fl::make_shared<DummyRxDevice>("RMT RX not supported on ESP8266");
+}
+
+template <>
+fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::FLEXPWM>(int pin) FL_NO_EXCEPT {
+    (void)pin;
+    return fl::make_shared<DummyRxDevice>("FLEXPWM RX not supported on ESP8266");
+}
+
+template <>
+fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::FLEXIO>(int pin) FL_NO_EXCEPT {
+    (void)pin;
+    return fl::make_shared<DummyRxDevice>("FLEXIO RX not supported on ESP8266");
+}
+
+template <>
+fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::LPC_SCT_CAPTURE>(int pin) FL_NO_EXCEPT {
+    (void)pin;
+    return fl::make_shared<DummyRxDevice>("LPC_SCT_CAPTURE RX not supported on ESP8266");
+}
+
+template <>
+fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::PARLIO_RX>(int pin) FL_NO_EXCEPT {
+    (void)pin;
+    return fl::make_shared<DummyRxDevice>("PARLIO_RX not supported on ESP8266");
+}
+
+// DEFAULT maps to the I2S RX engine on ESP8266.
+template <>
+fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::PLATFORM_DEFAULT>(int pin) FL_NO_EXCEPT {
+    return RxDevice::create<RxDeviceType::I2S_RX>(pin);
+}
+
+#else
 template <>
 fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::RMT>(int pin) FL_NO_EXCEPT {
     (void)pin;  // Suppress unused parameter warning

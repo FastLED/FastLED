@@ -1,9 +1,10 @@
 /// @file OTA.ino
-/// @brief Minimal OTA (Over-The-Air) update example for ESP32
-/// @filter: (platform is esp32)
+/// @brief Minimal OTA (Over-The-Air) update example for ESP32 and ESP8266
+/// @filter: ((platform is esp32) or (platform is esp8266))
 ///
-/// This example demonstrates the FastLED OTA functionality for ESP32 devices.
-/// It provides both Arduino IDE OTA and web-based firmware updates.
+/// This example demonstrates the FastLED OTA functionality. On ESP32 it offers
+/// Arduino-IDE OTA and a web-based update interface; on ESP8266 it provides
+/// Arduino-IDE OTA (port 3232) via the core's ArduinoOTA (no web server).
 ///
 ///
 /// PROJECT REQUIREMENTS:

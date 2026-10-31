@@ -15,6 +15,7 @@ from typing import Any, cast
 
 from running_process import PIPE, RunningProcess
 
+from ci.lint_cpp.driver_enable_define_checker import DriverEnableDefineChecker
 from ci.lint_cpp.rust_bridge import (
     merge_checker_results,
     run_rust_linter,
@@ -126,8 +127,10 @@ def create_checkers(
     # Python-only checker here without re-introducing the scope key.
     checkers_by_scope["global"] = []
 
-    # Src-only checkers — all retired to Rust.
-    checkers_by_scope["src"] = []
+    # Src-only checkers — the legacy Python fleet was retired to Rust; the
+    # driver-enable-define check stays Python-only because it needs to look at a
+    # preprocessor guard *and* the line it protects (see the checker's docstring).
+    checkers_by_scope["src"] = [DriverEnableDefineChecker()]
 
     # Platforms-specific checkers — all retired to Rust.
     checkers_by_scope["platforms"] = []
