@@ -46,6 +46,9 @@ ALLOWED_PATHS: frozenset[str] = frozenset(
         "SLIDE.md",
         "release_notes.md",
         "CLAUDE.md",  # one sentence explaining the ban
+        # ...and its mirror: AGENTS.md ships as a relative symlink to CLAUDE.md
+        # so non-Claude agents read the same file, so it carries that sentence too.
+        "AGENTS.md",
         "examples/README.md",
         # Names an external data branch of FastLED/boards that is literally
         # called `platformio`; the registry doc has to spell it.
@@ -197,7 +200,18 @@ def _tracked_and_untracked_files(root: Path) -> list[str]:
 
 def _walk_files(root: Path) -> list[str]:
     """Fallback for a non-git checkout: walk the tree, pruning noise dirs."""
-    skip = {".git", ".build", ".venv", ".cache", "node_modules", "__pycache__"}
+    # `.clud` and `.extern-repos` are ignored by git, so the git path above never
+    # sees them; a non-git checkout must not scan agent tool state either.
+    skip = {
+        ".git",
+        ".build",
+        ".venv",
+        ".cache",
+        ".clud",
+        ".extern-repos",
+        "node_modules",
+        "__pycache__",
+    }
     out: list[str] = []
     for dirpath, dirnames, filenames in os.walk(root):
         dirnames[:] = [d for d in dirnames if d not in skip]

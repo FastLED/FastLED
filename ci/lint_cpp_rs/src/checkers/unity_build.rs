@@ -56,6 +56,7 @@ const UNITY_EXPECTED_BUILD_FILES: &[&str] = &[
     "fl/build/platforms+.cpp",
     "fl/build/platforms.esp.32.net+.cpp",
     "fl/build/platforms.esp.32.ota+.cpp",
+    "fl/build/platforms.esp.8266.ota+.cpp",
     "fl/build/third_party+.cpp",
     "fl/build/extras+.cpp",
 ];

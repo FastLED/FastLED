@@ -90,10 +90,18 @@ public:
         while (SPI1CMD & SPIBUSY) {}
         SPI1C = 0;  // MSB-first, no delay chains
         SPI1C1 = 0;
-        // Clear SPICLK_EQU_SYSCLK so SPI1CLK's divider fields are used instead
-        // of the system clock.
-        GPMUX &= ~(1UL << 9);
-        SPI1CLK = clock().reg_value;
+        // SPICLK_EQU_SYSCLK is a GPMUX mux bit, not only a bit in SPI1CLK, so
+        // select the divider fields or the system-clock bypass the same way the
+        // Arduino core's setClockDivider() does. Writing the bypass value with
+        // the mux bit clear leaves every divider field at zero, which is the
+        // dead-pad encoding this driver exists to avoid.
+        const esp8266::HspiClock clk = clock();
+        if (clk.reg_value == esp8266::kHspiEquSysClk) {
+            GPMUX |= (1UL << 9);
+        } else {
+            GPMUX &= ~(1UL << 9);
+        }
+        SPI1CLK = clk.reg_value;
         SPI1U = SPIUMOSI | SPIUDUPLEX | SPIUSSE;
         // 8-bit MOSI phase; MISO is unused but kept in step with MOSI exactly
         // as the Arduino core's setDataBits() does.

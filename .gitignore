@@ -7,6 +7,9 @@ components/
 # Cross-repo agent workspace (clud-extern-repos convention)
 .extern-repos/
 
+# clud tool state (pr-merge-watch logs); never part of the tree
+.clud/
+
 # Build outputs
 .build/
 .cached/
