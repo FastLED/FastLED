@@ -97,6 +97,22 @@ enforces its own 2048-byte encoding-storage ceiling at compile time). The
 regression guard is `tests/data/esp32c6_bloat_budget.json`, run with
 `bash bloat esp32c6 --build --budget tests/data/esp32c6_bloat_budget.json`.
 
+#4766 esp32dev no-Serial scorecard: esp32dev Blink (`examples/Blink`,
+Serial-free since #4759) on Arduino-ESP32 3.3.11 / IDF 5.5.5 / Xtensa GCC
+14.2.0. Current master on fbuild 2.5.45 (2026-10-30) measures 287671 B image
+flash / 34091 B attributed RAM, under the budget below. The budget baseline
+image flash is 313231 B. Attributed RAM for that ELF is 32618 B on
+fbuild 2.5.37 and 34734 B on fbuild 2.5.39; the increase is fbuild#1663
+attributing weak vtable owners (#4813 / PR #4814), not a code regression, and
+the image size is identical. #4738 saved 452 B image flash / 148 B attributed
+RAM versus 313683 / 34637. The published 310428 / 25892 B are board flash/RAM
+from fbuild, not bloat-report image flash / attributed RAM, so they are not
+comparable. 3.10.3 and 3.10.6 esp32dev numbers are not recorded with the
+no-Serial sketch here; never reuse their old Serial-enabled measurements.
+`total_ram` is attributed RAM. The regression guard is
+`tests/data/esp32dev_bloat_budget.json`, run with
+`bash bloat esp32dev --build --budget tests/data/esp32dev_bloat_budget.json`.
+
 Rejected because flash cost outweighed RAM: replacing the `addLeds` static
 guard with a placement-new flag (-7 B RAM, +116 B flash, since the compiler
 loses the controller's dynamic type and divides at runtime) and a power-limit
