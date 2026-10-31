@@ -192,8 +192,24 @@ ELF still links `Serial`/`SerialUSB` and TinyUSB CDC: the unresolved references
 come from FastLED's platform I/O object (`platforms` translation unit) and the
 Arduino-Pico core `main.cpp` (USB init), not from the sketch, so this linkage
 remains in the baseline.
-3.10.3 and 3.10.6 rp2040 no-Serial numbers are not recorded here; never
-reuse their old Serial-enabled measurements. The regression guard is
+Matched 3.10.3 (`20667c3a64`) and 3.10.6 (`ebf8c2823c`) builds use the
+same fbuild project, toolchain, flags, Blink sketch and `main.cpp` with the
+released `src/` unchanged; the only compatibility edits are `#define PIN_DATA 3`
+(what `FL_PIN_CLOCKLESS_1` resolves to on rp2040 at master) and `delay(0)` for
+the `fl::delay(0)` yield in `main.cpp`, which those releases lack. Image flash /
+attributed RAM / physical RAM:
+
+| rp2040 Blink, no Serial | image flash | attributed RAM | physical RAM |
+|---|---:|---:|---:|
+| 3.10.3 | 78620 B | 7049 B | 8344 B |
+| 3.10.6 | 113852 B | 47433 B | 48788 B |
+| master a96b4a301 | 103212 B | 8624 B | 9844 B |
+| master vs 3.10.3 | +24592 B | +1575 B | +1500 B |
+
+All three ELFs link Serial/SerialUSB and TinyUSB CDC through the Arduino-Pico
+core. 3.10.6's RAM is dominated by a 38416 B `gPioRxCaptureBuffers` that
+master no longer links. Master's RAM growth over 3.10.3 includes the 1 KB
+`fl::detail` registry. The regression guard is
 `tests/data/rp2040_bloat_budget.json`, run with
 `bash bloat rp2040 --build --budget tests/data/rp2040_bloat_budget.json`.
 
