@@ -120,8 +120,9 @@ integration (#4873), is 325075 B image flash / 39147 B attributed RAM. The
 budget ceilings are 325139 B image flash (64 B link-layout slack) and
 40016 B attributed RAM; the separate ratchet
 `tests/data/esp32s3_bloat_baseline.txt` independently pins 325075.
-Attributed RAM is not physical board RAM, and board flash/RAM from fbuild
-are not comparable with bloat-report image flash / attributed RAM. 3.10.3
+Attributed RAM is not physical board RAM. Physical board RAM for this
+esp32s3 Blink build has not been measured and remains open for #4767; do not
+read 39147 B as physical RAM. Board flash/RAM from fbuild are not comparable with bloat-report image flash / attributed RAM. 3.10.3
 and 3.10.6 esp32s3 numbers are not recorded with the no-Serial sketch here;
 never reuse their old Serial-enabled measurements. The regression guard is
 `tests/data/esp32s3_bloat_budget.json`, run with
