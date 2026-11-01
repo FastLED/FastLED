@@ -1,9 +1,29 @@
 FastLED 3.10.9
 =============================
-  * **Memory: unused subsystems stay out of the image**
-    * On ESP32, the native UART console, Arduino SPI, the embedded filesystem, and `Serial0` are linked only when a sketch uses them (#4873, #4892, #4894, #4896, #4990). Diagnostic printing writes through the ROM UART until the console is actually used, so output-only sketches no longer pull in the SDK UART driver.
-    * Measured Blink image sizes: ESP32-S3 320,439 B flash (4.6 KB below the previous baseline), ESP32-C3 324,378 B, ESP32 287,671 B, RP2040 103,212 B, Teensy 4.1 47,104 B, STM32F103C8 22,904 B, Uno 3,600 B flash / 118 B RAM, and ATtiny85 2,460 B. CI enforces a per-board size budget for each of these.
+  * **Memory: flash and RAM compared with 3.10.8**
+    * Clockless ESP32 sketches are smaller. The native UART console, Arduino SPI, the embedded filesystem, and `Serial0` are linked only when a sketch uses them, and diagnostic printing writes through the ROM UART until the console is actually used (#4873, #4892, #4894, #4896, #4990). Blink drops 5.2 KB of flash and 640 B of RAM on ESP32-S3, and 5.8 KB of flash and 376 B of RAM on ESP32.
+    * Hardware-SPI sketches on ESP32 are larger. APA102 and other clocked chipsets now transmit through the ESP-IDF SPI master driver with real DMA bursts instead of the previous path (#4879, #4919). Linking that driver costs about 20-24 KB of flash and up to 760 B of RAM. Sketches without a clocked SPI strip do not pay for it.
+    * AVR and Teensy 4.1 are unchanged or slightly smaller in every benchmark.
     * `fl::unordered_map` no longer places rehash scratch space on the stack; on ESP8266 this raises loop-stack headroom from 368 B to 1,568 B (#4926).
+
+    Measured by the [FastLED memory dashboard](https://fastled.github.io/dashboard/) with identical sketches (no Serial), board configurations and fbuild 2.5.47. Flash and RAM are fbuild's board totals in bytes; RAM excludes heap and stack. 3.10.9 is master `5bf59bfa1`, which matches this release for these boards.
+
+    | Sketch | Board | Flash 3.10.8 | Flash 3.10.9 | Change | RAM 3.10.8 | RAM 3.10.9 | Change |
+    |---|---|---:|---:|---:|---:|---:|---:|
+    | Blink | Uno (AVR) | 3,592 | 3,592 | 0 | 118 | 118 | 0 |
+    | Blink | ESP32-S3 | 392,744 | 387,520 | -5,224 | 77,192 | 76,552 | -640 |
+    | Blink | ESP32 Dev | 290,724 | 284,904 | -5,820 | 23,896 | 23,520 | -376 |
+    | Blink | Teensy 4.1 | 47,104 | 47,104 | 0 | 27,136 | 27,104 | -32 |
+    | APA102 hardware SPI | Uno (AVR) | 3,262 | 3,262 | 0 | 119 | 119 | 0 |
+    | APA102 hardware SPI | ESP32-S3 | 393,076 | 417,472 | +24,396 | 77,136 | 77,896 | +760 |
+    | APA102 hardware SPI | ESP32 Dev | 275,100 | 295,092 | +19,992 | 23,112 | 23,664 | +552 |
+    | APA102 hardware SPI | Teensy 4.1 | 47,104 | 47,104 | 0 | 27,136 | 27,136 | 0 |
+    | Feature mix | Uno (AVR) | 8,414 | 8,414 | 0 | 355 | 355 | 0 |
+    | Feature mix | ESP32-S3 | 419,124 | 442,340 | +23,216 | 78,904 | 79,504 | +600 |
+    | Feature mix | ESP32 Dev | 309,980 | 328,420 | +18,440 | 25,048 | 24,864 | -184 |
+    | Feature mix | Teensy 4.1 | 56,320 | 56,320 | 0 | 29,024 | 28,992 | -32 |
+
+    The feature mix drives a WS2812B strip and an APA102 strip, so on ESP32 it carries the same SPI driver cost.
   * **Compatibility**
     * Arduino-ESP32 3.3.x (ESP-IDF 5.5) is the primary ESP32 target. The Arduino-ESP32 4.0.0 release candidate (ESP-IDF 6.1) and the legacy 1.0.x (ESP-IDF 3.3) and 2.0.x (ESP-IDF 4.4) cores are also built in CI.
     * Teknic ClearCore (SAME53) builds again; it was incorrectly treated as a SAMD21/SAMD51 board (#4997).
