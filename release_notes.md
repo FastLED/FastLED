@@ -11,13 +11,23 @@ FastLED 3.10.9
     * SPI and RMT drivers reclaim their pins after another peripheral has used them (#4905, #4907).
     * ESP32-S3 RMT receive captures are no longer truncated at 200 edges (#4903).
     * Pin functions are protected from Arduino-ESP32 remapping macros (#4931).
+    * ESP32-P4 native USB CDC links against the stock TinyUSB callbacks; ESP32-S2 native USB remains opt-in until it is verified on hardware (#4900).
+    * The RMT refill timing path runs from IRAM and starts its deadlines only once transmission begins, avoiding spurious underruns (#4877).
+    * Transfers queued through the ESP-IDF SPI driver keep their SDK ownership, and an unused ESP-DSP FFT adapter and PWM teardown code were removed (#4871, #4873).
+    * Remaining compiler warnings from the ESP32 and STL headers are cleared (#4932).
   * **Fixes**
     * JSON serialization and RPC responses stream without buffering the whole document and handle out-of-memory conditions gracefully (#4899).
+    * JSON output replaces unpaired UTF-16 surrogates with U+FFFD, producing valid UTF-8 (#4899).
+    * `fl::string` keeps its previous contents when a resize fails instead of being left in a partial state (#4900).
+    * `readStringUntil` resets its timeout after every received byte, so slow serial input is no longer cut off (#4893).
     * `fl::unordered_map` no longer places rehash scratch space on the stack, avoiding overflows on small-stack targets (#4926).
     * AVR: sketches that use the Servo library can own the Timer1 interrupt vector (#4884).
     * Teknic ClearCore (SAME53) builds again; it was incorrectly treated as a SAMD21/SAMD51 board (#4997).
   * **Build and tooling**
     * Requires fbuild 2.5.49 or newer and zccache 1.15.11 or newer (#4973, #4996).
+    * ESP32-S2/S3 TinyUSB deploys and AVR emulation run through fbuild (#4895, #4916).
+    * New lint rules flag driver-enabling defines that bypass the template pattern, bare `noinline` attributes in examples and tests, missing `FL_NO_EXCEPT` on ESP sources, and Arduino dependencies leaking into native ESP32 code (#4831, #4897, #4940, #4960).
+    * The main repository no longer publishes Doxygen output (#4880).
     * Pull requests now receive a per-target memory usage report (#4921, #4935).
 
 FastLED 3.10.8
