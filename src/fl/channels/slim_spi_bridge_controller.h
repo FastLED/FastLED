@@ -94,8 +94,10 @@ public:
     {
         mData = ChannelData::create(ChipsetVariant(cfg));
 #if defined(FL_IS_ESP32)
+        // The explicit-host addLeds() overload registers the native SPI
+        // driver itself; referencing it here would link the ESP-IDF SPI
+        // master stack (~20 KB) into every AUTO-host sketch.
         if (mExplicitSpiHost) {
-            platforms::registerNativeSpiDriver();
             return;
         }
 #endif
