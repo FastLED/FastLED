@@ -142,7 +142,7 @@ had made every `fl::print`/`println` construct EspIO, so failure diagnostics
 linked the SDK UART driver into no-Serial Blink (335592 / 27018 B). With the
 plain-UART backend, output-only callers now write through the ROM UART until
 the console is used (`begin`, `read`, `available`, `flush`, ...), and EspIO is
-garbage-collected otherwise: 324224 / 26490 B, physical DRAM 13722 B. The
+garbage-collected otherwise: 324378 / 26498 B, physical DRAM 13722 B. The
 regression guard is
 `tests/data/esp32c3_bloat_budget.json`, run with
 `bash bloat esp32c3 --build --budget tests/data/esp32c3_bloat_budget.json`.

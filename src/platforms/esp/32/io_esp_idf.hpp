@@ -7,6 +7,9 @@
 // Use ESP-IDF UART + USB-Serial JTAG driver via fl::platforms wrapper
 // Note: Implementation files are included via drivers/_build.hpp
 #include "platforms/esp/32/detail/io_esp_jtag_or_uart.hpp"
+#include "fl/stl/atomic.h"
+#include "freertos/FreeRTOS.h"  // IWYU pragma: keep
+#include "freertos/task.h"  // IWYU pragma: keep
 #include "fl/stl/noexcept.h"
 
 namespace fl {
@@ -19,8 +22,39 @@ namespace {
 // (#4982). The native console publishes its writer the first time a caller
 // that needs it (begin/read/available/flush/...) constructs it; until then
 // output goes to the ROM UART, which needs no driver, ring buffers or RAM.
+// Switch hand-off without a mutex (a lock costs ~900 B flash on esp32c3):
+// writers count themselves in-flight around ROM writes; the switching task
+// waits for that count to drain before the driver install resets UART0.
 using ConsoleWriteFn = void (*)(const char* str, bool newline);
+// Only nativeConsole() takes the address, so output-only builds drop EspIO.
 ConsoleWriteFn gNativeConsoleWrite = nullptr;
+// One word: kReady | kSwitching | in-flight ROM writer count.
+constexpr fl::u32 kReady = 1u << 31;
+constexpr fl::u32 kSwitching = 1u << 30;
+fl::atomic_u32 gConsoleState(0);
+
+// Sets `bits`, returning the previous state (fl::atomic has no fetch_or).
+fl::u32 setConsoleBits(fl::u32 bits) FL_NO_EXCEPT {
+    fl::u32 prev = gConsoleState.load();
+    while (!gConsoleState.compare_exchange_weak(prev, prev | bits)) {
+    }
+    return prev;
+}
+TaskHandle_t gSwitchTask = nullptr;
+
+void romConsoleWrite(const u8* bytes, fl::size size) FL_NO_EXCEPT {
+    if (fl::detail::tryConsoleWrite(bytes, size) == static_cast<fl::size>(-1)) {
+        UartEsp32::writeRom(bytes, size);
+    }
+}
+
+void romConsoleWriteLine(const char* str, bool newline) FL_NO_EXCEPT {
+    romConsoleWrite(reinterpret_cast<const u8*>(str), fl::strlen(str)); // ok reinterpret cast - byte transport boundary.
+    if (newline) {
+        const u8 terminator = '\n';
+        romConsoleWrite(&terminator, 1);
+    }
+}
 
 void nativeConsoleWrite(const char* str, bool newline) FL_NO_EXCEPT {
     EspIO& io = EspIO::instance();
@@ -32,31 +66,39 @@ void nativeConsoleWrite(const char* str, bool newline) FL_NO_EXCEPT {
 }
 
 EspIO& nativeConsole() FL_NO_EXCEPT {
-    if (!gNativeConsoleWrite) {
+    if (!(gConsoleState.load() & kReady)) {
+        if (setConsoleBits(kSwitching) & kSwitching) {
+            // Another task is switching; wait for it to finish.
+            while (!(gConsoleState.load() & kReady)) { vTaskDelay(1); }
+            return EspIO::instance();
+        }
+        gSwitchTask = xTaskGetCurrentTaskHandle();
+        while (gConsoleState.load() & ~kSwitching) { vTaskDelay(1); }
         // Drain ROM-written bytes before the driver install resets UART0.
         UartEsp32::waitRomIdle();
+        EspIO::instance();
         gNativeConsoleWrite = &nativeConsoleWrite;
+        setConsoleBits(kReady);  // published once constructed
     }
     return EspIO::instance();
 }
 
-void romConsoleWrite(const u8* bytes, fl::size size) FL_NO_EXCEPT {
-    if (fl::detail::tryConsoleWrite(bytes, size) == static_cast<fl::size>(-1)) {
-        UartEsp32::writeRom(bytes, size);
-    }
-}
-
 void consoleWrite(const char* str, bool newline) FL_NO_EXCEPT {
     if (!str) { return; }
-    if (gNativeConsoleWrite) {
-        gNativeConsoleWrite(str, newline);
-        return;
+    if (!(gConsoleState.load() & kReady)) {
+        // The switching task may log while constructing the console: it
+        // writes ROM sequentially with its own install, so let it through.
+        const fl::u32 state = gConsoleState.fetch_add(1);
+        if (!(state & (kReady | kSwitching)) ||
+            gSwitchTask == xTaskGetCurrentTaskHandle()) {
+            romConsoleWriteLine(str, newline);
+            gConsoleState.fetch_sub(1);
+            return;
+        }
+        gConsoleState.fetch_sub(1);
+        while (!(gConsoleState.load() & kReady)) { vTaskDelay(1); }
     }
-    romConsoleWrite(reinterpret_cast<const u8*>(str), fl::strlen(str)); // ok reinterpret cast - byte transport boundary.
-    if (newline) {
-        const u8 terminator = '\n';
-        romConsoleWrite(&terminator, 1);
-    }
+    gNativeConsoleWrite(str, newline);
 }
 #else
 // USB consoles have no ROM UART equivalent; output needs the native driver.
