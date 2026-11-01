@@ -310,7 +310,7 @@ dependencies = [
     # exits on success and timeout (FastLED/fbuild#1697).
     # 2.5.45 adds the Espressif8266 deployer used by ESP8266 AutoResearch
     # (FastLED/fbuild#1738).
-    # 2.5.49 sends a PlatformIO-compatible User-Agent, so cold registry
+    # 2.5.49 sends a registry-compatible User-Agent, so cold registry
     # downloads (esp_extra_libs' ArduinoJson) stop returning HTTP 403
     # (FastLED/fbuild#1783/#1784).
     "fbuild>=2.5.49",
