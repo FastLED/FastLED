@@ -1210,6 +1210,12 @@ public:
 		fl::SpiEncoder encoder = fl::SpiEncoder::spiEncoderForChipset(
 			static_cast<fl::SpiChipset>(CHIPSET), SPI_DATA_RATE);
 		fl::SpiChipsetConfig spiCfg(DATA_PIN, CLOCK_PIN, encoder, spiBus);
+#if defined(FL_IS_ESP32)
+		// Only sketches that request a host link the ESP-IDF SPI master driver.
+		if (spiBus != fl::Esp32SpiBus::AUTO) {
+			fl::platforms::registerNativeSpiDriver();
+		}
+#endif
 		typedef typename fl::conditional<CHIPSET != MY9221, fl::true_type, fl::false_type>::type UseSlim;
 		return addLedsSpiDispatch<CHIPSET, DATA_PIN, CLOCK_PIN, SPI_DATA_RATE, 1, RGB_ORDER, B, B_WHICH>(data, nLeds, 0, spiCfg, UseSlim());
 	}
