@@ -499,7 +499,13 @@ size_t UartEsp32::writeRom(const u8* buffer, size_t size) FL_NO_EXCEPT {
 
 void UartEsp32::waitRomIdle() FL_NO_EXCEPT {
     // ROM routine: no SDK driver. Lets ROM-written bytes leave the FIFO
-    // before a driver install reconfigures UART0 and resets it.
+    // before a driver install reconfigures UART0 and resets it. An installed
+    // driver (which may use flow control) owns the FIFO: no unbounded wait.
+#if ESP_IDF_VERSION_4_OR_HIGHER
+    if (&uart_is_driver_installed && uart_is_driver_installed(UART_NUM_0)) {
+        return;
+    }
+#endif
     esp_rom_output_tx_wait_idle(0);
 }
 
