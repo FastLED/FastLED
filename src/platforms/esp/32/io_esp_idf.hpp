@@ -32,7 +32,11 @@ void nativeConsoleWrite(const char* str, bool newline) FL_NO_EXCEPT {
 }
 
 EspIO& nativeConsole() FL_NO_EXCEPT {
-    gNativeConsoleWrite = &nativeConsoleWrite;
+    if (!gNativeConsoleWrite) {
+        // Drain ROM-written bytes before the driver install resets UART0.
+        UartEsp32::waitRomIdle();
+        gNativeConsoleWrite = &nativeConsoleWrite;
+    }
     return EspIO::instance();
 }
 

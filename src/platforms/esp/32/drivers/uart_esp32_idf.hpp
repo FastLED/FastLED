@@ -61,12 +61,14 @@ FL_EXTERN_C_END
 // Older IDF versions only have esp_rom_uart_tx_one_char.
 #if !ESP_IDF_VERSION_4_OR_HIGHER
 #define esp_rom_output_tx_one_char(c) uart_tx_one_char(c)
+#define esp_rom_output_tx_wait_idle(n) uart_tx_wait_idle(n)
 #define UART_SIGNAL_TXD_INV UART_INVERSE_TXD
 #define UART_SIGNAL_RXD_INV UART_INVERSE_RXD
 #define UART_SIGNAL_RTS_INV UART_INVERSE_RTS
 #define UART_SIGNAL_CTS_INV UART_INVERSE_CTS
 #elif ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(5, 3, 0)
 #define esp_rom_output_tx_one_char(c) esp_rom_uart_tx_one_char(c)
+#define esp_rom_output_tx_wait_idle(n) esp_rom_uart_tx_wait_idle(n)
 #endif
 
 namespace fl {
@@ -482,7 +484,10 @@ size_t UartEsp32::writeRom(const u8* buffer, size_t size) FL_NO_EXCEPT {
         uart_is_driver_installed(UART_NUM_0)) {
         const int written = uart_write_bytes(
             UART_NUM_0, static_cast<const char*>(static_cast<const void*>(buffer)), size);
-        return (written < 0) ? 0 : static_cast<size_t>(written);
+        if (written >= 0) {
+            return static_cast<size_t>(written);
+        }
+        // Driver removed between the check and the write: use the ROM path.
     }
 #endif
     // ROM UART (byte-by-byte, blocks while the FIFO is full)
@@ -490,6 +495,12 @@ size_t UartEsp32::writeRom(const u8* buffer, size_t size) FL_NO_EXCEPT {
         esp_rom_output_tx_one_char(static_cast<char>(buffer[i]));
     }
     return size;
+}
+
+void UartEsp32::waitRomIdle() FL_NO_EXCEPT {
+    // ROM routine: no SDK driver. Lets ROM-written bytes leave the FIFO
+    // before a driver install reconfigures UART0 and resets it.
+    esp_rom_output_tx_wait_idle(0);
 }
 
 void UartEsp32::writeln(const char* str) FL_NO_EXCEPT {
