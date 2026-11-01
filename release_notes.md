@@ -1,11 +1,21 @@
 FastLED 3.10.9
 =============================
+  * **Memory: unused subsystems stay out of the image**
+    * On ESP32, the native UART console, Arduino SPI, the embedded filesystem, and `Serial0` are linked only when a sketch uses them (#4873, #4892, #4894, #4896, #4990). Diagnostic printing writes through the ROM UART until the console is actually used, so output-only sketches no longer pull in the SDK UART driver.
+    * Measured Blink image sizes: ESP32-S3 320,439 B flash (4.6 KB below the previous baseline), ESP32-C3 324,378 B, ESP32 287,671 B, RP2040 103,212 B, Teensy 4.1 47,104 B, STM32F103C8 22,904 B, Uno 3,600 B flash / 118 B RAM, and ATtiny85 2,460 B. CI enforces a per-board size budget for each of these.
+    * `fl::unordered_map` no longer places rehash scratch space on the stack; on ESP8266 this raises loop-stack headroom from 368 B to 1,568 B (#4926).
+  * **Compatibility**
+    * Arduino-ESP32 3.3.x (ESP-IDF 5.5) is the primary ESP32 target. The Arduino-ESP32 4.0.0 release candidate (ESP-IDF 6.1) and the legacy 1.0.x (ESP-IDF 3.3) and 2.0.x (ESP-IDF 4.4) cores are also built in CI.
+    * Teknic ClearCore (SAME53) builds again; it was incorrectly treated as a SAMD21/SAMD51 board (#4997).
+    * AVR sketches that use the Servo library can own the Timer1 interrupt vector (#4884).
+    * The `FASTLED_ESP8266_UART`, `FASTLED_ALL_PINS_HARDWARE_SPI`, and `FL_ESP8266_EMBEDDED_FS` defines are retired in favour of explicit `fl::Bus` selection (see ESP8266 below).
+  * **ESP-IDF status**
+    * Every ESP-IDF version in CI is built with Arduino running as an ESP-IDF component: ESP-IDF 3.3, 4.4, 5.3 (through the ESP-IDF component/CMake build), 5.5, and 6.1.
+    * Pure ESP-IDF projects without the Arduino core (`framework = espidf`) are not yet verified by CI and are not officially supported in this release, on any ESP-IDF version. ESP-IDF-native code paths are now the default throughout `src/platforms/esp`, and lint blocks new Arduino dependencies there; Arduino-free build coverage is tracked in #3715.
   * **ESP8266: native drivers on the unified Bus API (#4917, #4925, #4941-#4948)**
     * Three hardware output engines: I2S (`fl::Bus::FLEX_IO`), UART for WS2812 (`fl::Bus::UART`), and hardware HSPI for clocked chipsets such as APA102 (`fl::Bus::SPI`). `fl::Bus::AUTO` selects a suitable default.
     * New support for `fl::RxChannel` (via the I2S receiver), embedded LittleFS, ArduinoOTA, and audio input through the shared Arduino I2S path.
-    * The `FASTLED_ESP8266_UART`, `FASTLED_ALL_PINS_HARDWARE_SPI`, and `FL_ESP8266_EMBEDDED_FS` defines are retired; choose the bus explicitly instead.
-  * **ESP32: smaller builds and more robust drivers**
-    * The native UART console, Arduino SPI, the embedded filesystem, and `Serial0` are linked only when a sketch uses them (#4873, #4892, #4894, #4896, #4990). ESP32-S3 Blink now uses 320,439 bytes of flash.
+  * **ESP32 drivers**
     * The lightweight legacy RMT4 backend is the default again, with transmit and receive verified on hardware (#4877, #4881).
     * Clocked SPI chipsets such as APA102 now use true DMA bursts, and explicitly requested SPI hosts are respected (#4879, #4919).
     * SPI and RMT drivers reclaim their pins after another peripheral has used them (#4905, #4907).
@@ -20,9 +30,6 @@ FastLED 3.10.9
     * JSON output replaces unpaired UTF-16 surrogates with U+FFFD, producing valid UTF-8 (#4899).
     * `fl::string` keeps its previous contents when a resize fails instead of being left in a partial state (#4900).
     * `readStringUntil` resets its timeout after every received byte, so slow serial input is no longer cut off (#4893).
-    * `fl::unordered_map` no longer places rehash scratch space on the stack, avoiding overflows on small-stack targets (#4926).
-    * AVR: sketches that use the Servo library can own the Timer1 interrupt vector (#4884).
-    * Teknic ClearCore (SAME53) builds again; it was incorrectly treated as a SAMD21/SAMD51 board (#4997).
   * **Build and tooling**
     * Requires fbuild 2.5.49 or newer and zccache 1.15.11 or newer (#4973, #4996).
     * ESP32-S2/S3 TinyUSB deploys and AVR emulation run through fbuild (#4895, #4916).
