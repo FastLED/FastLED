@@ -115,11 +115,11 @@ no-Serial sketch here; never reuse their old Serial-enabled measurements.
 
 #4767 esp32s3 no-Serial scorecard: esp32s3 Blink (`examples/Blink`,
 Serial-free since #4759) on Arduino-ESP32 3.3.11 / IDF 5.5.5 / Xtensa GCC
-14.2.0. The recorded measurement, fbuild 2.5.43 with stock console
-integration (#4873), is 325075 B image flash / 39147 B attributed RAM. The
-budget ceilings are 325139 B image flash (64 B link-layout slack) and
+14.2.0. The recorded measurement, fbuild 2.5.49 with the UART console kept out
+of output-only builds (#4990), is 320439 B image flash (CI run 41310165483).
+The budget ceilings are 320503 B image flash (64 B link-layout slack) and
 40016 B attributed RAM; the separate ratchet
-`tests/data/esp32s3_bloat_baseline.txt` independently pins 325075.
+`tests/data/esp32s3_bloat_baseline.txt` independently pins 320439.
 Attributed RAM is not physical board RAM. Physical board RAM for this
 esp32s3 Blink build has not been measured and remains open for #4767; do not
 read 39147 B as physical RAM. Board flash/RAM from fbuild are not comparable with bloat-report image flash / attributed RAM. 3.10.3

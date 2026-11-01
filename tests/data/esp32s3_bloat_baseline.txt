@@ -1,3 +1,8 @@
+# fbuild 2.5.49 / UART console out of output-only builds (#4990): CI run
+# 41310165483 on master 5a8ae7d24 measures image_flash 320439, down 4636 B
+# from 325075 (EspIO and the SDK UART driver no longer link into Blink).
+# Claim the measured saving.
+
 # Stock console integration atop #4873: FBuild 2.5.43 / Arduino3.3.11 /
 # IDF5.5.5 stock packages, local image_flash325075 (down13668 vs338743).
 # Hosted exact-head validation must confirm this ratchet.
@@ -376,4 +381,4 @@
 # the CI Blink report contains no ResponseLutsQ16 symbol. The local fbuild
 # symbol total remains ~4 KB higher for the same source (FastLED/fbuild#1456),
 # so this ratchet uses the CI measurement from PR #4511.
-325075
+320439
