@@ -1,3 +1,23 @@
+FastLED 3.10.9
+=============================
+  * **ESP8266 drivers (#4917, #4925, #4941-#4948)**
+    * Native I2S output engine (`Bus::FLEX_IO`), UART WS2812 engine (`Bus::UART`) and hardware HSPI (`Bus::SPI`) for clocked chipsets; `fl::Bus::AUTO` picks a default bus.
+    * `fl::RxChannel` through the I2S RX receiver, embedded LittleFS, ArduinoOTA and the shared Arduino-I2S audio input.
+    * Retired the `FASTLED_ESP8266_UART`, `FASTLED_ALL_PINS_HARDWARE_SPI` and `FL_ESP8266_EMBEDDED_FS` opt-in defines.
+  * **ESP32 size and dependency cleanup**
+    * The native UART console, Arduino SPI, embedded filesystem and Serial0 stay out of builds that do not use them (#4873, #4892, #4894, #4896, #4990). esp32s3 Blink is 320,439 B of flash.
+    * Slim legacy RMT4 output is the default again, with verified TX/RX (#4877, #4881).
+    * Real DMA bursts for clocked SPI chipsets such as APA102; explicit SPI hosts are honoured; an idle SPI bus or a cached RMT channel reclaims a pin another driver took (#4879, #4905, #4907, #4919).
+    * S3 RMT RX loopback no longer stops at 200 edges (#4903); pin functions are shielded from Arduino-ESP32 remap macros (#4931).
+  * **Fixes**
+    * JSON and RPC responses stream without whole-document buffers and survive out-of-memory (#4899).
+    * `unordered_map` rehash scratch no longer lands on small stacks (#4926).
+    * AVR: Servo can own the Timer1 vector (#4884).
+    * Teknic ClearCore (SAME53) builds again; it is no longer detected as SAMD (#4997).
+  * **Build and CI**
+    * Requires fbuild 2.5.49 or newer and zccache 1.15.11 or newer (#4973, #4996).
+    * Pull requests get a per-target memory usage report (#4921, #4935).
+
 FastLED 3.10.8
 =============================
   * **Compatibility with C library and standard C++ calls on FastLED types (#4827)**
