@@ -52,6 +52,7 @@ jobs:
         with:
           save: ${{ github.ref == 'refs/heads/master' && (github.event_name == 'push' || github.event_name == 'schedule') }}
           fbuild-version: latest
+          install-cache-key-extra: ${{ hashFiles('pyproject.toml') }}
           cache-key-extra: kitchensink-${{ hashFiles('ci/kitchensink/platformio.ini', 'library.json') }}
 
       # The kitchensink project pulls AsyncTCP, ESPAsyncWebServer, ArduinoJson,
