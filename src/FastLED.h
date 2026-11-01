@@ -1194,6 +1194,22 @@ public:
 		return addLeds(&sCtrl, data, nLedsOrOffset, nLedsIfOffset);
 	}
 
+	// Only explicit-host slim controllers reference the native SPI driver, so
+	// AUTO-host and MY9221 sketches never link the ESP-IDF SPI master stack.
+	static void registerExplicitSpiHost(const fl::SpiChipsetConfig &spiCfg, fl::true_type /*useSlim*/) FL_NO_EXCEPT {
+#if defined(FL_IS_ESP32)
+		if (spiCfg.spiBus != fl::Esp32SpiBus::AUTO) {
+			fl::platforms::registerNativeSpiDriver();
+		}
+#else
+		(void)spiCfg;
+#endif
+	}
+
+	static void registerExplicitSpiHost(const fl::SpiChipsetConfig &spiCfg, fl::false_type /*isMY9221*/) FL_NO_EXCEPT {
+		(void)spiCfg;
+	}
+
 	/// Add an SPI based CLEDController via Channel API.
 	template<ESPIChipsets CHIPSET, fl::u8 DATA_PIN, fl::u8 CLOCK_PIN, fl::EOrder RGB_ORDER, fl::u32 SPI_DATA_RATE, fl::Bus B = fl::Bus::AUTO, fl::u8 B_WHICH = 0>
 	::CLEDController &addLedsSpiChannel(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) FL_NO_EXCEPT {
@@ -1210,13 +1226,8 @@ public:
 		fl::SpiEncoder encoder = fl::SpiEncoder::spiEncoderForChipset(
 			static_cast<fl::SpiChipset>(CHIPSET), SPI_DATA_RATE);
 		fl::SpiChipsetConfig spiCfg(DATA_PIN, CLOCK_PIN, encoder, spiBus);
-#if defined(FL_IS_ESP32)
-		// Only sketches that request a host link the ESP-IDF SPI master driver.
-		if (spiBus != fl::Esp32SpiBus::AUTO) {
-			fl::platforms::registerNativeSpiDriver();
-		}
-#endif
 		typedef typename fl::conditional<CHIPSET != MY9221, fl::true_type, fl::false_type>::type UseSlim;
+		registerExplicitSpiHost(spiCfg, UseSlim());
 		return addLedsSpiDispatch<CHIPSET, DATA_PIN, CLOCK_PIN, SPI_DATA_RATE, 1, RGB_ORDER, B, B_WHICH>(data, nLeds, 0, spiCfg, UseSlim());
 	}
 
