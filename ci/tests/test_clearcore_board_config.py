@@ -29,6 +29,7 @@ def test_clearcore_badge_runs_a_real_blink_compile() -> None:
 
     assert "uses: ./.github/workflows/build_template.yml" in workflow
     assert "args: clearcore Blink" in workflow
-    assert 'fbuild_version: "2.5.19"' in workflow
+    # Unpinned: uses the repo's fbuild floor; 2.5.19 got HTTP 403 from the registry.
+    assert "fbuild_version:" not in workflow
     assert "prefer_setup_fbuild: true" in workflow
     assert "workflow_dispatch:" in workflow

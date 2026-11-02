@@ -201,7 +201,15 @@ async def main() -> None:
 
         # Use Playwright to test the server
         async with async_playwright() as p:
-            browser = await p.chromium.launch()
+            browser = await p.chromium.launch(
+                # SwiftShader's headless Vulkan driver has no Wayland surface
+                # extension; an inherited WAYLAND_DISPLAY disables WebGL (#4983).
+                env={
+                    key: value
+                    for key, value in os.environ.items()
+                    if key != "WAYLAND_DISPLAY"
+                },
+            )
             page = await browser.new_page()
 
             try:
