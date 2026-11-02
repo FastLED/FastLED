@@ -14,7 +14,11 @@ from pathlib import Path
 import pytest
 from typeguard import typechecked
 
-from ci.meson.mtime_stabilizer import restore_executable_bits, stabilize_dll_mtimes
+from ci.meson.mtime_stabilizer import (
+    refresh_relinked_mtimes,
+    restore_executable_bits,
+    stabilize_dll_mtimes,
+)
 
 
 @typechecked
@@ -133,3 +137,33 @@ def test_unreadable_binary_raises_instead_of_being_skipped(tmp_path: Path) -> No
             restore_executable_bits(tmp_path)
     finally:
         os.chmod(binary, 0o644)  # let tmp_path cleanup succeed
+
+
+def test_refreshes_cache_restored_core_and_dll_relinks(tmp_path: Path) -> None:
+    """Core and DLLs restored with old mtimes are refreshed in order (#4991)."""
+    tree = _build_tree(tmp_path, "so")
+    core = tmp_path / "ci" / "meson" / "native" / "fastled.so"
+    core.write_text("core")
+    for path in (core, tree.symbols, tree.dll):
+        _age(path, 7 * 3600)
+    build_start = tree.dll.stat().st_mtime + 3600
+
+    # The old DLL is still newer than the old symbols file, so the
+    # symbols-relative stabilizer cannot see the problem.
+    assert stabilize_dll_mtimes(tmp_path) == 0
+
+    assert refresh_relinked_mtimes(tmp_path, build_start, True, [tree.dll]) == 3
+    assert core.stat().st_mtime >= build_start
+    assert tree.dll.stat().st_mtime > core.stat().st_mtime
+
+
+def test_refresh_skips_outputs_not_relinked_this_build(tmp_path: Path) -> None:
+    """Up-to-date outputs Ninja did not relink keep their mtimes."""
+    tree = _build_tree(tmp_path, "so")
+    core = tmp_path / "ci" / "meson" / "native" / "fastled.so"
+    core.write_text("core")
+    _age(core, 60)
+    before = core.stat().st_mtime
+
+    assert refresh_relinked_mtimes(tmp_path, before + 30, False, []) == 0
+    assert core.stat().st_mtime == before

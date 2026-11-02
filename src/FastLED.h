@@ -30,13 +30,13 @@
 /// * 1 digit for the major version
 /// * 3 digits for the minor version
 /// * 3 digits for the patch version
-#define FASTLED_VERSION 3010008
+#define FASTLED_VERSION 3010009
 #ifndef FASTLED_INTERNAL
 #  ifdef  FASTLED_SHOW_VERSION
 #    ifdef FASTLED_HAS_PRAGMA_MESSAGE
-#      pragma message "FastLED version 3.010.008"
+#      pragma message "FastLED version 3.010.009"
 #    else
-#      warning FastLED version 3.010.008  (Not really a warning, just telling you here.)
+#      warning FastLED version 3.010.009  (Not really a warning, just telling you here.)
 #    endif
 #  endif
 #endif
@@ -1194,6 +1194,22 @@ public:
 		return addLeds(&sCtrl, data, nLedsOrOffset, nLedsIfOffset);
 	}
 
+	// Only explicit-host slim controllers reference the native SPI driver, so
+	// AUTO-host and MY9221 sketches never link the ESP-IDF SPI master stack.
+	static void registerExplicitSpiHost(const fl::SpiChipsetConfig &spiCfg, fl::true_type /*useSlim*/) FL_NO_EXCEPT {
+#if defined(FL_IS_ESP32)
+		if (spiCfg.spiBus != fl::Esp32SpiBus::AUTO) {
+			fl::platforms::registerNativeSpiDriver();
+		}
+#else
+		(void)spiCfg;
+#endif
+	}
+
+	static void registerExplicitSpiHost(const fl::SpiChipsetConfig &spiCfg, fl::false_type /*isMY9221*/) FL_NO_EXCEPT {
+		(void)spiCfg;
+	}
+
 	/// Add an SPI based CLEDController via Channel API.
 	template<ESPIChipsets CHIPSET, fl::u8 DATA_PIN, fl::u8 CLOCK_PIN, fl::EOrder RGB_ORDER, fl::u32 SPI_DATA_RATE, fl::Bus B = fl::Bus::AUTO, fl::u8 B_WHICH = 0>
 	::CLEDController &addLedsSpiChannel(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) FL_NO_EXCEPT {
@@ -1211,6 +1227,7 @@ public:
 			static_cast<fl::SpiChipset>(CHIPSET), SPI_DATA_RATE);
 		fl::SpiChipsetConfig spiCfg(DATA_PIN, CLOCK_PIN, encoder, spiBus);
 		typedef typename fl::conditional<CHIPSET != MY9221, fl::true_type, fl::false_type>::type UseSlim;
+		registerExplicitSpiHost(spiCfg, UseSlim());
 		return addLedsSpiDispatch<CHIPSET, DATA_PIN, CLOCK_PIN, SPI_DATA_RATE, 1, RGB_ORDER, B, B_WHICH>(data, nLeds, 0, spiCfg, UseSlim());
 	}
 
