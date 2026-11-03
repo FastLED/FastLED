@@ -35,3 +35,15 @@ The PR gate uses the existing `ci-platform:esp32dev_idf5_component` label
 A successful build proves configuration, compilation and linking. It does
 not prove GPIO output or runtime behavior on hardware; the printed message
 is only observed if the application is run on a device.
+
+## Current validation blocker
+
+The first real IDF 5.5 / esp32 build configured successfully without Arduino,
+but failed during FastLED compilation before linking. In translation units
+that have not yet included `sdkconfig.h`, `src/platforms/esp/is_esp.h` checks
+`ESP32`, `ARDUINO_ARCH_ESP32` and `CONFIG_IDF_TARGET_*`, while the IDF compiler
+command supplies `ESP_PLATFORM` and does not predefine those target macros.
+FastLED then reports an unrecognized platform and attempts to include
+`avr/interrupt.h`; other units also report conflicting integer/size typedefs.
+The harness deliberately supplies no workaround for this library blocker.
+No successful link, application binary size or hardware result is claimed.

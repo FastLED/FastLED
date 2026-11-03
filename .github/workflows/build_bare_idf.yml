@@ -38,7 +38,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Add version/target pairs only after validating the real link.
+        # Initial real-build candidate; expand after validating each link.
         include:
           - idf: v5.5
             target: esp32
@@ -72,3 +72,14 @@ jobs:
             ci/idf_app/build/fastled_bare_idf.map
             ci/idf_app/build/project_description.json
           if-no-files-found: error
+      - name: Preserve configure and compile failure evidence
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bare-idf-failure-${{ matrix.idf }}-${{ matrix.target }}
+          path: |
+            ci/idf_app/build/log/
+            ci/idf_app/build/compile_commands.json
+            ci/idf_app/build/project_description.json
+            ci/idf_app/build/CMakeCache.txt
+          if-no-files-found: warn
