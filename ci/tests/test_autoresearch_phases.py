@@ -1461,6 +1461,57 @@ class TestParseArgsAndBuildCommands:
         assert result.final_environment == "esp32s3"
         assert "LCD_CLOCKLESS" in result.drivers
 
+    def test_lcd_preserves_explicit_opi_psram8_board(
+        self, fake_project_dir: Path
+    ) -> None:
+        args = _make_args(
+            parlio=False,
+            lcd=True,
+            worker_core="1",
+            environment_positional="esp32s3_opi_psram8",
+            project_dir=fake_project_dir,
+        )
+        result = _parse_args_and_build_commands(args)
+        assert isinstance(result, RunContext)
+        assert result.final_environment == "esp32s3_opi_psram8"
+        assert result.json_rpc_commands[0]["params"]["workerCore"] == "1"
+
+    def test_lcd_six_lane_pins_preserve_loopback_rx(
+        self, fake_project_dir: Path
+    ) -> None:
+        args = _make_args(
+            parlio=False,
+            lcd=True,
+            legacy=True,
+            worker_core="1",
+            environment_positional="esp32s3_opi_psram8",
+            project_dir=fake_project_dir,
+            tx_pin=1,
+            rx_pin=2,
+            lanes="6",
+            lane_pins="1,3,4,5,6,7",
+        )
+        result = _parse_args_and_build_commands(args)
+        assert isinstance(result, RunContext)
+        assert result.json_rpc_commands[0]["params"]["lanePins"] == [1, 3, 4, 5, 6, 7]
+        assert not _legacy_lane_rx_overlap(args, 6, "esp32s3_opi_psram8")
+
+    @pytest.mark.parametrize("pins", ["1,1", "1,2", "3,4", "1,49", "1,bad"])
+    def test_lcd_lane_pins_reject_invalid_wiring(
+        self, fake_project_dir: Path, pins: str
+    ) -> None:
+        args = _make_args(
+            parlio=False,
+            lcd=True,
+            environment_positional="esp32s3_opi_psram8",
+            project_dir=fake_project_dir,
+            tx_pin=1,
+            rx_pin=2,
+            lanes="2",
+            lane_pins=pins,
+        )
+        assert _parse_args_and_build_commands(args) == 1
+
     # ============================================================
     # #3281: synthesised .build/fbuild/<board>/platformio.ini path
     # ============================================================

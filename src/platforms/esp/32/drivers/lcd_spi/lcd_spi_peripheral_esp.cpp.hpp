@@ -321,6 +321,21 @@ bool FL_IRAM LcdSpiPeripheralEsp::queueTransmit(const u16 *buffer,
     return transmitInternal(buffer, size_bytes, false);
 }
 
+void FL_IRAM LcdSpiPeripheralEsp::restoreTransmitSlot() FL_NO_EXCEPT {
+    if (mCompleteSem == nullptr) {
+        return;
+    }
+    if (xPortInIsrContext()) {
+        BaseType_t higherPriorityTaskWoken = pdFALSE;
+        xSemaphoreGiveFromISR(mCompleteSem, &higherPriorityTaskWoken);
+        if (higherPriorityTaskWoken) {
+            portYIELD_FROM_ISR();
+        }
+    } else {
+        xSemaphoreGive(mCompleteSem);
+    }
+}
+
 bool FL_IRAM LcdSpiPeripheralEsp::transmitInternal(
     const u16 *buffer, size_t size_bytes, bool wait_for_slot) FL_NO_EXCEPT {
     if (!mInitialized || mI80Bus == nullptr) {
@@ -373,6 +388,9 @@ bool FL_IRAM LcdSpiPeripheralEsp::transmitInternal(
     // not touch the I80 bus GPIO routing.
     if (size_bytes != mLastTransmitSize && mPanelIo != nullptr) {
         if (mPendingTransmits > 0) {
+            if (wait_for_slot) {
+                restoreTransmitSlot();
+            }
             return false;
         }
         esp_lcd_panel_io_del(mPanelIo);
@@ -407,6 +425,9 @@ bool FL_IRAM LcdSpiPeripheralEsp::transmitInternal(
             // Latch â€” transmit() can be entered from ISR context. Reported
             // from waitTransmitDone() in task context.
             mLastPanelIoRecreateError = err;
+            if (wait_for_slot) {
+                restoreTransmitSlot();
+            }
             return false;
         }
     }
@@ -440,6 +461,9 @@ bool FL_IRAM LcdSpiPeripheralEsp::transmitInternal(
         // Latch â€” transmit() can be entered from ISR context. Reported
         // from waitTransmitDone() in task context.
         mLastTxColorError = err;
+        if (wait_for_slot) {
+            restoreTransmitSlot();
+        }
         return false;
     }
 

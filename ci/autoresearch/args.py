@@ -61,6 +61,8 @@ MEMORY_BENCH_CONFLICT_FLAGS = (
     "frames",
     "lanes",
     "lane_counts",
+    "worker_core",
+    "lane_pins",
     "color_pattern",
     "tx_pin",
     "rx_pin",
@@ -230,6 +232,8 @@ class Args:
     spi_provider_native: bool = False
     static_init: bool = False
     static_init_no_lto: bool = False
+    worker_core: str | None = None
+    lane_pins: str | None = None
     driver_binding: str | None = None
     spi_streaming: bool = False
 
@@ -395,6 +399,11 @@ See Also:
             "--lcd",
             action="store_true",
             help="Test only LCD_CLOCKLESS driver (ESP32-S3, clockless via LCD_CAM I80; replaces misnamed I2S)",
+        )
+        driver_group.add_argument(
+            "--worker-core",
+            choices=("auto", "0", "1", "any", "calling"),
+            help="Validate LCD worker affinity under competing Core-0 task load (use with --lcd).",
         )
         driver_group.add_argument(
             "--lcd-spi",
@@ -806,6 +815,10 @@ See Also:
             help="Override TX pin number (FastLED driver output)",
         )
         pin_group.add_argument(
+            "--lane-pins",
+            help="Explicit comma-separated TX pin per lane; requires --tx-pin matching lane 0 and --rx-pin outside the list.",
+        )
+        pin_group.add_argument(
             "--rx-pin",
             type=int,
             help="Override RX pin number (RMT receiver input)",
@@ -1064,6 +1077,8 @@ See Also:
             uart=parsed.uart,
             bitbang=parsed.bitbang,
             lcd=parsed.lcd,
+            worker_core=parsed.worker_core,
+            lane_pins=parsed.lane_pins,
             lcd_spi=parsed.lcd_spi,
             lcd_rgb=parsed.lcd_rgb,
             object_fled=parsed.object_fled,

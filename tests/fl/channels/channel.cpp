@@ -47,6 +47,15 @@ public:
 
     int transmitCount = 0;
     fl::vector<ChannelDataPtr> mCapturedChannels;
+    WorkerConfig requestedWorker;
+    int workerConfigCount = 0;
+    bool acceptWorker = true;
+
+    bool configureWorkerImpl(const WorkerConfig& config) FL_NO_EXCEPT override {
+        requestedWorker = config;
+        ++workerConfigCount;
+        return acceptWorker;
+    }
 
     bool canHandle(const ChannelDataPtr& data) const override {
         (void)data;
@@ -503,6 +512,27 @@ FL_TEST_CASE("[#4733] Bus add overloads preserve the profile-id add overload") {
 }
 
 // ============ Typed mBus runtime dispatch (#2459) ============
+FL_TEST_CASE("Channel forwards worker settings and rejects an unhonored request #5001") {
+    auto& mgr = freshBusTestManager();
+    auto cleanup = fl::make_scope_exit([&]() { mgr.clearAllDrivers(); });
+    auto engine = fl::make_shared<ByteCapturingMockEngine>();
+    mgr.addDriver(9500, engine);
+    CRGB leds[8] = {};
+    auto cfg = makeBusTestConfig(fl::span<CRGB>(leds, 8));
+    cfg.options.mWorker.core = Core::Core1;
+    cfg.options.mWorker.priority = 23;
+    auto channel = Channel::create(cfg);
+    channel->showLeds(255);
+    FL_REQUIRE_EQ(engine->workerConfigCount, 1);
+    FL_CHECK(engine->requestedWorker.core == Core::Core1);
+    FL_CHECK_EQ(engine->requestedWorker.priority.value(), 23);
+    FL_CHECK_EQ(engine->mCapturedChannels.size(), 1u);
+
+    engine->acceptWorker = false;
+    channel->showLeds(255);
+    FL_CHECK_EQ(engine->mCapturedChannels.size(), 1u);
+}
+
 // `ChannelOptions::mBus` is the typed primary path for runtime driver
 // selection. The non-template `FastLED.add(cfg)` reads it and dispatches
 // to `busName(mBus)`. `Bus::AUTO` (the default) falls through to the

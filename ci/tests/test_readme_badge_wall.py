@@ -24,6 +24,7 @@ KNOWN_UNBADGED_ALL_BOARD_ALIASES = {
     "esp32dev_heapdbg",
     "esp32dev_qemu",
     "esp32rmt_51",
+    "esp32s3_opi_psram8",  # Hardware PSRAM profile; shares the S3 implementation.
     "mega",
     "nano",
     "nice_nano_nrf52840",

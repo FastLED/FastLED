@@ -1,0 +1,44 @@
+#pragma once
+
+#include "fl/stl/stdint.h"
+#include "fl/stl/optional.h"
+#include "fl/stl/noexcept.h"
+
+namespace fl {
+
+/// Worker task affinity. This does not change peripheral interrupt affinity.
+enum class Core : fl::i8 {
+    Auto = -1,    ///< Preserve the backend's legacy scheduling policy.
+    Any = -2,        ///< Allow the worker to run on any configured RTOS core.
+    CallingCore = -3, ///< Capture the core that creates the worker.
+    Core0 = 0,
+    Core1 = 1
+};
+
+/// Shared engine settings, configured before the first transmission.
+/// Default fields inherit the engine's configuration. Explicit conflicting
+/// requests are rejected. Configuration calls must be serialized with show().
+struct WorkerConfig {
+    Core core = Core::Auto;
+    fl::optional<fl::u8> priority; ///< Unset preserves the backend priority.
+
+    bool isDefault() const FL_NO_EXCEPT {
+        return core == Core::Auto && !priority.has_value();
+    }
+};
+
+/// Worker scheduling evidence. Unavailable workers retain the sentinels;
+/// core -1 means no affinity, core -2 means no worker has been created.
+struct WorkerDiagnostics {
+    int core = -2;
+    int priority = -1;
+    int observedCore = -1;
+    fl::u32 submittedChunks = 0;
+    fl::u32 completedChunks = 0;
+    fl::u32 totalChunks = 0;
+    fl::u32 maxEncodeUs = 0;
+    fl::u32 maxSubmitUs = 0;
+    bool streamError = false;
+};
+
+} // namespace fl

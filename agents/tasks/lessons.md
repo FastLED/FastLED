@@ -1,5 +1,13 @@
 # Lessons Learned
 
+- Worker affinity defaults must use the automatic policy (`fl::Core::Auto`);
+  fixed core 1 is an explicit application choice, not a library default.
+  Auto preserves legacy backend behavior; do not reinterpret it as a new
+  first-show pinning policy. Use explicit `CallingCore` for that behavior.
+- Trace heap-capability normalization before concluding an allocation is
+  impossible. ESP-IDF normalizes `SPIRAM | DMA` after calculating alignment;
+  static memory-region capability tables alone do not prove allocation fails.
+
 - GPIO direction helpers can reset peripheral output routing. On legacy ESP32,
   enabling output via gpio_set_direction reconnects SIG_GPIO_OUT_IDX. Preserve
   RMT routing with vendor input/output-enable operations that only change the

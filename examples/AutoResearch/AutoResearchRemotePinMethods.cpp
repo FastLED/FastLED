@@ -86,6 +86,7 @@ static const HelpEntry kHelpEntries[] = {
     {"setStripSizes", "Phase 2: Configuration", "[size] or [shortSize, longSize]", "{success, stripSizesSet, testCases}", "Configure strip sizes"},
     {"runTestCase", "Phase 3: Selective Execution", "[testCaseIndex]", "{success, testCaseIndex, result}", "Run single test case by index"},
     {"runDriver", "Phase 3: Selective Execution", "[driverName]", "{success, driver, testsRun, results}", "Run all tests for specific driver"},
+    {"runSingleTest", "Phase 3: Selective Execution", "{driver, laneSizes, lanePins?:GPIO[], workerCore?:string(auto|0|1|any|calling), useLegacyApi?:bool}", "{success, passed, totalTests, passedTests, lanePins, workerCore?, workerObservedCore?, workerPriority?, workerSubmittedChunks?, workerCompletedChunks?, workerTotalChunks?, workerMaxEncodeUs?, workerMaxSubmitUs?, workerStreamError?, competingTaskPasses?, competingTaskMaxPassUs?, heapBeforeInternal, heapBeforePsram, heapAfterInternal, heapAfterPsram, driverError?}", "Run lane-0 byte loopback; optional LCD worker affinity validation under Core-0 load (#5001)"},
     {"runAll", "Phase 3: Selective Execution", "[]", "{success, totalCases, passedCases, skippedCases, results}", "Run full test matrix with JSON results"},
     {"getResults", "Phase 3: Selective Execution", "[]", "[{driver, lanes, stripSize, ...}, ...]", "Return all test results"},
     {"getResult", "Phase 3: Selective Execution", "[testCaseIndex]", "{driver, lanes, stripSize, ...}", "Return specific test case result"},

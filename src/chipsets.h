@@ -11,6 +11,8 @@
 #include "fl/stl/static_assert.h"
 #include "fl/stl/bit_cast.h"
 #include "fl/stl/unique_ptr.h"
+#include "fl/channels/worker_policy.h"
+#include "fl/chipsets/fixed_rgbw_controller.h"
 #include "pixel_iterator.h"
 #include "crgb.h"
 #include "eorder.h"
@@ -482,23 +484,10 @@ class WS2813Controller : public fl::ClocklessControllerImpl<DATA_PIN, fl::TIMING
 /// fl::TIMING_WS2814 and automatically enables four-channel output.
 /// @see fl::TIMING_WS2814 in fl/chipsets/led_timing.h (320, 320, 640 ns)
 template <int DATA_PIN, EOrder RGB_ORDER = RGB>
-class WS2814Controller
-    : public fl::ClocklessControllerImpl<DATA_PIN, fl::TIMING_WS2814,
-                                         RGB_ORDER, 0, false,
-                                         fl::TIMING_WS2814::RESET> {
-    using Base = fl::ClocklessControllerImpl<
-        DATA_PIN, fl::TIMING_WS2814, RGB_ORDER, 0, false,
-        fl::TIMING_WS2814::RESET>;
-
-  public:
-    WS2814Controller() FL_NO_EXCEPT {
-        this->setFixedRgbw(fl::RgbwDefault::value());
-    }
-
-    void init() FL_NO_EXCEPT override {
-        Base::init();
-    }
-};
+class WS2814Controller : public fl::detail::FixedRgbwController<
+    fl::ClocklessControllerImpl<DATA_PIN, fl::TIMING_WS2814,
+                               RGB_ORDER, 0, false,
+                               fl::TIMING_WS2814::RESET>> {};
 
 /// WS2818 RGB controller with backup data input.
 /// @see fl::TIMING_WS2818 in fl/chipsets/led_timing.h (300, 300, 600 ns)
@@ -606,23 +595,10 @@ class SK6812Controller : public fl::ClocklessControllerImpl<DATA_PIN, fl::TIMING
 /// fl::TIMING_LC8816E and automatically emits the fourth white byte.
 /// @see fl::TIMING_LC8816E in fl/chipsets/led_timing.h (300, 600, 300 ns)
 template <int DATA_PIN, EOrder RGB_ORDER = GRB>
-class LC8816EController
-    : public fl::ClocklessControllerImpl<DATA_PIN, fl::TIMING_LC8816E,
-                                         RGB_ORDER, 0, false,
-                                         fl::TIMING_LC8816E::RESET> {
-    using Base = fl::ClocklessControllerImpl<
-        DATA_PIN, fl::TIMING_LC8816E, RGB_ORDER, 0, false,
-        fl::TIMING_LC8816E::RESET>;
-
-  public:
-    LC8816EController() FL_NO_EXCEPT {
-        this->setFixedRgbw(fl::RgbwDefault::value());
-    }
-
-    void init() FL_NO_EXCEPT override {
-        Base::init();
-    }
-};
+class LC8816EController : public fl::detail::FixedRgbwController<
+    fl::ClocklessControllerImpl<DATA_PIN, fl::TIMING_LC8816E,
+                               RGB_ORDER, 0, false,
+                               fl::TIMING_LC8816E::RESET>> {};
 
 /// SM16703 controller - references centralized timing from fl::TIMING_SM16703
 /// @see fl::TIMING_SM16703 in chipsets::led_timing.h (300, 600, 300 ns)
@@ -659,13 +635,17 @@ FL_DISABLE_WARNING_POP
 // WS2816 - is an emulated controller that emits 48 bit pixels by forwarding
 // them to a platform specific WS2812 controller.  The WS2812 controller
 // has to output twice as many 24 bit pixels.
-template <int DATA_PIN, EOrder RGB_ORDER = GRB>
-class WS2816Controller
+template <EOrder RGB_ORDER, typename DELEGATE>
+class WS2816ControllerImpl
     : public CPixelLEDController<RGB_ORDER, 
-                                 WS2812Controller800Khz<DATA_PIN, RGB>::LANES_VALUE,
-                                 WS2812Controller800Khz<DATA_PIN, RGB>::MASK_VALUE> {
+                                 DELEGATE::LANES_VALUE,
+                                 DELEGATE::MASK_VALUE> {
 
 public:
+    using ControllerBaseT = DELEGATE;
+    template<fl::Bus B, fl::Core CORE>
+    using WithWorker = WS2816ControllerImpl<RGB_ORDER,
+        typename fl::detail::ClocklessWorkerController<ControllerBaseT, B, CORE>::type>;
 
 	// ControllerT is a helper class.  It subclasses the device controller class
 	// and has three methods to call the three protected methods we use.
@@ -673,9 +653,8 @@ public:
 	// is janky, too.
 
     // N.B., byte order must be RGB.
-	typedef WS2812Controller800Khz<DATA_PIN, RGB> ControllerBaseT;
 	class ControllerT : public ControllerBaseT {
-		friend class WS2816Controller<DATA_PIN, RGB_ORDER>;
+		friend class WS2816ControllerImpl<RGB_ORDER, ControllerBaseT>;
 		void *callBeginShowLeds(int size) FL_NO_EXCEPT { return ControllerBaseT::beginShowLeds(size); }
 		void callShow(CRGB *data, int nLeds, fl::u8 brightness) FL_NO_EXCEPT {
 			ControllerBaseT::show(data, nLeds, brightness);
@@ -686,8 +665,14 @@ public:
     static const int LANES = ControllerT::LANES_VALUE;
     static const fl::u32 MASK = ControllerT::MASK_VALUE;
 
-    WS2816Controller() FL_NO_EXCEPT {}
-    ~WS2816Controller() {
+#if defined(FASTLED_TESTING)
+    const ControllerT& getDelegateForTesting() const FL_NO_EXCEPT {
+        return mController;
+    }
+#endif
+
+    WS2816ControllerImpl() FL_NO_EXCEPT {}
+    ~WS2816ControllerImpl() {
         mController.setLeds(nullptr, 0);
     }
 
@@ -747,6 +732,10 @@ private:
     fl::unique_ptr<CRGB[]> mData;
     ControllerT mController;
 };
+
+template <int DATA_PIN, EOrder RGB_ORDER = GRB>
+class WS2816Controller : public WS2816ControllerImpl<
+    RGB_ORDER, WS2812Controller800Khz<DATA_PIN, RGB>> {};
 
 
 #endif

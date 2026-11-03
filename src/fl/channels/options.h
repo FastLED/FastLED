@@ -1,4 +1,5 @@
 #pragma once
+#include "fl/channels/worker_config.h"
 
 #include "led_sysdefs.h"  // IWYU pragma: keep
 #include "pixeltypes.h"  // IWYU pragma: keep
@@ -102,6 +103,7 @@ struct ChannelOptions {
     ColorProfileBinding mColorProfile;
 #endif
     fl::u8 mBusWhich = 0;              // Instance selector for portable buses
+    WorkerConfig mWorker;             // Shared worker policy; defaults inherit.
 
     bool setColorProfile(const EmitterProfile& profile) FL_NO_EXCEPT {
 #if FL_COLOR_PROFILE_RUNTIME
