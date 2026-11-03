@@ -306,17 +306,11 @@ public:
 
     /// Configure shared worker settings before transmission. Unsupported
     /// backends reject explicit requests rather than silently ignoring them.
-    bool configureWorker(const WorkerConfig& config) FL_NO_EXCEPT {
-        return config.isDefault() || configureWorkerImpl(config);
-    }
+    bool configureWorker(const WorkerConfig& config) FL_NO_EXCEPT;
 
     /// Snapshot worker evidence after serializing with transmission completion.
     /// Callers must not read diagnostics concurrently with show or configuration.
-    WorkerDiagnostics workerDiagnostics() const FL_NO_EXCEPT {
-        WorkerDiagnostics result;
-        fillWorkerDiagnostics(result);
-        return result;
-    }
+    WorkerDiagnostics workerDiagnostics() const FL_NO_EXCEPT;
 
 private:
     // Keep default aggregate construction and configuration checks out of
@@ -325,12 +319,12 @@ private:
 #if defined(FL_IS_ESP_32S3) || defined(FASTLED_STUB_IMPL)
     virtual
 #endif
-    bool configureWorkerImpl(const WorkerConfig&) FL_NO_EXCEPT { return false; }
+    bool configureWorkerImpl(const WorkerConfig&) FL_NO_EXCEPT;
 
 #if defined(FL_IS_ESP_32S3) || defined(FASTLED_STUB_IMPL)
     virtual
 #endif
-    void fillWorkerDiagnostics(WorkerDiagnostics&) const FL_NO_EXCEPT {}
+    void fillWorkerDiagnostics(WorkerDiagnostics&) const FL_NO_EXCEPT;
 
 protected:
     IChannelDriver() FL_NO_EXCEPT = default;

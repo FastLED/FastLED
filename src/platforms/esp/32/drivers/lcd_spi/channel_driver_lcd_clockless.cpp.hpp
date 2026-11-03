@@ -217,6 +217,10 @@ bool ChannelDriverLcdClockless::configureWorkerImpl(
     return true;
 }
 
+int ChannelDriverLcdClockless::workerCore() const FL_NO_EXCEPT {
+    return mWorkerCore;
+}
+
 int ChannelDriverLcdClockless::workerPriority() const FL_NO_EXCEPT {
     if (mWorkerCore == -2) {
         return -1;
@@ -225,16 +229,26 @@ int ChannelDriverLcdClockless::workerPriority() const FL_NO_EXCEPT {
                ? mWorkerConfig.priority.value() : kLcdWorkerDefaultPriority;
 }
 
+int ChannelDriverLcdClockless::workerObservedCore() const FL_NO_EXCEPT {
+    return mWorkerObservedCore.load(fl::memory_order_acquire);
+}
+
 void ChannelDriverLcdClockless::fillWorkerDiagnostics(
     WorkerDiagnostics &result) const FL_NO_EXCEPT {
     result.core = workerCore();
     result.priority = workerPriority();
     result.observedCore = workerObservedCore();
-    result.submittedChunks = static_cast<u32>(
-        mIsrCtx.mSubmittedChunks.load(fl::memory_order_acquire));
-    result.completedChunks = static_cast<u32>(
-        mIsrCtx.mCompletedChunks.load(fl::memory_order_acquire));
-    result.totalChunks = static_cast<u32>(mIsrCtx.mTotalChunks);
+    if (mStartError == StartError::None) {
+        result.submittedChunks = static_cast<u32>(
+            mIsrCtx.mSubmittedChunks.load(fl::memory_order_acquire));
+        result.completedChunks = static_cast<u32>(
+            mIsrCtx.mCompletedChunks.load(fl::memory_order_acquire));
+        result.totalChunks = static_cast<u32>(mIsrCtx.mTotalChunks);
+    } else {
+        result.submittedChunks = 0;
+        result.completedChunks = 0;
+        result.totalChunks = 0;
+    }
     result.maxEncodeUs = mWorkerMaxEncodeUs.load(fl::memory_order_acquire);
     result.maxSubmitUs = mWorkerMaxSubmitUs.load(fl::memory_order_acquire);
     result.streamError = mWorkerStreamError.load(fl::memory_order_acquire);

@@ -61,11 +61,9 @@ class ChannelDriverLcdClockless : public IChannelDriver {
     void setPollNeededCallback(PollNeededCallback callback) FL_NO_EXCEPT override;
 
     /// Resolved worker affinity: -2 before creation, -1 for no affinity.
-    int workerCore() const FL_NO_EXCEPT { return mWorkerCore; }
+    int workerCore() const FL_NO_EXCEPT;
     int workerPriority() const FL_NO_EXCEPT;
-    int workerObservedCore() const FL_NO_EXCEPT {
-        return mWorkerObservedCore.load(fl::memory_order_acquire);
-    }
+    int workerObservedCore() const FL_NO_EXCEPT;
     fl::string getName() const FL_NO_EXCEPT override {
         return fl::string::from_literal("LCD_CLOCKLESS");
     }

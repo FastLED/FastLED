@@ -571,6 +571,10 @@ FL_TEST_CASE("ChannelDriverLcdClockless - failed bus recreation reports error an
     driver.show();
     mock.simulateTransmitComplete();
     FL_REQUIRE(driver.poll() == IChannelDriver::DriverState::READY);
+    const auto completed = driver.workerDiagnostics();
+    FL_REQUIRE_EQ(completed.submittedChunks, 1);
+    FL_REQUIRE_EQ(completed.completedChunks, 1);
+    FL_REQUIRE_EQ(completed.totalChunks, 1);
 
     auto larger = createClocklessChannelData(1, 700);
     driver.enqueue(larger);
@@ -579,6 +583,15 @@ FL_TEST_CASE("ChannelDriverLcdClockless - failed bus recreation reports error an
     FL_CHECK_EQ(driver.poll().error,
                 "LCD_CLOCKLESS: peripheral initialization failed");
     FL_CHECK_FALSE(larger->isInUse());
+    const auto failed = driver.workerDiagnostics();
+    FL_CHECK_EQ(failed.submittedChunks, 0);
+    FL_CHECK_EQ(failed.completedChunks, 0);
+    FL_CHECK_EQ(failed.totalChunks, 0);
+    FL_CHECK_EQ(failed.core, completed.core);
+    FL_CHECK_EQ(failed.priority, completed.priority);
+    FL_CHECK_EQ(failed.maxEncodeUs, 0);
+    FL_CHECK_EQ(failed.maxSubmitUs, 0);
+    FL_CHECK_FALSE(failed.streamError);
 
     driver.enqueue(larger);
     driver.show();
@@ -586,6 +599,10 @@ FL_TEST_CASE("ChannelDriverLcdClockless - failed bus recreation reports error an
     mock.simulateTransmitComplete();
     FL_CHECK(driver.poll() == IChannelDriver::DriverState::READY);
     FL_CHECK_FALSE(larger->isInUse());
+    const auto retried = driver.workerDiagnostics();
+    FL_CHECK_EQ(retried.submittedChunks, 3);
+    FL_CHECK_EQ(retried.completedChunks, 3);
+    FL_CHECK_EQ(retried.totalChunks, 3);
 }
 
 //=============================================================================
