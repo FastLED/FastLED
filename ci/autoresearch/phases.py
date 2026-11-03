@@ -648,7 +648,11 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
     math_test_mode = args.math
     fft_test_mode = args.fft
     mp3_test_mode = args.mp3
-    rpc_smoke_mode = args.rpc_smoke
+    static_init_mode = getattr(args, "static_init", False)
+    if getattr(args, "static_init_no_lto", False) and not static_init_mode:
+        print("--static-init-no-lto requires --static-init")
+        return 1
+    rpc_smoke_mode = args.rpc_smoke or static_init_mode
     watchdog_soak_mode = args.watchdog_soak
 
     # Parse --perf-wave2d "<W>x<H>" — None disables the mode.
@@ -1383,6 +1387,11 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
                 project_root=project_root,
                 verbose=args.verbose,
                 extra_defines=bench_defines,
+                **(
+                    {"static_init_lto": not args.static_init_no_lto}
+                    if static_init_mode
+                    else {}
+                ),
             )
         except KeyboardInterrupt as ki:
             # Let user-initiated interrupts propagate via the project's
@@ -1669,6 +1678,11 @@ async def _resolve_port_and_environment(ctx: RunContext) -> int | None:
                 project_root=args.project_dir.resolve(),
                 verbose=args.verbose,
                 extra_defines=deferred_defines,
+                **(
+                    {"static_init_lto": not args.static_init_no_lto}
+                    if getattr(args, "static_init", False)
+                    else {}
+                ),
             )
             # The staged sketch lives under <build_dir>/src/sketch \u2014 point
             # PLATFORMIO_SRC_DIR at it so fbuild and any downstream sketch
@@ -1923,6 +1937,7 @@ async def _run_schema_and_pin_setup(ctx: RunContext) -> int | None:
         args.skip_schema
         or args.quiet
         or args.rpc_smoke
+        or getattr(args, "static_init", False)
         or args.watchdog_soak
         or final_environment in constrained_platforms
     )
@@ -2262,6 +2277,22 @@ def _is_valid_rp_pio_parallel_result(result: Any) -> bool:
     )
 
 
+def _static_init_passed(result: Any) -> bool:
+    """Require real overlapping callers and exactly one completed constructor."""
+    return (
+        isinstance(result, dict)
+        and result.get("success") is True
+        and type(result.get("constructions")) is int
+        and result["constructions"] == 1
+        and type(result.get("contenders")) is int
+        and result["contenders"] == 2
+        and type(result.get("completed")) is int
+        and result["completed"] == 2
+        and result.get("constructorEntered") is True
+        and result.get("overlapped") is True
+    )
+
+
 async def _run_rpc_smoke_tests(ctx: RunContext) -> int:
     """Validate the pin-free JSON-RPC transport and core system surface."""
     upload_port = ctx.upload_port
@@ -2297,6 +2328,16 @@ async def _run_rpc_smoke_tests(ctx: RunContext) -> int:
     try:
         await client.connect()
         await client.drain_boot_output(verbose=False)
+
+        if getattr(ctx.args, "static_init", False):
+            result = await call("staticInitTest")
+            if not _static_init_passed(result):
+                raise RpcError(f"static initialization regression: {result!r}")
+            mode = "without LTO" if ctx.args.static_init_no_lto else "with LTO"
+            print(
+                f"RESULT: static initialization PASS ({mode}, two overlapping tasks, one construction)"
+            )
+            return 0
 
         rp_environment = _active_rp2xxx_environment(ctx.final_environment)
         required_methods = {

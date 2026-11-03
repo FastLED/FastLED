@@ -48,7 +48,8 @@ typedef unsigned long prog_uint32_t;
 # define INTERRUPT_THRESHOLD 0
 #endif
 
-#define NEED_CXX_BITS
+// ESP-IDF provides thread-safe local-static guards. FastLED's fallback
+// can replace them under LTO (#4994).
 
 // These can be overridden
 #   define FASTLED_ESP32_RAW_PIN_ORDER

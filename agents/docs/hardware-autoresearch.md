@@ -333,6 +333,28 @@ output, commit/PR URL, and issue URL. Stale chat comments, CI compile-only
 results, and old serial buffers do not close hardware issues when a board can
 be tested locally.
 
+### ESP32 local-static initialization under LTO (#4994)
+
+`--static-init` runs a pin-free concurrency regression through the
+`staticInitTest` RPC. One FreeRTOS task begins constructing a slow function-local
+static; a second task calls the same accessor while initialization is in progress.
+The host requires two completed callers, an observed overlap, and exactly one
+constructor invocation. Reset before calling the RPC again: a successfully
+initialized local static cannot be uninitialized safely for another trial.
+
+```bash
+fbuild port scan
+bash autoresearch esp32c6 --static-init --upload-port <port> --timeout 120s
+bash autoresearch esp32c6 --static-init --static-init-no-lto --upload-port <port> --timeout 120s
+```
+
+The default run enables LTO for the framework, FastLED, sketch, and final link;
+`--static-init-no-lto` is a control with LTO disabled. Both explicitly enable
+thread-safe statics. No LED or jumper is required. A pre-fix LTO failure followed by a
+post-fix pass on the same board is the regression evidence; a non-LTO pass alone
+does not establish that #4994 is fixed. Check the linked guard implementation as
+well as the runtime count when changing the LTO build recipe.
+
 ### ESP32 two-host APA102 check with one jumper
 
 For a registration-order bug involving explicit `Esp32SpiBus::HOST2` and

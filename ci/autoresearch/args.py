@@ -157,6 +157,8 @@ class Args:
     embedded_fs_format_fixture: bool = False
     spi_provider: bool = False
     spi_provider_native: bool = False
+    static_init: bool = False
+    static_init_no_lto: bool = False
 
     @staticmethod
     def parse_args(argv: list[str] | None = None) -> "Args":
@@ -448,6 +450,16 @@ See Also:
             "--rpc-smoke",
             action="store_true",
             help="Validate pin-free JSON-RPC discovery, health, payload, and error handling",
+        )
+        driver_group.add_argument(
+            "--static-init",
+            action="store_true",
+            help="Verify ESP32 concurrent local-static initialization with LTO (#4994); no wiring",
+        )
+        parser.add_argument(
+            "--static-init-no-lto",
+            action="store_true",
+            help="Use --static-init without LTO as a control",
         )
         driver_group.add_argument(
             "--watchdog-soak",
@@ -947,6 +959,8 @@ See Also:
             spi_provider=parsed.spi_provider,
             spi_provider_native=parsed.spi_provider_native,
             rpc_smoke=parsed.rpc_smoke,
+            static_init=parsed.static_init,
+            static_init_no_lto=parsed.static_init_no_lto,
             watchdog_soak=parsed.watchdog_soak,
             perf_wave2d=parsed.perf_wave2d,
             environment=parsed.environment,

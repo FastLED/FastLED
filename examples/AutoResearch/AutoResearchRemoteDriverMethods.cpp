@@ -44,6 +44,11 @@
 #include "fl/stl/span.h"
 #include "fl/stl/singleton.h"
 #include <Arduino.h>
+#if defined(FL_IS_ESP32) // ok platform specific - fl::thread is synchronous on ESP32; this ABI regression requires competing FreeRTOS tasks
+#include "freertos/FreeRTOS.h" // ok platform specific - exercise the ESP-IDF local-static guard with real tasks
+#include "freertos/semphr.h" // ok platform specific - coordinate the two-task ABI regression without racy volatile counters
+#include "freertos/task.h" // ok platform specific - fl::thread does not launch tasks on this target
+#endif
 #if defined(FL_IS_ESP32) // ok platform specific - the explicit ESP32 SPI host probe needs this chip's peripheral count
 #include "platforms/esp/32/drivers/spi/spi_hw_base.h" // ok platform specific - FASTLED_ESP32_HAS_SPI3 rejects one-host chips
 #endif
@@ -66,6 +71,92 @@
 
 namespace {
 
+#if defined(FL_IS_ESP32) // ok platform specific - this regression checks ESP-IDF's process-wide C++ ABI guard implementation
+struct StaticInitProbe {
+    fl::atomic<int> constructions{0};
+    fl::atomic<int> contenders{0};
+    fl::atomic<bool> overlapped{false};
+    SemaphoreHandle_t entered = nullptr;
+    SemaphoreHandle_t completed = nullptr;
+    bool used = false;
+};
+
+// Tasks retain this state until completion, including on timeout.
+StaticInitProbe staticInitProbe;
+
+struct SlowStatic {
+    SlowStatic() {
+        staticInitProbe.constructions.fetch_add(1);
+        xSemaphoreGive(staticInitProbe.entered);
+        // Give the second task time to enter the same accessor while the
+        // first constructor is still running, including on single-core C6.
+        vTaskDelay(pdMS_TO_TICKS(200));
+        staticInitProbe.overlapped.store(
+            staticInitProbe.contenders.load(fl::memory_order_acquire) == 2,
+            fl::memory_order_release);
+    }
+};
+
+SlowStatic& contendedStatic() {
+    static SlowStatic instance;
+    return instance;
+}
+
+void staticInitWorker(void*) {
+    staticInitProbe.contenders.fetch_add(1);
+    (void)contendedStatic();
+    xSemaphoreGive(staticInitProbe.completed);
+    vTaskDelete(nullptr);
+}
+
+fl::json staticInitTest() {
+    fl::json result = fl::json::object();
+    result.set("success", false);
+    if (staticInitProbe.used) {
+        result.set("error", "ResetBoardBeforeStaticInitTest");
+        return result;
+    }
+    staticInitProbe.used = true;
+    staticInitProbe.entered = xSemaphoreCreateBinary();
+    staticInitProbe.completed = xSemaphoreCreateCounting(2, 0);
+    if (!staticInitProbe.entered || !staticInitProbe.completed) {
+        result.set("error", "SemaphoreAllocationFailed");
+        return result;
+    }
+    const bool owner_created = xTaskCreate(staticInitWorker, "static-owner", 4096,
+                                         nullptr, 1, nullptr) == pdPASS;
+    const bool entered = owner_created &&
+        xSemaphoreTake(staticInitProbe.entered, pdMS_TO_TICKS(2000)) == pdTRUE;
+    const bool contender_created = entered &&
+        xTaskCreate(staticInitWorker, "static-contender", 4096,
+                    nullptr, 1, nullptr) == pdPASS;
+    int completed = 0;
+    const int tasks = (owner_created ? 1 : 0) + (contender_created ? 1 : 0);
+    for (int i = 0; i < tasks; ++i) {
+        if (xSemaphoreTake(staticInitProbe.completed, pdMS_TO_TICKS(3000)) == pdTRUE) {
+            ++completed;
+        }
+    }
+    const int constructions = staticInitProbe.constructions.load(fl::memory_order_acquire);
+    const int contenders = staticInitProbe.contenders.load(fl::memory_order_acquire);
+    const bool overlapped = staticInitProbe.overlapped.load(fl::memory_order_acquire);
+    result.set("constructorEntered", entered);
+    result.set("constructions", constructions);
+    result.set("contenders", contenders);
+    result.set("completed", completed);
+    result.set("overlapped", overlapped);
+    result.set("success", entered && completed == 2 && contenders == 2 &&
+                          overlapped && constructions == 1);
+    // On timeout keep the handles alive for any unfinished task. This probe
+    // runs once per boot, so failure cannot accumulate allocations.
+    if (completed == tasks) {
+        vSemaphoreDelete(staticInitProbe.entered);
+        vSemaphoreDelete(staticInitProbe.completed);
+    }
+    return result;
+}
+#endif
+
 #if defined(FL_IS_TEENSY_4X)
 struct FlexIoObjectFledState {
     CRGB leds[100];
@@ -79,6 +170,16 @@ FlexIoObjectFledState& flexIoObjectFledState() {
 }  // namespace
 
 void AutoResearchRemoteControl::bindDriverMethods(fl::Remote& remote) {
+    remote.bind("staticInitTest", [](const fl::json&) -> fl::json {
+#if defined(FL_IS_ESP32) // ok platform specific - fl::thread has no concurrent ESP32 implementation; directly test the vendor ABI
+        return staticInitTest();
+#else
+        fl::json result = fl::json::object();
+        result.set("success", false);
+        result.set("error", "Esp32Required");
+        return result;
+#endif
+    });
     // One physical data jumper checks either SPI host while a second APA102
     // channel exercises the registration-order interaction from #4864.
     remote.bind("dualSpiHostLoopback", [this](const fl::json& args) -> fl::json {

@@ -62,6 +62,8 @@ Driver Selection (optional - omit for GPIO-only mode):
   --spi-provider      Test Arduino SPI provider (explicit classic ESP32 env and port)
   --spi-provider-native  With --spi-provider, test native SPI timeout/ownership faults
   --simd              Test SIMD operations only (no LED drivers needed)
+  --static-init       Verify ESP32 local-static initialization under LTO; no wiring
+  --static-init-no-lto  With --static-init, run the control without LTO
   --coroutine         Test coroutine/task creation, stop, await (no LED drivers needed)
   --parallel          Test multiple drivers simultaneously (requires 2+ drivers)
 

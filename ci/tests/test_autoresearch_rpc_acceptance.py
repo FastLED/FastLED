@@ -8,8 +8,17 @@ from types import SimpleNamespace
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
 
+import pytest
+
+from ci.autoresearch.args import Args
 from ci.autoresearch.context import QuietContext, RunContext
-from ci.autoresearch.phases import _classify_test_failure, _run_tests_or_special_mode
+from ci.autoresearch.phases import (
+    _classify_test_failure,
+    _parse_args_and_build_commands,
+    _run_rpc_smoke_tests,
+    _run_tests_or_special_mode,
+    _static_init_passed,
+)
 
 
 _PATCH_MOD = "ci.autoresearch.phases"
@@ -448,3 +457,79 @@ def test_driver_decline_without_a_reason_still_says_it_declined() -> None:
 
     assert failure_class == "driver_declined"
     assert "gave no reason" in detail
+
+
+def _static_init_result() -> dict[str, object]:
+    return {
+        "success": True,
+        "constructions": 1,
+        "contenders": 2,
+        "completed": 2,
+        "constructorEntered": True,
+        "overlapped": True,
+    }
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("success", False),
+        ("constructions", 2),
+        ("constructions", True),
+        ("contenders", 1),
+        ("completed", 1),
+        ("constructorEntered", False),
+        ("overlapped", False),
+    ],
+)
+def test_static_init_gate_rejects_incomplete_or_duplicate_construction(
+    field: str, value: object
+) -> None:
+    result = _static_init_result()
+    result[field] = value
+    assert not _static_init_passed(result)
+
+
+def test_static_init_gate_accepts_one_constructor_with_overlapping_tasks() -> None:
+    assert _static_init_passed(_static_init_result())
+    assert not _static_init_passed(None)
+    assert not _static_init_passed({"success": True})
+
+
+def test_static_init_mode_uses_pin_free_readiness_and_enables_lto() -> None:
+    args = Args.parse_args(["esp32c6", "--static-init"])
+    with patch("ci.autoresearch.staging.synthesise_autoresearch_project") as staging:
+        ctx = _parse_args_and_build_commands(args)
+    assert not isinstance(ctx, int)
+    assert ctx.rpc_smoke_mode
+    assert not ctx.gpio_only_mode
+    assert ctx.drivers == []
+    assert staging.call_args.kwargs["static_init_lto"] is True
+
+
+def test_static_init_control_requires_test_mode() -> None:
+    args = Args.parse_args(["esp32c6", "--static-init-no-lto"])
+    assert _parse_args_and_build_commands(args) == 1
+
+
+@pytest.mark.parametrize("valid", (True, False))
+def test_static_init_runner_gates_rpc_result(valid: bool) -> None:
+    result = _static_init_result()
+    if not valid:
+        result["constructions"] = 2
+        result["success"] = False
+    client = AsyncMock()
+    client.send.return_value = SimpleNamespace(success=True, data=result)
+    ctx = SimpleNamespace(
+        args=SimpleNamespace(static_init=True, static_init_no_lto=False),
+        upload_port="test-port",
+        remaining_seconds=lambda minimum: 30.0,
+        serial_iface=object(),
+        crash_decoder=None,
+        use_fbuild=True,
+    )
+    with patch("ci.autoresearch.phases.RpcClient", return_value=client):
+        rc = asyncio.run(_run_rpc_smoke_tests(ctx))
+    assert rc == (0 if valid else 1)
+    client.send.assert_awaited_once_with("staticInitTest", args=None, timeout=30.0)
+    client.close.assert_awaited_once()
