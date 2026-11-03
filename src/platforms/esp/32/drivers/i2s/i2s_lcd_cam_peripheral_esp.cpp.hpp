@@ -136,13 +136,14 @@ bool I2sLcdCamPeripheralEsp::initialize(const I2sLcdCamConfig& config) FL_NO_EXC
     bus_config.max_transfer_bytes = config.max_transfer_bytes;
 
     // DMA configuration (IDF version dependent)
-#if ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(5, 3, 0)
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 4, 2) && \
+    ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(5, 3, 0)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
     bus_config.psram_trans_align = LCD_DRIVER_PSRAM_DATA_ALIGNMENT;
     bus_config.sram_trans_align = 4;
 #pragma GCC diagnostic pop
-#else
+#elif ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 3, 0)
     bus_config.dma_burst_size = 64;
 #endif
 

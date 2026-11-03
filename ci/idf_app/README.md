@@ -26,9 +26,15 @@ components, and the existing `FL_NO_ARDUINO` ratchet applies to all compiled
 sources. The workflow requires both the linked ELF and a nonempty application
 binary, reports the binary size and uploads build evidence.
 
-The matrix starts with IDF 5.5 / esp32. Each additional version/chip pair is
-one `include` entry in `.github/workflows/build_bare_idf.yml`; IDF 4.4, 5.1,
-6.x and esp32s3/c3/c6/p4 are future coverage, not claimed support here.
+The matrix in `.github/workflows/build_bare_idf.yml` covers IDF 5.5 with
+esp32/esp32s3/esp32c3/esp32c6/esp32p4, plus IDF 5.1 and 4.4 with esp32/esp32s3.
+The root manifest keeps mDNS version and target conditions as separate ANDed
+rules for older component managers. IDF 4.x uses the SDK's bundled mDNS;
+IDF 5.x uses the registry component. Pioarduino dependencies remain
+declared in that same manifest.
+On IDF 4.x this harness disables the component manager, whose bundled version
+does not recognize manifest rules at all. All required components come from
+the SDK there; this setting does not affect downstream applications.
 The PR gate uses the existing `ci-platform:esp32dev_idf5_component` label
 (and the usual `ci-platform:esp*` / `ci-full` labels).
 
@@ -46,4 +52,5 @@ The library recognizes `ESP_PLATFORM`, routes native IDF through the ESP32
 dispatchers, uses toolchain-owned global size types, and declares its SDK
 component dependencies. CPU frequency comes from SDK configuration when the
 application does not supply `F_CPU`. The harness supplies no library workaround.
-Hardware execution and other version/chip combinations remain unverified.
+Hardware execution remains unverified. See the PR matrix for link evidence
+for each version/chip pair.
