@@ -5,7 +5,7 @@
 // Pull in ARM-family detection so platform-routed FL_IS_ARM_* defines are
 // visible before the dispatcher below.
 #include "platforms/arm/is_arm.h"  // ok platform headers
-#include "platforms/esp/is_esp.h"
+#include "platforms/is_platform.h"
 
 
 /// @file platforms.h
