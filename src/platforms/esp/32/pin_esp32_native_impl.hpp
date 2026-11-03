@@ -118,10 +118,10 @@ namespace {
             return;  // Already initialized
         }
 
-        adc_oneshot_unit_init_cfg_t init_config = {
-            .unit_id = ADC_UNIT_1,
-            .ulp_mode = ADC_ULP_MODE_DISABLE,
-        };
+        // Zero-initialize SDK-added fields, including the default ADC clock.
+        adc_oneshot_unit_init_cfg_t init_config = {};
+        init_config.unit_id = ADC_UNIT_1;
+        init_config.ulp_mode = ADC_ULP_MODE_DISABLE;
         adc_oneshot_new_unit(&init_config, &adc1_handle);
     }
 }

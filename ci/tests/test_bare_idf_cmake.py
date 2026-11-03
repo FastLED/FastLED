@@ -130,6 +130,8 @@ def test_component_requirements(
         "esp_timer",
         "mbedtls",
     } | extra
+    if major >= 6:
+        expected.add("bootloader_support")
     if major == 4:
         expected.add("mdns")
     if arduino:

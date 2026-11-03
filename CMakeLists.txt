@@ -71,9 +71,21 @@ if(NOT DEFINED IDF_VERSION_MAJOR OR IDF_VERSION_MAJOR GREATER_EQUAL 4)
     list(APPEND FASTLED_REQUIRES esp_rom)
 endif()
 
+if(IDF_VERSION_MAJOR GREATER_EQUAL 6)
+    list(APPEND FASTLED_REQUIRES bootloader_support)
+endif()
+
 # Register the component with ESP-IDF
 idf_component_register(SRCS ${FastLED_SRCS}
                        INCLUDE_DIRS "src"
                        REQUIRES ${FASTLED_REQUIRES})
+
+# esp_h264 1.5.0 omits this dependency on IDF 6 even though its P4 encoder
+# still includes esp_flash_encrypt.h. Restore the dependency on its own target.
+# The managed component is registered before FastLED during normal expansion.
+if(IDF_VERSION_MAJOR GREATER_EQUAL 6 AND TARGET idf::espressif__esp_h264)
+    idf_component_get_property(FASTLED_H264_LIB espressif__esp_h264 COMPONENT_LIB)
+    target_link_libraries(${FASTLED_H264_LIB} PRIVATE idf::bootloader_support)
+endif()
 
 project(FastLED)
