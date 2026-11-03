@@ -841,6 +841,28 @@ public:
 	/// @endcode
 	static fl::ChannelPtr add(const fl::ChannelConfig& config) FL_NO_EXCEPT;
 
+	/// Add a channel through one compile-time-selected driver (#4733).
+	/// Bus::AUTO resolves to the platform default for Chipset. This path
+	/// registers only that driver instead of the runtime all-driver bundle.
+	/// Chipset defaults to ClocklessChipset for an erased ChannelConfig;
+	/// pass SpiChipsetConfig explicitly for an erased clocked configuration.
+	/// A chipset-family mismatch returns nullptr without registering anything.
+	template<fl::Bus B, typename Chipset = fl::ClocklessChipset, fl::u8 Which = 0>
+	static fl::ChannelPtr add(const fl::ChannelConfig& config) FL_NO_EXCEPT {
+		fl::ChannelPtr channel = fl::TypedChannel<B, Chipset, Which>::create(config);
+		if (channel != nullptr) add(channel);
+		return channel;
+	}
+
+	/// Add a typed configuration, deducing its chipset family.
+	/// The template bus and instance take precedence over runtime bus options.
+	template<fl::Bus B, typename Chipset, fl::u8 Which = 0>
+	static fl::ChannelPtr add(const fl::ChannelConfigOf<Chipset>& config) FL_NO_EXCEPT {
+		fl::ChannelPtr channel = fl::TypedChannel<B, Chipset, Which>::create(config);
+		if (channel != nullptr) add(channel);
+		return channel;
+	}
+
 	template<fl::ProfileId Profile>
 	static fl::ChannelPtr add(const fl::ChannelConfig& config) FL_NO_EXCEPT {
 		fl::ChannelPtr channel = fl::Channel::create<Profile>(config);

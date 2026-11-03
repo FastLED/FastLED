@@ -84,6 +84,11 @@ async def run(args: Args | None = None) -> int:
     args = args or Args.parse_args()
     assert args is not None
 
+    if args.driver_binding or args.spi_streaming:
+        from ci.autoresearch.memory_bench import run_memory_bench
+
+        return await run_memory_bench(args)
+
     if args.usb_console:
         from ci.autoresearch.usb_console import run_usb_console
 

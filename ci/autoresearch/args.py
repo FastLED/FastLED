@@ -6,6 +6,58 @@ from dataclasses import dataclass
 from pathlib import Path
 
 
+MEMORY_BENCH_CONFLICT_FLAGS = (
+    "parlio",
+    "rmt",
+    "spi",
+    "uart",
+    "bitbang",
+    "lcd",
+    "lcd_spi",
+    "lcd_rgb",
+    "object_fled",
+    "flex_io",
+    "lpuart",
+    "all",
+    "simd",
+    "coroutine",
+    "ieee754",
+    "math",
+    "fft",
+    "mp3",
+    "net",
+    "net_server",
+    "net_client",
+    "net_peer",
+    "ota",
+    "ble",
+    "decode",
+    "watchdog_soak",
+    "rpc_smoke",
+    "perf_wave2d",
+    "pwm_dma_cl",
+    "dma_spi",
+    "dma_uart",
+    "rp_spi_loopback",
+    "rp_spi_public_api",
+    "rp_pio_both",
+    "test_fault_emit",
+    "embedded_fs",
+    "embedded_fs_provider",
+    "embedded_fs_format_fixture",
+    "pin_toggle_rx",
+    "ws2812_loopback",
+    "tight_timing",
+    "parallel",
+    "legacy",
+    "legacy_mixed_timings",
+    "legacy_rgbw_small_counts",
+    "spi_provider",
+    "spi_provider_native",
+    "usb_console",
+)
+
+
 @dataclass
 class Args:
     """Parsed command-line arguments for autoresearch test runner."""
@@ -157,6 +209,8 @@ class Args:
     embedded_fs_format_fixture: bool = False
     spi_provider: bool = False
     spi_provider_native: bool = False
+    driver_binding: str | None = None
+    spi_streaming: bool = False
 
     @staticmethod
     def parse_args(argv: list[str] | None = None) -> "Args":
@@ -379,6 +433,17 @@ See Also:
             "--all",
             action="store_true",
             help="Test all currently implemented drivers (Teensy 4.x: --object-fled --flex-io)",
+        )
+        memory_group = driver_group.add_mutually_exclusive_group()
+        memory_group.add_argument(
+            "--driver-binding",
+            choices=("typed", "runtime"),
+            help="Measure cold driver registration and steady heap through the public Channel API",
+        )
+        memory_group.add_argument(
+            "--spi-streaming",
+            action="store_true",
+            help="ESP32-S3 native SPI2 APA102/SK9822 memory and full-frame SPI3-slave loopback",
         )
         driver_group.add_argument(
             "--spi-provider",
@@ -919,6 +984,16 @@ See Also:
                     file=sys.stderr,
                 )
 
+        if parsed.driver_binding or parsed.spi_streaming:
+            conflicts = [
+                name for name in MEMORY_BENCH_CONFLICT_FLAGS if getattr(parsed, name)
+            ]
+            if conflicts:
+                parser.error(
+                    "Run memory benches separately from other test modes: "
+                    + ", ".join("--" + name.replace("_", "-") for name in conflicts)
+                )
+
         # Convert argparse.Namespace to Args dataclass
         return Args(
             environment_positional=parsed.environment_positional,
@@ -946,6 +1021,8 @@ See Also:
             embedded_fs_format_fixture=parsed.embedded_fs_format_fixture,
             spi_provider=parsed.spi_provider,
             spi_provider_native=parsed.spi_provider_native,
+            driver_binding=parsed.driver_binding,
+            spi_streaming=parsed.spi_streaming,
             rpc_smoke=parsed.rpc_smoke,
             watchdog_soak=parsed.watchdog_soak,
             perf_wave2d=parsed.perf_wave2d,

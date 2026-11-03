@@ -69,6 +69,9 @@ void streamHelpEntry(fl::JsonStreamWriter& writer, const HelpEntry& entry) {
 }
 
 static const HelpEntry kHelpEntries[] = {
+#if defined(FL_AUTORESEARCH_MEMORY_BENCH)
+    {"memoryBench", "Memory", "[{chipset:apa102|sk9822, pixels:1000, frames:20}]", "{success, heapBefore, heapAfterRegister, heapSteady, driverCount, frames, wireMismatches, frameUs}", "Cold typed/runtime driver binding or native SPI2 full-frame loopback to SPI3; run the matching --driver-binding or --spi-streaming AutoResearch mode."},
+#endif
     {"rpc.discover", "JSON-RPC", "[]", "{schema:[[name, ...], ...]}", "Discover the registered JSON-RPC method schema"},
     {"start", "Phase 1: Basic Control", "[]", "void", "Trigger test matrix execution"},
     {"status", "Phase 1: Basic Control", "[]", "{ready, platform, rpcReady, ledRxAvailable, pinTx, pinRx}", "Query RPC, platform, and LED RX readiness"},

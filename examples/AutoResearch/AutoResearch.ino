@@ -582,7 +582,13 @@ void setup() {
     // Post-#2428 the channel driver registry no longer auto-populates. This
     // example needs every available driver enrolled with ChannelManager so the
     // discovery + autoresearch loop below can enumerate them.
+#if !defined(FL_AUTORESEARCH_MEMORY_BENCH)
     FastLED.enableAllDrivers();
+#else
+    // A memory bench must sample registration before any driver is created.
+    // Its dedicated RPC chooses the production API under test.
+    g_autoresearch_state->gpio_baseline_test_done = true;
+#endif
 
     // List all available drivers and store globally
     g_autoresearch_state->drivers_available = FastLED.getDriverInfos();
@@ -596,7 +602,9 @@ void setup() {
     }
 
     // Validate that expected drivers are available for this platform
+#if !defined(FL_AUTORESEARCH_MEMORY_BENCH)
     autoResearchExpectedEngines();
+#endif
 
     // Emit JSON-RPC ready event for Python orchestration
     fl::json readyData = fl::json::object();
