@@ -27,9 +27,37 @@ ROOT = Path(__file__).resolve().parents[2]
                 "esp_lcd",
                 "esp_mm",
                 "esp_adc",
+                "esp_driver_gpio",
+                "esp_driver_gptimer",
+                "esp_driver_ledc",
+                "esp_driver_parlio",
+                "esp_driver_spi",
+                "esp_driver_uart",
+                "esp_driver_usb_serial_jtag",
                 "esp_driver_i2s",
                 "esp_driver_mcpwm",
                 "esp_driver_rmt",
+            },
+        ),
+        (
+            5,
+            5,
+            {
+                "esp_rom",
+                "esp_netif",
+                "esp_lcd",
+                "esp_mm",
+                "esp_adc",
+                "esp_driver_gpio",
+                "esp_driver_gptimer",
+                "esp_driver_i2s",
+                "esp_driver_ledc",
+                "esp_driver_mcpwm",
+                "esp_driver_parlio",
+                "esp_driver_rmt",
+                "esp_driver_spi",
+                "esp_driver_uart",
+                "esp_driver_usb_serial_jtag",
             },
         ),
         (
@@ -41,6 +69,13 @@ ROOT = Path(__file__).resolve().parents[2]
                 "esp_lcd",
                 "esp_mm",
                 "esp_adc",
+                "esp_driver_gpio",
+                "esp_driver_gptimer",
+                "esp_driver_ledc",
+                "esp_driver_parlio",
+                "esp_driver_spi",
+                "esp_driver_uart",
+                "esp_driver_usb_serial_jtag",
                 "esp_driver_i2s",
                 "esp_driver_mcpwm",
                 "esp_driver_rmt",
@@ -95,6 +130,8 @@ def test_component_requirements(
         "esp_timer",
         "mbedtls",
     } | extra
+    if major == 4:
+        expected.add("mdns")
     if arduino:
         expected.add(arduino)
     assert set(output.read_text(encoding="utf-8").split(";")) == expected

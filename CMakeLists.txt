@@ -52,7 +52,15 @@ if(IDF_VERSION_MAJOR GREATER_EQUAL 5)
 endif()
 if(IDF_VERSION_MAJOR GREATER 5 OR
    (IDF_VERSION_MAJOR EQUAL 5 AND IDF_VERSION_MINOR GREATER_EQUAL 3))
-    list(APPEND FASTLED_REQUIRES esp_driver_i2s esp_driver_mcpwm esp_driver_rmt)
+    # IDF 5.3 split these out of driver. IDF 6 no longer re-exports them
+    # through driver, so every directly included driver needs a public dependency.
+    # Before 5.3, driver owns these headers (including GPTimer since 5.0).
+    list(APPEND FASTLED_REQUIRES
+         esp_driver_gpio esp_driver_gptimer esp_driver_i2s esp_driver_ledc
+         esp_driver_mcpwm esp_driver_parlio esp_driver_rmt esp_driver_spi
+         esp_driver_uart esp_driver_usb_serial_jtag)
+    # Legacy driver/timer.h is used only on IDF 3/4 and stays in driver.
+    # FastLED does not include driver/pulse_cnt.h or driver/pcnt.h.
 endif()
 
 # esp_rom is a standalone component only from IDF 4.x onward (esp_rom_sys.h /
