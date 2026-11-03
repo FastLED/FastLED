@@ -10,6 +10,7 @@
 #include "fl/channels/driver.h"
 #include "fl/channels/data.h"
 #include "fl/channels/manager.h"
+#include "fl/channels/slim_spi_bridge_controller.h"
 #include "fl/chipsets/spi.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/move.h"
@@ -491,6 +492,13 @@ public:
 
     int enqueueCount = 0;
     int showCount = 0;
+    bool acceptWorker = false;
+    Core requestedCore = Core::Auto;
+
+    bool configureWorker(const WorkerConfig& config) FL_NO_EXCEPT override {
+        requestedCore = config.core;
+        return config.isDefault() || acceptWorker;
+    }
     // Snapshots of encoded data captured at enqueue time (survives poll)
     fl::vector<fl::vector<uint8_t>> capturedData;
 
@@ -579,6 +587,32 @@ FL_TEST_CASE("spiEncoderForChipset speed override") {
     // Zero override means use default
     enc = SpiEncoder::spiEncoderForChipset(SpiChipset::APA102, 0);
     FL_CHECK_EQ(enc.clock_hz, 6000000u);
+}
+
+FL_TEST_CASE("Slim SPI affinity adds no controller storage and must be honored #5001") {
+    using DefaultController = SlimSpiBridgeController<SpiChipset::APA102, RGB, Bus::AUTO, 0>;
+    using PinnedController = SlimSpiBridgeController<SpiChipset::APA102, RGB, Bus::AUTO, 0, Core::Core1>;
+    FL_CHECK_EQ(sizeof(DefaultController), sizeof(PinnedController));
+
+    auto mock = fl::make_shared<SpiCaptureMock>("SPI_WORKER_POLICY");
+    auto& manager = ChannelManager::instance();
+    manager.addDriver(1000, mock);
+    FL_REQUIRE_TRUE(manager.setExclusiveDriverByName("SPI_WORKER_POLICY"));
+    CRGB leds[2] = {CRGB::Red, CRGB::Blue};
+    SpiChipsetConfig cfg(5, 6, SpiEncoder::apa102());
+    {
+        PinnedController controller(cfg);
+        controller.setLeds(leds, 2);
+        controller.showLeds(255);
+        FL_CHECK_EQ(mock->enqueueCount, 0);
+        FL_CHECK(mock->requestedCore == Core::Core1);
+
+        mock->acceptWorker = true;
+        controller.showLeds(255);
+        FL_CHECK_EQ(mock->enqueueCount, 1);
+        controller.setLeds(nullptr, 0);
+    }
+    manager.removeDriver(mock);
 }
 
 FL_TEST_CASE("APA102 channel routes through ChannelManager") {

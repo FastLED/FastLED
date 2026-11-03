@@ -155,6 +155,9 @@ public:
 template<int DATA_PIN, typename TIMING, EOrder RGB_ORDER>
 class MockClocklessController : public CPixelLEDController<RGB_ORDER>, public IData {
 public:
+    template<Bus B, Core CORE>
+    using WithWorker = MockClocklessController<DATA_PIN, TIMING, RGB_ORDER>;
+
     fl::vector<uint8_t> capturedBytes;
 
     virtual void init() override {}
@@ -174,6 +177,47 @@ public:
         iterator.writeWS2812(&capturedBytes);
     }
 };
+
+FL_TEST_CASE("UCS7604 worker rebinding preserves its 16-bit preamble encoder #5001") {
+    using Original = UCS7604Controller16bitT<10, RGB, MockClocklessController>;
+    using Rebound = Original::WithWorker<Bus::AUTO, Core::Core1>;
+    Original original;
+    Rebound controller;
+    original.init();
+    controller.init();
+    CRGB leds[] = {CRGB::Red};
+    original.setDither(DISABLE_DITHER);
+    controller.setDither(DISABLE_DITHER);
+    original.setLeds(fl::span<CRGB>(leds, 1));
+    original.showLeds(255);
+    controller.setLeds(fl::span<CRGB>(leds, 1));
+    controller.showLeds(255);
+    const auto& bytes = controller.getDelegate().capturedBytes;
+    FL_REQUIRE_GE(bytes.size(), 23u); // 15-byte header + one RGBW16 pixel.
+    FL_CHECK_EQ(bytes[0], 0xFF);
+    FL_CHECK_EQ(bytes[8], 0x8B);
+    FL_CHECK(bytes == original.getDelegate().capturedBytes);
+    FL_CHECK_EQ(sizeof(Original), sizeof(Rebound));
+}
+
+FL_TEST_CASE("WS2816 worker rebinding preserves 48-bit output #5001") {
+    using Delegate = MockClocklessController<10, TIMING_WS2812_800KHZ, RGB>;
+    using Original = WS2816ControllerImpl<RGB, Delegate>;
+    using Rebound = Original::WithWorker<Bus::AUTO, Core::Core1>;
+    Original original;
+    Rebound controller;
+    CRGB leds[] = {CRGB::Red, CRGB::Green};
+    original.setDither(DISABLE_DITHER);
+    controller.setDither(DISABLE_DITHER);
+    original.setLeds(fl::span<CRGB>(leds, 2));
+    original.showLeds(255);
+    controller.setLeds(fl::span<CRGB>(leds, 2));
+    controller.showLeds(255);
+    const auto& bytes = controller.getDelegateForTesting().capturedBytes;
+    FL_REQUIRE_EQ(bytes.size(), 12u);
+    FL_CHECK(bytes == original.getDelegateForTesting().capturedBytes);
+    FL_CHECK_EQ(sizeof(Original), sizeof(Rebound));
+}
 
 /// Test wrapper that exposes protected showPixels method and provides access to captured bytes
 template<int DATA_PIN, EOrder RGB_ORDER>

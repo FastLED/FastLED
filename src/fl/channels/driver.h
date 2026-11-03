@@ -20,6 +20,7 @@
 
 #include "fl/channels/can_match.h"      // free fl::canMatch / canMatchBulk
 #include "fl/channels/capabilities.h"   // DriverCapabilities, PinGroup, ChannelRequest, HandleResult
+#include "fl/channels/worker_config.h"
 #include "fl/stl/atomic.h"
 #include "fl/stl/noexcept.h"
 #include "fl/stl/shared_ptr.h"
@@ -51,6 +52,16 @@ FASTLED_SHARED_PTR(ChannelData);
 /// - poll(): Return current hardware state and perform cleanup when complete
 class IChannelDriver {
 public:
+    /// Configure shared worker settings before transmission. Unsupported
+    /// backends reject explicit requests rather than silently ignoring them.
+    virtual bool configureWorker(const WorkerConfig& config) FL_NO_EXCEPT {
+        return config.isDefault();
+    }
+
+    virtual WorkerDiagnostics workerDiagnostics() const FL_NO_EXCEPT {
+        return {};
+    }
+
     /// @brief ISR-safe callback handle invoked when the manager should poll again.
     ///
     /// ChannelManager installs this callback on every driver and owns the

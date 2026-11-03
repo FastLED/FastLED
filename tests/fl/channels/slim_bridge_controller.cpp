@@ -47,6 +47,9 @@ public:
     int enqueuedAtFirstShow = 0;
     int busyPolls = 0;
     int rejectedFrameCount = 0;
+    int workerConfigCount = 0;
+    Core requestedCore = Core::Auto;
+    bool acceptWorker = true;
     DriverState::Value mState = DriverState::READY;
 
     fl::vector<u8> lastBytes;
@@ -56,6 +59,12 @@ public:
     fl::size lastCapacity = 0;
 
     bool canHandle(const ChannelDataPtr&) const FL_NO_EXCEPT override { return true; }
+
+    bool configureWorker(const WorkerConfig& config) FL_NO_EXCEPT override {
+        ++workerConfigCount;
+        requestedCore = config.core;
+        return acceptWorker;
+    }
 
     void enqueue(ChannelDataPtr data) FL_NO_EXCEPT override {
         ++enqueueCount;
@@ -130,6 +139,10 @@ struct TestDriverTraits {
     }
 };
 
+template<fl::u8 PIN, EOrder ORDER>
+using WorkerTestChipset = SlimBridgeController<PIN, TIMING_WS2812_800KHZ,
+    ORDER, 280, TestDriverTraits>;
+
 /// Reset the mock + manager registration to a known state before each test.
 struct SlimBridgeFixture {
     SlimBridgeFixture() {
@@ -187,6 +200,36 @@ FL_TEST_CASE("SlimBridgeController::registerWithManager is idempotent across ins
     (void)b;
 
     FL_CHECK_EQ(registerCallCount(), before + 1);
+}
+
+FL_TEST_CASE("addLeds worker template preserves slim storage and forwards affinity #5001") {
+    using Original = WS2812<27, RGB>;
+    using Automatic = detail::ClocklessWorkerController<Original,
+        DefaultBus<ClocklessChipset>::value, Core::Auto>::type;
+    // Preserve platform hooks when Auto selects the original transport.
+    FL_CHECK_TRUE((fl::is_same<Original, Automatic>::value));
+    using Default = WorkerTestChipset<27, RGB>;
+    using Fixed = Default::WithWorker<Bus::AUTO, Core::Core1>;
+    FL_CHECK_EQ(sizeof(Fixed), sizeof(Default));
+    auto& driver = mockDriverInstance();
+    driver.acceptWorker = true;
+    driver.workerConfigCount = 0;
+    driver.enqueueCount = 0;
+    CRGB leds[1] = {CRGB::Red};
+    auto& controller = FastLED.addLeds<WorkerTestChipset, 27, RGB,
+        Bus::AUTO, Core::Core1>(leds, 1);
+    auto cleanup = fl::make_scope_exit([&]() {
+        controller.setLeds(nullptr, 0);
+        controller.removeFromDrawList();
+        driver.acceptWorker = true;
+    });
+    controller.showLeds(255);
+    FL_CHECK_GT(driver.workerConfigCount, 0);
+    FL_CHECK(driver.requestedCore == Core::Core1);
+    FL_CHECK_EQ(driver.enqueueCount, 1);
+    driver.acceptWorker = false;
+    controller.showLeds(255);
+    FL_CHECK_EQ(driver.enqueueCount, 1);
 }
 
 FL_TEST_CASE("FastLED.show() flushes the frame and calls driver show() once") {

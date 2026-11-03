@@ -133,6 +133,58 @@ def test_run_single_valid_pass_is_accepted() -> None:
     assert rc == 0
 
 
+def test_lcd_worker_affinity_requires_observed_core_evidence() -> None:
+    """#5001: byte loopback alone cannot establish worker isolation."""
+    command = _run_single_command()
+    command["params"].update(driver="LCD_CLOCKLESS", workerCore="1")
+    response = _valid_single_pass()
+    response["driver"] = "LCD_CLOCKLESS"
+    assert _run_rpc([command], [response]) == 1
+
+    response.update(
+        workerCore=1,
+        workerObservedCore=1,
+        workerPriority=23,
+        competingTaskPasses=10,
+        competingTaskMaxPassUs=1200,
+        workerSubmittedChunks=1,
+        workerCompletedChunks=1,
+        workerTotalChunks=1,
+        workerMaxEncodeUs=20,
+        workerMaxSubmitUs=5,
+        workerStreamError=False,
+    )
+    assert _run_rpc([command], [response]) == 0
+    response["workerCompletedChunks"] = 0
+    assert _run_rpc([command], [response]) == 1
+    response["workerCompletedChunks"] = 1
+    response["workerObservedCore"] = 0
+    assert _run_rpc([command], [response]) == 1
+
+    command["params"]["workerCore"] = "auto"
+    response["workerObservedCore"] = 1
+    response["workerCore"] = -1
+    assert _run_rpc([command], [response]) == 0
+
+    command["params"]["workerCore"] = "any"
+    response["workerCore"] = -1
+    assert _run_rpc([command], [response]) == 0
+
+
+def test_lcd_lane_pins_require_exact_applied_wiring() -> None:
+    """Six-strip acceptance must prove the requested nonconsecutive pin map."""
+    pins = [1, 3, 4, 5, 6, 7]
+    command = _run_single_command()
+    command["params"].update(driver="LCD_CLOCKLESS", laneSizes=[170] * 6, lanePins=pins)
+    response = _valid_single_pass()
+    response.update(driver="LCD_CLOCKLESS", laneCount=6, laneSizes=[170] * 6)
+    assert _run_rpc([command], [response]) == 1
+    response["lanePins"] = pins
+    assert _run_rpc([command], [response]) == 0
+    response["lanePins"] = [1, 2, 3, 4, 5, 6]
+    assert _run_rpc([command], [response]) == 1
+
+
 def test_run_single_missing_passed_field_fails() -> None:
     response = _valid_single_pass()
     del response["passed"]

@@ -90,7 +90,7 @@ class ILcdSpiPeripheral {
     virtual void deinitialize() FL_NO_EXCEPT = 0;
     virtual bool isInitialized() const FL_NO_EXCEPT = 0;
 
-    // Buffer management (DMA-capable, 16-bit aligned)
+    // Buffer management (DMA-capable, at least 4-byte aligned)
     virtual u16 *allocateBuffer(size_t size_bytes) FL_NO_EXCEPT = 0;
     virtual void freeBuffer(u16 *buffer) FL_NO_EXCEPT = 0;
 

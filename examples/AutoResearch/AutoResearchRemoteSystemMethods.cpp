@@ -225,6 +225,12 @@ void AutoResearchRemoteControl::bindSystemMethods(fl::Remote& remote) {
     // Returns: {success, passed, totalTests, passedTests, duration_ms, driver,
     //          laneCount, laneSizes, pattern, firstFailure?}
     // ASYNC: Sends ACK immediately, final response sent via sendAsyncResponse()
+    // Optional workerCore ("auto", "0", "1", "any", "calling") validates LCD worker
+    // affinity and returns workerCore/workerObservedCore/workerPriority plus
+    // competingTaskPasses/competingTaskMaxPassUs for a priority-5 Core-0 load.
+    // Optional lanePins is the exact TX GPIO per lane (unique, excluding RX,
+    // lane 0 matches pinTx). The response echoes the applied map; RX captures
+    // only lane 0 even when multiple lanes transmit in parallel.
     // NOTE: runSingleTestImpl() may return early (error cases) without calling
     // sendAsyncResponse(). This wrapper ensures a response is ALWAYS sent so
     // the Python client never times out waiting 120s for a missing response.

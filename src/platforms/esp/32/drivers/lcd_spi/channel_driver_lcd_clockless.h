@@ -31,7 +31,9 @@
 #include "fl/channels/driver.h"
 #include "fl/channels/wave3.h"
 #include "fl/channels/wave8.h"
+#include "fl/channels/worker_config.h"
 #include "fl/chipsets/led_timing.h"
+#include "fl/stl/atomic.h"
 #include "fl/stl/noexcept.h"
 #include "fl/stl/span.h"
 #include "fl/stl/shared_ptr.h"
@@ -57,6 +59,20 @@ class ChannelDriverLcdClockless : public IChannelDriver {
     void show() FL_NO_EXCEPT override;
     DriverState poll() FL_NO_EXCEPT override;
     void setPollNeededCallback(PollNeededCallback callback) FL_NO_EXCEPT override;
+
+    /// Configure the shared worker before its first transmission. Default
+    /// fields inherit the current settings; conflicting requests are rejected.
+    bool configureWorker(const WorkerConfig &config) FL_NO_EXCEPT override;
+
+    /// Resolved worker affinity: -2 before creation, -1 for no affinity.
+    int workerCore() const FL_NO_EXCEPT { return mWorkerCore; }
+    int workerPriority() const FL_NO_EXCEPT;
+    int workerObservedCore() const FL_NO_EXCEPT {
+        return mWorkerObservedCore.load(fl::memory_order_acquire);
+    }
+    /// Snapshot after the caller has serialized with transmission completion.
+    /// Chunk counters describe the last frame; timings reset for each frame.
+    WorkerDiagnostics workerDiagnostics() const FL_NO_EXCEPT override;
 
     fl::string getName() const FL_NO_EXCEPT override {
         return fl::string::from_literal("LCD_CLOCKLESS");
@@ -84,6 +100,16 @@ class ChannelDriverLcdClockless : public IChannelDriver {
     }
 
   private:
+    enum class StartError : u8 {
+        None,
+        InvalidConfig,
+        WorkerCreation,
+        PeripheralInitialization,
+        BufferAllocation,
+        CallbackRegistration,
+        InitialTransmit
+    };
+
     bool beginTransmission(
         fl::span<const ChannelDataPtr> channels) FL_NO_EXCEPT;
 
@@ -155,6 +181,7 @@ class ChannelDriverLcdClockless : public IChannelDriver {
 
     fl::shared_ptr<detail::ILcdSpiPeripheral> mPeripheral;
     bool mInitialized;
+    StartError mStartError;
     fl::vector<ChannelDataPtr> mEnqueuedChannels;
     fl::vector<ChannelDataPtr> mTransmittingChannels;
 
@@ -165,9 +192,15 @@ class ChannelDriverLcdClockless : public IChannelDriver {
     volatile bool mBusy;
     IsrContext mIsrCtx;
     size_t mChunkInputBytesOverride;
-    void *mWorkerTaskHandle;
-    volatile bool mWorkerStop;
-    volatile bool mWorkerRunning;
+    fl::atomic<void *> mWorkerTaskHandle;
+    fl::atomic_bool mWorkerStop;
+    fl::atomic_bool mWorkerRunning;
+    WorkerConfig mWorkerConfig;
+    fl::i8 mWorkerCore;
+    fl::atomic_int mWorkerObservedCore;
+    fl::atomic_u32 mWorkerMaxEncodeUs;
+    fl::atomic_u32 mWorkerMaxSubmitUs;
+    fl::atomic_bool mWorkerStreamError;
     PollNeededCallbackSlot mPollNeededCallback;
 
     // Encoding state (set during beginTransmission, stable during ISR)

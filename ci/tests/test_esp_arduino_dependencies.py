@@ -90,6 +90,47 @@ def test_foreign_dispatch_branch_is_not_a_native_dependency(tmp_path: Path) -> N
 
 
 @pytest.mark.parametrize(
+    "sdk_directory", [".build/issue5001-fbuild/cache/sdk", "build/cache/sdk"]
+)
+@pytest.mark.parametrize("arduino_dependency", [False, True])
+def test_cached_native_sdk_boundary_preserves_arduino_detection(
+    tmp_path: Path, sdk_directory: str, arduino_dependency: bool
+) -> None:
+    unit = _write(tmp_path, "src/platforms/esp/32/native.hpp", "#include <tusb.h>\n")
+    _write(
+        tmp_path,
+        f"{sdk_directory}/tusb.h",
+        "#include <Arduino.h>\n" if arduino_dependency else "#include OSAL_HEADER\n",
+    )
+    _write(
+        tmp_path,
+        "compile_commands.json",
+        json.dumps(
+            [
+                {
+                    "directory": str(tmp_path),
+                    "file": str(unit),
+                    "arguments": [
+                        "c++",
+                        "-DESP32=1",
+                        "-I" + str(tmp_path / "src"),
+                        "-I" + str(tmp_path / sdk_directory),
+                        "-c",
+                        str(unit),
+                    ],
+                }
+            ]
+        ),
+    )
+    hits = _check(tmp_path)
+    if arduino_dependency:
+        assert hits, "An SDK cache must not hide an actual Arduino include"
+        assert any("Arduino.h" in str(hit["message"]) for hit in hits)
+    else:
+        assert not hits, "Native SDK configuration macros are not repository wrappers"
+
+
+@pytest.mark.parametrize(
     "directive",
     [
         "#include HIDDEN_HEADER",
