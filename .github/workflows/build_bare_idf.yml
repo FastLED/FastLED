@@ -61,6 +61,16 @@ jobs:
             target: esp32
           - idf: v4.4
             target: esp32s3
+          - idf: v6.0
+            target: esp32
+          - idf: v6.0
+            target: esp32s3
+          - idf: v6.0
+            target: esp32c3
+          - idf: v6.0
+            target: esp32c6
+          - idf: v6.0
+            target: esp32p4
     steps:
       - uses: actions/checkout@v4
       - name: Configure, compile and link without Arduino
