@@ -39,10 +39,28 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Initial real-build candidate; expand after validating each link.
+        # Chips are paired with the IDF releases that actually support them:
+        # esp32c6 needs 5.1+, esp32p4 needs 5.3+, and 4.4 predates both.
+        # Every entry must LINK (the assert step checks the .elf and .bin).
         include:
           - idf: v5.5
             target: esp32
+          - idf: v5.5
+            target: esp32s3
+          - idf: v5.5
+            target: esp32c3
+          - idf: v5.5
+            target: esp32c6
+          - idf: v5.5
+            target: esp32p4
+          - idf: v5.1
+            target: esp32
+          - idf: v5.1
+            target: esp32s3
+          - idf: v4.4
+            target: esp32
+          - idf: v4.4
+            target: esp32s3
     steps:
       - uses: actions/checkout@v4
       - name: Configure, compile and link without Arduino
