@@ -8,6 +8,10 @@ cmake_minimum_required(VERSION 3.5)
 file(GLOB_RECURSE FastLED_SRCS "src/*.cpp")
 
 set(FASTLED_REQUIRES esp_http_server driver esp_wifi app_update esp_timer mbedtls)
+if(IDF_VERSION_MAJOR EQUAL 4)
+    # mDNS moved from the SDK to the component registry in IDF 5.
+    list(APPEND FASTLED_REQUIRES mdns)
+endif()
 
 # BUILD_COMPONENTS is populated after dependency expansion. During IDF's
 # earlier requirements pass, only the registered component targets exist.

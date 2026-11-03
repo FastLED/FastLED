@@ -30,8 +30,11 @@ The matrix in `.github/workflows/build_bare_idf.yml` covers IDF 5.5 with
 esp32/esp32s3/esp32c3/esp32c6/esp32p4, plus IDF 5.1 and 4.4 with esp32/esp32s3.
 The root manifest keeps mDNS version and target conditions as separate ANDed
 rules for older component managers. IDF 4.x uses the SDK's bundled mDNS;
-IDF 5.x uses the registry component. PlatformIO/pioarduino dependencies remain
+IDF 5.x uses the registry component. Pioarduino dependencies remain
 declared in that same manifest.
+On IDF 4.x this harness disables the component manager, whose bundled version
+does not recognize manifest rules at all. All required components come from
+the SDK there; this setting does not affect downstream applications.
 The PR gate uses the existing `ci-platform:esp32dev_idf5_component` label
 (and the usual `ci-platform:esp*` / `ci-full` labels).
 

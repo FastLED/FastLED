@@ -30,6 +30,7 @@
 
 // Include feature flags to detect FASTLED_RMT5
 #include "platforms/esp/32/feature_flags/enabled.h"
+#include "platforms/esp/esp_version.h"
 
 #if FASTLED_RMT5
 
@@ -223,7 +224,9 @@ int mcpwm_timer_init(DualIsrContext* ctx, int gpio_pin) FL_NO_EXCEPT {
     mcpwm_capture_timer_config_t timer_config = {
         .group_id = MCPWM_GROUP_ID,
         .clk_src = MCPWM_CAPTURE_CLK_SRC_DEFAULT,  // Use default clock source
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 2, 0)
         .resolution_hz = MCPWM_TIMER_RESOLUTION_HZ,
+#endif
     };
 
     esp_err_t ret = mcpwm_new_capture_timer(&timer_config, &g_mcpwm_state().timer_handle);

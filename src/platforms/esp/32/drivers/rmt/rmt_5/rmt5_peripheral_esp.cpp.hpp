@@ -10,6 +10,7 @@
 #ifdef FL_IS_ESP32
 
 #include "platforms/esp/32/feature_flags/enabled.h"
+#include "platforms/esp/esp_version.h"
 
 #if FASTLED_RMT5
 
@@ -175,7 +176,9 @@ bool Rmt5PeripheralESPImpl::createTxChannel(const Rmt5ChannelConfig& config,
     // With io_loop_back=1, ESP-IDF may reconfigure GPIO in ways that break subsequent TX.
     esp_config.flags.io_loop_back = 0;
 #endif
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 2, 0)
     esp_config.intr_priority = config.intr_priority;
+#endif
 
     // NOTE: Removed gpio_reset_pin() call - ESP-IDF rmt_new_tx_channel() handles GPIO configuration
     // gpio_reset_pin() was interfering with GPIO matrix routing when both TX and RX are active

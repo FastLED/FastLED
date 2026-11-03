@@ -27,6 +27,7 @@ FL_EXTERN_C_BEGIN
 #include "driver/ledc.h"
 // IWYU pragma: end_keep
 #include "esp_err.h"
+#include "soc/soc.h"
 
 #if ESP_IDF_VERSION_5_OR_HIGHER
 // IWYU pragma: begin_keep
@@ -137,7 +138,9 @@ inline u16 (analogRead)(int pin) FL_NO_EXCEPT {
 
     // Configure channel (simplified - assumes ADC1 channel 0)
     adc_oneshot_chan_cfg_t config = {
-        .atten = ADC_ATTEN_DB_12,
+        // Attenuation 3 has the same value under the old 11 dB and new
+        // 12 dB names; IDF 5.1 does not expose ADC_ATTEN_DB_12 yet.
+        .atten = static_cast<adc_atten_t>(3),
         .bitwidth = ADC_BITWIDTH_12,
     };
 
