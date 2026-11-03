@@ -36,14 +36,14 @@ A successful build proves configuration, compilation and linking. It does
 not prove GPIO output or runtime behavior on hardware; the printed message
 is only observed if the application is run on a device.
 
-## Current validation blocker
+## Validation
 
-The first real IDF 5.5 / esp32 build configured successfully without Arduino,
-but failed during FastLED compilation before linking. In translation units
-that have not yet included `sdkconfig.h`, `src/platforms/esp/is_esp.h` checks
-`ESP32`, `ARDUINO_ARCH_ESP32` and `CONFIG_IDF_TARGET_*`, while the IDF compiler
-command supplies `ESP_PLATFORM` and does not predefine those target macros.
-FastLED then reports an unrecognized platform and attempts to include
-`avr/interrupt.h`; other units also report conflicting integer/size typedefs.
-The harness deliberately supplies no workaround for this library blocker.
-No successful link, application binary size or hardware result is claimed.
+The official `espressif/idf:v5.5` image builds and links the esp32 application
+without Arduino. The validated application binary is 240,368 bytes; the workflow
+reports the size for each subsequent build and preserves its ELF/bin evidence.
+
+The library recognizes `ESP_PLATFORM`, routes native IDF through the ESP32
+dispatchers, uses toolchain-owned global size types, and declares its SDK
+component dependencies. CPU frequency comes from SDK configuration when the
+application does not supply `F_CPU`. The harness supplies no library workaround.
+Hardware execution and other version/chip combinations remain unverified.
