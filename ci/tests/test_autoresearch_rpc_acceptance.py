@@ -588,6 +588,7 @@ def test_static_init_control_requires_test_mode() -> None:
         ["--frames", "0"],
         ["--chipset", "ws2812"],
         ["--rp-spi-chipset", "apa102"],
+        ["--contaminate-tx-mux"],
     ],
 )
 def test_static_init_rejects_other_modes_and_ignored_workloads(

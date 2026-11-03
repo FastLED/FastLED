@@ -1043,6 +1043,7 @@ See Also:
                     "spi_streaming",
                     "chipset",
                     "rp_spi_chipset",
+                    "contaminate_tx_mux",
                 )
                 if (value := getattr(parsed, name)) is not None and value is not False
             )

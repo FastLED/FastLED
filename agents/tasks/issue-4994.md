@@ -20,6 +20,13 @@ or jumper wiring are required. Record board, port, commands, and output below.
 
 ## Evidence
 
+- Final review tidy-up: reject the ignored TX-remux workload option, clarify
+  the board reboot requirement, and encapsulate semaphore ownership while
+  retaining resources on timeout. Both deferred LTO/control staging paths are
+  covered. All **501** AutoResearch Python checks, lint, WASM compilation,
+  and peer review passed. The updated C6 LTO probe passed with one
+  construction, two completed callers, and suspended workers.
+
 - Final scheduling robustness: an injected 400 ms RPC scheduling delay made the
   fixed 200 ms sample fail with one construction; a bounded two-second wait
   for the real blocked contender passed under that same delay. The temporary

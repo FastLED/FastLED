@@ -1829,6 +1829,56 @@ class TestResolvePortAndEnvironment:
             extra_defines=["FL_ESP32_LEGACY_CLOCKLESS_USE_RMT=1"],
         )
 
+    @pytest.mark.parametrize("lto", [True, False])
+    def test_static_init_deferred_synthesis_selects_lto(
+        self, tmp_path: Path, lto: bool
+    ) -> None:
+        (tmp_path / "examples" / "AutoResearch").mkdir(parents=True)
+        staged_dir = tmp_path / ".build" / "fbuild" / "esp32c6"
+        staged_dir.mkdir(parents=True)
+        args = _make_args(
+            upload_port=None,
+            environment_positional=None,
+            parlio=False,
+            static_init=True,
+            static_init_no_lto=not lto,
+            project_dir=tmp_path,
+        )
+        ctx = _make_ctx(
+            args=args,
+            upload_port=None,
+            final_environment=None,
+            build_dir=tmp_path.resolve(),
+            rpc_smoke_mode=True,
+        )
+        with (
+            patch(
+                f"{_PATCH_MOD}.auto_detect_upload_port",
+                return_value=MagicMock(ok=True, selected_port="COM9"),
+            ),
+            patch(
+                f"{_PATCH_MOD}.detect_attached_chip",
+                return_value=MagicMock(
+                    ok=True, chip_type="ESP32-C6", environment="esp32c6"
+                ),
+            ),
+            patch(
+                "ci.autoresearch.staging.synthesise_autoresearch_project",
+                return_value=staged_dir,
+            ) as synth,
+            patch(
+                f"{_PATCH_MOD}.select_build_driver",
+                return_value=_make_mock_driver(),
+            ),
+        ):
+            rc = asyncio.run(_resolve_port_and_environment(ctx))
+
+        assert rc is None
+        assert ctx.final_environment == "esp32c6"
+        assert ctx.build_dir == staged_dir
+        assert synth.call_count == 1
+        assert synth.call_args.kwargs["static_init_lto"] is lto
+
     def test_cli_upload_port(self) -> None:
         ctx = _make_ctx(upload_port=None)
         ctx.args = _make_args(upload_port="/dev/ttyUSB0")

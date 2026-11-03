@@ -72,13 +72,33 @@
 namespace {
 
 #if defined(FL_IS_ESP32) // ok platform specific - this regression checks ESP-IDF's process-wide C++ ABI guard implementation
+class ProbeSemaphore {
+public:
+    ProbeSemaphore() = default;
+    ~ProbeSemaphore() { reset(); }
+    ProbeSemaphore(const ProbeSemaphore&) = delete;
+    ProbeSemaphore& operator=(const ProbeSemaphore&) = delete;
+
+    SemaphoreHandle_t get() const { return mHandle; } // ok platform specific - expose the owned SDK semaphore only for synchronous FreeRTOS calls
+    explicit operator bool() const { return mHandle != nullptr; }
+    void reset(SemaphoreHandle_t handle = nullptr) { // ok platform specific - this private owner manages the probe's SDK semaphore lifetime
+        if (mHandle) {
+            vSemaphoreDelete(mHandle); // ok platform specific - release the owned SDK semaphore only after workers are quiescent
+        }
+        mHandle = handle;
+    }
+
+private:
+    SemaphoreHandle_t mHandle = nullptr; // ok platform specific - keep raw SDK ownership encapsulated in a noncopyable owner
+};
+
 struct StaticInitProbe {
     fl::atomic<int> constructions{0};
     fl::atomic<int> contenders{0};
     fl::atomic<bool> overlapped{false};
     fl::atomic<TaskHandle_t> contender{nullptr}; // ok platform specific - the probe observes the SDK worker's actual blocked state
-    SemaphoreHandle_t entered = nullptr; // ok platform specific - the real SDK guard probe requires FreeRTOS task synchronization
-    SemaphoreHandle_t completed = nullptr; // ok platform specific - the real SDK guard probe requires FreeRTOS task synchronization
+    ProbeSemaphore entered;
+    ProbeSemaphore completed;
     bool used = false;
 };
 
@@ -88,7 +108,7 @@ StaticInitProbe staticInitProbe;
 struct SlowStatic {
     SlowStatic() {
         const bool owner = staticInitProbe.constructions.fetch_add(1) == 0;
-        xSemaphoreGive(staticInitProbe.entered); // ok platform specific - synchronize actual SDK tasks; fl::thread is not concurrent on ESP32
+        xSemaphoreGive(staticInitProbe.entered.get()); // ok platform specific - synchronize actual SDK tasks; fl::thread is not concurrent on ESP32
         if (!owner) {
             // Make duplicate initialization observable in the failing build.
             vTaskDelay(pdMS_TO_TICKS(200)); // ok platform specific - require an actual FreeRTOS-blocked duplicate initializer for observation
@@ -119,7 +139,7 @@ SlowStatic& contendedStatic() {
 void staticInitWorker(void*) {
     staticInitProbe.contenders.fetch_add(1);
     (void)contendedStatic();
-    xSemaphoreGive(staticInitProbe.completed); // ok platform specific - synchronize actual SDK tasks; fl::thread is not concurrent on ESP32
+    xSemaphoreGive(staticInitProbe.completed.get()); // ok platform specific - synchronize actual SDK tasks; fl::thread is not concurrent on ESP32
     // Retain the TCB until the RPC has sampled it and received both completions.
     for (;;) {
         vTaskSuspend(nullptr); // ok platform specific - keep the SDK task handle valid until the probe's explicit teardown
@@ -134,17 +154,11 @@ fl::json staticInitTest() {
         return result;
     }
     staticInitProbe.used = true;
-    staticInitProbe.entered = xSemaphoreCreateBinary(); // ok platform specific - synchronize actual SDK tasks; fl::thread is not concurrent on ESP32
-    staticInitProbe.completed = xSemaphoreCreateCounting(2, 0); // ok platform specific - synchronize actual SDK tasks; fl::thread is not concurrent on ESP32
+    staticInitProbe.entered.reset(xSemaphoreCreateBinary()); // ok platform specific - synchronize actual SDK tasks; fl::thread is not concurrent on ESP32
+    staticInitProbe.completed.reset(xSemaphoreCreateCounting(2, 0)); // ok platform specific - synchronize actual SDK tasks; fl::thread is not concurrent on ESP32
     if (!staticInitProbe.entered || !staticInitProbe.completed) {
-        if (staticInitProbe.entered) {
-            vSemaphoreDelete(staticInitProbe.entered); // ok platform specific - this probe owns the SDK semaphore used by its real FreeRTOS tasks
-            staticInitProbe.entered = nullptr;
-        }
-        if (staticInitProbe.completed) {
-            vSemaphoreDelete(staticInitProbe.completed); // ok platform specific - this probe owns the SDK semaphore used by its real FreeRTOS tasks
-            staticInitProbe.completed = nullptr;
-        }
+        staticInitProbe.entered.reset();
+        staticInitProbe.completed.reset();
         result.set("error", "SemaphoreAllocationFailed");
         return result;
     }
@@ -153,7 +167,7 @@ fl::json staticInitTest() {
     const bool owner_created = xTaskCreate(staticInitWorker, "static-owner", 4096, // ok platform specific - fl::thread has no concurrent ESP32 implementation
                                          nullptr, 1, &owner_task) == pdPASS;
     const bool entered = owner_created &&
-        xSemaphoreTake(staticInitProbe.entered, pdMS_TO_TICKS(2000)) == pdTRUE; // ok platform specific - await the real SDK constructor before creating its contender
+        xSemaphoreTake(staticInitProbe.entered.get(), pdMS_TO_TICKS(2000)) == pdTRUE; // ok platform specific - await the real SDK constructor before creating its contender
     const bool contender_created = entered &&
         xTaskCreate(staticInitWorker, "static-contender", 4096, // ok platform specific - fl::thread has no concurrent ESP32 implementation
                     nullptr, 1, &contender_task) == pdPASS;
@@ -161,7 +175,7 @@ fl::json staticInitTest() {
     int completed = 0;
     const int tasks = (owner_created ? 1 : 0) + (contender_created ? 1 : 0);
     for (int i = 0; i < tasks; ++i) {
-        if (xSemaphoreTake(staticInitProbe.completed, pdMS_TO_TICKS(3000)) == pdTRUE) { // ok platform specific - join actual SDK workers without a concurrent fl::thread backend
+        if (xSemaphoreTake(staticInitProbe.completed.get(), pdMS_TO_TICKS(3000)) == pdTRUE) { // ok platform specific - join actual SDK workers without a concurrent fl::thread backend
             ++completed;
         }
     }
@@ -200,10 +214,8 @@ fl::json staticInitTest() {
         if (contender_task) {
             vTaskDelete(contender_task); // ok platform specific - reclaim the quiescent SDK worker used to exercise ESP-IDF guards
         }
-        vSemaphoreDelete(staticInitProbe.entered); // ok platform specific - this probe owns the SDK semaphore used by its real FreeRTOS tasks
-        vSemaphoreDelete(staticInitProbe.completed); // ok platform specific - this probe owns the SDK semaphore used by its real FreeRTOS tasks
-        staticInitProbe.entered = nullptr;
-        staticInitProbe.completed = nullptr;
+        staticInitProbe.entered.reset();
+        staticInitProbe.completed.reset();
     }
     return result;
 }
