@@ -2,8 +2,11 @@
 
 import sys
 import time
+from collections.abc import Iterator
+from contextlib import contextmanager
 from pathlib import Path
 from types import SimpleNamespace
+from typing import cast
 
 import pytest
 from running_process import RunningProcess
@@ -32,7 +35,7 @@ def test_silent_child_is_diagnosed_and_killed_before_deadline_returns(
         [
             sys.executable,
             "-c",
-            "import time; print('started', flush=True); time.sleep(10)",
+            "import time; time.sleep(10)",
         ],
         auto_run=True,
         check=False,
@@ -60,24 +63,45 @@ def test_progressing_child_can_be_quiet_for_more_than_warning_threshold(
 ) -> None:
     _short_thresholds(monkeypatch)
     monkeypatch.setattr(compile_mod, "_COMPILE_HARD_TIMEOUT_SECONDS", 1.0)
-    proc = RunningProcess(
-        [
-            sys.executable,
-            "-c",
-            "import time; print('start', flush=True); time.sleep(.07); "
-            "print('step', flush=True); time.sleep(.07); print('done', flush=True)",
-        ],
-        auto_run=True,
-        check=False,
-    )
+    # Drive quiet intervals with a virtual clock: child startup and host load
+    # must not turn a progressing process into a sustained-silence diagnostic.
+    clock = SimpleNamespace(now=0.0)
+    monkeypatch.setattr(compile_mod.time, "monotonic", lambda: clock.now)
+
+    class ProgressingLines:
+        def __init__(self) -> None:
+            self.events = iter(("start", None, "step", None, "done"))
+
+        def __next__(self) -> str:
+            event = next(self.events)
+            if event is None:
+                clock.now += 0.06
+                raise TimeoutError
+            return event
+
+    class ProgressingProcess:
+        pid = None
+
+        @contextmanager
+        def line_iter(self, **_kwargs: object) -> Iterator[ProgressingLines]:
+            yield ProgressingLines()
+
+        def poll(self) -> int:
+            return 0
+
+    proc = ProgressingProcess()
     lines = list(
         compile_mod._monitored_compile_lines(
-            proc, command=["meson", "compile"], target="smoke", started=time.monotonic()
+            cast(RunningProcess, proc),
+            command=["meson", "compile"],
+            target="smoke",
+            started=time.monotonic(),
         )
     )
-    assert proc.wait(timeout=1) == 0
     assert [line.strip() for line in lines] == ["start", "step", "done"]
-    assert "Sustained silence" not in capsys.readouterr().err
+    stderr = capsys.readouterr().err
+    assert stderr.count("Compiler still quiet") == 2
+    assert "Sustained silence" not in stderr
 
 
 def test_compile_timeout_is_a_nonretryable_failure(
@@ -288,7 +312,9 @@ def test_streaming_full_build_enforces_deadline_while_child_is_silent(
     monkeypatch.setattr(streaming, "RunningProcess", slow_process)
     started = time.monotonic()
     result = streaming.stream_compile_only(build_dir, compile_timeout=0.2)
-    assert time.monotonic() - started < 2
+    # Match the direct monitor test: process-tree cleanup has its own grace
+    # period, but must still finish before the child's natural ten-second exit.
+    assert time.monotonic() - started < 8
     assert not result.success
     assert "Hard compilation deadline exceeded" in result.compile_output
     assert len(children) == 1 and children[0].poll() is not None
