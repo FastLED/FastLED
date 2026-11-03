@@ -2,6 +2,9 @@
 // IWYU pragma: begin_keep
 #include <stdint.h>
 // IWYU pragma: end_keep  // for u8, u32, u16
+#if defined(NEED_CXX_BITS) && (defined(FL_IS_ESP32) || defined(FL_IS_ESP8266))
+#error FastLED #4994: NEED_CXX_BITS on ESP32/ESP8266 breaks thread-safe local statics with LTO
+#endif
 #include "FastLED.h"  // ok include: this file implements CFastLED, declared in FastLED.h
 #include "fl/system/engine_events.h"
 #include "fl/stl/compiler_control.h"
@@ -896,6 +899,9 @@ fl::RxChannelPtr CFastLED::addRx(const fl::RxChannelConfig& config) FL_NO_EXCEPT
 // ============================================================================
 
 #ifdef NEED_CXX_BITS
+#if defined(FL_IS_ESP32) || defined(FL_IS_ESP8266)
+#error FastLED #4994: NEED_CXX_BITS on ESP32/ESP8266 breaks thread-safe local statics with LTO
+#endif
 namespace __cxxabiv1
 {
 	#if !defined(FL_IS_ESP8266) && !defined(FL_IS_ESP32) && !defined(ARDUINO)
