@@ -27,7 +27,7 @@ FL_EXTERN_C_BEGIN
 #include "driver/ledc.h"
 // IWYU pragma: end_keep
 #include "esp_err.h"
-#include "soc/soc.h"
+#include "soc/soc.h" // IWYU pragma: keep
 
 #if ESP_IDF_VERSION_5_OR_HIGHER
 // IWYU pragma: begin_keep
