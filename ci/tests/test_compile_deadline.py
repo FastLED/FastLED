@@ -184,7 +184,9 @@ def test_fuzzy_target_fallback_cannot_hide_compiler_failure(
 ) -> None:
     attempted: list[str] = []
 
-    def compile_candidate(_build_dir: Path, target: str, **_kwargs: object):
+    def compile_candidate(
+        _build_dir: Path, target: str, **_kwargs: object
+    ) -> compile_mod.CompileResult:
         attempted.append(target)
         return compile_mod.CompileResult(
             success=target == "second", error_output=diagnostic, suppressed_errors=[]
