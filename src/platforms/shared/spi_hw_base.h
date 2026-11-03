@@ -25,8 +25,11 @@
 #include "fl/stl/limits.h"
 #include "platforms/shared/spi_types.h"
 #include "fl/stl/noexcept.h"
+#include "fl/stl/shared_ptr.h"
 
 namespace fl {
+
+class ChannelData;
 
 /// @brief Abstract base interface for all SPI hardware controllers
 /// @details Provides polymorphic interface for 1/2/4/8-lane SPI hardware.
@@ -58,6 +61,22 @@ public:
     /// @returns true if transmitted successfully, false on error
     /// @note Must call acquireDMABuffer() before this
     virtual bool transmit(TransmitMode mode = TransmitMode::ASYNC) FL_NO_EXCEPT = 0;
+
+    /// Optional bounded-staging transfer of an already encoded channel.
+    /// Retain the source or copy its bytes before returning; keep the encoded
+    /// storage alive until final completion. Other backends keep their DMA path.
+    virtual bool supportsStreaming() const FL_NO_EXCEPT { return false; }
+    virtual bool transmitStream(const fl::shared_ptr<ChannelData>& source) FL_NO_EXCEPT {
+        (void)source;
+        return false;
+    }
+
+    /// Completion wakeup, callable from an ISR; installed while idle.
+    virtual void setStreamCompletionCallback(void (*callback)(void*),
+                                            void* context) FL_NO_EXCEPT {
+        (void)callback;
+        (void)context;
+    }
 
     /// Wait for current transmission to complete (blocking)
     /// @param timeout_ms Maximum wait time in milliseconds

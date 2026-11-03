@@ -21,14 +21,40 @@ Users create `Channel` objects using the Channel API (`FastLED.add(cfg)` / `Chan
 
 Two complementary dispatch modes are available (introduced by issue #2428, refined by #2459 / #2460):
 
-- **Compile-time `fl::Bus` binding** — two equivalent entry points pin the driver at compile time:
+- **Compile-time `fl::Bus` binding** — these entry points pin the driver at compile time:
+  - `FastLED.add<fl::Bus::RMT>(cfg)` — creates and registers a clockless channel while retaining only the selected driver (#4733).
   - `fl::TypedChannel<fl::Bus::RMT, fl::ClocklessChipset>::create(cfg)` — strongly-typed factory with `static_assert` for bus/chipset compatibility.
   - `FastLED.addLeds<WS2812, 4, GRB, fl::Bus::RMT>(leds, NUM)` — every `addLeds<>` variant takes an optional trailing `fl::Bus B = fl::Bus::AUTO` template parameter (#2460).
 
-  In either case, naming `Bus::X` at the call site is what links the driver's translation unit, so `--gc-sections` drops every driver the sketch doesn't reference. Bus/chipset mismatches become `static_assert` errors rather than runtime warnings.
+  Naming `Bus::X` at the call site is what links the driver's translation unit, so `--gc-sections` drops every driver the sketch doesn't reference. Unsupported bus/chipset combinations produce `static_assert` errors. An erased `ChannelConfig` with the wrong chipset family returns `nullptr` before registering a driver.
 - **Runtime selection** — `FastLED.add(cfg)` is **non-template**. Pick the driver by setting `cfg.options.mBus = fl::Bus::RMT` (typed `enum class`). The non-template path auto-enrolls every driver on the platform via `fl::enableAllDrivers()` and emits a one-time `FL_WARN_ONCE` explaining the binary-size trade-off (suppress with `-DFASTLED_SUPPRESS_RUNTIME_DRIVER_WARNING`). For minimum binary size, use the compile-time path instead. Custom/mock drivers (whose names aren't in the `fl::Bus` enum) bind via priority dispatch — register the mock with `manager.addDriver()` and either let it win by priority, or use `manager.setExclusiveDriver(name)` to force-select.
 
 **Why `Channel` still derives from `CPixelLEDController<RGB>`:** `FastLED.add(ChannelPtr)` puts the channel on the `CLEDController` draw list via `addToDrawList()` (`DeferRegister`), and the MY9221 `addLeds<>` path returns a `Channel` as a `CLEDController&`. Removing the base would need a separate channel draw list in `FastLED.show()` and a slim/managed MY9221 path.
+
+### Bind one driver without constructing the runtime driver bundle
+
+Use `FastLED.add<Bus>()` when the application knows its driver at compile time:
+
+```cpp
+CRGB leds[60];
+auto timing = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
+fl::ChannelConfig cfg(4, timing, leds, GRB);
+auto channel = FastLED.add<fl::Bus::AUTO>(cfg);
+```
+
+`Bus::AUTO` as a template argument resolves to the platform's clockless default at compile time. It does not enroll all runtime drivers. To select a particular peripheral, replace it with a supported bus such as `fl::Bus::RMT` or `fl::Bus::SPI` (clockless-over-SPI on ESP32).
+
+For a clocked chipset, use a typed configuration so the family is inferred:
+
+```cpp
+fl::ChannelConfigOf<fl::SpiChipsetConfig> cfg(
+    fl::SpiChipsetConfig(4, 5, fl::SpiEncoder::apa102()), leds, RGB);
+auto channel = FastLED.add<fl::Bus::AUTO>(cfg);
+```
+
+An existing erased SPI configuration instead uses `FastLED.add<fl::Bus::AUTO, fl::SpiChipsetConfig>(cfg)`. The optional third template argument selects a bus instance supported by that platform and chipset family. The template selection takes precedence over the config's runtime `mBus` options.
+
+This removes unrelated driver singleton allocations, registration callback storage, and registry entries. The selected driver, channel, manager, and frame buffers still own their normal storage. `FastLED.remove(channel)` releases FastLED's channel reference; driver singletons remain available for reuse. Existing `FastLED.add(cfg)` retains its runtime selection behavior and enrolls every available driver.
 
 ---
 

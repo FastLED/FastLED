@@ -431,6 +431,86 @@ ChannelConfig makeBusTestConfig(fl::span<CRGB> leds) {
 
 }  // namespace
 
+FL_TEST_CASE("[#4733] typed driver binding rejects an erased chipset family mismatch") {
+    auto& mgr = freshBusTestManager();
+    auto cleanup = fl::make_scope_exit([&]() { mgr.clearAllDrivers(); });
+    CRGB leds[8] = {};
+    ChannelConfig spi(SpiChipsetConfig{5, 6, SpiEncoder::apa102()}, leds, RGB);
+
+    auto channel = TypedChannel<Bus::BIT_BANG, ClocklessChipset>::create(spi);
+
+    FL_CHECK(channel == nullptr);
+    FL_CHECK_EQ(mgr.getDriverCount(), 0u);
+}
+
+FL_TEST_CASE("[#4733] FastLED typed add owns a channel and binds only its selected bus") {
+    auto& mgr = freshBusTestManager();
+    CRGB leds[8] = {};
+    ChannelConfig cfg = makeBusTestConfig(leds);
+    // The template choice remains authoritative, as in TypedChannel::create.
+    cfg.options.mBus = Bus::RMT;
+    auto channel = FastLED.add<Bus::BIT_BANG>(cfg);
+    auto cleanup = fl::make_scope_exit([&]() {
+        FastLED.remove(channel);
+        mgr.clearAllDrivers();
+    });
+
+    FL_REQUIRE(channel != nullptr);
+    FL_CHECK_EQ(mgr.getDriverCount(), 1u);
+    FL_CHECK_GE(channel.use_count(), 2);
+    FL_CHECK_TRUE(channel->isClockless());
+    channel->showLeds(255);
+    FL_CHECK_EQ(channel->getEngineName(), fl::string::from_literal("BIT_BANG"));
+
+    FastLED.remove(channel);
+    FL_CHECK_EQ(channel.use_count(), 1);
+}
+
+FL_TEST_CASE("[#4733] FastLED typed add infers SPI family and resolves AUTO") {
+    auto& mgr = freshBusTestManager();
+    CRGB leds[8] = {};
+    ChannelConfigOf<SpiChipsetConfig> cfg(
+        SpiChipsetConfig(5, 6, SpiEncoder::apa102()), leds, BGR);
+    auto channel = FastLED.add<Bus::AUTO>(cfg);
+    auto cleanup = fl::make_scope_exit([&]() {
+        FastLED.remove(channel);
+        mgr.clearAllDrivers();
+    });
+
+    FL_REQUIRE(channel != nullptr);
+    FL_CHECK_EQ(mgr.getDriverCount(), 1u);
+    FL_CHECK_TRUE(channel->isSpi());
+    FL_CHECK_EQ(channel->getClockPin(), 6);
+    FL_CHECK_EQ(channel->getRgbOrder(), BGR);
+    channel->showLeds(255);
+    FL_CHECK_EQ(channel->getEngineName(), fl::string::from_literal("BIT_BANG"));
+}
+
+FL_TEST_CASE("[#4733] FastLED typed add rejects the wrong erased family without adding a channel") {
+    auto& mgr = freshBusTestManager();
+    CRGB leds[8] = {};
+    auto cfg = makeBusTestConfig(leds);
+    auto channel = FastLED.add<Bus::BIT_BANG, SpiChipsetConfig>(cfg);
+    auto cleanup = fl::make_scope_exit([&]() {
+        FastLED.remove(channel);
+        mgr.clearAllDrivers();
+    });
+
+    FL_CHECK(channel == nullptr);
+    FL_CHECK_EQ(mgr.getDriverCount(), 0u);
+}
+
+FL_TEST_CASE("[#4733] Bus add overloads preserve the profile-id add overload") {
+    CRGB leds[8] = {};
+    auto cfg = makeBusTestConfig(leds);
+    auto channel = FastLED.add<ProfileId::WS2812B>(cfg);
+    auto cleanup = fl::make_scope_exit([&]() { FastLED.remove(channel); });
+
+    FL_REQUIRE(channel != nullptr);
+    FL_CHECK_EQ(channel->emitterProfile(), &profiles::WS2812B);
+    FL_CHECK_GE(channel.use_count(), 2);
+}
+
 // ============ Typed mBus runtime dispatch (#2459) ============
 FL_TEST_CASE("Channel forwards worker settings and rejects an unhonored request #5001") {
     auto& mgr = freshBusTestManager();

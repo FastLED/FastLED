@@ -312,15 +312,7 @@ fn esp_arduino_dependency_pass(
                 parsed.insert(path.clone(), includes.clone());
                 includes
             };
-            // A downloaded SDK may live inside the project cache. Apply
-            // authored-wrapper rules only where source discovery also walks;
-            // still traverse cached headers below to catch Arduino includes.
-            let authored_path = path.starts_with(root)
-                && path
-                    .ancestors()
-                    .take_while(|ancestor| *ancestor != root)
-                    .all(should_visit_directory);
-            if authored_path {
+            if path.starts_with(root) {
                 if let Some(Some((line, problem))) = unresolved.get(&path) {
                     let display = path
                         .strip_prefix(root)

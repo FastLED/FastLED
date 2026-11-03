@@ -101,6 +101,8 @@ public:
     /// @note Checks isBusy(), releases buffers when complete
     DriverState poll() FL_NO_EXCEPT override;
 
+    void setPollNeededCallback(PollNeededCallback callback) FL_NO_EXCEPT override;
+
     /// @brief Get adapter name for debugging
     /// @return Engine name (e.g., "SPI_SINGLE")
     fl::string getName() const FL_NO_EXCEPT override { return mName; }
@@ -184,12 +186,19 @@ private:
     /// @return true on success, false on error
     bool transmitBatch(fl::span<const ChannelDataPtr> channels) FL_NO_EXCEPT;
 
+    /// Advance ordered streaming channels after the preceding source is reaped.
+    DriverState advanceStreaming() FL_NO_EXCEPT;
+    static void streamCompletionThunk(void* context) FL_NO_EXCEPT;
+
     fl::vector<ControllerInfo> mControllers;              ///< All managed controllers
     fl::vector<ClockPinAssignment> mClockPinAssignments;  ///< Clock pin → controller mapping
     fl::string mName;                                    ///< Engine name for debugging
 
     fl::vector<ChannelDataPtr> mEnqueuedChannels;      ///< Channels waiting for show()
     fl::vector<ChannelDataPtr> mTransmittingChannels;  ///< Channels currently transmitting
+    size_t mNextStreamingChannel = 0;
+    bool mStreamingFrame = false;
+    PollNeededCallbackSlot mPollNeededCallback;
 
     // Non-copyable, non-movable
     SpiChannelEngineAdapter(const SpiChannelEngineAdapter&) FL_NO_EXCEPT = delete;

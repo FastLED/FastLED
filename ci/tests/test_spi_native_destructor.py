@@ -33,19 +33,22 @@ COMMON = r"""
 #define ESP_ERR_INVALID_STATE 2
 #define ESP_ERR_INVALID_ARG 3
 #define ESP_ERR_TIMEOUT 4
+#define MALLOC_CAP_INTERNAL 1
+#define MALLOC_CAP_DMA 2
 #define portMAX_DELAY 0xffffffffu
 #define pdMS_TO_TICKS(value) (value)
 using esp_err_t = int;
 using spi_host_device_t = int;
 using spi_device_handle_t = void*;
 using TickType_t = unsigned;
-struct spi_transaction_t { unsigned length; const void* tx_buffer; };
+struct spi_transaction_t { unsigned length; const void* tx_buffer; void* user; };
 struct spi_bus_config_t {
     int mosi_io_num, miso_io_num, sclk_io_num, quadwp_io_num, quadhd_io_num;
     unsigned max_transfer_sz, flags;
 };
 struct spi_device_interface_config_t {
     unsigned mode, clock_speed_hz; int spics_io_num; unsigned queue_size, flags;
+    void (*post_cb)(spi_transaction_t*);
 };
 extern spi_transaction_t* queued;
 extern bool outstanding;
@@ -57,17 +60,26 @@ struct Payload {
     ~Payload() { if (outstanding) std::_Exit(92); }
 };
 namespace fl {
-using u8 = std::uint8_t; using i8 = std::int8_t;
+using u8 = std::uint8_t; using i8 = std::int8_t; using i32 = std::int32_t;
 using u32 = std::uint32_t; using size = std::size_t;
 using std::shared_ptr; using std::make_shared; using std::numeric_limits;
-using std::memset;
+using std::unique_ptr; using std::vector;
+using std::memset; using std::memcpy;
 template<class T> class span {
     T* pointer; std::size_t count;
 public:
     span(T* p, std::size_t n) : pointer(p), count(n) {}
+    template<class U> span(const std::vector<U>& value)
+        : pointer(value.data()), count(value.size()) {}
     T* data() const { return pointer; }
     std::size_t size() const { return count; }
 };
+class ChannelData {
+    std::vector<u8> bytes;
+public:
+    const std::vector<u8>& getData() const { return bytes; }
+};
+using ChannelDataPtr = std::shared_ptr<ChannelData>;
 enum class SPIError { NOT_INITIALIZED, BUSY, BUFFER_TOO_LARGE, ALLOCATION_FAILED };
 enum class TransmitMode { ASYNC, SYNC };
 class DMABuffer {
@@ -92,6 +104,9 @@ public:
     virtual void end() noexcept = 0;
     virtual DMABuffer acquireDMABuffer(std::size_t) noexcept = 0;
     virtual bool transmit(TransmitMode) noexcept = 0;
+    virtual bool supportsStreaming() const noexcept { return false; }
+    virtual bool transmitStream(const ChannelDataPtr&) noexcept { return false; }
+    virtual void setStreamCompletionCallback(void (*)(void*), void*) noexcept {}
     virtual bool waitComplete(u32) noexcept = 0;
     virtual bool isBusy() const noexcept = 0;
     virtual bool isInitialized() const noexcept = 0;
@@ -99,6 +114,9 @@ public:
     virtual const char* getName() const noexcept = 0;
 };
 }
+inline TickType_t xTaskGetTickCount() { return 0; }
+inline void* heap_caps_malloc(std::size_t count, unsigned) { return std::malloc(count); }
+inline void heap_caps_free(void* value) { std::free(value); }
 inline int spi_bus_initialize(int, const spi_bus_config_t*, int) { return ESP_OK; }
 inline int spi_bus_add_device(int, const spi_device_interface_config_t*, void** handle) {
     *handle = reinterpret_cast<void*>(1); return ESP_OK;
@@ -139,9 +157,14 @@ def test_native_spi_preserves_queued_ownership(
         "platforms/shared/spi_hw_1.h",
         "platforms/shared/spi_manager.h",
         "platforms/esp/32/drivers/spi/spi_hw_base.h",
+        "fl/channels/data.h",
+        "fl/stl/cstddef.h",
         "fl/stl/cstring.h",
         "fl/stl/limits.h",
         "fl/stl/noexcept.h",
+        "fl/stl/span.h",
+        "fl/stl/stdint.h",
+        "fl/stl/unique_ptr.h",
         "driver/spi_master.h",
         "esp_heap_caps.h",
         "esp_err.h",
@@ -154,6 +177,7 @@ def test_native_spi_preserves_queued_ownership(
         '#include "common.h"\n'
         "spi_transaction_t* queued = nullptr; bool outstanding = false;\n"
         "int resultError = 0; unsigned removed = 0;\n"
+        '#include "platforms/shared/spi_dma_stream.cpp.hpp"\n'
         '#include "platforms/esp/32/drivers/spi/spi_hw_1_esp32.cpp.hpp"\n'
         "int main() {\n"
         " { fl::SPISingleESP32 controller(2); fl::SpiHw1::Config config;\n"

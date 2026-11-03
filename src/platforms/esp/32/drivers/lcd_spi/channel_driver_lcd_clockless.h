@@ -157,8 +157,8 @@ class ChannelDriverLcdClockless : public IChannelDriver {
     struct IsrContext {
         volatile bool mStreamComplete;
         volatile bool mStreamError;
-        volatile size_t mSubmittedChunks;
-        volatile size_t mCompletedChunks;
+        fl::atomic<size_t> mSubmittedChunks;
+        fl::atomic<size_t> mCompletedChunks;
 
         size_t mTotalBytes;
         size_t mChunkInputBytes;
@@ -167,8 +167,10 @@ class ChannelDriverLcdClockless : public IChannelDriver {
         void reset() FL_NO_EXCEPT {
             mStreamComplete = false;
             mStreamError = false;
-            mSubmittedChunks = 0;
-            mCompletedChunks = 0;
+            // The caller resets only between transfers. The initial submitted
+            // release store publishes this reset and the remaining frame data.
+            mSubmittedChunks.store(0, fl::memory_order_relaxed);
+            mCompletedChunks.store(0, fl::memory_order_relaxed);
             mTotalBytes = 0;
             mChunkInputBytes = 0;
             mTotalChunks = 0;

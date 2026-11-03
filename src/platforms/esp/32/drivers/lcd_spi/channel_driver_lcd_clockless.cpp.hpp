@@ -230,8 +230,10 @@ WorkerDiagnostics ChannelDriverLcdClockless::workerDiagnostics() const FL_NO_EXC
     result.core = workerCore();
     result.priority = workerPriority();
     result.observedCore = workerObservedCore();
-    result.submittedChunks = static_cast<u32>(mIsrCtx.mSubmittedChunks);
-    result.completedChunks = static_cast<u32>(mIsrCtx.mCompletedChunks);
+    result.submittedChunks = static_cast<u32>(
+        mIsrCtx.mSubmittedChunks.load(fl::memory_order_acquire));
+    result.completedChunks = static_cast<u32>(
+        mIsrCtx.mCompletedChunks.load(fl::memory_order_acquire));
     result.totalChunks = static_cast<u32>(mIsrCtx.mTotalChunks);
     result.maxEncodeUs = mWorkerMaxEncodeUs.load(fl::memory_order_acquire);
     result.maxSubmitUs = mWorkerMaxSubmitUs.load(fl::memory_order_acquire);
@@ -399,8 +401,8 @@ void ChannelDriverLcdClockless::processWorkerQueue() FL_NO_EXCEPT {
     IsrContext &ctx = mIsrCtx;
 
     while (mBusy && !ctx.mStreamComplete && !ctx.mStreamError) {
-        size_t submitted = ctx.mSubmittedChunks;
-        size_t completed = ctx.mCompletedChunks;
+        size_t submitted = ctx.mSubmittedChunks.load(fl::memory_order_acquire);
+        size_t completed = ctx.mCompletedChunks.load(fl::memory_order_acquire);
 
         if (submitted >= ctx.mTotalChunks) {
             break;
@@ -419,7 +421,7 @@ void ChannelDriverLcdClockless::processWorkerQueue() FL_NO_EXCEPT {
             break;
         }
 
-        ctx.mSubmittedChunks = submitted + 1;
+        ctx.mSubmittedChunks.store(submitted + 1, fl::memory_order_release);
         FL_MEMORY_BARRIER;
     }
 }
@@ -643,16 +645,20 @@ bool FL_IRAM ChannelDriverLcdClockless::isrChunkDone(void *panel_io,
     auto *self = static_cast<ChannelDriverLcdClockless *>(user_ctx);
     IsrContext &ctx = self->mIsrCtx;
 
-    ctx.mCompletedChunks = ctx.mCompletedChunks + 1;
+    const size_t submitted = ctx.mSubmittedChunks.load(fl::memory_order_acquire);
+    // This LCD ISR is the only completion writer during a transfer.
+    const size_t completed =
+        ctx.mCompletedChunks.load(fl::memory_order_relaxed) + 1;
+    ctx.mCompletedChunks.store(completed, fl::memory_order_release);
 
-    if (ctx.mCompletedChunks >= ctx.mTotalChunks) {
+    if (completed >= ctx.mTotalChunks) {
         ctx.mStreamComplete = true;
         self->mBusy = false;
         self->mPollNeededCallback.invoke();
         return false;
     }
 
-    if (ctx.mSubmittedChunks < ctx.mTotalChunks) {
+    if (submitted < ctx.mTotalChunks) {
         return self->notifyWorkerFromIsr();
     }
 
@@ -841,7 +847,11 @@ bool ChannelDriverLcdClockless::beginTransmission(
 
     mBusy = true;
 
+    // A short first DMA transfer can complete before transmit() returns.
+    // Publish the complete frame context before its ISR can wake the worker.
+    mIsrCtx.mSubmittedChunks.store(1, fl::memory_order_release);
     if (!submitChunk(0, true)) {
+        mIsrCtx.mSubmittedChunks.store(0, fl::memory_order_release);
         mStartError = StartError::InitialTransmit;
         mBusy = false;
         for (const auto &channel : channels) {
@@ -855,8 +865,6 @@ bool ChannelDriverLcdClockless::beginTransmission(
         FL_WARN("ChannelDriverLcdClockless: Initial transmit failed");
         return false;
     }
-    mIsrCtx.mSubmittedChunks = 1;
-
     notifyWorker();
 
     return true;
