@@ -498,15 +498,21 @@ def test_static_init_gate_accepts_one_constructor_with_overlapping_tasks() -> No
     assert not _static_init_passed({"success": True})
 
 
-def test_static_init_mode_uses_pin_free_readiness_and_enables_lto() -> None:
-    args = Args.parse_args(["esp32c6", "--static-init"])
+@pytest.mark.parametrize("lto", (True, False))
+def test_static_init_mode_uses_pin_free_readiness_and_selects_lto(lto: bool) -> None:
+    """Both standalone modes must reach staging with the requested LTO setting."""
+    argv = ["esp32c6", "--static-init"]
+    if not lto:
+        argv.append("--static-init-no-lto")
+    args = Args.parse_args(argv)
+    assert args.static_init_no_lto is (not lto)
     with patch("ci.autoresearch.staging.synthesise_autoresearch_project") as staging:
         ctx = _parse_args_and_build_commands(args)
     assert not isinstance(ctx, int)
     assert ctx.rpc_smoke_mode
     assert not ctx.gpio_only_mode
     assert ctx.drivers == []
-    assert staging.call_args.kwargs["static_init_lto"] is True
+    assert staging.call_args.kwargs["static_init_lto"] is lto
 
 
 def test_static_init_control_requires_test_mode() -> None:

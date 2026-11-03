@@ -20,6 +20,16 @@ or jumper wiring are required. Record board, port, commands, and output below.
 
 ## Evidence
 
+- Final scheduling robustness: an injected 400 ms RPC scheduling delay made the
+  fixed 200 ms sample fail with one construction; a bounded two-second wait
+  for the real blocked contender passed under that same delay. The temporary
+  delay was removed. With the final probe, the original fallback under LTO
+  still failed with two constructions; the fixed LTO and subsequent non-LTO
+  control both passed with one construction, a blocked contender, two completed
+  callers, and suspended workers. Artifacts: `c6-schedule-{before,after}.*` and
+  `c6-bounded-{before,after,control}.*` in the evidence directory. All **482**
+  AutoResearch Python checks, final lint, WASM AutoResearch, and the final local
+  code review passed. The positive control has explicit parser/staging coverage.
 - Review-tightened acceptance: use the contender's real FreeRTOS blocked state
   while the first constructor is active. Workers retain their TCBs until both
   completions and explicit suspension, then the RPC deletes them and its SDK

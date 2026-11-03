@@ -89,19 +89,25 @@ struct SlowStatic {
     SlowStatic() {
         const bool owner = staticInitProbe.constructions.fetch_add(1) == 0;
         xSemaphoreGive(staticInitProbe.entered); // ok platform specific - synchronize actual SDK tasks; fl::thread is not concurrent on ESP32
-        // Give the second task time to enter the same accessor while the
-        // first constructor is still running, including on single-core C6.
-        vTaskDelay(pdMS_TO_TICKS(200)); // ok platform specific - the regression requires a FreeRTOS-blocked constructor, not a generic busy delay
-        if (owner) {
+        if (!owner) {
+            // Make duplicate initialization observable in the failing build.
+            vTaskDelay(pdMS_TO_TICKS(200)); // ok platform specific - require an actual FreeRTOS-blocked duplicate initializer for observation
+            return;
+        }
+        const TickType_t wait_start = xTaskGetTickCount(); // ok platform specific - measure the same scheduler clock used by the guard-state polling delay
+        const TickType_t wait_ticks = pdMS_TO_TICKS(2000); // ok platform specific - bound the real SDK contention wait in scheduler ticks
+        do {
             const TaskHandle_t contender = staticInitProbe.contender.load(fl::memory_order_acquire); // ok platform specific - retain the SDK task identity through the guard-state sample
             // Between arrival and completion, the worker can block only in
             // this guard or this constructor's delay. Finished workers suspend
             // rather than delete themselves, so the sampled handle stays valid.
             const bool blocked = contender && eTaskGetState(contender) == eBlocked; // ok platform specific - no core API observes ESP-IDF's guard waiter state
-            staticInitProbe.overlapped.store(
-                staticInitProbe.contenders.load(fl::memory_order_acquire) == 2 && blocked,
-                fl::memory_order_release);
-        }
+            if (staticInitProbe.contenders.load(fl::memory_order_acquire) == 2 && blocked) {
+                staticInitProbe.overlapped.store(true, fl::memory_order_release);
+                return;
+            }
+            vTaskDelay(1); // ok platform specific - yield to the actual SDK contender until guard entry is observed
+        } while (static_cast<TickType_t>(xTaskGetTickCount() - wait_start) < wait_ticks); // ok platform specific - scheduler-tick subtraction handles tick-counter wrap
     }
 };
 
