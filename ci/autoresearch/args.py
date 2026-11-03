@@ -362,7 +362,7 @@ See Also:
         driver_group.add_argument(
             "--rp-spi-chipset",
             choices=("apa102", "sk9822"),
-            default="apa102",
+            default=None,
             help="Chipset for --rp-spi-public-api (default: apa102).",
         )
         driver_group.add_argument(
@@ -920,7 +920,7 @@ See Also:
         parser.add_argument(
             "--chipset",
             choices=["ws2812", "ws2814", "ws2818", "ucs7604", "ws2811-400"],
-            default="ws2812",
+            default=None,
             help=(
                 "Chipset to use for autoresearch (default: ws2812). "
                 "ws2814 requires --legacy and exercises automatic RGBW output; "
@@ -1003,6 +1003,14 @@ See Also:
 
         if parsed.driver_binding or parsed.spi_streaming:
             conflicts = memory_bench_conflicts(parsed)
+            # Inspect raw optional values before restoring the normal defaults:
+            # explicitly requesting even the default chipset would be ignored
+            # by the fixed memory workload.
+            conflicts.extend(
+                name
+                for name in ("chipset", "rp_spi_chipset")
+                if getattr(parsed, name) is not None
+            )
             if conflicts:
                 parser.error(
                     "Run memory benches separately from other test modes: "
@@ -1068,7 +1076,7 @@ See Also:
             legacy=parsed.legacy,
             legacy_mixed_timings=parsed.legacy_mixed_timings,
             legacy_rgbw_small_counts=parsed.legacy_rgbw_small_counts,
-            chipset=parsed.chipset,
+            chipset=parsed.chipset or "ws2812",
             net_server=parsed.net_server,
             net_client=parsed.net_client,
             net=parsed.net,
@@ -1087,7 +1095,7 @@ See Also:
             rp_spi_loopback=parsed.rp_spi_loopback,
             rp_spi_index=parsed.rp_spi_index,
             rp_spi_public_api=parsed.rp_spi_public_api,
-            rp_spi_chipset=parsed.rp_spi_chipset,
+            rp_spi_chipset=parsed.rp_spi_chipset or "apa102",
             rp_uart_index=parsed.rp_uart_index,
             rp_pio_index=parsed.rp_pio_index,
             rp_pio_both=parsed.rp_pio_both,

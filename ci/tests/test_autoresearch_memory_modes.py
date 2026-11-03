@@ -15,6 +15,8 @@ def test_driver_binding_mode(mode: str) -> None:
     assert args.driver_binding == mode
     assert args.strip_sizes is None
     assert args.frames is None
+    assert args.chipset == "ws2812"
+    assert args.rp_spi_chipset == "apa102"
 
 
 def test_spi_streaming_mode() -> None:
@@ -22,6 +24,8 @@ def test_spi_streaming_mode() -> None:
     assert args.spi_streaming
     assert args.strip_sizes is None
     assert args.frames is None
+    assert args.chipset == "ws2812"
+    assert args.rp_spi_chipset == "apa102"
 
 
 def test_memory_modes_are_mutually_exclusive() -> None:
@@ -112,6 +116,10 @@ def test_spi_memory_acceptance_requires_measured_threefold_reduction(
         ["--tx-pin", "0"],
         ["--rx-pin", "2"],
         ["--rx-pin", "0"],
+        ["--chipset", "ws2814"],
+        ["--chipset", "ws2812"],
+        ["--rp-spi-chipset", "sk9822"],
+        ["--rp-spi-chipset", "apa102"],
     ],
 )
 def test_memory_bench_rejects_explicit_ignored_workload_options(
@@ -152,3 +160,17 @@ def test_memory_bench_provenance_rejects_missing_release_even_with_debug(
     )
     with pytest.raises(FileNotFoundError, match="release/firmware.elf"):
         deployed_elf(tmp_path)
+
+
+def test_default_chipset_choices_are_preserved() -> None:
+    args = Args.parse_args(["esp32s3"])
+    assert args.chipset == "ws2812"
+    assert args.rp_spi_chipset == "apa102"
+
+
+def test_non_memory_chipset_choices_are_preserved() -> None:
+    args = Args.parse_args(
+        ["esp32s3", "--chipset", "ucs7604", "--rp-spi-chipset", "sk9822"]
+    )
+    assert args.chipset == "ucs7604"
+    assert args.rp_spi_chipset == "sk9822"
