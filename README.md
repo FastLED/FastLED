@@ -256,6 +256,53 @@ void loop() {
 
 **More examples & full API reference**: [src/fl/audio/README.md](src/fl/audio/README.md)
 
+## 🔌 Using FastLED as a pure ESP-IDF component
+
+FastLED no longer requires the Arduino core. Add it as a normal IDF component and
+drive it from `app_main()`:
+
+```cmake
+# CMakeLists.txt
+set(EXTRA_COMPONENT_DIRS path/to/FastLED)
+include($ENV{IDF_PATH}/tools/cmake/project.cmake)
+project(blink)
+```
+
+```cpp
+// main/main.cpp - no Arduino.h, no .ino
+#include <FastLED.h>
+
+static CRGB leds[8];
+
+extern "C" void app_main(void) {
+    FastLED.addLeds<WS2812, 2, GRB>(leds, 8);
+    fill_solid(leds, 8, CRGB::Red);
+    FastLED.show();
+}
+```
+
+The build defines `FL_NO_ARDUINO`, and `src/fl/system/arduino.h` raises a compile
+error if anything still reaches for `Arduino.h`, so a regression is loud instead of
+silent. A working reference project lives in [`ci/idf_app/`](ci/idf_app/), which CI
+configures, compiles, links and asserts a `.bin` for on every push.
+
+**Tested matrix** (each cell links a firmware image; see the `bare_idf` workflow):
+
+| IDF | esp32 | esp32s3 | esp32c3 | esp32c6 | esp32p4 |
+|---|---|---|---|---|---|
+| 4.4 | ✅ | ✅ | | | |
+| 5.1 | ✅ | ✅ | | | |
+| 5.5 | ✅ | ✅ | ✅ | ✅ | ✅ |
+| 6.0 | ✅ | ✅ | ✅ | ✅ | ✅ |
+
+Notes:
+
+- **ESP8266 is not an ESP-IDF chip.** It runs the Arduino core (or the legacy
+  ESP8266 RTOS SDK), so it stays on the Arduino path and is not part of this matrix.
+- **IDF 3.x** is not covered: it is end-of-life, defaults to the GNU Make build and
+  only ships the RMT4 driver. Its only consumer is the Arduino 1.0.x core, which the
+  `esp32dev_idf3.3` job already builds.
+
 ## ⏱️ Async Tasks Instead of delay()
 
 **Run several independent animations, sensor reads, and network polls out of one `loop()` — no blocking, no hand-rolled `millis()` bookkeeping.** Each task is a small callback with its own schedule. `fl::task::run()` executes whichever tasks are due and returns. Adding a feature means adding a task, not rethreading the timing of everything already there.
