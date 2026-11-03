@@ -5,8 +5,7 @@ ESP8266 family support (Xtensa).
 ## Files (quick pass)
 - `fastled_esp8266.h`: Aggregator; includes pin/SPI and clockless.
 - `fastpin_esp8266.h`: Direct GPIO helpers and pin mappings (raw/NodeMCU/D1 variants).
-- `fastspi_esp8266.h`: Legacy Arduino-SPI shim, used only under `FASTLED_ALL_PINS_HARDWARE_SPI` for non-HSPI pin pairs.
-- `fastspi_esp8266_hspi.h`: Native register-level HSPI driver for the hardware SPI pair (no Arduino `<SPI.h>`).
+- `fastspi_esp8266_hspi.h`: Native register-level HSPI driver for the hardware SPI pair (no Arduino `<SPI.h>`); also exposed to the channel API as `Bus::SPI`.
 - `spi_hspi_clock.h`: Pure C++11 constexpr SPI1 clock-divider math (host-testable).
 - `spi_output_template.h`: `SPIOutput<>` dispatch: native HSPI vs. software bit-bang.
 - `clockless_esp8266.h`: Single‑lane clockless driver using cycle counter with retry/abort logic for NMI/ISR windows.
@@ -40,11 +39,48 @@ Notes:
   - **`FASTLED_ESP8266_D1_PIN_ORDER`**: Legacy Wemos D1-style mapping for bare numeric pins.
 
 - **SPI backend**
-  - **GPIO13/GPIO14 (MOSI/SCK)**: clocked chipsets such as APA102 use the native register-level HSPI driver (`fastspi_esp8266_hspi.h`) by default. It writes `SPI1W0..15`/`SPI1CMD` directly, honors the chipset's `SPI_SPEED`, and does not depend on Arduino `<SPI.h>`. The pads are fixed by the peripheral, so the dispatch resolves the active pin-order mode first: 13/14 in raw order, 7/5 in NodeMCU and D1 order (those are GPIO13/GPIO14). Using GPIO13/14 this way takes the pads away from Arduino `SPI`, so a sketch cannot also run `SPI` on those pins while FastLED drives them.
-  - **Any other pin pair**: falls back to the shared software SPI bit-bang.
-  - **`FASTLED_ALL_PINS_HARDWARE_SPI`**: legacy opt-in that routes non-HSPI pin pairs through the Arduino-SPI shim (`fastspi_esp8266.h`). It is no longer needed for GPIO13/14; the shim now also honors `SPI_SPEED` instead of a hard-coded 3.2 MHz.
+  - **GPIO13/GPIO14 (MOSI/SCK)**: clocked chipsets such as APA102 use the native register-level HSPI driver (`fastspi_esp8266_hspi.h`) by default. It writes `SPI1W0..15`/`SPI1CMD` directly, honors the chipset's `SPI_SPEED`, and does not depend on Arduino `<SPI.h>`. The pads are fixed by the peripheral, so the dispatch resolves the active pin-order mode first: 13/14 in raw order, 7/5 in NodeMCU and D1 order (those are GPIO13/GPIO14). Using GPIO13/14 this way takes the pads away from Arduino `SPI`, so a sketch cannot also run `SPI` on those pins while FastLED drives them. The channel API reaches the same engine through `fl::Bus::SPI` (`hspi_bus_traits.h`), selected by template with no define — add a clocked strip on 13/14 with `add<SpiChipsetConfig>()` or let it win over the bit-bang fallback via priority.
+  - **Any other pin pair**: falls back to the shared software SPI bit-bang (`Bus::BIT_BANG`).
+  - **`FASTLED_ALL_PINS_HARDWARE_SPI`**: **retired (#4942).** The legacy Arduino-SPI shim it enabled (`fastspi_esp8266.h`) is gone; the shared software bit-bang now covers every non-HSPI pin pair, and the hardware HSPI pair is selected by template. The define no longer has any effect on ESP8266.
 
-- **Debugging / diagnostics**
-  - **`FASTLED_DEBUG_COUNT_FRAME_RETRIES`**: When defined, counts and reports frame retries due to timing interference during show(). Helpful for diagnosing ISR contention.
+- **`FASTLED_ESP8266_UART`**: **retired (#4944).** The UART1 (GPIO2) WS2812
+  driver is now available and selectable by template — through the channel API
+  (`fl::Bus::UART`) or the legacy `fl::UARTController_ESP8266` controller — with
+  no define. A sketch that never names the engine links no UART-driver symbols.
+  UART1 TX is fixed to GPIO2, so the channel driver only claims a clockless
+  channel whose data pin is GPIO2; it is not registered by
+  `FastLED.enableAllDrivers()`, so ordinary pin-2 clockless strips keep the
+  bit-bang driver unless you select `Bus::UART` explicitly.
+- **`FASTLED_ESP8266_UART_BAUD`** / **`FASTLED_ESP8266_UART_RESET_US`**: tune the
+  UART baud (default 3.2 Mbaud) and reset/latch time (default 300 µs).
+- **`FASTLED_DEBUG_COUNT_FRAME_RETRIES`**: When defined, counts and reports frame retries due to timing interference during show(). Helpful for diagnosing ISR contention.
+
+- **Audio input (#4948)**: ESP8266 has **no dedicated** audio-input engine.
+  `fl::AudioInput` falls through to the shared Arduino-I2S backend
+  (`platforms/arduino/audio_input.hpp`) whenever `<I2S.h>` is present, which the
+  ESP8266 Arduino core provides. There is no ESP32-style native engine
+  (`platforms/esp/32/audio/`) on this platform, and none is planned for now: the
+  ESP8266 is a low-memory tier, so the shared backend's sample buffer is the
+  limiting factor — keep the buffer small and expect the main loop to be
+  affected. If `<I2S.h>` is absent the input is a no-op (`Null_Audio`).
+
+- **I2S output engine (#4943)**: a native I2S engine for clockless (WS2812-class)
+  strips, selected by template through `fl::Bus::FLEX_IO` (the ESP8266 "I2S" bus)
+  — `add<fl::Bus::FLEX_IO, fl::ClocklessChipset>(...)` or
+  `fl::enableDriver<fl::Bus::FLEX_IO>()`. It streams 16-bit samples at the
+  WS2812 slot rate (4 slots per bit; `i2s_ws2812_codec.h`) over the Arduino
+  core's verified `core_esp8266_i2s.h`, so the CPU is free during the DMA
+  transfer. It is **not** the clockless default (that stays `Bus::BIT_BANG`), so
+  a sketch that does not name it is unaffected and links no I2S code. The RX
+  path of the same peripheral validates the emitted waveform on-device (capture
+  + `decodeFrame`, the inverse of `encodeFrame`).
+- **OTA (#4946)**: ESP8266 OTA is supported through the Arduino core's verified
+  `ArduinoOTA` library (Arduino-IDE OTA on port 3232), selected automatically —
+  `fl::net::OTA` / `IOTA::create()` resolves to the ESP8266 backend when
+  `<ArduinoOTA.h>` is on the include path. It lives in its own component TU
+  (`fl/build/platforms.esp.8266.ota+.cpp`), so a sketch that does not use OTA
+  links no `ArduinoOTA`/WiFi code. There is no web-OTA HTTP server on ESP8266
+  (`getFailedServices()` reports `HTTP_FAILED`); Wi-Fi setup, progress/error/state
+  callbacks and `onBeforeReboot` all work. See `examples/OTA/OTA.ino`.
 
 Place these defines before including `FastLED.h` in your sketch.

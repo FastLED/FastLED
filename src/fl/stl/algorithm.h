@@ -338,26 +338,35 @@ Iterator median_of_three(Iterator first, Iterator middle, Iterator last, Compare
     }
 }
 
-// Partition function for quicksort
+// Three-way (Dutch national flag) partition for quicksort.
+// On return: [first, lt) < pivot, [lt, gt) == pivot, [gt, last) > pivot.
+// Grouping equal keys in the middle keeps duplicate-heavy input O(n log n);
+// a two-way Lomuto partition put every equal key on one side and went O(n^2).
+// The pivot element itself is tracked at *lt, so no value copy is needed.
 template <typename Iterator, typename Compare>
-Iterator partition(Iterator first, Iterator last, Compare comp) FL_NO_EXCEPT {
+void partition3(Iterator first, Iterator last, Compare comp,
+                Iterator& lt_out, Iterator& gt_out) FL_NO_EXCEPT {
     Iterator middle = first + (last - first) / 2;
     Iterator pivot_iter = median_of_three(first, middle, last - 1, comp);
-    
-    // Move pivot to end
-    swap(*pivot_iter, *(last - 1));
-    Iterator pivot = last - 1;
-    
-    Iterator i = first;
-    for (Iterator j = first; j != pivot; ++j) {
-        if (comp(*j, *pivot)) {
-            swap(*i, *j);
+    swap(*first, *pivot_iter);
+
+    Iterator lt = first;      // *lt is always a pivot-equal element
+    Iterator i = first + 1;
+    Iterator gt = last;
+    while (i < gt) {
+        if (comp(*i, *lt)) {
+            swap(*lt, *i);
+            ++lt;
+            ++i;
+        } else if (comp(*lt, *i)) {
+            --gt;
+            swap(*i, *gt);
+        } else {
             ++i;
         }
     }
-    
-    swap(*i, *pivot);
-    return i;
+    lt_out = lt;
+    gt_out = gt;
 }
 
 // Heapsort implementation (fallback for deep recursion)
@@ -365,7 +374,8 @@ template <typename Iterator, typename Compare>
 void sift_down(Iterator first, Iterator start, Iterator end, Compare comp) FL_NO_EXCEPT {
     Iterator root = start;
     
-    while (root - first <= (end - first - 2) / 2) {
+    // `end` is inclusive: keep sifting while root has at least a left child.
+    while (2 * (root - first) + 1 <= end - first) {
         Iterator child = first + 2 * (root - first) + 1;
         Iterator swap_iter = root;
         
@@ -391,7 +401,7 @@ void heapify(Iterator first, Iterator last, Compare comp) FL_NO_EXCEPT {
     Iterator start = first + (last - first - 2) / 2;
     
     while (true) {
-        sift_down(first, start, last - 1, comp);
+        detail::sift_down(first, start, last - 1, comp);
         if (start == first) {
             break;
         }
@@ -406,22 +416,44 @@ void heap_sort(Iterator first, Iterator last, Compare comp) FL_NO_EXCEPT {
     Iterator end = last - 1;
     while (end > first) {
         swap(*end, *first);
-        sift_down(first, first, end - 1, comp);
+        detail::sift_down(first, first, end - 1, comp);
         --end;
     }
 }
 
-// Quicksort implementation
+// Introsort: three-way quicksort that recurses into the smaller side and
+// loops on the larger (stack depth <= log2(n)), and falls back to heap_sort
+// once the partition depth exceeds ~2*log2(n) (worst case O(n log n)).
+template <typename Iterator, typename Compare>
+void quicksort_impl(Iterator first, Iterator last, Compare comp,
+                    int depth_limit) FL_NO_EXCEPT {
+    while (last - first > 16) {
+        if (depth_limit <= 0) {
+            detail::heap_sort(first, last, comp);
+            return;
+        }
+        --depth_limit;
+        Iterator lt;
+        Iterator gt;
+        detail::partition3(first, last, comp, lt, gt);
+        if (lt - first < last - gt) {
+            detail::quicksort_impl(first, lt, comp, depth_limit);
+            first = gt;
+        } else {
+            detail::quicksort_impl(gt, last, comp, depth_limit);
+            last = lt;
+        }
+    }
+    insertion_sort(first, last, comp);
+}
+
 template <typename Iterator, typename Compare>
 void quicksort_impl(Iterator first, Iterator last, Compare comp) FL_NO_EXCEPT {
-    if (last - first <= 16) {  // Use insertion sort for small arrays
-        insertion_sort(first, last, comp);
-        return;
+    int depth_limit = 0;
+    for (auto n = last - first; n > 1; n >>= 1) {
+        depth_limit += 2;
     }
-    
-    Iterator pivot = partition(first, last, comp);
-    quicksort_impl(first, pivot, comp);
-    quicksort_impl(pivot + 1, last, comp);
+    detail::quicksort_impl(first, last, comp, depth_limit);
 }
 
 // Rotate elements in range [first, last) so that middle becomes the new first

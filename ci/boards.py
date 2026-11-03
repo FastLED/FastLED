@@ -2,7 +2,7 @@
 
 import json
 from copy import deepcopy
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import Any
 
 
@@ -1009,6 +1009,16 @@ ESP32_S3_DEVKITC_1 = Board(
         "-DFASTLED_ESP_FORCE_USB_SERIAL_JTAG=1",  # Native console on the upload port.
         "-DARDUINO_LOOP_STACK_SIZE=16384",  # AutoResearch RPC plus ESP driver setup is deep enough to exceed the Arduino 8KB default
     ],
+)
+
+# Bench modules with verified 8 MB OPI PSRAM need its matching SDK memory
+# geometry. Keep the conservative 4 MB flash cap: PSRAM capacity does not
+# establish physical flash capacity. Leave esp32s3's no-PSRAM default intact.
+ESP32_S3_OPI_PSRAM8 = replace(
+    deepcopy(ESP32_S3_DEVKITC_1),
+    board_name="esp32s3_opi_psram8",
+    board_build_options={"memory_type": "qio_opi", "psram_type": "opi"},
+    build_flags=[*(ESP32_S3_DEVKITC_1.build_flags or []), "-DBOARD_HAS_PSRAM"],
 )
 
 ESP32_S2_DEVKITM_1 = Board(

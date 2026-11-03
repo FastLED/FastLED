@@ -8,6 +8,7 @@
 //   ./profile_chasing_spirals q31               # Profile Q31 (scalar fixed-point) only
 //   ./profile_chasing_spirals simd              # Profile Q31_SIMD (vectorized) only
 
+#include "fl/stl/compiler_control.h"  // FL_NO_INLINE
 #include "FastLED.h"
 #include "fl/fx/2d/animartrix.hpp"
 #include "fl/fx/2d/animartrix_detail/viz/chasing_spirals.h"
@@ -26,7 +27,7 @@ static const int PROFILE_FRAMES = 200;
 
 // These functions are named so callgrind --toggle-collect can target them.
 
-__attribute__((noinline))
+FL_NO_INLINE
 void renderFloat(Animartrix &fx, CRGB *leds, int frames, int start_frame) {
     for (int i = 0; i < frames; i++) {
         uint32_t t = static_cast<uint32_t>((start_frame + i) * 16);
@@ -36,7 +37,7 @@ void renderFloat(Animartrix &fx, CRGB *leds, int frames, int start_frame) {
 }
 
 // Direct class renderers for benchmarking specific implementations
-__attribute__((noinline))
+FL_NO_INLINE
 void renderQ31_Direct(IAnimartrix2Viz &viz,
                       Context &ctx,
                       int frames, int start_frame) {

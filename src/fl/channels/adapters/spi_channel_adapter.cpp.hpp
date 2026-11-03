@@ -3,7 +3,6 @@
 
 #include "fl/channels/adapters/spi_channel_adapter.h"
 #include "fl/log/log.h"
-#include "fl/log/log.h"
 #include "fl/stl/cstring.h"  // For memcpy
 #include "fl/channels/config.h"  // For SpiChipsetConfig
 // IWYU pragma: begin_keep
@@ -56,6 +55,10 @@ fl::shared_ptr<SpiChannelEngineAdapter> SpiChannelEngineAdapter::create(
         return nullptr;
     }
 
+    for (auto& ctrl : adapter->mControllers) {
+        ctrl.controller->setStreamCompletionCallback(&streamCompletionThunk, adapter.get());
+    }
+
     return adapter;
 }
 
@@ -83,6 +86,7 @@ SpiChannelEngineAdapter::~SpiChannelEngineAdapter() FL_NO_EXCEPT {
         if (ctrl.controller && ctrl.controller->isInitialized()) {
             ctrl.controller->end();
         }
+        if (ctrl.controller) ctrl.controller->setStreamCompletionCallback(nullptr, nullptr);
     }
 }
 
@@ -231,6 +235,10 @@ void SpiChannelEngineAdapter::enqueue(ChannelDataPtr channelData) FL_NO_EXCEPT {
 }
 
 void SpiChannelEngineAdapter::show() FL_NO_EXCEPT {
+    if (mStreamingFrame) {
+        // Preserve the active frame and its source owners if called early.
+        if (advanceStreaming() == DriverState::BUSY) return;
+    }
     if (mEnqueuedChannels.empty()) {
         return;
     }
@@ -240,6 +248,15 @@ void SpiChannelEngineAdapter::show() FL_NO_EXCEPT {
     // Move enqueued channels to transmitting list
     mTransmittingChannels = fl::move(mEnqueuedChannels);
     mEnqueuedChannels.clear();
+
+    for (const auto& ctrl : mControllers) {
+        if (ctrl.controller->supportsStreaming()) {
+            mStreamingFrame = true;
+            mNextStreamingChannel = 0;
+            advanceStreaming();
+            return;
+        }
+    }
 
     // Group adjacent channels with identical SPI bus configuration.
     auto groups = groupByClockPin(mTransmittingChannels);
@@ -262,6 +279,7 @@ void SpiChannelEngineAdapter::show() FL_NO_EXCEPT {
 }
 
 IChannelDriver::DriverState SpiChannelEngineAdapter::poll() FL_NO_EXCEPT {
+    if (mStreamingFrame) return advanceStreaming();
     // Check if ANY controller is busy
     bool anyBusy = false;
     for (const auto& ctrl : mControllers) {
@@ -293,6 +311,49 @@ IChannelDriver::DriverState SpiChannelEngineAdapter::poll() FL_NO_EXCEPT {
     }
 
     return DriverState::READY;
+}
+
+void SpiChannelEngineAdapter::setPollNeededCallback(PollNeededCallback callback) FL_NO_EXCEPT {
+    mPollNeededCallback.set(callback);
+}
+
+void SpiChannelEngineAdapter::streamCompletionThunk(void* context) FL_NO_EXCEPT {
+    static_cast<SpiChannelEngineAdapter*>(context)->mPollNeededCallback.invoke();
+}
+
+IChannelDriver::DriverState SpiChannelEngineAdapter::advanceStreaming() FL_NO_EXCEPT {
+    for (const auto& ctrl : mControllers) {
+        if (ctrl.controller->isBusy()) return DriverState::BUSY;
+    }
+
+    if (mNextStreamingChannel != 0) {
+        const auto& previous = mTransmittingChannels[mNextStreamingChannel - 1];
+        if (previous) previous->setInUse(false);
+    }
+
+    while (mNextStreamingChannel < mTransmittingChannels.size()) {
+        const size_t index = mNextStreamingChannel++;
+        const auto& channel = mTransmittingChannels[index];
+        if (!channel) continue;
+        if (!transmitBatch(fl::span<const ChannelDataPtr>(mTransmittingChannels.data() + index, 1))) {
+            // Report a dropped frame even with normal errors-only logging.
+            // Keep the established READY-after-failure semantics: a sticky
+            // ERROR would prevent onBeginFrame() from reaching the next retry.
+            FL_ERROR("SpiChannelEngineAdapter: SPI frame submission failed on pin "
+                     << channel->getPin() << " (" << channel->getData().size() << " bytes)");
+            channel->setInUse(false);
+            continue;
+        }
+        for (const auto& ctrl : mControllers) {
+            if (ctrl.controller->isBusy()) return DriverState::BUSY;
+        }
+        channel->setInUse(false);
+    }
+
+    mTransmittingChannels.clear();
+    mStreamingFrame = false;
+    mNextStreamingChannel = 0;
+    return mEnqueuedChannels.empty() ? DriverState::READY : DriverState::DRAINING;
 }
 
 fl::vector<SpiChannelEngineAdapter::ClockPinGroup> SpiChannelEngineAdapter::groupByClockPin(
@@ -389,6 +450,17 @@ bool SpiChannelEngineAdapter::transmitBatch(fl::span<const ChannelDataPtr> chann
         }
 
         FL_DBG("SpiChannelEngineAdapter: Transmitting channel via " << ctrl.name << " (pin " << channel->getPin() << ", " << data.size() << " bytes)");
+
+        if (ctrl.controller->supportsStreaming()) {
+            // The backend retains or copies encoded bytes until completion.
+            // advanceStreaming() submits one channel at a time, preserving
+            // pin/rate changes and enqueue order without blocking show().
+            if (!ctrl.controller->transmitStream(channel)) {
+                channel->setInUse(false);
+                return false;
+            }
+            return true;
+        }
 
         // Acquire DMA buffer
         DMABuffer dmaBuffer = ctrl.controller->acquireDMABuffer(data.size());

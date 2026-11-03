@@ -848,6 +848,7 @@ class TestAutoResearchFilter:
             "board": [
                 "esp32dev_idf44",
                 "esp32s3",
+                "esp32s3_opi_psram8",
                 "esp32c6",
                 "esp32p4",
                 "teensy41",

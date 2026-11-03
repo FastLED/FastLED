@@ -1,3 +1,60 @@
+FastLED 3.10.9
+=============================
+  * **Memory: smaller flash and RAM than 3.10.8 on every measured ESP32 sketch**
+    * Subsystems a sketch does not use are no longer linked. On ESP32, the native UART console, Arduino SPI, the embedded filesystem, and `Serial0` are included only when a sketch uses them, and diagnostic printing writes through the ROM UART until the console is actually used (#4873, #4892, #4894, #4896, #4990).
+    * Clocked LED chipsets such as APA102 link the ESP-IDF SPI master driver only when a sketch requests a specific SPI host with `addLeds<...>(leds, n, fl::Esp32SpiBus::...)`. Sketches on the default host no longer carry that driver (#5000).
+    * Across the benchmarks below, ESP32 and ESP32-S3 save 4.2-6.4 KB of flash and 300-730 B of static RAM. AVR and Teensy 4.1 are unchanged or slightly smaller.
+    * `fl::unordered_map` no longer places rehash scratch space on the stack; on ESP8266 this raises loop-stack headroom from 368 B to 1,568 B (#4926).
+
+    Measured with the [FastLED memory dashboard](https://fastled.github.io/dashboard/) benchmark protocol: identical sketches without Serial, identical board configurations, and the same fbuild build for both versions. Flash and RAM are fbuild's board totals in bytes; RAM is static RAM and excludes heap and stack. Blink drives one WS2812B; APA102 hardware SPI drives one APA102 strip; the feature mix drives a WS2812B and an APA102 strip with colour correction, power limiting, palettes, noise and blur.
+
+    | Sketch | Board | Flash 3.10.8 | Flash 3.10.9 | Change | RAM 3.10.8 | RAM 3.10.9 | Change |
+    |---|---|---:|---:|---:|---:|---:|---:|
+    | Blink | ESP32 Dev | 290,724 | 284,904 | -5,820 | 23,896 | 23,520 | -376 |
+    | Blink | ESP32-S3 | 392,760 | 387,552 | -5,208 | 77,192 | 76,552 | -640 |
+    | Blink | Teensy 4.1 | 47,104 | 47,104 | 0 | 27,136 | 27,104 | -32 |
+    | Blink | Uno (AVR) | 3,592 | 3,592 | 0 | 118 | 118 | 0 |
+    | APA102 hardware SPI | ESP32 Dev | 275,100 | 269,132 | -5,968 | 23,112 | 22,808 | -304 |
+    | APA102 hardware SPI | ESP32-S3 | 393,076 | 388,924 | -4,152 | 77,136 | 76,568 | -568 |
+    | APA102 hardware SPI | Teensy 4.1 | 47,104 | 47,104 | 0 | 27,136 | 27,136 | 0 |
+    | APA102 hardware SPI | Uno (AVR) | 3,262 | 3,262 | 0 | 119 | 119 | 0 |
+    | Feature mix | ESP32 Dev | 309,980 | 303,560 | -6,420 | 25,048 | 24,608 | -440 |
+    | Feature mix | ESP32-S3 | 419,140 | 413,868 | -5,272 | 78,904 | 78,176 | -728 |
+    | Feature mix | Teensy 4.1 | 56,320 | 56,320 | 0 | 29,024 | 28,992 | -32 |
+    | Feature mix | Uno (AVR) | 8,414 | 8,414 | 0 | 355 | 355 | 0 |
+  * **Compatibility**
+    * Arduino-ESP32 3.3.x (ESP-IDF 5.5) is the primary ESP32 target. The Arduino-ESP32 4.0.0 release candidate (ESP-IDF 6.1) and the legacy 1.0.x (ESP-IDF 3.3) and 2.0.x (ESP-IDF 4.4) cores are also built in CI.
+    * Teknic ClearCore (SAME53) builds again; it was incorrectly treated as a SAMD21/SAMD51 board (#4997).
+    * AVR sketches that use the Servo library can own the Timer1 interrupt vector (#4884).
+    * The `FASTLED_ESP8266_UART`, `FASTLED_ALL_PINS_HARDWARE_SPI`, and `FL_ESP8266_EMBEDDED_FS` defines are retired in favour of explicit `fl::Bus` selection (see ESP8266 below).
+  * **ESP-IDF status**
+    * Every ESP-IDF version in CI is built with Arduino running as an ESP-IDF component: ESP-IDF 3.3, 4.4, 5.3 (through the ESP-IDF component/CMake build), 5.5, and 6.1.
+    * Pure ESP-IDF projects without the Arduino core (`framework = espidf`) are not yet verified by CI and are not officially supported in this release, on any ESP-IDF version. ESP-IDF-native code paths are now the default throughout `src/platforms/esp`, and lint blocks new Arduino dependencies there; Arduino-free build coverage is tracked in #3715.
+  * **ESP8266: native drivers on the unified Bus API (#4917, #4925, #4941-#4948)**
+    * Three hardware output engines: I2S (`fl::Bus::FLEX_IO`), UART for WS2812 (`fl::Bus::UART`), and hardware HSPI for clocked chipsets such as APA102 (`fl::Bus::SPI`). `fl::Bus::AUTO` selects a suitable default.
+    * New support for `fl::RxChannel` (via the I2S receiver), embedded LittleFS, ArduinoOTA, and audio input through the shared Arduino I2S path.
+  * **ESP32 drivers**
+    * The lightweight legacy RMT4 backend is the default again, with transmit and receive verified on hardware (#4877, #4881).
+    * Clocked SPI chipsets such as APA102 now use true DMA bursts, and explicitly requested SPI hosts are respected (#4879, #4919).
+    * SPI and RMT drivers reclaim their pins after another peripheral has used them (#4905, #4907).
+    * ESP32-S3 RMT receive captures are no longer truncated at 200 edges (#4903).
+    * Pin functions are protected from Arduino-ESP32 remapping macros (#4931).
+    * ESP32-P4 native USB CDC links against the stock TinyUSB callbacks; ESP32-S2 native USB remains opt-in until it is verified on hardware (#4900).
+    * The RMT refill timing path runs from IRAM and starts its deadlines only once transmission begins, avoiding spurious underruns (#4877).
+    * Transfers queued through the ESP-IDF SPI driver keep their SDK ownership, and an unused ESP-DSP FFT adapter and PWM teardown code were removed (#4871, #4873).
+    * Remaining compiler warnings from the ESP32 and STL headers are cleared (#4932).
+  * **Fixes**
+    * JSON serialization and RPC responses stream without buffering the whole document and handle out-of-memory conditions gracefully (#4899).
+    * JSON output replaces unpaired UTF-16 surrogates with U+FFFD, producing valid UTF-8 (#4899).
+    * `fl::string` keeps its previous contents when a resize fails instead of being left in a partial state (#4900).
+    * `readStringUntil` resets its timeout after every received byte, so slow serial input is no longer cut off (#4893).
+  * **Build and tooling**
+    * Requires fbuild 2.5.49 or newer and zccache 1.15.11 or newer (#4973, #4996).
+    * ESP32-S2/S3 TinyUSB deploys and AVR emulation run through fbuild (#4895, #4916).
+    * New lint rules flag driver-enabling defines that bypass the template pattern, bare `noinline` attributes in examples and tests, missing `FL_NO_EXCEPT` on ESP sources, and Arduino dependencies leaking into native ESP32 code (#4831, #4897, #4940, #4960).
+    * The main repository no longer publishes Doxygen output (#4880).
+    * Pull requests now receive a per-target memory usage report (#4921, #4935).
+
 FastLED 3.10.8
 =============================
   * **Compatibility with C library and standard C++ calls on FastLED types (#4827)**
