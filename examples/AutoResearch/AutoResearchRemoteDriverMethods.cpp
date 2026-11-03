@@ -75,21 +75,21 @@ namespace {
 class ProbeSemaphore {
 public:
     ProbeSemaphore() = default;
-    ~ProbeSemaphore() { reset(); }
+    ~ProbeSemaphore() { reset(nullptr); }
     ProbeSemaphore(const ProbeSemaphore&) = delete;
     ProbeSemaphore& operator=(const ProbeSemaphore&) = delete;
 
-    SemaphoreHandle_t get() const { return mHandle; } // ok platform specific - expose the owned SDK semaphore only for synchronous FreeRTOS calls
+    SemaphoreHandle_t get() const { return mHandle; } // ok platform specific - core synchronization cannot supply handles for the real FreeRTOS tasks in this SDK guard probe
     explicit operator bool() const { return mHandle != nullptr; }
-    void reset(SemaphoreHandle_t handle = nullptr) { // ok platform specific - this private owner manages the probe's SDK semaphore lifetime
+    void reset(SemaphoreHandle_t handle) { // ok platform specific - core synchronization cannot own the SDK semaphore used by this real FreeRTOS guard probe
         if (mHandle) {
-            vSemaphoreDelete(mHandle); // ok platform specific - release the owned SDK semaphore only after workers are quiescent
+            vSemaphoreDelete(mHandle); // ok platform specific - core synchronization has no ownership API for the real FreeRTOS semaphore required by this SDK guard probe
         }
         mHandle = handle;
     }
 
 private:
-    SemaphoreHandle_t mHandle = nullptr; // ok platform specific - keep raw SDK ownership encapsulated in a noncopyable owner
+    SemaphoreHandle_t mHandle = nullptr; // ok platform specific - core synchronization cannot represent this real FreeRTOS semaphore used by the SDK guard probe
 };
 
 struct StaticInitProbe {
@@ -157,8 +157,8 @@ fl::json staticInitTest() {
     staticInitProbe.entered.reset(xSemaphoreCreateBinary()); // ok platform specific - synchronize actual SDK tasks; fl::thread is not concurrent on ESP32
     staticInitProbe.completed.reset(xSemaphoreCreateCounting(2, 0)); // ok platform specific - synchronize actual SDK tasks; fl::thread is not concurrent on ESP32
     if (!staticInitProbe.entered || !staticInitProbe.completed) {
-        staticInitProbe.entered.reset();
-        staticInitProbe.completed.reset();
+        staticInitProbe.entered.reset(nullptr);
+        staticInitProbe.completed.reset(nullptr);
         result.set("error", "SemaphoreAllocationFailed");
         return result;
     }
@@ -214,8 +214,8 @@ fl::json staticInitTest() {
         if (contender_task) {
             vTaskDelete(contender_task); // ok platform specific - reclaim the quiescent SDK worker used to exercise ESP-IDF guards
         }
-        staticInitProbe.entered.reset();
-        staticInitProbe.completed.reset();
+        staticInitProbe.entered.reset(nullptr);
+        staticInitProbe.completed.reset(nullptr);
     }
     return result;
 }
