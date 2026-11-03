@@ -85,7 +85,10 @@ idf_component_register(SRCS ${FastLED_SRCS}
 # The managed component is registered before FastLED during normal expansion.
 if(IDF_VERSION_MAJOR GREATER_EQUAL 6 AND TARGET idf::espressif__esp_h264)
     idf_component_get_property(FASTLED_H264_LIB espressif__esp_h264 COMPONENT_LIB)
+    cmake_policy(PUSH)
+    cmake_policy(SET CMP0079 NEW)
     target_link_libraries(${FASTLED_H264_LIB} PRIVATE idf::bootloader_support)
+    cmake_policy(POP)
 endif()
 
 project(FastLED)

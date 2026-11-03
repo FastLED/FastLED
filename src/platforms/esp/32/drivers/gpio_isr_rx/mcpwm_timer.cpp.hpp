@@ -221,10 +221,9 @@ int mcpwm_timer_init(DualIsrContext* ctx, int gpio_pin) FL_NO_EXCEPT {
              1000000000.0 / MCPWM_TIMER_RESOLUTION_HZ);
 
     // Step 1: Create capture timer at 80 MHz
-    mcpwm_capture_timer_config_t timer_config = {
-        .group_id = MCPWM_GROUP_ID,
-        .clk_src = MCPWM_CAPTURE_CLK_SRC_DEFAULT,  // Use default clock source
-    };
+    mcpwm_capture_timer_config_t timer_config = {};
+    timer_config.group_id = MCPWM_GROUP_ID;
+    timer_config.clk_src = MCPWM_CAPTURE_CLK_SRC_DEFAULT;
 #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 2, 0)
     timer_config.resolution_hz = MCPWM_TIMER_RESOLUTION_HZ;
 #endif
@@ -254,15 +253,11 @@ int mcpwm_timer_init(DualIsrContext* ctx, int gpio_pin) FL_NO_EXCEPT {
     }
 
     // Step 2: Create capture channel and connect to GPIO
-    mcpwm_capture_channel_config_t channel_config = {
-        .gpio_num = gpio_pin,
-        .prescale = 1,  // No prescaling - capture at full timer resolution
-        .flags = {
-            .pos_edge = 1,  // Capture on positive edges
-            .neg_edge = 1,  // Capture on negative edges
-            .invert_cap_signal = 0,  // No inversion
-        }
-    };
+    mcpwm_capture_channel_config_t channel_config = {};
+    channel_config.gpio_num = gpio_pin;
+    channel_config.prescale = 1;  // No prescaling - capture at full timer resolution
+    channel_config.flags.pos_edge = 1;
+    channel_config.flags.neg_edge = 1;
 
     ret = mcpwm_new_capture_channel(g_mcpwm_state().timer_handle, &channel_config,
                                      &g_mcpwm_state().channel_handle);
