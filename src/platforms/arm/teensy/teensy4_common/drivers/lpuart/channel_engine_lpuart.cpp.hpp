@@ -12,6 +12,7 @@
 
 #include "fl/log/log.h"
 #include "fl/stl/noexcept.h"
+#include "fl/system/yield.h"
 
 #if defined(FL_IS_TEENSY_4X)
 // IWYU pragma: begin_keep
@@ -141,7 +142,7 @@ void ChannelEngineLPUART::show() FL_NO_EXCEPT {
 
     for (auto& ch : mTransmittingChannels) ch->setInUse(false);
     mTransmittingChannels.clear();
-    yield();
+    fl::yield();
 }
 
 IChannelDriver::DriverState ChannelEngineLPUART::poll() FL_NO_EXCEPT {

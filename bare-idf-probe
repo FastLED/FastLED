@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+set -euo pipefail
+exec uv run python ci/bare_idf_probe.py "$@"
