@@ -281,10 +281,14 @@ extern "C" void app_main(void) {
 }
 ```
 
-The build defines `FL_NO_ARDUINO`, and `src/fl/system/arduino.h` raises a compile
-error if anything still reaches for `Arduino.h`, so a regression is loud instead of
-silent. A working reference project lives in [`ci/idf_app/`](ci/idf_app/), which CI
-configures, compiles, links and asserts a `.bin` for on every push.
+On ESP32 the shared Arduino wrapper (`src/fl/system/arduino.h`) is skipped entirely:
+it never includes `Arduino.h` there, so in a build without an Arduino component a
+direct `#include <Arduino.h>` fails because the header is absent. `FL_NO_ARDUINO` is
+the guard for the other platforms that do use that wrapper. To catch regressions
+before a user hits them, `ci/bare_idf_probe.py` compiles every unity translation unit
+with all `-DARDUINO*` defines and the Arduino include directories stripped. A working
+reference project lives in [`ci/idf_app/`](ci/idf_app/), which CI configures,
+compiles, links and asserts a `.bin` for on every push.
 
 **Tested matrix** (each cell links a firmware image; see the `bare_idf` workflow):
 
