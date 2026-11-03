@@ -7,7 +7,7 @@ cmake_minimum_required(VERSION 3.5)
 # Collect all source files
 file(GLOB_RECURSE FastLED_SRCS "src/*.cpp")
 
-set(FASTLED_REQUIRES esp_http_server driver esp_wifi app_update esp_timer)
+set(FASTLED_REQUIRES esp_http_server driver esp_wifi app_update esp_timer mbedtls)
 
 # BUILD_COMPONENTS is populated after dependency expansion. During IDF's
 # earlier requirements pass, only the registered component targets exist.
@@ -42,6 +42,9 @@ endif()
 if(IDF_VERSION_MAJOR GREATER 5 OR
    (IDF_VERSION_MAJOR EQUAL 5 AND IDF_VERSION_MINOR GREATER_EQUAL 1))
     list(APPEND FASTLED_REQUIRES esp_mm)
+endif()
+if(IDF_VERSION_MAJOR GREATER_EQUAL 5)
+    list(APPEND FASTLED_REQUIRES esp_adc)
 endif()
 if(IDF_VERSION_MAJOR GREATER 5 OR
    (IDF_VERSION_MAJOR EQUAL 5 AND IDF_VERSION_MINOR GREATER_EQUAL 3))

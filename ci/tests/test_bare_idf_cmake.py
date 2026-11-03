@@ -16,8 +16,8 @@ ROOT = Path(__file__).resolve().parents[2]
         (4, 0, {"esp_rom"}),
         (4, 1, {"esp_rom", "esp_netif"}),
         (4, 4, {"esp_rom", "esp_netif", "esp_lcd"}),
-        (5, 0, {"esp_rom", "esp_netif", "esp_lcd"}),
-        (5, 1, {"esp_rom", "esp_netif", "esp_lcd", "esp_mm"}),
+        (5, 0, {"esp_rom", "esp_netif", "esp_lcd", "esp_adc"}),
+        (5, 1, {"esp_rom", "esp_netif", "esp_lcd", "esp_mm", "esp_adc"}),
         (
             5,
             3,
@@ -26,6 +26,7 @@ ROOT = Path(__file__).resolve().parents[2]
                 "esp_netif",
                 "esp_lcd",
                 "esp_mm",
+                "esp_adc",
                 "esp_driver_i2s",
                 "esp_driver_mcpwm",
                 "esp_driver_rmt",
@@ -39,6 +40,7 @@ ROOT = Path(__file__).resolve().parents[2]
                 "esp_netif",
                 "esp_lcd",
                 "esp_mm",
+                "esp_adc",
                 "esp_driver_i2s",
                 "esp_driver_mcpwm",
                 "esp_driver_rmt",
@@ -91,6 +93,7 @@ def test_component_requirements(
         "esp_wifi",
         "app_update",
         "esp_timer",
+        "mbedtls",
     } | extra
     if arduino:
         expected.add(arduino)

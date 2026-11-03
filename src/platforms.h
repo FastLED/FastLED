@@ -5,6 +5,7 @@
 // Pull in ARM-family detection so platform-routed FL_IS_ARM_* defines are
 // visible before the dispatcher below.
 #include "platforms/arm/is_arm.h"  // ok platform headers
+#include "platforms/esp/is_esp.h"
 
 
 /// @file platforms.h
@@ -48,7 +49,7 @@
 #include "platforms/arm/rp/rp2040/fastled_arm_rp2040.h"  // ok platform headers
 #elif defined(ESP8266)
 #include "platforms/esp/8266/fastled_esp8266.h"  // ok platform headers
-#elif defined(ESP32)
+#elif defined(FL_IS_ESP32)
 #include "platforms/esp/32/core/fastled_esp32.h"  // ok platform headers
 #elif defined(ARDUINO_ARCH_CI13XX)
 #include "platforms/ci13xx/fastled_ci13xx.h"  // ok platform headers
