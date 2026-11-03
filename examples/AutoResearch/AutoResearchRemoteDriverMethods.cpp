@@ -169,6 +169,10 @@ FlexIoObjectFledState& flexIoObjectFledState() {
 
 }  // namespace
 
+#if defined(FL_AUTORESEARCH_MEMORY_BENCH)
+void bindMemoryBench(fl::Remote& remote);
+#endif
+
 void AutoResearchRemoteControl::bindDriverMethods(fl::Remote& remote) {
     remote.bind("staticInitTest", [](const fl::json&) -> fl::json {
 #if defined(FL_IS_ESP32) // ok platform specific - fl::thread has no concurrent ESP32 implementation; directly test the vendor ABI
@@ -180,6 +184,9 @@ void AutoResearchRemoteControl::bindDriverMethods(fl::Remote& remote) {
         return result;
 #endif
     });
+#if defined(FL_AUTORESEARCH_MEMORY_BENCH)
+    bindMemoryBench(remote);
+#endif
     // One physical data jumper checks either SPI host while a second APA102
     // channel exercises the registration-order interaction from #4864.
     remote.bind("dualSpiHostLoopback", [this](const fl::json& args) -> fl::json {

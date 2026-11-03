@@ -14,6 +14,7 @@
 #include "fl/stl/shared_ptr.h"
 #include "platforms/shared/spi_hw_base.h"
 #include "platforms/shared/spi_hw_1.h"
+#include "platforms/shared/spi_dma_stream.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
 
@@ -57,10 +58,25 @@ public:
         mTransmitCalled = true;
         mTransmitCount++;
         mTransmitMode = mode;
-        if (mode == TransmitMode::ASYNC) {
+        if (mTransmitReturnValue && mode == TransmitMode::ASYNC) {
             mBusy = true;
         }
         return mTransmitReturnValue;
+    }
+
+    bool supportsStreaming() const override { return mStreaming; }
+
+    bool transmitStream(const ChannelDataPtr& source) override {
+        ++mStreamCount;
+        if (!mTransmitReturnValue) return false;
+        mStreamSource = source;
+        mBusy = true;
+        return true;
+    }
+
+    void setStreamCompletionCallback(void (*callback)(void*), void* context) override {
+        mCompletion = callback;
+        mCompletionContext = context;
     }
 
     bool waitComplete(uint32_t timeout_ms = fl::numeric_limits<uint32_t>::max()) override {
@@ -95,7 +111,15 @@ public:
     void setBeginReturnValue(bool value) { mBeginReturnValue = value; }
     void setTransmitReturnValue(bool value) { mTransmitReturnValue = value; }
     void setWaitCompleteReturnValue(bool value) { mWaitCompleteReturnValue = value; }
-    void completeTransmission() { mBusy = false; }
+    void completeTransmission() {
+        mBusy = false;
+        mStreamSource.reset();
+        if (mCompletion) mCompletion(mCompletionContext);
+    }
+    void setStreaming(bool value) { mStreaming = value; }
+    int getStreamCount() const { return mStreamCount; }
+    bool wasAcquireBufferCalled() const { return mAcquireBufferCalled; }
+    bool hasCompletionCallback() const { return mCompletion != nullptr; }
 
     bool wasBeginCalled() const { return mBeginCalled; }
     bool wasTransmitCalled() const { return mTransmitCalled; }
@@ -122,6 +146,11 @@ private:
     int mBusId = -1;
     bool mInitialized = false;
     bool mBusy = false;
+    bool mStreaming = false;
+    int mStreamCount = 0;
+    ChannelDataPtr mStreamSource;
+    void (*mCompletion)(void*) = nullptr;
+    void* mCompletionContext = nullptr;
 
     // Test tracking
     bool mBeginCalled = false;
@@ -446,6 +475,108 @@ FL_TEST_CASE("SpiChannelEngineAdapter - Transmission completes synchronously") {
     // Verify transmission machinery was invoked
     FL_CHECK(spiHw1->wasTransmitCalled());
     FL_CHECK(spiHw1->wasWaitCompleteCalled());
+}
+
+FL_TEST_CASE("SpiChannelEngineAdapter - streaming is asynchronous and preserves channel lifetime #3179") {
+    auto hw = fl::make_shared<MockSpiHw>(1, "SPI2");
+    hw->setBusId(2);
+    hw->setStreaming(true);
+    auto adapter = SpiChannelEngineAdapter::create({hw}, {5}, {"SPI2"}, "SPI");
+    auto first = createSpiChannelData(5, 18, Esp32SpiBus::HOST2);
+    auto second = createSpiChannelData(5, 18, Esp32SpiBus::HOST2);
+    adapter->enqueue(first);
+    adapter->enqueue(second);
+    adapter->show();
+
+    FL_CHECK_EQ(hw->getStreamCount(), 1);
+    FL_CHECK_FALSE(hw->wasAcquireBufferCalled());
+    FL_CHECK_FALSE(hw->wasWaitCompleteCalled());
+    FL_CHECK_EQ(adapter->poll(), IChannelDriver::DriverState::BUSY);
+    FL_CHECK_TRUE(first->isInUse());
+
+    hw->completeTransmission();
+    FL_CHECK_EQ(adapter->poll(), IChannelDriver::DriverState::BUSY);
+    FL_CHECK_EQ(hw->getStreamCount(), 2);
+    FL_CHECK_FALSE(first->isInUse());
+    FL_CHECK_TRUE(second->isInUse());
+    hw->completeTransmission();
+    FL_CHECK_EQ(adapter->poll(), IChannelDriver::DriverState::READY);
+    FL_CHECK_FALSE(second->isInUse());
+}
+
+FL_TEST_CASE("SpiChannelEngineAdapter - failed streaming submission releases channel and permits retry #3179") {
+    auto hw = fl::make_shared<MockSpiHw>(1, "SPI2");
+    hw->setBusId(2);
+    hw->setStreaming(true);
+    hw->setTransmitReturnValue(false);
+    auto adapter = SpiChannelEngineAdapter::create({hw}, {5}, {"SPI2"}, "SPI");
+    auto data = createSpiChannelData(5, 18, Esp32SpiBus::HOST2);
+    adapter->enqueue(data);
+    adapter->show();
+    FL_CHECK_EQ(hw->getStreamCount(), 1);
+    FL_CHECK_FALSE(hw->wasAcquireBufferCalled());
+    FL_CHECK_FALSE(data->isInUse());
+    FL_CHECK_EQ(adapter->poll(), IChannelDriver::DriverState::READY);
+
+    // A new frame retries the backend rather than permanently poisoning it.
+    hw->setTransmitReturnValue(true);
+    adapter->enqueue(data);
+    adapter->show();
+    FL_CHECK_EQ(adapter->poll(), IChannelDriver::DriverState::BUSY);
+    hw->completeTransmission();
+    FL_CHECK_EQ(adapter->poll(), IChannelDriver::DriverState::READY);
+}
+
+FL_TEST_CASE("SPI DMA streaming preserves an encoded frame across every chunk boundary #3179") {
+    // Includes exact chunks, final single-byte tails, the 1000-pixel APA102
+    // workload, and the native backend's maximum frame size.
+    for (size_t bytes : {size_t(1), size_t(511), size_t(512), size_t(513),
+                         size_t(4068), size_t(65536)}) {
+        fl::vector<u8> frame(bytes);
+        for (size_t i = 0; i < bytes; ++i) frame[i] = static_cast<u8>((i * 37) ^ (i >> 8));
+        fl::vector<u8> received;
+        u8 staging[detail::SpiDmaStreamPlan::kChunkBytes] = {};
+        const size_t count = detail::SpiDmaStreamPlan::chunkCount(bytes);
+        for (size_t index = 0; index < count; ++index) {
+            FL_REQUIRE(detail::SpiDmaStreamPlan::copyChunk(frame, index, staging));
+            const size_t chunk = detail::SpiDmaStreamPlan::chunkSize(bytes, index);
+            received.insert(received.end(), staging, staging + chunk);
+        }
+        FL_CHECK_EQ(received, frame);
+        FL_CHECK_FALSE(detail::SpiDmaStreamPlan::copyChunk(frame, count, staging));
+    }
+    FL_CHECK_EQ(detail::SpiDmaStreamPlan::chunkCount(0), 0);
+    FL_CHECK_EQ(detail::SpiDmaStreamPlan::chunkCount(65537), 0);
+    const u8 frame[8] = {};
+    u8 tooSmall[7] = {};
+    FL_CHECK_FALSE(detail::SpiDmaStreamPlan::copyChunk(frame, 0, tooSmall));
+}
+
+FL_TEST_CASE("SpiChannelEngineAdapter - streaming completion follows manager callback replacement #3179") {
+    auto hw = fl::make_shared<MockSpiHw>(1, "SPI2");
+    hw->setBusId(2);
+    hw->setStreaming(true);
+    auto adapter = SpiChannelEngineAdapter::create({hw}, {5}, {"SPI2"}, "SPI");
+    fl::i32 first = 0;
+    fl::i32 second = 0;
+    auto notify = [](void* context) { ++*static_cast<fl::i32*>(context); };
+    adapter->setPollNeededCallback({notify, &first});
+    adapter->enqueue(createSpiChannelData(5, 18, Esp32SpiBus::HOST2));
+    adapter->show();
+    adapter->setPollNeededCallback({notify, &second});
+    hw->completeTransmission();
+    FL_CHECK_EQ(first, 0);
+    FL_CHECK_EQ(second, 1);
+    FL_CHECK_EQ(adapter->poll(), IChannelDriver::DriverState::READY);
+
+    adapter->enqueue(createSpiChannelData(5, 18, Esp32SpiBus::HOST2));
+    adapter->show();
+    adapter->setPollNeededCallback({});
+    hw->completeTransmission();
+    FL_CHECK_EQ(second, 1);
+    FL_CHECK_EQ(adapter->poll(), IChannelDriver::DriverState::READY);
+    adapter.reset();
+    FL_CHECK_FALSE(hw->hasCompletionCallback());
 }
 
 FL_TEST_CASE("SpiChannelEngineAdapter - Poll returns READY after transmission completes") {
