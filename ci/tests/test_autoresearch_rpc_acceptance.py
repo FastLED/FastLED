@@ -467,6 +467,7 @@ def _static_init_result() -> dict[str, object]:
         "completed": 2,
         "constructorEntered": True,
         "overlapped": True,
+        "workersSuspended": True,
     }
 
 
@@ -480,6 +481,7 @@ def _static_init_result() -> dict[str, object]:
         ("completed", 1),
         ("constructorEntered", False),
         ("overlapped", False),
+        ("workersSuspended", False),
     ],
 )
 def test_static_init_gate_rejects_incomplete_or_duplicate_construction(
@@ -512,12 +514,37 @@ def test_static_init_control_requires_test_mode() -> None:
     assert _parse_args_and_build_commands(args) == 1
 
 
+@pytest.mark.parametrize("control", ([], ["--static-init-no-lto"]))
+@pytest.mark.parametrize(
+    "other",
+    [
+        ["--rmt"],
+        ["--rpc-smoke"],
+        ["--spi"],
+        ["--simd"],
+        ["--watchdog-soak"],
+        ["--driver-binding", "typed"],
+        ["--driver-binding", "runtime"],
+        ["--spi-streaming"],
+        ["--tx-pin", "0"],
+        ["--frames", "0"],
+        ["--chipset", "ws2812"],
+        ["--rp-spi-chipset", "apa102"],
+    ],
+)
+def test_static_init_rejects_other_modes_and_ignored_workloads(
+    control: list[str], other: list[str]
+) -> None:
+    """A standalone guard probe must not silently skip another requested test."""
+    with pytest.raises(SystemExit):
+        Args.parse_args(["esp32c6", "--static-init", *control, *other])
+
+
 @pytest.mark.parametrize("valid", (True, False))
 def test_static_init_runner_gates_rpc_result(valid: bool) -> None:
     result = _static_init_result()
     if not valid:
         result["constructions"] = 2
-        result["success"] = False
     client = AsyncMock()
     client.send.return_value = SimpleNamespace(success=True, data=result)
     ctx = SimpleNamespace(

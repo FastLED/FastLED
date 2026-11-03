@@ -2290,6 +2290,7 @@ def _static_init_passed(result: Any) -> bool:
         and result["completed"] == 2
         and result.get("constructorEntered") is True
         and result.get("overlapped") is True
+        and result.get("workersSuspended") is True
     )
 
 

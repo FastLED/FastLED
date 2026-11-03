@@ -121,6 +121,8 @@ def synthesise_autoresearch_project(
     paths = FastLEDPaths(board.board_name, project_root=root)
     build_dir = paths.build_dir
     if static_init_lto is not None:
+        # Scoped LTO/control fixture authorized by the maintainer directive:
+        # https://github.com/FastLED/FastLED/pull/5006#discussion_r4451255589
         # build_flags reach framework, FastLED, and sketch compiles. Native
         # fbuild's link overlay is separate: append the driver flag after
         # SDK ld_flags, which can contain -fno-lto.

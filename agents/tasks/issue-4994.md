@@ -20,6 +20,18 @@ or jumper wiring are required. Record board, port, commands, and output below.
 
 ## Evidence
 
+- Review-tightened acceptance: use the contender's real FreeRTOS blocked state
+  while the first constructor is active. Workers retain their TCBs until both
+  completions and explicit suspension, then the RPC deletes them and its SDK
+  semaphores. With the original fallback temporarily restored, LTO produced
+  two constructions and failed; restoring the fix produced one construction,
+  two completed callers, an observed blocked contender, and safe teardown.
+  The non-LTO control passed without cleaning after LTO. Logs and ELFs:
+  `.build/evidence/issue-4994/c6-review-{lto-before,lto-after,control-after}.*`.
+  New incompatible-mode tests reproduced 18 failures before parser validation;
+  all **481 AutoResearch Python checks**, full lint, WASM AutoResearch, and the
+  follow-up code review passed. The first hosted full sweep passed 99 workflows
+  on `dd2293368`; the final review commit requires its own full CI sweep.
 - Published-package hardware acceptance: installed CLI
   `2.5.50+git.9c0dd1bcaa38`, no executable override. Rebuilt and fully flashed
   LTO firmware with `--clean`; both tasks completed and overlapped, exactly one

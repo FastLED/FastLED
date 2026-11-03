@@ -76,8 +76,9 @@ struct StaticInitProbe {
     fl::atomic<int> constructions{0};
     fl::atomic<int> contenders{0};
     fl::atomic<bool> overlapped{false};
-    SemaphoreHandle_t entered = nullptr;
-    SemaphoreHandle_t completed = nullptr;
+    fl::atomic<TaskHandle_t> contender{nullptr}; // ok platform specific - the probe observes the SDK worker's actual blocked state
+    SemaphoreHandle_t entered = nullptr; // ok platform specific - the real SDK guard probe requires FreeRTOS task synchronization
+    SemaphoreHandle_t completed = nullptr; // ok platform specific - the real SDK guard probe requires FreeRTOS task synchronization
     bool used = false;
 };
 
@@ -86,14 +87,21 @@ StaticInitProbe staticInitProbe;
 
 struct SlowStatic {
     SlowStatic() {
-        staticInitProbe.constructions.fetch_add(1);
-        xSemaphoreGive(staticInitProbe.entered);
+        const bool owner = staticInitProbe.constructions.fetch_add(1) == 0;
+        xSemaphoreGive(staticInitProbe.entered); // ok platform specific - synchronize actual SDK tasks; fl::thread is not concurrent on ESP32
         // Give the second task time to enter the same accessor while the
         // first constructor is still running, including on single-core C6.
-        vTaskDelay(pdMS_TO_TICKS(200));
-        staticInitProbe.overlapped.store(
-            staticInitProbe.contenders.load(fl::memory_order_acquire) == 2,
-            fl::memory_order_release);
+        vTaskDelay(pdMS_TO_TICKS(200)); // ok platform specific - the regression requires a FreeRTOS-blocked constructor, not a generic busy delay
+        if (owner) {
+            const TaskHandle_t contender = staticInitProbe.contender.load(fl::memory_order_acquire); // ok platform specific - retain the SDK task identity through the guard-state sample
+            // Between arrival and completion, the worker can block only in
+            // this guard or this constructor's delay. Finished workers suspend
+            // rather than delete themselves, so the sampled handle stays valid.
+            const bool blocked = contender && eTaskGetState(contender) == eBlocked; // ok platform specific - no core API observes ESP-IDF's guard waiter state
+            staticInitProbe.overlapped.store(
+                staticInitProbe.contenders.load(fl::memory_order_acquire) == 2 && blocked,
+                fl::memory_order_release);
+        }
     }
 };
 
@@ -105,8 +113,11 @@ SlowStatic& contendedStatic() {
 void staticInitWorker(void*) {
     staticInitProbe.contenders.fetch_add(1);
     (void)contendedStatic();
-    xSemaphoreGive(staticInitProbe.completed);
-    vTaskDelete(nullptr);
+    xSemaphoreGive(staticInitProbe.completed); // ok platform specific - synchronize actual SDK tasks; fl::thread is not concurrent on ESP32
+    // Retain the TCB until the RPC has sampled it and received both completions.
+    for (;;) {
+        vTaskSuspend(nullptr); // ok platform specific - keep the SDK task handle valid until the probe's explicit teardown
+    }
 }
 
 fl::json staticInitTest() {
@@ -117,24 +128,49 @@ fl::json staticInitTest() {
         return result;
     }
     staticInitProbe.used = true;
-    staticInitProbe.entered = xSemaphoreCreateBinary();
-    staticInitProbe.completed = xSemaphoreCreateCounting(2, 0);
+    staticInitProbe.entered = xSemaphoreCreateBinary(); // ok platform specific - synchronize actual SDK tasks; fl::thread is not concurrent on ESP32
+    staticInitProbe.completed = xSemaphoreCreateCounting(2, 0); // ok platform specific - synchronize actual SDK tasks; fl::thread is not concurrent on ESP32
     if (!staticInitProbe.entered || !staticInitProbe.completed) {
+        if (staticInitProbe.entered) {
+            vSemaphoreDelete(staticInitProbe.entered); // ok platform specific - this probe owns the SDK semaphore used by its real FreeRTOS tasks
+            staticInitProbe.entered = nullptr;
+        }
+        if (staticInitProbe.completed) {
+            vSemaphoreDelete(staticInitProbe.completed); // ok platform specific - this probe owns the SDK semaphore used by its real FreeRTOS tasks
+            staticInitProbe.completed = nullptr;
+        }
         result.set("error", "SemaphoreAllocationFailed");
         return result;
     }
-    const bool owner_created = xTaskCreate(staticInitWorker, "static-owner", 4096,
-                                         nullptr, 1, nullptr) == pdPASS;
+    TaskHandle_t owner_task = nullptr; // ok platform specific - this RPC owns the SDK worker until explicit teardown
+    TaskHandle_t contender_task = nullptr; // ok platform specific - this RPC owns the SDK worker until explicit teardown
+    const bool owner_created = xTaskCreate(staticInitWorker, "static-owner", 4096, // ok platform specific - fl::thread has no concurrent ESP32 implementation
+                                         nullptr, 1, &owner_task) == pdPASS;
     const bool entered = owner_created &&
-        xSemaphoreTake(staticInitProbe.entered, pdMS_TO_TICKS(2000)) == pdTRUE;
+        xSemaphoreTake(staticInitProbe.entered, pdMS_TO_TICKS(2000)) == pdTRUE; // ok platform specific - await the real SDK constructor before creating its contender
     const bool contender_created = entered &&
-        xTaskCreate(staticInitWorker, "static-contender", 4096,
-                    nullptr, 1, nullptr) == pdPASS;
+        xTaskCreate(staticInitWorker, "static-contender", 4096, // ok platform specific - fl::thread has no concurrent ESP32 implementation
+                    nullptr, 1, &contender_task) == pdPASS;
+    staticInitProbe.contender.store(contender_task, fl::memory_order_release);
     int completed = 0;
     const int tasks = (owner_created ? 1 : 0) + (contender_created ? 1 : 0);
     for (int i = 0; i < tasks; ++i) {
-        if (xSemaphoreTake(staticInitProbe.completed, pdMS_TO_TICKS(3000)) == pdTRUE) {
+        if (xSemaphoreTake(staticInitProbe.completed, pdMS_TO_TICKS(3000)) == pdTRUE) { // ok platform specific - join actual SDK workers without a concurrent fl::thread backend
             ++completed;
+        }
+    }
+    bool workers_suspended = false;
+    if (completed == tasks) {
+        // On SMP, completion can wake this RPC before a worker reaches its
+        // suspension. Wait a bounded time before deleting tasks or semaphores.
+        for (int attempt = 0; attempt < 100; ++attempt) {
+            const bool owner_suspended = !owner_task || eTaskGetState(owner_task) == eSuspended; // ok platform specific - no core API joins actual ESP32 FreeRTOS workers
+            const bool contender_suspended = !contender_task || eTaskGetState(contender_task) == eSuspended; // ok platform specific - no core API joins actual ESP32 FreeRTOS workers
+            if (owner_suspended && contender_suspended) {
+                workers_suspended = true;
+                break;
+            }
+            vTaskDelay(1); // ok platform specific - let the SDK workers quiesce before their handles are reclaimed
         }
     }
     const int constructions = staticInitProbe.constructions.load(fl::memory_order_acquire);
@@ -145,13 +181,23 @@ fl::json staticInitTest() {
     result.set("contenders", contenders);
     result.set("completed", completed);
     result.set("overlapped", overlapped);
+    result.set("workersSuspended", workers_suspended);
     result.set("success", entered && completed == 2 && contenders == 2 &&
-                          overlapped && constructions == 1);
-    // On timeout keep the handles alive for any unfinished task. This probe
-    // runs once per boot, so failure cannot accumulate allocations.
-    if (completed == tasks) {
-        vSemaphoreDelete(staticInitProbe.entered);
-        vSemaphoreDelete(staticInitProbe.completed);
+                          overlapped && constructions == 1 && workers_suspended);
+    // Keep handles alive unless every worker is suspended. This probe runs
+    // once per boot, so a timeout cannot accumulate allocations.
+    if (workers_suspended) {
+        staticInitProbe.contender.store(nullptr, fl::memory_order_release);
+        if (owner_task) {
+            vTaskDelete(owner_task); // ok platform specific - reclaim the quiescent SDK worker used to exercise ESP-IDF guards
+        }
+        if (contender_task) {
+            vTaskDelete(contender_task); // ok platform specific - reclaim the quiescent SDK worker used to exercise ESP-IDF guards
+        }
+        vSemaphoreDelete(staticInitProbe.entered); // ok platform specific - this probe owns the SDK semaphore used by its real FreeRTOS tasks
+        vSemaphoreDelete(staticInitProbe.completed); // ok platform specific - this probe owns the SDK semaphore used by its real FreeRTOS tasks
+        staticInitProbe.entered = nullptr;
+        staticInitProbe.completed = nullptr;
     }
     return result;
 }

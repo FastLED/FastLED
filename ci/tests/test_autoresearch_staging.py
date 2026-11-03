@@ -70,6 +70,7 @@ def test_static_init_staging_applies_lto_to_compilation_and_link(
     board = mock_init.call_args.args[0]
     flag = "-flto=auto" if lto else "-fno-lto"
     assert flag in board.build_flags
+    assert "-fthreadsafe-statics" in board.build_flags
     assert "-fno-threadsafe-statics" in board.build_unflags
     assert ("-fno-lto" if lto else "-flto=auto") in board.build_unflags
     script = build_dir / "static_init_link.py"

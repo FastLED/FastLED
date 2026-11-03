@@ -1015,6 +1015,30 @@ See Also:
                     file=sys.stderr,
                 )
 
+        if parsed.static_init:
+            # Standalone probes share the benchmark exclusions, except for
+            # this probe's own mode and non-LTO control switch.
+            conflicts = [
+                name
+                for name in memory_bench_conflicts(parsed)
+                if name not in ("static_init", "static_init_no_lto")
+            ]
+            conflicts.extend(
+                name
+                for name in (
+                    "driver_binding",
+                    "spi_streaming",
+                    "chipset",
+                    "rp_spi_chipset",
+                )
+                if (value := getattr(parsed, name)) is not None and value is not False
+            )
+            if conflicts:
+                parser.error(
+                    "Run --static-init separately from other modes or workloads: "
+                    + ", ".join("--" + name.replace("_", "-") for name in conflicts)
+                )
+
         if parsed.driver_binding or parsed.spi_streaming:
             conflicts = memory_bench_conflicts(parsed)
             # Inspect raw optional values before restoring the normal defaults:

@@ -338,8 +338,10 @@ be tested locally.
 `--static-init` runs a pin-free concurrency regression through the
 `staticInitTest` RPC. One FreeRTOS task begins constructing a slow function-local
 static; a second task calls the same accessor while initialization is in progress.
-The host requires two completed callers, an observed overlap, and exactly one
-constructor invocation. Reset before calling the RPC again: a successfully
+The host requires two completed callers, a contender observed blocked during
+construction, exactly one constructor invocation, and suspended workers before
+teardown. Run this mode separately from other tests or workload options.
+Reset before calling the RPC again: a successfully
 initialized local static cannot be uninitialized safely for another trial.
 
 ```bash
