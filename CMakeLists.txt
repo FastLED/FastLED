@@ -5,7 +5,7 @@
 cmake_minimum_required(VERSION 3.5)
 
 # Collect all source files
-file(GLOB_RECURSE FastLED_SRCS "${CMAKE_CURRENT_LIST_DIR}/src/*.cpp")
+file(GLOB_RECURSE FastLED_SRCS "src/*.cpp")
 
 set(FASTLED_REQUIRES esp_http_server driver esp_wifi app_update esp_timer mbedtls)
 
@@ -61,7 +61,7 @@ endif()
 
 # Register the component with ESP-IDF
 idf_component_register(SRCS ${FastLED_SRCS}
-                       INCLUDE_DIRS "${CMAKE_CURRENT_LIST_DIR}/src"
+                       INCLUDE_DIRS "src"
                        REQUIRES ${FASTLED_REQUIRES})
 
 project(FastLED)

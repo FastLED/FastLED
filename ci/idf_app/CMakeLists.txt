@@ -1,7 +1,8 @@
 cmake_minimum_required(VERSION 3.16)
 
-# The local fastled component reuses the root CMake registration without
-# exposing the PlatformIO component-manager manifest to bare IDF.
+# Register this checkout directly, regardless of its directory name.
+get_filename_component(FASTLED_ROOT "${CMAKE_CURRENT_LIST_DIR}/../.." ABSOLUTE)
+set(EXTRA_COMPONENT_DIRS "${FASTLED_ROOT}")
 add_compile_definitions(FL_NO_ARDUINO=1)
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 project(fastled_bare_idf)

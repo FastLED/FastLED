@@ -19,19 +19,19 @@ With an activated ESP-IDF installation, the equivalent is:
 idf.py -C ci/idf_app set-target esp32 build
 ```
 
-The local `components/fastled` entry includes the repository's CMake registration
-with absolute source/include paths, so it also works when the checkout is not
-named `FastLED`. It intentionally does not expose the root `idf_component.yml`:
-that manifest supplies PlatformIO/pioarduino dependencies and uses rule syntax
-unsupported by older component managers. Its dependencies remain unchanged.
-Bare IDF uses the SDK dependencies declared in the shared CMake registration.
-Configuration rejects Arduino
+`EXTRA_COMPONENT_DIRS` registers the repository itself. The main component
+computes its dependency name from the checkout directory, so it also works
+when the checkout is not named `FastLED`. Configuration rejects Arduino
 components, and the existing `FL_NO_ARDUINO` ratchet applies to all compiled
 sources. The workflow requires both the linked ELF and a nonempty application
 binary, reports the binary size and uploads build evidence.
 
 The matrix in `.github/workflows/build_bare_idf.yml` covers IDF 5.5 with
 esp32/esp32s3/esp32c3/esp32c6/esp32p4, plus IDF 5.1 and 4.4 with esp32/esp32s3.
+The root manifest keeps mDNS version and target conditions as separate ANDed
+rules for older component managers. IDF 4.x uses the SDK's bundled mDNS;
+IDF 5.x uses the registry component. PlatformIO/pioarduino dependencies remain
+declared in that same manifest.
 The PR gate uses the existing `ci-platform:esp32dev_idf5_component` label
 (and the usual `ci-platform:esp*` / `ci-full` labels).
 
@@ -49,5 +49,5 @@ The library recognizes `ESP_PLATFORM`, routes native IDF through the ESP32
 dispatchers, uses toolchain-owned global size types, and declares its SDK
 component dependencies. CPU frequency comes from SDK configuration when the
 application does not supply `F_CPU`. The harness supplies no library workaround.
-Hardware execution remains unverified. See the PR's matrix results for evidence
+Hardware execution remains unverified. See the PR matrix for link evidence
 for each version/chip pair.
