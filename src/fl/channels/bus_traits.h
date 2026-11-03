@@ -46,6 +46,11 @@ template<fl::Bus B, fl::u8 Which = 0> struct BusTraits;
 template<fl::Bus B, typename Chipset, fl::u8 Which = 0>
 struct BusSupports : fl::false_type {};
 
+/// Whether a bus exposes configurable worker task affinity. This is distinct
+/// from interrupt affinity and from merely supporting a chipset family.
+template<fl::Bus B, fl::u8 Which = 0>
+struct BusWorkerAffinitySupported : fl::false_type {};
+
 namespace detail {
 
 /// @brief Call `Traits::enableClockless()` when the bus provides one.

@@ -60,6 +60,97 @@ This removes unrelated driver singleton allocations, registration callback stora
 
 ## Basic Usage
 
+### ESP32-S3 LCD clockless worker affinity
+
+Clockless `addLeds<>` overloads accept a worker core after the bus:
+
+```cpp
+FastLED.addLeds<WS2812B, 4, GRB,
+               fl::Bus::FLEX_IO, fl::Core::Core1>(leds, NUM_LEDS);
+```
+
+This uses the slim controller: affinity is a template constant, with no new
+per-controller field or runtime `Channel` object. The shared LCD engine stores
+its worker settings once. Channel-based SPI overloads append the core after
+the existing bus-instance index; drivers without a configurable worker reject
+explicit requests. LCD SPI itself has no corresponding encoding worker.
+
+The full-rate channel-based SPI overload has this template order:
+
+```cpp
+template<ESPIChipsets CHIPSET, fl::u8 DATA_PIN, fl::u8 CLOCK_PIN,
+         fl::EOrder RGB_ORDER, fl::u32 SPI_DATA_RATE,
+         fl::Bus B = fl::Bus::AUTO, fl::u8 B_WHICH = 0,
+         fl::Core CORE = fl::Core::Auto>
+CLEDController& addLeds(CRGB* data, int nLedsOrOffset,
+                        int nLedsIfOffset = 0);
+
+FastLED.addLeds<APA102, 23, 18, RGB, DATA_RATE_MHZ(10),
+               fl::Bus::SPI, 0, fl::Core::Auto>(leds, NUM_LEDS);
+```
+
+This example preserves the selected SPI driver's default scheduling. An
+explicit core requires a driver with a configurable worker; it does not add
+a worker to a synchronous SPI driver.
+
+Template core selection adds no per-controller fields. Worker configuration
+and diagnostics add two driver vtable entries on ESP32-S3 (8 bytes per
+concrete driver vtable with 32-bit pointers), shared by all its strips.
+Platforms without a configurable worker retain default rejecting methods
+without those entries.
+
+Runtime channels use the same engine configuration:
+
+```cpp
+fl::ChannelConfig config(4,
+    fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>(),
+    fl::span<CRGB>(leds, NUM_LEDS), GRB);
+config.options.mBus = fl::Bus::FLEX_IO;
+config.options.mWorker.core = fl::Core::Core1;
+config.options.mWorker.priority = 23; // Optional; normally leave unset.
+auto channel = FastLED.add<fl::Bus::FLEX_IO, fl::ClocklessChipset>(config);
+```
+
+`Core::Auto` is the default and preserves legacy backend behavior (LCD:
+unpinned; RMT4: first show caller's core). `Any` explicitly
+requests no affinity, and `CallingCore` captures the core creating the worker
+on the first transmission. `Core0` and `Core1` select an available RTOS core.
+Pinning does not follow subsequent `show()` calls between cores and does not
+configure interrupt affinity. Priority must be less than `configMAX_PRIORITIES`;
+the LCD default remains `configMAX_PRIORITIES - 2` for ordinary configurations.
+
+Configure during setup, before concurrent LED activity. All strips sharing
+the engine share one worker. The first explicit configuration establishes its
+policy; matching requests and unspecified fields inherit it. Conflicting,
+unsupported, invalid, or late changes are rejected and the affected frame is
+dropped with a diagnostic. No fallback to an unpinned task is permitted for an
+explicit core request. This API does not make concurrent `show()` calls safe.
+
+`IChannelDriver::workerDiagnostics()` reports resolved affinity, priority, and
+the last observed execution core. Affinity `-1` means unpinned; `-2` means no
+worker created. An observed core of `-1` means execution has not been observed.
+Backends without diagnostics retain these unavailable sentinels.
+
+LCD diagnostics also report `submittedChunks`, `completedChunks`, and
+`totalChunks` for the current or most recent transmission. `maxEncodeUs` is
+the maximum time spent encoding one chunk, and `maxSubmitUs` is the maximum
+time spent submitting an encoded chunk to the peripheral; both are in
+microseconds. `streamError` retains a follow-up chunk submission failure
+after the engine becomes idle, so completion cannot erase that evidence.
+Chunk counters, timing maxima, and the retained stream-error flag reset for
+each new transmission. Backends without streaming diagnostics leave these
+fields at zero or false.
+
+Pinning can protect another core from worker preemption, but DMA/cache/bus
+contention remains. A busy selected core or a lower priority can delay refills;
+validate long multi-chunk strips under application load.
+
+Custom chipset controllers with constructor behavior or encoding overrides
+must provide their own `WithWorker<Bus, Core>` alias that retains those hooks
+around the rebound transport. Inheriting a plain transport's alias alone does
+not preserve custom behavior. Built-in fixed-RGBW and 16-bit wrappers provide
+this composition.
+
 ### Channel API (Recommended)
 
 The Channel API provides a clean, explicit interface for creating and configuring LED strips:

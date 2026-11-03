@@ -364,6 +364,21 @@ FL_TEST_CASE("WS2814 enables RGBW with white in byte four") {
     FL_CHECK_EQ(white_bytes[3], 255);
 }
 
+FL_TEST_CASE("worker rebinding preserves fixed RGBW chipset constructors #5001") {
+    using Ws2814 = WS2814<1, RGB>::WithWorker<Bus::AUTO, Core::Core1>;
+    using Lc8816e = LC8816E<6, GRB>::WithWorker<Bus::AUTO, Core::Core1>;
+    Ws2814 ws2814;
+    Lc8816e lc8816e;
+    FL_CHECK_TRUE(ws2814.getRgbw().active());
+    FL_CHECK_TRUE(lc8816e.getRgbw().active());
+    FL_CHECK_EQ(ws2814.getRgbw().w_placement, EOrderW::W3);
+    FL_CHECK_EQ(lc8816e.getRgbw().w_placement, EOrderW::W3);
+    ws2814.clearWhiteChannel();
+    lc8816e.clearWhiteChannel();
+    FL_CHECK_TRUE(ws2814.getRgbw().active());
+    FL_CHECK_TRUE(lc8816e.getRgbw().active());
+}
+
 FL_TEST_CASE("WS2814 rejects explicit RGBW reconfiguration") {
     static CRGB leds[1];
     const Rgbw custom(

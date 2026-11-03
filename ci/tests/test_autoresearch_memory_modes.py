@@ -111,6 +111,8 @@ def test_spi_memory_acceptance_requires_measured_threefold_reduction(
         ["--frames", "0"],
         ["--lanes", "1"],
         ["--lane-counts", "100,200"],
+        ["--worker-core", "1"],
+        ["--lane-pins", "1,3,4"],
         ["--color-pattern", "ff0000"],
         ["--tx-pin", "4"],
         ["--tx-pin", "0"],

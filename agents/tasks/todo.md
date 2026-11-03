@@ -1,5 +1,13 @@
 # Task Tracker
 
+## ESP32 LCD worker affinity (#5001)
+
+- [x] Add failing regression coverage for engine affinity and shared conflicts.
+- [x] Implement addLeds core template and runtime channel worker configuration without per-strip slim storage.
+- [x] Validate 329 native unit tests, targeted sanitizers, controller-size equality, changed Python tests and full lint.
+- [x] Validate AutoResearch template/runtime multi-chunk output and actual worker affinity on the connected S3.
+- [x] Review the production path and prepare a feature PR with full platform coverage; track hosted checks and merge in the PR.
+
 ## Restore legacy ESP32 RMT selection
 
 - [x] Reproduce missing SDK capability selection with regression tests.

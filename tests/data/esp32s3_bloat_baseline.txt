@@ -1,3 +1,14 @@
+# #5001: explicitly configurable LCD worker affinity adds two small shared
+# driver hooks on ESP32-S3. Auto avoids eager singleton access and unused
+# diagnostics initialization stays behind a nonvirtual facade. Redundant zero
+# metadata initialization is omitted. Matched local image_flash is
+# 320423 -> 320443 (+20 B), with unchanged attributed RAM and
+# no controller fields. Exact-head CI run 41582542350 on 0802046e37 measured
+# image_flash 320475 (+36 B vs the previous CI baseline), with unchanged
+# attributed RAM 22451 B. The local/CI difference includes link layout.
+# Record this intentional shared-driver feature cost; the fixed 320503 B
+# ceiling is unchanged.
+
 # fbuild 2.5.49 / UART console out of output-only builds (#4990): CI run
 # 41310165483 on master 5a8ae7d24 measures image_flash 320439, down 4636 B
 # from 325075 (EspIO and the SDK UART driver no longer link into Blink).
@@ -381,4 +392,4 @@
 # the CI Blink report contains no ResponseLutsQ16 symbol. The local fbuild
 # symbol total remains ~4 KB higher for the same source (FastLED/fbuild#1456),
 # so this ratchet uses the CI measurement from PR #4511.
-320439
+320475

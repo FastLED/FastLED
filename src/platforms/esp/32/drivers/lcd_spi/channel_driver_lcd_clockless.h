@@ -31,7 +31,9 @@
 #include "fl/channels/driver.h"
 #include "fl/channels/wave3.h"
 #include "fl/channels/wave8.h"
+#include "fl/channels/worker_config.h"
 #include "fl/chipsets/led_timing.h"
+#include "fl/stl/atomic.h"
 #include "fl/stl/noexcept.h"
 #include "fl/stl/span.h"
 #include "fl/stl/shared_ptr.h"
@@ -58,6 +60,10 @@ class ChannelDriverLcdClockless : public IChannelDriver {
     DriverState poll() FL_NO_EXCEPT override;
     void setPollNeededCallback(PollNeededCallback callback) FL_NO_EXCEPT override;
 
+    /// Resolved worker affinity: -2 before creation, -1 for no affinity.
+    int workerCore() const FL_NO_EXCEPT;
+    int workerPriority() const FL_NO_EXCEPT;
+    int workerObservedCore() const FL_NO_EXCEPT;
     fl::string getName() const FL_NO_EXCEPT override {
         return fl::string::from_literal("LCD_CLOCKLESS");
     }
@@ -84,6 +90,19 @@ class ChannelDriverLcdClockless : public IChannelDriver {
     }
 
   private:
+    bool configureWorkerImpl(const WorkerConfig &config) FL_NO_EXCEPT override;
+    void fillWorkerDiagnostics(WorkerDiagnostics &result) const FL_NO_EXCEPT override;
+
+    enum class StartError : u8 {
+        None,
+        InvalidConfig,
+        WorkerCreation,
+        PeripheralInitialization,
+        BufferAllocation,
+        CallbackRegistration,
+        InitialTransmit
+    };
+
     bool beginTransmission(
         fl::span<const ChannelDataPtr> channels) FL_NO_EXCEPT;
 
@@ -131,8 +150,8 @@ class ChannelDriverLcdClockless : public IChannelDriver {
     struct IsrContext {
         volatile bool mStreamComplete;
         volatile bool mStreamError;
-        volatile size_t mSubmittedChunks;
-        volatile size_t mCompletedChunks;
+        fl::atomic<size_t> mSubmittedChunks;
+        fl::atomic<size_t> mCompletedChunks;
 
         size_t mTotalBytes;
         size_t mChunkInputBytes;
@@ -141,8 +160,10 @@ class ChannelDriverLcdClockless : public IChannelDriver {
         void reset() FL_NO_EXCEPT {
             mStreamComplete = false;
             mStreamError = false;
-            mSubmittedChunks = 0;
-            mCompletedChunks = 0;
+            // The caller resets only between transfers. The initial submitted
+            // release store publishes this reset and the remaining frame data.
+            mSubmittedChunks.store(0, fl::memory_order_relaxed);
+            mCompletedChunks.store(0, fl::memory_order_relaxed);
             mTotalBytes = 0;
             mChunkInputBytes = 0;
             mTotalChunks = 0;
@@ -155,6 +176,7 @@ class ChannelDriverLcdClockless : public IChannelDriver {
 
     fl::shared_ptr<detail::ILcdSpiPeripheral> mPeripheral;
     bool mInitialized;
+    StartError mStartError;
     fl::vector<ChannelDataPtr> mEnqueuedChannels;
     fl::vector<ChannelDataPtr> mTransmittingChannels;
 
@@ -165,9 +187,15 @@ class ChannelDriverLcdClockless : public IChannelDriver {
     volatile bool mBusy;
     IsrContext mIsrCtx;
     size_t mChunkInputBytesOverride;
-    void *mWorkerTaskHandle;
-    volatile bool mWorkerStop;
-    volatile bool mWorkerRunning;
+    fl::atomic<void *> mWorkerTaskHandle;
+    fl::atomic_bool mWorkerStop;
+    fl::atomic_bool mWorkerRunning;
+    WorkerConfig mWorkerConfig;
+    fl::i8 mWorkerCore;
+    fl::atomic_int mWorkerObservedCore;
+    fl::atomic_u32 mWorkerMaxEncodeUs;
+    fl::atomic_u32 mWorkerMaxSubmitUs;
+    fl::atomic_bool mWorkerStreamError;
     PollNeededCallbackSlot mPollNeededCallback;
 
     // Encoding state (set during beginTransmission, stable during ISR)
