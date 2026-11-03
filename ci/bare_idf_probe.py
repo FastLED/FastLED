@@ -10,10 +10,10 @@ from pathlib import Path
 
 from running_process import CompletedProcess, RunningProcess
 
+from ci.util.fbuild_runner import get_fbuild_executable
+
 
 ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT))
-from ci.util.fbuild_runner import get_fbuild_executable  # noqa: E402
 
 
 ALLOWLIST = "ci/bare_idf_allowlist.txt"

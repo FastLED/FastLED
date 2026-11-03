@@ -137,12 +137,26 @@ def test_user_app_main_keeps_loop_task_globals(tmp_path: Path) -> None:
     )
     result = RunningProcess.run(
         [
-            compiler, "-std=c++17", "-E", "-DESP32", "-DARDUINO_ARCH_ESP32",
-            "-I" + str(tmp_path), "-I" + str(ROOT / "src"), str(source),
+            compiler,
+            "-std=c++17",
+            "-E",
+            "-DESP32",
+            "-DARDUINO_ARCH_ESP32",
+            "-I" + str(tmp_path),
+            "-I" + str(ROOT / "src"),
+            str(source),
         ],
-        check=False, capture_output=True, encoding="utf-8", errors="replace", timeout=30,
+        check=False,
+        capture_output=True,
+        encoding="utf-8",
+        errors="replace",
+        timeout=30,
     )
     assert result.returncode == 0, result.stdout
     preprocessed = result.stdout
-    assert "loopTaskHandle" in preprocessed, "loopTaskHandle vanished under FL_ESP32_USER_APP_MAIN"
-    assert "loopTaskWDTEnabled" in preprocessed, "loopTaskWDTEnabled vanished under FL_ESP32_USER_APP_MAIN"
+    assert "loopTaskHandle" in preprocessed, (
+        "loopTaskHandle vanished under FL_ESP32_USER_APP_MAIN"
+    )
+    assert "loopTaskWDTEnabled" in preprocessed, (
+        "loopTaskWDTEnabled vanished under FL_ESP32_USER_APP_MAIN"
+    )

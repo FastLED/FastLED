@@ -160,6 +160,8 @@ badge before, so the breakage was not visible from this page.
 
 **IDF Variants:** [![esp32dev_idf4.4](https://github.com/FastLED/FastLED/actions/workflows/build_esp32dev_idf4.4.yml/badge.svg?event=push)](https://github.com/FastLED/FastLED/actions/workflows/build_esp32dev_idf4.4.yml) [![esp32dev_idf5_component](https://github.com/FastLED/FastLED/actions/workflows/build_esp32dev_idf5_component.yml/badge.svg?event=push)](https://github.com/FastLED/FastLED/actions/workflows/build_esp32dev_idf5_component.yml) [![esp32dev_idf6](https://github.com/FastLED/FastLED/actions/workflows/build_esp32dev_idf6.yml/badge.svg?event=push)](https://github.com/FastLED/FastLED/actions/workflows/build_esp32dev_idf6.yml)
 
+**Bare IDF:** [![bare_idf](https://github.com/FastLED/FastLED/actions/workflows/build_bare_idf.yml/badge.svg?event=push)](https://github.com/FastLED/FastLED/actions/workflows/build_bare_idf.yml)
+
 **Legacy:** [![esp32dev-idf3.3-lts](https://github.com/FastLED/FastLED/actions/workflows/build_esp32dev_idf3.3.yml/badge.svg?event=push)](https://github.com/FastLED/FastLED/actions/workflows/build_esp32dev_idf3.3.yml)
 
 *ESP32-C2 support was added in 3.9.10. See the [Espressif compatibility evaluation](https://github.com/espressif/arduino-esp32/blob/gh-pages/LIBRARIES_TEST.md).*
