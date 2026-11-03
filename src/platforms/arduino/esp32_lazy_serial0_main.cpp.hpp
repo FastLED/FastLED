@@ -46,6 +46,10 @@
 #define SOC_TX0 U0TXD_GPIO_NUM
 #endif
 
+// Arduino.h declares this C startup hook; keep the Arduino-only dependency
+// local instead of importing Arduino.h through shared heap/system code.
+extern "C" void initArduino(void);
+
 void setup(void);
 void loop(void);
 

@@ -14,7 +14,10 @@
 #include "fl/stl/noexcept.h"
 #include "platforms/esp/32/esp32_lazy_serial0_gate.h"
 
-#if FL_ESP32_ARDUINO_LAZY_SERIAL0
+// Define FL_ESP32_USER_APP_MAIN=1 before including FastLED.h when the
+// application supplies app_main (including Arduino-as-component applications).
+// Keep the replacement in sketch objects for normal Arduino startup.
+#if FL_ESP32_ARDUINO_LAZY_SERIAL0 && !defined(FL_ESP32_USER_APP_MAIN)
 // IWYU pragma: begin_keep
 #include <freertos/FreeRTOS.h>  // ok include
 #include <freertos/task.h>      // ok include

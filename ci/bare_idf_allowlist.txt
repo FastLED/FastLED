@@ -1,0 +1,2 @@
+# Bare-IDF syntax offenders, one repository-relative unity TU per line.
+# Entries may only be removed. An empty list requires every TU to pass.

@@ -1,8 +1,12 @@
 #pragma once
 
 #include "fl/stl/has_include.h"
+#include "platforms/is_platform.h"
 
-#if FL_HAS_INCLUDE(<Arduino.h>)
+#if !defined(FL_IS_ESP32) && FL_HAS_INCLUDE(<Arduino.h>)
+#ifdef FASTLED_NO_ARDUINO
+#error "Arduino.h is forbidden by FASTLED_NO_ARDUINO"
+#endif
 // IWYU pragma: begin_keep
 #include <Arduino.h>
 // IWYU pragma: end_keep
