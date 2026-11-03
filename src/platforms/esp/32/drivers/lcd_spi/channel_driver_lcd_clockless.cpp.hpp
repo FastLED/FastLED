@@ -180,7 +180,7 @@ bool ChannelDriverLcdClockless::allocateRingBuffers(
 // Worker Task
 //=============================================================================
 
-bool ChannelDriverLcdClockless::configureWorker(
+bool ChannelDriverLcdClockless::configureWorkerImpl(
     const WorkerConfig &config) FL_NO_EXCEPT {
     if (config.isDefault()) {
         return true;
@@ -225,8 +225,8 @@ int ChannelDriverLcdClockless::workerPriority() const FL_NO_EXCEPT {
                ? mWorkerConfig.priority.value() : kLcdWorkerDefaultPriority;
 }
 
-WorkerDiagnostics ChannelDriverLcdClockless::workerDiagnostics() const FL_NO_EXCEPT {
-    WorkerDiagnostics result;
+void ChannelDriverLcdClockless::fillWorkerDiagnostics(
+    WorkerDiagnostics &result) const FL_NO_EXCEPT {
     result.core = workerCore();
     result.priority = workerPriority();
     result.observedCore = workerObservedCore();
@@ -238,7 +238,6 @@ WorkerDiagnostics ChannelDriverLcdClockless::workerDiagnostics() const FL_NO_EXC
     result.maxEncodeUs = mWorkerMaxEncodeUs.load(fl::memory_order_acquire);
     result.maxSubmitUs = mWorkerMaxSubmitUs.load(fl::memory_order_acquire);
     result.streamError = mWorkerStreamError.load(fl::memory_order_acquire);
-    return result;
 }
 
 bool ChannelDriverLcdClockless::ensureWorkerTask() FL_NO_EXCEPT {

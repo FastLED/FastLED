@@ -495,7 +495,7 @@ public:
     bool acceptWorker = false;
     Core requestedCore = Core::Auto;
 
-    bool configureWorker(const WorkerConfig& config) FL_NO_EXCEPT override {
+    bool configureWorkerImpl(const WorkerConfig& config) FL_NO_EXCEPT override {
         requestedCore = config.core;
         return config.isDefault() || acceptWorker;
     }

@@ -60,7 +60,7 @@ public:
 
     bool canHandle(const ChannelDataPtr&) const FL_NO_EXCEPT override { return true; }
 
-    bool configureWorker(const WorkerConfig& config) FL_NO_EXCEPT override {
+    bool configureWorkerImpl(const WorkerConfig& config) FL_NO_EXCEPT override {
         ++workerConfigCount;
         requestedCore = config.core;
         return acceptWorker;
@@ -230,6 +230,23 @@ FL_TEST_CASE("addLeds worker template preserves slim storage and forwards affini
     driver.acceptWorker = false;
     controller.showLeds(255);
     FL_CHECK_EQ(driver.enqueueCount, 1);
+}
+
+FL_TEST_CASE("Default worker facade avoids backend dispatch #5001") {
+    SlimBridgeMockDriver driver;
+    driver.acceptWorker = false;
+    IChannelDriver& backend = driver;
+    FL_CHECK(backend.configureWorker(WorkerConfig{}));
+    FL_CHECK_EQ(driver.workerConfigCount, 0);
+    WorkerConfig explicitConfig;
+    explicitConfig.core = Core::Core1;
+    FL_CHECK_FALSE(backend.configureWorker(explicitConfig));
+    FL_CHECK_EQ(driver.workerConfigCount, 1);
+    const auto diagnostics = backend.workerDiagnostics();
+    FL_CHECK_EQ(diagnostics.core, -2);
+    FL_CHECK_EQ(diagnostics.priority, -1);
+    FL_CHECK_EQ(diagnostics.totalChunks, 0u);
+    FL_CHECK_FALSE(diagnostics.streamError);
 }
 
 FL_TEST_CASE("FastLED.show() flushes the frame and calls driver show() once") {
@@ -417,6 +434,34 @@ struct DirectDriverTraits {
     static IChannelDriver& instance() FL_NO_EXCEPT { return directDriverInstance(); }
     static void registerWithManager() FL_NO_EXCEPT { ++directRegisterCount(); }
 };
+
+struct CountingWorkerDriverTraits : DirectDriverTraits {
+    static int& accesses() {
+        static int count = 0;
+        return count;
+    }
+    static IChannelDriver& instance() FL_NO_EXCEPT {
+        ++accesses();
+        return directDriverInstance();
+    }
+};
+
+FL_TEST_CASE("Auto worker construction does not access the driver singleton #5001") {
+    using Automatic = SlimBridgeController<7, TIMING_WS2812_800KHZ, RGB, 280,
+        CountingWorkerDriverTraits, 0, true>;
+    using Fixed = Automatic::WithWorker<Bus::AUTO, Core::Core1>;
+    FL_CHECK_EQ(sizeof(Automatic), sizeof(Fixed));
+    CountingWorkerDriverTraits::accesses() = 0;
+    directDriverInstance().acceptWorker = true;
+    {
+        Automatic automatic;
+        FL_CHECK_EQ(CountingWorkerDriverTraits::accesses(), 0);
+    }
+    {
+        Fixed fixed;
+        FL_CHECK_EQ(CountingWorkerDriverTraits::accesses(), 1);
+    }
+}
 
 struct RejectingDirectDriverTraits : DirectDriverTraits {
     static void rejectLegacyFrame() FL_NO_EXCEPT {

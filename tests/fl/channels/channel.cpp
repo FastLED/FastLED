@@ -51,7 +51,7 @@ public:
     int workerConfigCount = 0;
     bool acceptWorker = true;
 
-    bool configureWorker(const WorkerConfig& config) FL_NO_EXCEPT override {
+    bool configureWorkerImpl(const WorkerConfig& config) FL_NO_EXCEPT override {
         requestedWorker = config;
         ++workerConfigCount;
         return acceptWorker;

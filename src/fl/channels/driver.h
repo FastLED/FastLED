@@ -52,16 +52,6 @@ FASTLED_SHARED_PTR(ChannelData);
 /// - poll(): Return current hardware state and perform cleanup when complete
 class IChannelDriver {
 public:
-    /// Configure shared worker settings before transmission. Unsupported
-    /// backends reject explicit requests rather than silently ignoring them.
-    virtual bool configureWorker(const WorkerConfig& config) FL_NO_EXCEPT {
-        return config.isDefault();
-    }
-
-    virtual WorkerDiagnostics workerDiagnostics() const FL_NO_EXCEPT {
-        return {};
-    }
-
     /// @brief ISR-safe callback handle invoked when the manager should poll again.
     ///
     /// ChannelManager installs this callback on every driver and owns the
@@ -313,6 +303,34 @@ public:
 
     /// @brief Virtual destructor
     virtual ~IChannelDriver() FL_NO_EXCEPT = default;
+
+    /// Configure shared worker settings before transmission. Unsupported
+    /// backends reject explicit requests rather than silently ignoring them.
+    bool configureWorker(const WorkerConfig& config) FL_NO_EXCEPT {
+        return config.isDefault() || configureWorkerImpl(config);
+    }
+
+    /// Snapshot worker evidence after serializing with transmission completion.
+    /// Callers must not read diagnostics concurrently with show or configuration.
+    WorkerDiagnostics workerDiagnostics() const FL_NO_EXCEPT {
+        WorkerDiagnostics result;
+        fillWorkerDiagnostics(result);
+        return result;
+    }
+
+private:
+    // Keep default aggregate construction and configuration checks out of
+    // unused vtable entries. Only S3 and stub implementations have a worker
+    // backend; other platforms carry no worker vtable entries.
+#if defined(FL_IS_ESP_32S3) || defined(FASTLED_STUB_IMPL)
+    virtual
+#endif
+    bool configureWorkerImpl(const WorkerConfig&) FL_NO_EXCEPT { return false; }
+
+#if defined(FL_IS_ESP_32S3) || defined(FASTLED_STUB_IMPL)
+    virtual
+#endif
+    void fillWorkerDiagnostics(WorkerDiagnostics&) const FL_NO_EXCEPT {}
 
 protected:
     IChannelDriver() FL_NO_EXCEPT = default;

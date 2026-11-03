@@ -60,20 +60,12 @@ class ChannelDriverLcdClockless : public IChannelDriver {
     DriverState poll() FL_NO_EXCEPT override;
     void setPollNeededCallback(PollNeededCallback callback) FL_NO_EXCEPT override;
 
-    /// Configure the shared worker before its first transmission. Default
-    /// fields inherit the current settings; conflicting requests are rejected.
-    bool configureWorker(const WorkerConfig &config) FL_NO_EXCEPT override;
-
     /// Resolved worker affinity: -2 before creation, -1 for no affinity.
     int workerCore() const FL_NO_EXCEPT { return mWorkerCore; }
     int workerPriority() const FL_NO_EXCEPT;
     int workerObservedCore() const FL_NO_EXCEPT {
         return mWorkerObservedCore.load(fl::memory_order_acquire);
     }
-    /// Snapshot after the caller has serialized with transmission completion.
-    /// Chunk counters describe the last frame; timings reset for each frame.
-    WorkerDiagnostics workerDiagnostics() const FL_NO_EXCEPT override;
-
     fl::string getName() const FL_NO_EXCEPT override {
         return fl::string::from_literal("LCD_CLOCKLESS");
     }
@@ -100,6 +92,9 @@ class ChannelDriverLcdClockless : public IChannelDriver {
     }
 
   private:
+    bool configureWorkerImpl(const WorkerConfig &config) FL_NO_EXCEPT override;
+    void fillWorkerDiagnostics(WorkerDiagnostics &result) const FL_NO_EXCEPT override;
+
     enum class StartError : u8 {
         None,
         InvalidConfig,

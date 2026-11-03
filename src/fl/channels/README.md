@@ -93,6 +93,12 @@ This example preserves the selected SPI driver's default scheduling. An
 explicit core requires a driver with a configurable worker; it does not add
 a worker to a synchronous SPI driver.
 
+Template core selection adds no per-controller fields. Worker configuration
+and diagnostics add two driver vtable entries on ESP32-S3 (8 bytes per
+concrete driver vtable with 32-bit pointers), shared by all its strips.
+Platforms without a configurable worker retain default rejecting methods
+without those entries.
+
 Runtime channels use the same engine configuration:
 
 ```cpp
