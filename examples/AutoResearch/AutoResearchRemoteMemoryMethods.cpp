@@ -14,20 +14,13 @@
 #include "fl/stl/chrono.h"
 
 #if FL_AUTORESEARCH_MEMORY_BENCH == 3
-// ok platform specific - a second native SPI peripheral is the independent wire receiver; no neutral core SPI-slave API exists.
-#include "driver/spi_slave.h"
-// ok platform specific - preserve master output while sampling its pads with SPI3.
-#include "driver/gpio.h"
-// ok platform specific - SPI3 input initialization disconnects the existing SPI2 output matrix routes.
-#include "esp_rom_gpio.h"
-// ok platform specific - vendor-owned S3 signal IDs restore SPI2 output while preserving SPI3 input.
-#include "soc/gpio_sig_map.h"
-// ok platform specific - measure and allocate the independent receiver's internal DMA storage.
-#include "esp_heap_caps.h"
-// ok platform specific - local heap watermark measurement requires the current SDK API.
-#include "esp_idf_version.h"
-// ok platform specific - verify that this target actually exposes SPI3.
-#include "soc/soc_caps.h"
+#include "driver/spi_slave.h" // ok platform specific - a second native SPI peripheral is the independent wire receiver; no neutral core SPI-slave API exists.
+#include "driver/gpio.h" // ok platform specific - preserve master output while sampling its pads with SPI3.
+#include "esp_rom_gpio.h" // ok platform specific - SPI3 input initialization disconnects the existing SPI2 output matrix routes.
+#include "soc/gpio_sig_map.h" // ok platform specific - vendor-owned S3 signal IDs restore SPI2 output while preserving SPI3 input.
+#include "esp_heap_caps.h" // ok platform specific - measure and allocate the independent receiver's internal DMA storage.
+#include "esp_idf_version.h" // ok platform specific - local heap watermark measurement requires the current SDK API.
+#include "soc/soc_caps.h" // ok platform specific - verify that this target actually exposes SPI3.
 #endif
 
 namespace {
@@ -218,9 +211,9 @@ fl::json spiBench(const fl::json& args) {
     for (int i = 0; i < pixels; ++i) leds[i] = CRGB(255, static_cast<fl::u8>(i * 13 + 2), static_cast<fl::u8>(i * 7 + 3));
     const fl::size heap_before = fl::getFreeHeap().free_sram;
     if (chipset == "apa102") {
-        FastLED.addLeds<APA102, 1, 3, RGB, DATA_RATE_MHZ(6)>(leds.data(), pixels, fl::Esp32SpiBus::HOST2);
+        FastLED.addLeds<APA102, 1, 3, RGB, DATA_RATE_MHZ(6)>(leds.data(), pixels, fl::Esp32SpiBus::HOST2); // ok platform specific - the independent receiver requires this physical native SPI host; no neutral host selector exists.
     } else {
-        FastLED.addLeds<SK9822, 1, 3, RGB, DATA_RATE_MHZ(6)>(leds.data(), pixels, fl::Esp32SpiBus::HOST2);
+        FastLED.addLeds<SK9822, 1, 3, RGB, DATA_RATE_MHZ(6)>(leds.data(), pixels, fl::Esp32SpiBus::HOST2); // ok platform specific - the independent receiver requires this physical native SPI host; no neutral host selector exists.
     }
     FastLED.setBrightness(255);
     FastLED.setDither(0);

@@ -3,7 +3,6 @@
 // IWYU pragma: private
 
 #include "fl/stl/cstddef.h"
-#include "fl/stl/cstring.h"
 #include "fl/stl/noexcept.h"
 #include "fl/stl/span.h"
 #include "fl/stl/stdint.h"
@@ -19,23 +18,10 @@ struct SpiDmaStreamPlan {
     static constexpr size_t kChunkBytes = 512;
     static constexpr size_t kMaxFrameBytes = 65536;
 
-    static size_t chunkCount(size_t bytes) FL_NO_EXCEPT {
-        return bytes <= kMaxFrameBytes ? (bytes + kChunkBytes - 1) / kChunkBytes : 0;
-    }
-
-    static size_t chunkSize(size_t bytes, size_t index) FL_NO_EXCEPT {
-        if (index >= chunkCount(bytes)) return 0;
-        const size_t remaining = bytes - index * kChunkBytes;
-        return remaining < kChunkBytes ? remaining : kChunkBytes;
-    }
-
+    static size_t chunkCount(size_t bytes) FL_NO_EXCEPT;
+    static size_t chunkSize(size_t bytes, size_t index) FL_NO_EXCEPT;
     static bool copyChunk(fl::span<const u8> source, size_t index,
-                          fl::span<u8> staging) FL_NO_EXCEPT {
-        const size_t bytes = chunkSize(source.size(), index);
-        if (bytes == 0 || bytes > staging.size()) return false;
-        fl::memcpy(staging.data(), source.data() + index * kChunkBytes, bytes);
-        return true;
-    }
+                          fl::span<u8> staging) FL_NO_EXCEPT;
 };
 
 } // namespace detail

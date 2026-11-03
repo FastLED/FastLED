@@ -9,10 +9,9 @@ from pathlib import Path
 
 from running_process import RunningProcess
 
-from ci.autoresearch.args import MEMORY_BENCH_CONFLICT_FLAGS, Args
+from ci.autoresearch.args import Args, memory_bench_conflicts
 from ci.autoresearch.dual_spi_hosts import reset_board
 from ci.autoresearch.staging import synthesise_autoresearch_project
-from ci.bloat import find_elf
 from ci.boards import create_board
 from ci.rpc_client import RpcClient
 from ci.util.fbuild_runner import run_fbuild_deploy
@@ -35,6 +34,14 @@ def _source_provenance(project: Path) -> dict[str, str]:
         "lib/FastLED/platforms/esp/32/drivers/spi/spi_hw_1_esp32.cpp.hpp",
     )
     return {name: _sha256(project / name) for name in relative_paths}
+
+
+def _deployed_elf(project: Path) -> Path:
+    """Select the release artifact used by run_fbuild_deploy, never newest mtime."""
+    elf = project / ".fbuild" / "build" / "release" / "firmware.elf"
+    if not elf.is_file():
+        raise FileNotFoundError(f"Deployed release ELF is missing: {elf}")
+    return elf
 
 
 def spi_memory_within_budget(result: Mapping[str, object]) -> bool:
@@ -70,7 +77,7 @@ async def run_memory_bench(args: Args) -> int:
             file=sys.stderr,
         )
         return 1
-    if any(getattr(args, name) for name in MEMORY_BENCH_CONFLICT_FLAGS):
+    if memory_bench_conflicts(args):
         print(
             "Run memory benches separately from driver and subsystem modes",
             file=sys.stderr,
@@ -112,7 +119,11 @@ async def run_memory_bench(args: Args) -> int:
     if not deployed.success:
         return 1
     port = deployed.port or args.upload_port
-    elf = find_elf(environment, root / ".build").elf
+    try:
+        elf = _deployed_elf(project)
+    except FileNotFoundError as error:
+        print(error, file=sys.stderr)
+        return 1
     if not elf.is_relative_to(project):
         print(
             f"Refusing an ELF outside the staged benchmark project: {elf}",
@@ -136,7 +147,9 @@ async def run_memory_bench(args: Args) -> int:
         ) as client:
             result = await client.send(
                 "memoryBench",
-                args={"chipset": chipset, "pixels": 1000, "frames": 20},
+                args={"chipset": chipset, "pixels": 1000, "frames": 20}
+                if args.spi_streaming
+                else {"pin": 4},
                 timeout=60,
             )
         print("RESULT: " + json.dumps(result.data, sort_keys=True), flush=True)

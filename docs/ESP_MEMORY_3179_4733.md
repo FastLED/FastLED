@@ -5,7 +5,7 @@ The typed `FastLED.add<Bus>()` API avoids registering unused drivers
 SPI now sends large APA102/SK9822 frames through a 512-byte DMA staging buffer
 ([#3179](https://github.com/FastLED/FastLED/issues/3179)).
 
-The final-source hardware run on 2026-11-02 passed both SPI chipsets. Matched
+The measured candidate hardware run on 2026-11-02 passed both SPI chipsets. Matched
 binding runs passed on ESP32-S3 and ESP32-C6. Final lint/checks and PR merge are
 tracked separately in `agents/tasks/esp-memory-3179-4733.md`; these measurements
 do not claim that a PR has merged. Complete RPC records, source hashes and ELF
@@ -89,11 +89,11 @@ or extra jumper is needed for this pad-level byte-equivalence test. It does
 not characterize electrical integrity along a long physical strip.
 
 Each chipset sent twenty changing 1,000-pixel frames. Every frame contained
-4,132 bytes / 33,056 bits, including start and end framing. Baseline and final
+4,132 bytes / 33,056 bits, including start and end framing. Baseline and measured
 candidate both captured every bit with zero byte mismatches and flat steady
 heap.
 
-| S3 native SPI measurement | Block baseline | Final streaming | Change |
+| S3 native SPI measurement | Block baseline | Measured streaming | Change |
 |---|---:|---:|---:|
 | Scoped transfer DMA/internal allocation peak | 4,576 B | 1,044 B | 4.38× smaller |
 | Free internal heap after prime | 118,256 B | 117,664 B | 592 B more retained |
@@ -144,16 +144,26 @@ The SPI runner resets between chipsets, prints source/ELF SHA-256 provenance,
 and returns nonzero on failed wire, heap or memory-budget checks. Ordinary
 AutoResearch driver registration remains unchanged outside these isolated
 benchmark modes. GPIO bring-up passed on S3 GPIO 1→2 and C6 GPIO 0→1; all four
-S3 explicit-host/registration-order controls passed on the block baseline;
-final-source normal-firmware controls are tracked in the task record.
+S3 explicit-host/registration-order controls passed on both the block baseline
+and final-source normal firmware. The existing `bash autoresearch esp32s3 --spi`
+clockless-SPI regression also passed. The isolated memory firmware skips normal
+GPIO/RX priming and is not used for these generic RX controls.
 
-Final SPI ELF SHA-256:
+Measured SPI ELF SHA-256:
 `7c38f75157d32d2e52da251df28a85b75249ba1744db26b4bc1c8187d4425b01`.
 Matched ELFs/maps are retained locally under `.build/memory-evidence/` in
 `spi-baseline`, `spi-final`, and the four `binding-*` directories. Earlier
 stale candidate runs are excluded from the committed measurement record.
 
 Native debug validation passed 329/329 unit binaries and 95/95 examples.
-Affected Python validation passed 291 tests. C++ lint passed with `bash lint --cpp --no-rust` after the Rust-backed
+Affected Python validation passed 291 tests. The existing native SPI destructor
+probe additionally passed all eight debug/release cases after its SDK shim was
+updated for the new streaming dependencies; CI first exposed the missing shim
+headers, and the failure was reproduced locally before correction. C++ lint passed with `bash lint --cpp --no-rust` after the Rust-backed
 linter twice exceeded its 300-second deadline under concurrent host load.
 The other full-lint lanes passed. See the task record for landing status.
+
+The measurements were captured before review-only warning/help, argument
+validation, exact-artifact lookup and header-layout corrections. Recorded hashes
+identify the measured inputs; those later corrections do not change the SPI
+chunking algorithm or typed driver selection.

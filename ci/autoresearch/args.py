@@ -55,7 +55,24 @@ MEMORY_BENCH_CONFLICT_FLAGS = (
     "spi_provider",
     "spi_provider_native",
     "usb_console",
+    "strip_sizes",
+    "frames",
+    "lanes",
+    "lane_counts",
+    "color_pattern",
+    "tx_pin",
+    "rx_pin",
 )
+
+
+def memory_bench_conflicts(args: object) -> list[str]:
+    """Only False/None defaults are inactive; explicit zero/empty values conflict."""
+    conflicts: list[str] = []
+    for name in MEMORY_BENCH_CONFLICT_FLAGS:
+        value = getattr(args, name)
+        if value is not None and value is not False:
+            conflicts.append(name)
+    return conflicts
 
 
 @dataclass
@@ -985,9 +1002,7 @@ See Also:
                 )
 
         if parsed.driver_binding or parsed.spi_streaming:
-            conflicts = [
-                name for name in MEMORY_BENCH_CONFLICT_FLAGS if getattr(parsed, name)
-            ]
+            conflicts = memory_bench_conflicts(parsed)
             if conflicts:
                 parser.error(
                     "Run memory benches separately from other test modes: "
