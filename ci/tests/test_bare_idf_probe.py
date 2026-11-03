@@ -31,7 +31,7 @@ def test_strip_arduino_and_outputs() -> None:
     )
     assert "-DESP32" in flags
     assert "-I/sdk/esp32/include" in flags
-    assert "-DFASTLED_NO_ARDUINO=1" in flags
+    assert "-DFL_NO_ARDUINO=1" in flags
     assert "-fsyntax-only" in flags
     assert not any(
         "ARDUINO_ARCH" in flag

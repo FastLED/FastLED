@@ -80,7 +80,7 @@ def bare_flags(arguments: list[str], source: str) -> list[str]:
         output.append(arg)
     return output + [
         f"-I{ROOT / 'src'}",
-        "-DFASTLED_NO_ARDUINO=1",
+        "-DFL_NO_ARDUINO=1",
         "-fsyntax-only",
         "-fmax-errors=1",
     ]
@@ -93,11 +93,18 @@ def arduino_include(path: str) -> bool:
 
 
 def entries(text: str) -> set[str]:
-    return {
-        line.strip()
-        for line in text.splitlines()
-        if line.strip() and not line.startswith("#")
-    }
+    """Repository-relative TUs from an allowlist, ignoring blanks and comments.
+
+    The comment marker is checked on the STRIPPED line: a comment indented by
+    whitespace is still a comment, and treating it as an entry would make the
+    shrink-only comparison fail on a file that only has comments.
+    """
+    parsed: set[str] = set()
+    for raw in text.splitlines():
+        line = raw.strip()
+        if line and not line.startswith("#"):
+            parsed.add(line)
+    return parsed
 
 
 def check_allowlist(offenders: set[str], base_ref: str) -> bool:

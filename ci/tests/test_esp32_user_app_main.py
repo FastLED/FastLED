@@ -82,7 +82,7 @@ def test_shared_arduino_header(
         )
     )
     flags = (["-DESP32"] if esp32 else []) + (
-        ["-DFASTLED_NO_ARDUINO=1"] if forbidden else []
+        ["-DFL_NO_ARDUINO=1"] if forbidden else []
     )
     result = RunningProcess.run(
         [
@@ -101,7 +101,7 @@ def test_shared_arduino_header(
     )
     assert (result.returncode == 0) == success, result.stdout
     if not success:
-        assert "Arduino.h is forbidden by FASTLED_NO_ARDUINO" in result.stdout
+        assert "Arduino.h is forbidden by FL_NO_ARDUINO" in result.stdout
 
 
 def test_user_app_main_keeps_loop_task_globals(tmp_path: Path) -> None:

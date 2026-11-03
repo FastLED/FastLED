@@ -4,8 +4,8 @@
 #include "platforms/is_platform.h"
 
 #if !defined(FL_IS_ESP32) && FL_HAS_INCLUDE(<Arduino.h>)
-#ifdef FASTLED_NO_ARDUINO
-#error "Arduino.h is forbidden by FASTLED_NO_ARDUINO"
+#ifdef FL_NO_ARDUINO
+#error "Arduino.h is forbidden by FL_NO_ARDUINO"
 #endif
 // IWYU pragma: begin_keep
 #include <Arduino.h>
