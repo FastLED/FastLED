@@ -842,6 +842,16 @@ fl::shared_ptr<IChannelDriver> Channel::resolveDynamicDriver() FL_NO_EXCEPT {
 
     fl::shared_ptr<IChannelDriver> driver =
         ChannelManager::instance().selectDriverForChannel(mChannelData, busKey);
+    if (!mSettings.mWorker.isDefault()) {
+        // Explicit worker isolation must never silently fall back to a
+        // different bus or an engine that ignores the requested affinity.
+        if (!driver || (mBus != Bus::AUTO && driver->getName() != busKey) ||
+            !driver->configureWorker(mSettings.mWorker)) {
+            FL_ERROR("Channel: worker configuration rejected - dropping frame");
+            mDriver.reset();
+            return {};
+        }
+    }
     mDriver = driver;
 
     // #2455 / #2459: one-shot diagnostic when a typed-Bus miss happens.

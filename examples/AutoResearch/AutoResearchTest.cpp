@@ -1585,7 +1585,9 @@ void autoResearchChipsetTiming(fl::AutoResearchConfig& config,
             // (FastLED#4373).
             fl::ClocklessChipset clockless_chipset(
                 config.tx_configs[i].getDataPin(), config.timing, config.encoder);
-            fl::ChannelConfig channel_config(clockless_chipset, config.tx_configs[i].mLeds, config.tx_configs[i].rgb_order);
+            fl::ChannelConfig channel_config(clockless_chipset,
+                config.tx_configs[i].mLeds, config.tx_configs[i].rgb_order,
+                config.tx_configs[i].options);
             channel = FastLED.add(channel_config);
         }
         if (!channel) {
@@ -1705,7 +1707,9 @@ void autoResearchChipsetTimingLegacy(fl::AutoResearchConfig& config,
         }
 
         auto proxy = fl::make_unique<LegacyClocklessProxy>(
-            pin, leds, numLeds, chipset, config.legacy_rgbw);
+            pin, leds, numLeds, chipset, config.legacy_rgbw,
+            config.tx_configs[i].options.mWorker.core,
+            fl::strcmp(config.driver_name, "LCD_CLOCKLESS") == 0);
         if (!proxy->valid()) {
             FL_ERROR("Legacy proxy invalid for lane " << i << " (pin " << pin
                      << ", chipset " << legacyClocklessChipsetName(chipset)

@@ -36,7 +36,7 @@ fbuild ingestion (build + runtime cache + fallback)
    crates/fbuild-core/src/usb/data.rs → USB_VIDS_PROTO_ZSTD_URL
    crates/fbuild-core/src/usb/profiles.rs → schema + SHA-256 verification
               │
-              │  version bump cascaded via the `fbuild==X.Y.Z` pin
+              │  version bump cascaded via the `fbuild>=X.Y.Z` floor
               ▼
 FastLED (this repo) — `fbuild port scan`, `fbuild deploy`, autoresearch
 ```
@@ -69,7 +69,7 @@ design.
    bare chip or debug probe; `platformio` / `arduino` for a board). The
    `site.yml` workflow republishes the artifact on push.
 3. **Let fbuild ingest it** and cut an fbuild release.
-4. **Cascade the version into this repo** — see below. Until the pin moves,
+4. **Cascade the version into this repo** — see below. Until the floor is raised,
    FastLED still resolves against the older artifact.
 
 Never short-circuit steps 1–3 by adding the literal here "temporarily". The
@@ -78,15 +78,15 @@ temporary exception looks like three months later.
 
 ## Cascading an fbuild version bump into FastLED
 
-The registry reaches this repo only through the fbuild pin. When fbuild
+The registry reaches this repo only through the fbuild version floor. When fbuild
 publishes a release carrying new USB identities:
 
 ```bash
-# 1. Confirm the release is actually on PyPI before moving the pin.
+# 1. Confirm the release is actually on PyPI before raising the floor.
 curl -fsSL https://pypi.org/pypi/fbuild/json | python -c "import sys,json;print(json.load(sys.stdin)['info']['version'])"
 
-# 2. Move the pin in pyproject.toml: fbuild==<old>  →  fbuild==<new>
-#    Add a "Pin history" entry saying what the bump carries.
+# 2. Raise the floor in pyproject.toml: fbuild>=<old>  →  fbuild>=<new>
+#    Add a "Version history" entry saying what the bump carries.
 
 # 3. Refresh the local lockfile and environment.
 uv lock

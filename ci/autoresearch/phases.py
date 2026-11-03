@@ -156,6 +156,10 @@ def _legacy_lane_rx_overlap(
     ``--rx-pin`` the firmware default for ``environment`` applies; with no
     environment yet (auto-detect) the check is re-run after detection.
     """
+    # Explicit lane maps are validated against their explicit RX pin during
+    # argument parsing; they need not occupy a consecutive GPIO interval.
+    if getattr(args, "lane_pins", None) is not None:
+        return False
     if not args.legacy or args.tx_pin is None or max_lanes < 2:
         return False
     rx_pin = args.rx_pin
@@ -495,6 +499,10 @@ LPC_BRING_UP_ENVS = {
     "lpcxpresso845max",
     "lpcxpresso804",
 }
+# Every board whose AutoResearch build takes the low-memory sketch path
+# (FL_PLATFORM_HAS_LARGE_MEMORY == 0), which binds `echo` instead of the
+# pin-discovery / driver-matrix RPCs.
+LOW_MEMORY_BRING_UP_ENVS = LPC_BRING_UP_ENVS | {"esp8266"}
 LPC_WS2812_ENVS = {"lpc845brk", "lpc845", "lpcxpresso845max"}
 # SPI+DMA harness (#3456) — LPC845 only. LPC804 has no DMA peripheral
 # (see agents/docs/peripheral-existence.md); the earlier LPC804 widening
@@ -904,6 +912,27 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
     # Parse --lanes argument
     min_lanes: int | None = None
     max_lanes: int | None = None
+    lane_pins: list[int] | None = None
+    if args.lane_pins is not None:
+        try:
+            lane_pins = [int(pin.strip()) for pin in args.lane_pins.split(",")]
+        except ValueError:
+            print("Error: --lane-pins requires comma-separated integer GPIOs")
+            return 1
+        if (
+            not 1 <= len(lane_pins) <= 16
+            or len(set(lane_pins)) != len(lane_pins)
+            or any(pin < 0 or pin > 48 for pin in lane_pins)
+            or args.tx_pin != lane_pins[0]
+            or args.rx_pin is None
+            or args.rx_pin in lane_pins
+            or parallel_mode
+        ):
+            print(
+                "Error: --lane-pins requires unique GPIOs 0-48, matching --tx-pin, non-overlapping --rx-pin, and a single driver test"
+            )
+            return 1
+        min_lanes = max_lanes = len(lane_pins)
 
     if args.lanes:
         if "-" in args.lanes:
@@ -952,7 +981,9 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
                     "\u274c Error: --legacy multi-lane requires explicit --tx-pin in the historical 0-8 template range"
                 )
                 return 1
-            max_pin = args.tx_pin + requested_max_lanes - 1
+            max_pin = (
+                max(lane_pins) if lane_pins else args.tx_pin + requested_max_lanes - 1
+            )
             if args.tx_pin < 0 or max_pin > 8:
                 print(
                     "\u274c Error: --legacy multi-lane supports consecutive TX pins 0-8 only; pin 22 is single-lane for the current ObjectFLED loopback"
@@ -1166,6 +1197,11 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
     drivers_list = config["drivers"]
     lane_range = config.get("laneRange", {"min": 1, "max": 1})
     strip_sizes = config.get("stripSizes", [100])
+    if lane_pins is not None and (
+        lane_range["min"] != len(lane_pins) or lane_range["max"] != len(lane_pins)
+    ):
+        print("Error: --lane-pins count must match the requested lane count")
+        return 1
 
     if parallel_mode:
         for lane_count in range(lane_range["min"], lane_range["max"] + 1):
@@ -1203,6 +1239,8 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
                         "iterations": 1,
                         "timing": timing_name,
                     }
+                    if lane_pins is not None:
+                        test_config["lanePins"] = lane_pins
                     if args.legacy:
                         test_config["useLegacyApi"] = True
                         if args.legacy_rgbw_small_counts:
@@ -1229,6 +1267,11 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
                         test_config["frameCount"] = frame_count
                     if args.contaminate_tx_mux:
                         test_config["contaminateTxMux"] = True
+                    if args.worker_core is not None:
+                        if driver != "LCD_CLOCKLESS":
+                            print("Error: --worker-core requires --lcd")
+                            return 1
+                        test_config["workerCore"] = args.worker_core
                     if args.tight_timing:
                         if (
                             args.tight_timing_iterations < 1
@@ -2004,9 +2047,9 @@ async def _run_schema_and_pin_setup(ctx: RunContext) -> int | None:
     # so pin discovery would hang. Skip it for those boards — the bring-up
     # short-circuit later in `_run_full_autoresearch_pipeline` will run
     # `_run_bring_up_tests` directly against the configured upload port.
-    if final_environment in LPC_BRING_UP_ENVS:
+    if final_environment in LOW_MEMORY_BRING_UP_ENVS:
         print(
-            f"\n\U0001f4cc LPC bring-up mode ({ctx.final_environment}): "
+            f"\n\U0001f4cc Low-memory bring-up mode ({ctx.final_environment}): "
             "skipping pin discovery and GPIO pre-test"
         )
     elif ctx.simd_test_mode:
@@ -2106,8 +2149,8 @@ async def _run_schema_and_pin_setup(ctx: RunContext) -> int | None:
         _ensure_leading_set_pins_command(ctx)
 
     # GPIO connectivity pre-test
-    if final_environment in LPC_BRING_UP_ENVS:
-        # LPC bring-up: no jumper wire / pin loop, the bring-up RPC test
+    if final_environment in LOW_MEMORY_BRING_UP_ENVS:
+        # Low-memory bring-up: no jumper wire / pin loop, the bring-up RPC test
         # itself is the only check we run.
         pass
     elif ctx.simd_test_mode:
@@ -2620,12 +2663,18 @@ async def _run_tests_or_special_mode(ctx: RunContext, qctx: QuietContext) -> int
     if getattr(ctx.args, "rp_spi_public_api", False):
         return await _run_rp_spi_public_api_tests(ctx)
 
-    if final_environment in LPC_BRING_UP_ENVS:
+    if final_environment in LOW_MEMORY_BRING_UP_ENVS:
         if ctx.ieee754_test_mode:
             return await _run_ieee754_tests(ctx)
         # FastLED #3021 Phase 1: --pin-toggle-rx runs the SCT-RX
         # loopback bench instead of the default echo bring-up.
         if getattr(ctx.args, "pin_toggle_rx", False):
+            if final_environment not in LPC_WS2812_ENVS:
+                print(
+                    "--pin-toggle-rx is only supported on LPC845 boards "
+                    f"(got {final_environment!r})"
+                )
+                return 1
             return await _run_lpc_pin_toggle_rx_tests(ctx)
         # FastLED #3021 Phase 2: --ws2812-loopback runs the WS2812
         # byte-match loopback bench. LPC845 low-memory builds bind the
@@ -4491,6 +4540,59 @@ def _validate_test_rpc_response(
     expected_driver = (
         command_params.get("driver") if isinstance(command_params, dict) else None
     )
+    if isinstance(command_params, dict) and "workerCore" in command_params:
+        requested_core = command_params["workerCore"]
+        expected_core = (
+            {"auto": -1, "0": 0, "1": 1, "any": -1}.get(requested_core)
+            if isinstance(requested_core, str)
+            else None
+        )
+        if requested_core == "calling":
+            expected_core = data.get("workerCore")
+            if not _is_plain_int(expected_core) or expected_core not in (0, 1):
+                errors.append("workerCore must identify the captured calling core")
+        if expected_driver != "LCD_CLOCKLESS":
+            errors.append("workerCore validation requires LCD_CLOCKLESS")
+        actual_core = data.get("workerCore")
+        observed_core = data.get("workerObservedCore")
+        if not _is_plain_int(actual_core) or actual_core != expected_core:
+            errors.append("workerCore does not match the requested affinity")
+        if not _is_plain_int(observed_core) or observed_core not in (0, 1):
+            errors.append("workerObservedCore must identify the executing worker core")
+        elif expected_core != -1 and observed_core != expected_core:
+            errors.append("workerObservedCore does not match the requested affinity")
+        for field in (
+            "workerPriority",
+            "competingTaskPasses",
+            "competingTaskMaxPassUs",
+        ):
+            value = data.get(field)
+            if not _is_plain_int(value) or value <= 0:
+                errors.append(f"{field} must be a positive integer")
+        for field in (
+            "workerSubmittedChunks",
+            "workerCompletedChunks",
+            "workerTotalChunks",
+            "workerMaxEncodeUs",
+            "workerMaxSubmitUs",
+        ):
+            value = data.get(field)
+            if not _is_plain_int(value) or value < 0:
+                errors.append(f"{field} must be a nonnegative integer")
+        if not isinstance(data.get("workerStreamError"), bool):
+            errors.append("workerStreamError must be boolean")
+        if data.get("passed") is True:
+            total_chunks = data.get("workerTotalChunks")
+            if (
+                not _is_plain_int(total_chunks)
+                or total_chunks <= 0
+                or data.get("workerSubmittedChunks") != total_chunks
+                or data.get("workerCompletedChunks") != total_chunks
+                or data.get("workerStreamError") is not False
+            ):
+                errors.append(
+                    "worker PASS requires every frame chunk submitted and completed without error"
+                )
     requires_rp_uart_diagnostics = method == "runSingleTest" and expected_driver in {
         "UART0",
         "UART1",
@@ -4576,6 +4678,24 @@ def _validate_test_rpc_response(
     expected_tx_pin, expected_rx_pin = _expected_test_pins(
         method, cmd, expected_tx_pin, expected_rx_pin
     )
+    if isinstance(command_params, dict) and "lanePins" in command_params:
+        requested_pins = command_params["lanePins"]
+        if (
+            not isinstance(requested_pins, list)
+            or not requested_pins
+            or any(
+                not _is_plain_int(pin) or not 0 <= pin <= 48 for pin in requested_pins
+            )
+            or len(set(requested_pins)) != len(requested_pins)
+            or expected_rx_pin in requested_pins
+        ):
+            errors.append("lanePins must contain unique GPIOs excluding RX")
+        elif (
+            data.get("lanePins") != requested_pins
+            or data.get("laneCount") != len(requested_pins)
+            or data.get("actualTxPin") != requested_pins[0]
+        ):
+            errors.append("lanePins response must match the exact requested pin map")
     is_concurrent_resource_test = (
         method == "runParallelTest"
         and data.get("concurrent_resource_test") is True
@@ -4867,6 +4987,40 @@ async def _run_rpc_tests(ctx: RunContext, qctx: QuietContext) -> int:
                 _lanes = test_data.get("laneCount", "?")
                 _leds = sum(test_data.get("laneSizes", [0]))
                 _dur = test_data.get("duration_ms", "?")
+                if "captureEvidenceBytes" in test_data:
+                    print(
+                        "   Capture: "
+                        f"bytes={test_data.get('captureEvidenceBytes')} "
+                        f"raw_edges={test_data.get('captureEvidenceRawEdges')} "
+                        f"backend={test_data.get('captureBackend')}"
+                    )
+                if "lanePins" in test_data:
+                    print(f"   Lane pins: {test_data['lanePins']} (RX captures lane 0)")
+                if "driverError" in test_data:
+                    print(f"   Driver error: {test_data['driverError']}")
+                if "heapBeforeInternal" in test_data:
+                    print(
+                        "   Heap: "
+                        f"internal_before={test_data.get('heapBeforeInternal')} "
+                        f"psram_before={test_data.get('heapBeforePsram')} "
+                        f"internal_after={test_data.get('heapAfterInternal')} "
+                        f"psram_after={test_data.get('heapAfterPsram')}"
+                    )
+                if "workerCore" in test_data:
+                    print(
+                        "   Worker: "
+                        f"affinity={test_data.get('workerCore')} "
+                        f"observed={test_data.get('workerObservedCore')} "
+                        f"priority={test_data.get('workerPriority')} "
+                        f"chunks={test_data.get('workerSubmittedChunks')}/"
+                        f"{test_data.get('workerCompletedChunks')}/"
+                        f"{test_data.get('workerTotalChunks')} "
+                        f"max_encode_us={test_data.get('workerMaxEncodeUs')} "
+                        f"max_submit_us={test_data.get('workerMaxSubmitUs')} "
+                        f"stream_error={test_data.get('workerStreamError')} "
+                        f"competing_passes={test_data.get('competingTaskPasses')} "
+                        f"competing_max_us={test_data.get('competingTaskMaxPassUs')}"
+                    )
 
                 if test_data.get("success") is False or "error" in test_data:
                     stop_word_found = "ERROR"

@@ -24,13 +24,12 @@
 #ifdef FL_LCD_CLOCKLESS_COMPILE
 
 #include "platforms/esp/32/drivers/lcd_spi/channel_driver_lcd_clockless.h"
-#include "fl/channels/detail/wave3.h"
-#include "fl/channels/detail/wave8.h"
+#include "fl/channels/detail/bit_spread_lut.hpp"
 #include "fl/chipsets/led_timing.h"
 #include "fl/log/log.h"
 #include "fl/task/executor.h"
-#include "fl/stl/cstring.h"
 #include "fl/stl/noexcept.h"
+#include "fl/stl/align.h"
 #include "platforms/memory_barrier.h"
 
 #if defined(FL_IS_ESP32) && !defined(FASTLED_STUB_IMPL)
@@ -54,6 +53,58 @@
 
 namespace fl {
 
+namespace {
+#if defined(FL_IS_ESP32) && !defined(FASTLED_STUB_IMPL)
+#if defined(CONFIG_FREERTOS_UNICORE) && CONFIG_FREERTOS_UNICORE
+constexpr int kLcdWorkerCoreCount = 1;
+#elif defined(configNUMBER_OF_CORES)
+constexpr int kLcdWorkerCoreCount = configNUMBER_OF_CORES;
+#else
+constexpr int kLcdWorkerCoreCount = portNUM_PROCESSORS;
+#endif
+constexpr int kLcdWorkerPriorityCount = configMAX_PRIORITIES;
+#else
+// Host tests exercise the ESP32-S3 configuration contract without an RTOS.
+constexpr int kLcdWorkerCoreCount = 2;
+constexpr int kLcdWorkerPriorityCount = 25;
+#endif
+constexpr int kLcdWorkerDefaultPriority =
+    (kLcdWorkerPriorityCount > 2) ? (kLcdWorkerPriorityCount - 2) : 1;
+
+void recordWorkerMaximum(fl::atomic_u32 &maximum, u64 elapsedUs) FL_NO_EXCEPT {
+    const u32 elapsed = elapsedUs > 0xffffffffULL
+                            ? 0xffffffffu : static_cast<u32>(elapsedUs);
+    u32 current = maximum.load(fl::memory_order_relaxed);
+    while (current < elapsed &&
+           !maximum.compare_exchange_weak(current, elapsed,
+                                          fl::memory_order_relaxed)) {}
+}
+
+FASTLED_FORCE_INLINE FL_IRAM
+void encodeWave8Words(const u8 (&lanes)[16],
+                      const u32 (&zeroPairs)[4],
+                      const u32 (&xorPairs)[4],
+                      u16 (&output)[64]) FL_NO_EXCEPT {
+    u8 columns[16];
+    detail::spread_transpose16_symbol(lanes, columns);
+    // Ring allocations are at least 64-byte aligned, and every byte's DMA
+    // window is 128 bytes. Constant-size memcpy keeps u16 storage alias-safe
+    // while allowing an aligned native u32 store for each pair of LCD ticks.
+    u16 *dma = fl::assume_aligned<4>(output);
+    size_t wordIndex = 0;
+    for (size_t bit = 0; bit < 8; ++bit) {
+        u32 mask = static_cast<u32>(columns[bit * 2]) |
+                   (static_cast<u32>(columns[bit * 2 + 1]) << 8);
+        mask |= mask << 16;
+        for (size_t pair = 0; pair < 4; ++pair) {
+            const u32 word = zeroPairs[pair] ^ (mask & xorPairs[pair]);
+            FL_BUILTIN_MEMCPY(dma + wordIndex, &word, sizeof(word));
+            wordIndex += 2;
+        }
+    }
+}
+} // namespace
+
 //=============================================================================
 // Constructor / Destructor
 //=============================================================================
@@ -61,10 +112,13 @@ namespace fl {
 ChannelDriverLcdClockless::ChannelDriverLcdClockless(
     fl::shared_ptr<detail::ILcdSpiPeripheral> peripheral) FL_NO_EXCEPT
     : mPeripheral(fl::move(peripheral)), mInitialized(false),
+      mStartError(StartError::None),
       mEnqueuedChannels(), mTransmittingChannels(),
       mRingBuffers{nullptr, nullptr, nullptr}, mRingCapacity(0),
       mNumLanes(0), mBusy(false), mIsrCtx(), mChunkInputBytesOverride(0),
       mWorkerTaskHandle(nullptr), mWorkerStop(false), mWorkerRunning(false),
+      mWorkerConfig(), mWorkerCore(-2), mWorkerObservedCore(-1),
+      mWorkerMaxEncodeUs(0), mWorkerMaxSubmitUs(0), mWorkerStreamError(false),
       mPollNeededCallback(), mUseWave3(true), mWave3Lut(), mWave8Lut(), mClockHz(0),
       mOutputBytesPerInputByte(0) {
     mIsrCtx.reset();
@@ -126,55 +180,147 @@ bool ChannelDriverLcdClockless::allocateRingBuffers(
 // Worker Task
 //=============================================================================
 
-bool ChannelDriverLcdClockless::ensureWorkerTask() FL_NO_EXCEPT {
-#if defined(FL_IS_ESP32) && !defined(FASTLED_STUB_IMPL)
-    if (mWorkerTaskHandle != nullptr) {
+bool ChannelDriverLcdClockless::configureWorkerImpl(
+    const WorkerConfig &config) FL_NO_EXCEPT {
+    if (config.isDefault()) {
         return true;
     }
 
-    mWorkerStop = false;
-    mWorkerRunning = false;
-
-    TaskHandle_t handle = nullptr;
-    UBaseType_t priority =
-        (configMAX_PRIORITIES > 2) ? (configMAX_PRIORITIES - 2) : 1;
-    BaseType_t ok = xTaskCreate(workerTaskEntry, "fl_lcd_clk",
-                                4096, this, priority, &handle);
-    if (ok != pdPASS || handle == nullptr) {
-        mWorkerTaskHandle = nullptr;
+    const i8 requestedCore = static_cast<i8>(config.core);
+    if (config.core != Core::Auto && config.core != Core::Any &&
+        config.core != Core::CallingCore &&
+        (requestedCore < 0 || requestedCore >= kLcdWorkerCoreCount)) {
+        return false;
+    }
+    if (config.priority.has_value() &&
+        config.priority.value() >= kLcdWorkerPriorityCount) {
         return false;
     }
 
-    mWorkerTaskHandle = static_cast<void *>(handle);
+    const Core currentCore = mWorkerConfig.core == Core::Auto
+                                 ? Core::Any : mWorkerConfig.core;
+    const int currentPriority = mWorkerConfig.priority.has_value()
+                                    ? mWorkerConfig.priority.value()
+                                    : kLcdWorkerDefaultPriority;
+    const Core core = config.core == Core::Auto ? currentCore : config.core;
+    const int priority = config.priority.has_value()
+                             ? config.priority.value() : currentPriority;
+
+    // One LCD peripheral owns one worker. A second strip cannot change its
+    // first explicit policy, including before the task has been created.
+    if (!mWorkerConfig.isDefault() || mWorkerCore != -2) {
+        return core == currentCore && priority == currentPriority;
+    }
+
+    mWorkerConfig.core = core;
+    mWorkerConfig.priority = static_cast<u8>(priority);
+    return true;
+}
+
+int ChannelDriverLcdClockless::workerCore() const FL_NO_EXCEPT {
+    return mWorkerCore;
+}
+
+int ChannelDriverLcdClockless::workerPriority() const FL_NO_EXCEPT {
+    if (mWorkerCore == -2) {
+        return -1;
+    }
+    return mWorkerConfig.priority.has_value()
+               ? mWorkerConfig.priority.value() : kLcdWorkerDefaultPriority;
+}
+
+int ChannelDriverLcdClockless::workerObservedCore() const FL_NO_EXCEPT {
+    return mWorkerObservedCore.load(fl::memory_order_acquire);
+}
+
+void ChannelDriverLcdClockless::fillWorkerDiagnostics(
+    WorkerDiagnostics &result) const FL_NO_EXCEPT {
+    result.core = workerCore();
+    result.priority = workerPriority();
+    result.observedCore = workerObservedCore();
+    if (mStartError == StartError::None) {
+        result.submittedChunks = static_cast<u32>(
+            mIsrCtx.mSubmittedChunks.load(fl::memory_order_acquire));
+        result.completedChunks = static_cast<u32>(
+            mIsrCtx.mCompletedChunks.load(fl::memory_order_acquire));
+        result.totalChunks = static_cast<u32>(mIsrCtx.mTotalChunks);
+    } else {
+        result.submittedChunks = 0;
+        result.completedChunks = 0;
+        result.totalChunks = 0;
+    }
+    result.maxEncodeUs = mWorkerMaxEncodeUs.load(fl::memory_order_acquire);
+    result.maxSubmitUs = mWorkerMaxSubmitUs.load(fl::memory_order_acquire);
+    result.streamError = mWorkerStreamError.load(fl::memory_order_acquire);
+}
+
+bool ChannelDriverLcdClockless::ensureWorkerTask() FL_NO_EXCEPT {
+#if defined(FL_IS_ESP32) && !defined(FASTLED_STUB_IMPL)
+    if (mWorkerTaskHandle.load(fl::memory_order_acquire) != nullptr) {
+        return true;
+    }
+
+    mWorkerStop.store(false, fl::memory_order_release);
+    mWorkerRunning.store(false, fl::memory_order_release);
+
+    TaskHandle_t handle = nullptr;
+    const UBaseType_t priority = mWorkerConfig.priority.has_value()
+                                    ? mWorkerConfig.priority.value()
+                                    : kLcdWorkerDefaultPriority;
+    BaseType_t core = tskNO_AFFINITY;
+    if (mWorkerConfig.core == Core::CallingCore) {
+        core = xPortGetCoreID();
+    } else if (mWorkerConfig.core == Core::Core0 ||
+               mWorkerConfig.core == Core::Core1) {
+        core = static_cast<BaseType_t>(mWorkerConfig.core);
+    }
+    BaseType_t ok = xTaskCreatePinnedToCore(workerTaskEntry, "fl_lcd_clk",
+                                          4096, this, priority, &handle, core);
+    if (ok != pdPASS || handle == nullptr) {
+        mWorkerTaskHandle.store(nullptr, fl::memory_order_release);
+        return false;
+    }
+
+    mWorkerCore = core == tskNO_AFFINITY ? -1 : static_cast<i8>(core);
+    mWorkerTaskHandle.store(static_cast<void *>(handle), fl::memory_order_release);
     return true;
 #else
+    if (mWorkerCore == -2) {
+        const Core core = mWorkerConfig.core;
+        mWorkerCore = core == Core::Core0 || core == Core::Core1
+                          ? static_cast<i8>(core) : -1;
+    }
     return true;
 #endif
 }
 
 void ChannelDriverLcdClockless::stopWorkerTask() FL_NO_EXCEPT {
 #if defined(FL_IS_ESP32) && !defined(FASTLED_STUB_IMPL)
-    TaskHandle_t handle = static_cast<TaskHandle_t>(mWorkerTaskHandle);
+    TaskHandle_t handle = static_cast<TaskHandle_t>(
+        mWorkerTaskHandle.load(fl::memory_order_acquire));
     if (handle == nullptr) {
         return;
     }
 
-    mWorkerStop = true;
+    mWorkerStop.store(true, fl::memory_order_release);
     xTaskNotifyGive(handle);
 
-    for (int i = 0; i < 100 && mWorkerTaskHandle != nullptr; i++) {
+    for (int i = 0; i < 100 &&
+         mWorkerTaskHandle.load(fl::memory_order_acquire) != nullptr; i++) {
         vTaskDelay(pdMS_TO_TICKS(1));
     }
 
-    if (mWorkerTaskHandle != nullptr) {
-        vTaskDelete(static_cast<TaskHandle_t>(mWorkerTaskHandle));
-        mWorkerTaskHandle = nullptr;
-        mWorkerRunning = false;
+    handle = static_cast<TaskHandle_t>(
+        mWorkerTaskHandle.load(fl::memory_order_acquire));
+    if (handle != nullptr) {
+        vTaskDelete(handle);
+        mWorkerTaskHandle.store(nullptr, fl::memory_order_release);
+        mWorkerRunning.store(false, fl::memory_order_release);
     }
 #else
-    mWorkerStop = true;
-    mWorkerTaskHandle = nullptr;
-    mWorkerRunning = false;
+    mWorkerStop.store(true, fl::memory_order_release);
+    mWorkerTaskHandle.store(nullptr, fl::memory_order_release);
+    mWorkerRunning.store(false, fl::memory_order_release);
 #endif
 }
 
@@ -186,17 +332,19 @@ void ChannelDriverLcdClockless::workerTaskEntry(void *arg) FL_NO_EXCEPT {
         return;
     }
 
-    self->mWorkerRunning = true;
+    self->mWorkerRunning.store(true, fl::memory_order_release);
+    self->mWorkerObservedCore.store(xPortGetCoreID(), fl::memory_order_release);
     for (;;) {
         ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
-        if (self->mWorkerStop) {
+        if (self->mWorkerStop.load(fl::memory_order_acquire)) {
             break;
         }
+        self->mWorkerObservedCore.store(xPortGetCoreID(), fl::memory_order_release);
         self->processWorkerQueue();
     }
 
-    self->mWorkerRunning = false;
-    self->mWorkerTaskHandle = nullptr;
+    self->mWorkerRunning.store(false, fl::memory_order_release);
+    self->mWorkerTaskHandle.store(nullptr, fl::memory_order_release);
     vTaskDelete(nullptr);
 #else
     (void)arg;
@@ -205,7 +353,8 @@ void ChannelDriverLcdClockless::workerTaskEntry(void *arg) FL_NO_EXCEPT {
 
 bool ChannelDriverLcdClockless::notifyWorker() FL_NO_EXCEPT {
 #if defined(FL_IS_ESP32) && !defined(FASTLED_STUB_IMPL)
-    TaskHandle_t handle = static_cast<TaskHandle_t>(mWorkerTaskHandle);
+    TaskHandle_t handle = static_cast<TaskHandle_t>(
+        mWorkerTaskHandle.load(fl::memory_order_acquire));
     if (handle == nullptr) {
         return false;
     }
@@ -220,7 +369,8 @@ bool ChannelDriverLcdClockless::notifyWorker() FL_NO_EXCEPT {
 
 bool ChannelDriverLcdClockless::notifyWorkerFromIsr() FL_NO_EXCEPT {
 #if defined(FL_IS_ESP32) && !defined(FASTLED_STUB_IMPL)
-    TaskHandle_t handle = static_cast<TaskHandle_t>(mWorkerTaskHandle);
+    TaskHandle_t handle = static_cast<TaskHandle_t>(
+        mWorkerTaskHandle.load(fl::memory_order_acquire));
     if (handle == nullptr) {
         return false;
     }
@@ -243,23 +393,29 @@ bool ChannelDriverLcdClockless::submitChunk(size_t chunkIndex,
         return false;
     }
 
+    const u64 encodeStart = mPeripheral->getMicroseconds();
     size_t dmaBytes = encodeChunk(mTransmittingChannels, buf, startByte,
                                   mIsrCtx.mChunkInputBytes);
+    recordWorkerMaximum(mWorkerMaxEncodeUs,
+                        mPeripheral->getMicroseconds() - encodeStart);
 
     FL_MEMORY_BARRIER;
 
-    if (waitForSlot) {
-        return mPeripheral->transmit(buf, dmaBytes);
-    }
-    return mPeripheral->queueTransmit(buf, dmaBytes);
+    const u64 submitStart = mPeripheral->getMicroseconds();
+    const bool submitted = waitForSlot
+                               ? mPeripheral->transmit(buf, dmaBytes)
+                               : mPeripheral->queueTransmit(buf, dmaBytes);
+    recordWorkerMaximum(mWorkerMaxSubmitUs,
+                        mPeripheral->getMicroseconds() - submitStart);
+    return submitted;
 }
 
 void ChannelDriverLcdClockless::processWorkerQueue() FL_NO_EXCEPT {
     IsrContext &ctx = mIsrCtx;
 
     while (mBusy && !ctx.mStreamComplete && !ctx.mStreamError) {
-        size_t submitted = ctx.mSubmittedChunks;
-        size_t completed = ctx.mCompletedChunks;
+        size_t submitted = ctx.mSubmittedChunks.load(fl::memory_order_acquire);
+        size_t completed = ctx.mCompletedChunks.load(fl::memory_order_acquire);
 
         if (submitted >= ctx.mTotalChunks) {
             break;
@@ -271,13 +427,14 @@ void ChannelDriverLcdClockless::processWorkerQueue() FL_NO_EXCEPT {
         }
 
         if (!submitChunk(submitted, false)) {
+            mWorkerStreamError.store(true, fl::memory_order_release);
             ctx.mStreamError = true;
             ctx.mStreamComplete = true;
             mBusy = false;
             break;
         }
 
-        ctx.mSubmittedChunks = submitted + 1;
+        ctx.mSubmittedChunks.store(submitted + 1, fl::memory_order_release);
         FL_MEMORY_BARRIER;
     }
 }
@@ -306,7 +463,11 @@ void ChannelDriverLcdClockless::show() FL_NO_EXCEPT {
         return;
     }
 
-    (void)waitForReady(2000);
+    // A failed start owns no active transfer. Retry it directly rather than
+    // waiting for its latched ERROR state to become READY by itself.
+    if (mStartError == StartError::None) {
+        (void)waitForReady(2000);
+    }
     if (mBusy) {
         FL_WARN("ChannelDriverLcdClockless: DMA hung â€” forcing release");
         mBusy = false;
@@ -327,6 +488,29 @@ void ChannelDriverLcdClockless::show() FL_NO_EXCEPT {
 }
 
 IChannelDriver::DriverState ChannelDriverLcdClockless::poll() FL_NO_EXCEPT {
+    switch (mStartError) {
+    case StartError::InvalidConfig:
+        return DriverState(DriverState::ERROR,
+                           fl::string::from_literal("LCD_CLOCKLESS: invalid transmission configuration"));
+    case StartError::WorkerCreation:
+        return DriverState(DriverState::ERROR,
+                           fl::string::from_literal("LCD_CLOCKLESS: worker task creation failed"));
+    case StartError::PeripheralInitialization:
+        return DriverState(DriverState::ERROR,
+                           fl::string::from_literal("LCD_CLOCKLESS: peripheral initialization failed"));
+    case StartError::BufferAllocation:
+        return DriverState(DriverState::ERROR,
+                           fl::string::from_literal("LCD_CLOCKLESS: DMA ring buffer allocation failed"));
+    case StartError::CallbackRegistration:
+        return DriverState(DriverState::ERROR,
+                           fl::string::from_literal("LCD_CLOCKLESS: transmit callback registration failed"));
+    case StartError::InitialTransmit:
+        return DriverState(DriverState::ERROR,
+                           fl::string::from_literal("LCD_CLOCKLESS: initial transmit failed"));
+    case StartError::None:
+        break;
+    }
+
     if (mTransmittingChannels.empty()) {
         return DriverState::READY;
     }
@@ -373,16 +557,66 @@ void ChannelDriverLcdClockless::setPollNeededCallback(PollNeededCallback callbac
 // FL_IRAM matches the declaration in channel_driver_lcd_clockless.h. Keep the
 // encoder IRAM-safe because worker wake-up is triggered by the LCD ISR and this
 // code is part of the time-critical refill path.
+FL_OPTIMIZE_FUNCTION
 size_t FL_IRAM ChannelDriverLcdClockless::encodeChunk(
     fl::span<const ChannelDataPtr> channels, u16 *output,
     size_t startByte, size_t byteCount) FL_NO_EXCEPT {
-    size_t outputIdx = 0; // bytes written
+    if (!mUseWave3) {
+        const u8 zeroPulse = mWave8Lut.lut[0][0].data;
+        const u8 xorPulse = zeroPulse ^ mWave8Lut.lut[15][0].data;
+        u32 zeroPairs[4];
+        u32 xorPairs[4];
+        for (size_t pair = 0; pair < 4; ++pair) {
+            const u32 first = 0x80u >> (pair * 2);
+            const u32 second = first >> 1;
+            // ESP32-S3 is little-endian: the low half is the earlier tick.
+            zeroPairs[pair] = (zeroPulse & first ? 0xffffu : 0u) |
+                              (zeroPulse & second ? 0xffff0000u : 0u);
+            xorPairs[pair] = (xorPulse & first ? 0xffffu : 0u) |
+                             (xorPulse & second ? 0xffff0000u : 0u);
+        }
+        auto *dmaOutput =
+            reinterpret_cast<u16 (*)[64]>(output); // ok reinterpret cast
+        size_t offset = 0;
+        for (; byteCount - offset >= 4; offset += 4) {
+            u8 lanes[4][16] = {};
+            for (size_t lane = 0; lane < channels.size() && lane < 16; ++lane) {
+                const auto &data = channels[lane]->getData();
+                for (size_t position = 0; position < 4; ++position) {
+                    const size_t input = startByte + offset + position;
+                    if (input < data.size()) {
+                        lanes[position][lane] = data[input];
+                    }
+                }
+            }
+            for (size_t position = 0; position < 4; ++position) {
+                encodeWave8Words(lanes[position], zeroPairs, xorPairs,
+                                 dmaOutput[offset + position]);
+            }
+        }
+        for (; offset < byteCount; ++offset) {
+            u8 lanes[16] = {};
+            const size_t input = startByte + offset;
+            for (size_t lane = 0; lane < channels.size() && lane < 16; ++lane) {
+                const auto &data = channels[lane]->getData();
+                if (input < data.size()) {
+                    lanes[lane] = data[input];
+                }
+            }
+            encodeWave8Words(lanes, zeroPairs, xorPairs, dmaOutput[offset]);
+        }
+        return byteCount * 16 * sizeof(Wave8Byte);
+    }
+
+    // Eligible wave3 timings use one or two leading high ticks for each bit.
+    // Transpose the input bits once; every bit then emits high/data/low words.
+    const u16 inversionMask = (mWave3Lut.lut[0] & 0x2u) ? 0xffffu : 0;
+    size_t outputIdx = 0; // u16 words written
 
     for (size_t byteIdx = startByte; byteIdx < startByte + byteCount;
          byteIdx++) {
         // Gather one byte from each lane (zero-fill unused lanes)
-        u8 lanes[16];
-        fl::memset(lanes, 0, sizeof(lanes));
+        u8 lanes[16] = {};
         for (size_t lane = 0; lane < channels.size() && lane < 16; lane++) {
             const auto &data = channels[lane]->getData();
             if (byteIdx < data.size()) {
@@ -390,30 +624,19 @@ size_t FL_IRAM ChannelDriverLcdClockless::encodeChunk(
             }
         }
 
-        if (mUseWave3) {
-            u8 transposed[16 * sizeof(Wave3Byte)]; // 48 bytes = 24 u16 words
-            wave3Transpose_16(
-                reinterpret_cast<const u8 (&)[16]>(lanes), // ok reinterpret cast
-                mWave3Lut,
-                reinterpret_cast<u8 (&)[16 * sizeof(Wave3Byte)]>( // ok reinterpret cast
-                    transposed));
-            fl::memcpy(reinterpret_cast<u8 *>(output) + outputIdx, // ok reinterpret cast
-                       transposed, sizeof(transposed));
-            outputIdx += sizeof(transposed);
-        } else {
-            u8 transposed[16 * sizeof(Wave8Byte)]; // 128 bytes = 64 u16 words
-            wave8Transpose_16(
-                reinterpret_cast<const u8 (&)[16]>(lanes), // ok reinterpret cast
-                mWave8Lut,
-                reinterpret_cast<u8 (&)[16 * sizeof(Wave8Byte)]>( // ok reinterpret cast
-                    transposed));
-            fl::memcpy(reinterpret_cast<u8 *>(output) + outputIdx, // ok reinterpret cast
-                       transposed, sizeof(transposed));
-            outputIdx += sizeof(transposed);
+        u8 columns[16];
+        detail::spread_transpose16_symbol(lanes, columns);
+        for (size_t bit = 0; bit < 8; ++bit) {
+            const u16 mask = static_cast<u16>(
+                columns[bit * 2] |
+                (static_cast<u16>(columns[bit * 2 + 1]) << 8));
+            output[outputIdx++] = 0xffffu;
+            output[outputIdx++] = static_cast<u16>(mask ^ inversionMask);
+            output[outputIdx++] = 0;
         }
     }
 
-    return outputIdx;
+    return outputIdx * sizeof(u16);
 }
 
 //=============================================================================
@@ -435,16 +658,20 @@ bool FL_IRAM ChannelDriverLcdClockless::isrChunkDone(void *panel_io,
     auto *self = static_cast<ChannelDriverLcdClockless *>(user_ctx);
     IsrContext &ctx = self->mIsrCtx;
 
-    ctx.mCompletedChunks = ctx.mCompletedChunks + 1;
+    const size_t submitted = ctx.mSubmittedChunks.load(fl::memory_order_acquire);
+    // This LCD ISR is the only completion writer during a transfer.
+    const size_t completed =
+        ctx.mCompletedChunks.load(fl::memory_order_relaxed) + 1;
+    ctx.mCompletedChunks.store(completed, fl::memory_order_release);
 
-    if (ctx.mCompletedChunks >= ctx.mTotalChunks) {
+    if (completed >= ctx.mTotalChunks) {
         ctx.mStreamComplete = true;
         self->mBusy = false;
         self->mPollNeededCallback.invoke();
         return false;
     }
 
-    if (ctx.mSubmittedChunks < ctx.mTotalChunks) {
+    if (submitted < ctx.mTotalChunks) {
         return self->notifyWorkerFromIsr();
     }
 
@@ -457,16 +684,23 @@ bool FL_IRAM ChannelDriverLcdClockless::isrChunkDone(void *panel_io,
 
 bool ChannelDriverLcdClockless::beginTransmission(
     fl::span<const ChannelDataPtr> channels) FL_NO_EXCEPT {
+    mStartError = StartError::None;
+    mWorkerMaxEncodeUs.store(0, fl::memory_order_release);
+    mWorkerMaxSubmitUs.store(0, fl::memory_order_release);
+    mWorkerStreamError.store(false, fl::memory_order_release);
     if (channels.empty() || !mPeripheral) {
+        mStartError = StartError::InvalidConfig;
         return false;
     }
 
     if (channels.size() > 16) {
+        mStartError = StartError::InvalidConfig;
         FL_WARN("ChannelDriverLcdClockless: too many channels (" << channels.size() << "), max 16 supported");
         return false;
     }
 
     if (!ensureWorkerTask()) {
+        mStartError = StartError::WorkerCreation;
         FL_WARN("ChannelDriverLcdClockless: worker task creation failed");
         return false;
     }
@@ -475,7 +709,6 @@ bool ChannelDriverLcdClockless::beginTransmission(
     size_t maxSize = 0;
     ChipsetTiming chipsetTiming = {};
     bool timingFound = false;
-    int firstPin = -1;
 
     for (const auto &channel : channels) {
         size_t sz = channel->getSize();
@@ -491,12 +724,10 @@ bool ChannelDriverLcdClockless::beginTransmission(
             chipsetTiming.name = timingCfg.name;
             timingFound = true;
         }
-        if (firstPin < 0) {
-            firstPin = channel->getPin();
-        }
     }
 
     if (maxSize == 0 || !timingFound) {
+        mStartError = StartError::InvalidConfig;
         return false;
     }
 
@@ -545,11 +776,20 @@ bool ChannelDriverLcdClockless::beginTransmission(
 
     size_t slotCapacityBytes = chunkInputBytes * mOutputBytesPerInputByte;
 
-    // Peripheral init when lane count, clock rate, or pin assignment changes
+    // A different DMA chunk size needs a fresh bus as well as fresh panel IO:
+    // ESP-IDF retains the exclusive-device flag after deleting panel IO.
     bool needPeripheralInit = !mInitialized || (numLanes != mNumLanes) ||
                               (mClockHz != 0 && mClockHz != mPeripheral->getConfig().clock_hz) ||
-                              (firstPin >= 0 && mInitialized &&
-                               mPeripheral->getConfig().data_gpios[0] != firstPin);
+                              slotCapacityBytes != mPeripheral->getConfig().max_transfer_bytes;
+    if (!needPeripheralInit) {
+        const auto &currentConfig = mPeripheral->getConfig();
+        for (size_t lane = 0; lane < channels.size(); ++lane) {
+            if (currentConfig.data_gpios[lane] != channels[lane]->getPin()) {
+                needPeripheralInit = true;
+                break;
+            }
+        }
+    }
 
     if (needPeripheralInit) {
         freeRingBuffers();
@@ -586,6 +826,7 @@ bool ChannelDriverLcdClockless::beginTransmission(
         }
 
         if (!mPeripheral->initialize(config)) {
+            mStartError = StartError::PeripheralInitialization;
             FL_WARN("ChannelDriverLcdClockless: Failed to init peripheral");
             return false;
         }
@@ -595,12 +836,14 @@ bool ChannelDriverLcdClockless::beginTransmission(
     }
 
     if (!allocateRingBuffers(slotCapacityBytes)) {
+        mStartError = StartError::BufferAllocation;
         return false;
     }
 
     // Register ISR callback
     if (!mPeripheral->registerTransmitCallback(
             reinterpret_cast<void *>(&isrChunkDone), this)) { // ok reinterpret cast
+        mStartError = StartError::CallbackRegistration;
         FL_WARN("ChannelDriverLcdClockless: registerTransmitCallback failed");
         return false;
     }
@@ -617,16 +860,24 @@ bool ChannelDriverLcdClockless::beginTransmission(
 
     mBusy = true;
 
+    // A short first DMA transfer can complete before transmit() returns.
+    // Publish the complete frame context before its ISR can wake the worker.
+    mIsrCtx.mSubmittedChunks.store(1, fl::memory_order_release);
     if (!submitChunk(0, true)) {
+        mIsrCtx.mSubmittedChunks.store(0, fl::memory_order_release);
+        mStartError = StartError::InitialTransmit;
         mBusy = false;
         for (const auto &channel : channels) {
             channel->setInUse(false);
         }
+        // No DMA was started. Destroy the failed SDK session as well: panel
+        // IO creation can claim an exclusive bus before its allocation fails.
+        mPeripheral->deinitialize();
+        mInitialized = false;
+        freeRingBuffers();
         FL_WARN("ChannelDriverLcdClockless: Initial transmit failed");
         return false;
     }
-    mIsrCtx.mSubmittedChunks = 1;
-
     notifyWorker();
 
     return true;

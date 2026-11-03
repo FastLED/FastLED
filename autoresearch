@@ -61,6 +61,8 @@ Driver Selection (optional - omit for GPIO-only mode):
   --embedded-fs-format-fixture  Allow formatting an unmountable test volume
   --spi-provider      Test Arduino SPI provider (explicit classic ESP32 env and port)
   --spi-provider-native  With --spi-provider, test native SPI timeout/ownership faults
+  --driver-binding MODE  Measure typed or runtime driver registration and steady heap
+  --spi-streaming     ESP32-S3 native SPI memory/time and full-frame SPI3 loopback
   --simd              Test SIMD operations only (no LED drivers needed)
   --coroutine         Test coroutine/task creation, stop, await (no LED drivers needed)
   --parallel          Test multiple drivers simultaneously (requires 2+ drivers)
@@ -147,4 +149,5 @@ for arg in "$@"; do
 done
 
 # Run the Python autoresearch script with all arguments
+. "$(dirname "$0")/ci/util/keep_editable_fbuild.sh"
 exec uv run -m ci.autoresearch "$@"

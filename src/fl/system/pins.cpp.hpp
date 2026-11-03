@@ -19,7 +19,7 @@ namespace fl {
 // - On platforms with FASTLED_NO_PINMAP (Apollo3, Renesas, Giga, NRF51,
 //   STM32, RP2040): digitalPinToPort() is unavailable, so fall back to
 //   grouping pins by blocks of 32.
-// - On real platforms with pin maps (AVR, ESP32, SAM): use the platform's
+// - On real platforms with pin maps (AVR, SAM): use the platform's
 //   digitalPinToPort() macro which is already available.
 
 #ifdef FASTLED_ALL_PINS_VALID
@@ -100,17 +100,17 @@ int pinToPort(int pin) FL_NO_EXCEPT {
     return pin / 32;
 }
 
-#elif defined(FASTLED_NO_PINMAP)
+#elif defined(FASTLED_NO_PINMAP) || defined(FL_IS_ESP32)
 
 // Platforms that define FASTLED_NO_PINMAP (Apollo3, Renesas, Giga, NRF51,
-// STM32, RP2040) don't provide digitalPinToPort(). Fall back to grouping
-// pins by blocks of 32.
+// STM32, RP2040) do not provide digitalPinToPort(). ESP32 uses native GPIO
+// banks without Arduino: group pins by blocks of 32 on these platforms.
 int pinToPort(int pin) FL_NO_EXCEPT {
     if (pin < 0) return -1;
     return pin / 32;
 }
 
-#else // Real platforms with pin maps (AVR, ESP32, SAM, etc.)
+#else // Real platforms with pin maps (AVR, SAM, etc.)
 
 namespace {
 // Convert digitalPinToPort() result to int. Most platforms return integers;
@@ -253,10 +253,10 @@ void DigitalMultiWrite8::buildNibbleLut(u8 bit_offset, PinList (&set_lut)[16],
 
 void DigitalMultiWrite8::applyNibble(const PinList &set, const PinList &clr) FL_NO_EXCEPT {
     for (u8 i = 0; i < set.count; ++i) {
-        fl::digitalWrite(set.pins[i], PinValue::High);
+        (fl::digitalWrite)(set.pins[i], PinValue::High);
     }
     for (u8 i = 0; i < clr.count; ++i) {
-        fl::digitalWrite(clr.pins[i], PinValue::Low);
+        (fl::digitalWrite)(clr.pins[i], PinValue::Low);
     }
 }
 
@@ -370,10 +370,10 @@ void DigitalMultiWrite16::buildNibbleLut(u8 bit_offset,
 
 void DigitalMultiWrite16::applyNibble(const PinList &set, const PinList &clr) FL_NO_EXCEPT {
     for (u8 i = 0; i < set.count; ++i) {
-        fl::digitalWrite(set.pins[i], PinValue::High);
+        (fl::digitalWrite)(set.pins[i], PinValue::High);
     }
     for (u8 i = 0; i < clr.count; ++i) {
-        fl::digitalWrite(clr.pins[i], PinValue::Low);
+        (fl::digitalWrite)(clr.pins[i], PinValue::Low);
     }
 }
 

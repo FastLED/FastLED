@@ -27,6 +27,7 @@ FL_EXTERN_C_BEGIN
 #include "driver/ledc.h"
 // IWYU pragma: end_keep
 #include "esp_err.h"
+#include "soc/soc.h" // IWYU pragma: keep
 
 #if ESP_IDF_VERSION_5_OR_HIGHER
 // IWYU pragma: begin_keep
@@ -49,7 +50,7 @@ namespace platforms {
 // Digital Pin Functions
 // ============================================================================
 
-inline void pinMode(int pin, PinMode mode) FL_NO_EXCEPT {
+inline void (pinMode)(int pin, PinMode mode) FL_NO_EXCEPT {
     if (pin < 0 || pin >= GPIO_NUM_MAX) {
         return;  // Invalid pin
     }
@@ -86,7 +87,7 @@ inline void pinMode(int pin, PinMode mode) FL_NO_EXCEPT {
     gpio_config(&io_conf);
 }
 
-inline void digitalWrite(int pin, PinValue val) FL_NO_EXCEPT {
+inline void (digitalWrite)(int pin, PinValue val) FL_NO_EXCEPT {
     if (pin < 0 || pin >= GPIO_NUM_MAX) {
         return;  // Invalid pin
     }
@@ -94,7 +95,7 @@ inline void digitalWrite(int pin, PinValue val) FL_NO_EXCEPT {
                    val == PinValue::High ? 1 : 0);
 }
 
-inline PinValue digitalRead(int pin) FL_NO_EXCEPT {
+inline PinValue (digitalRead)(int pin) FL_NO_EXCEPT {
     if (pin < 0 || pin >= GPIO_NUM_MAX) {
         return PinValue::Low;  // Invalid pin
     }
@@ -117,15 +118,15 @@ namespace {
             return;  // Already initialized
         }
 
-        adc_oneshot_unit_init_cfg_t init_config = {
-            .unit_id = ADC_UNIT_1,
-            .ulp_mode = ADC_ULP_MODE_DISABLE,
-        };
+        // Zero-initialize SDK-added fields, including the default ADC clock.
+        adc_oneshot_unit_init_cfg_t init_config = {};
+        init_config.unit_id = ADC_UNIT_1;
+        init_config.ulp_mode = ADC_ULP_MODE_DISABLE;
         adc_oneshot_new_unit(&init_config, &adc1_handle);
     }
 }
 
-inline u16 analogRead(int pin) FL_NO_EXCEPT {
+inline u16 (analogRead)(int pin) FL_NO_EXCEPT {
     // Map GPIO pin to ADC channel (ESP32-specific mapping)
     // This is a simplified mapping - real implementation would need
     // platform-specific channel detection
@@ -137,7 +138,9 @@ inline u16 analogRead(int pin) FL_NO_EXCEPT {
 
     // Configure channel (simplified - assumes ADC1 channel 0)
     adc_oneshot_chan_cfg_t config = {
-        .atten = ADC_ATTEN_DB_12,
+        // Attenuation 3 has the same value under the old 11 dB and new
+        // 12 dB names; IDF 5.1 does not expose ADC_ATTEN_DB_12 yet.
+        .atten = static_cast<adc_atten_t>(3),
         .bitwidth = ADC_BITWIDTH_12,
     };
 
@@ -156,6 +159,13 @@ inline u16 analogRead(int pin) FL_NO_EXCEPT {
 namespace {
     bool adc1_initialized = false;
 
+    // ADC attenuation 3 is the 11 dB setting. Newer SDKs spell it
+    // ADC_ATTEN_DB_12 and mark ADC_ATTEN_DB_11 deprecated, but IDF 4.4 SDKs in
+    // the wild (including this repo's esp32dev_idf44 environment) do not
+    // define ADC_ATTEN_DB_12, so name the stable underlying value instead of
+    // either spelling.
+    constexpr adc_atten_t kAdcAtten11Db = static_cast<adc_atten_t>(3);
+
     void initADC1() FL_NO_EXCEPT {
         if (adc1_initialized) {
             return;
@@ -170,13 +180,13 @@ namespace {
     }
 }
 
-inline u16 analogRead(int pin) FL_NO_EXCEPT {
+inline u16 (analogRead)(int pin) FL_NO_EXCEPT {
     initADC1();
 
     // Note: This is a stub implementation. Real implementation would need
     // proper GPIO-to-ADC channel mapping based on ESP32 variant
     adc1_channel_t channel = ADC1_CHANNEL_0;  // Placeholder
-    adc1_config_channel_atten(channel, ADC_ATTEN_DB_11);
+    adc1_config_channel_atten(channel, kAdcAtten11Db);
 
     int raw_value = adc1_get_raw(channel);
     if (raw_value < 0) {
@@ -401,7 +411,7 @@ inline void ledcWriteScaledDuty(int pin, u32 val, u32 in_max) FL_NO_EXCEPT {
     // No LEDC allocation for this pin (setPwmFrequency was not called): no-op.
 }
 
-inline void analogWrite(int pin, u16 val) FL_NO_EXCEPT {
+inline void (analogWrite)(int pin, u16 val) FL_NO_EXCEPT {
     // Arduino-style 8-bit duty input (0-255) onto the LEDC channel that
     // setPwmFrequencyNative() configured for this pin.
     ledcWriteScaledDuty(pin, val, 255);

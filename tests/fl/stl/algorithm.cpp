@@ -537,4 +537,95 @@ FL_TEST_CASE("fl::shuffle") {
     }
 }
 
+// Regression: fl::sort degraded to O(n^2) time / O(n) recursion depth on
+// duplicate-heavy input (Lomuto partition put all equal keys on one side).
+namespace {
+struct CountingLess {
+    fl::u64* count;
+    bool operator()(fl::u32 a, fl::u32 b) const {
+        ++(*count);
+        return a < b;
+    }
+};
+
+void check_sort_bounded(fl::vector<fl::u32> v) {
+    const fl::size n = v.size();
+    fl::u32 expected_sum = 0;
+    for (fl::size i = 0; i < n; ++i) expected_sum += v[i] * 2654435761u + v[i];
+    fl::u64 comps = 0;
+    fl::sort(v.begin(), v.end(), CountingLess{&comps});
+    for (fl::size i = 1; i < n; ++i) {
+        if (v[i] < v[i - 1]) {
+            FL_FAIL("not sorted at index " << i);
+        }
+    }
+    fl::u32 sum = 0;
+    for (fl::size i = 0; i < n; ++i) sum += v[i] * 2654435761u + v[i];
+    FL_CHECK_EQ(sum, expected_sum);  // permutation fingerprint
+    fl::u64 log2n = 1;
+    while ((fl::u64(1) << log2n) < n) ++log2n;
+    // Generous n*log2(n) bound; the old quicksort needed ~n^2/2 here.
+    FL_CHECK_LT(comps, fl::u64(8) * n * log2n);
+}
+}  // namespace
+
+FL_TEST_CASE("fl::sort adversarial inputs stay n log n") {
+    const fl::size n = 20000;
+    FL_SUBCASE("all equal") {
+        fl::vector<fl::u32> v(n, 7u);
+        check_sort_bounded(v);
+    }
+    FL_SUBCASE("few distinct values") {
+        fl::vector<fl::u32> v;
+        for (fl::size i = 0; i < n; ++i) v.push_back((i * 7919u) % 3u);
+        check_sort_bounded(v);
+    }
+    FL_SUBCASE("already sorted") {
+        fl::vector<fl::u32> v;
+        for (fl::size i = 0; i < n; ++i) v.push_back(fl::u32(i));
+        check_sort_bounded(v);
+    }
+    FL_SUBCASE("reverse sorted") {
+        fl::vector<fl::u32> v;
+        for (fl::size i = 0; i < n; ++i) v.push_back(fl::u32(n - i));
+        check_sort_bounded(v);
+    }
+    FL_SUBCASE("organ pipe") {
+        fl::vector<fl::u32> v;
+        for (fl::size i = 0; i < n; ++i) v.push_back(fl::u32(i < n / 2 ? i : n - i));
+        check_sort_bounded(v);
+    }
+    FL_SUBCASE("median-of-3 killer") {
+        // Musser's pattern: interleaves so median-of-3 picks a bad pivot.
+        const fl::size k = n / 2;
+        fl::vector<fl::u32> v(n, 0u);
+        for (fl::size i = 1; i <= k; ++i) {
+            if (i % 2 == 1) {
+                v[i - 1] = fl::u32(i);
+                v[i] = fl::u32(k + i);
+            }
+            v[k + i - 1] = fl::u32(2 * i);
+        }
+        check_sort_bounded(v);
+    }
+    FL_SUBCASE("heap_sort fallback sorts every small size") {
+        // Introsort's depth-limit fallback; sift_down used to skip a node
+        // whose only child was the last element.
+        for (fl::u32 len = 2; len < 64; ++len) {
+            fl::vector<fl::u32> v;
+            for (fl::u32 i = 0; i < len; ++i) v.push_back((i * 37u + 11u) % 17u);
+            fl::detail::heap_sort(v.begin(), v.end(), fl::less<fl::u32>());
+            for (fl::u32 i = 1; i < len; ++i) {
+                if (v[i] < v[i - 1]) {
+                    FL_FAIL("heap_sort len " << len << " unsorted at " << i);
+                }
+            }
+        }
+    }
+    FL_SUBCASE("100k all equal") {
+        fl::vector<fl::u32> v(100000, 42u);
+        check_sort_bounded(v);
+    }
+}
+
 } // FL_TEST_FILE

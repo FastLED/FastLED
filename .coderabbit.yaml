@@ -15,10 +15,15 @@ reviews:
         comments before broad API changes, mass annotation edits, moving or
         splitting implementations across the codebase, or changing unity-build
         architecture. Measurements and passing tests prove benefit, not
-        authorization. A PR author's own explanation is not maintainer approval.
+        authorization. A PR author's explanation alone is not authorization
+        when the author is not a maintainer. If the author is a maintainer,
+        their explicit scope approval in the PR conversation counts; do not
+        require a separate issue or a second maintainer solely because the
+        maintainer authored the PR. Verify the author's maintainer role and
+        distinguish an explicit authorization from a description of the diff.
 
         Flag unauthorized expansion as HIGH severity and request changes.
-        Ask for the exact issue/comment link granting the expanded scope;
+        Ask for the exact issue or PR comment link granting the expanded scope;
         without it, require a smaller patch within the authorized scope or
         preservation of the experiment on a separate branch for later review.
         Evaluate the breadth and structural impact of the diff, not a fixed
@@ -26,13 +31,16 @@ reviews:
         not need separate authorization merely because they touch several files.
 
         Build files require a specific maintainer directive in the referenced
-        issue authorizing the build changes. This includes build scripts and
+        issue or PR conversation authorizing the build changes. An explicit
+        directive from a verified maintainer who authored the PR qualifies.
+        This includes build scripts and
         configuration, source inventories, CI workflows, linker/compiler flags,
         canonical compilation units (src/fl/build/*), and unity include routers
         (**/_build.cpp.hpp). Do not accept incidental cleanup, opportunistic
         restructuring, or splitting/consolidating unity groups under a generic
-        optimization request. For each build change, require the directive's
-        issue/comment link and explain how that change implements the directive.
+        optimization request. For each build change, require a link to the
+        maintainer's issue or PR comment and explain how the change implements
+        that directive.
         Flag missing directives as HIGH severity and request removal of the
         unauthorized build changes. Apply this gate to build-related files
         regardless of their directory or extension.

@@ -84,9 +84,9 @@ public:
 	typedef RwReg port_t;  ///< @copydoc Pin::port_t
 
 	/// @copydoc Pin::setOutput()
-	inline static void setOutput() { _init(); pinMode(PIN, PinMode::Output); }
+	inline static void setOutput() { _init(); (fl::pinMode)(PIN, PinMode::Output); }
 	/// @copydoc Pin::setInput()
-	inline static void setInput() { _init(); pinMode(PIN, PinMode::Input); }
+	inline static void setInput() { _init(); (fl::pinMode)(PIN, PinMode::Input); }
 
 	/// @copydoc Pin::hi()
 	inline static void hi() __attribute__ ((always_inline)) { *sPort |= sPinMask; }

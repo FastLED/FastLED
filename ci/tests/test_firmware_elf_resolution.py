@@ -18,6 +18,7 @@ from __future__ import annotations
 import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from unittest.mock import patch
 
 from ci.util.firmware_elf import find_fbuild_elf, resolve_firmware_elf
 
@@ -96,6 +97,52 @@ class TestResolveFirmwareElf(unittest.TestCase):
         self.assertIsNone(resolve_firmware_elf({}, self.build_dir))
         elf = self._write(".fbuild/build/release/firmware.elf")
         self.assertEqual(resolve_firmware_elf({}, self.build_dir), elf)
+
+    def test_crash_decoder_fbuild_release_layout(
+        self: "TestResolveFirmwareElf",
+    ) -> None:
+        from ci.util.crash_trace_decoder import CrashTraceDecoder
+
+        elf = self._write(".fbuild/build/release/firmware.elf")
+        decoder = CrashTraceDecoder(
+            self.build_dir, "esp32s3_opi_psram8", use_fbuild=True
+        )
+        with patch("ci.util.crash_trace_decoder.find_addr2line", return_value=None):
+            decoder._resolve_tools()
+        self.assertEqual(decoder._elf_path, elf)
+
+    def test_crash_decoder_prefers_requested_environment(
+        self: "TestResolveFirmwareElf",
+    ) -> None:
+        import os
+
+        from ci.util.crash_trace_decoder import CrashTraceDecoder
+
+        requested = self._write(".fbuild/build/esp32s3_opi_psram8/release/firmware.elf")
+        legacy = self._write(".fbuild/build/esp32s3_opi_psram8/firmware.elf")
+        other = self._write(".fbuild/build/esp32c6/release/firmware.elf")
+        os.utime(legacy, (0, 0))
+        os.utime(requested, (1, 1))
+        os.utime(other, (2, 2))
+        decoder = CrashTraceDecoder(
+            self.build_dir, "esp32s3_opi_psram8", use_fbuild=True
+        )
+        with patch("ci.util.crash_trace_decoder.find_addr2line", return_value=None):
+            decoder._resolve_tools()
+        self.assertEqual(decoder._elf_path, requested)
+
+    def test_crash_decoder_rejects_foreign_environment(
+        self: "TestResolveFirmwareElf",
+    ) -> None:
+        from ci.util.crash_trace_decoder import CrashTraceDecoder
+
+        self._write(".fbuild/build/esp32c6/release/firmware.elf")
+        decoder = CrashTraceDecoder(
+            self.build_dir, "esp32s3_opi_psram8", use_fbuild=True
+        )
+        with patch("ci.util.crash_trace_decoder.find_addr2line", return_value=None):
+            decoder._resolve_tools()
+        self.assertIsNone(decoder._elf_path)
 
     def test_the_newest_fbuild_layout_wins(self: "TestResolveFirmwareElf") -> None:
         import os

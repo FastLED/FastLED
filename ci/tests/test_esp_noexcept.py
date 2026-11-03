@@ -92,6 +92,38 @@ def test_sdkconfig_target_is_loaded_before_selection(tmp_path: Path) -> None:
     _compile('#include "fl/stl/noexcept.h"\n' + _probe(True), [f"-I{tmp_path}"])
 
 
+def test_bare_idf_integer_dispatch(tmp_path: Path) -> None:
+    """IDF defines ESP_PLATFORM rather than Arduino's ESP32 macro."""
+    (tmp_path / "sdkconfig.h").write_text("#define CONFIG_IDF_TARGET_ESP32 1\n")
+    (tmp_path / "esp_idf_version.h").write_text(
+        "#define ESP_IDF_VERSION_MAJOR 5\n#define ESP_IDF_VERSION_MINOR 5\n"
+    )
+    _compile(
+        '#include "platforms/int.h"\n'
+        'static_assert(__is_same(fl::size, unsigned int), "ESP integer dispatch");\n',
+        ["-DESP_PLATFORM=1", f"-I{tmp_path}"],
+    )
+
+
+@pytest.mark.parametrize(
+    "frequency_macro",
+    [
+        "CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ",
+        "CONFIG_ESP32_DEFAULT_CPU_FREQ_MHZ",
+    ],
+)
+@pytest.mark.parametrize("override", [False, True])
+def test_bare_idf_cpu_frequency(
+    tmp_path: Path, frequency_macro: str, override: bool
+) -> None:
+    (tmp_path / "sdkconfig.h").write_text(f"#define {frequency_macro} 160\n")
+    _compile(
+        '#include "platforms/esp/32/core/led_sysdefs_esp32.h"\n'
+        f'static_assert(F_CPU == {80000000 if override else 160000000}, "SDK CPU frequency");\n',
+        [f"-I{tmp_path}"] + (["-DF_CPU=80000000"] if override else []),
+    )
+
+
 def test_system_debug_exception_policy_preserves_nonthrowing_contract() -> None:
     _compile(
         '#include "fl/stl/noexcept.h"\n' + _probe(True),

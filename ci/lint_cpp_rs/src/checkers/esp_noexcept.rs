@@ -62,7 +62,9 @@ impl FileContentChecker for EspNoexceptChecker {
                 // Report one diagnostic per broken region, not every child.
                 continue;
             }
-            if matches!(node.kind(), "function_declarator" | "operator_cast") {
+            if matches!(node.kind(), "function_declarator" | "operator_cast")
+                && !esp_noexcept_misparsed_assignment(node, &source)
+            {
                 if let Some(hit) = esp_noexcept_function(node, &source, &file.content) {
                     hits.push(hit);
                 }
@@ -400,11 +402,41 @@ fn esp_noexcept_source(content: &str) -> String {
     String::from_utf8(bytes).expect("ASCII macro replacement preserves UTF-8")
 }
 
+/// Inside a function body, tree-sitter reads a register-macro store such as
+/// `USIE(kUart) = 0;` as a function declarator with a pure-specifier. A
+/// pure-specifier is only legal on a class member, so a `= ...` declarator
+/// whose nearest scope is a block is an assignment, not a function.
+fn esp_noexcept_misparsed_assignment(node: tree_sitter::Node<'_>, source: &str) -> bool {
+    if !source[node.end_byte()..].trim_start().starts_with('=') {
+        return false;
+    }
+    let mut parent = node.parent();
+    while let Some(p) = parent {
+        match p.kind() {
+            "compound_statement" => return true,
+            "field_declaration_list" | "translation_unit" => return false,
+            _ => parent = p.parent(),
+        }
+    }
+    false
+}
+
 fn esp_noexcept_function(
     mut node: tree_sitter::Node<'_>,
     source: &str,
     original: &str,
 ) -> Option<(usize, String)> {
+    // `Type (name)(args)` with a non-primitive return type parses as a nested
+    // declarator chain, so the inner `Type(name)` node is this declaration's
+    // parenthesized name, not a callable of its own. The outer node owns it.
+    if node.parent().is_some_and(|parent| {
+        parent.kind() == "function_declarator"
+            && parent
+                .child_by_field_name("declarator")
+                .is_some_and(|inner| inner.id() == node.id())
+    }) {
+        return None;
+    }
     let declarator = if node.kind() == "operator_cast" {
         let name = node.child_by_field_name("type")?;
         node = node.child_by_field_name("declarator")?;
@@ -417,16 +449,42 @@ fn esp_noexcept_function(
     };
     // `void (*callback)()` describes a pointer's type, not a function owned by
     // this file. The inner function in `void (*factory())()` is still checked.
-    if matches!(
-        declarator.kind(),
-        "parenthesized_declarator"
-            | "pointer_declarator"
-            | "reference_declarator"
-            | "array_declarator"
-            | "structured_binding_declarator"
-    ) {
-        return None;
-    }
+    let declarator = match declarator.kind() {
+        // A shielded name, `Type (name)(args)`: parentheses are the only
+        // spelling that keeps Arduino-ESP32's io_pin_remap.h function-like
+        // macros from rewriting the declaration (see #4914). Unwrap to the
+        // name; a parenthesized pointer/reference/array type is still skipped.
+        "parenthesized_declarator" => {
+            let inner = declarator.named_child(0)?;
+            if matches!(
+                inner.kind(),
+                "identifier" | "qualified_identifier" | "field_identifier"
+            ) {
+                inner
+            } else {
+                return None;
+            }
+        }
+        // `PinValue (name)(args)` parses as a nested declarator chain when the
+        // return type is a non-primitive identifier: the grammar reads
+        // `PinValue(name)` as an inner call-like declarator. Same shielded
+        // declaration, so unwrap it the same way.
+        "function_declarator" => {
+            let inner = declarator.child_by_field_name("declarator")?;
+            if !matches!(
+                inner.kind(),
+                "identifier" | "qualified_identifier" | "field_identifier"
+            ) {
+                return None;
+            }
+            inner
+        }
+        "pointer_declarator"
+        | "reference_declarator"
+        | "array_declarator"
+        | "structured_binding_declarator" => return None,
+        _ => declarator,
+    };
     let mut parent = node.parent();
     let owner = loop {
         let ancestor = parent?;
@@ -545,10 +603,33 @@ mod esp_noexcept_tests {
     }
 
     #[test]
+    fn esp_noexcept_checks_parenthesized_declarators() {
+        // Parenthesized names keep Arduino-ESP32 pin-remap macros from
+        // rewriting the declaration; they are still owned functions.
+        assert!(check("inline void (pinMode)(int, PinMode) FL_NO_EXCEPT {}\n").is_empty());
+        assert_eq!(check("inline void (pinMode)(int, PinMode) {}\n").len(), 1);
+        assert!(
+            check("inline PinValue (digitalRead)(int) FL_NO_EXCEPT { return 0; }\n").is_empty()
+        );
+        assert_eq!(check("inline PinValue (digitalRead)(int) { return 0; }\n").len(), 1);
+        assert_eq!(check("inline u16 (analogRead)(int) { return 0; }\n").len(), 1);
+        assert!(check("inline u16 (analogRead)(int) FL_NO_EXCEPT { return 0; }\n").is_empty());
+        // Parenthesized pointer types stay exempt, as before.
+        assert!(check("void (*callback)();\n").is_empty());
+    }
+
+    #[test]
     fn esp_noexcept_checks_both_preprocessor_arms_and_multiline_callbacks() {
         let hits = check("#if ESP32\nvoid foo(\nvoid (*handler)() noexcept\n) {}\n#else\nvoid foo() {}\n#endif\n");
         assert_eq!(hits.len(), 2, "{hits:?}");
         assert!(hits.iter().all(|hit| hit.1.starts_with("Missing")));
+    }
+
+    #[test]
+    fn esp_noexcept_ignores_register_macro_stores_in_function_bodies() {
+        assert!(check("void f() FL_NO_EXCEPT { USIE(kUart) = 0; USC0(kUart) = 1; }\n").is_empty());
+        // Local class members are still checked.
+        assert_eq!(check("void f() FL_NO_EXCEPT { struct L { virtual void go() = 0; }; }\n").len(), 1);
     }
 
     #[test]

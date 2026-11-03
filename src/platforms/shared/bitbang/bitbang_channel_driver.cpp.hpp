@@ -86,7 +86,7 @@ void BitBangChannelDriver::rebuildPinConfig(
         mPinForSlot[slot] = pin;
         mActiveSlotMask |= (1 << slot);
 
-        fl::pinMode(pin, PinMode::Output);
+        (fl::pinMode)(pin, PinMode::Output);
     }
 
     // Also set up clock pins for SPI channels
@@ -96,8 +96,8 @@ void BitBangChannelDriver::rebuildPinConfig(
 
         const auto* spiCfg = ch->getChipset().ptr<SpiChipsetConfig>();
         if (spiCfg && spiCfg->clockPin >= 0) {
-            fl::pinMode(spiCfg->clockPin, PinMode::Output);
-            fl::digitalWrite(spiCfg->clockPin, PinValue::Low);
+            (fl::pinMode)(spiCfg->clockPin, PinMode::Output);
+            (fl::digitalWrite)(spiCfg->clockPin, PinValue::Low);
         }
     }
 
@@ -293,11 +293,11 @@ void BitBangChannelDriver::transmitSpi(
                 mMultiWriter.writeByte(dataMask);
 
                 // Clock rising edge
-                fl::digitalWrite(clockPin, PinValue::High);
+                (fl::digitalWrite)(clockPin, PinValue::High);
                 fl::delayNanoseconds(halfPeriodNs);
 
                 // Clock falling edge
-                fl::digitalWrite(clockPin, PinValue::Low);
+                (fl::digitalWrite)(clockPin, PinValue::Low);
                 fl::delayNanoseconds(halfPeriodNs);
             }
         }

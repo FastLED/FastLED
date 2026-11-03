@@ -46,6 +46,7 @@
 #include "cpixel_ledcontroller.h"
 #include "fl/channels/data.h"
 #include "fl/channels/driver.h"
+#include "fl/channels/worker_policy.h"
 #include "fl/channels/manager.h"
 #include "fl/channels/bus.h"
 #include "fl/channels/bus_traits.h"  // IWYU pragma: keep (DriverTraits<Bus::X> satisfies the DriverTraits contract)
@@ -75,7 +76,9 @@ void registerNativeSpiDriver() FL_NO_EXCEPT;
 ///                    platform (see `kBus` below).
 /// @tparam B_WHICH    Bus instance index, for platforms with more than one
 ///                    instance of a given bus kind.
-template <fl::SpiChipset CHIPSET, EOrder RGB_ORDER, fl::Bus B, fl::u8 B_WHICH>
+/// @tparam CORE       Worker affinity, with no per-controller configuration storage.
+template <fl::SpiChipset CHIPSET, EOrder RGB_ORDER, fl::Bus B, fl::u8 B_WHICH,
+          Core CORE = Core::Auto>
 class SlimSpiBridgeController : public CPixelLEDController<RGB_ORDER> {
 public:
     /// The bus actually used after resolving `Bus::AUTO` -- mirrors
@@ -94,8 +97,10 @@ public:
     {
         mData = ChannelData::create(ChipsetVariant(cfg));
 #if defined(FL_IS_ESP32)
+        // The explicit-host addLeds() overload registers the native SPI
+        // driver itself; referencing it here would link the ESP-IDF SPI
+        // master stack (~20 KB) into every AUTO-host sketch.
         if (mExplicitSpiHost) {
-            platforms::registerNativeSpiDriver();
             return;
         }
 #endif
@@ -113,6 +118,10 @@ protected:
     void showPixels(PixelController<RGB_ORDER>& pixels) FL_NO_EXCEPT override {
         fl::shared_ptr<IChannelDriver> driver = resolveDriver();
         if (!driver) {
+            return;
+        }
+        if (!detail::WorkerPolicy<CORE>::apply(*driver)) {
+            FL_ERROR("SlimSpiBridgeController: worker configuration rejected - dropping frame");
             return;
         }
 

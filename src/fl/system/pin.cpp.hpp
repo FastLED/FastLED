@@ -48,12 +48,12 @@ namespace fl {
 // NOTE: pinMode() is defined later, after PWM state management, because it
 // needs to release PWM channels.
 
-void digitalWrite(int pin, PinValue val) FL_NO_EXCEPT {
-    platforms::digitalWrite(pin, val);
+void (digitalWrite)(int pin, PinValue val) FL_NO_EXCEPT {
+    (platforms::digitalWrite)(pin, val);
 }
 
-PinValue digitalRead(int pin) FL_NO_EXCEPT {
-    return platforms::digitalRead(pin);
+PinValue (digitalRead)(int pin) FL_NO_EXCEPT {
+    return (platforms::digitalRead)(pin);
 }
 
 // analogRead() lives in fl/system/analog/analog_read.cpp.hpp, its own unity
@@ -137,14 +137,14 @@ void FL_IRAM pwm_isr_handler(void* user_data) FL_NO_EXCEPT {
 
         // Turn LOW at duty cycle boundary
         if (ch.tick_counter == ch.high_ticks && ch.pin_state) {
-            fl::digitalWrite(ch.pin, fl::PinValue::Low);
+            (fl::digitalWrite)(ch.pin, fl::PinValue::Low);
             ch.pin_state = false;
         }
         // Start new period: reset counter, turn HIGH if duty > 0
         else if (ch.tick_counter >= ch.period_ticks) {
             ch.tick_counter = 0;
             if (ch.high_ticks > 0) {
-                fl::digitalWrite(ch.pin, fl::PinValue::High);
+                (fl::digitalWrite)(ch.pin, fl::PinValue::High);
                 ch.pin_state = true;
             }
         }
@@ -225,7 +225,7 @@ void maybeShutdownIsr() FL_NO_EXCEPT {
 void releaseChannel(PwmPinState* ch) FL_NO_EXCEPT {
     if (!ch || ch->pin < 0) return;
 
-    fl::digitalWrite(ch->pin, fl::PinValue::Low);
+    (fl::digitalWrite)(ch->pin, fl::PinValue::Low);
 
     {
         fl::isr::critical_section cs;
@@ -244,7 +244,7 @@ void releaseChannel(PwmPinState* ch) FL_NO_EXCEPT {
 // analogWrite / setPwm16 — route through PWM state when configured
 // ============================================================================
 
-void analogWrite(int pin, u16 val) FL_NO_EXCEPT {
+void (analogWrite)(int pin, u16 val) FL_NO_EXCEPT {
     pwm_state::PwmPinState* ch = pwm_state::findByPin(pin);
 
     if (ch && ch->backend == pwm_state::PwmBackend::IsrSoftware) {
@@ -258,12 +258,12 @@ void analogWrite(int pin, u16 val) FL_NO_EXCEPT {
 
     if (ch && ch->backend == pwm_state::PwmBackend::Native) {
         // Native backend — forward to platform (frequency already configured)
-        platforms::analogWrite(pin, val);
+        (platforms::analogWrite)(pin, val);
         return;
     }
 
     // No setPwmFrequency called — forward to platform as before
-    platforms::analogWrite(pin, val);
+    (platforms::analogWrite)(pin, val);
 }
 
 void setPwm16(int pin, u16 val) FL_NO_EXCEPT {
@@ -352,8 +352,8 @@ int setPwmFrequency(int pin, u32 frequency_hz) FL_NO_EXCEPT {
     }
 
     // Configure GPIO
-    fl::pinMode(pin, fl::PinMode::Output);
-    fl::digitalWrite(pin, fl::PinValue::Low);
+    (fl::pinMode)(pin, fl::PinMode::Output);
+    (fl::digitalWrite)(pin, fl::PinValue::Low);
 
     // Initialize channel (atomic)
     {
@@ -395,7 +395,7 @@ int pwmEnd(int pin) FL_NO_EXCEPT {
 // pinMode - releases PWM when pin mode changes
 // ============================================================================
 
-void pinMode(int pin, PinMode mode) FL_NO_EXCEPT {
+void (pinMode)(int pin, PinMode mode) FL_NO_EXCEPT {
     // Release any active PWM channel on this pin
     // When pinMode is called, the pin's function is being changed,
     // so any existing PWM configuration should be cleared
@@ -404,7 +404,7 @@ void pinMode(int pin, PinMode mode) FL_NO_EXCEPT {
         pwm_state::releaseChannel(ch);
     }
 
-    platforms::pinMode(pin, mode);
+    (platforms::pinMode)(pin, mode);
 }
 
 }  // namespace fl

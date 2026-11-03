@@ -281,7 +281,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
 
                 // Restore GPIO pulldown when RMT channel is destroyed
                 // This ensures pin returns to stable LOW state
-                fl::pinMode(ch.pin, fl::PinMode::InputPulldown);
+                (fl::pinMode)(ch.pin, fl::PinMode::InputPulldown);
 
                 // Free DMA if this channel was using it
                 if (ch.useDMA) {

@@ -30,6 +30,7 @@ from ci.meson.link_retry import (
     kill_stale_runner_processes,
 )
 from ci.meson.mtime_stabilizer import (
+    refresh_relinked_mtimes,
     restore_executable_bits,
     stabilize_dll_mtimes,
 )
@@ -186,6 +187,7 @@ def stream_compile_only(
         build_optimizer: Optional BuildOptimizer for DLL relink suppression.
         build_timer: Optional BuildTimer for recording compile_done checkpoint.
     """
+    build_start = time.time()
     native_inputs = _run_precompile_passes(build_dir)
     cmd = [get_meson_executable(), "compile", "-C", str(build_dir)]
 
@@ -673,6 +675,7 @@ def stream_compile_only(
     # perpetually older than the symbols file → infinite relink cascade.
     # Touch stale outputs to break the loop (~5ms, saves ~1-2s per build).
     if not compilation_failed:
+        refresh_relinked_mtimes(build_dir, build_start, seen_libfastled, compiled_tests)
         stabilize_dll_mtimes(build_dir, verbose=verbose)
         # Same cache-restore defect, different attribute: cached link results
         # come back without the executable bit (FastLED#4205).

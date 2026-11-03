@@ -98,13 +98,16 @@ FL_DISABLE_WARNING_POP
 CLEDController *CLEDController::mPHead = nullptr;
 static fl::u32 lastshow = 0;
 
-/// Global frame counter, used for debugging ESP implementations
-/// @todo Include in FASTLED_DEBUG_COUNT_FRAME_RETRIES block?
-fl::u32 _frame_cnt=0;
+namespace fl {
+/// Frame counter for ESP8266 clockless drivers (FASTLED_DEBUG_COUNT_FRAME_RETRIES).
+/// Declared as fl::_frame_cnt in platforms/esp/8266/clockless*_esp8266.h.
+// FL_LINT_ALLOW_GLOBAL(mutable counter written by the driver via extern)
+u32 _frame_cnt=0;
 
-/// Global frame retry counter, used for debugging ESP implementations
-/// @todo Include in FASTLED_DEBUG_COUNT_FRAME_RETRIES block?
-fl::u32 _retry_cnt=0;
+/// Frame retry counter for ESP8266 clockless drivers (FASTLED_DEBUG_COUNT_FRAME_RETRIES).
+// FL_LINT_ALLOW_GLOBAL(mutable counter written by the driver via extern)
+u32 _retry_cnt=0;
+}  // namespace fl
 
 // uint32_t CRGB::Squant = ((uint32_t)((__TIME__[4]-'0') * 28))<<16 | ((__TIME__[6]-'0')*50)<<8 | ((__TIME__[7]-'0')*28);
 
@@ -824,7 +827,9 @@ fl::ChannelPtr CFastLED::add(const fl::ChannelConfig& config) FL_NO_EXCEPT {
     // selection, so they get runtime selection.
     //
     // For minimum binary size, callers should use the compile-time path:
-    //   FastLED.addLeds<CHIPSET, PIN, ORDER, fl::Bus::X>(leds, n);
+    //   FastLED.add<fl::Bus::X>(config);  // clockless chipset
+    //   FastLED.add<fl::Bus::X, fl::SpiChipsetConfig>(config);  // erased SPI
+    // or FastLED.addLeds<CHIPSET, PIN, ORDER, fl::Bus::X>(leds, n);
     // which ODR-uses only `BusTraits<X>::instancePtr()` and lets
     // `--gc-sections` drop every other driver TU.
     //
@@ -833,8 +838,10 @@ fl::ChannelPtr CFastLED::add(const fl::ChannelConfig& config) FL_NO_EXCEPT {
     #ifndef FASTLED_SUPPRESS_RUNTIME_DRIVER_WARNING
     FL_WARN_ONCE("FastLED.add(cfg): runtime-selection mode â€” enrolling every "
                  "available driver via fl::enableAllDrivers(). For minimum "
-                 "binary size, prefer FastLED.addLeds<CHIPSET, PIN, ORDER, "
-                 "fl::Bus::X>(leds, n) which links only the named driver. "
+                 "binary size, prefer FastLED.add<fl::Bus::X>(cfg) for clockless "
+                 "chipsets, or FastLED.add<fl::Bus::X, fl::SpiChipsetConfig>(cfg) "
+                 "for erased SPI configurations. The bus must support the chipset. "
+                 "Each call links only the named driver. "
                  "Suppress this warning with -DFASTLED_SUPPRESS_RUNTIME_DRIVER_WARNING.");
     #endif
     fl::enableAllDrivers();

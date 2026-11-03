@@ -25,6 +25,12 @@ public:
     typedef volatile u32 * port_ptr_t;
     typedef u32 port_t;
 
+    /// GPIO number this logical pin resolves to. Pin-order modes remap the
+    /// template pin numbers, so drivers that need the real pad (for example
+    /// the HSPI peripheral, which is hard-wired to GPIO13/14) must consult
+    /// this rather than the template argument.
+    static constexpr u8 kRealPin = PIN;
+
     inline static void setOutput() FL_NO_EXCEPT { pinMode(PIN, PinMode::Output); }
     inline static void setInput() FL_NO_EXCEPT { pinMode(PIN, PinMode::Input); }
 

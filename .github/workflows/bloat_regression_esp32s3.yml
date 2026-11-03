@@ -72,16 +72,58 @@ jobs:
           # has no merge base to read.
           fetch-depth: 0
 
+      # Same path classification as the memory report (ci/changed_targets.py):
+      # an ESP8266-only or stub/WASM-only push cannot move the ESP32-S3 image,
+      # so the gate reports success without building. An explicit label always
+      # runs it, and `ci-full` already selects this job.
+      - name: Decide whether this change can affect ESP32-S3
+        id: relevance
+        env:
+          LABELS: ${{ github.event_name == 'workflow_dispatch' && '[]' || toJSON(github.event.pull_request.labels.*.name) }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha || '' }}
+          DISPATCH: ${{ github.event_name == 'workflow_dispatch' }}
+        run: |
+          set -euo pipefail
+          labels="$(jq -r 'join(",")' <<<"$LABELS")"
+          case ",$labels," in
+            *,ci-full,*|*,ci-test:bloat,*|*,ci-platform:esp32s3,*|*,ci-platform:esp\*,*)
+              echo "run=true" >> "$GITHUB_OUTPUT"
+              echo "ESP32-S3 bloat gate selected by label." >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+              ;;
+          esac
+          if [ "$DISPATCH" = "true" ]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          : > changed.txt
+          if [ -n "$BASE_SHA" ]; then
+            base="$(git merge-base "$HEAD_SHA" "$BASE_SHA")"
+            git diff --name-only "$base" "$HEAD_SHA" > changed.txt
+          elif git rev-parse --verify --quiet "$HEAD_SHA~1" >/dev/null; then
+            git diff --name-only "$HEAD_SHA~1" "$HEAD_SHA" > changed.txt
+          fi
+          if python3 ci/changed_targets.py --changed-file changed.txt --affects esp32; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=false" >> "$GITHUB_OUTPUT"
+            echo "Skipping the ESP32-S3 bloat gate: the change cannot affect ESP32." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
       - name: Set up uv (Python toolchain)
+        if: steps.relevance.outputs.run == 'true'
         uses: astral-sh/setup-uv@v6
         with:
           save-cache: ${{ github.ref == 'refs/heads/master' && (github.event_name == 'push' || github.event_name == 'schedule') }}
           enable-cache: true
 
       - name: Sync project dependencies
+        if: steps.relevance.outputs.run == 'true'
         run: uv sync
 
       - name: Recover the baseline as it stands on the merge base
+        if: steps.relevance.outputs.run == 'true'
         id: previous_baseline
         run: |
           set -euo pipefail
@@ -107,6 +149,7 @@ jobs:
           fi
 
       - name: Run ESP32-S3 bloat regression gate
+        if: steps.relevance.outputs.run == 'true'
         run: |
           set -euo pipefail
           if [ -n "${{ steps.previous_baseline.outputs.path }}" ]; then
@@ -120,6 +163,7 @@ jobs:
       # under .build/symbols/esp32s3-slim so it never touches the baseline
       # above. The step fails if the slim knobs did not take effect.
       - name: Slim profile smoke (explicit opt-in profile)
+        if: steps.relevance.outputs.run == 'true'
         run: uv run ci/bloat.py esp32s3 --example Blink --build --profile slim --top 25
 
       # The gate's total is a sum over this report, and a local run of the same
@@ -128,7 +172,7 @@ jobs:
       # instead of rebuilt and guessed at. Uploaded on failure too: that is
       # when it is needed most.
       - name: Upload the symbol report
-        if: always()
+        if: always() && steps.relevance.outputs.run == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: esp32s3-bloat-report

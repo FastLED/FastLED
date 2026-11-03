@@ -50,12 +50,61 @@ This directory contains the ESP32-specific implementation of FastLED's SPI chann
 
 ## Architecture
 
+### Native clocked SPI streaming (#3179)
+
+The explicit native-host path for APA102/SK9822 runs through
+`SpiChannelEngineAdapter` and `SPISingleESP32`. It is separate from
+`ChannelEngineSpi`, which generates clockless WS2812 waveforms over SPI.
+
+```cpp
+FastLED.addLeds<APA102, 1, 3, RGB, DATA_RATE_MHZ(6)>(
+    leds, numLeds, fl::Esp32SpiBus::HOST2);
+FastLED.show();
+FastLED.wait();
 ```
-User API (FastLED.addLeds<APA102, DATA, CLK>)
+
+Native clocked transfers choose their memory strategy automatically. Frames
+of at most 512 bytes use the existing whole-frame copy and one asynchronous
+transaction, avoiding stream descriptors and ownership allocation for small
+strips. Larger frames use a fixed 512-byte internal DMA staging buffer.
+The SDK queues the large frame's transaction descriptors in task context; each
+completion ISR refills that same storage before the next DMA starts. The
+adapter retains the encoded channel until all SDK results have been drained,
+then advances to the next channel without blocking `show()` for the wire time.
+
+Only staging storage has a constant bound. The encoded source remains live,
+and descriptors and SDK queue storage scale with `ceil(frameBytes / 512)`;
+the existing 64-KiB encoded-frame limit still applies. SDK queue capacity keeps
+its high-water allocation for reuse. Include those allocations when comparing
+total SRAM, rather than equating the staging reduction with total heap savings.
+
+Refill uses a non-IRAM SPI interrupt, which the SDK masks while flash/PSRAM
+cache is unavailable. An externally initialized bus has unknown interrupt
+flags and retains the block path. Targets with cached internal DMA memory
+also retain the block path until cache synchronization is supported. Other
+platform backends and the direct `acquireDMABuffer()`/`transmit()` interface
+keep their existing behavior.
+
+The full-frame hardware probe uses the canonical AutoResearch sketch:
+
+```bash
+bash autoresearch esp32s3 --spi-streaming --upload-port <port> --timeout 120s
+```
+
+It compares 1000-pixel APA102 and SK9822 frames against a separate SPI3
+receiver, including start/end framing and changing data across chunk boundaries.
+SPI2 drives GPIO 1/3; SPI3 samples those pads through the input matrix, with
+GPIO 4 controlling the receiver's chip select. This probe needs no external
+SPI loopback jumpers. It reports source/ELF hashes, frame times, heap stability,
+and scoped heap watermarks; the receiver's allocation is outside the measured
+transfer windows.
+
+```
+User API (explicit native-host FastLED.addLeds<APA102, DATA, CLK>)
   ↓
-ChannelEngineSpi (this directory)
+SpiChannelEngineAdapter
   ↓
-SPI Bus Manager (acquires SPI2/SPI3 hosts)
+SPISingleESP32 (SPI2/SPI3)
   ↓
 ESP32 SPI Peripheral (hardware DMA)
 ```

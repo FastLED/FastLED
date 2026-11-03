@@ -42,7 +42,9 @@ FL_EXTERN_C_BEGIN
 // IWYU pragma: begin_keep
 #include "driver/uart.h"
 // IWYU pragma: end_keep
-#if ESP_IDF_VERSION_4_OR_HIGHER
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(6, 0, 0)
+#include "esp_rom_serial_output.h"
+#elif ESP_IDF_VERSION_4_OR_HIGHER
 #include "esp_rom_uart.h"
 #else
 // IWYU pragma: begin_keep
@@ -61,12 +63,14 @@ FL_EXTERN_C_END
 // Older IDF versions only have esp_rom_uart_tx_one_char.
 #if !ESP_IDF_VERSION_4_OR_HIGHER
 #define esp_rom_output_tx_one_char(c) uart_tx_one_char(c)
+#define esp_rom_output_tx_wait_idle(n) uart_tx_wait_idle(n)
 #define UART_SIGNAL_TXD_INV UART_INVERSE_TXD
 #define UART_SIGNAL_RXD_INV UART_INVERSE_RXD
 #define UART_SIGNAL_RTS_INV UART_INVERSE_RTS
 #define UART_SIGNAL_CTS_INV UART_INVERSE_CTS
 #elif ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(5, 3, 0)
 #define esp_rom_output_tx_one_char(c) esp_rom_uart_tx_one_char(c)
+#define esp_rom_output_tx_wait_idle(n) esp_rom_uart_tx_wait_idle(n)
 #endif
 
 namespace fl {
@@ -460,12 +464,51 @@ size_t UartEsp32::write(const u8* buffer, size_t size) FL_NO_EXCEPT {
         int written = uart_write_bytes(port, static_cast<const char*>(static_cast<const void*>(buffer)), size);
         return (written < 0) ? 0 : static_cast<size_t>(written);
     } else {
-        // Fallback to ROM UART (byte-by-byte)
-        for (size_t i = 0; i < size; i++) {
-            esp_rom_output_tx_one_char(static_cast<char>(buffer[i]));
-        }
-        return size;
+        return writeRom(buffer, size);
     }
+}
+
+#if ESP_IDF_VERSION_4_OR_HIGHER
+// Weak references: they resolve only when another component (Arduino
+// Serial, a UartEsp32 instance, ...) already links the SDK UART driver, so
+// writeRom() never pulls the driver into a sketch on its own (#4982).
+#pragma weak uart_is_driver_installed
+#pragma weak uart_write_bytes
+#endif
+
+size_t UartEsp32::writeRom(const u8* buffer, size_t size) FL_NO_EXCEPT {
+    if (!buffer)
+        return 0;
+#if ESP_IDF_VERSION_4_OR_HIGHER
+    // An installed console driver owns the TX FIFO; queue behind its ring
+    // buffer so output stays ordered with Serial.write() and friends.
+    if (&uart_is_driver_installed && &uart_write_bytes &&
+        uart_is_driver_installed(UART_NUM_0)) {
+        const int written = uart_write_bytes(
+            UART_NUM_0, static_cast<const char*>(static_cast<const void*>(buffer)), size);
+        if (written >= 0) {
+            return static_cast<size_t>(written);
+        }
+        // Driver removed between the check and the write: use the ROM path.
+    }
+#endif
+    // ROM UART (byte-by-byte, blocks while the FIFO is full)
+    for (size_t i = 0; i < size; i++) {
+        esp_rom_output_tx_one_char(static_cast<char>(buffer[i]));
+    }
+    return size;
+}
+
+void UartEsp32::waitRomIdle() FL_NO_EXCEPT {
+    // ROM routine: no SDK driver. Lets ROM-written bytes leave the FIFO
+    // before a driver install reconfigures UART0 and resets it. An installed
+    // driver (which may use flow control) owns the FIFO: no unbounded wait.
+#if ESP_IDF_VERSION_4_OR_HIGHER
+    if (&uart_is_driver_installed && uart_is_driver_installed(UART_NUM_0)) {
+        return;
+    }
+#endif
+    esp_rom_output_tx_wait_idle(0);
 }
 
 void UartEsp32::writeln(const char* str) FL_NO_EXCEPT {

@@ -44,7 +44,7 @@ def test_copy_example_source_skips_generated_files(tmp_path: Path) -> None:
     assert not (staged_sketch / "compile_commands.json").exists()
 
 
-def test_copy_example_source_returns_embedded_fs_build_requirements(
+def test_copy_example_source_returns_no_embedded_fs_build_requirements(
     tmp_path: Path,
 ) -> None:
     project_root = tmp_path / "project"
@@ -62,4 +62,5 @@ def test_copy_example_source_returns_embedded_fs_build_requirements(
 
     assert isinstance(result, CopyExampleResult)
     assert result.success
-    assert result.build_defines == ["FL_ESP8266_EMBEDDED_FS"]
+    # #4947: the ESP8266 embedded FS is automatic; no define is required.
+    assert result.build_defines == []

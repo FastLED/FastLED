@@ -20,7 +20,7 @@ namespace platforms {
 // Pin mode control
 // ============================================================================
 
-inline void pinMode(int /*pin*/, PinMode /*mode*/) {
+inline void (pinMode)(int /*pin*/, PinMode /*mode*/) {
     // No-op: Host builds don't have physical pins
 }
 
@@ -28,11 +28,11 @@ inline void pinMode(int /*pin*/, PinMode /*mode*/) {
 // Digital I/O
 // ============================================================================
 
-inline void digitalWrite(int /*pin*/, PinValue /*val*/) {
+inline void (digitalWrite)(int /*pin*/, PinValue /*val*/) {
     // No-op: Host builds don't have physical pins
 }
 
-inline PinValue digitalRead(int /*pin*/) {
+inline PinValue (digitalRead)(int /*pin*/) {
     return PinValue::Low;  // Always return LOW
 }
 
@@ -40,12 +40,12 @@ inline PinValue digitalRead(int /*pin*/) {
 // Analog I/O
 // ============================================================================
 
-inline u16 analogRead(int /*pin*/) {
+inline u16 (analogRead)(int /*pin*/) {
     // No-op: Host builds don't have physical pins
     return 0;  // Always return 0
 }
 
-inline void analogWrite(int /*pin*/, u16 /*val*/) {
+inline void (analogWrite)(int /*pin*/, u16 /*val*/) {
     // No-op: Host builds don't have physical pins
 }
 

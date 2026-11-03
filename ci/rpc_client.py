@@ -308,6 +308,9 @@ class RpcClient:
             # the fallback — see issue #2265), preserving the original
             # "waited N seconds then moved on" behavior.
             assert self._serial is not None
+            # One deadline bounds the first poll and every follow-up poll so
+            # the whole boot wait never exceeds ``boot_wait``.
+            deadline = time.monotonic() + boot_wait
             try:
                 matched, poll_drained_lines = await wait_for_signal(
                     self._serial,
@@ -320,6 +323,44 @@ class RpcClient:
                 raise
 
             self._check_interrupt()
+
+            # A reset banner ("rst:0x...") also matches the default "rst:"
+            # boot signal, so the first match may just be the first of many
+            # resets. Once a reset has been seen, keep reading while the
+            # latest match is still a ROM-stage line (rst:, ESP-ROM:, boot:)
+            # so a boot loop that interleaves banners accumulates enough
+            # resets to be detected. "entry 0x" only means the ROM handed off
+            # to the app, which can still crash and reset, so it keeps the
+            # wait going too; only a setup-stage signal confirms startup.
+            from ci.util.boot_wait import (
+                BOOT_LOOP_THRESHOLD,
+                BOOT_SIGNALS_ROM,
+                count_reset_banners,
+            )
+
+            def _rom_stage(m: str | None) -> bool:
+                return m is not None and m in BOOT_SIGNALS_ROM
+
+            while (
+                _rom_stage(matched)
+                and count_reset_banners(poll_drained_lines) > 0
+                and count_reset_banners(poll_drained_lines) < BOOT_LOOP_THRESHOLD
+            ):
+                remaining = deadline - time.monotonic()
+                if remaining <= 0:
+                    break
+                try:
+                    matched, more_lines = await wait_for_signal(
+                        self._serial,
+                        effective_signals,
+                        timeout=remaining,
+                        on_line=_mirror if self.verbose else None,
+                    )
+                except KeyboardInterrupt:
+                    notify_main_thread()
+                    raise
+                self._check_interrupt()
+                poll_drained_lines.extend(more_lines)
 
             if self.verbose:
                 if matched is not None:
@@ -334,6 +375,15 @@ class RpcClient:
                         f"(drained {len(poll_drained_lines)} line(s)); "
                         f"falling back to timeout behavior."
                     )
+
+            from ci.util.boot_wait import BootLoopError, raise_if_boot_looping
+
+            try:
+                raise_if_boot_looping(poll_drained_lines)
+            except BootLoopError:
+                # Release the port so a retry (or another tool) can open it.
+                await self.close()
+                raise
 
         if drain_boot:
             if self.verbose:

@@ -63,6 +63,34 @@ src/fl/stl/fixed_point/          ← implementation directory
     - `header.cpp`: Has platform guards (e.g., `#ifdef ESP32 ... #endif`)
   - Avoid: Adding `#ifdef ESP32` to both header and implementation files (degrades IDE experience)
 
+## Pin Function Names: Parenthesize `pinMode`/`digitalWrite`/`digitalRead`/`analogRead`/`analogWrite` (REQUIRED)
+
+Arduino-ESP32 boards that set `BOARD_HAS_PIN_REMAP` (Arduino Nano ESP32) get
+function-like macros named exactly `pinMode`, `digitalWrite`, `digitalRead`,
+`analogRead` and `analogWrite` from `cores/esp32/io_pin_remap.h`. A
+function-like macro expands wherever its name is followed by `(`, so it
+rewrites declarations, definitions, `fl::`-qualified calls, and even
+`platforms::`-qualified calls. Arduino's macro maps Arduino D-numbers to GPIO
+numbers; FastLED's pin numbers are always raw GPIO numbers, so applying the
+remap would be silently wrong, not just noisy.
+
+Spell the name in parentheses everywhere FastLED owns it — declaration,
+definition, and call site:
+
+```cpp
+void (pinMode)(int pin, PinMode mode) FL_NO_EXCEPT;         // pin.h
+void (pinMode)(int pin, PinMode mode) FL_NO_EXCEPT { ... }  // pin.cpp.hpp
+(fl::pinMode)(pin, PinMode::Output);                        // call site
+```
+
+Parenthesizing a *call* disables argument-dependent lookup, so every call site
+states its namespace: `(fl::pinMode)(...)` or `(platforms::pinMode)(...)`,
+never a bare `(pinMode)(...)`. `ci/tests/test_esp32_pin_remap_macros.py`
+enforces this across `src/fl`, `src/platforms/esp/32` and
+`src/platforms/shared` (see #4914). Arduino-API implementations that
+deliberately use Arduino pin numbers — `src/platforms/arduino`, and the host
+Arduino shim in `src/platforms/stub` — are exempt.
+
 ## Select Types at the Preprocessor Boundary (REQUIRED)
 
 When behavior is selected at compile time, keep platform/capability `#if`
@@ -99,6 +127,50 @@ using PlatformComponent = Component<SelectedBackend>;
   footprint claim, measure matched before/after images and check that template
   instantiations have not duplicated code. This pattern alone does not guarantee
   a smaller binary.
+
+## Driver selection is by template, never a code-enabling define (REQUIRED)
+
+**Do not gate a driver's code behind a `#define` that turns it on.** Select
+drivers by *template*, and let the linker drop the ones nothing references.
+
+FastLED already has the mechanism: `BusTraits<Bus::X>::instance()` /
+`BusSupports<Bus::X, Chipset>` (see `src/fl/channels/bus_traits.h`). Naming
+`BusTraits<Bus::X>::instance()` anywhere in the program is what makes the linker
+keep that driver's translation unit; if no instantiation references it, the TU is
+dead-stripped (#2428). So on a given target the *unused* drivers are eliminated
+automatically — most of them — with no compile-time enable flag, and the whole
+program is still type-checked.
+
+```cpp
+// Yes — a driver is a BusTraits specialization plus a BusSupports capability.
+template<> struct BusTraits<Bus::SPI> {
+    using Driver = Esp8266HspiChannelDriver;
+    static fl::shared_ptr<Driver> instancePtr() FL_NO_EXCEPT { /* ... */ }
+    static Driver& instance() FL_NO_EXCEPT { return *instancePtr(); }
+    static void registerWithManager() FL_NO_EXCEPT { /* ... */ }
+};
+template<> struct BusSupports<Bus::SPI, SpiChipsetConfig> : fl::true_type {};
+
+// No — an opt-in define that turns the driver's code on. It moves the decision
+// to the build system and prevents the driver from being link-eliminated *or*
+// compile-verified. (Retired: FASTLED_ESP8266_UART, FASTLED_ALL_PINS_HARDWARE_SPI,
+// FL_ESP8266_EMBEDDED_FS — FastLED#4940 / #4949.)
+#ifdef MY_DRIVER
+#include "platforms/.../my_driver.h"
+#endif
+```
+
+Consequences when adding or changing a platform driver:
+
+- A new platform driver is a `BusTraits`/`BusSupports` specialization (plus a
+  `DefaultBus<Chipset>` arm when it should be the platform default), **not** an
+  `#ifdef MY_DRIVER` guard.
+- Select the concrete backend at the preprocessor boundary (see the section
+  above); do not repeat `#if defined(MY_DRIVER)` throughout a driver's body.
+- A define may still gate code that is genuinely unavailable (a missing SDK
+  header), or carry platform wiring options (pin order). It must not be the
+  switch that turns a driver's implementation on.
+- Prove elimination with a size diff (`bash bloat`), not by reading the source.
 
 ## Sparse Platform Dispatch Pattern (`.cpp.hpp` files)
 

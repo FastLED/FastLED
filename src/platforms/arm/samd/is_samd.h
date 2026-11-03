@@ -36,6 +36,10 @@
 #endif
 
 // General SAMD platform (any SAMD board)
-#if defined(FL_IS_SAMD21) || defined(FL_IS_SAMD51) || defined(ARDUINO_ARCH_SAMD)
+// SAME53 (Teknic ClearCore) is its own platform (FL_IS_SAME53) even though its
+// core defines ARDUINO_ARCH_SAMD; claiming it here sends every FL_IS_SAMD-first
+// dispatcher (pin.h, isr.h, ...) into SAMD21/SAMD51-only backends.
+#if defined(FL_IS_SAMD21) || defined(FL_IS_SAMD51) || \
+    (defined(ARDUINO_ARCH_SAMD) && !defined(__SAME53N19A__) && !defined(__ATSAME53N19A__))
 #define FL_IS_SAMD
 #endif

@@ -23,6 +23,7 @@
 #include "freertos/semphr.h"
 // IWYU pragma: end_keep
 #include "esp_lcd_panel_rgb.h"
+#include "driver/gpio.h" // IWYU pragma: keep
 #include "esp_heap_caps.h"
 #include "esp_timer.h"
 #include "esp_attr.h"
@@ -89,7 +90,12 @@ bool LcdRgbPeripheralEsp::initialize(const LcdRgbPeripheralConfig& config) FL_NO
     esp_lcd_rgb_panel_config_t panel_config = {};
     panel_config.clk_src = LCD_CLK_SRC_DEFAULT;
     panel_config.data_width = 16;
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(6, 0, 0)
+    panel_config.in_color_format = LCD_COLOR_FMT_RGB565;
+    panel_config.out_color_format = LCD_COLOR_FMT_RGB565;
+#else
     panel_config.bits_per_pixel = 16;
+#endif
 
     // DMA configuration (IDF version dependent)
 #if ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(5, 3, 0)
@@ -121,18 +127,18 @@ bool LcdRgbPeripheralEsp::initialize(const LcdRgbPeripheralConfig& config) FL_NO
     panel_config.timings.vsync_front_porch = config.vsync_front_porch;
 
     // GPIO configuration
-    panel_config.pclk_gpio_num = config.pclk_gpio;
-    panel_config.hsync_gpio_num = config.hsync_gpio;
-    panel_config.vsync_gpio_num = config.vsync_gpio;
-    panel_config.de_gpio_num = config.de_gpio;
-    panel_config.disp_gpio_num = config.disp_gpio;
+    panel_config.pclk_gpio_num = static_cast<gpio_num_t>(config.pclk_gpio);
+    panel_config.hsync_gpio_num = static_cast<gpio_num_t>(config.hsync_gpio);
+    panel_config.vsync_gpio_num = static_cast<gpio_num_t>(config.vsync_gpio);
+    panel_config.de_gpio_num = static_cast<gpio_num_t>(config.de_gpio);
+    panel_config.disp_gpio_num = static_cast<gpio_num_t>(config.disp_gpio);
 
     // Data GPIO pins
     for (int i = 0; i < 16; i++) {
         if (i < static_cast<int>(config.num_lanes)) {
-            panel_config.data_gpio_nums[i] = config.data_gpios[i];
+            panel_config.data_gpio_nums[i] = static_cast<gpio_num_t>(config.data_gpios[i]);
         } else {
-            panel_config.data_gpio_nums[i] = -1;
+            panel_config.data_gpio_nums[i] = static_cast<gpio_num_t>(-1);
         }
     }
 

@@ -160,6 +160,8 @@ badge before, so the breakage was not visible from this page.
 
 **IDF Variants:** [![esp32dev_idf4.4](https://github.com/FastLED/FastLED/actions/workflows/build_esp32dev_idf4.4.yml/badge.svg?event=push)](https://github.com/FastLED/FastLED/actions/workflows/build_esp32dev_idf4.4.yml) [![esp32dev_idf5_component](https://github.com/FastLED/FastLED/actions/workflows/build_esp32dev_idf5_component.yml/badge.svg?event=push)](https://github.com/FastLED/FastLED/actions/workflows/build_esp32dev_idf5_component.yml) [![esp32dev_idf6](https://github.com/FastLED/FastLED/actions/workflows/build_esp32dev_idf6.yml/badge.svg?event=push)](https://github.com/FastLED/FastLED/actions/workflows/build_esp32dev_idf6.yml)
 
+**Bare IDF:** [![bare_idf](https://github.com/FastLED/FastLED/actions/workflows/build_bare_idf.yml/badge.svg?event=push)](https://github.com/FastLED/FastLED/actions/workflows/build_bare_idf.yml)
+
 **Legacy:** [![esp32dev-idf3.3-lts](https://github.com/FastLED/FastLED/actions/workflows/build_esp32dev_idf3.3.yml/badge.svg?event=push)](https://github.com/FastLED/FastLED/actions/workflows/build_esp32dev_idf3.3.yml)
 
 *ESP32-C2 support was added in 3.9.10. See the [Espressif compatibility evaluation](https://github.com/espressif/arduino-esp32/blob/gh-pages/LIBRARIES_TEST.md).*
@@ -253,6 +255,57 @@ void loop() {
 > **Platforms**: ESP32 (I2S / PDM) and Teensy. Code compiles on all platforms — callbacks are simply inert where hardware isn't available.
 
 **More examples & full API reference**: [src/fl/audio/README.md](src/fl/audio/README.md)
+
+## 🔌 Using FastLED as a pure ESP-IDF component
+
+FastLED no longer requires the Arduino core. Add it as a normal IDF component and
+drive it from `app_main()`:
+
+```cmake
+# CMakeLists.txt
+set(EXTRA_COMPONENT_DIRS path/to/FastLED)
+include($ENV{IDF_PATH}/tools/cmake/project.cmake)
+project(blink)
+```
+
+```cpp
+// main/main.cpp - no Arduino.h, no .ino
+#include <FastLED.h>
+
+static CRGB leds[8];
+
+extern "C" void app_main(void) {
+    FastLED.addLeds<WS2812, 2, GRB>(leds, 8);
+    fill_solid(leds, 8, CRGB::Red);
+    FastLED.show();
+}
+```
+
+On ESP32 the shared Arduino wrapper (`src/fl/system/arduino.h`) is skipped entirely:
+it never includes `Arduino.h` there, so in a build without an Arduino component a
+direct `#include <Arduino.h>` fails because the header is absent. `FL_NO_ARDUINO` is
+the guard for the other platforms that do use that wrapper. To catch regressions
+before a user hits them, `ci/bare_idf_probe.py` compiles every unity translation unit
+with all `-DARDUINO*` defines and the Arduino include directories stripped. A working
+reference project lives in [`ci/idf_app/`](ci/idf_app/), which CI configures,
+compiles, links and asserts a `.bin` for on every push.
+
+**Tested matrix** (each cell links a firmware image; see the `bare_idf` workflow):
+
+| IDF | esp32 | esp32s3 | esp32c3 | esp32c6 | esp32p4 |
+|---|---|---|---|---|---|
+| 4.4 | ✅ | ✅ | | | |
+| 5.1 | ✅ | ✅ | | | |
+| 5.5 | ✅ | ✅ | ✅ | ✅ | ✅ |
+| 6.0 | ✅ | ✅ | ✅ | ✅ | ✅ |
+
+Notes:
+
+- **ESP8266 is not an ESP-IDF chip.** It runs the Arduino core (or the legacy
+  ESP8266 RTOS SDK), so it stays on the Arduino path and is not part of this matrix.
+- **IDF 3.x** is not covered: it is end-of-life, defaults to the GNU Make build and
+  only ships the RMT4 driver. Its only consumer is the Arduino 1.0.x core, which the
+  `esp32dev_idf3.3` job already builds.
 
 ## ⏱️ Async Tasks Instead of delay()
 

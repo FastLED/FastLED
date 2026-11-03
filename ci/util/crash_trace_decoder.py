@@ -179,28 +179,25 @@ class CrashTraceDecoder:
         self._resolved = True
 
         # --- ELF ---
-        if self._use_fbuild:
-            elf_candidates = [
-                self._build_dir
-                / ".fbuild"
-                / "build"
-                / self._environment
-                / "firmware.elf",
-            ]
-        else:
-            elf_candidates = [
-                self._build_dir
-                / ".fbuild"
-                / "build"
-                / self._environment
-                / "firmware.elf",
-                self._build_dir / ".fbuild" / "build" / "release" / "firmware.elf",
-            ]
-
-        for p in elf_candidates:
-            if p.exists():
-                self._elf_path = p
-                break
+        environment_dir = self._build_dir / ".fbuild" / "build" / self._environment
+        environment_candidates = (
+            environment_dir / "firmware.elf",
+            environment_dir / "release" / "firmware.elf",
+        )
+        matching_environment = [
+            candidate for candidate in environment_candidates if candidate.is_file()
+        ]
+        self._elf_path = max(
+            matching_environment,
+            key=lambda candidate: candidate.stat().st_mtime,
+            default=None,
+        )
+        if self._elf_path is None:
+            flat_release = (
+                self._build_dir / ".fbuild" / "build" / "release" / "firmware.elf"
+            )
+            if flat_release.is_file():
+                self._elf_path = flat_release
 
         if not self._elf_path:
             print(

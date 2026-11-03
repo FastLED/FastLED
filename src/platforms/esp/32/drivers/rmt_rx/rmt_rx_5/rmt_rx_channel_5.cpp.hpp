@@ -7,6 +7,7 @@
 
 // Include feature flags to detect FASTLED_RMT5
 #include "platforms/esp/32/feature_flags/enabled.h"
+#include "platforms/esp/esp_version.h"
 
 // Include FL_WARN for both RMT5 and RMT4 paths
 #include "fl/log/log.h"
@@ -909,12 +910,14 @@ class RmtRxChannelImpl : public RmtRxChannel {
         //   deterministically falls back to the non-DMA ping-pong path
         //   (FastLED#3591; observable via RmtRxDebug::dma_tally). See #2254.
         rx_config.mem_block_symbols = mUseDma ? kDmaRxSymbols : kNonDmaRxSymbols;
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 2, 0)
         // Interrupt priority level 3 (maximum supported by ESP-IDF RMT driver
         // API) Note: Both RISC-V and Xtensa platforms are limited to level 3 by
         // driver validation RISC-V hardware supports 1-7, but ESP-IDF
         // rmt_new_rx_channel() rejects >3 Testing on ESP32-C6 confirmed level 4
         // fails with ESP_ERR_INVALID_ARG
         rx_config.intr_priority = 3;
+#endif
 
         // Additional flags
         rx_config.flags.invert_in = false; // No signal inversion

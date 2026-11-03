@@ -113,6 +113,22 @@ template<> struct DefaultBus<SpiChipsetConfig> {
     static constexpr Bus value = Bus::SPI;
 };
 
+#elif defined(FL_IS_ESP8266)
+
+// ESP8266 has no peripheral engine wired through the channel API yet, so both
+// chipset families resolve to the shared GPIO bit-bang driver
+// (`src/platforms/shared/bitbang/bus_traits.h`). A native engine (I2S, see
+// #4943) can replace the clockless default later. This is a template selection,
+// not a code-enabling define: naming `Bus::AUTO` is what keeps the driver's
+// translation unit, and the selection is fully type-checked either way.
+template<> struct DefaultBus<ClocklessChipset> {
+    static constexpr Bus value = Bus::BIT_BANG;
+};
+
+template<> struct DefaultBus<SpiChipsetConfig> {
+    static constexpr Bus value = Bus::BIT_BANG;
+};
+
 #endif
 
 template<Bus B> struct BusInstanceCount {
@@ -173,6 +189,12 @@ inline const char* busDriverName(Bus b, fl::u8 which = 0, bool spi = false) FL_N
 #if defined(FL_IS_TEENSY_4X)
             (void)spi;
             return which == 0 ? "OBJECT_FLED" : "FLEX_IO";
+#elif defined(FL_IS_ESP8266)
+            // ESP8266 has no parallel-I/O bank; `Bus::FLEX_IO` names its native
+            // I2S output engine (#4943), matching ESP32's I2S naming.
+            (void)which;
+            (void)spi;
+            return "I2S";
 #elif defined(FL_IS_RP2040) || defined(FL_IS_RP2350)
             (void)spi;
             if (which == 0) return "PIO0";

@@ -389,6 +389,21 @@ public:
     size_t write(const u8* buffer, size_t size) FL_NO_EXCEPT;
 
     /**
+     * @brief Write raw bytes to UART0 without owning or linking its driver
+     *
+     * On ESP-IDF 4+, queues through an already-installed SDK driver (e.g.
+     * Arduino Serial) so output stays ordered; otherwise, and always on IDF
+     * 3.x, blocking ROM FIFO writes. Lets output-only callers print without
+     * linking the SDK UART driver.
+     */
+    static size_t writeRom(const u8* buffer, size_t size) FL_NO_EXCEPT;
+
+    /**
+     * @brief Wait (ROM routine) until UART0 has transmitted its TX FIFO
+     */
+    static void waitRomIdle() FL_NO_EXCEPT;
+
+    /**
      * @brief Write string with newline to UART
      * @param str Null-terminated string to write
      */

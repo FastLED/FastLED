@@ -5,10 +5,13 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-    # Pin to fbuild 2.5.42 so digispark-tiny builds (FastLED/fbuild#1679,
-    # FastLED#4846).
+    # Require fbuild >= 2.5.44 so deploys to an ESP32-S2/S3 running TinyUSB
+    # CDC firmware enter ROM download mode via a 1200-bps touch
+    # (FastLED/fbuild#1703).
     #
-    # Pin history:
+    # Version history:
+    #   2.5.44 -- 1200-bps touch + re-enumeration for ESP32-S2/S3 TinyUSB CDC
+    #              app ports before flashing (FastLED/fbuild#1703).
     #   2.5.42 -- validates the registry digistump repack against
     #              cores/dtiny (FastLED/fbuild#1679); moves the zip crate to
     #              9.0.3 after crates.io yanked every older release
@@ -305,7 +308,12 @@ dependencies = [
     # (FastLED/fbuild#573).
     # 2.5.43 resolves native Node behind nodejs-wheel's launcher so AVR8JS
     # exits on success and timeout (FastLED/fbuild#1697).
-    "fbuild==2.5.43",
+    # 2.5.45 adds the Espressif8266 deployer used by ESP8266 AutoResearch
+    # (FastLED/fbuild#1738).
+    # 2.5.49 sends a registry-compatible User-Agent, so cold registry
+    # downloads (esp_extra_libs' ArduinoJson) stop returning HTTP 403
+    # (FastLED/fbuild#1783/#1784).
+    "fbuild>=2.5.49",
     # Decodes the FastLED/boards `usb-vids.proto.zstd` registry artifact in
     # ci/util/audit_usb_registry.py. Declared explicitly rather than relied on
     # transitively (clang-tool-chain-bins pulls it in today) so the documented
@@ -394,8 +402,22 @@ dependencies = [
     # `FileNotFoundError: meson_native.txt` / `ninja: error: rebuilding
     # 'build.ninja': subcommand failed` cascade we hit during long-session
     # `bash test --cpp` cycles.
+    # 1.15.8 (released 2026-10-27): latest published release (PyPI and
+    # crates.io). Windows CI still logs
+    # `zccache[warn][S]: cannot connect to daemon at
+    # \\.\pipe\zccache-runneradmin-v1.15.8: ... retrying via ephemeral
+    # session` before the first parallel compile of a step. That warning is
+    # the wrapper's cold-start fallback: the compile still succeeds through
+    # the ephemeral session. The related Windows daemon-pipe failure class
+    # is tracked upstream (zackees/zccache#1976) and has no released fix, so
+    # this floor does not silence the warning -- it keeps environments off
+    # 1.15.6, the version named in that report, and picks up 1.15.7's
+    # same-size-edit stale-hit fix (zackees/zccache#1935/#1947) plus 1.15.8's
+    # Windows destination-delivery retry (zackees/zccache#1757).
     # Private, content-verified PCH input snapshots preserve shared source mtimes.
-    "zccache>=1.15.6",
+    # 1.15.11: internal PCH alias scans no longer fail -Werror builds on
+    # driver-injected -Wl,... flags, and fail open (forge-ci/zccache#2027, #4973).
+    "zccache>=1.15.11",
     "ninja",
     "meson>=1.11.0",
     "download",
