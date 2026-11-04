@@ -205,6 +205,7 @@ void ChannelDriverPARLIOImpl::show() FL_NO_EXCEPT {
             // hardware lane counts need sorting (at most 16 channels).
             if (group.mChannels.size() > 16) {
 #if defined(FASTLED_LOG_PARLIO_ENABLED) && FL_HAS_WARN
+                // Preserve the diagnostic without sorting an invalid group.
                 bool has_unique_pins = true;
                 for (size_t i = 1; i < group.mChannels.size() && has_unique_pins; ++i) {
                     for (size_t j = 0; j < i; ++j) {

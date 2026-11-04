@@ -136,6 +136,10 @@ FL_TEST_CASE("IChannelDriver waits distinguish READY DRAINING and BUSY") {
     FL_CHECK_EQ(driver.pollCount, 1);
 
     driver.pollCount = 0;
+    FL_CHECK(driver.waitForReadyOrDraining(10));
+    FL_CHECK_EQ(driver.pollCount, 1);
+
+    driver.pollCount = 0;
     driver.mState = DriverState::DRAINING;
     FL_CHECK(driver.waitForReadyOrDraining(10));
     FL_CHECK_EQ(driver.pollCount, 1);
