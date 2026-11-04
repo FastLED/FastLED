@@ -13,6 +13,7 @@
 #include "fl/math/ease.h"
 #include "fl/stl/iterator.h"
 #include "fl/stl/noexcept.h"
+#include "fl/channels/worker_policy.h"
 
 /// @file fl/chipsets/ucs7604.h
 /// @brief UCS7604 LED chipset controller implementation for FastLED
@@ -85,16 +86,17 @@ template <
     EOrder RGB_ORDER,  // Color order for input pixels (converted to RGB internally)
     fl::UCS7604Mode MODE,
     typename CHIPSET_TIMING,
-    template<int, typename, EOrder> class CLOCKLESS_CONTROLLER
+    template<int, typename, EOrder> class CLOCKLESS_CONTROLLER,
+    typename DELEGATE = CLOCKLESS_CONTROLLER<DATA_PIN, CHIPSET_TIMING, RGB>
 >
 class UCS7604ControllerT : public CPixelLEDController<RGB_ORDER>
 {
 private:
-    using DelegateControllerBase = CLOCKLESS_CONTROLLER<DATA_PIN, CHIPSET_TIMING, RGB>;
+    using DelegateControllerBase = DELEGATE;
 
     // Helper class to access protected methods of the delegate controller
     class DelegateController : public DelegateControllerBase {
-        friend class UCS7604ControllerT<DATA_PIN, RGB_ORDER, MODE, CHIPSET_TIMING, CLOCKLESS_CONTROLLER>;
+        friend class UCS7604ControllerT<DATA_PIN, RGB_ORDER, MODE, CHIPSET_TIMING, CLOCKLESS_CONTROLLER, DELEGATE>;
         void callShowPixels(PixelController<RGB> & pixels) FL_NO_EXCEPT {
             DelegateControllerBase::showPixels(pixels);
         }
@@ -108,6 +110,11 @@ private:
     fl::vector_psram<u8> mByteBuffer;
 
 public:
+    template<fl::Bus B, fl::Core CORE>
+    using WithWorker = UCS7604ControllerT<DATA_PIN, RGB_ORDER, MODE,
+        CHIPSET_TIMING, CLOCKLESS_CONTROLLER,
+        typename detail::ClocklessWorkerController<DELEGATE, B, CORE>::type>;
+
     UCS7604ControllerT() FL_NO_EXCEPT {}
 
     void setGamma(float gamma) FL_NO_EXCEPT { mGamma = gamma; }

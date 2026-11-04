@@ -120,12 +120,22 @@ def collect(boards: list[str], example: str) -> Sizes:
     return sizes
 
 
+UP = r"$\color{red}\uparrow$"
+DOWN = r"$\color{green}\downarrow$"
+
+
 def _delta(delta: int) -> str:
-    """`+120` in red, `-120` in green, and `0` in green (nothing changed)."""
+    """A red up arrow for growth, a green down arrow for shrinkage, plain `0`.
+
+    No emoji is a green arrow, so the arrows are GitHub inline math, which
+    renders colored in PR comments. An unchanged size gets no arrow: a down
+    arrow beside 0 would claim a decrease, and leaving it plain makes the
+    rows that did change stand out.
+    """
     if delta == 0:
-        return "🟢 0"
-    mark = "🟢" if delta < 0 else "🔴"
-    return f"{mark} {delta:+,}"
+        return "0"
+    arrow = DOWN if delta < 0 else UP
+    return f"{arrow} {abs(delta):,}"
 
 
 def _cell(size: int, base: int) -> str:
@@ -139,7 +149,7 @@ def render(base: Sizes, head: Sizes, example: str) -> str:
         "",
         f"Change in `examples/{example}` per target. The left number is this PR's "
         "image flash / attributed RAM in bytes; the colored delta is the change "
-        "from the merge base (red is larger, green is smaller or unchanged).",
+        "from the merge base (red ↑ is larger, green ↓ is smaller, 0 is unchanged).",
         "",
         "| Target | FLASH [bytes] | RAM [bytes] |",
         "|---|---:|---:|",

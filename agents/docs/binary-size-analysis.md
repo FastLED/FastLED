@@ -178,6 +178,12 @@ never reuse their old Serial-enabled measurements. The regression guard is
 `tests/data/esp32s3_bloat_budget.json`, run with
 `bash bloat esp32s3 --build --budget tests/data/esp32s3_bloat_budget.json`.
 
+#4763 stm32f103c8 no-Serial scorecard: stm32f103c8 Blink (`examples/Blink`,
+Serial-free since #4759) on fbuild 2.5.37, STM32duino 2.9.0, GCC 15.2.1
+(#4744). The budget ceilings are 26324 B image flash / 1924 B attributed RAM,
+including the #4742 compact RGBW selectors/exact adjustment ratchet.
+`total_ram` is attributed RAM, not physical board RAM; board flash/RAM from
+fbuild are not comparable with bloat-report image flash / attributed RAM.
 #4761 esp32c3 no-Serial scorecard: esp32c3 Blink (`examples/Blink`,
 Serial-free since #4759). Image flash is 384692 B. Attributed RAM for the
 same ELF is 24607 B on fbuild 2.5.37 and 26670 B on fbuild 2.5.39; the

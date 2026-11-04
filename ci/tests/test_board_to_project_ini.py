@@ -9,6 +9,7 @@ from ci.boards import (
     SPARKFUN_XRP_CONTROLLER_2350B,
     XIAO_ESP32S3,
     Board,
+    create_board,
 )
 from ci.compiler.build_config import _apply_esp_release_exception_policy
 from ci.compiler.project_ini import ProjectIni
@@ -28,6 +29,19 @@ class TestBoardToProjectIni(unittest.TestCase):
     def _ini_to_set(self, ini: str) -> set[str]:
         """Return a set with each non-empty, stripped line of the ini snippet."""
         return {line.strip() for line in ini.splitlines() if line.strip()}
+
+    def test_esp32s3_opi_psram8_preserves_flash_cap(self) -> None:
+        board = create_board("esp32s3_opi_psram8")
+        self.assertEqual(board.real_board_name, "esp32-s3-devkitc-1")
+        self.assertEqual(board.platform, ESP32_S3_DEVKITC_1.platform)
+        ini = board.to_project_ini()
+        self.assertIn("board_build.memory_type = qio_opi", ini)
+        self.assertIn("board_build.psram_type = opi", ini)
+        self.assertIn("-DBOARD_HAS_PSRAM", ini)
+        self.assertIn("board_build.flash_size = 4MB", ini)
+        self.assertIn("-DFASTLED_ESP_FORCE_USB_SERIAL_JTAG=1", ini)
+        # The existing no-PSRAM default remains available and unchanged.
+        self.assertEqual(create_board("esp32s3").real_board_name, "esp32-s3-devkitc-1")
 
     def test_basic_fields(self) -> None:
         board = Board(

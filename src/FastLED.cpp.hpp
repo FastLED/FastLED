@@ -827,7 +827,9 @@ fl::ChannelPtr CFastLED::add(const fl::ChannelConfig& config) FL_NO_EXCEPT {
     // selection, so they get runtime selection.
     //
     // For minimum binary size, callers should use the compile-time path:
-    //   FastLED.addLeds<CHIPSET, PIN, ORDER, fl::Bus::X>(leds, n);
+    //   FastLED.add<fl::Bus::X>(config);  // clockless chipset
+    //   FastLED.add<fl::Bus::X, fl::SpiChipsetConfig>(config);  // erased SPI
+    // or FastLED.addLeds<CHIPSET, PIN, ORDER, fl::Bus::X>(leds, n);
     // which ODR-uses only `BusTraits<X>::instancePtr()` and lets
     // `--gc-sections` drop every other driver TU.
     //
@@ -836,8 +838,10 @@ fl::ChannelPtr CFastLED::add(const fl::ChannelConfig& config) FL_NO_EXCEPT {
     #ifndef FASTLED_SUPPRESS_RUNTIME_DRIVER_WARNING
     FL_WARN_ONCE("FastLED.add(cfg): runtime-selection mode â€” enrolling every "
                  "available driver via fl::enableAllDrivers(). For minimum "
-                 "binary size, prefer FastLED.addLeds<CHIPSET, PIN, ORDER, "
-                 "fl::Bus::X>(leds, n) which links only the named driver. "
+                 "binary size, prefer FastLED.add<fl::Bus::X>(cfg) for clockless "
+                 "chipsets, or FastLED.add<fl::Bus::X, fl::SpiChipsetConfig>(cfg) "
+                 "for erased SPI configurations. The bus must support the chipset. "
+                 "Each call links only the named driver. "
                  "Suppress this warning with -DFASTLED_SUPPRESS_RUNTIME_DRIVER_WARNING.");
     #endif
     fl::enableAllDrivers();

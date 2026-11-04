@@ -69,6 +69,13 @@ void streamHelpEntry(fl::JsonStreamWriter& writer, const HelpEntry& entry) {
 }
 
 static const HelpEntry kHelpEntries[] = {
+#if defined(FL_AUTORESEARCH_MEMORY_BENCH)
+#if FL_AUTORESEARCH_MEMORY_BENCH == 3
+    {"memoryBench", "Memory", "[{chipset:apa102|sk9822, pixels:1000, frames:20}]", "{success, heapBefore, heapAfterRegister, heapSteady, frames, wireMismatches, frameUs}", "Native SPI2 full-frame loopback to SPI3; run --spi-streaming. Reset before each chipset."},
+#else
+    {"memoryBench", "Memory", "[{pin:4}] (optional)", "{success, heapBefore, heapAfterRegister, heapSteady, driverCount, actualDriverName}", "Cold typed/runtime binding: 32 red WS2812 pixels on the selected pin for 20 frames; run --driver-binding typed or runtime."},
+#endif
+#endif
     {"rpc.discover", "JSON-RPC", "[]", "{schema:[[name, ...], ...]}", "Discover the registered JSON-RPC method schema"},
     {"start", "Phase 1: Basic Control", "[]", "void", "Trigger test matrix execution"},
     {"status", "Phase 1: Basic Control", "[]", "{ready, platform, rpcReady, ledRxAvailable, pinTx, pinRx}", "Query RPC, platform, and LED RX readiness"},
@@ -79,6 +86,7 @@ static const HelpEntry kHelpEntries[] = {
     {"setStripSizes", "Phase 2: Configuration", "[size] or [shortSize, longSize]", "{success, stripSizesSet, testCases}", "Configure strip sizes"},
     {"runTestCase", "Phase 3: Selective Execution", "[testCaseIndex]", "{success, testCaseIndex, result}", "Run single test case by index"},
     {"runDriver", "Phase 3: Selective Execution", "[driverName]", "{success, driver, testsRun, results}", "Run all tests for specific driver"},
+    {"runSingleTest", "Phase 3: Selective Execution", "{driver, laneSizes, lanePins?:GPIO[], workerCore?:string(auto|0|1|any|calling), useLegacyApi?:bool}", "{success, passed, totalTests, passedTests, lanePins, workerCore?, workerObservedCore?, workerPriority?, workerSubmittedChunks?, workerCompletedChunks?, workerTotalChunks?, workerMaxEncodeUs?, workerMaxSubmitUs?, workerStreamError?, competingTaskPasses?, competingTaskMaxPassUs?, heapBeforeInternal, heapBeforePsram, heapAfterInternal, heapAfterPsram, driverError?}", "Run lane-0 byte loopback; optional LCD worker affinity validation under Core-0 load (#5001)"},
     {"runAll", "Phase 3: Selective Execution", "[]", "{success, totalCases, passedCases, skippedCases, results}", "Run full test matrix with JSON results"},
     {"getResults", "Phase 3: Selective Execution", "[]", "[{driver, lanes, stripSize, ...}, ...]", "Return all test results"},
     {"getResult", "Phase 3: Selective Execution", "[testCaseIndex]", "{driver, lanes, stripSize, ...}", "Return specific test case result"},

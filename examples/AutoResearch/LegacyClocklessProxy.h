@@ -133,6 +133,38 @@ inline const char* legacyClocklessBoundDriverName() {
 #endif
 }
 
+template<fl::Core CORE>
+struct LegacyWorkerTemplateCore {
+    template<int PIN>
+    static CLEDController* create(CRGB* leds, int numLeds) FL_NO_EXCEPT {
+        return &FastLED.addLeds<WS2812B, PIN, RGB,
+            fl::Bus::FLEX_IO, CORE>(leds, numLeds);
+    }
+};
+
+template<>
+struct LegacyWorkerTemplateCore<fl::Core::Auto> {
+    template<int PIN>
+    static CLEDController* create(CRGB* leds, int numLeds) FL_NO_EXCEPT {
+        return &FastLED.addLeds<WS2812B, PIN, RGB,
+            fl::Bus::FLEX_IO>(leds, numLeds);
+    }
+};
+
+template<bool SUPPORTED>
+struct LegacyWorkerTemplate {
+    template<int PIN, fl::Core CORE>
+    static CLEDController* create(CRGB*, int) FL_NO_EXCEPT { return nullptr; }
+};
+
+template<>
+struct LegacyWorkerTemplate<true> {
+    template<int PIN, fl::Core CORE>
+    static CLEDController* create(CRGB* leds, int numLeds) FL_NO_EXCEPT {
+        return LegacyWorkerTemplateCore<CORE>::template create<PIN>(leds, numLeds);
+    }
+};
+
 /// @brief Proxy that creates a legacy clockless controller from runtime inputs.
 ///
 /// The legacy FastLED API requires compile-time template pin parameters:
@@ -149,6 +181,36 @@ inline const char* legacyClocklessBoundDriverName() {
 /// automatically calls removeFromDrawList() via ~CLEDController().
 class LegacyClocklessProxy {
     fl::unique_ptr<CLEDController> mController;
+    // addLeds<> owns these controllers in function-local static storage;
+    // they outlive every proxy. Only enabled while the test owns its buffer.
+    fl::shared_ptr<CLEDController> mStaticController;
+
+    template<int PIN, fl::Core CORE>
+    void createLcd(CRGB* leds, int numLeds) FL_NO_EXCEPT {
+        auto* controller = LegacyWorkerTemplate<
+            fl::BusWorkerAffinitySupported<fl::Bus::FLEX_IO>::value>::
+                template create<PIN, CORE>(leds, numLeds);
+        mStaticController = controller ? fl::make_shared_no_tracking(*controller)
+                                       : fl::shared_ptr<CLEDController>();
+        if (mStaticController) { mStaticController->setEnabled(true); }
+    }
+
+    template<int PIN>
+    void createLcd(CRGB* leds, int numLeds, fl::Core core) FL_NO_EXCEPT {
+        switch (core) {
+        case fl::Core::Auto: createLcd<PIN, fl::Core::Auto>(leds, numLeds); break;
+        case fl::Core::Core0: createLcd<PIN, fl::Core::Core0>(leds, numLeds); break;
+        case fl::Core::Core1: createLcd<PIN, fl::Core::Core1>(leds, numLeds); break;
+        case fl::Core::Any: createLcd<PIN, fl::Core::Any>(leds, numLeds); break;
+        case fl::Core::CallingCore: createLcd<PIN, fl::Core::CallingCore>(leds, numLeds); break;
+        default: break;
+        }
+    }
+
+    CLEDController* controller() const FL_NO_EXCEPT {
+        if (mStaticController) { return mStaticController.get(); }
+        return mController.get();
+    }
 #if AUTORESEARCH_LEGACY_OBSERVES_RMT4_FRAMES
     fl::weak_ptr<fl::ChannelData> mFrame;
 #endif
@@ -188,7 +250,24 @@ public:
     LegacyClocklessProxy(
         int pin, CRGB* leds, int numLeds,
         LegacyClocklessChipset chipset = LegacyClocklessChipset::WS2812B,
-        bool rgbw = false) {
+        bool rgbw = false,
+        fl::Core worker_core = fl::Core::Auto,
+        bool lcd_worker = false) {
+        if (lcd_worker) {
+            switch (pin) {
+            case 0: createLcd<0>(leds, numLeds, worker_core); break;
+            case 1: createLcd<1>(leds, numLeds, worker_core); break;
+            case 2: createLcd<2>(leds, numLeds, worker_core); break;
+            case 3: createLcd<3>(leds, numLeds, worker_core); break;
+            case 4: createLcd<4>(leds, numLeds, worker_core); break;
+            case 5: createLcd<5>(leds, numLeds, worker_core); break;
+            case 6: createLcd<6>(leds, numLeds, worker_core); break;
+            case 7: createLcd<7>(leds, numLeds, worker_core); break;
+            case 8: createLcd<8>(leds, numLeds, worker_core); break;
+            default: break;
+            }
+            return;
+        }
         switch (pin) {
             case 0: mController = create<0>(leds, numLeds, chipset, rgbw); break;
             case 1: mController = create<1>(leds, numLeds, chipset, rgbw); break;
@@ -216,25 +295,30 @@ public:
         }
     }
 
-    ~LegacyClocklessProxy() = default;
+    ~LegacyClocklessProxy() {
+        if (mStaticController) {
+            mStaticController->setEnabled(false);
+            mStaticController->setLeds(fl::span<CRGB>());
+        }
+    }
 
     // Non-copyable (unique_ptr already enforces this, but be explicit)
     LegacyClocklessProxy(const LegacyClocklessProxy&) = delete;
     LegacyClocklessProxy& operator=(const LegacyClocklessProxy&) = delete;
 
     /// @brief Check if the proxy was successfully created
-    bool valid() const { return mController != nullptr; }
+    bool valid() const { return controller() != nullptr; }
 
     void showLeds(uint8_t brightness = 255) {
-        if (mController) { mController->showLeds(brightness); }
+        if (controller()) { controller()->showLeds(brightness); }
     }
 
     void setEnabled(bool enabled) {
-        if (mController) { mController->setEnabled(enabled); }
+        if (controller()) { controller()->setEnabled(enabled); }
     }
 
     void setLeds(fl::span<CRGB> leds) {
-        if (mController) { mController->setLeds(leds); }
+        if (controller()) { controller()->setLeds(leds); }
     }
 
 #if AUTORESEARCH_LEGACY_OBSERVES_RMT4_FRAMES

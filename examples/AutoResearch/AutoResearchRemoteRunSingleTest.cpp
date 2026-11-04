@@ -22,6 +22,8 @@
 #include "fl/stl/optional.h"
 #include "fl/stl/json.h"
 #include "fl/stl/cstdio.h"
+#include "fl/stl/chrono.h"
+#include "fl/system/delay.h"
 #include "fl/task/task.h"
 #include "fl/task/executor.h"
 #include "fl/math/wave/wave_perf_bench.h"
@@ -59,6 +61,61 @@
 #include "fl/fx/frame.h"
 
 namespace {
+
+// A priority-5 Core-0 workload makes the isolation exercised by #5001
+// observable. This is synthetic CPU work, not a network latency benchmark.
+class WorkerCoreLoad {
+    struct State {
+        fl::atomic<bool> stop{false};
+        fl::atomic<bool> done{false};
+        fl::atomic<fl::u32> passes{0};
+        fl::atomic<fl::u32> maxPassUs{0};
+    };
+    fl::shared_ptr<State> mState;
+    fl::task::Handle mTask;
+    bool mStarted = false;
+
+public:
+    bool start() FL_NO_EXCEPT {
+        mState = fl::make_shared<State>();
+        if (!mState) { return false; }
+        fl::task::CoroutineConfig task;
+        task.name = "fl-core-load";
+        task.priority = 5;
+        task.core_id = 0;
+        task.stack_size = 2048;
+        const auto state = mState;
+        task.func = [state]() {
+            while (!state->stop.load(fl::memory_order_acquire)) {
+                const fl::u32 start = fl::micros();
+                while (fl::micros() - start < 1000) {}
+                const fl::u32 elapsed = fl::micros() - start;
+                if (elapsed > state->maxPassUs.load(fl::memory_order_relaxed)) {
+                    state->maxPassUs.store(elapsed, fl::memory_order_relaxed);
+                }
+                state->passes.fetch_add(1);
+                fl::delay(1, false);
+            }
+            state->done.store(true, fl::memory_order_release);
+        };
+        mTask = fl::task::coroutine(task);
+        mStarted = mTask.is_valid() && mTask.isRunning();
+        return mStarted;
+    }
+    void stop() FL_NO_EXCEPT {
+        if (mStarted) {
+            mState->stop.store(true, fl::memory_order_release);
+            while (!mState->done.load(fl::memory_order_acquire)) {
+                fl::delay(1, false);
+            }
+            mTask.stop();
+            mStarted = false;
+        }
+    }
+    fl::u32 passes() const FL_NO_EXCEPT { return mState ? mState->passes.load() : 0; }
+    fl::u32 maxPassUs() const FL_NO_EXCEPT { return mState ? mState->maxPassUs.load() : 0; }
+    ~WorkerCoreLoad() FL_NO_EXCEPT { stop(); }
+};
 
 /// @brief Stand down the session's RX channel for the duration of one call.
 ///
@@ -715,6 +772,41 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
         }
     }
 
+    fl::vector<int> lane_pins;
+    const bool explicit_lane_pins = config.contains("lanePins");
+    if (explicit_lane_pins && (!config["lanePins"].is_array() ||
+        config["lanePins"].size() != lane_sizes.size())) {
+        response.set("success", false);
+        response.set("error", "InvalidLanePins");
+        response.set("message", "lanePins must contain one GPIO per lane");
+        return response;
+    }
+    for (fl::size i = 0; i < lane_sizes.size(); ++i) {
+        const auto pin_value = explicit_lane_pins ? config["lanePins"][i] : fl::json(pin_tx + static_cast<int>(i));
+        if (!pin_value.is_int()) {
+            response.set("success", false);
+            response.set("error", "InvalidLanePins");
+            return response;
+        }
+        const auto raw_pin = pin_value.as_int().value();
+        if (explicit_lane_pins && (raw_pin < 0 || raw_pin > 48)) {
+            response.set("success", false);
+            response.set("error", "InvalidLanePins");
+            return response;
+        }
+        const int pin = static_cast<int>(raw_pin);
+        bool duplicate = false;
+        for (const int previous : lane_pins) { duplicate = duplicate || previous == pin; }
+        if (explicit_lane_pins && (pin == pin_rx ||
+            duplicate || (i == 0 && pin != pin_tx))) {
+            response.set("success", false);
+            response.set("error", "InvalidLanePins");
+            response.set("message", "lanePins must be unique GPIOs 0-48 excluding RX, with lane 0 matching TX");
+            return response;
+        }
+        lane_pins.push_back(pin);
+    }
+
     // 7. Extract timing (optional, default: "WS2812B-V5")
     fl::string timing_name = "WS2812B-V5";
     if (config.contains("timing") && config["timing"].is_string()) {
@@ -792,9 +884,43 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
         }
     }
 
+    fl::Core worker_core = fl::Core::Auto;
+    const bool worker_core_test = config.contains("workerCore");
+    if (worker_core_test) {
+        const fl::string requested = config["workerCore"] | fl::string("");
+        if (driver_name != "LCD_CLOCKLESS" ||
+            (requested != "auto" && requested != "0" && requested != "1" &&
+             requested != "any" && requested != "calling")) {
+            response.set("success", false);
+            response.set("error", "InvalidWorkerCore");
+            response.set("message", "workerCore requires LCD_CLOCKLESS and auto, 0, 1, any or calling");
+            return response;
+        }
+        worker_core = requested == "auto" ? fl::Core::Auto :
+                      requested == "0" ? fl::Core::Core0 :
+                      requested == "1" ? fl::Core::Core1 :
+                      requested == "any" ? fl::Core::Any : fl::Core::CallingCore;
+        bool plain_ws2812b = !legacy_rgbw;
+        for (const auto chipset : legacy_chipsets) {
+            plain_ws2812b = plain_ws2812b &&
+                chipset == LegacyClocklessChipset::WS2812B;
+        }
+        if (use_legacy_api && !plain_ws2812b) {
+            response.set("success", false);
+            response.set("error", "UnsupportedWorkerCoreLegacyChipset");
+            response.set("message", "workerCore legacy validation supports plain WS2812B only");
+            return response;
+        }
+        if (!fl::BusWorkerAffinitySupported<fl::Bus::FLEX_IO>::value) {
+            response.set("success", false);
+            response.set("error", "WorkerCoreUnsupportedPlatform");
+            return response;
+        }
+    }
+
     const char* legacy_driver_name = nullptr;
     if (use_legacy_api) {
-        legacy_driver_name = legacyClocklessBoundDriverName();
+        legacy_driver_name = worker_core_test ? "LCD_CLOCKLESS" : legacyClocklessBoundDriverName();
         if (legacy_driver_name != nullptr &&
             driver_name != legacy_driver_name) {
             response.set("success", false);
@@ -853,7 +979,8 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
     // wiring. Other targets may mark GPIO22 invalid at compile time.
     // Multi-lane uses consecutive pins starting at pin_tx.
     if (use_legacy_api) {
-        int max_pin = pin_tx + (int)lane_sizes.size() - 1;
+        int max_pin = pin_tx;
+        for (const int pin : lane_pins) { if (pin > max_pin) { max_pin = pin; } }
         const bool historical_pin_range = pin_tx >= 0 && max_pin <= 8;
 #if AUTORESEARCH_LEGACY_SUPPORTS_PIN_22
         const bool current_loopback_pin =
@@ -878,6 +1005,7 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
     // ========== EXECUTION ==========
 
     uint32_t start_ms = millis();
+    const auto heap_before = fl::getFreeHeap();
 
     fl::json standard_gpio_pad_probe;
     if (is_object_fled_driver) {
@@ -993,11 +1121,15 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
             ));
         } else {
             tx_configs.push_back(fl::ChannelConfig(
-                pin_tx + i,  // Consecutive pins for multi-lane
+                lane_pins[i],
                 timing_config.timing,
                 fl::span<CRGB>(leds->data(), leds->size()),
                 RGB  // Default color order
             ));
+        }
+        if (worker_core_test) {
+            tx_configs.back().options.mBus = fl::Bus::FLEX_IO;
+            tx_configs.back().options.mWorker.core = worker_core;
         }
         led_arrays.push_back(fl::move(leds));
     }
@@ -1169,6 +1301,12 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
     bool passed = false;
     uint32_t show_duration_ms = 0;
     fl::vector<fl::RunResult> run_results;
+    WorkerCoreLoad worker_load;
+    if (worker_core_test && !worker_load.start()) {
+        response.set("success", false);
+        response.set("error", "WorkerCoreLoadStartFailed");
+        return response;
+    }
     fl::json tight_timing_response = fl::json::object();
     bool tight_timing_passed = true;
 
@@ -1253,6 +1391,38 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
     }
 
     // ========== RESPONSE ==========
+    const auto heap_after = fl::getFreeHeap();
+    response.set("heapBeforeInternal", static_cast<int64_t>(heap_before.free_sram));
+    response.set("heapBeforePsram", static_cast<int64_t>(heap_before.free_psram));
+    response.set("heapAfterInternal", static_cast<int64_t>(heap_after.free_sram));
+    response.set("heapAfterPsram", static_cast<int64_t>(heap_after.free_psram));
+    auto selected_driver = fl::ChannelManager::instance().findDriverByName(driver_name);
+    if (selected_driver) {
+        const auto state = selected_driver->poll();
+        if (state.state == fl::IChannelDriver::DriverState::ERROR) {
+            response.set("driverError", state.error.c_str());
+            passed = false;
+        }
+    }
+    if (worker_core_test) {
+        worker_load.stop();
+        if (!selected_driver) {
+            passed = false;
+        } else {
+            const auto worker = selected_driver->workerDiagnostics();
+            response.set("workerCore", worker.core);
+            response.set("workerObservedCore", worker.observedCore);
+            response.set("workerPriority", worker.priority);
+            response.set("workerSubmittedChunks", static_cast<int64_t>(worker.submittedChunks));
+            response.set("workerCompletedChunks", static_cast<int64_t>(worker.completedChunks));
+            response.set("workerTotalChunks", static_cast<int64_t>(worker.totalChunks));
+            response.set("workerMaxEncodeUs", static_cast<int64_t>(worker.maxEncodeUs));
+            response.set("workerMaxSubmitUs", static_cast<int64_t>(worker.maxSubmitUs));
+            response.set("workerStreamError", worker.streamError);
+        }
+        response.set("competingTaskPasses", static_cast<int64_t>(worker_load.passes()));
+        response.set("competingTaskMaxPassUs", static_cast<int64_t>(worker_load.maxPassUs()));
+    }
     response.set("success", true);
     response.set("passed", passed);
     response.set("totalTests", static_cast<int64_t>(total_tests));
@@ -1275,6 +1445,11 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
                                      : fl::string("none");
     response.set("captureBackend", capture_backend.c_str());
     response.set("laneCount", static_cast<int64_t>(lane_sizes.size()));
+    fl::json pins_response = fl::json::array();
+    for (const auto& channel : tx_configs) {
+        pins_response.push_back(static_cast<int64_t>(channel.getDataPin()));
+    }
+    response.set("lanePins", pins_response);
 #if defined(FL_IS_RP2040) || defined(FL_IS_RP2350)
     if (driver_name == "UART0" || driver_name == "UART1") {
         auto& uart = driver_name == "UART0"

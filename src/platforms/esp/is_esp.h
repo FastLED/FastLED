@@ -44,6 +44,7 @@
 // FL_IS_ESP32 - ESP32 platform detection (any variant)
 // ============================================================================
 #if defined(ESP32) || defined(ARDUINO_ARCH_ESP32) || \
+    (defined(ESP_PLATFORM) && !defined(FL_IS_ESP8266)) || \
     defined(CONFIG_IDF_TARGET_ESP32) || defined(CONFIG_IDF_TARGET_ESP32S2) || \
     defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32C2) || \
     defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32C5) || \

@@ -9,6 +9,22 @@
 
 namespace fl {
 
+bool IChannelDriver::configureWorker(const WorkerConfig& config) FL_NO_EXCEPT {
+    return config.isDefault() || configureWorkerImpl(config);
+}
+
+WorkerDiagnostics IChannelDriver::workerDiagnostics() const FL_NO_EXCEPT {
+    WorkerDiagnostics result;
+    fillWorkerDiagnostics(result);
+    return result;
+}
+
+bool IChannelDriver::configureWorkerImpl(const WorkerConfig&) FL_NO_EXCEPT {
+    return false;
+}
+
+void IChannelDriver::fillWorkerDiagnostics(WorkerDiagnostics&) const FL_NO_EXCEPT {}
+
 template<typename Condition>
 bool IChannelDriver::waitForCondition(Condition condition, u32 timeoutMs) FL_NO_EXCEPT {
     const u32 startTime = timeoutMs > 0 ? millis() : 0;

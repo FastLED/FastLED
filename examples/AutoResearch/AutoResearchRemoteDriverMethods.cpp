@@ -78,7 +78,14 @@ FlexIoObjectFledState& flexIoObjectFledState() {
 
 }  // namespace
 
+#if defined(FL_AUTORESEARCH_MEMORY_BENCH)
+void bindMemoryBench(fl::Remote& remote);
+#endif
+
 void AutoResearchRemoteControl::bindDriverMethods(fl::Remote& remote) {
+#if defined(FL_AUTORESEARCH_MEMORY_BENCH)
+    bindMemoryBench(remote);
+#endif
     // One physical data jumper checks either SPI host while a second APA102
     // channel exercises the registration-order interaction from #4864.
     remote.bind("dualSpiHostLoopback", [this](const fl::json& args) -> fl::json {
