@@ -607,3 +607,15 @@
   station/client before requesting private network credentials. The host does
   not need a Wi-Fi adapter. Use TLS for HTTPS tests and distinguish local
   transport evidence from reproduction against the public internet endpoint.
+
+## Worker priority footprint (#5001)
+
+- Keep default scheduling policies as compile-time no-ops; do not instantiate
+  a driver singleton or add per-controller fields for unused options. Reuse
+  existing configuration bytes and compare matched firmware, not just budgets.
+- Check the linked symbol graph before attributing a size change to a helper:
+  default builds may strip that helper completely, while template-name changes
+  affect Xtensa linker relaxation elsewhere.
+- Make the old core-only and new priority-aware rebind specializations mutually
+  exclusive with SFINAE. A fixed `Auto` argument alone does not disambiguate
+  two partial specializations whose final arguments are dependent `void` types.

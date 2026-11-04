@@ -1130,6 +1130,7 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
         if (worker_core_test) {
             tx_configs.back().options.mBus = fl::Bus::FLEX_IO;
             tx_configs.back().options.mWorker.core = worker_core;
+            tx_configs.back().options.mWorker.priority = fl::Priority::High;
         }
         led_arrays.push_back(fl::move(leds));
     }

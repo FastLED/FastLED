@@ -844,3 +844,12 @@ separate child #4893. Next implementation child after publication is #4892.
 - [ ] Verify the consumer writer controls in hosted CI and merge this separate fix.
 - [ ] Bound generation overlap and model every family from real measurements.
 - [ ] Validate budget and complete required CI before merge.
+
+## Named worker priority (#5001)
+
+- [x] Capture matched Blink image/static-RAM and configuration-layout baselines before production edits.
+- [x] Add red tests for friendly Auto/High/Medium/Low policies, template/runtime forwarding, conflicts, and unchanged controller storage.
+- [x] Implement trailing addLeds priority arguments and channel worker policy; map LCD/I2S Auto to High without per-strip growth.
+- [x] Validate targeted sanitizers, full native suite, lint, matched firmware sizes and the S3 AutoResearch SDK build. Confirmed that the attached USB-native boards are C6s, so live S3 LCD validation is unavailable.
+- [x] Run repository and pre-push code review with no actionable findings.
+- [ ] Create the labelled PR, address hosted review/checks and merge.

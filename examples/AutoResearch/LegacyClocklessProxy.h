@@ -138,7 +138,7 @@ struct LegacyWorkerTemplateCore {
     template<int PIN>
     static CLEDController* create(CRGB* leds, int numLeds) FL_NO_EXCEPT {
         return &FastLED.addLeds<WS2812B, PIN, RGB,
-            fl::Bus::FLEX_IO, CORE>(leds, numLeds);
+            fl::Bus::FLEX_IO, CORE, fl::Priority::High>(leds, numLeds);
     }
 };
 

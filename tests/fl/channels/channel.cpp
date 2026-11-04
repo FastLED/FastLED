@@ -520,17 +520,36 @@ FL_TEST_CASE("Channel forwards worker settings and rejects an unhonored request 
     CRGB leds[8] = {};
     auto cfg = makeBusTestConfig(fl::span<CRGB>(leds, 8));
     cfg.options.mWorker.core = Core::Core1;
-    cfg.options.mWorker.priority = 23;
+    cfg.options.mWorker.priority = Priority::High;
     auto channel = Channel::create(cfg);
     channel->showLeds(255);
     FL_REQUIRE_EQ(engine->workerConfigCount, 1);
     FL_CHECK(engine->requestedWorker.core == Core::Core1);
-    FL_CHECK_EQ(engine->requestedWorker.priority.value(), 23);
+    FL_CHECK(engine->requestedWorker.priority == Priority::High);
     FL_CHECK_EQ(engine->mCapturedChannels.size(), 1u);
 
     engine->acceptWorker = false;
     channel->showLeds(255);
     FL_CHECK_EQ(engine->mCapturedChannels.size(), 1u);
+}
+
+FL_TEST_CASE("Channel forwards priority-only worker policies #5001") {
+    const Priority policies[] = {Priority::High, Priority::Medium, Priority::Low};
+    for (const auto policy : policies) {
+        auto& mgr = freshBusTestManager();
+        auto cleanup = fl::make_scope_exit([&]() { mgr.clearAllDrivers(); });
+        auto engine = fl::make_shared<ByteCapturingMockEngine>();
+        mgr.addDriver(9500, engine);
+        CRGB leds[8] = {};
+        auto cfg = makeBusTestConfig(fl::span<CRGB>(leds, 8));
+        cfg.options.mWorker.priority = policy;
+        auto channel = Channel::create(cfg);
+        channel->showLeds(255);
+        FL_REQUIRE_EQ(engine->workerConfigCount, 1);
+        FL_CHECK(engine->requestedWorker.core == Core::Auto);
+        FL_CHECK(engine->requestedWorker.priority == policy);
+        FL_CHECK_EQ(engine->mCapturedChannels.size(), 1u);
+    }
 }
 
 // `ChannelOptions::mBus` is the typed primary path for runtime driver
