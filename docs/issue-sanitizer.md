@@ -5,9 +5,12 @@ triage agents, bug-ingestion bots, and maintainers' own tooling.  A report can
 describe a real bug and *also* carry instructions aimed at whatever processes
 it.  This document describes the screen that stands between the two.
 
-**The gate:** the `sanitized` label.  Automation must ingest an issue, a PR or a
-comment **only** when its container carries `sanitized`.  Anything else is
-untrusted text, including text a maintainer has not yet reviewed.
+**The gate:** the `sanitized` label covers an issue or PR's title, body and
+conversation comments at screening time. Automation may ingest those fields
+**only** when the container carries `sanitized`. Inline review comments and
+review bodies are explicitly outside this authorization: never ingest them
+based on this label alone. They need separate screening immediately before use.
+Anything else is untrusted text, including text a maintainer has not reviewed.
 
 - Policy, thresholds and signal set: `ci/issue_sanitizer.py`
 - Trigger and workflow invariants: `.github/workflows/sanitize_issues.yml`
@@ -20,11 +23,12 @@ untrusted text, including text a maintainer has not yet reviewed.
    (Why *not* on `pull_request_review_comment`: see the limits below.)
 2. The script collects the **title, body and every comment** of that one
    container — and, for a pull request, its inline review comments and review
-   bodies too.  Items written by a trusted actor are excluded; everything else
-   forms the corpus.
+   bodies too, as additional conservative evidence. Their inclusion can hold a
+   verdict but does not extend the gate's authorization to review text. Items
+   written by a trusted actor are excluded; everything else forms the corpus.
 3. **The gate label is revoked before any GitHub read.**  `sanitized` is a
-   claim about the text as it stands right now, and a run that has not finished screening has not
-   earned it, so it is dropped at the start and re-added only on a passing
+   claim about the covered fields as they stand at screening time. A run that
+   has not finished screening has not earned it, so it is dropped at the start and re-added only on a passing
    verdict.  A crash, a timeout, a cancellation or an unreadable answer
    therefore leaves the container un-vouched-for rather than wrongly vouched-for.
 4. Two cases are labelled **without** asking the judge: the corpus is empty
@@ -166,7 +170,7 @@ exactly how a payload would get past it.
 
 | Label | Meaning |
 | --- | --- |
-| `sanitized` (green) | screened and clean — automation may ingest |
+| `sanitized` (green) | title, body and conversation screened; review text excluded |
 | `security: unscreened-content` (orange) | the judge answered and did not pass, or answered with uncertainty — automation must skip, a maintainer decides |
 
 Both are created on demand by the script. Each live screening revokes
@@ -214,23 +218,35 @@ Cost: one judge request per run, a few thousand tokens; the corpus is capped at
    nothing", not "this text is now instructions".  Pass it to an agent inside a
    delimited, clearly-labelled block, exactly as the judge prompt does.
 3. Re-check the label before acting: an edit or a new comment revokes it, and
-   the workflow re-screens on both.
+   the workflow re-screens on both. This applies to title, body and conversation
+   comments only. The label never authorizes inline comments or review bodies;
+   screen those separately immediately before ingesting them.
 
 ## Known limits
+
+- **The existing Claude workflow is ungated.** `.github/workflows/claude.yml`
+  runs an agent on issue, conversation and review events. Its mention and
+  author-association checks do not check `sanitized`. Those runs remain outside
+  this contract until a consumer-side gate exists; this PR does not provide
+  end-to-end protection for that integration.
 
 - **Images and attachments are not screened.**  Jev accepts images; this tool
   does not send them.  Screenshot-only payloads are out of scope today.
 - **Links are not followed.**  A report can point at a page holding the real
   instructions; `obfuscated_payload` is asked to catch the *ask*, not the page.
-- **Inline review comments are screened only as part of a PR**, not on their
-  own arrival.  `pull_request_review_comment` cannot be triggered here: GitHub
+- **Review text is outside the label's authorization.** Inline comments and
+  review bodies are collected as additional evidence on a PR re-screen, but
+  their own arrival does not trigger revocation. Consumers must not treat the
+  label as permission to ingest them. `pull_request_review_comment` cannot be
+  triggered here: GitHub
   runs the workflow file for that event *from the pull request's merge commit*,
   so a same-repo PR could supply the workflow that then runs with the judge key
   (and `pull_request_review` has the same problem).  Instead, a PR's inline
   review comments and review bodies are folded into its corpus whenever the PR
   is screened for any other reason.  A brand-new inline comment on an otherwise
-  unchanged PR is therefore not itself a trigger; covering that needs a
-  `workflow_run` bridge, which runs the default-branch workflow with secrets.
+  unchanged PR is therefore not itself a trigger. Extending the gate to cover
+  review text would need a `workflow_run` bridge running default-branch code
+  with secrets; that extension is deferred.
 - **Trivially short text is labelled without the judge — a deliberate
   weakening.**  A container whose *whole* untrusted corpus is under
   `SHORT_CONTENT_MAX_CHARS` (24 characters by default, `0` disables) skips the

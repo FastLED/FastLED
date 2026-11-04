@@ -110,7 +110,7 @@ UNSCREENED_LABEL = "security: unscreened-content"
 LABEL_SPECS: dict[str, tuple[str, str]] = {
     SANITIZED_LABEL: (
         "0e8a16",
-        "Content screened by Jev: safe for automation to ingest.",
+        "Title, body and conversation screened; review text requires separate screening.",
     ),
     UNSCREENED_LABEL: (
         "d93f0b",
@@ -471,9 +471,9 @@ def build_corpus(
 def _pr_review_text(github: "GitHubClient", number: int) -> list[dict[str, Any]]:
     """Inline review comments and review bodies of a pull request.
 
-    A ``sanitized`` label must cover *all* the text on a container, so when a
-    pull request is screened its diff comments and review summaries are folded
-    into the corpus.  If they cannot be read, the run cannot vouch for the
+    When a pull request is screened, its diff comments and review summaries
+    provide supplemental evidence that may hold a verdict. Their inclusion
+    does not authorize later review-text ingestion based on the label alone.  If they cannot be read, the run cannot vouch for the
     container and fails closed.
     """
     items: list[dict[str, Any]] = []
@@ -868,7 +868,8 @@ class GitHubClient:
         if status not in (200, 201):
             raise SanitizerError(f"cannot add label {label}: HTTP {status} {payload}")
 
-    def remove_label(self, number: int, label: str) -> None:
+    def remove_label(self, number: int, label: str) -> bool:
+        """Remove a label and report whether it existed before this request."""
         status, payload = self._call(
             "DELETE",
             f"/repos/{self.repo}/issues/{number}/labels/{urllib.parse.quote(label)}",
@@ -878,6 +879,7 @@ class GitHubClient:
             raise SanitizerError(
                 f"cannot remove label {label}: HTTP {status} {payload}"
             )
+        return status != 404
 
     def ensure_label(self, label: str) -> None:
         color, description = LABEL_SPECS[label]
@@ -1191,17 +1193,19 @@ def run(
     kind, number = resolve_target(args, github)
     # Revoke before any API read: even a failed container/comment fetch must
     # leave the previous safety claim invalid. A missing label is harmless.
+    revoked = False
     if not args.dry_run:
-        github.remove_label(number, SANITIZED_LABEL)
+        revoked = github.remove_label(number, SANITIZED_LABEL)
     container = github.container(number)
     kind = "pull request" if container.get("pull_request") else "issue"
     number = int(container.get("number") or number)
     user = as_dict(container.get("user"))
     comments = github.comments(number)
     if container.get("pull_request"):
-        # Review comments and review bodies are text on the same container; a
-        # `sanitized` label has to cover them too.
+        # Include review text as additional evidence that can hold a verdict.
         comments = comments + _pr_review_text(github, number)
+    # Review text is supplemental evidence only: its own arrival does not
+    # trigger re-screening, so the label never authorizes review ingestion.
     # Review endpoints can also set this flag when pagination hits the cap.
     fetch_truncated = bool(getattr(github, "fetch_truncated", False))
     corpus = build_corpus(
@@ -1270,6 +1274,9 @@ def run(
         dry_run=args.dry_run,
         want_comment=args.comment,
     )
+    if revoked:
+        outcome.actions.insert(0, f"remove:{SANITIZED_LABEL}")
+        outcome.labels_before.append(SANITIZED_LABEL)
     print(summarize(outcome))
     write_job_summary(summarize(outcome))
     if verdict.decision == DECISION_HOLD:

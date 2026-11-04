@@ -184,10 +184,12 @@ class FakeGitHub(GitHubClient):
         if label not in self._labels:
             self._labels.append(label)
 
-    def remove_label(self, number: int, label: str) -> None:
+    def remove_label(self, number: int, label: str) -> bool:
         self.removed.append((number, label))
         if label in self._labels:
             self._labels.remove(label)
+            return True
+        return False
 
     def ensure_label(self, label: str) -> None:
         self.ensured.append(label)
@@ -1266,6 +1268,18 @@ class TestTextItem(unittest.TestCase):
 
 
 class TestReviewSecurityRegressions(unittest.TestCase):
+    def setUp(self) -> None:
+        patcher = mock.patch.dict(os.environ, {"GITHUB_STEP_SUMMARY": ""})
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+    def test_revocation_is_recorded_in_outcome(self) -> None:
+        github = FakeGitHub(fake_container(labels=[SANITIZED_LABEL]), [])
+        args = build_parser().parse_args(["--issue", "4912"])
+        outcome = run(args, github=github, jev=FakeJev(signals()))
+        self.assertEqual(outcome.actions[0], f"remove:{SANITIZED_LABEL}")
+        self.assertIn(SANITIZED_LABEL, outcome.labels_before)
+
     def test_fetch_failure_revokes_before_every_read(self) -> None:
         for endpoint in ("container", "comments", "review_comments", "reviews"):
             with self.subTest(endpoint=endpoint):
