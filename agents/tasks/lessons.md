@@ -600,3 +600,10 @@
 - Keep release execution explicit: a local `gh workflow run` dispatch starts
   GitHub CI; it does not build, sign, or publish a release locally. Verify the
   CI publication gates and registry artifacts before advancing a dependency.
+
+## Two-board Wi-Fi reproductions (#5010)
+
+- When two Wi-Fi boards exist, use one as a SoftAP/server and the other as a
+  station/client before requesting private network credentials. The host does
+  not need a Wi-Fi adapter. Use TLS for HTTPS tests and distinguish local
+  transport evidence from reproduction against the public internet endpoint.
