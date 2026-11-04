@@ -19,6 +19,7 @@
 #include "cpixel_ledcontroller.h"
 #include "fl/channels/data.h"
 #include "fl/channels/driver.h"
+#include "fl/channels/worker_policy.h"
 #include "fl/channels/manager.h"
 #include "fl/channels/bus_traits.h"  // IWYU pragma: keep (DriverTraits<Bus::X> satisfies the DriverTraits contract)
 #include "fl/channels/config.h"
@@ -144,11 +145,19 @@ struct SlimBridgeShowPolicy<true, true> : SlimBridgeShowPolicy<true, false> {
 ///                     enable for drivers that consume multiple queued strips.
 template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER, int WAIT_TIME, typename DriverTraits,
           int XTRA0 = 0, bool DIRECT_SHOW = SlimBridgeDirectShow<>::value,
-          bool BATCHED_DIRECT_SHOW = false>
+          bool BATCHED_DIRECT_SHOW = false, Core CORE = Core::Auto>
 class SlimBridgeController : public CPixelLEDController<RGB_ORDER> {
     using Policy = SlimBridgeShowPolicy<DIRECT_SHOW, BATCHED_DIRECT_SHOW>;
 
 public:
+    /// Rebind only the scheduling/bus policy; retain the compile-time chipset
+    /// timing and slim storage rather than constructing a runtime Channel.
+    template<Bus B, Core C>
+    using WithWorker = SlimBridgeController<DATA_PIN, TIMING, RGB_ORDER,
+        WAIT_TIME, typename fl::conditional<B == Bus::AUTO, DriverTraits,
+                                            BusTraits<B>>::type,
+        XTRA0, DIRECT_SHOW, BATCHED_DIRECT_SHOW, C>;
+
     SlimBridgeController() FL_NO_EXCEPT {
         ChipsetTimingConfig timing = makeTimingConfig<TIMING>();
         // (A?) Fold WAIT_TIME (microseconds) into reset_us, mirroring the
@@ -161,10 +170,15 @@ public:
         // A clockless controller bound to a unified parallel-IO bus needs
         // that engine's clockless pipeline linked (#4793).
         detail::enable_clockless<DriverTraits>();
+        if (CORE != Core::Auto) {
+            detail::WorkerPolicy<CORE>::apply(DriverTraits::instance());
+        }
         mData = ChannelData::create(DATA_PIN, timing, fl::vector_psram<u8>(),
                                      ChannelPixelFormat::RGB);
         FL_STATIC_ASSERT(XTRA0 >= 0 && XTRA0 <= 32, "XTRA0 out of range");
-        mData->setExtraZeroBitsPerByte(static_cast<u8>(XTRA0));
+        if (XTRA0 != 0) {
+            mData->setExtraZeroBitsPerByte(static_cast<u8>(XTRA0));
+        }
         // Idempotent by contract -- safe to call from every instantiation's
         // constructor (mirrors ClocklessIdf5's registerWithManager() call).
         // A no-op in direct-show mode.
@@ -186,6 +200,11 @@ public:
 protected:
     void showPixels(PixelController<RGB_ORDER>& pixels) FL_NO_EXCEPT override {
         IChannelDriver& driver = DriverTraits::instance();
+
+        if (!detail::WorkerPolicy<CORE>::apply(driver)) {
+            FL_ERROR("SlimBridgeController: worker configuration rejected - dropping frame");
+            return;
+        }
 
         // (A1) Respect runtime driver enable/disable: ChannelManager is the
         // single source of truth. A disabled driver means "drop this frame",

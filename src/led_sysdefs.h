@@ -59,7 +59,7 @@
 #include "platforms/arm/rp/rp2040/led_sysdefs_arm_rp2040.h"  // ok platform headers
 #elif defined(ESP8266)
 #include "platforms/esp/8266/led_sysdefs_esp8266.h"  // ok platform headers
-#elif defined(ESP32)
+#elif defined(FL_IS_ESP32)
 #include "platforms/esp/32/core/led_sysdefs_esp32.h"  // ok platform headers
 #elif defined(ARDUINO_ARCH_CI13XX)
 #include "platforms/ci13xx/led_sysdefs_ci13xx.h"  // ok platform headers

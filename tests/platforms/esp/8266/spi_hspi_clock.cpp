@@ -119,6 +119,68 @@ FL_TEST_CASE("ESP8266 HSPI clock - 50 percent duty encoding") {
     }
 }
 
+FL_TEST_CASE("ESP8266 HSPI clock - CLKCNT_L is never zero") {
+    // CLKCNT_L is the clock's high phase, so a zero leaves SCK parked low for
+    // the whole transfer. Measured on an ESP8266: 25 kHz resolved to
+    // CLKDIV_PRE = 3201 with CLKCNT_N = CLKCNT_L = 0, and a 64-bit HSPI
+    // transfer drove the SCK pad for 0 of 4691 samples -- the frame took the
+    // programmed 2.6 ms while nothing reached the wire. Re-splitting the same
+    // divider with CLKCNT_N = 1 (CLKCNT_L = 1) produced 128 edges. ESP-IDF's
+    // own divider search starts at n = 2 for this reason.
+    const fl::u32 rates[] = {1,      100,    1000,     25000,
+                             50000,  100000, 1000000,  3200000,
+                             6000000, 12000000, 40000000};
+    for (fl::u32 rate : rates) {
+        const HspiClock clk = hspiClockFor(rate);
+        FL_CHECK((clk.reg_value & 0x3F) >= 1);
+        FL_CHECK_EQ(clk.actual_hz, decodeHz(clk.reg_value));
+    }
+
+    // The minimum-divider entry point is what the driver actually calls, so it
+    // gets the same guarantee across the whole usable divider range.
+    for (fl::u32 min_div = 1; min_div <= 4096; min_div = min_div * 2) {
+        const HspiClock clk = hspiClockForMinDivider(min_div);
+        // Divider 1 has no CLKCNT_L encoding; it is the system-clock bypass.
+        if (min_div == 1) {
+            FL_CHECK_EQ(clk.reg_value, kHspiEquSysClk);
+        } else {
+            FL_CHECK((clk.reg_value & 0x3F) >= 1);
+        }
+        FL_CHECK_EQ(clk.actual_hz, decodeHz(clk.reg_value));
+        FL_CHECK(clk.actual_hz <= kHspiSourceHz / min_div);
+    }
+
+    // The invariant belongs to the arithmetic, not to one caller: a candidate
+    // built directly with the forbidden n = 1 is clamped, so its register value
+    // and its reported frequency still agree.
+    const HspiClock clamped = hspiCandidate(1, 1);
+    FL_CHECK((clamped.reg_value & 0x3F) >= 1);
+    FL_CHECK_EQ(clamped.actual_hz, decodeHz(clamped.reg_value));
+    FL_CHECK_EQ(clamped.actual_hz, kHspiSourceHz / kHspiMinNDivider);
+}
+
+FL_TEST_CASE("ESP8266 HSPI clock - divider 1 is the system-clock bypass") {
+    // The divider fields cannot express divider 1 (CLKCNT_L would be zero), so
+    // the fastest setting is the SPICLK_EQU_SYSCLK bypass -- the same value the
+    // Arduino core's setFrequency() uses for any request at or above 80 MHz.
+    // The driver turns that into the GPMUX mux bit, exactly as the core does.
+    const HspiClock min1 = hspiClockForMinDivider(1);
+    FL_CHECK_EQ(min1.reg_value, kHspiEquSysClk);
+    FL_CHECK_EQ(min1.actual_hz, kHspiSourceHz);
+
+    // Both entry points agree, and 0 keeps its "slowest possible request"
+    // meaning by selecting the bypass rather than dividing by zero.
+    FL_CHECK_EQ(hspiClockForMinDivider(0).reg_value, kHspiEquSysClk);
+    FL_CHECK_EQ(hspiClockFor(kHspiSourceHz).reg_value, min1.reg_value);
+    FL_CHECK_EQ(hspiClockFor(120000000).reg_value, min1.reg_value);
+
+    // One step slower is a real divider with a nonzero high phase.
+    const HspiClock min2 = hspiClockForMinDivider(2);
+    FL_CHECK((min2.reg_value & kHspiEquSysClk) == 0);
+    FL_CHECK((min2.reg_value & 0x3F) >= 1);
+    FL_CHECK_EQ(min2.actual_hz, kHspiSourceHz / 2);
+}
+
 FL_TEST_CASE("ESP8266 HSPI clock - degenerate inputs") {
     // Zero is clamped instead of dividing by zero.
     const HspiClock zero = hspiClockFor(0);

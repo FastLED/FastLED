@@ -539,18 +539,21 @@ def embedded_fs_defines(scan: AssetScanResult) -> list[str]:
     """Preprocessor defines a build needs to satisfy the sketch's assets.
 
     Separate from the reporting below so the decision is testable on its own
-    and has exactly one home. Empty unless some asset declares on-chip storage.
+    and has exactly one home.
 
-    Today this is only non-empty for ESP8266. ESP32 needs no flag -- its
-    embedded filesystem is already selected automatically by
-    `platforms/embedded_fs.h` -- so on the platform people actually use for
-    LittleFS, an asset declaring `storage=littlefs` already works.
+    Always empty now (#4947). Both ESP32 and ESP8266 select their embedded
+    filesystem automatically in `platforms/embedded_fs.h`, so an asset
+    declaring ``storage=littlefs`` needs no `FL_ESP8266_EMBEDDED_FS` flag. The
+    ESP8266 adapter self-guards on `FL_HAS_INCLUDE(<LittleFS.h>)` and degrades
+    to a null filesystem when the library is absent.
 
     ``copy_example_source`` carries these per-sketch requirements into the
-    generated compile configuration. fbuild#1380 supplies the ESP8266 core's
-    LittleFS submodule, so opting into that backend is now safe.
+    generated compile configuration; with the gate retired there are none to
+    carry. Kept as the single decision point rather than deleted so a future
+    per-sketch requirement has one home.
     """
-    return ["FL_ESP8266_EMBEDDED_FS"] if scan.embedded_fs_assets() else []
+    del scan  # No per-sketch embedded-fs requirement remains.
+    return []
 
 
 def announce_storage_requirements(scan: AssetScanResult) -> None:
@@ -561,9 +564,8 @@ def announce_storage_requirements(scan: AssetScanResult) -> None:
     prints, in green, which assets asked for it and where that requirement is
     already met.
 
-    ESP32 is automatic -- `platforms/embedded_fs.h` selects LittleFS with no
-    flag -- while ESP8266 receives `FL_ESP8266_EMBEDDED_FS` through the staged
-    example's build requirements.
+    ESP32 and ESP8266 both select their embedded filesystem automatically in
+    `platforms/embedded_fs.h` (#4947); no per-sketch define is required.
 
     Green because it is neither a warning nor an error. An unrecognised target
     is the yellow case -- a typo like `littleFS` would otherwise behave exactly
@@ -597,6 +599,6 @@ def announce_storage_requirements(scan: AssetScanResult) -> None:
         f"({'/'.join(targets)}): {shown}"
     )
     print_green(
-        "  ESP32 selects its embedded filesystem automatically. ESP8266 needs "
-        "-DFL_ESP8266_EMBEDDED_FS, which no build applies yet (FastLED#4020)."
+        "  ESP32 and ESP8266 both select their embedded filesystem "
+        "automatically (#4947) — no define is required."
     )

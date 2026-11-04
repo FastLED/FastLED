@@ -26,7 +26,7 @@ ESP platform support covering ESP8266 and ESP32 (Xtensa and RISC‑V variants), 
   - `clockless_esp8266.h`: Single‑lane clockless controller using cycle counter with interrupt handling and frame retry handling.
   - `clockless_block_esp8266.h`: Multi‑lane “blockless” controller (transpose + timed output across lanes).
   - `fastpin_esp8266.h`: Direct GPIO access helpers and pin mappings for ESP8266 variants and NodeMCU/D1 mappings.
-  - `fastspi_esp8266.h`: Hardware SPI helper (where available) for ESP8266.
+  - `fastspi_esp8266_hspi.h`: Register-level HSPI (SPI1) driver for the hardware SPI pair (channel API `Bus::SPI`).
 
 ## Backend selection quick guide
 

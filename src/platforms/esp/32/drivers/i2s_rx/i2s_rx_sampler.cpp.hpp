@@ -380,7 +380,7 @@ class I2sRxSampler final : public RxDevice {
                 return; // next fill not ready yet
             }
             const size_t len = d.length ? d.length : kRxDescBytes;
-            g_i2s_rx_debug[0]++;
+            g_i2s_rx_debug[0] = g_i2s_rx_debug[0] + 1;
             // lldesc buf is volatile u8* — the DMA finished writing this
             // descriptor (owner flipped), so the snapshot read is safe.
             processSamples(const_cast<const u8 *>(d.buf), len);
@@ -407,7 +407,7 @@ class I2sRxSampler final : public RxDevice {
         const size_t nwords = len_bytes / 4;
         for (size_t w = 0; w < nwords && !mFinished; ++w) {
             const u32 word = words[w];
-            g_i2s_rx_debug[1]++;
+            g_i2s_rx_debug[1] = g_i2s_rx_debug[1] + 1;
             if (word != 0) {
                 if (g_i2s_rx_debug[3] == 0) {
                     g_i2s_rx_debug[3] = word;

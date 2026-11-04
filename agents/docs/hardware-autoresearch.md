@@ -22,6 +22,82 @@ COM10     1FC9:0132    USB Serial Device (COM10)         ser=0B03400A
 Do NOT reason about attachment from memory or from "which board this task is about." Read the scan. Full rule + history (two incidents where boards were wrongly declared absent): `agents/docs/cpp-standards.md` → "Check if the target hardware might already be attached (REQUIRED)".
 
 ## Live Device Testing (AI Agents)
+
+### LCD worker scheduling (#5001)
+
+Use `--lcd --worker-core 1` to validate LCD clockless output together with the
+worker's resolved and observed affinity. A priority-5 coroutine on Core 0
+performs 1 ms CPU work passes and yields between passes; the response reports
+its pass count and maximum elapsed pass duration. This is synthetic scheduling
+load, not a W5500 or Wi-Fi latency benchmark. Add `--legacy` to exercise the
+actual `FastLED.addLeds<..., Bus::FLEX_IO, Core::Core1>` path instead of runtime
+channel settings. The template fixture supports plain WS2812B only.
+
+```bash
+bash autoresearch esp32s3_opi_psram8 --lcd --worker-core 1 --lanes 1 --strip-sizes 170,700 --frames 4 --timeout 3m
+bash autoresearch esp32s3_opi_psram8 --lcd --worker-core 1 --legacy --lanes 1 --strip-sizes 170,700 --frames 4 --timeout 3m
+```
+
+The `esp32s3_opi_psram8` profile enables verified 8 MB octal PSRAM with the
+existing conservative flash cap. It does not assume a physical flash size.
+Use it only on matching PSRAM hardware; `esp32s3` keeps its legacy no-PSRAM
+configuration. The wave8 ring for these long-strip tests needs substantial DMA
+memory, so a no-PSRAM profile can fail allocation before transmitting.
+
+Specify `--upload-port` when multiple boards are attached and use discovered
+TX/RX wiring. The 700-LED case crosses the default 1024-input-byte chunk
+boundary and exercises worker refills. Short 170-LED RGB lanes fit in one
+chunk and do not establish refill scheduling. Core values `0`, `1`, `auto`, `any`,
+and `calling` are supported. Restart the device between different explicit
+policies: a shared engine rejects conflicting or late reconfiguration.
+Acceptance requires byte validation, observed affinity matching the request,
+and nonzero competing-task progress. Preserve the reported latency values;
+do not claim reproduction of the issue's network timing from this test alone.
+For `--worker-core auto`, acceptance checks the LCD's legacy unpinned policy;
+the legacy fixture omits the template core argument. Failed LCD starts now
+report `DriverState::ERROR` with a reason instead of appearing READY.
+
+#### Recorded ESP32-S3 validation (#5001)
+
+The bench S3 had verified 8 MB octal PSRAM and a TX GPIO 1 → RX GPIO 2
+jumper. Six configured output lanes used GPIOs `1,3,4,5,6,7`; RX measured
+**lane 0 only**. Both APIs passed 170 → 700 → 170 LED grow/shrink cycles with
+four repeated frames per pattern. Single-lane 1100- and 2000-LED cases also
+passed with four and six chunks respectively. Successful captures required
+all submitted/completed/total chunk counts to agree and no stream error.
+
+```bash
+bash autoresearch esp32s3_opi_psram8 --lcd --worker-core 1 --upload-port /dev/ttyACM1 --tx-pin 1 --rx-pin 2 --lane-pins 1,3,4,5,6,7 --lanes 6 --strip-sizes 170,700,170 --frames 4 --timeout 3m --skip-lint
+bash autoresearch esp32s3_opi_psram8 --lcd --legacy --worker-core 1 --upload-port /dev/ttyACM1 --tx-pin 1 --rx-pin 2 --lane-pins 1,3,4,5,6,7 --lanes 6 --strip-sizes 170,700,170 --frames 4 --timeout 3m --skip-lint
+bash autoresearch esp32s3_opi_psram8 --lcd --legacy --worker-core 1 --upload-port /dev/ttyACM1 --tx-pin 1 --rx-pin 2 --lane-pins 1,3,4,5,6,7 --lanes 6 --strip-sizes 2000 --frames 16 --timeout 3m --skip-lint
+bash autoresearch esp32s3_opi_psram8 --lcd --worker-core 1 --upload-port /dev/ttyACM1 --tx-pin 1 --rx-pin 2 --lane-pins 1,3,4,5,6,7 --lanes 6 --strip-sizes 2000 --frames 16 --timeout 3m --skip-lint
+```
+
+The six-lane template 2000-LED test passed 16 repeated frames per pattern,
+with six completed chunks and 6000 correctly decoded lane-0 bytes per
+pattern. The response records the last captured frame for each of four
+patterns; it does not count every repeated frame as a separate capture.
+The corresponding runtime V5 six-lane 2000-LED, 16-frame stress test also
+passed after contiguous word stores reduced maximum encode time from 9122
+to 6897 µs. The preceding byte-store version captured only 3000 of 6000
+bytes despite all six chunks completing; the final version captured all
+6000 bytes per pattern. Maximum submission time was 681 µs, leaving measured
+encode-plus-submit time below the chunk's 9600 µs wire time.
+The runtime V5 wave8 optimization reduced a 700-LED maximum encode measurement
+from 22678 to 6055 µs. The template WS2812B wave3 optimization reduced the
+six-lane 700-LED maximum from 6774 to 1509 µs and changed its previously
+truncated 1400-byte capture into the complete 2100-byte frame.
+
+Both APIs passed explicit `0`, `1`, `any`, `calling`, and `auto` policies
+after separate resets. Auto's template fixture actually omitted the core
+argument. Auto/Any resolved to unpinned affinity `-1`; CallingCore resolved
+to Core 1 on this bench. Fixed policies' observed cores matched their
+requests. Worker priority was 23. For the single-lane runtime 700-LED case,
+the competing priority-5 Core-0 task's longest 1 ms work pass was 7356 µs
+with a Core-0 worker versus about 1001 µs with a Core-1 worker. This is
+synthetic scheduling evidence, not a W5500/network result or a latency bound.
+`--skip-lint` was used because repository lint ran separately.
+
 **PRIMARY TOOL: `bash autoresearch`** - Hardware-in-the-loop autoresearch framework:
 
 The `bash autoresearch` command is the **preferred entry point** for AI agents doing live device testing. It provides a complete autoresearch framework with pre-configured expect/fail patterns designed for hardware testing.
@@ -332,6 +408,30 @@ Closeout evidence must include the command, board, port, wiring, decisive
 output, commit/PR URL, and issue URL. Stale chat comments, CI compile-only
 results, and old serial buffers do not close hardware issues when a board can
 be tested locally.
+
+### ESP32 local-static initialization under LTO (#4994)
+
+`--static-init` runs a pin-free concurrency regression through the
+`staticInitTest` RPC. One FreeRTOS task begins constructing a slow function-local
+static; a second task calls the same accessor while initialization is in progress.
+The host requires two completed callers, a contender observed blocked during
+construction, exactly one constructor invocation, and suspended workers before
+teardown. Run this mode separately from other tests or workload options.
+Reset before calling the RPC again: a successfully
+initialized local static cannot be uninitialized safely for another trial.
+
+```bash
+fbuild port scan
+bash autoresearch esp32c6 --static-init --upload-port <port> --timeout 120s
+bash autoresearch esp32c6 --static-init --static-init-no-lto --upload-port <port> --timeout 120s
+```
+
+The default run enables LTO for the framework, FastLED, sketch, and final link;
+`--static-init-no-lto` is a control with LTO disabled. Both explicitly enable
+thread-safe statics. No LED or jumper is required. A pre-fix LTO failure followed by a
+post-fix pass on the same board is the regression evidence; a non-LTO pass alone
+does not establish that #4994 is fixed. Check the linked guard implementation as
+well as the runtime count when changing the LTO build recipe.
 
 ### ESP32 two-host APA102 check with one jumper
 

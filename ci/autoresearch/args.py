@@ -6,6 +6,79 @@ from dataclasses import dataclass
 from pathlib import Path
 
 
+MEMORY_BENCH_CONFLICT_FLAGS = (
+    "parlio",
+    "rmt",
+    "spi",
+    "uart",
+    "bitbang",
+    "lcd",
+    "lcd_spi",
+    "lcd_rgb",
+    "object_fled",
+    "flex_io",
+    "lpuart",
+    "all",
+    "simd",
+    "coroutine",
+    "ieee754",
+    "math",
+    "fft",
+    "mp3",
+    "net",
+    "net_server",
+    "net_client",
+    "net_peer",
+    "ota",
+    "ble",
+    "decode",
+    "watchdog_soak",
+    "rpc_smoke",
+    "static_init",
+    "static_init_no_lto",
+    "perf_wave2d",
+    "pwm_dma_cl",
+    "dma_spi",
+    "dma_uart",
+    "rp_spi_loopback",
+    "rp_spi_public_api",
+    "rp_pio_both",
+    "test_fault_emit",
+    "embedded_fs",
+    "embedded_fs_provider",
+    "embedded_fs_format_fixture",
+    "pin_toggle_rx",
+    "ws2812_loopback",
+    "tight_timing",
+    "parallel",
+    "legacy",
+    "legacy_mixed_timings",
+    "legacy_rgbw_small_counts",
+    "spi_provider",
+    "spi_provider_native",
+    "usb_console",
+    "strip_sizes",
+    "frames",
+    "lanes",
+    "lane_counts",
+    "worker_core",
+    "lane_pins",
+    "color_pattern",
+    "tx_pin",
+    "rx_pin",
+)
+
+
+def memory_bench_conflicts(args: object) -> list[str]:
+    """Only False/None defaults are inactive; explicit zero/empty values conflict."""
+    conflicts: list[str] = []
+    for name in MEMORY_BENCH_CONFLICT_FLAGS:
+        value = getattr(args, name)
+        if value is not None and value is not False:
+            conflicts.append(name)
+    return conflicts
+
+
 @dataclass
 class Args:
     """Parsed command-line arguments for autoresearch test runner."""
@@ -157,6 +230,12 @@ class Args:
     embedded_fs_format_fixture: bool = False
     spi_provider: bool = False
     spi_provider_native: bool = False
+    static_init: bool = False
+    static_init_no_lto: bool = False
+    worker_core: str | None = None
+    lane_pins: str | None = None
+    driver_binding: str | None = None
+    spi_streaming: bool = False
 
     @staticmethod
     def parse_args(argv: list[str] | None = None) -> "Args":
@@ -291,7 +370,7 @@ See Also:
         driver_group.add_argument(
             "--rp-spi-chipset",
             choices=("apa102", "sk9822"),
-            default="apa102",
+            default=None,
             help="Chipset for --rp-spi-public-api (default: apa102).",
         )
         driver_group.add_argument(
@@ -320,6 +399,11 @@ See Also:
             "--lcd",
             action="store_true",
             help="Test only LCD_CLOCKLESS driver (ESP32-S3, clockless via LCD_CAM I80; replaces misnamed I2S)",
+        )
+        driver_group.add_argument(
+            "--worker-core",
+            choices=("auto", "0", "1", "any", "calling"),
+            help="Validate LCD worker affinity under competing Core-0 task load (use with --lcd).",
         )
         driver_group.add_argument(
             "--lcd-spi",
@@ -379,6 +463,17 @@ See Also:
             "--all",
             action="store_true",
             help="Test all currently implemented drivers (Teensy 4.x: --object-fled --flex-io)",
+        )
+        memory_group = driver_group.add_mutually_exclusive_group()
+        memory_group.add_argument(
+            "--driver-binding",
+            choices=("typed", "runtime"),
+            help="Measure cold driver registration and steady heap through the public Channel API",
+        )
+        memory_group.add_argument(
+            "--spi-streaming",
+            action="store_true",
+            help="ESP32-S3 native SPI2 APA102/SK9822 memory and full-frame SPI3-slave loopback",
         )
         driver_group.add_argument(
             "--spi-provider",
@@ -448,6 +543,16 @@ See Also:
             "--rpc-smoke",
             action="store_true",
             help="Validate pin-free JSON-RPC discovery, health, payload, and error handling",
+        )
+        driver_group.add_argument(
+            "--static-init",
+            action="store_true",
+            help="Verify ESP32 concurrent local-static initialization with LTO (#4994); no wiring",
+        )
+        parser.add_argument(
+            "--static-init-no-lto",
+            action="store_true",
+            help="Use --static-init without LTO as a control",
         )
         driver_group.add_argument(
             "--watchdog-soak",
@@ -710,6 +815,10 @@ See Also:
             help="Override TX pin number (FastLED driver output)",
         )
         pin_group.add_argument(
+            "--lane-pins",
+            help="Explicit comma-separated TX pin per lane; requires --tx-pin matching lane 0 and --rx-pin outside the list.",
+        )
+        pin_group.add_argument(
             "--rx-pin",
             type=int,
             help="Override RX pin number (RMT receiver input)",
@@ -838,7 +947,7 @@ See Also:
         parser.add_argument(
             "--chipset",
             choices=["ws2812", "ws2814", "ws2818", "ucs7604", "ws2811-400"],
-            default="ws2812",
+            default=None,
             help=(
                 "Chipset to use for autoresearch (default: ws2812). "
                 "ws2814 requires --legacy and exercises automatic RGBW output; "
@@ -919,6 +1028,47 @@ See Also:
                     file=sys.stderr,
                 )
 
+        if parsed.static_init:
+            # Standalone probes share the benchmark exclusions, except for
+            # this probe's own mode and non-LTO control switch.
+            conflicts = [
+                name
+                for name in memory_bench_conflicts(parsed)
+                if name not in ("static_init", "static_init_no_lto")
+            ]
+            conflicts.extend(
+                name
+                for name in (
+                    "driver_binding",
+                    "spi_streaming",
+                    "chipset",
+                    "rp_spi_chipset",
+                    "contaminate_tx_mux",
+                )
+                if (value := getattr(parsed, name)) is not None and value is not False
+            )
+            if conflicts:
+                parser.error(
+                    "Run --static-init separately from other modes or workloads: "
+                    + ", ".join("--" + name.replace("_", "-") for name in conflicts)
+                )
+
+        if parsed.driver_binding or parsed.spi_streaming:
+            conflicts = memory_bench_conflicts(parsed)
+            # Inspect raw optional values before restoring the normal defaults:
+            # explicitly requesting even the default chipset would be ignored
+            # by the fixed memory workload.
+            conflicts.extend(
+                name
+                for name in ("chipset", "rp_spi_chipset")
+                if getattr(parsed, name) is not None
+            )
+            if conflicts:
+                parser.error(
+                    "Run memory benches separately from other test modes: "
+                    + ", ".join("--" + name.replace("_", "-") for name in conflicts)
+                )
+
         # Convert argparse.Namespace to Args dataclass
         return Args(
             environment_positional=parsed.environment_positional,
@@ -928,6 +1078,8 @@ See Also:
             uart=parsed.uart,
             bitbang=parsed.bitbang,
             lcd=parsed.lcd,
+            worker_core=parsed.worker_core,
+            lane_pins=parsed.lane_pins,
             lcd_spi=parsed.lcd_spi,
             lcd_rgb=parsed.lcd_rgb,
             object_fled=parsed.object_fled,
@@ -946,7 +1098,11 @@ See Also:
             embedded_fs_format_fixture=parsed.embedded_fs_format_fixture,
             spi_provider=parsed.spi_provider,
             spi_provider_native=parsed.spi_provider_native,
+            driver_binding=parsed.driver_binding,
+            spi_streaming=parsed.spi_streaming,
             rpc_smoke=parsed.rpc_smoke,
+            static_init=parsed.static_init,
+            static_init_no_lto=parsed.static_init_no_lto,
             watchdog_soak=parsed.watchdog_soak,
             perf_wave2d=parsed.perf_wave2d,
             environment=parsed.environment,
@@ -976,7 +1132,7 @@ See Also:
             legacy=parsed.legacy,
             legacy_mixed_timings=parsed.legacy_mixed_timings,
             legacy_rgbw_small_counts=parsed.legacy_rgbw_small_counts,
-            chipset=parsed.chipset,
+            chipset=parsed.chipset or "ws2812",
             net_server=parsed.net_server,
             net_client=parsed.net_client,
             net=parsed.net,
@@ -995,7 +1151,7 @@ See Also:
             rp_spi_loopback=parsed.rp_spi_loopback,
             rp_spi_index=parsed.rp_spi_index,
             rp_spi_public_api=parsed.rp_spi_public_api,
-            rp_spi_chipset=parsed.rp_spi_chipset,
+            rp_spi_chipset=parsed.rp_spi_chipset or "apa102",
             rp_uart_index=parsed.rp_uart_index,
             rp_pio_index=parsed.rp_pio_index,
             rp_pio_both=parsed.rp_pio_both,

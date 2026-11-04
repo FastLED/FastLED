@@ -1,4 +1,4 @@
-from ci.memory_report import ALL_BOARDS, MARKER, plan, render
+from ci.memory_report import ALL_BOARDS, DOWN, MARKER, UP, plan, render
 
 
 def test_render_is_one_table_with_size_then_colored_delta() -> None:
@@ -15,9 +15,12 @@ def test_render_is_one_table_with_size_then_colored_delta() -> None:
     # One table only: the absolute sizes live in the same cell as the delta.
     assert out.count("|---|---:|---:|") == 1
     assert "Absolute sizes" not in out
-    # Increase is red, decrease is green, unchanged is green.
-    assert "| uno | 3,660 (🔴 +60) | 134 (🟢 0) |" in out
-    assert "| esp32s3 | 320,655 (🟢 -5,368) | 38,623 (🟢 -570) |" in out
+    assert "🟢" not in out and "🔴" not in out
+    # Increase is a red up arrow, decrease a green down arrow, unchanged plain 0.
+    assert "| uno | 3,660 (" + UP + " 60) | 134 (0) |" in out
+    assert (
+        "| esp32s3 | 320,655 (" + DOWN + " 5,368) | 38,623 (" + DOWN + " 570) |" in out
+    )
 
 
 def test_render_lists_missing_boards() -> None:
@@ -27,7 +30,7 @@ def test_render_lists_missing_boards() -> None:
     }
     head = {"esp32c6": {"image_flash": 348_182, "total_ram": 19_544}}
     out = render(base, head, "Blink")
-    assert "| esp32c6 | 348,182 (🟢 -18,432) | 19,544 (🟢 0) |" in out
+    assert "| esp32c6 | 348,182 (" + DOWN + " 18,432) | 19,544 (0) |" in out
     assert "`rp2040`" in out
 
 

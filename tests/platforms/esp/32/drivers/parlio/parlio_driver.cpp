@@ -39,6 +39,9 @@
 #include "fl/stl/vector.h"
 #include "fl/stl/move.h"
 #include "fl/stl/map.h"
+#include "fl/stl/cstdio.h"
+#include "fl/stl/string.h"
+#include "fl/log/log.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
 
@@ -1593,6 +1596,91 @@ FL_TEST_CASE("ParlioEngine - SPI to clockless mode switch") {
 //=============================================================================
 // Full Channels API - SPI through PARLIO
 //=============================================================================
+
+FL_TEST_CASE("ChannelDriverPARLIO - bounded lane sorting preserves pin order") {
+    for (bool reversed : {false, true}) {
+        resetMockHistory();
+        fl::ChannelDriverPARLIOImpl driver(4);
+        driver.setReversedPinOrder(reversed);
+        const auto timing = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
+        for (int pin : {8, 3, 7, 5}) {
+            fl::vector_psram<u8> data = {0xFF, 0x00, 0xAA};
+            driver.enqueue(fl::ChannelData::create(pin, timing, fl::move(data)));
+        }
+        driver.show();
+        waitForDriverReady(driver);
+        const auto& mock = ParlioPeripheralMock::instance();
+        FL_REQUIRE(!mock.getTransmissionHistory().empty());
+        const int ascending[] = {3, 5, 7, 8};
+        for (size_t i = 0; i < 4; ++i) {
+            FL_CHECK_EQ(mock.getConfig().gpio_pins[i], ascending[reversed ? 3 - i : i]);
+        }
+    }
+}
+
+FL_TEST_CASE("ChannelDriverPARLIO - oversized timing group is not transmitted") {
+    resetMockHistory();
+    fl::ChannelDriverPARLIOImpl driver(16);
+    const auto timing = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
+    for (int pin = 0; pin < 17; ++pin) {
+        fl::vector_psram<u8> data = {0xFF, 0x00, 0xAA};
+        driver.enqueue(fl::ChannelData::create(pin, timing, fl::move(data)));
+    }
+    driver.show();
+    FL_CHECK(ParlioPeripheralMock::instance().getTransmissionHistory().empty());
+}
+
+#if defined(FASTLED_LOG_PARLIO_ENABLED) && FL_HAS_WARN
+FL_TEST_CASE("ChannelDriverPARLIO - oversized groups report duplicate pins once") {
+    resetMockHistory();
+    fl::ChannelDriverPARLIOImpl driver(16);
+    const auto timing = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
+    for (int lane = 0; lane < 17; ++lane) {
+        fl::vector_psram<u8> data = {0xFF, 0x00, 0xAA};
+        driver.enqueue(fl::ChannelData::create(lane % 8, timing, fl::move(data)));
+    }
+    static fl::string captured;
+    captured.clear();
+    const auto capture = [](const char* text) { captured += text; };
+    fl::inject_print_handler(capture);
+    fl::inject_println_handler(capture);
+    driver.show();
+    fl::clear_print_handler();
+    fl::clear_println_handler();
+    const fl::string diagnostic = "PARLIO: Channels in group CHIPSET have non-unique pins";
+    const auto first = captured.find(diagnostic);
+    FL_REQUIRE_NE(first, fl::string::npos);
+    FL_CHECK_EQ(captured.find(diagnostic, first + diagnostic.size()), fl::string::npos);
+    FL_CHECK(ParlioPeripheralMock::instance().getTransmissionHistory().empty());
+}
+#endif
+
+FL_TEST_CASE("ChannelDriverPARLIO - more than sixteen timing groups sort fastest first") {
+    resetMockHistory();
+    fl::ChannelDriverPARLIOImpl driver(1);
+    // Reuse one physical pin across independent timing groups. Enqueue in
+    // descending transmission duration to exercise the unbounded group sort.
+    fl::ChannelDataPtr completionChannel;
+    for (int length = 20; length > 0; --length) {
+        auto timing = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
+        timing.reset_us += length;
+        fl::vector_psram<u8> data(static_cast<size_t>(length * 3), 0xAA);
+        completionChannel = fl::ChannelData::create(5, timing, fl::move(data));
+        driver.enqueue(completionChannel);
+    }
+    driver.show();
+    // READY can also mean a nonfinal group has just started. Channel use
+    // ends only once every timing group has completed.
+    for (int poll = 0; poll < 100 && completionChannel->isInUse(); ++poll) {
+        driver.poll();
+    }
+    FL_REQUIRE_FALSE(completionChannel->isInUse());
+    const auto& history = ParlioPeripheralMock::instance().getTransmissionHistory();
+    FL_REQUIRE_EQ(history.size(), 20);
+    for (size_t i = 1; i < history.size(); ++i) {
+        FL_CHECK_LT(history[i - 1].bit_count, history[i].bit_count);
+    }
+}
 
 FL_TEST_CASE("ChannelDriverPARLIO - canHandle accepts SPI channel data") {
     fl::ChannelDriverPARLIO parlioDriver;

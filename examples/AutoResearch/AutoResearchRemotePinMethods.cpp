@@ -69,6 +69,13 @@ void streamHelpEntry(fl::JsonStreamWriter& writer, const HelpEntry& entry) {
 }
 
 static const HelpEntry kHelpEntries[] = {
+#if defined(FL_AUTORESEARCH_MEMORY_BENCH)
+#if FL_AUTORESEARCH_MEMORY_BENCH == 3
+    {"memoryBench", "Memory", "[{chipset:apa102|sk9822, pixels:1000, frames:20}]", "{success, heapBefore, heapAfterRegister, heapSteady, frames, wireMismatches, frameUs}", "Native SPI2 full-frame loopback to SPI3; run --spi-streaming. Reset before each chipset."},
+#else
+    {"memoryBench", "Memory", "[{pin:4}] (optional)", "{success, heapBefore, heapAfterRegister, heapSteady, driverCount, actualDriverName}", "Cold typed/runtime binding: 32 red WS2812 pixels on the selected pin for 20 frames; run --driver-binding typed or runtime."},
+#endif
+#endif
     {"rpc.discover", "JSON-RPC", "[]", "{schema:[[name, ...], ...]}", "Discover the registered JSON-RPC method schema"},
     {"start", "Phase 1: Basic Control", "[]", "void", "Trigger test matrix execution"},
     {"status", "Phase 1: Basic Control", "[]", "{ready, platform, rpcReady, ledRxAvailable, pinTx, pinRx}", "Query RPC, platform, and LED RX readiness"},
@@ -79,6 +86,7 @@ static const HelpEntry kHelpEntries[] = {
     {"setStripSizes", "Phase 2: Configuration", "[size] or [shortSize, longSize]", "{success, stripSizesSet, testCases}", "Configure strip sizes"},
     {"runTestCase", "Phase 3: Selective Execution", "[testCaseIndex]", "{success, testCaseIndex, result}", "Run single test case by index"},
     {"runDriver", "Phase 3: Selective Execution", "[driverName]", "{success, driver, testsRun, results}", "Run all tests for specific driver"},
+    {"runSingleTest", "Phase 3: Selective Execution", "{driver, laneSizes, lanePins?:GPIO[], workerCore?:string(auto|0|1|any|calling), useLegacyApi?:bool}", "{success, passed, totalTests, passedTests, lanePins, workerCore?, workerObservedCore?, workerPriority?, workerSubmittedChunks?, workerCompletedChunks?, workerTotalChunks?, workerMaxEncodeUs?, workerMaxSubmitUs?, workerStreamError?, competingTaskPasses?, competingTaskMaxPassUs?, heapBeforeInternal, heapBeforePsram, heapAfterInternal, heapAfterPsram, driverError?}", "Run lane-0 byte loopback; optional LCD worker affinity validation under Core-0 load (#5001)"},
     {"runAll", "Phase 3: Selective Execution", "[]", "{success, totalCases, passedCases, skippedCases, results}", "Run full test matrix with JSON results"},
     {"getResults", "Phase 3: Selective Execution", "[]", "[{driver, lanes, stripSize, ...}, ...]", "Return all test results"},
     {"getResult", "Phase 3: Selective Execution", "[testCaseIndex]", "{driver, lanes, stripSize, ...}", "Return specific test case result"},
@@ -111,6 +119,7 @@ static const HelpEntry kHelpEntries[] = {
     {"parlioStreamValidate", "Phase 4: Utility", "[{baseTxPin, txPins, numLanes, numLeds, iterations, timeoutMs}] (all optional; txPins overrides contiguous baseTxPin)", "{success, completed, baseTxPin, txPins, lanes, leds_per_lane, iterations, perIterUs:[...], steadyAvgUs, failedIter, underrunCount, txDoneCount, workerIsrCount, ringError, hardwareIdle}", "Functional test of the PARLIO ISR-chunked streaming engine (#2548). Drives N back-to-back FastLED.show() calls through the production engine (which uses BF1+pipe4 on 16-lane Wave8 since #2559) and verifies all complete within timeout. Catches hangs/stalls."},
     {"flexioRxBenchmark", "Phase 4: Utility", "[{frequency_hz=1000, duration_ms=100, tx_pin=3, rx_pin=4}] (all optional)", "{success, frequency_hz, duration_ms, tx_pin, rx_pin, edges_captured, periods, period_mean_ns, period_sigma_ns, period_min_ns, period_max_ns}", "Square-wave validation for the FlexIO RX backend (Teensy 4.x only, FastLED#2764 Phase 2). Drives tx_pin via analogWriteFrequency at 50%% duty, captures via RxBackend::FLEXIO on rx_pin, reports per-period statistics."},
     {"dualSpiHostLoopback", "Phase 4: Utility", "[{activeHost:2|3, dummyFirst:false|true}]", "{success, activeHost, dummyFirst, verifiedLeds, wireMismatches, rawEdges}", "On ESP32 boards with two SPI hosts, register one APA102 output on each host and verify eight LED frames from GPIO 1 to GPIO 2. Reset between calls."},
+    {"staticInitTest", "Phase 4: Utility", "[]", "{success, constructorEntered, constructions, contenders, completed, overlapped, workersSuspended}", "ESP32: two FreeRTOS tasks contend on one slow function-local static. Sample a blocked contender during construction and require quiescent workers before teardown. Exactly one construction must run. No wiring required; reboot the board before repeating (#4994). The reset RPC does not clear this state."},
     {"flexioObjectFledTest", "Phase 4: Utility", "[{test_case=0..4, tx_pin=3, rx_pin=4, capture_ms=50}] (all optional)", "{success, test_case, tx_pin, rx_pin, num_leds, expected_bytes, decoded_bytes, matched, mismatched, edges_captured}", "End-to-end ObjectFLED TX -> FlexIO RX loopback verification (Teensy 4.x only, FastLED#2764 Phase 3). Drives WS2812 patterns through Bus::FLEX_IO slot 0, captures via RxBackend::FLEXIO, decodes the bit stream, and reports byte-level match counts. Five fixed test patterns: 0=red, 1=RGB triple, 2=all zeros, 3=all ones, 4=100-LED alternating."},
 };
 

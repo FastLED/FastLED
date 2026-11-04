@@ -20,6 +20,14 @@ FL_EXTERN_C_BEGIN
 // IWYU pragma: end_keep
 FL_EXTERN_C_END
 
+// IDF 6 moved channel capabilities from soc_caps.h to the RMT HAL.
+#if defined(SOC_RMT_TX_CANDIDATES_PER_GROUP)
+#define FL_RMT_TX_CHANNELS_PER_GROUP SOC_RMT_TX_CANDIDATES_PER_GROUP
+#else
+#include "hal/rmt_ll.h" // IWYU pragma: keep
+#define FL_RMT_TX_CHANNELS_PER_GROUP RMT_LL_TX_CANDIDATES_PER_INST
+#endif
+
 namespace fl {
 
 namespace {
@@ -230,7 +238,7 @@ size_t RmtMemoryManager::calculateMemoryBlocks(bool networkActive) FL_NO_EXCEPT 
     size_t networkBlocks = mgr.mNetworkBlocks;
 
     // Calculate platform maximum blocks based on available TX channels
-    size_t max_blocks = SOC_RMT_TX_CANDIDATES_PER_GROUP;
+    size_t max_blocks = FL_RMT_TX_CHANNELS_PER_GROUP;
 
     // Select strategy based on network activity
     size_t requested_blocks = networkActive ? networkBlocks : idleBlocks;
@@ -243,7 +251,7 @@ size_t RmtMemoryManager::calculateMemoryBlocks(bool networkActive) FL_NO_EXCEPT 
     // Memory pressure detection:
     // - Count already-allocated TX channels (not RX, which uses separate pool)
     // - Calculate remaining TX memory after this allocation
-    // - If insufficient to fit min(SOC_RMT_TX_CANDIDATES_PER_GROUP, 4) channels
+    // - If insufficient to fit min(FL_RMT_TX_CHANNELS_PER_GROUP, 4) channels
     //   at the requested rate, switch to single-buffering. The clamp at 4
     //   avoids unnecessary fallback on classic ESP32/S2 (8 TX channels) while
     //   still triggering correctly on S3/C3/C6/H2 where #1873 lives.
@@ -271,7 +279,7 @@ size_t RmtMemoryManager::calculateMemoryBlocks(bool networkActive) FL_NO_EXCEPT 
     //                                      (cannot fit 2 channels with double-buffer)
     //
     // Strategy: Use single-buffering (1 block) when needed to maximize channel count.
-    // Threshold: If available memory can't fit SOC_RMT_TX_CANDIDATES_PER_GROUP channels
+    // Threshold: If available memory can't fit FL_RMT_TX_CHANNELS_PER_GROUP channels
     //            at the requested rate, fall back to 1 block per channel.
     //
     // CRITICAL for ESP32-C3/C6/H2 (GitHub issue #1873):
@@ -307,15 +315,15 @@ size_t RmtMemoryManager::calculateMemoryBlocks(bool networkActive) FL_NO_EXCEPT 
     // 512 words) on the first allocation — there, 2× buffering fits 4 strips
     // comfortably and falling back to 1× would change observable behaviour
     // without fixing any real bug. Platforms with ≤4 TX channels
-    // (ESP32-S3, C3, C6, H2) use their own SOC_RMT_TX_CANDIDATES_PER_GROUP,
+    // (ESP32-S3, C3, C6, H2) use their own FL_RMT_TX_CHANNELS_PER_GROUP,
     // which is what drives the #1873 fix on C3/C6/H2.
     //
     //   ESP32 / ESP32-S2:     min(8, 4) = 4 → pressure if <4 fit (unchanged)
     //   ESP32-S3:             min(4, 4) = 4 → pressure if <4 fit (unchanged)
     //   ESP32-C3 / C6 / H2:   min(2, 4) = 2 → pressure if <2 fit (fixes #1873)
     constexpr size_t kMemoryPressureThreshold =
-        (SOC_RMT_TX_CANDIDATES_PER_GROUP < 4)
-            ? static_cast<size_t>(SOC_RMT_TX_CANDIDATES_PER_GROUP)
+        (FL_RMT_TX_CHANNELS_PER_GROUP < 4)
+            ? static_cast<size_t>(FL_RMT_TX_CHANNELS_PER_GROUP)
             : static_cast<size_t>(4);
     bool memory_pressure =
         (requested_blocks > 1 &&
@@ -332,18 +340,18 @@ size_t RmtMemoryManager::calculateMemoryBlocks(bool networkActive) FL_NO_EXCEPT 
     }
 
     // Platform constraint enforcement
-#if SOC_RMT_TX_CANDIDATES_PER_GROUP < 3
+#if FL_RMT_TX_CHANNELS_PER_GROUP < 3
     // Insufficient TX memory for triple-buffering (C3/C6/H2/C5: 2 TX channels)
     // Force cap to 2 blocks regardless of strategy
     if (requested_blocks > 2) {
-        FL_LOG_RMT("Platform limited to 2× buffering (SOC_RMT_TX_CANDIDATES_PER_GROUP=" << SOC_RMT_TX_CANDIDATES_PER_GROUP << "), capping from " << requested_blocks << " to 2 blocks");
+        FL_LOG_RMT("Platform limited to 2× buffering (FL_RMT_TX_CHANNELS_PER_GROUP=" << FL_RMT_TX_CHANNELS_PER_GROUP << "), capping from " << requested_blocks << " to 2 blocks");
         requested_blocks = 2;
     }
 #else
     // Sufficient TX memory for network-aware allocation
     // Validate requested blocks do not exceed platform maximum
     if (requested_blocks > max_blocks) {
-        FL_LOG_RMT("Requested " << requested_blocks << " blocks exceeds platform max " << max_blocks << " (SOC_RMT_TX_CANDIDATES_PER_GROUP), capping to " << max_blocks);
+        FL_LOG_RMT("Requested " << requested_blocks << " blocks exceeds platform max " << max_blocks << " (FL_RMT_TX_CHANNELS_PER_GROUP), capping to " << max_blocks);
         requested_blocks = max_blocks;
     }
 #endif
@@ -363,7 +371,7 @@ size_t RmtMemoryManager::calculateMemoryBlocks(bool networkActive) FL_NO_EXCEPT 
 void RmtMemoryManager::setMemoryBlockStrategy(size_t idleBlocks, size_t networkBlocks) FL_NO_EXCEPT {
     // Calculate platform maximum blocks based on available TX memory
     // max_blocks = total_TX_words / words_per_channel
-    size_t max_blocks = SOC_RMT_TX_CANDIDATES_PER_GROUP;
+    size_t max_blocks = FL_RMT_TX_CHANNELS_PER_GROUP;
 
     // Zero-block validation: clamp to minimum 1 block
     if (idleBlocks == 0) {

@@ -24,7 +24,12 @@ impl FileContentChecker for BareNoInlineChecker {
     }
 
     fn should_process_file(&self, file_path: &str, _project_root: &Path) -> bool {
-        if !is_under_dir(file_path, "src") {
+        // Covers src/, examples/ and tests/ -- a bare noinline is the same smell
+        // in an example or a benchmark as in library code.
+        let in_scope = is_under_dir(file_path, "src")
+            || is_under_dir(file_path, "examples")
+            || is_under_dir(file_path, "tests");
+        if !in_scope {
             return false;
         }
         if !ends_with_any(file_path, &[".cpp", ".h", ".hpp"]) {

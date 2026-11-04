@@ -90,6 +90,7 @@ class LcdSpiPeripheralEsp : public ILcdSpiPeripheral {
     void teardownLocked() FL_NO_EXCEPT;
     bool FL_IRAM transmitInternal(const u16 *buffer, size_t size_bytes,
                                   bool wait_for_slot) FL_NO_EXCEPT;
+    void FL_IRAM restoreTransmitSlot() FL_NO_EXCEPT;
 
     bool mInitialized;
     LcdSpiConfig mConfig;

@@ -1,6 +1,6 @@
 // @filter
 // require:
-//   - board: esp32dev_idf44,esp32s3,esp32c6,esp32p4,teensy41,teensy40,rp2350,rp2350w,lpc845,lpc845brk,lpcxpresso845max,lpcxpresso804
+//   - board: esp32dev_idf44,esp32s3,esp32s3_opi_psram8,esp32c6,esp32p4,teensy41,teensy40,rp2350,rp2350w,lpc845,lpc845brk,lpcxpresso845max,lpcxpresso804
 // @end-filter
 //
 // Low-memory mode (FastLED #3030): on Low-tier targets (LPC8xx etc., per
@@ -582,7 +582,13 @@ void setup() {
     // Post-#2428 the channel driver registry no longer auto-populates. This
     // example needs every available driver enrolled with ChannelManager so the
     // discovery + autoresearch loop below can enumerate them.
+#if !defined(FL_AUTORESEARCH_MEMORY_BENCH)
     FastLED.enableAllDrivers();
+#else
+    // A memory bench must sample registration before any driver is created.
+    // Its dedicated RPC chooses the production API under test.
+    g_autoresearch_state->gpio_baseline_test_done = true;
+#endif
 
     // List all available drivers and store globally
     g_autoresearch_state->drivers_available = FastLED.getDriverInfos();
@@ -596,7 +602,9 @@ void setup() {
     }
 
     // Validate that expected drivers are available for this platform
+#if !defined(FL_AUTORESEARCH_MEMORY_BENCH)
     autoResearchExpectedEngines();
+#endif
 
     // Emit JSON-RPC ready event for Python orchestration
     fl::json readyData = fl::json::object();
