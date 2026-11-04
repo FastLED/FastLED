@@ -218,6 +218,8 @@ const PRIVATE_LIBCPP_HEADER_MAPPINGS_RS: &[(&str, &str)] = &[
 ];
 
 const BANNED_HEADER_EXCEPTIONS: &[(&str, &str)] = &[
+    // Only this wrapper owns toolchain-guarded global size/ptrdiff types.
+    ("stddef.h", "fl/stl/cstddef.h"),
     ("new", "inplacenew.h"),
     ("new", "platforms/wasm/new.h"),
     ("new", "platforms/arm/new.h"),

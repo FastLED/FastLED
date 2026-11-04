@@ -22,11 +22,10 @@
 #elif defined(FL_IS_ESP32)
 #include "platforms/esp/32/drivers/spi/spi_output_template.h"
 
-#elif defined(FL_IS_ESP8266) && defined(FASTLED_ALL_PINS_HARDWARE_SPI)
-// ESP8266 hardware SPI driver pulls in Arduino <SPI.h>; only route here when
-// the user has opted in via FASTLED_ALL_PINS_HARDWARE_SPI (and added SPI to
-// their platformio.ini lib_deps). Otherwise fall through to the bitbang
-// fallback below — matches Apollo3's pattern.
+#elif defined(FL_IS_ESP8266)
+// ESP8266 picks per pin pair: native HSPI on GPIO13/14, bit-bang elsewhere.
+// The Arduino <SPI.h> shim remains available via FASTLED_ALL_PINS_HARDWARE_SPI
+// (see platforms/esp/8266/spi_output_template.h).
 #include "platforms/esp/8266/spi_output_template.h"
 
 #elif defined(NRF51)

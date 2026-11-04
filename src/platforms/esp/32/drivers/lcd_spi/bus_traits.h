@@ -109,6 +109,7 @@ template<> struct BusTraits<Bus::FLEX_IO, 0> {
 
 template<> struct BusSupports<Bus::FLEX_IO, SpiChipsetConfig, 0> : fl::true_type {};
 template<> struct BusSupports<Bus::FLEX_IO, ClocklessChipset, 0> : fl::true_type {};
+template<> struct BusWorkerAffinitySupported<Bus::FLEX_IO, 0> : fl::true_type {};
 
 }  // namespace fl
 

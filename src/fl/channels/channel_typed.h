@@ -30,6 +30,7 @@
 #include "fl/channels/bus_traits.h"
 #include "fl/channels/channel.h"
 #include "fl/channels/config.h"
+#include "fl/log/log.h"
 #include "fl/stl/noexcept.h"
 #include "fl/stl/static_assert.h"
 #include "fl/stl/type_traits.h"
@@ -100,9 +101,13 @@ public:
     ///
     /// Useful for callers that already hold a `ChannelConfig` but want
     /// compile-time bus/chipset validation. The runtime chipset variant must
-    /// match `Chipset` -- there's no compile-time guarantee at this overload,
-    /// so the static_assert above is the only contract.
+    /// match `Chipset`. Reject a mismatch before registering the driver or
+    /// creating a channel, so an erased config cannot bypass the contract.
     static ChannelPtr create(const ChannelConfig& cfg) FL_NO_EXCEPT {
+        if (!cfg.getChipset().is<Chipset>()) {
+            FL_ERROR("TypedChannel: configuration does not match the selected chipset family");
+            return nullptr;
+        }
         detail::enable_clockless_for<Chipset, BusTraits<kBus, Which>>::apply();  // #4793
         BusTraits<kBus, Which>::registerWithManager();
         ChannelConfig erased = cfg;

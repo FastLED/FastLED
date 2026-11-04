@@ -6,7 +6,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // FastLED Integer Type Definitions
 //
-// IMPORTANT: FastLED has carefully purged <stdint.h> and <stddef.h> from the
+// IMPORTANT: FastLED has carefully purged <stdint.h> from the
 // include path because including those headers alone adds approximately 500ms
 // to the compilation time of EVERY *.o file.
 //
@@ -123,6 +123,7 @@
 
 // Platform-specific integer type definitions
 // This includes platform-specific 16/32/64-bit types
+#include "fl/stl/cstddef.h"
 #include "platforms/int.h"  // IWYU pragma: keep
 
 namespace fl {
@@ -219,8 +220,6 @@ typedef fl::u32 uint32_t;
 typedef fl::i32 int32_t;
 typedef fl::u64 u64;
 typedef fl::i64 i64;
-typedef fl::size size_t;
 typedef fl::uptr uintptr_t;
 typedef fl::iptr intptr_t;
-typedef fl::ptrdiff ptrdiff_t;
 

@@ -1,5 +1,13 @@
 # Lessons Learned
 
+- Worker affinity defaults must use the automatic policy (`fl::Core::Auto`);
+  fixed core 1 is an explicit application choice, not a library default.
+  Auto preserves legacy backend behavior; do not reinterpret it as a new
+  first-show pinning policy. Use explicit `CallingCore` for that behavior.
+- Trace heap-capability normalization before concluding an allocation is
+  impossible. ESP-IDF normalizes `SPIRAM | DMA` after calculating alignment;
+  static memory-region capability tables alone do not prove allocation fails.
+
 - GPIO direction helpers can reset peripheral output routing. On legacy ESP32,
   enabling output via gpio_set_direction reconnects SIG_GPIO_OUT_IDX. Preserve
   RMT routing with vendor input/output-enable operations that only change the
@@ -585,3 +593,10 @@
   when Serial.begin replaces a native driver before its HAL mutex exists.
   Test both initialization orders; preserve native-only fallback behavior.
 - Library footprint changes must work with unmodified supported SDKs. Do not rely on forked framework startup patches or custom package pins for a claimed FastLED saving; stock framework-owned references remain outside the library's control.
+- For OIDC failures, compare the emitted subject with the existing cloud trust
+  and GitHub repository settings before proposing a new credential. Azure may
+  already expect immutable owner/repository IDs while an older repository has
+  not enabled `use_immutable_subject`; prefer matching that existing trust.
+- Keep release execution explicit: a local `gh workflow run` dispatch starts
+  GitHub CI; it does not build, sign, or publish a release locally. Verify the
+  CI publication gates and registry artifacts before advancing a dependency.

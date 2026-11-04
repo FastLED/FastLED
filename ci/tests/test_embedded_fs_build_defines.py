@@ -8,13 +8,15 @@ from ci.compiler.compiler import InitResult
 from ci.compiler.path_manager import FastLEDPaths
 
 
-@pytest.mark.parametrize(
-    ("storage_declaration", "expects_define"),
-    [("storage=littlefs\n", True), ("", False)],
-)
-def test_asset_requirement_reaches_generated_compile_configuration(
-    tmp_path: Path, storage_declaration: str, expects_define: bool
+@pytest.mark.parametrize("storage_declaration", ["storage=littlefs\n", ""])
+def test_storage_assets_no_longer_inject_a_build_define(
+    tmp_path: Path, storage_declaration: str
 ) -> None:
+    """#4947: the ESP8266 embedded FS is automatic, so no -D is generated.
+
+    Both with and without an on-chip-storage declaration the retired
+    `FL_ESP8266_EMBEDDED_FS` flag must be absent from the generated build.
+    """
     example_dir = tmp_path / "example"
     example_dir.mkdir()
     (example_dir / "Example.ino").write_text("void setup() {}\nvoid loop() {}\n")
@@ -37,7 +39,7 @@ def test_asset_requirement_reaches_generated_compile_configuration(
 
     assert result.success
     generated_ini = (build_dir / "platformio.ini").read_text()
-    assert ("-DFL_ESP8266_EMBEDDED_FS" in generated_ini) is expects_define
+    assert "-DFL_ESP8266_EMBEDDED_FS" not in generated_ini
 
 
 @pytest.mark.parametrize(

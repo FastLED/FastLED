@@ -10,8 +10,8 @@ through fbuild's ingestion of the published `usb-vids.proto.zstd` archive.
 
 Use `fbuild port scan` for registry-backed USB diagnostics and let `fbuild
 deploy` select a port for a known environment. If a board cannot be identified,
-add the record upstream, let fbuild ingest it, then cascade the `fbuild==X.Y.Z`
-pin in `pyproject.toml` and relock locally (`uv lock && uv sync`; `uv.lock`
+add the record upstream, let fbuild ingest it, then raise the `fbuild>=X.Y.Z`
+floor in `pyproject.toml` and relock locally (`uv lock && uv sync`; `uv.lock`
 itself is gitignored here).
 
 `ci/util/audit_usb_registry.py --lookup <VID:PID>` retains the exact catalogue

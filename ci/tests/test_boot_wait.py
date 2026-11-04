@@ -167,3 +167,25 @@ def test_pattern_matching_is_substring_containment(
         assert matched == pattern
     else:
         assert matched is None
+
+
+def test_count_reset_banners_esp8266_and_esp32() -> None:
+    from ci.util.boot_wait import count_reset_banners
+
+    lines = [
+        " ets Jan  8 2013,rst cause:2, boot mode:(3,7)",
+        "load 0x4010f000, len 3424, room 16",
+        "rst:0xc (SW_CPU_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)",
+        "REMOTE: {}",
+    ]
+    assert count_reset_banners(lines) == 2
+
+
+def test_raise_if_boot_looping() -> None:
+    from ci.util.boot_wait import BootLoopError, raise_if_boot_looping
+
+    one_boot = [" ets Jan  8 2013,rst cause:2, boot mode:(3,7)", "~ld", "ready"]
+    raise_if_boot_looping(one_boot)  # a single reset is a normal boot
+    looping = one_boot * 3
+    with pytest.raises(BootLoopError, match="boot-looping: 3 ROM reset"):
+        raise_if_boot_looping(looping)

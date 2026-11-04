@@ -289,6 +289,71 @@ FL_TEST_CASE("fl::memory_order - memory order enum values exist") {
     }
 }
 
+FL_TEST_CASE("fl::atomic - compare-exchange operations") {
+    FL_SUBCASE("strong exchange succeeds when the value matches") {
+        atomic_int a(7);
+        int expected = 7;
+        FL_CHECK(a.compare_exchange_strong(expected, 9));
+        FL_CHECK_EQ(a.load(), 9);
+    }
+
+    FL_SUBCASE("failed exchange reports the observed value") {
+        atomic_int a(7);
+        int expected = 5;
+        FL_CHECK(!a.compare_exchange_strong(expected, 9));
+        FL_CHECK_EQ(expected, 7);
+        FL_CHECK_EQ(a.load(), 7);
+    }
+
+    FL_SUBCASE("failed exchange works for every memory order") {
+        // The failure path is where GCC rejects release/acq_rel failure
+        // orders, so exercise it with each order as the success order.
+        const memory_order orders[] = {
+            memory_order_relaxed, memory_order_acquire, memory_order_release,
+            memory_order_acq_rel, memory_order_seq_cst,
+        };
+        for (memory_order order : orders) {
+            atomic_int a(7);
+            int expected = 5;
+            FL_CHECK(!a.compare_exchange_strong(expected, 9, order));
+            FL_CHECK_EQ(expected, 7);
+            FL_CHECK_EQ(a.load(), 7);
+        }
+    }
+
+    FL_SUBCASE("weak exchange applies the update") {
+        atomic_int a(3);
+        int expected = 3;
+        // Weak exchanges may fail spuriously, so retry like std::atomic users do.
+        while (!a.compare_exchange_weak(expected, 4)) {
+            expected = 3;
+        }
+        FL_CHECK_EQ(a.load(), 4);
+    }
+
+    FL_SUBCASE("every memory order is accepted by compare-exchange") {
+        // Exercises the success/failure order pairing for real atomics: GCC
+        // rejects release/acq_rel as a failure order (-Winvalid-memory-model).
+        const memory_order orders[] = {
+            memory_order_relaxed, memory_order_acquire, memory_order_release,
+            memory_order_acq_rel, memory_order_seq_cst,
+        };
+        for (memory_order order : orders) {
+            atomic_int a(1);
+            int expected = 1;
+            FL_CHECK(a.compare_exchange_strong(expected, 2, order));
+            FL_CHECK_EQ(a.load(), 2);
+            expected = 2;
+            // Weak exchanges may fail spuriously, so retry like std::atomic
+            // users do, restoring the expected value after each failure.
+            while (!a.compare_exchange_weak(expected, 3, order)) {
+                expected = 2;
+            }
+            FL_CHECK_EQ(a.load(), 3);
+        }
+    }
+}
+
 FL_TEST_CASE("fl::atomic - complex usage patterns") {
     FL_SUBCASE("using atomic as counter") {
         atomic_int counter(0);

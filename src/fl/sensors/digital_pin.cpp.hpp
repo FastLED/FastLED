@@ -35,15 +35,15 @@ class DigitalPinImpl {
             default:
                 return;
         }
-        fl::pinMode(mPin, pinMode);
+        (fl::pinMode)(mPin, pinMode);
     }
 
     bool high() FL_NO_EXCEPT {
-        return fl::digitalRead(mPin) == fl::PinValue::High;
+        return (fl::digitalRead)(mPin) == fl::PinValue::High;
     }
 
     void write(bool value) FL_NO_EXCEPT {
-        fl::digitalWrite(mPin, value ? fl::PinValue::High : fl::PinValue::Low);
+        (fl::digitalWrite)(mPin, value ? fl::PinValue::High : fl::PinValue::Low);
     }
 
   private:

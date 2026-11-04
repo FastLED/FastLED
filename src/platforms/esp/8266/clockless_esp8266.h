@@ -10,14 +10,11 @@
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/noexcept.h"
 #include "fl/system/delay.h"
+#include "platforms/esp/8266/clockless_esp8266_bits.h"
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_DEPRECATED_REGISTER
 namespace fl {
-#ifdef FASTLED_DEBUG_COUNT_FRAME_RETRIES
-extern u32 _frame_cnt;
-extern u32 _retry_cnt;
-#endif
 
 // Info on reading cycle counter from https://github.com/kbeckmann/nodemcu-firmware/blob/ws2812-dual/app/modules/ws2812.c
 __attribute__ ((always_inline)) inline static u32 __clock_cycles() FL_NO_EXCEPT {
@@ -74,43 +71,7 @@ protected:
     mWait.mark();
   }
 
-#define _ESP_ADJ (0)
-#define _ESP_ADJ2 (0)
-
-	template<int BITS> __attribute__ ((always_inline)) inline static bool writeBits(FASTLED_REGISTER u32 & last_mark, FASTLED_REGISTER u32 b) FL_NO_EXCEPT {
-    b <<= 24; b = ~b;
-    for(FASTLED_REGISTER u32 i = BITS; i > 0; --i) {
-      while((__clock_cycles() - last_mark) < (T1+T2+T3)) {
-            ;
-      }
-      last_mark = __clock_cycles();
-      FastPin<DATA_PIN>::hi();
-
-      while((__clock_cycles() - last_mark) < T1) {
-            ;
-      }
-      if(b & 0x80000000L) { FastPin<DATA_PIN>::lo(); }
-      b <<= 1;
-
-      while((__clock_cycles() - last_mark) < (T1+T2)) {
-            ;
-      }
-      FastPin<DATA_PIN>::lo();
-
-			// even with interrupts disabled, the NMI interupt seems to cause
-			// timing issues here. abort the frame if one bit took to long. if the
-			// last of the 24 bits has been sent already, it is too late
-			// this fixes the flickering first pixel that started to occur with
-			// framework version 3.0.0
-			if ((__clock_cycles() - last_mark) >= (T1 + T2 + T3 - 5)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-
-	static u32 FL_IRAM showRGBInternal(PixelController<RGB_ORDER> pixels) FL_NO_EXCEPT {
+	static u32 showRGBInternal(PixelController<RGB_ORDER> pixels) FL_NO_EXCEPT {
 		// Setup the pixel controller and load/scale the first byte
 		pixels.preStepFirstByteDithering();
 		FASTLED_REGISTER u32 b = pixels.loadAndScale0();
@@ -141,21 +102,15 @@ protected:
 
 			start = __clock_cycles();
 			u32 last_mark = start;
+			const esp8266_clockless::BitTiming timing = {T1, T2, T3};
 			while(pixels.has(1)) {
-				// Write first byte, read next byte
-				if (writeBits<8+XTRA0>(last_mark, b)) {
-					return 0;
-				}
-				b = pixels.loadAndScale1();
-
-				// Write second byte, read 3rd byte
-				if (writeBits<8+XTRA0>(last_mark, b)) {
-					return 0;
-				}
-				b = pixels.loadAndScale2();
-
-				// Write third byte, read 1st byte of next pixel
-				if (writeBits<8+XTRA0>(last_mark, b)) {
+				// Load the pixel before its first bit; the timed bits then run
+				// entirely from IRAM.
+				const u8 bytes[3] = {static_cast<u8>(b),
+				                     pixels.loadAndScale1(),
+				                     pixels.loadAndScale2()};
+				if (!esp8266_clockless::sendPixel(last_mark, bytes, 8 + XTRA0,
+				                                  DATA_PIN, timing)) {
 					return 0;
 				}
 

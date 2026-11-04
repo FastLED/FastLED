@@ -59,12 +59,12 @@ public:
 	typedef typename fl::remove_cv<RwReg>::type port_t;  ///< type for a pin read/write register, non-volatile
 
 	/// Set the pin mode as `OUTPUT`
-	inline void setOutput() { pinMode(mPin, PinMode::Output); }
+	inline void setOutput() { (fl::pinMode)(mPin, PinMode::Output); }
 
 	/// Set the pin mode as `INPUT`
-	inline void setInput() { pinMode(mPin, PinMode::Input); }
+	inline void setInput() { (fl::pinMode)(mPin, PinMode::Input); }
 
-	inline void setInputPullup() { pinMode(mPin, PinMode::InputPullup); }
+	inline void setInputPullup() { (fl::pinMode)(mPin, PinMode::InputPullup); }
 
 	/// Set the pin state to `HIGH`
 	FL_DISABLE_WARNING_PUSH
@@ -72,12 +72,12 @@ public:
 	FL_DISABLE_WARNING_VOLATILE
 	inline void hi() FL_NO_EXCEPT __attribute__ ((always_inline)) {
 		if (mPort) { *mPort |= mPinMask; }
-		else { digitalWrite(mPin, PinValue::High); }
+		else { (fl::digitalWrite)(mPin, PinValue::High); }
 	}
 	/// Set the pin state to `LOW`
 	inline void lo() FL_NO_EXCEPT __attribute__ ((always_inline)) {
 		if (mPort) { *mPort &= ~mPinMask; }
-		else { digitalWrite(mPin, PinValue::Low); }
+		else { (fl::digitalWrite)(mPin, PinValue::Low); }
 	}
 	FL_DISABLE_WARNING_POP
 
@@ -88,8 +88,8 @@ public:
 	inline void toggle() FL_NO_EXCEPT __attribute__ ((always_inline)) {
 		if (mInPort) { *mInPort = mPinMask; }
 		else {
-			PinValue current = digitalRead(mPin);
-			digitalWrite(mPin, current == PinValue::High ? PinValue::Low : PinValue::High);
+			PinValue current = (fl::digitalRead)(mPin);
+			(fl::digitalWrite)(mPin, current == PinValue::High ? PinValue::Low : PinValue::High);
 		}
 	}
 
@@ -146,7 +146,7 @@ public:
 	/// Checks if the pin is currently `HIGH`
 	virtual bool isSelected() FL_NO_EXCEPT override {
 		if (mPort) { return (*mPort & mPinMask) == mPinMask; }
-		else { return digitalRead(mPin) == PinValue::High; }
+		else { return (fl::digitalRead)(mPin) == PinValue::High; }
 	}
 };
 

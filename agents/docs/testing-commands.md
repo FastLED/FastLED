@@ -174,8 +174,26 @@ File board build compatibility problems at https://github.com/FastLED/fbuild/iss
 
 fbuild provides:
 - **Daemon-based compilation** - Background process handles builds, survives agent interrupts
-- **Cached toolchains/frameworks** - Downloads and caches ESP32 toolchain, Arduino framework
+- **Every supported platform's toolchain, provisioned on demand** - AVR (`dl-toolchain-atmelavr-*`, i.e. `uno`, `nano`, `attiny85`, `attiny88`), ESP8266, the ESP32 family, ARM (GCC ARM none-eabi, RP2040/Pico, Teensy), plus the matching Arduino frameworks and the QEMU runtimes. `fbuild install --check` lists what a board needs before anything is compiled.
 - **Direct esptool integration** - Fast uploads with no extra tooling layer
+
+**Do not claim a platform "cannot be compiled" on this machine.** The box carries no system-wide AVR/ARM cross compilers and that is irrelevant: fbuild downloads and caches the toolchain for whatever board you name. Verify with the command before writing a limitation into a PR, a comment, or a report:
+
+```bash
+bash compile uno,attiny85 --examples Blink   # AVR: atmelavr toolchain from fbuild
+bash compile esp32dev,esp8266 --examples Blink
+fbuild install --check                       # what a board still needs, offline
+```
+
+A build that has not been attempted is unknown, not impossible — say "not attempted" instead. (This mistake was made on FastLED#4994 / PR #5007: "no AVR toolchain on this box" was written into the PR while the atmelavr toolchain sat in `~/.fbuild/prod/cache/toolchains/`. The AVR build then succeeded: `uno,attiny85 --examples Blink`, 31 s.)
+
+If a compile dies with `the fbuild cache root is owned by another fbuild-daemon (... version X ..., which this fbuild Y cannot share)`, that is a **version skew between the repo's pinned fbuild and an older daemon**, not a missing toolchain. Clear it rather than concluding the board is unsupported:
+
+```bash
+fbuild daemon kill-all                  # stop the stale daemon
+uv tool install --force fbuild@latest   # un-pin the global tool to the repo's version
+fbuild --version                        # must match the repo's .venv fbuild
+```
 
 **Default behavior:**
 - **All boards**: fbuild is used automatically (no flag needed)

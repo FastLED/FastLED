@@ -2,6 +2,7 @@
 /// @file blur.cpp
 /// @brief Tests for SKIPSM Gaussian blur
 
+#include "fl/stl/compiler_control.h"  // FL_NO_INLINE
 #include "test.h"
 #include "fl/gfx/blur.h"
 #include "fl/gfx/crgb.h"
@@ -264,9 +265,9 @@ static void fill_test_data(CRGB *pixels, int n) {
 
 template <typename Func>
 #ifdef NDEBUG
-__attribute__((noinline)) static double bench(Func fn, int iterations, int warmup = 200) {
+FL_NO_INLINE static double bench(Func fn, int iterations, int warmup = 200) {
 #else
-__attribute__((noinline)) static double bench(Func fn, int iterations, int warmup = 2) {
+FL_NO_INLINE static double bench(Func fn, int iterations, int warmup = 2) {
 #endif
     for (int i = 0; i < warmup; ++i)
         fn();
@@ -279,7 +280,7 @@ __attribute__((noinline)) static double bench(Func fn, int iterations, int warmu
 }
 
 template <int R, int W, int H>
-__attribute__((noinline)) static void run_benchmark(const char *label, int iters) {
+FL_NO_INLINE static void run_benchmark(const char *label, int iters) {
     constexpr int N = W * H;
     static CRGB px[N]; // static to avoid stack overflow with ASAN
 
@@ -298,7 +299,7 @@ __attribute__((noinline)) static void run_benchmark(const char *label, int iters
 }
 
 template <int R, int W, int H>
-__attribute__((noinline)) static void run_benchmark_blur_only(const char *label, int iters) {
+FL_NO_INLINE static void run_benchmark_blur_only(const char *label, int iters) {
     constexpr int N = W * H;
     static CRGB px[N]; // static to avoid stack overflow with ASAN
     fill_test_data(px, N); // fill once before benchmark

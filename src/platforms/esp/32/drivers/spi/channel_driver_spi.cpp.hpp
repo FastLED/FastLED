@@ -264,7 +264,7 @@ ChannelEngineSpi::~ChannelEngineSpi() {
 
         // Restore GPIO pulldown when SPI channel is destroyed
         // This ensures pin returns to stable LOW state
-        fl::pinMode(channel.pin, fl::PinMode::InputPulldown);
+        (fl::pinMode)(channel.pin, fl::PinMode::InputPulldown);
     }
 }
 

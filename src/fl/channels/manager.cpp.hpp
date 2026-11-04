@@ -463,8 +463,12 @@ fl::shared_ptr<IChannelDriver> ChannelManager::selectDriverForChannel(const Chan
 }
 
 
-template<typename Condition>
-bool ChannelManager::waitForCondition(Condition condition, u32 timeoutMs) FL_NO_EXCEPT {
+bool ChannelManager::waitForState(bool allowDraining, u32 timeoutMs) FL_NO_EXCEPT {
+    const auto condition = [this, allowDraining]() {
+        const auto state = poll().state;
+        return state == IChannelDriver::DriverState::READY ||
+               (allowDraining && state == IChannelDriver::DriverState::DRAINING);
+    };
     const u32 startTime = timeoutMs > 0 ? millis() : 0;
 
     // Tier 1: instant non-blocking check (avoid micros() / millis() cost on
@@ -568,9 +572,7 @@ IChannelDriver::DriverState ChannelManager::poll() FL_NO_EXCEPT {
 }
 
 bool ChannelManager::waitForReady(u32 timeoutMs) FL_NO_EXCEPT {
-    bool ok = waitForCondition([this]() {
-        return poll().state == IChannelDriver::DriverState::READY;
-    }, timeoutMs);
+    bool ok = waitForState(false, timeoutMs);
     if (!ok) {
         FL_ERROR("ChannelManager: Timeout occurred while waiting for READY state");
     }
@@ -578,14 +580,7 @@ bool ChannelManager::waitForReady(u32 timeoutMs) FL_NO_EXCEPT {
 }
 
 bool ChannelManager::waitForReadyOrDraining(u32 timeoutMs) FL_NO_EXCEPT {
-    bool ok = waitForCondition([this]() {
-        auto state = poll();
-        bool draining_or_done = (
-            state.state == IChannelDriver::DriverState::READY ||
-            state.state == IChannelDriver::DriverState::DRAINING
-        );
-        return draining_or_done;
-    }, timeoutMs);
+    bool ok = waitForState(true, timeoutMs);
     if (!ok) {
         FL_ERROR("ChannelManager: Timeout occurred while waiting for READY or DRAINING state");
     }

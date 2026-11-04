@@ -1,0 +1,189 @@
+name: memory_report
+
+# Posts one sticky PR comment comparing Blink's image flash and RAM per target
+# against the PR's merge base (#4920). Report only; the size gates stay in
+# check_uno_size.yml and bloat_regression_esp32s3.yml.
+#
+# Which targets run follows the changed files (ci/changed_targets.py):
+# platform-only changes measure that platform, common code measures the cheap
+# AVR target, and WASM/stub-only changes measure nothing. The labels
+# `ci-full`, `ci-test:bloat` and `ci-platform:<board>` remain additive.
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  # A manual run measures every target, HEAD against its parent, into the
+  # job summary; only pull requests get a comment.
+  workflow_dispatch:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled]
+    branches: [master]
+    paths:
+      - 'src/**'
+      - 'ci/memory_report.py'
+      - 'ci/changed_targets.py'
+      - '.github/workflows/memory_report.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  plan:
+    # Hard-block external-fork pull requests, like the other board jobs (#2757).
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    outputs:
+      boards: ${{ steps.pick.outputs.boards }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          # [cache.pr] mode "none": restore on PRs, save only from master.
+          save-cache: false
+
+      - name: Pick targets
+        id: pick
+        env:
+          LABELS: ${{ github.event_name == 'workflow_dispatch' && '[]' || toJSON(github.event.pull_request.labels.*.name) }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha || '' }}
+          DISPATCH: ${{ github.event_name == 'workflow_dispatch' }}
+        run: |
+          set -euo pipefail
+          : > changed.txt
+          if [ -n "$BASE_SHA" ]; then
+            base="$(git merge-base "$HEAD_SHA" "$BASE_SHA")"
+            git diff --name-only "$base" "$HEAD_SHA" > changed.txt
+          elif git rev-parse --verify --quiet "$HEAD_SHA~1" >/dev/null; then
+            git diff --name-only "$HEAD_SHA~1" "$HEAD_SHA" > changed.txt
+          fi
+          labels="$(jq -r 'join(",")' <<<"$LABELS")"
+          if [ "$DISPATCH" = "true" ]; then
+            boards="$(uv run ci/memory_report.py plan --changed-file changed.txt --all)"
+          else
+            boards="$(uv run ci/memory_report.py plan --changed-file changed.txt --labels "$labels")"
+          fi
+          echo "boards=$boards" >> "$GITHUB_OUTPUT"
+          echo "targets: $boards" >> "$GITHUB_STEP_SUMMARY"
+
+  measure:
+    needs: plan
+    # Nothing to measure for WASM/stub-only changes.
+    if: needs.plan.outputs.boards != '[]'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        board: ${{ fromJSON(needs.plan.outputs.boards) }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          # [cache.pr] mode "none": restore on PRs, save only from master.
+          save-cache: ${{ github.ref == 'refs/heads/master' && (github.event_name == 'push' || github.event_name == 'schedule') }}
+
+      - name: Measure merge base and PR head
+        env:
+          BOARD: ${{ matrix.board }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha || '' }}
+        run: |
+          set -euo pipefail
+          # The merge base may predate this script, so run the PR's copy.
+          cp ci/memory_report.py "$RUNNER_TEMP/memory_report.py"
+          mkdir -p out
+          if [ -n "$BASE_SHA" ]; then base="$(git merge-base "$HEAD_SHA" "$BASE_SHA")"; else base="$HEAD_SHA~1"; fi
+          git checkout --quiet "$base"
+          uv run python "$RUNNER_TEMP/memory_report.py" collect --out "out/base-$BOARD.json" "$BOARD"
+          git checkout --quiet "$HEAD_SHA"
+          uv run python "$RUNNER_TEMP/memory_report.py" collect --out "out/head-$BOARD.json" "$BOARD"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: memory-${{ matrix.board }}
+          path: out/*.json
+
+  comment:
+    needs: [plan, measure]
+    # Still run when nothing was measured, so the sticky comment reports the
+    # skip instead of leaving the previous push's numbers in place.
+    if: always() && needs.plan.result == 'success'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          # [cache.pr] mode "none": restore on PRs, save only from master.
+          save-cache: ${{ github.ref == 'refs/heads/master' && (github.event_name == 'push' || github.event_name == 'schedule') }}
+
+      - uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          pattern: memory-*
+          merge-multiple: true
+          path: out
+
+      - name: Render and post
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+          SKIPPED: ${{ needs.measure.result == 'skipped' }}
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          bases=(out/base-*.json)
+          heads=(out/head-*.json)
+          if [ "$SKIPPED" = "true" ]; then
+            {
+              echo '<!-- fastled-memory-report -->'
+              echo '### Memory usage'
+              echo
+              echo 'No measurement: this change only touches platform code that is'
+              echo 'not a size target (stub/WASM).'
+            } > body.md
+          elif [ "${#bases[@]}" -eq 0 ] || [ "${#heads[@]}" -eq 0 ]; then
+            {
+              echo '<!-- fastled-memory-report -->'
+              echo '### Memory usage'
+              echo
+              echo 'No measurement: the build for the selected target(s) failed.'
+              echo 'See the `measure` job for the failing target.'
+            } > body.md
+          else
+            uv run ci/memory_report.py render --base "${bases[@]}" --head "${heads[@]}" > body.md
+          fi
+          cat body.md >> "$GITHUB_STEP_SUMMARY"
+          [ -n "$PR" ] || exit 0
+          marker='<!-- fastled-memory-report -->'
+          id="$(gh api --paginate "repos/$REPO/issues/$PR/comments" \
+            --jq ".[] | select(.user.login == \"github-actions[bot]\" and (.body | startswith(\"$marker\"))) | .id" | head -n1)"
+          if [ -n "$id" ]; then
+            gh api -X PATCH "repos/$REPO/issues/comments/$id" -F body=@body.md >/dev/null
+          else
+            gh api "repos/$REPO/issues/$PR/comments" -F body=@body.md >/dev/null
+          fi

@@ -8,8 +8,17 @@ from types import SimpleNamespace
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
 
+import pytest
+
+from ci.autoresearch.args import Args
 from ci.autoresearch.context import QuietContext, RunContext
-from ci.autoresearch.phases import _classify_test_failure, _run_tests_or_special_mode
+from ci.autoresearch.phases import (
+    _classify_test_failure,
+    _parse_args_and_build_commands,
+    _run_rpc_smoke_tests,
+    _run_tests_or_special_mode,
+    _static_init_passed,
+)
 
 
 _PATCH_MOD = "ci.autoresearch.phases"
@@ -131,6 +140,58 @@ def _valid_single_pass() -> dict[str, Any]:
 def test_run_single_valid_pass_is_accepted() -> None:
     rc = _run_rpc([_run_single_command()], [_valid_single_pass()])
     assert rc == 0
+
+
+def test_lcd_worker_affinity_requires_observed_core_evidence() -> None:
+    """#5001: byte loopback alone cannot establish worker isolation."""
+    command = _run_single_command()
+    command["params"].update(driver="LCD_CLOCKLESS", workerCore="1")
+    response = _valid_single_pass()
+    response["driver"] = "LCD_CLOCKLESS"
+    assert _run_rpc([command], [response]) == 1
+
+    response.update(
+        workerCore=1,
+        workerObservedCore=1,
+        workerPriority=23,
+        competingTaskPasses=10,
+        competingTaskMaxPassUs=1200,
+        workerSubmittedChunks=1,
+        workerCompletedChunks=1,
+        workerTotalChunks=1,
+        workerMaxEncodeUs=20,
+        workerMaxSubmitUs=5,
+        workerStreamError=False,
+    )
+    assert _run_rpc([command], [response]) == 0
+    response["workerCompletedChunks"] = 0
+    assert _run_rpc([command], [response]) == 1
+    response["workerCompletedChunks"] = 1
+    response["workerObservedCore"] = 0
+    assert _run_rpc([command], [response]) == 1
+
+    command["params"]["workerCore"] = "auto"
+    response["workerObservedCore"] = 1
+    response["workerCore"] = -1
+    assert _run_rpc([command], [response]) == 0
+
+    command["params"]["workerCore"] = "any"
+    response["workerCore"] = -1
+    assert _run_rpc([command], [response]) == 0
+
+
+def test_lcd_lane_pins_require_exact_applied_wiring() -> None:
+    """Six-strip acceptance must prove the requested nonconsecutive pin map."""
+    pins = [1, 3, 4, 5, 6, 7]
+    command = _run_single_command()
+    command["params"].update(driver="LCD_CLOCKLESS", laneSizes=[170] * 6, lanePins=pins)
+    response = _valid_single_pass()
+    response.update(driver="LCD_CLOCKLESS", laneCount=6, laneSizes=[170] * 6)
+    assert _run_rpc([command], [response]) == 1
+    response["lanePins"] = pins
+    assert _run_rpc([command], [response]) == 0
+    response["lanePins"] = [1, 2, 3, 4, 5, 6]
+    assert _run_rpc([command], [response]) == 1
 
 
 def test_run_single_missing_passed_field_fails() -> None:
@@ -448,3 +509,113 @@ def test_driver_decline_without_a_reason_still_says_it_declined() -> None:
 
     assert failure_class == "driver_declined"
     assert "gave no reason" in detail
+
+
+def _static_init_result() -> dict[str, object]:
+    return {
+        "success": True,
+        "constructions": 1,
+        "contenders": 2,
+        "completed": 2,
+        "constructorEntered": True,
+        "overlapped": True,
+        "workersSuspended": True,
+    }
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("success", False),
+        ("constructions", 2),
+        ("constructions", True),
+        ("contenders", 1),
+        ("completed", 1),
+        ("constructorEntered", False),
+        ("overlapped", False),
+        ("workersSuspended", False),
+    ],
+)
+def test_static_init_gate_rejects_incomplete_or_duplicate_construction(
+    field: str, value: object
+) -> None:
+    result = _static_init_result()
+    result[field] = value
+    assert not _static_init_passed(result)
+
+
+def test_static_init_gate_accepts_one_constructor_with_overlapping_tasks() -> None:
+    assert _static_init_passed(_static_init_result())
+    assert not _static_init_passed(None)
+    assert not _static_init_passed({"success": True})
+
+
+@pytest.mark.parametrize("lto", (True, False))
+def test_static_init_mode_uses_pin_free_readiness_and_selects_lto(lto: bool) -> None:
+    """Both standalone modes must reach staging with the requested LTO setting."""
+    argv = ["esp32c6", "--static-init"]
+    if not lto:
+        argv.append("--static-init-no-lto")
+    args = Args.parse_args(argv)
+    assert args.static_init_no_lto is (not lto)
+    with patch("ci.autoresearch.staging.synthesise_autoresearch_project") as staging:
+        ctx = _parse_args_and_build_commands(args)
+    assert not isinstance(ctx, int)
+    assert ctx.rpc_smoke_mode
+    assert not ctx.gpio_only_mode
+    assert ctx.drivers == []
+    assert staging.call_args.kwargs["static_init_lto"] is lto
+
+
+def test_static_init_control_requires_test_mode() -> None:
+    args = Args.parse_args(["esp32c6", "--static-init-no-lto"])
+    assert _parse_args_and_build_commands(args) == 1
+
+
+@pytest.mark.parametrize("control", ([], ["--static-init-no-lto"]))
+@pytest.mark.parametrize(
+    "other",
+    [
+        ["--rmt"],
+        ["--rpc-smoke"],
+        ["--spi"],
+        ["--simd"],
+        ["--watchdog-soak"],
+        ["--driver-binding", "typed"],
+        ["--driver-binding", "runtime"],
+        ["--spi-streaming"],
+        ["--tx-pin", "0"],
+        ["--frames", "0"],
+        ["--chipset", "ws2812"],
+        ["--rp-spi-chipset", "apa102"],
+        ["--contaminate-tx-mux"],
+    ],
+)
+def test_static_init_rejects_other_modes_and_ignored_workloads(
+    control: list[str], other: list[str]
+) -> None:
+    """A standalone guard probe must not silently skip another requested test."""
+    with pytest.raises(SystemExit):
+        Args.parse_args(["esp32c6", "--static-init", *control, *other])
+
+
+@pytest.mark.parametrize("valid", (True, False))
+def test_static_init_runner_gates_rpc_result(valid: bool) -> None:
+    result = _static_init_result()
+    if not valid:
+        result["constructions"] = 2
+    client = AsyncMock()
+    client.send.return_value = SimpleNamespace(success=True, data=result)
+    ctx = SimpleNamespace(
+        args=SimpleNamespace(static_init=True, static_init_no_lto=False),
+        upload_port="test-port",
+        remaining_seconds=lambda minimum: 30.0,
+        serial_iface=object(),
+        crash_decoder=None,
+        use_fbuild=True,
+    )
+    with patch("ci.autoresearch.phases.RpcClient", return_value=client):
+        rc = asyncio.run(_run_rpc_smoke_tests(ctx))
+    assert rc == (0 if valid else 1)
+    client.send.assert_awaited_once_with("staticInitTest", args=None, timeout=30.0)
+    client.close.assert_awaited_once()

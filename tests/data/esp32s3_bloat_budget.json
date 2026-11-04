@@ -2,7 +2,7 @@
   "board": "esp32s3",
   "example": "Blink",
   "profile": "default",
-  "image_flash": 325139,
+  "image_flash": 320503,
   "total_ram": 40016,
-  "reference": "Stock console integration with #4873, FBuild2.5.43 / Arduino3.3.11 / IDF5.5.5 / GCC14.2.0: local Blink image_flash325075 and attributed RAM39147; flash ceiling permits64 bytes link-layout variation. Baseline ratchet independently pins325075. Stock SDK only; no framework startup patch. Previous attributedRAM40016 ceiling retained; attributed RAM is not physical board RAM."
+  "reference": "UART console kept out of output-only builds (#4990), fbuild 2.5.49 / Arduino3.3.11 / IDF5.5.5 / GCC14.2.0: CI Blink image_flash320439 (run 41310165483); flash ceiling permits64 bytes link-layout variation. Baseline ratchet independently pins320439. Previous attributedRAM40016 ceiling retained; attributed RAM is not physical board RAM."
 }

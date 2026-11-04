@@ -20,9 +20,9 @@ class AnalogRGBController : public CPixelLEDController<RGB> {
     static constexpr u32 PWM_FREQUENCY_HZ = 500;
 
     void init() FL_NO_EXCEPT override {
-        fl::pinMode(RED_PIN, PinMode::Output);
-        fl::pinMode(GREEN_PIN, PinMode::Output);
-        fl::pinMode(BLUE_PIN, PinMode::Output);
+        (fl::pinMode)(RED_PIN, PinMode::Output);
+        (fl::pinMode)(GREEN_PIN, PinMode::Output);
+        (fl::pinMode)(BLUE_PIN, PinMode::Output);
         fl::setPwmFrequency(RED_PIN, PWM_FREQUENCY_HZ);
         fl::setPwmFrequency(GREEN_PIN, PWM_FREQUENCY_HZ);
         fl::setPwmFrequency(BLUE_PIN, PWM_FREQUENCY_HZ);
@@ -41,9 +41,9 @@ class AnalogRGBController : public CPixelLEDController<RGB> {
     }
 
     virtual void writeRgb(u8 red, u8 green, u8 blue) FL_NO_EXCEPT {
-        fl::analogWrite(RED_PIN, red);
-        fl::analogWrite(GREEN_PIN, green);
-        fl::analogWrite(BLUE_PIN, blue);
+        (fl::analogWrite)(RED_PIN, red);
+        (fl::analogWrite)(GREEN_PIN, green);
+        (fl::analogWrite)(BLUE_PIN, blue);
     }
 };
 

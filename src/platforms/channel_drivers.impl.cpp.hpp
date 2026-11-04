@@ -24,6 +24,8 @@
 
 #if defined(FL_IS_ESP32)
 #include "platforms/esp/32/channel_drivers_esp32.impl.hpp"
+#elif defined(FL_IS_ESP8266)
+#include "platforms/esp/8266/channel_drivers_esp8266.impl.hpp"
 #elif defined(FL_IS_TEENSY_4X)
 #include "platforms/arm/teensy/channel_drivers_teensy.impl.hpp"
 #elif defined(FL_IS_ARM_LPC)

@@ -269,7 +269,7 @@ lzw_result lzw_decode_init(
 {
 	struct lzw_table_entry *table = ctx->table;
 	lzw_result res;
-	fl::u16 code;
+	fl::u16 code = 0;
 
 	if (minimum_code_size >= LZW_CODE_MAX) {
 		return LZW_BAD_ICODE;

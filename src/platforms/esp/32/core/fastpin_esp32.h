@@ -42,9 +42,9 @@ public:
 
   inline static void setOutput() FL_NO_EXCEPT {
       FL_STATIC_ASSERT(validpin(), "This pin has been marked as an invalid pin, common reasons includes it being a ground pin, read only, or too noisy (e.g. hooked up to the uart).");
-      pinMode(PIN, PinMode::Output);
+      (fl::pinMode)(PIN, PinMode::Output);
   }
-  inline static void setInput() FL_NO_EXCEPT { pinMode(PIN, PinMode::Input); }
+  inline static void setInput() FL_NO_EXCEPT { (fl::pinMode)(PIN, PinMode::Input); }
 
   inline static void hi() FL_NO_EXCEPT __attribute__ ((always_inline)) {
       *sport() = MASK;

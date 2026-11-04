@@ -1461,6 +1461,57 @@ class TestParseArgsAndBuildCommands:
         assert result.final_environment == "esp32s3"
         assert "LCD_CLOCKLESS" in result.drivers
 
+    def test_lcd_preserves_explicit_opi_psram8_board(
+        self, fake_project_dir: Path
+    ) -> None:
+        args = _make_args(
+            parlio=False,
+            lcd=True,
+            worker_core="1",
+            environment_positional="esp32s3_opi_psram8",
+            project_dir=fake_project_dir,
+        )
+        result = _parse_args_and_build_commands(args)
+        assert isinstance(result, RunContext)
+        assert result.final_environment == "esp32s3_opi_psram8"
+        assert result.json_rpc_commands[0]["params"]["workerCore"] == "1"
+
+    def test_lcd_six_lane_pins_preserve_loopback_rx(
+        self, fake_project_dir: Path
+    ) -> None:
+        args = _make_args(
+            parlio=False,
+            lcd=True,
+            legacy=True,
+            worker_core="1",
+            environment_positional="esp32s3_opi_psram8",
+            project_dir=fake_project_dir,
+            tx_pin=1,
+            rx_pin=2,
+            lanes="6",
+            lane_pins="1,3,4,5,6,7",
+        )
+        result = _parse_args_and_build_commands(args)
+        assert isinstance(result, RunContext)
+        assert result.json_rpc_commands[0]["params"]["lanePins"] == [1, 3, 4, 5, 6, 7]
+        assert not _legacy_lane_rx_overlap(args, 6, "esp32s3_opi_psram8")
+
+    @pytest.mark.parametrize("pins", ["1,1", "1,2", "3,4", "1,49", "1,bad"])
+    def test_lcd_lane_pins_reject_invalid_wiring(
+        self, fake_project_dir: Path, pins: str
+    ) -> None:
+        args = _make_args(
+            parlio=False,
+            lcd=True,
+            environment_positional="esp32s3_opi_psram8",
+            project_dir=fake_project_dir,
+            tx_pin=1,
+            rx_pin=2,
+            lanes="2",
+            lane_pins=pins,
+        )
+        assert _parse_args_and_build_commands(args) == 1
+
     # ============================================================
     # #3281: synthesised .build/fbuild/<board>/platformio.ini path
     # ============================================================
@@ -1777,6 +1828,56 @@ class TestResolvePortAndEnvironment:
             verbose=False,
             extra_defines=["FL_ESP32_LEGACY_CLOCKLESS_USE_RMT=1"],
         )
+
+    @pytest.mark.parametrize("lto", [True, False])
+    def test_static_init_deferred_synthesis_selects_lto(
+        self, tmp_path: Path, lto: bool
+    ) -> None:
+        (tmp_path / "examples" / "AutoResearch").mkdir(parents=True)
+        staged_dir = tmp_path / ".build" / "fbuild" / "esp32c6"
+        staged_dir.mkdir(parents=True)
+        args = _make_args(
+            upload_port=None,
+            environment_positional=None,
+            parlio=False,
+            static_init=True,
+            static_init_no_lto=not lto,
+            project_dir=tmp_path,
+        )
+        ctx = _make_ctx(
+            args=args,
+            upload_port=None,
+            final_environment=None,
+            build_dir=tmp_path.resolve(),
+            rpc_smoke_mode=True,
+        )
+        with (
+            patch(
+                f"{_PATCH_MOD}.auto_detect_upload_port",
+                return_value=MagicMock(ok=True, selected_port="COM9"),
+            ),
+            patch(
+                f"{_PATCH_MOD}.detect_attached_chip",
+                return_value=MagicMock(
+                    ok=True, chip_type="ESP32-C6", environment="esp32c6"
+                ),
+            ),
+            patch(
+                "ci.autoresearch.staging.synthesise_autoresearch_project",
+                return_value=staged_dir,
+            ) as synth,
+            patch(
+                f"{_PATCH_MOD}.select_build_driver",
+                return_value=_make_mock_driver(),
+            ),
+        ):
+            rc = asyncio.run(_resolve_port_and_environment(ctx))
+
+        assert rc is None
+        assert ctx.final_environment == "esp32c6"
+        assert ctx.build_dir == staged_dir
+        assert synth.call_count == 1
+        assert synth.call_args.kwargs["static_init_lto"] is lto
 
     def test_cli_upload_port(self) -> None:
         ctx = _make_ctx(upload_port=None)

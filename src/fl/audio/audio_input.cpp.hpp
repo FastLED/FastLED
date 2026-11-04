@@ -20,6 +20,10 @@
 // IWYU pragma: end_keep
 
 #ifndef FASTLED_USES_ARDUINO_AUDIO_INPUT
+  // ESP32 (excluding ESP8266) has a dedicated native engine below. ESP8266 has
+  // no dedicated engine and deliberately falls through to the shared Arduino-I2S
+  // backend (`platforms/arduino/audio_input.hpp`) when <I2S.h> is present — see
+  // issue #4948 and `platforms/esp/8266/README.md`.
   #if defined(FL_IS_ESP32) && !defined(FL_IS_ESP8266)
     #define FASTLED_USES_ARDUINO_AUDIO_INPUT 0
   #elif defined(FL_IS_WASM)
