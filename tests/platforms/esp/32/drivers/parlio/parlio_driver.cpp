@@ -39,6 +39,9 @@
 #include "fl/stl/vector.h"
 #include "fl/stl/move.h"
 #include "fl/stl/map.h"
+#include "fl/stl/cstdio.h"
+#include "fl/stl/string.h"
+#include "fl/log/log.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
 
@@ -1626,6 +1629,31 @@ FL_TEST_CASE("ChannelDriverPARLIO - oversized timing group is not transmitted") 
     driver.show();
     FL_CHECK(ParlioPeripheralMock::instance().getTransmissionHistory().empty());
 }
+
+#if defined(FASTLED_LOG_PARLIO_ENABLED) && FL_HAS_WARN
+FL_TEST_CASE("ChannelDriverPARLIO - oversized groups report duplicate pins once") {
+    resetMockHistory();
+    fl::ChannelDriverPARLIOImpl driver(16);
+    const auto timing = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
+    for (int lane = 0; lane < 17; ++lane) {
+        fl::vector_psram<u8> data = {0xFF, 0x00, 0xAA};
+        driver.enqueue(fl::ChannelData::create(lane % 8, timing, fl::move(data)));
+    }
+    static fl::string captured;
+    captured.clear();
+    const auto capture = [](const char* text) { captured += text; };
+    fl::inject_print_handler(capture);
+    fl::inject_println_handler(capture);
+    driver.show();
+    fl::clear_print_handler();
+    fl::clear_println_handler();
+    const fl::string diagnostic = "PARLIO: Channels in group CHIPSET have non-unique pins";
+    const auto first = captured.find(diagnostic);
+    FL_REQUIRE_NE(first, fl::string::npos);
+    FL_CHECK_EQ(captured.find(diagnostic, first + diagnostic.size()), fl::string::npos);
+    FL_CHECK(ParlioPeripheralMock::instance().getTransmissionHistory().empty());
+}
+#endif
 
 FL_TEST_CASE("ChannelDriverPARLIO - more than sixteen timing groups sort fastest first") {
     resetMockHistory();
