@@ -19,8 +19,9 @@ def workflow(name: str) -> dict:
 
 def test_smoke_manifest_sources_exist_and_is_small() -> None:
     assert 1 <= len(CPP_SMOKE) <= 5
-    # 10th entry: ci/tests/test_driver_enable_define_checker.py (#4940 lint).
-    assert 1 <= len(PY_SMOKE) <= 10
+    # Keep master's driver-define checker and add the hermetic issue-sanitizer
+    # policy tests as the 11th entry (~0.3s, no network or API key).
+    assert 1 <= len(PY_SMOKE) <= 11
     for target, source in CPP_SMOKE.items():
         assert target
         assert (ROOT / source).is_file(), target
