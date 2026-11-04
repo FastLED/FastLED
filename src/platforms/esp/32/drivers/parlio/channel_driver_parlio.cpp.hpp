@@ -204,6 +204,21 @@ void ChannelDriverPARLIOImpl::show() FL_NO_EXCEPT {
             // Oversized groups are rejected by beginTransmission; only valid
             // hardware lane counts need sorting (at most 16 channels).
             if (group.mChannels.size() > 16) {
+#ifdef FASTLED_LOG_PARLIO_ENABLED
+                // Preserve the diagnostic without sorting an invalid group.
+                bool has_unique_pins = true;
+                for (size_t i = 1; i < group.mChannels.size() && has_unique_pins; ++i) {
+                    for (size_t j = 0; j < i; ++j) {
+                        if (group.mChannels[i]->getPin() == group.mChannels[j]->getPin()) {
+                            has_unique_pins = false;
+                            break;
+                        }
+                    }
+                }
+                if (!has_unique_pins) {
+                    FL_LOG_PARLIO("PARLIO: Channels in group " << group.mTiming.name << " have non-unique pins");
+                }
+#endif
                 continue;
             }
             // sort each member of the group by their pin orders.
