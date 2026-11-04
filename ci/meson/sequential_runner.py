@@ -9,6 +9,7 @@ its target-discovery layer for single-test runs.
 """
 
 import os
+import re
 import sys
 import time
 from dataclasses import dataclass
@@ -179,6 +180,21 @@ def _print_compile_failure(
         print_error("=" * 80)
 
 
+def _is_target_resolution_failure(output: str) -> bool:
+    """Only missing/ambiguous target names justify trying a sibling target."""
+    diagnostics = [
+        re.sub(r"\x1b\[[0-9;]*m", "", line).strip().lower()
+        for line in output.splitlines()
+        if _is_compilation_error(line) or "zccache[err]" in line.lower()
+    ]
+    return bool(diagnostics) and all(
+        line.startswith(
+            ("error: can't invoke target ", "ninja: error: unknown target ")
+        )
+        for line in diagnostics
+    )
+
+
 def run_sequential_compile(
     ctx: SequentialCompileContext,
 ) -> SequentialCompileResult:
@@ -224,9 +240,8 @@ def run_sequential_compile(
             break
         last_error_output = result.error_output
         all_suppressed_errors.extend(result.suppressed_errors)
-        if result.timed_out:
-            # A wall-clock deadline is a real build failure, not a missing or
-            # ambiguous Meson target. A later fuzzy candidate cannot mask it.
+        if result.timed_out or not _is_target_resolution_failure(last_error_output):
+            # Another target cannot repair a compiler/linker/cache failure.
             break
 
     ctx.build_timer.checkpoint("compile_done")
