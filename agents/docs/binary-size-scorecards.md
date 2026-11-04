@@ -179,3 +179,36 @@ master no longer links. Master's RAM growth over 3.10.3 includes the 1 KB
 `tests/data/rp2040_bloat_budget.json`, run with
 `bash bloat rp2040 --build --budget tests/data/rp2040_bloat_budget.json`.
 
+
+## ESP flash recovery after #5003
+
+Matched no-Serial Blink measurements on 2026-11-03 use fbuild
+`2.5.49+git.98affea702ff`, the same checkout path, build harness and board
+configuration throughout. The historical column substitutes `src/` from
+`1c0ac9724e` (before #5003); the starting master is `525c533f60`, which also
+includes the later introsort change #5005. These are allocated `image_flash`
+bytes, not board-summary flash or summed symbol attribution.
+
+| Target | Pre-#5003 source | Starting master | Iteration 1: shared waits | Iteration 2: compact PARLIO sorts |
+|---|---:|---:|---:|---:|
+| esp32s3 | 320419 | 320427 | 320255 | 320259 |
+| esp32dev | 287695 | 287675 | 287547 | 287555 |
+| esp32c3 | 324378 | 324372 | 324180 | 324180 |
+| esp32c6 | 354760 | 355506 | 355318 | 354042 |
+
+Each iteration used one GPT-6.1 Sol agent at low effort. Shared wait loops
+preserve READY/DRAINING acceptance, spin budgets, timeout diagnostics and
+yielding. PARLIO uses the existing heapsort for its unbounded timing groups
+and insertion sort only for valid groups of at most 16 hardware lanes;
+oversized groups retain their existing rejection. General-purpose introsort
+and its worst-case guarantee are unchanged. The encoding path, worker APIs
+and `Core::Auto` behavior are unchanged, with no new object fields.
+
+Attributed RAM stays constant in all phases: S3 22451, ESP32 18651, C3 13770
+and C6 17877 bytes. Toolchains are GCC 14.2.0 / Arduino 3.3.11 / IDF 5.5.5
+for ESP32 and S3; GCC 13.2.0 / Arduino 3.1.0 / IDF 5.3.2 for C3; and GCC
+14.2.0 / Arduino 3.3.5 / IDF 5.5.1 for C6. Local reports, source patches,
+provenance and build logs are preserved in `.build/esp-flash-study/`. After
+integrating master `6698370285` (including the ESP C++ guard fix), all four
+iteration-2 image-flash and attributed-RAM measurements were unchanged.
+

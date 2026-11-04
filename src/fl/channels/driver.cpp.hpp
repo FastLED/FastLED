@@ -25,8 +25,12 @@ bool IChannelDriver::configureWorkerImpl(const WorkerConfig&) FL_NO_EXCEPT {
 
 void IChannelDriver::fillWorkerDiagnostics(WorkerDiagnostics&) const FL_NO_EXCEPT {}
 
-template<typename Condition>
-bool IChannelDriver::waitForCondition(Condition condition, u32 timeoutMs) FL_NO_EXCEPT {
+bool IChannelDriver::waitForState(bool allowDraining, u32 timeoutMs) FL_NO_EXCEPT {
+    const auto condition = [this, allowDraining]() {
+        const auto state = poll().state;
+        return state == IChannelDriver::DriverState::READY ||
+               (allowDraining && state == IChannelDriver::DriverState::DRAINING);
+    };
     const u32 startTime = timeoutMs > 0 ? millis() : 0;
 
     // Tier 1: instant non-blocking check.
@@ -61,7 +65,7 @@ bool IChannelDriver::waitForCondition(Condition condition, u32 timeoutMs) FL_NO_
         }
 
         // Adaptive yield (refs #2815, generalizes the #2493 ESP32-P4 carve-out):
-        // see the matching comment in ChannelManager::waitForCondition for the
+        // see the matching comment in ChannelManager::waitForState for the
         // full rationale. The deep yield is only needed when a radio is
         // actually up; otherwise the FreeRTOS tick floor is pure timing drift.
         if (fl::NetworkDetector::isAnyNetworkActive()) {
@@ -78,19 +82,13 @@ bool IChannelDriver::waitForCondition(Condition condition, u32 timeoutMs) FL_NO_
 
 bool IChannelDriver::waitForReady(u32 timeoutMs) FL_NO_EXCEPT {
     // wait until the driver is in a READY state.
-    bool ok = waitForCondition([this]() {
-        auto state = poll();
-        return state.state == IChannelDriver::DriverState::READY;
-    }, timeoutMs);
+    bool ok = waitForState(false, timeoutMs);
     return ok;
 }
 
 bool IChannelDriver::waitForReadyOrDraining(u32 timeoutMs) FL_NO_EXCEPT {
     // wait until the driver is in a READY or DRAINING state.
-    bool ok = waitForCondition([this]() {
-        auto state = poll();
-        return state.state == IChannelDriver::DriverState::READY || state.state == IChannelDriver::DriverState::DRAINING;
-    }, timeoutMs);
+    bool ok = waitForState(true, timeoutMs);
     return ok;
 }
 

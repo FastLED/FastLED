@@ -52,10 +52,10 @@ Provenance (fbuild version, toolchain, what changed) is in
 |---|---|---:|---:|---|
 | `uno` | #4788 / #4764 | 3600 B | not recorded | `tests/data/uno_blink_bloat_budget.json` |
 | `attiny85` | #4765 | 2460 B | 136 B | `tests/data/attiny85_bloat_budget.json` |
-| `esp32c6` | #4762 | 402674 B | 33478 B | `tests/data/esp32c6_bloat_budget.json` |
-| `esp32dev` | #4766 | 287671 B | 34091 B | `tests/data/esp32dev_bloat_budget.json` |
-| `esp32s3` | #4767 | 320439 B | not recorded | `tests/data/esp32s3_bloat_budget.json` |
-| `esp32c3` | #4761 / #4982 | 324378 B | 26498 B | `tests/data/esp32c3_bloat_budget.json` |
+| `esp32c6` | #4762 | 354042 B | 17877 B | `tests/data/esp32c6_bloat_budget.json` |
+| `esp32dev` | #4766 | 287555 B | 18651 B | `tests/data/esp32dev_bloat_budget.json` |
+| `esp32s3` | #4767 | 320259 B | 22451 B | `tests/data/esp32s3_bloat_budget.json` |
+| `esp32c3` | #4761 / #4982 | 324180 B | 13770 B | `tests/data/esp32c3_bloat_budget.json` |
 | `stm32f103c8` | #4763 | 22904 B | 1789 B | `tests/data/stm32f103c8_bloat_budget.json` |
 | `teensy40` | #4768 | 46080 B | 21449 B | `tests/data/teensy40_bloat_budget.json` |
 | `teensy41` | #4769 | 47104 B | 21738 B | `tests/data/teensy41_bloat_budget.json` |
@@ -64,9 +64,9 @@ Provenance (fbuild version, toolchain, what changed) is in
 Image flash and attributed RAM are bloat-report metrics, **not** fbuild's board
 flash/RAM totals; the two are not interchangeable for any board in this table.
 Unknown readings are not replaced with budget ceilings: Uno's 118 B is
-physical RAM, and the latest ESP32-S3 record contains image flash only.
-The same ESP32-C6 ELF reads 29027 B attributed RAM on fbuild 2.5.37 and
-33478 B on 2.5.39+, at identical image size.
+physical RAM. The ESP rows are local 2026-11-03 readings; the
+[matched recovery scorecard](binary-size-scorecards.md#esp-flash-recovery-after-5003)
+records the toolchains, fbuild version and historical comparisons.
 
 ## Rules for quoting a number
 

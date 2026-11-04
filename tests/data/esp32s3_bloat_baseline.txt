@@ -1,3 +1,10 @@
+# ESP flash recovery: share READY/DRAINING wait loops without adding fields
+# or removing default error diagnostics. Matched local ESP32-S3 Blink measures
+# image_flash 320427 -> 320259 (-168 B), attributed RAM unchanged at 22451 B.
+# Exact-head hosted CI run 41749927183 on 07838db76b measures image_flash
+# 320291 B and attributed RAM 22451 B, matching the pin with zero headroom.
+# This confirms the 32 B local/hosted offset measured previously in #5003.
+#
 # #5001: explicitly configurable LCD worker affinity adds two small shared
 # driver hooks on ESP32-S3. Auto avoids eager singleton access and unused
 # diagnostics initialization stays behind a nonvirtual facade. Redundant zero
@@ -392,4 +399,4 @@
 # the CI Blink report contains no ResponseLutsQ16 symbol. The local fbuild
 # symbol total remains ~4 KB higher for the same source (FastLED/fbuild#1456),
 # so this ratchet uses the CI measurement from PR #4511.
-320475
+320291

@@ -335,8 +335,7 @@ protected:
     IChannelDriver(IChannelDriver&&) FL_NO_EXCEPT = delete;
     IChannelDriver& operator=(IChannelDriver&&) FL_NO_EXCEPT = delete;
 
-    template<typename Condition>
-    bool waitForCondition(Condition condition, u32 timeoutMs = 1000) FL_NO_EXCEPT;
+    FL_NO_INLINE bool waitForState(bool allowDraining, u32 timeoutMs) FL_NO_EXCEPT;
 };
 
 }  // namespace fl

@@ -1,5 +1,18 @@
 # Task Tracker
 
+## ESP flash recovery after #5003
+
+- [x] Freeze fresh Blink image-flash baselines on ESP32, S3, C3 and C6 with matching fbuild/toolchains.
+- [x] Measure the pre-affinity revision in the same checkout path and distinguish feature growth from later changes.
+- [x] Run one GPT-6.1 Sol low agent per optimization iteration; preserve behavior and report each measured table.
+- [x] Validate retained improvements with native tests, lint and board bloat reports; prepare the PR for hosted review and merge.
+
+Review: two iterations save 168 / 120 / 192 / 1464 image bytes on S3 /
+ESP32 / C3 / C6 respectively, with unchanged attributed RAM. All four are
+below the matched pre-#5003 readings. Native 329 unit tests and 95 examples,
+PARLIO sanitizer tests, lint and all four fixed bloat budgets pass. Hosted
+validation and merge are tracked by the follow-up PR.
+
 ## ESP32 LCD worker affinity (#5001)
 
 - [x] Add failing regression coverage for engine affinity and shared conflicts.
