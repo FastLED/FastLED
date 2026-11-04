@@ -123,6 +123,11 @@ fn esp_noexcept_scope_call(node: tree_sitter::Node<'_>, source: &str) -> Option<
         ancestor = parent.parent();
     }
     let expression = node.named_child(0)?;
+    // Global assembly is a language construct, not a declaration-generating
+    // macro or a callable that can carry FL_NO_EXCEPT.
+    if expression.kind() == "gnu_asm_expression" {
+        return None;
+    }
     let expression = if expression.kind() == "assignment_expression" {
         expression.child_by_field_name("left")?
     } else {
@@ -783,6 +788,11 @@ mod esp_noexcept_tests {
         let hits = check(&broken);
         assert_eq!(hits.len(), 8, "{hits:?}");
         assert!(hits.iter().all(|hit| hit.1.starts_with("Missing")));
+    }
+
+    #[test]
+    fn esp_noexcept_ignores_global_assembly() {
+        assert!(check("asm(R\"ASM(.pushsection .iram1, \"ax\"\nret\n.popsection\n)ASM\");\n").is_empty());
     }
 
     #[test]
