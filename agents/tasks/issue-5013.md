@@ -9,7 +9,7 @@ fix it, identify and repair fbuild validation gaps, and merge the resulting PRs.
   this newer toolchain does not reproduce the legacy linker failure.
 - [x] Reproduce with official GCC 7-2017q4, then the complete Arduino board build.
 - [x] Add failing regression coverage before implementing the fix.
-- [ ] Trace fbuild source selection, assembly flags, and archive/link semantics;
+- [x] Trace fbuild source selection, assembly flags, and archive/link semantics;
   fix actual backend defects with independent RED/GREEN evidence.
 - [x] Validate the actual XIAO Arduino build and ESP32-C6 fbuild Blink.
 - [ ] Review, push, and merge all necessary PRs; verify hosted checks.
@@ -26,10 +26,15 @@ these against Cortex-M0+ (`12/0`) and Cortex-M4 (`13/0`). GCC 9 accepts the
 same objects, so testing a newer compiler does not cover this failure.
 
 fbuild supplies the board CPU flags to assembly. Its local FastLED path
-already discovers `.S` and links its objects; the recipe difference masks
+already discovers `.S`; the recipe difference masks
 the Arduino failure. Investigation also found separate backend defects in
 extra-library assembly driver/flag selection and ignored archive policy;
-these are tracked in FastLED/fbuild#1885 and being fixed in the sister repo.
+these are tracked in FastLED/fbuild#1885. The assembly dispatch fix merged in
+FastLED/fbuild#1886; archive policy, cache invalidation, native link regressions,
+and version 2.5.51 merged through the queue in FastLED/fbuild#1887.
+The exact-SHA release dry run is GitHub Actions run `41793135699`, at
+`e9ece7e885785d96014f5b617d38a886f990d627`. Publication and the FastLED
+dependency floor remain pending until that validation succeeds.
 
 The minimal fix keeps the released `.S` path and its RISC-V instructions
 unchanged, and supplies compatible Thumb architecture metadata only for
