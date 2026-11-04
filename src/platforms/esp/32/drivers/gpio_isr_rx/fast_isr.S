@@ -47,6 +47,15 @@
  * - Critical for achieving <20 cycle target
  */
 
+// Seeed SAMD 1.8.6 omits CPU/Thumb flags from its assembler recipe. Even an
+// empty object then gets incompatible ARM architecture attributes with GCC 7
+// (#5013). No instructions are emitted on SAMD; declare the minimum compatible
+// Thumb architecture for both Cortex-M0+ and Cortex-M4 link targets.
+#if defined(ARDUINO_ARCH_SAMD) && defined(__arm__)
+.cpu cortex-m0plus
+.thumb
+#endif
+
 // The companion C++ glue gates this implementation on MCPWM-capable RISC-V
 // targets. The edge ISR is the sole producer, so aligned loads/stores plus a
 // release fence are sufficient for its single-producer circular buffer.
