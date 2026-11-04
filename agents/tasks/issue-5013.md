@@ -12,7 +12,11 @@ fix it, identify and repair fbuild validation gaps, and merge the resulting PRs.
 - [x] Trace fbuild source selection, assembly flags, and archive/link semantics;
   fix actual backend defects with independent RED/GREEN evidence.
 - [x] Validate the actual XIAO Arduino build and ESP32-C6 fbuild Blink.
-- [ ] Review, push, and merge all necessary PRs; verify hosted checks.
+- [x] Review, push, and merge the source and backend repair PRs.
+- [x] Publish fbuild 2.5.51 through GitHub CI and verify the installed wheel.
+
+Final consumer gate: merge the dependency-floor follow-up after its full
+hosted CI passes. The PR's checks and merge state are the final evidence.
 
 Evidence belongs under `.build/evidence/issue-5013/` (ignored).
 The GCC 7 archive checksum comes from Seeed's official package index:
@@ -39,8 +43,11 @@ the SDK manager, preserving build caches and disk reserve guards.
 The current exact-SHA release dry run is GitHub Actions run `41819723869`, at
 `9b26affea5ad8b2cf8ffe09f597759758d5d5359`, with publication disabled;
 the entire run passed, including all six native artifact builds and wheel
-smoke checks. Publication and validation of the FastLED dependency floor
-remain pending. Releases are built and published only by GitHub CI.
+smoke checks. Publication passed in GitHub Actions run `41825898032` at the
+same source commit. Git tag `v2.5.51` resolves to that exact commit; PyPI
+provides all five platform wheels. Releases are built and published only by
+GitHub CI. The FastLED dependency floor is now 2.5.51; the full-CI follow-up
+PR remains pending.
 
 The source repair merged in FastLED/FastLED#5015 at
 `90463e920ddcd2e188fca3decdd1dbb2505cdb30`, closing issue #5013.
@@ -64,6 +71,11 @@ Actual Arduino CLI / Seeeduino SAMD 1.8.6 / GCC 7-2017q4:
   whole-event measurements. Platform-sensitive merges require full CI, which
   now includes this previously missing legacy frontend regression.
 - ESP32-C6 fbuild Blink: final minimal source passes (28 seconds).
+  The published 2.5.51 wheel (`9b26affea5ad`) also passes through
+  `bash compile esp32c6 --examples Blink` in four seconds, using the existing
+  SDK cache: 317,352 bytes of flash and 17,348 bytes of RAM. The wheel was
+  installed with `uv sync --upgrade-package fbuild==2.5.51 --no-build-package
+  fbuild`; no local producer build or release was used.
 - Full native debug validation: **329 unit groups + 95 examples** passed;
   final-source incremental confirmation passed again in **100.60 seconds**.
 - Full Python validation passed: **2425 tests**, plus **3281 subtests**;
