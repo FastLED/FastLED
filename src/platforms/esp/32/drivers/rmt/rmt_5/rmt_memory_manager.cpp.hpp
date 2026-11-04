@@ -456,8 +456,7 @@ result<size_t, RmtMemoryError> RmtMemoryManager::allocateTx(u8 channel_id, bool 
     // FL_NO_INLINE cold helper so the hot path here stays small. See
     // #2773 item 2.5.
     if (!tryAllocateWords(words_needed, true)) {
-        return handleAllocateTxFailure(channel_id, mem_blocks, words_needed,
-                                       networkActive);
+        return handleAllocateTxFailure(channel_id, mem_blocks, networkActive);
     }
 
     recordAllocation(ChannelAllocation(channel_id, words_needed, true, false));
@@ -469,8 +468,12 @@ result<size_t, RmtMemoryError> RmtMemoryManager::allocateTx(u8 channel_id, bool 
 
 FL_NO_INLINE result<size_t, RmtMemoryError>
 RmtMemoryManager::handleAllocateTxFailure(u8 channel_id, size_t mem_blocks,
-                                          size_t words_needed,
                                           bool networkActive) FL_NO_EXCEPT {
+#if FASTLED_LOG_RUNTIME_ENABLED
+    // This count is redundant with mem_blocks and only feeds diagnostics.
+    // Do not pass it through the release build's cold-call ABI.
+    const size_t words_needed = mem_blocks * SOC_RMT_MEM_WORDS_PER_CHANNEL;
+#endif
     // ITERATION 2 FIX: Progressive fallback for multi-channel scenarios.
     // When double-buffering (2 blocks) fails, try single-buffering (1 block)
     // so more channels can coexist on memory-constrained platforms like

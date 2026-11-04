@@ -1,7 +1,6 @@
 #pragma once
 
 #include "fl/stl/stdint.h"
-#include "fl/stl/optional.h"
 #include "fl/stl/noexcept.h"
 
 namespace fl {
@@ -15,15 +14,25 @@ enum class Core : fl::i8 {
     Core1 = 1
 };
 
+/// Portable worker scheduling policy, resolved by the selected backend.
+/// Auto inherits an existing shared worker setting; a new LCD/I2S worker
+/// defaults to High. These values are policies, not RTOS priority numbers.
+enum class Priority : fl::u8 {
+    Auto,
+    High,
+    Medium,
+    Low
+};
+
 /// Shared engine settings, configured before the first transmission.
 /// Default fields inherit the engine's configuration. Explicit conflicting
 /// requests are rejected. Configuration calls must be serialized with show().
 struct WorkerConfig {
     Core core = Core::Auto;
-    fl::optional<fl::u8> priority; ///< Unset preserves the backend priority.
+    Priority priority = Priority::Auto;
 
-    bool isDefault() const FL_NO_EXCEPT {
-        return core == Core::Auto && !priority.has_value();
+    constexpr bool isDefault() const FL_NO_EXCEPT {
+        return priority == Priority::Auto && core == Core::Auto;
     }
 };
 

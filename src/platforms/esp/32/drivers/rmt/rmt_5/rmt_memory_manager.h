@@ -495,8 +495,7 @@ private:
     /// messages. Returns the recovered allocation size on success, or a
     /// failure result on hard failure. See #2773 item 2.5.
     result<size_t, RmtMemoryError> handleAllocateTxFailure(
-        u8 channel_id, size_t mem_blocks, size_t words_needed,
-        bool networkActive) FL_NO_EXCEPT;
+        u8 channel_id, size_t mem_blocks, bool networkActive) FL_NO_EXCEPT;
 };
 
 } // namespace fl

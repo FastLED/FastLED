@@ -14,6 +14,7 @@
 #include "fl/chipsets/spi.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/move.h"
+#include "fl/stl/scope_exit.h"
 #include "crgb.h"
 #include "test.h"
 
@@ -494,9 +495,11 @@ public:
     int showCount = 0;
     bool acceptWorker = false;
     Core requestedCore = Core::Auto;
+    Priority requestedPriority = Priority::Auto;
 
     bool configureWorkerImpl(const WorkerConfig& config) FL_NO_EXCEPT override {
         requestedCore = config.core;
+        requestedPriority = config.priority;
         return config.isDefault() || acceptWorker;
     }
     // Snapshots of encoded data captured at enqueue time (survives poll)
@@ -593,6 +596,9 @@ FL_TEST_CASE("Slim SPI affinity adds no controller storage and must be honored #
     using DefaultController = SlimSpiBridgeController<SpiChipset::APA102, RGB, Bus::AUTO, 0>;
     using PinnedController = SlimSpiBridgeController<SpiChipset::APA102, RGB, Bus::AUTO, 0, Core::Core1>;
     FL_CHECK_EQ(sizeof(DefaultController), sizeof(PinnedController));
+    using PriorityController = SlimSpiBridgeController<SpiChipset::APA102, RGB,
+        Bus::AUTO, 0, Core::Auto, Priority::High>;
+    FL_CHECK_EQ(sizeof(DefaultController), sizeof(PriorityController));
 
     auto mock = fl::make_shared<SpiCaptureMock>("SPI_WORKER_POLICY");
     auto& manager = ChannelManager::instance();
@@ -613,6 +619,28 @@ FL_TEST_CASE("Slim SPI affinity adds no controller storage and must be honored #
         controller.setLeds(nullptr, 0);
     }
     manager.removeDriver(mock);
+}
+
+FL_TEST_CASE("SPI addLeds dispatch forwards named priority without affinity #5001") {
+    auto mock = fl::make_shared<SpiCaptureMock>("SPI_NAMED_PRIORITY");
+    auto& manager = ChannelManager::instance();
+    manager.addDriver(1000, mock);
+    auto removeDriver = fl::make_scope_exit([&]() { manager.removeDriver(mock); });
+    FL_REQUIRE_TRUE(manager.setExclusiveDriverByName("SPI_NAMED_PRIORITY"));
+    CRGB leds[1] = {CRGB::Red};
+    auto& controller = FastLED.addLedsSpiChannel<APA102, 24, 25, RGB,
+        DATA_RATE_MHZ(1), Bus::AUTO, 0, Core::Auto, Priority::Medium>(leds, 1);
+    auto removeController = fl::make_scope_exit([&]() {
+        controller.setLeds(nullptr, 0);
+        controller.removeFromDrawList();
+    });
+    controller.showLeds(255);
+    FL_CHECK_EQ(mock->enqueueCount, 0);
+    FL_CHECK_EQ(mock->requestedCore, Core::Auto);
+    FL_CHECK_EQ(mock->requestedPriority, Priority::Medium);
+    mock->acceptWorker = true;
+    controller.showLeds(255);
+    FL_CHECK_EQ(mock->enqueueCount, 1);
 }
 
 FL_TEST_CASE("APA102 channel routes through ChannelManager") {

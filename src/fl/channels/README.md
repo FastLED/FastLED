@@ -60,18 +60,31 @@ This removes unrelated driver singleton allocations, registration callback stora
 
 ## Basic Usage
 
-### ESP32-S3 LCD clockless worker affinity
+### ESP32-S3 LCD/I2S clockless worker scheduling
 
-Clockless `addLeds<>` overloads accept a worker core after the bus:
+Clockless `addLeds<>` overloads accept a worker core after the bus, then a
+friendly `fl::Priority` (`Auto`, `High`, `Medium`, or `Low`):
 
 ```cpp
 FastLED.addLeds<WS2812B, 4, GRB,
-               fl::Bus::FLEX_IO, fl::Core::Core1>(leds, NUM_LEDS);
+               fl::Bus::FLEX_IO, fl::Core::Core1,
+               fl::Priority::High>(leds, NUM_LEDS);
+
+// Keep the backend's affinity, but give networking more scheduling time.
+FastLED.addLeds<WS2812B, 4, GRB,
+               fl::Bus::FLEX_IO, fl::Core::Auto,
+               fl::Priority::Medium>(leds, NUM_LEDS);
 ```
 
-This uses the slim controller: affinity is a template constant, with no new
+These are alternative setup examples for the same strip, not simultaneous
+registrations with conflicting settings.
+
+This uses the slim controller: scheduling is a template constant, with no new
 per-controller field or runtime `Channel` object. The shared LCD engine stores
-its worker settings once. Channel-based SPI overloads append the core after
+its worker settings once. Default `Auto`/`Auto` compiles to a no-op and does
+not instantiate a worker singleton during controller construction. The priority
+enum replaces the existing optional numeric field instead of adding storage.
+Channel-based SPI overloads append the core after
 the existing bus-instance index; drivers without a configurable worker reject
 explicit requests. LCD SPI itself has no corresponding encoding worker.
 
@@ -81,7 +94,8 @@ The full-rate channel-based SPI overload has this template order:
 template<ESPIChipsets CHIPSET, fl::u8 DATA_PIN, fl::u8 CLOCK_PIN,
          fl::EOrder RGB_ORDER, fl::u32 SPI_DATA_RATE,
          fl::Bus B = fl::Bus::AUTO, fl::u8 B_WHICH = 0,
-         fl::Core CORE = fl::Core::Auto>
+         fl::Core CORE = fl::Core::Auto,
+         fl::Priority PRIORITY = fl::Priority::Auto>
 CLEDController& addLeds(CRGB* data, int nLedsOrOffset,
                         int nLedsIfOffset = 0);
 
@@ -107,7 +121,7 @@ fl::ChannelConfig config(4,
     fl::span<CRGB>(leds, NUM_LEDS), GRB);
 config.options.mBus = fl::Bus::FLEX_IO;
 config.options.mWorker.core = fl::Core::Core1;
-config.options.mWorker.priority = 23; // Optional; normally leave unset.
+config.options.mWorker.priority = fl::Priority::High; // Auto by default.
 auto channel = FastLED.add<fl::Bus::FLEX_IO, fl::ClocklessChipset>(config);
 ```
 
@@ -116,8 +130,26 @@ unpinned; RMT4: first show caller's core). `Any` explicitly
 requests no affinity, and `CallingCore` captures the core creating the worker
 on the first transmission. `Core0` and `Core1` select an available RTOS core.
 Pinning does not follow subsequent `show()` calls between cores and does not
-configure interrupt affinity. Priority must be less than `configMAX_PRIORITIES`;
-the LCD default remains `configMAX_PRIORITIES - 2` for ordinary configurations.
+configure interrupt affinity.
+
+`Priority::Auto` inherits an already configured worker's policy. A new LCD/I2S
+clockless worker defaults to `High`, preserving its previous scheduling:
+
+| Priority | ESP32 FreeRTOS priority (`configMAX_PRIORITIES = 25`) |
+|---|---:|
+| `Auto` (new worker) / `High` | `configMAX_PRIORITIES - 2` = 23 |
+| `Medium` | `configMAX_PRIORITIES / 2` = 12 |
+| `Low` | 1 |
+
+The enum values are policies, not raw scheduler numbers. Migrate the previous
+numeric runtime setting `23` to `fl::Priority::High`. Lower priorities allow
+more competing work but can reduce the driver's ability to refill long strips
+in time. Task stack and DMA buffer sizing do not change with priority.
+
+These settings configure an existing worker, not interrupt priority or driver
+selection priority. Classic ESP32 I2S, LCD SPI, and other backends without a
+configurable worker reject explicit policies. Their default paths keep the
+priority mapping and worker configuration code compiled out.
 
 Configure during setup, before concurrent LED activity. All strips sharing
 the engine share one worker. The first explicit configuration establishes its

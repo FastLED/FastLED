@@ -49,6 +49,7 @@ public:
     int rejectedFrameCount = 0;
     int workerConfigCount = 0;
     Core requestedCore = Core::Auto;
+    Priority requestedPriority = Priority::Auto;
     bool acceptWorker = true;
     DriverState::Value mState = DriverState::READY;
 
@@ -63,6 +64,7 @@ public:
     bool configureWorkerImpl(const WorkerConfig& config) FL_NO_EXCEPT override {
         ++workerConfigCount;
         requestedCore = config.core;
+        requestedPriority = config.priority;
         return acceptWorker;
     }
 
@@ -230,6 +232,42 @@ FL_TEST_CASE("addLeds worker template preserves slim storage and forwards affini
     driver.acceptWorker = false;
     controller.showLeds(255);
     FL_CHECK_EQ(driver.enqueueCount, 1);
+}
+
+template<Priority PRIORITY, fl::u8 PIN>
+void checkAddLedsWorkerPriority() {
+    using Default = WorkerTestChipset<PIN, RGB>;
+    using Explicit = typename Default::template WithWorker<Bus::AUTO,
+        Core::Auto, PRIORITY>;
+    FL_CHECK_EQ(sizeof(Explicit), sizeof(Default));
+    auto& driver = mockDriverInstance();
+    driver.acceptWorker = true;
+    driver.workerConfigCount = 0;
+    driver.enqueueCount = 0;
+    CRGB leds[1] = {CRGB::Red};
+    auto& controller = FastLED.addLeds<WorkerTestChipset, PIN, RGB,
+        Bus::AUTO, Core::Auto, PRIORITY>(leds, 1);
+    auto cleanup = fl::make_scope_exit([&]() {
+        controller.setLeds(nullptr, 0);
+        controller.removeFromDrawList();
+        driver.acceptWorker = true;
+    });
+    // Priority-only requests must configure the worker during construction,
+    // even though the core remains automatic.
+    FL_CHECK_GT(driver.workerConfigCount, 0);
+    FL_CHECK_EQ(driver.requestedCore, Core::Auto);
+    FL_CHECK_EQ(driver.requestedPriority, PRIORITY);
+    controller.showLeds(255);
+    FL_CHECK_EQ(driver.enqueueCount, 1);
+    driver.acceptWorker = false;
+    controller.showLeds(255);
+    FL_CHECK_EQ(driver.enqueueCount, 1);
+}
+
+FL_TEST_CASE("addLeds accepts named worker priorities without growing controllers #5001") {
+    checkAddLedsWorkerPriority<Priority::High, 24>();
+    checkAddLedsWorkerPriority<Priority::Medium, 25>();
+    checkAddLedsWorkerPriority<Priority::Low, 26>();
 }
 
 FL_TEST_CASE("Default worker facade avoids backend dispatch #5001") {
@@ -450,7 +488,13 @@ FL_TEST_CASE("Auto worker construction does not access the driver singleton #500
     using Automatic = SlimBridgeController<7, TIMING_WS2812_800KHZ, RGB, 280,
         CountingWorkerDriverTraits, 0, true>;
     using Fixed = Automatic::WithWorker<Bus::AUTO, Core::Core1>;
+    using High = Automatic::WithWorker<Bus::AUTO, Core::Auto, Priority::High>;
+    using Medium = Automatic::WithWorker<Bus::AUTO, Core::Auto, Priority::Medium>;
+    using Low = Automatic::WithWorker<Bus::AUTO, Core::Auto, Priority::Low>;
     FL_CHECK_EQ(sizeof(Automatic), sizeof(Fixed));
+    FL_CHECK_EQ(sizeof(Automatic), sizeof(High));
+    FL_CHECK_EQ(sizeof(Automatic), sizeof(Medium));
+    FL_CHECK_EQ(sizeof(Automatic), sizeof(Low));
     CountingWorkerDriverTraits::accesses() = 0;
     directDriverInstance().acceptWorker = true;
     {
@@ -460,6 +504,21 @@ FL_TEST_CASE("Auto worker construction does not access the driver singleton #500
     {
         Fixed fixed;
         FL_CHECK_EQ(CountingWorkerDriverTraits::accesses(), 1);
+    }
+    {
+        High high;
+        FL_CHECK_EQ(CountingWorkerDriverTraits::accesses(), 2);
+        FL_CHECK_EQ(directDriverInstance().requestedPriority, Priority::High);
+    }
+    {
+        Medium medium;
+        FL_CHECK_EQ(CountingWorkerDriverTraits::accesses(), 3);
+        FL_CHECK_EQ(directDriverInstance().requestedPriority, Priority::Medium);
+    }
+    {
+        Low low;
+        FL_CHECK_EQ(CountingWorkerDriverTraits::accesses(), 4);
+        FL_CHECK_EQ(directDriverInstance().requestedPriority, Priority::Low);
     }
 }
 

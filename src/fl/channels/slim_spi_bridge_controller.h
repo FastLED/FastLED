@@ -77,8 +77,9 @@ void registerNativeSpiDriver() FL_NO_EXCEPT;
 /// @tparam B_WHICH    Bus instance index, for platforms with more than one
 ///                    instance of a given bus kind.
 /// @tparam CORE       Worker affinity, with no per-controller configuration storage.
+/// @tparam PRIORITY   Named worker priority, inherited by default.
 template <fl::SpiChipset CHIPSET, EOrder RGB_ORDER, fl::Bus B, fl::u8 B_WHICH,
-          Core CORE = Core::Auto>
+          Core CORE = Core::Auto, Priority PRIORITY = Priority::Auto>
 class SlimSpiBridgeController : public CPixelLEDController<RGB_ORDER> {
 public:
     /// The bus actually used after resolving `Bus::AUTO` -- mirrors
@@ -120,7 +121,7 @@ protected:
         if (!driver) {
             return;
         }
-        if (!detail::WorkerPolicy<CORE>::apply(*driver)) {
+        if (!detail::WorkerPolicy<CORE, PRIORITY>::apply(*driver)) {
             FL_ERROR("SlimSpiBridgeController: worker configuration rejected - dropping frame");
             return;
         }
