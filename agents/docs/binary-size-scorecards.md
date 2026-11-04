@@ -208,5 +208,7 @@ Attributed RAM stays constant in all phases: S3 22451, ESP32 18651, C3 13770
 and C6 17877 bytes. Toolchains are GCC 14.2.0 / Arduino 3.3.11 / IDF 5.5.5
 for ESP32 and S3; GCC 13.2.0 / Arduino 3.1.0 / IDF 5.3.2 for C3; and GCC
 14.2.0 / Arduino 3.3.5 / IDF 5.5.1 for C6. Local reports, source patches,
-provenance and build logs are preserved in `.build/esp-flash-study/`.
+provenance and build logs are preserved in `.build/esp-flash-study/`. After
+integrating master `6698370285` (including the ESP C++ guard fix), all four
+iteration-2 image-flash and attributed-RAM measurements were unchanged.
 
