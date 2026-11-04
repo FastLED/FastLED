@@ -23,6 +23,38 @@ Do NOT reason about attachment from memory or from "which board this task is abo
 
 ## Live Device Testing (AI Agents)
 
+### Two Wi-Fi boards: use a peer access point before requesting credentials
+
+When two Wi-Fi-capable boards are attached, use one as a SoftAP and test
+server and the other as a station/client. For example, use an ESP32-C6 as
+the AP and an ESP32dev as the client when investigating repeated HTTPS
+requests (FastLED #5010). A host with Ethernet but no Wi-Fi adapter does not
+prevent this arrangement. Do not make access to a private Wi-Fi password a
+prerequisite for a local network reproducer.
+
+1. Run `fbuild port scan`, then confirm each chip from firmware output;
+   shared USB identities alone do not identify a C6 versus an S3.
+2. Use the canonical AutoResearch sketch for the fixture. Start the peer AP
+   with explicit disposable test credentials and a server on its AP address.
+   HTTPS regressions require a **TLS** server; a plain HTTP server does not
+   exercise TLS connection setup or cleanup. Keep the AP firmware fixed
+   while comparing client library versions.
+3. Flash through `fbuild deploy`, naming each board's discovered port.
+   Confirm AP/server readiness and station association before attributing
+   request failures to FastLED. Bound connection, handshake and read times;
+   log request starts, completions, HTTP status, and server receipt counts.
+4. Compare the same request/cleanup sequence with the requested release and
+   master on the client. For suspected LTO regressions, retain the exact
+   compiler/link flags and use matching LTO and non-LTO controls. Keep the
+   include-only case distinct from cases that actually call FastLED APIs.
+
+A peer AP provides local connectivity, **not internet routing**. A local TLS
+fixture can investigate a second-request hang but does not establish behavior
+against a public endpoint, its certificate chain, DNS, or redirects. Label
+those limits in the results. A disposable self-signed server certificate and
+an insecure test client exercise encrypted transport only, not certificate
+verification; never present that fixture as production TLS configuration.
+
 ### LCD worker scheduling (#5001)
 
 Use `--lcd --worker-core 1` to validate LCD clockless output together with the
