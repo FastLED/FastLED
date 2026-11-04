@@ -167,39 +167,48 @@ void ChannelDriverPARLIOImpl::show() FL_NO_EXCEPT {
         // Transmission time = LED count * (T1 + T2 + T3)
         // This allows faster transmissions to complete first, reducing latency
         // for shorter/faster strips while longer/slower strips are still being prepared
-        fl::sort(mChipsetGroups.begin(), mChipsetGroups.end(),
-                 [](const ChipsetGroup& a, const ChipsetGroup& b) FL_NO_EXCEPT {
-                     // Find max channel size in group a
-                     size_t maxSizeA = 0;
-                     for (const auto& channel : a.mChannels) {
-                         size_t size = channel->getSize();
-                         if (size > maxSizeA) {
-                             maxSizeA = size;
+        // Timing groups are unbounded; heapsort keeps worst-case O(n log n)
+        // without instantiating the larger introsort path in this driver.
+        if (mChipsetGroups.size() > 1) {
+            fl::detail::heap_sort(mChipsetGroups.begin(), mChipsetGroups.end(),
+                     [](const ChipsetGroup& a, const ChipsetGroup& b) FL_NO_EXCEPT {
+                         // Find max channel size in group a
+                         size_t maxSizeA = 0;
+                         for (const auto& channel : a.mChannels) {
+                             size_t size = channel->getSize();
+                             if (size > maxSizeA) {
+                                 maxSizeA = size;
+                             }
                          }
-                     }
 
-                     // Find max channel size in group b
-                     size_t maxSizeB = 0;
-                     for (const auto& channel : b.mChannels) {
-                         size_t size = channel->getSize();
-                         if (size > maxSizeB) {
-                             maxSizeB = size;
+                         // Find max channel size in group b
+                         size_t maxSizeB = 0;
+                         for (const auto& channel : b.mChannels) {
+                             size_t size = channel->getSize();
+                             if (size > maxSizeB) {
+                                 maxSizeB = size;
+                             }
                          }
-                     }
 
-                     // Calculate transmission time: LED count * bit period
-                     // Note: Using 64-bit to avoid overflow (max ~4 billion ns)
-                     u64 transmissionTimeA = static_cast<u64>(maxSizeA) * a.mTiming.total_period_ns();
-                     u64 transmissionTimeB = static_cast<u64>(maxSizeB) * b.mTiming.total_period_ns();
+                         // Calculate transmission time: LED count * bit period
+                         // Note: Using 64-bit to avoid overflow (max ~4 billion ns)
+                         u64 transmissionTimeA = static_cast<u64>(maxSizeA) * a.mTiming.total_period_ns();
+                         u64 transmissionTimeB = static_cast<u64>(maxSizeB) * b.mTiming.total_period_ns();
 
-                     // Sort by transmission time ascending (faster groups first)
-                     return transmissionTimeA < transmissionTimeB;
-                 });
+                         // Sort by transmission time ascending (faster groups first)
+                         return transmissionTimeA < transmissionTimeB;
+                     });
+        }
 
         for (auto& group : mChipsetGroups) {
+            // Oversized groups are rejected by beginTransmission; only valid
+            // hardware lane counts need sorting (at most 16 channels).
+            if (group.mChannels.size() > 16) {
+                continue;
+            }
             // sort each member of the group by their pin orders.
             bool reversed = mReversedPinOrder;
-            fl::sort(group.mChannels.begin(), group.mChannels.end(), [reversed](const ChannelDataPtr& a, const ChannelDataPtr& b) FL_NO_EXCEPT {
+            fl::sort_small(group.mChannels.begin(), group.mChannels.end(), [reversed](const ChannelDataPtr& a, const ChannelDataPtr& b) FL_NO_EXCEPT {
                 if (reversed) {
                     return b->getPin() < a->getPin();
                 }

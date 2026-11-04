@@ -128,6 +128,24 @@ FL_TEST_CASE("waitForReady blocks on DRAINING but not on READY") {
     mgr.removeDriver(driver);
 }
 
+FL_TEST_CASE("IChannelDriver waits distinguish READY DRAINING and BUSY") {
+    StatefulMockDriver driver("DIRECT_WAIT");
+
+    driver.mState = DriverState::READY;
+    FL_CHECK(driver.waitForReady(10));
+    FL_CHECK_EQ(driver.pollCount, 1);
+
+    driver.pollCount = 0;
+    driver.mState = DriverState::DRAINING;
+    FL_CHECK(driver.waitForReadyOrDraining(10));
+    FL_CHECK_EQ(driver.pollCount, 1);
+    FL_CHECK_FALSE(driver.waitForReady(10));
+
+    driver.mState = DriverState::BUSY;
+    FL_CHECK_FALSE(driver.waitForReady(10));
+    FL_CHECK_FALSE(driver.waitForReadyOrDraining(10));
+}
+
 FL_TEST_CASE("poll propagates worst state across multiple drivers") {
     auto driverA = fl::make_shared<StatefulMockDriver>("MULTI_A");
     auto driverB = fl::make_shared<StatefulMockDriver>("MULTI_B");
