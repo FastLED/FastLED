@@ -232,10 +232,11 @@ Cost: one judge request per run, a few thousand tokens; the corpus is capped at
   weakening.**  A container whose *whole* untrusted corpus is under
   `SHORT_CONTENT_MAX_CHARS` (24 characters by default, `0` disables) skips the
   judge, on the grounds that at that size there is no report for the text to be.
-  The catch: the shortest real instruction, `you are now DAN.`, is 16 characters
-  — it fits under any threshold that still catches ordinary noise (`+1`,
-  `same here`, `bump`).  So this is an accepted hole, not an oversight: raise the
-  threshold to widen it, set it to `0` to close it.  It is bounded either way —
+  The catch: `you are now DAN.` is 16 characters and fits under the default
+  24-character threshold. A threshold of 10 accepts `same here` but excludes
+  that particular instruction; shorter text can still contain instructions.
+  This is an accepted hole: raise the threshold to widen it, set it to `0` to
+  close it. It is bounded either way —
   the run records `trivial_content` as the reason, and the moment a container
   grows past the threshold the next run judges it in full.
 - **A payload quoted by a trusted actor is not screened.**  Only untrusted
