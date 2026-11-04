@@ -80,6 +80,7 @@ def synthesise_autoresearch_project(
     verbose: bool,
     extra_defines: list[str] | None = None,
     ota_fixture: bool = False,
+    static_init_lto: bool | None = None,
 ) -> Path:
     """Stage ``.build/fbuild/<board>/`` and write a synthesised ``platformio.ini``.
 
@@ -94,6 +95,9 @@ def synthesise_autoresearch_project(
             AutoResearchSpiDma handlers compile in — FastLED #3456).
         ota_fixture: Select the C6-only partition table that reserves space
             for a staged RP2350W firmware image during peer OTA validation.
+        static_init_lto: Enable the ESP32 static-initialization regression
+            with LTO (True) or its no-LTO control (False). None leaves flags
+            unchanged. Both cases keep thread-safe static initialization.
 
     Returns:
         Absolute path to the staged build directory, ready to be handed to
@@ -109,9 +113,40 @@ def synthesise_autoresearch_project(
 
     root = (project_root or resolve_project_root()).resolve()
     board = create_board(board_name)
+    if static_init_lto is not None:
+        if board.platform_family != "esp32":
+            raise RuntimeError("--static-init requires an ESP32 board")
+        board = board.clone()
 
     paths = FastLEDPaths(board.board_name, project_root=root)
     build_dir = paths.build_dir
+    if static_init_lto is not None:
+        # Scoped LTO/control fixture authorized by the maintainer directive:
+        # https://github.com/FastLED/FastLED/pull/5006#discussion_r4451255589
+        # build_flags reach framework, FastLED, and sketch compiles. Native
+        # fbuild's link overlay is separate: append the driver flag after
+        # SDK ld_flags, which can contain -fno-lto.
+        flag = "-flto=auto" if static_init_lto else "-fno-lto"
+        board.build_flags = [
+            *(board.build_flags or []),
+            flag,
+            "-fthreadsafe-statics",
+        ]
+        board.build_unflags = [
+            *(board.build_unflags or []),
+            "-fno-lto" if static_init_lto else "-flto=auto",
+            "-fno-threadsafe-statics",
+        ]
+        build_dir.mkdir(parents=True, exist_ok=True)
+        script = build_dir / "static_init_link.py"
+        script.write_text(
+            'Import("env")\n' + f'env.Append(LINKFLAGS=["{flag}"])\n',
+            encoding="utf-8",
+        )
+        board.extra_scripts = [
+            *(board.extra_scripts or []),
+            f"post:{script.as_posix()}",
+        ]
 
     # The staged project never reads root platformio.ini (#3278 / #3279).
     defines = ["FASTLED_OBJECTFLED_DIAGNOSTICS=1"]

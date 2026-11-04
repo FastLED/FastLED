@@ -46,6 +46,8 @@ def test_memory_modes_are_mutually_exclusive() -> None:
         ["--coroutine"],
         ["--decode", "example.json"],
         ["--rpc-smoke"],
+        ["--static-init"],
+        ["--static-init", "--static-init-no-lto"],
         ["--net-peer"],
         ["--watchdog-soak"],
         ["--spi-provider-native"],

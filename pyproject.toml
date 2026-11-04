@@ -313,7 +313,9 @@ dependencies = [
     # 2.5.49 sends a registry-compatible User-Agent, so cold registry
     # downloads (esp_extra_libs' ArduinoJson) stop returning HTTP 403
     # (FastLED/fbuild#1783/#1784).
-    "fbuild>=2.5.49",
+    # 2.5.50 applies SDK linker unflags and invalidates local framework
+    # archives across LTO mode changes (FastLED/fbuild#1862/#1863).
+    "fbuild>=2.5.50",
     # Decodes the FastLED/boards `usb-vids.proto.zstd` registry artifact in
     # ci/util/audit_usb_registry.py. Declared explicitly rather than relied on
     # transitively (clang-tool-chain-bins pulls it in today) so the documented

@@ -34,6 +34,8 @@ MEMORY_BENCH_CONFLICT_FLAGS = (
     "decode",
     "watchdog_soak",
     "rpc_smoke",
+    "static_init",
+    "static_init_no_lto",
     "perf_wave2d",
     "pwm_dma_cl",
     "dma_spi",
@@ -228,6 +230,8 @@ class Args:
     embedded_fs_format_fixture: bool = False
     spi_provider: bool = False
     spi_provider_native: bool = False
+    static_init: bool = False
+    static_init_no_lto: bool = False
     worker_core: str | None = None
     lane_pins: str | None = None
     driver_binding: str | None = None
@@ -539,6 +543,16 @@ See Also:
             "--rpc-smoke",
             action="store_true",
             help="Validate pin-free JSON-RPC discovery, health, payload, and error handling",
+        )
+        driver_group.add_argument(
+            "--static-init",
+            action="store_true",
+            help="Verify ESP32 concurrent local-static initialization with LTO (#4994); no wiring",
+        )
+        parser.add_argument(
+            "--static-init-no-lto",
+            action="store_true",
+            help="Use --static-init without LTO as a control",
         )
         driver_group.add_argument(
             "--watchdog-soak",
@@ -1014,6 +1028,31 @@ See Also:
                     file=sys.stderr,
                 )
 
+        if parsed.static_init:
+            # Standalone probes share the benchmark exclusions, except for
+            # this probe's own mode and non-LTO control switch.
+            conflicts = [
+                name
+                for name in memory_bench_conflicts(parsed)
+                if name not in ("static_init", "static_init_no_lto")
+            ]
+            conflicts.extend(
+                name
+                for name in (
+                    "driver_binding",
+                    "spi_streaming",
+                    "chipset",
+                    "rp_spi_chipset",
+                    "contaminate_tx_mux",
+                )
+                if (value := getattr(parsed, name)) is not None and value is not False
+            )
+            if conflicts:
+                parser.error(
+                    "Run --static-init separately from other modes or workloads: "
+                    + ", ".join("--" + name.replace("_", "-") for name in conflicts)
+                )
+
         if parsed.driver_binding or parsed.spi_streaming:
             conflicts = memory_bench_conflicts(parsed)
             # Inspect raw optional values before restoring the normal defaults:
@@ -1062,6 +1101,8 @@ See Also:
             driver_binding=parsed.driver_binding,
             spi_streaming=parsed.spi_streaming,
             rpc_smoke=parsed.rpc_smoke,
+            static_init=parsed.static_init,
+            static_init_no_lto=parsed.static_init_no_lto,
             watchdog_soak=parsed.watchdog_soak,
             perf_wave2d=parsed.perf_wave2d,
             environment=parsed.environment,
