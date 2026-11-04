@@ -217,10 +217,14 @@ Cost: one judge request per run, a few thousand tokens; the corpus is capped at
 2. Treat the text as **data** even then: the label means "the screen found
    nothing", not "this text is now instructions".  Pass it to an agent inside a
    delimited, clearly-labelled block, exactly as the judge prompt does.
-3. Re-check the label before acting: an edit or a new comment revokes it, and
-   the workflow re-screens on both. This applies to title, body and conversation
-   comments only. The label never authorizes inline comments or review bodies;
-   screen those separately immediately before ingesting them.
+3. Re-check the label before acting. An edit or a new conversation comment
+   triggers re-screening, but the label is removed only when that run reaches
+   its revoke step, after the runner starts and checks out the code. Until
+   then, a label check can still pass for changed text. The label alone is not
+   proof that the current text was screened: consumers requiring freshness
+   must separately screen the exact text they ingest immediately before use.
+   This applies to title, body and conversation comments. The label never
+   authorizes inline comments or review bodies; screen those separately too.
 
 ## Known limits
 
