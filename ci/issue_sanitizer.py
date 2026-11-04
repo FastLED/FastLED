@@ -30,7 +30,7 @@ deliberately lopsided:
 
 Two cases skip the judge and are labelled directly, because they are facts
 about the container rather than readings of its meaning: text whose author is a
-trusted actor (``zackees``, a repository member or collaborator, or a bot), and
+trusted actor (``zackees``, a repository member or collaborator), and
 a container whose entire untrusted text is trivially short.  Each is recorded
 in the run's ``reason`` (``trusted_author`` / ``trivial_content``) so it is
 auditable, and neither survives: an edit that adds untrusted text past the
@@ -120,10 +120,10 @@ LABEL_SPECS: dict[str, tuple[str, str]] = {
 }
 
 # Authors whose text is not screened: the maintainer's own words are trusted by
-# definition, as are repository members, invited collaborators and bots.
+# definition, as are repository members and invited collaborators. Bot text
+# is screened too: integrations can relay attacker-controlled content.
 TRUSTED_LOGINS: frozenset[str] = frozenset({"zackees"})
 TRUSTED_ASSOCIATIONS: frozenset[str] = frozenset({"OWNER", "MEMBER", "COLLABORATOR"})
-TRUSTED_USER_TYPES: frozenset[str] = frozenset({"Bot"})
 
 # One ``noul``-style question per signal: the probability that the statement in
 # the second element is true of the untrusted corpus.  The first element is the
@@ -401,9 +401,9 @@ def is_trusted(login: str, association: str, user_type: str) -> bool:
     """Return True when the author's text is not screened at all."""
     if (login or "").lower() in TRUSTED_LOGINS:
         return True
-    if (association or "").upper() in TRUSTED_ASSOCIATIONS:
-        return True
-    return (user_type or "") in TRUSTED_USER_TYPES
+    if user_type == "Bot":
+        return False
+    return (association or "").upper() in TRUSTED_ASSOCIATIONS
 
 
 def build_corpus(
@@ -447,7 +447,7 @@ def build_corpus(
         )
 
     # Enforce the item cap *after* classification so a dropped item counts only
-    # when it is untrusted: losing a bot's boilerplate must not hold a
+    # when it is untrusted: losing a maintainer's boilerplate must not hold a
     # container, but losing a stranger's words means text nobody judged.
     if len(corpus.items) > MAX_ITEMS:
         dropped = corpus.items[MAX_ITEMS:]
@@ -1148,9 +1148,7 @@ def write_job_summary(text: str) -> None:
 def resolve_target(args: argparse.Namespace, github: GitHubClient) -> tuple[str, int]:
     """Work out which container this run is about."""
     if args.issue:
-        container = github.container(args.issue)
-        kind = "pull request" if container.get("pull_request") else "issue"
-        return kind, args.issue
+        return "issue", args.issue
     # An explicit --event-path wins over the ambient Actions payload: in CI the
     # environment always carries *some* event, and a caller who names a file
     # means that file.
@@ -1191,15 +1189,21 @@ def run(
             raise SanitizerError("GITHUB_TOKEN (or GH_TOKEN) is not set")
         github = GitHubClient(token, repo)
     kind, number = resolve_target(args, github)
+    # Revoke before any API read: even a failed container/comment fetch must
+    # leave the previous safety claim invalid. A missing label is harmless.
+    if not args.dry_run:
+        github.remove_label(number, SANITIZED_LABEL)
     container = github.container(number)
+    kind = "pull request" if container.get("pull_request") else "issue"
     number = int(container.get("number") or number)
     user = as_dict(container.get("user"))
     comments = github.comments(number)
-    fetch_truncated = bool(getattr(github, "fetch_truncated", False))
     if container.get("pull_request"):
         # Review comments and review bodies are text on the same container; a
         # `sanitized` label has to cover them too.
         comments = comments + _pr_review_text(github, number)
+    # Review endpoints can also set this flag when pagination hits the cap.
+    fetch_truncated = bool(getattr(github, "fetch_truncated", False))
     corpus = build_corpus(
         title=str(container.get("title") or ""),
         body=str(container.get("body") or ""),
@@ -1222,23 +1226,6 @@ def run(
             print(
                 f"  {trust:9} {item.locator} by @{item.author} ({len(item.text)} chars)"
             )
-
-    # REVOKE FIRST.  The label is a claim about the text as it stands now, and
-    # this run has not yet earned that claim: dropping it up front means a
-    # crash, a timeout, a cancellation or an unreadable answer leaves the
-    # container un-vouched-for rather than wrongly vouched-for.
-    if (
-        corpus.untrusted
-        and not args.dry_run
-        and SANITIZED_LABEL in label_names(container)
-    ):
-        github.remove_label(number, SANITIZED_LABEL)
-        print(
-            f"::notice::revoked {SANITIZED_LABEL} on {corpus.target} pending re-screen"
-        )
-        # Re-read so the verdict is written against the real post-revoke state,
-        # not the stale copy fetched before the revoke.
-        container = github.container(number)
 
     if corpus.untrusted and not api_key and jev is None:
         print(

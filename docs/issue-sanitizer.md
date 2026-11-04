@@ -22,8 +22,8 @@ untrusted text, including text a maintainer has not yet reviewed.
    container — and, for a pull request, its inline review comments and review
    bodies too.  Items written by a trusted actor are excluded; everything else
    forms the corpus.
-3. **The gate label is revoked first.**  `sanitized` is a claim about the text
-   as it stands right now, and a run that has not finished screening has not
+3. **The gate label is revoked before any GitHub read.**  `sanitized` is a
+   claim about the text as it stands right now, and a run that has not finished screening has not
    earned it, so it is dropped at the start and re-added only on a passing
    verdict.  A crash, a timeout, a cancellation or an unreadable answer
    therefore leaves the container un-vouched-for rather than wrongly vouched-for.
@@ -48,7 +48,9 @@ Text is excluded from the corpus when its author is:
 | --- | --- |
 | `zackees` | the maintainer's own words are trusted by definition |
 | `author_association` in `OWNER`, `MEMBER`, `COLLABORATOR` | the same set the repository's `claude.yml` gate uses |
-| a `Bot` account | Dependabot and friends are not attacker-controlled |
+
+Bot-authored text is screened even when the bot has a trusted repository
+association: integrations can relay attacker-controlled text.
 
 Everyone else — `CONTRIBUTOR`, `FIRST_TIME_CONTRIBUTOR`, `FIRST_TIMER`, `NONE`
 — is screened.  Note the consequence: **one untrusted comment holds the whole
@@ -167,9 +169,10 @@ exactly how a payload would get past it.
 | `sanitized` (green) | screened and clean — automation may ingest |
 | `security: unscreened-content` (orange) | the judge answered and did not pass, or answered with uncertainty — automation must skip, a maintainer decides |
 
-Both are created on demand by the script.  Label writes are idempotent: a run
-that finds the labels already correct writes nothing, so runs do not churn
-events or spam the timeline.
+Both are created on demand by the script. Each live screening revokes
+`sanitized` before fetching text and restores it only after a passing verdict. This deliberately writes the gate label again
+even when the previous screening passed; failed reads must not leave a stale
+safety claim. Other label writes are idempotent.
 
 An **outage** is handled differently from a **verdict**: when the judge never
 answered, `sanitized` is still revoked (the tool can no longer vouch for the
