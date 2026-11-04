@@ -60,7 +60,7 @@ typedef unsigned long prog_uint32_t;
 # define INTERRUPT_THRESHOLD 0
 #endif
 
-#define NEED_CXX_BITS
+// ESP-IDF provides thread-safe C++ guard functions; do not define NEED_CXX_BITS (#4994).
 
 // These can be overridden
 #   define FASTLED_ESP32_RAW_PIN_ORDER

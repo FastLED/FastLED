@@ -43,7 +43,7 @@ typedef fl::u32 prog_uint32_t;
 # define INTERRUPT_THRESHOLD 0
 #endif
 
-#define NEED_CXX_BITS
+// The ESP8266 core provides thread-safe C++ guard functions (#266, #4994).
 
 // Arduino ESP8266 board variants expose Dn constants as raw GPIO numbers (for
 // example, NodeMCU D5 is GPIO 14). Default to raw numbering so those constants

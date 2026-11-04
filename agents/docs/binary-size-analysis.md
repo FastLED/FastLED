@@ -4,6 +4,15 @@ Per-symbol flash / RAM bloat reports for FastLED builds. Use this doc when inves
 
 For the per-workflow `max_size` / `max_size_apa102` thresholds in `.github/workflows/check_*_size.yml` and which ones are real ceilings vs. band-aids waiting on a tracked regression, see `docs/SIZE_THRESHOLD_HISTORY.md`.
 
+This is the entry page: the command, the current per-board readings, the rules
+for quoting a number, and the don'ts. Long-form material is on two companion
+pages so a bloat investigation does not have to read all of it:
+
+| Need | Read |
+|---|---|
+| Where a board's number came from, per-issue provenance | [binary-size-scorecards.md](binary-size-scorecards.md) |
+| Artifacts, measurement semantics, the release-build levers, lessons | [binary-size-reference.md](binary-size-reference.md) |
+
 ## Quick start
 
 ```bash
@@ -33,319 +42,53 @@ RAM; they are not fbuild's board flash/RAM totals. The RMT allocation-record
 compile-time size assertion additionally guards the measured static RAM saving.
 Check each profile separately; `--compare --budget` is rejected before building.
 
-### AVR RAM regressions: use `bash bloat`, count physical bytes once
+## Current per-board readings
 
-For "Uno uses more RAM than 3.10.3" reports (dashboard, #4760/#4764), run
-`bash bloat uno --build --budget tests/data/uno_blink_bloat_budget.json` and
-read the `.data`/`.bss` rows in `.build/symbols/uno/report.json`. Its
-`total_ram` is *attributed* RAM: a concrete controller vtable is listed once
-per alias (e.g. `ClocklessController<...>` and `NEOPIXEL<3>` share one
-address), so it overstates physical RAM. Physical static RAM is the
-`build succeeded (... ram: N bytes)` line from fbuild. To diff two builds,
-compare rows by address and size, never by summing name-only deltas.
+Latest no-Serial Blink measurement per board, with the budget that guards it.
+Provenance (fbuild version, toolchain, what changed) is in
+[binary-size-scorecards.md](binary-size-scorecards.md).
 
-The dashboard's matched sketch (FastLED/dashboard `benchmark/Blink.ino`,
-`benchmark/config/uno.ini`) has a weak `main()` and no Serial, so its numbers
-differ from repository Blink; measure both when claiming parity.
+| Board | Issue | Image flash | Attributed RAM | Budget |
+|---|---|---:|---:|---|
+| `uno` | #4788 / #4764 | 3600 B | not recorded | `tests/data/uno_blink_bloat_budget.json` |
+| `attiny85` | #4765 | 2460 B | 136 B | `tests/data/attiny85_bloat_budget.json` |
+| `esp32c6` | #4762 | 402674 B | 33478 B | `tests/data/esp32c6_bloat_budget.json` |
+| `esp32dev` | #4766 | 287671 B | 34091 B | `tests/data/esp32dev_bloat_budget.json` |
+| `esp32s3` | #4767 | 320439 B | not recorded | `tests/data/esp32s3_bloat_budget.json` |
+| `esp32c3` | #4761 / #4982 | 324378 B | 26498 B | `tests/data/esp32c3_bloat_budget.json` |
+| `stm32f103c8` | #4763 | 22904 B | 1789 B | `tests/data/stm32f103c8_bloat_budget.json` |
+| `teensy40` | #4768 | 46080 B | 21449 B | `tests/data/teensy40_bloat_budget.json` |
+| `teensy41` | #4769 | 47104 B | 21738 B | `tests/data/teensy41_bloat_budget.json` |
+| `rp2040` | #4770 | 103212 B | 8624 B | `tests/data/rp2040_bloat_budget.json` |
 
-#4788 removed 32 B physical RAM from matched Uno Blink (168 -> 136; flash
-3762 -> 3730; 3.10.3 is 131 / 3784): 8 controller slots on Uno instead of 16
-(16 B), `setSpiBus` virtual only on ESP32 and the fixed-white policy as a bit
-next to `mEnabled` instead of a virtual (8 B over two vtables), `constexpr`
-`AtomicFake` so the wait-spin budget has no startup constructor (4 B), and
-no weak `timer_millis` on classic ATmega (4 B). A follow-up reached 118 B /
-3592 B flash, below 3.10.3: `size`, `beginShowLeds` and `endShowLeds` are not
-virtual on AVR (12 B), no list tail pointer (2 B), a 16-bit FPS timestamp
-(2 B) and the refresh cap stored in Hz (2 B).
+Image flash and attributed RAM are bloat-report metrics, **not** fbuild's board
+flash/RAM totals; the two are not interchangeable for any board in this table.
+Unknown readings are not replaced with budget ceilings: Uno's 118 B is
+physical RAM, and the latest ESP32-S3 record contains image flash only.
+The same ESP32-C6 ELF reads 29027 B attributed RAM on fbuild 2.5.37 and
+33478 B on 2.5.39+, at identical image size.
 
-#4764 no-Serial scorecard: the earlier published Uno Blink had Serial init and
-a banner; dropping it saves 1208 B flash / 177 B RAM, separate from library
-optimization. No-Serial Blink: 3.10.3 = 3784 B flash / 131 B RAM (matched
-sketch); master a439902 = 3922 / 266, measured with repository
-`examples/Blink` right after #4759 dropped its Serial, not the dashboard's
-matched sketch, which is why it exceeds the 3762 / 168 "before #4788" figure
-above; master after #4788 and its follow-up = 3592 / 118, and 3600 / 118 on
-2026-10-30 master.
-3.10.6 is not measured with the no-Serial sketch; never reuse its old
-Serial-enabled numbers. The regression guard is
-`tests/data/uno_blink_bloat_budget.json`, run with the `bash bloat` command
-above.
+## Rules for quoting a number
 
-#4765 attiny85 no-Serial scorecard: attiny85 Blink (`examples/Blink`,
-Serial-free since #4759) on fbuild 2.5.37, AVR GCC 7.3.0-atmel3.6.1-arduino7,
-ATTinyCore 1.5.2, F_CPU=8000000L. Image flash / attributed RAM went from the
-recorded 2638 B flash ceiling (#4743/#4751) to 2574 / 160 after #4788, and to
-2460 / 136 after its follow-up (AVR non-virtual size/begin/endShowLeds, no
-tail pointer, 16-bit FPS timestamp, Hz refresh cap). 3.10.3 and 3.10.6
-attiny85 numbers are not recorded with the no-Serial sketch here; never reuse
-their old Serial-enabled measurements. `total_ram` is attributed RAM, not
-physical RAM (see the AVR section above). The regression guard is
-`tests/data/attiny85_bloat_budget.json`, run with
-`bash bloat attiny85 --build --budget tests/data/attiny85_bloat_budget.json`.
+- `total_ram` is *attributed* RAM: a controller vtable is listed once per alias,
+  so it overstates physical RAM. Physical static RAM is fbuild's
+  `build succeeded (... ram: N bytes)` line.
+- fbuild's board flash/RAM totals and the bloat report's `image_flash` /
+  `attributed RAM` describe different things. Never mix them in one comparison.
+- fbuild version moves attribution, not code: weak-vtable owners (#4813 /
+  PR #4814) raise attributed RAM from 2.5.37 to 2.5.39 at identical image size.
+- RP2040: the ELF's read-only `.heap` / `.stack_dummy` reservations are counted
+  by GNU `size` as programmed flash. Compare allocated `image_flash`.
+- Always check flash alongside RAM when taking a "RAM win" (see the rejected
+  experiments in the [reference page](binary-size-reference.md#avr-ram-semantics)).
 
-#4762 esp32c6 no-Serial scorecard: esp32c6 Blink (`examples/Blink`,
-Serial-free since #4759) on Arduino-ESP32 3.3.5 / IDF 5.5.1. Image flash is
-402674 B. Attributed RAM for the same ELF is 29027 B on fbuild 2.5.37 and
-33478 B on fbuild 2.5.39; the increase is fbuild#1663 attributing weak vtable
-owners (#4813 / PR #4814), not a code regression, and the image size is
-identical. The earlier published 359834 / 18460 B (#4738) are board flash/RAM
-from fbuild, not bloat-report image flash / attributed RAM, so they are not
-comparable. 3.10.3 and 3.10.6 esp32c6 numbers are not recorded with the
-no-Serial sketch here; never reuse their old Serial-enabled measurements.
-`total_ram` is attributed RAM and omits singleton storage (ParlioEngine
-enforces its own 2048-byte encoding-storage ceiling at compile time). The
-regression guard is `tests/data/esp32c6_bloat_budget.json`, run with
-`bash bloat esp32c6 --build --budget tests/data/esp32c6_bloat_budget.json`.
+## The dominant lever
 
-#4766 esp32dev no-Serial scorecard: esp32dev Blink (`examples/Blink`,
-Serial-free since #4759) on Arduino-ESP32 3.3.11 / IDF 5.5.5 / Xtensa GCC
-14.2.0. Current master on fbuild 2.5.45 (2026-10-30) measures 287671 B image
-flash / 34091 B attributed RAM, under the budget below. The budget baseline
-image flash is 313231 B. Attributed RAM for that ELF is 32618 B on
-fbuild 2.5.37 and 34734 B on fbuild 2.5.39; the increase is fbuild#1663
-attributing weak vtable owners (#4813 / PR #4814), not a code regression, and
-the image size is identical. #4738 saved 452 B image flash / 148 B attributed
-RAM versus 313683 / 34637. The published 310428 / 25892 B are board flash/RAM
-from fbuild, not bloat-report image flash / attributed RAM, so they are not
-comparable. 3.10.3 and 3.10.6 esp32dev numbers are not recorded with the
-no-Serial sketch here; never reuse their old Serial-enabled measurements.
-`total_ram` is attributed RAM. The regression guard is
-`tests/data/esp32dev_bloat_budget.json`, run with
-`bash bloat esp32dev --build --budget tests/data/esp32dev_bloat_budget.json`.
-
-#4767 esp32s3 no-Serial scorecard: esp32s3 Blink (`examples/Blink`,
-Serial-free since #4759) on Arduino-ESP32 3.3.11 / IDF 5.5.5 / Xtensa GCC
-14.2.0. The recorded measurement, fbuild 2.5.49 with the UART console kept out
-of output-only builds (#4990), is 320439 B image flash (CI run 41310165483).
-The budget ceilings are 320503 B image flash (64 B link-layout slack) and
-40016 B attributed RAM; the separate ratchet
-`tests/data/esp32s3_bloat_baseline.txt` independently pins 320439.
-Attributed RAM is not physical board RAM. Physical board RAM for this
-esp32s3 Blink build has not been measured and remains open for #4767; do not
-read 39147 B as physical RAM. Board flash/RAM from fbuild are not comparable with bloat-report image flash / attributed RAM. 3.10.3
-and 3.10.6 esp32s3 numbers are not recorded with the no-Serial sketch here;
-never reuse their old Serial-enabled measurements. The regression guard is
-`tests/data/esp32s3_bloat_budget.json`, run with
-`bash bloat esp32s3 --build --budget tests/data/esp32s3_bloat_budget.json`.
-
-#4763 stm32f103c8 no-Serial scorecard: stm32f103c8 Blink (`examples/Blink`,
-Serial-free since #4759) on fbuild 2.5.37, STM32duino 2.9.0, GCC 15.2.1
-(#4744). The budget ceilings are 26324 B image flash / 1924 B attributed RAM,
-including the #4742 compact RGBW selectors/exact adjustment ratchet.
-`total_ram` is attributed RAM, not physical board RAM; board flash/RAM from
-fbuild are not comparable with bloat-report image flash / attributed RAM.
-#4761 esp32c3 no-Serial scorecard: esp32c3 Blink (`examples/Blink`,
-Serial-free since #4759). Image flash is 384692 B. Attributed RAM for the
-same ELF is 24607 B on fbuild 2.5.37 and 26670 B on fbuild 2.5.39; the
-increase is fbuild#1663 attributing weak vtable owners (#4813 / PR #4814),
-not a code regression, and the image size is identical. The earlier
-published 402670 / 68388 B (#4738) are board flash/RAM from fbuild, not
-bloat-report image flash / attributed RAM, so they are not comparable.
-Attributed RAM is not physical board RAM. 3.10.3 and 3.10.6 esp32c3 numbers
-are not recorded with the no-Serial sketch here; never reuse their old
-Serial-enabled measurements. #4982: the native ESP32 console (12b85b405)
-had made every `fl::print`/`println` construct EspIO, so failure diagnostics
-linked the SDK UART driver into no-Serial Blink (335592 / 27018 B). With the
-plain-UART backend, output-only callers now write through the ROM UART until
-the console is used (`begin`, `read`, `available`, `flush`, ...), and EspIO is
-garbage-collected otherwise: 324378 / 26498 B, physical DRAM 13722 B. The
-regression guard is
-`tests/data/esp32c3_bloat_budget.json`, run with
-`bash bloat esp32c3 --build --budget tests/data/esp32c3_bloat_budget.json`.
-
-#4763 stm32f103c8 no-Serial scorecard: stm32f103c8 Blink (`examples/Blink`,
-Serial-free since #4759) on fbuild 2.5.37, STM32duino 2.9.0, GCC 15.2.1.
-Image flash / attributed RAM is 22904 / 1789 B (re-measured by #4763, supersedes the Serial-enabled #4744 26324 / 1924 B; includes #4742
-compact RGBW selectors / exact adjustment). These are bloat-report image
-flash / attributed RAM; board flash/RAM totals from fbuild are measured
-separately and are not comparable. Attributed RAM is not physical board RAM.
-3.10.3 and 3.10.6 stm32f103c8 numbers are not recorded with the no-Serial
-sketch here; never reuse their old Serial-enabled measurements. The
-regression guard is `tests/data/stm32f103c8_bloat_budget.json`, run with
-`bash bloat stm32f103c8 --build --budget tests/data/stm32f103c8_bloat_budget.json`.
-
-#4768 teensy40 no-Serial scorecard: teensy40 Blink (`examples/Blink`,
-Serial-free since #4759) on fbuild 2.5.45, Teensy framework 1.160.0, ARM GCC 11.3.1.
-Image flash / attributed RAM is 46080 / 21449 B (re-measured by #4768, supersedes the Serial-enabled #4745 49152 / 22990 B). These are bloat-report image
-flash / attributed RAM; board flash/RAM totals from fbuild are measured
-separately and are not comparable. Attributed RAM is not physical board RAM.
-3.10.3 and 3.10.6 teensy40 no-Serial numbers are not recorded here; never
-reuse their old Serial-enabled measurements. The regression guard is
-`tests/data/teensy40_bloat_budget.json`, run with
-`bash bloat teensy40 --build --budget tests/data/teensy40_bloat_budget.json`.
-
-#4769 teensy41 no-Serial scorecard: teensy41 Blink (`examples/Blink`,
-Serial-free since #4759) on fbuild 2.5.45, Teensy framework 1.160.0, ARM GCC 11.3.1.
-Image flash / attributed RAM is 47104 / 21738 B (re-measured by #4769, supersedes the Serial-enabled #4746 50176 / 23279 B). These are bloat-report image
-flash / attributed RAM; board flash/RAM totals from fbuild are measured
-separately and are not comparable. Attributed RAM is not physical board RAM.
-Physical static RAM, measured with `arm-none-eabi-size -A` on the same ELF, is
-21984 B (`.data` 6848 + `.bss` 2688 + `.bss.dma` 12448); this differs from the
-21738 B attributed figure. `.text.itcm` (28800 B of code copied into ITCM at
-boot) is excluded and is not data RAM. Physical RAM is informational and is not
-enforced by the budget guard.
-3.10.3 and 3.10.6 teensy41 no-Serial numbers are not recorded here; never
-reuse their old Serial-enabled measurements. The regression guard is
-`tests/data/teensy41_bloat_budget.json`, run with
-`bash bloat teensy41 --build --budget tests/data/teensy41_bloat_budget.json`.
-
-#4770 rp2040 no-Serial scorecard: rp2040 Blink (`examples/Blink`,
-Serial-free since #4759) on fbuild 2.5.45, Arduino-Pico 5.7.0, ARM GCC 14.2.0,
-master a96b4a301. Image flash / attributed RAM is 103212 / 8624 B (re-measured
-by #4770, supersedes the Serial-enabled #4813 135744 / 9474 B). These are
-bloat-report image flash / attributed RAM; board flash/RAM totals from fbuild
-are measured separately and are not comparable. Attributed RAM is not physical
-board RAM. Physical static RAM, measured with `arm-none-eabi-size -A` on the
-same ELF, is 9844 B (`.ram_vector_table` 192 + `.data` 3292 + `.bss` 6360); the
-read-only NOBITS `.heap` (252296 B), `.stack_dummy` and `.stack1_dummy`
-(2048 B each) reservations are excluded. Physical RAM is informational and is
-not enforced by the budget guard. Blink itself has no Serial reference, but the
-ELF still links `Serial`/`SerialUSB` and TinyUSB CDC: the unresolved references
-come from FastLED's platform I/O object (`platforms` translation unit) and the
-Arduino-Pico core `main.cpp` (USB init), not from the sketch, so this linkage
-remains in the baseline.
-Matched 3.10.3 (`20667c3a64`) and 3.10.6 (`ebf8c2823c`) builds use the
-same fbuild project, toolchain, flags, Blink sketch and `main.cpp` with the
-released `src/` unchanged; the only compatibility edits are `#define PIN_DATA 3`
-(what `FL_PIN_CLOCKLESS_1` resolves to on rp2040 at master) and `delay(0)` for
-the `fl::delay(0)` yield in `main.cpp`, which those releases lack. Image flash /
-attributed RAM / physical RAM:
-
-| rp2040 Blink, no Serial | image flash | attributed RAM | physical RAM |
-|---|---:|---:|---:|
-| 3.10.3 | 78620 B | 7049 B | 8344 B |
-| 3.10.6 | 113852 B | 47433 B | 48788 B |
-| master a96b4a301 | 103212 B | 8624 B | 9844 B |
-| master vs 3.10.3 | +24592 B | +1575 B | +1500 B |
-
-All three ELFs link Serial/SerialUSB and TinyUSB CDC through the Arduino-Pico
-core. 3.10.6's RAM is dominated by a 38416 B `gPioRxCaptureBuffers` that
-master no longer links. Master's RAM growth over 3.10.3 includes the 1 KB
-`fl::detail` registry. The regression guard is
-`tests/data/rp2040_bloat_budget.json`, run with
-`bash bloat rp2040 --build --budget tests/data/rp2040_bloat_budget.json`.
-
-Rejected because flash cost outweighed RAM: replacing the `addLeds` static
-guard with a placement-new flag (-7 B RAM, +116 B flash, since the compiler
-loses the controller's dynamic type and divides at runtime) and a power-limit
-flag instead of `mPPowerFunc` (-1 B RAM, +1.6 KB flash, since it links the
-limiter unconditionally). Always check flash alongside RAM.
-
-### RP2040 reserved heap is not programmed flash
-
-Arduino-Pico's ELF contains a read-only `SHT_NOBITS` `.heap` reservation.
-GNU `size` includes it, and the read-only `.stack_dummy` reservation, in
-`text`; fbuild 2.5.37's board flash summary therefore grows when unused BSS
-is removed and the reserved heap expands. Compare allocated `image_flash`
-from `bash bloat`, and keep the raw board summary separate.
-
-For #4747, the SPI routing and unused RX pool optimizations reduced Blink's
-allocated image from 135,820 to 135,744 bytes and physical RAM from 59,980 to
-21,564 bytes. SPI routing saves 32 image bytes; the unused 38,416-byte RX pool
-and its constructor account for another 44 image bytes and the RAM saving.
-The new raw flash summary is 388,476 bytes: 135,744 image bytes plus
-250,684 reserved heap bytes and 2,048 reserved stack bytes. Those reservations
-are not programmed into flash. The scoped RP2040 budget enforces allocated
-image bytes and attributed RAM; neither metric includes the heap reservation.
-
-### Slim ESP32-S3 profile (#4564)
-
-```bash
-# Build + analyze the documented log-off release config
-bash bloat esp32s3 --build --profile slim
-
-# Build both default and slim, report them side by side
-bash bloat esp32s3 --build --compare
-```
-
-**The default `bash bloat` image is NOT the documented release config.** It is built without `-DNDEBUG`, so `src/fl/log/log.h` resolves `FL_LOG_LEVEL` to 1 (errors only, since #4712): `FL_ERROR`/`FL_PRINT` stay linked, the `FL_WARN`/`FL_INFO` string pool does not. Before #4712 the default was full logging; reference numbers from that era: Blink at `0811ca88af` measured 374,588 B attributed / 459,560 B `firmware.bin`.
-
-`--profile slim` applies `-DFASTLED_LOG_VERBOSITY=0` plus `tools/sdkconfig_for_smallest_fastled.defaults`, and fails the run if `libespcoredump.a` or `diag_log_add` are still linked (proof the overlay actually took effect). Output goes to `.build/symbols/esp32s3-slim/` alongside a `provenance.json` recording the flags and overlay used.
-
-Slim disables field-debug logs and coredumps, so it is opt-in only. The ordinary ratchet baseline `tests/data/esp32s3_bloat_baseline.txt` still tracks the default image and is unchanged.
-
-`bash bloat <board>` hides every choice that was previously a per-invocation footgun — toolchain prefix, ELF path, `--nm` override, output directory. Use it instead of running `nm`/`size`/`xtensa-esp32s3-elf-nm` by hand.
-
-The wrapper recognizes fbuild's artifact layout, `.build/fbuild/<board>/.fbuild/build/release/firmware.elf`, and lets fbuild resolve the toolchain there.
-
-### ESP flash recovery after #5003
-
-Matched no-Serial Blink measurements on 2026-11-03 use fbuild
-`2.5.49+git.98affea702ff`, the same checkout path, build harness and board
-configuration throughout. The historical column substitutes `src/` from
-`1c0ac9724e` (before #5003); the starting master is `525c533f60`, which also
-includes the later introsort change #5005. These are allocated `image_flash`
-bytes, not board-summary flash or summed symbol attribution.
-
-| Target | Pre-#5003 source | Starting master | Iteration 1: shared waits | Iteration 2: compact PARLIO sorts |
-|---|---:|---:|---:|---:|
-| esp32s3 | 320419 | 320427 | 320255 | 320259 |
-| esp32dev | 287695 | 287675 | 287547 | 287555 |
-| esp32c3 | 324378 | 324372 | 324180 | 324180 |
-| esp32c6 | 354760 | 355506 | 355318 | 354042 |
-
-Each iteration used one GPT-6.1 Sol agent at low effort. Shared wait loops
-preserve READY/DRAINING acceptance, spin budgets, timeout diagnostics and
-yielding. PARLIO uses the existing heapsort for its unbounded timing groups
-and insertion sort only for valid groups of at most 16 hardware lanes;
-oversized groups retain their existing rejection. General-purpose introsort
-and its worst-case guarantee are unchanged. The encoding path, worker APIs
-and `Core::Auto` behavior are unchanged, with no new object fields.
-
-Attributed RAM stays constant in all phases: S3 22451, ESP32 18651, C3 13770
-and C6 17877 bytes. Toolchains are GCC 14.2.0 / Arduino 3.3.11 / IDF 5.5.5
-for ESP32 and S3; GCC 13.2.0 / Arduino 3.1.0 / IDF 5.3.2 for C3; and GCC
-14.2.0 / Arduino 3.3.5 / IDF 5.5.1 for C6. Local reports, source patches,
-provenance and build logs are preserved in `.build/esp-flash-study/`.
-
-## Artifacts
-
-Every run writes BOTH files side by side under `.build/symbols/<board>/`:
-
-| File | What's in it |
-|---|---|
-| `report.json` | Machine-readable: `{ symbols: [...], sections: [...], total_flash, image_flash, total_ram, ... }`. `total_flash` is the sum of attributed symbol rows (a breakdown). `image_flash` (fbuild >= 2.5.28) is the allocated, file-backed ELF section bytes, independent of `nm`; compare it across machines, and it is what the ESP32-S3 bloat gate uses (#4468). Per-symbol rows carry `archive`, `object`, `output_section`, `source`, `region`, demangled `demangled` name. Suitable for diffing two builds. |
-| `report.md` | Human-readable GitHub-style tables: top FLASH symbols, top RAM symbols, per-archive flash roll-up. Renders inline on PRs. |
-
-## Lessons baked in (do not re-discover)
-
-These are the gotchas the wrapper handles for you. They are documented here so they survive an agent rewrite of `ci/bloat.py`:
-
-1. **fbuild release lag.** `fbuild symbols` (the underlying subcommand) was merged to fbuild#main after the v2.2.18 wheel was tagged. The released wheel **does NOT carry it**. The wrapper's `assert_fbuild_has_symbols()` detects this and fails fast with the upgrade instructions. Until fbuild >= 2.2.19 publishes, rebuild fbuild from main (`cargo build --release -p fbuild-cli` inside the dev checkout) and drop the binary into `.venv/Scripts/fbuild.exe`.
-
-2. **Map-derived synthesis is what makes the report useful.** fbuild PR #427 parses `.rodata.<owner>.str1.<N>` input-section names and attributes those bytes to the owning function. Without it, the single biggest contributor on ESP32-S3 Blink (the NEOPIXEL chipset ctor's `FL_WARN`/`FL_LOG` string pool, ~58 KB / 15 %) appears as anonymous bytes against `main.cpp.o` and there's no way to chase it. The `source: "map-derived"` field on each symbol tags rows whose attribution came from this synthesis pass; treat them with the same trust as `source: "nm"` rows.
-
-3. **The dominant flash lever on ESP32 is the log level.** `FL_LOG_LEVEL` (`src/fl/log/log.h`) is 0 = off, 1 = errors only (`FL_ERROR`, `FL_PRINT`, `FL_WARN_LIT`), 2 = full (`FL_WARN`/`FL_INFO`/`FL_DBG`). The `FL_WARN` string pool is ~37-58 KB. Defaults: 0 under `NDEBUG` (#2890), 1 otherwise (#4712), 2 under `FASTLED_TESTING`. The legacy `FASTLED_LOG_VERBOSITY` (#2791) still works: 0 = off, 1 = full. **When a size measurement looks off, check the effective level first — it dominates everything else.**
-
-   ### Release-build flash savers (in order of impact)
-
-   | Lever | How to enable | Savings | Source |
-   |---|---|---:|---|
-   | `FL_LOG_LEVEL` 1 (errors only) | Default on non-`NDEBUG` builds; `-DFL_LOG_LEVEL=2` (or legacy `-DFASTLED_LOG_VERBOSITY=1`) restores full logs | ~37-50 KB | #4712 |
-   | `FL_LOG_LEVEL` 0 / `FASTLED_LOG_VERBOSITY=0` | Release default (NDEBUG); also drops `FL_ERROR`/`FL_PRINT` | a few KB more than level 1 | #2791 + #2890 |
-   | `tools/sdkconfig_for_smallest_fastled.defaults` | `board_build.sdkconfig_defaults` in `platformio.ini`; disables coredump, IDF log, bootloader log, panic-print + **switches newlib to nano printf (#2915 — biggest single lever)** | ~30-45 KB | #2895 + #2915 (Stage 3) |
-   | `-DFASTLED_SUPPRESS_ARDUINO_CHIP_DEBUG_REPORT=1` | `build_flags`; strong-overrides the Arduino-ESP32 boot-banner gate | ~3 KB | #2894 (Stage 2) |
-   | `-DFL_RMT_STATIC_ALLOCATION=1` | `build_flags`; exactly one fixed TX strip, no late add/remove, runtime reconfiguration, or RMT5 RX allocation | −4,395 B symbol flash and −108 B RAM versus default dynamic Blink; whole `firmware.bin` is 4,640 B smaller on the same candidate. The isolated ledger before/after results (including its 192 B whole-bin increase) are in `docs/SLIM_ESP32S3.md`. | #2846; issue #4567 |
-
-   The user-facing copy of this table — same content, written for end users rather than agents, with platformio.ini snippets — lives at [`docs/SLIM_ESP32S3.md`](../../docs/SLIM_ESP32S3.md). When a new knob lands, update both: this table for the agent reference, and `docs/SLIM_ESP32S3.md` for the user copy.
-
-   To refresh the measured numbers in the SLIM doc, run `uv run python tests/measure_esp32s3_opt_ins.py --config all --out compare.md` — the script builds the ESP32-S3 Blink under each opt-in combo, runs `bash bloat esp32s3` against each ELF, and emits a Markdown comparison table sized to drop straight into the doc. See #2905. Configs that need the Stage 3 sdkconfig overlay (`stage3`, `stack`, `max_savings`) are skipped by `all` and refused by name, because fbuild cannot apply sdkconfig overrides yet (FastLED/fbuild#1460, #4570).
-
-4. **The ELF it analyses is the newest one, and `--build` refuses a stale one.** `find_elf` used to rank candidate ELFs under a board directory by fixed priority and ignore mtime, so `--build` could compile one and report on another. That is fixed in #4386: the newest candidate wins, with the documented order only as a tie-break, and after `--build` an ELF older than the build is refused outright rather than analysed.
-
-   If you see
-
-   ```
-   Bloat: --build ran, but the ELF selected for analysis predates it by N h
-   ```
-
-   that guard is doing its job — a layout the build did not write is sitting where the analyser looks. Remove it, or build the layout it belongs to.
-
-   Worth knowing what the old behaviour looked like, because it was silent: two `--build --top 200` runs across a real code change produced **byte-identical** `report.json` files, `total_flash` included, and the local total did not match CI's for the same board and example because they described different binaries. The failure mode was plausible output and an inverted conclusion, not an error.
-
-5. **Toolchain resolution belongs to fbuild.** The current wrapper calls `fbuild symbols` without an explicit `--nm` path. fbuild resolves the installed toolchain from the board build metadata; do not reintroduce a hardcoded cross-toolchain path.
-
-6. **Preserve both reports before comparing builds.** Each run overwrites the board's `report.json`. Save both reports and compare image/RAM totals and affected symbol rows, including their object, section, region and attribution source. Symbol aliases and map-derived rows can overlap, so do not equate a sum of name-only deltas with an image saving. The previously documented `.claude/symbolaudit/diff.py` helper is no longer present; the wrapper does not automatically produce a before/after diff.
+On ESP32 the log level beats everything else: `FL_LOG_LEVEL` 2 (full) links the
+`FL_WARN`/`FL_INFO`/`FL_DBG` string pool, ~37-58 KB. The default `bash bloat`
+image is **not** the documented release config; `bash bloat <board> --profile
+slim` is. All levers, their measured savings and the `--profile slim` recipe:
+[binary-size-reference.md](binary-size-reference.md#release-build-flash-savers).
 
 ## Don'ts
 
@@ -359,3 +102,6 @@ These are the gotchas the wrapper handles for you. They are documented here so t
 - fbuild #424 / #427 — the symbols subcommand + map-derived synthesis (merged, but post-2.2.18-wheel)
 - fbuild #428 — `BuildInfo` schema migration so `--nm` becomes unnecessary
 - fbuild #434 — meta to rename `symbols` → `bloat` and write reports to `.fbuild/build/<env>/bloat-report/`
+
+- Companion pages: [scorecards](binary-size-scorecards.md) ·
+  [reference](binary-size-reference.md)
