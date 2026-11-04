@@ -32,9 +32,20 @@ extra-library assembly driver/flag selection and ignored archive policy;
 these are tracked in FastLED/fbuild#1885. The assembly dispatch fix merged in
 FastLED/fbuild#1886; archive policy, cache invalidation, native link regressions,
 and version 2.5.51 merged through the queue in FastLED/fbuild#1887.
-The exact-SHA release dry run is GitHub Actions run `41793135699`, at
-`e9ece7e885785d96014f5b617d38a886f990d627`. Publication and the FastLED
-dependency floor remain pending until that validation succeeds.
+FastLED/fbuild#1888 subsequently fixed a Windows-only regression fixture and
+the CI summary's GitHub API pagination. FastLED/fbuild#1892 fixed cold hosted
+Linux runner capacity by uninstalling unused Android NDK packages through
+the SDK manager, preserving build caches and disk reserve guards.
+The current exact-SHA release dry run is GitHub Actions run `41819723869`, at
+`9b26affea5ad8b2cf8ffe09f597759758d5d5359`, with publication disabled;
+the entire run passed, including all six native artifact builds and wheel
+smoke checks. Publication and validation of the FastLED dependency floor
+remain pending. Releases are built and published only by GitHub CI.
+
+The source repair merged in FastLED/FastLED#5015 at
+`90463e920ddcd2e188fca3decdd1dbb2505cdb30`, closing issue #5013.
+That PR ran native validation; a dependency-floor follow-up must run full
+board validation against the published fbuild 2.5.51 package.
 
 The minimal fix keeps the released `.S` path and its RISC-V instructions
 unchanged, and supplies compatible Thumb architecture metadata only for
