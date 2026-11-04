@@ -14,7 +14,9 @@
 
 // ESP-IDF headers (only in .cpp.hpp, not in .h)
 FL_EXTERN_C_BEGIN
-#if ESP_IDF_VERSION_4_OR_HIGHER
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(6, 0, 0)
+#include "esp_rom_serial_output.h"
+#elif ESP_IDF_VERSION_4_OR_HIGHER
 #include "esp_rom_uart.h"
 #else
 // IWYU pragma: begin_keep

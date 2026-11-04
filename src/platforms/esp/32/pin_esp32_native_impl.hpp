@@ -27,6 +27,7 @@ FL_EXTERN_C_BEGIN
 #include "driver/ledc.h"
 // IWYU pragma: end_keep
 #include "esp_err.h"
+#include "soc/soc.h" // IWYU pragma: keep
 
 #if ESP_IDF_VERSION_5_OR_HIGHER
 // IWYU pragma: begin_keep
@@ -117,10 +118,10 @@ namespace {
             return;  // Already initialized
         }
 
-        adc_oneshot_unit_init_cfg_t init_config = {
-            .unit_id = ADC_UNIT_1,
-            .ulp_mode = ADC_ULP_MODE_DISABLE,
-        };
+        // Zero-initialize SDK-added fields, including the default ADC clock.
+        adc_oneshot_unit_init_cfg_t init_config = {};
+        init_config.unit_id = ADC_UNIT_1;
+        init_config.ulp_mode = ADC_ULP_MODE_DISABLE;
         adc_oneshot_new_unit(&init_config, &adc1_handle);
     }
 }
@@ -137,7 +138,9 @@ inline u16 (analogRead)(int pin) FL_NO_EXCEPT {
 
     // Configure channel (simplified - assumes ADC1 channel 0)
     adc_oneshot_chan_cfg_t config = {
-        .atten = ADC_ATTEN_DB_12,
+        // Attenuation 3 has the same value under the old 11 dB and new
+        // 12 dB names; IDF 5.1 does not expose ADC_ATTEN_DB_12 yet.
+        .atten = static_cast<adc_atten_t>(3),
         .bitwidth = ADC_BITWIDTH_12,
     };
 

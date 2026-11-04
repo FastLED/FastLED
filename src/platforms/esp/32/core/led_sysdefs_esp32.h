@@ -5,6 +5,18 @@
 #include "fl/stl/stdint.h"
 #include "fl/stl/has_include.h"
 #include "sdkconfig.h"
+
+// Arduino supplies F_CPU on the command line; bare IDF supplies sdkconfig.
+#ifndef F_CPU
+#if defined(CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ)
+#define F_CPU (CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ * 1000000L)
+#elif defined(CONFIG_ESP32_DEFAULT_CPU_FREQ_MHZ)
+#define F_CPU (CONFIG_ESP32_DEFAULT_CPU_FREQ_MHZ * 1000000L)
+#elif defined(CONFIG_ESP32S3_DEFAULT_CPU_FREQ_MHZ)
+#define F_CPU (CONFIG_ESP32S3_DEFAULT_CPU_FREQ_MHZ * 1000000L)
+#endif
+#endif
+
 #ifndef ESP32
 #define ESP32
 #endif
@@ -48,8 +60,7 @@ typedef unsigned long prog_uint32_t;
 # define INTERRUPT_THRESHOLD 0
 #endif
 
-// ESP-IDF provides thread-safe local-static guards. FastLED's fallback
-// can replace them under LTO (#4994).
+// ESP-IDF provides thread-safe C++ guard functions; do not define NEED_CXX_BITS (#4994).
 
 // These can be overridden
 #   define FASTLED_ESP32_RAW_PIN_ORDER

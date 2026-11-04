@@ -183,13 +183,14 @@ bool LcdSpiPeripheralEsp::initialize(const LcdSpiConfig &config) FL_NO_EXCEPT {
     bus_config.bus_width = 16;
     bus_config.max_transfer_bytes = config.max_transfer_bytes;
 
-#if ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(5, 3, 0)
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 4, 2) && \
+    ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(5, 3, 0)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
     bus_config.psram_trans_align = LCD_SPI_PSRAM_ALIGNMENT;
     bus_config.sram_trans_align = 4;
 #pragma GCC diagnostic pop
-#else
+#elif ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 3, 0)
     bus_config.dma_burst_size = 64;
 #endif
 

@@ -492,11 +492,10 @@ public:
             }
 
             // Create GPTimer for slow ISR (10µs interval)
-            gptimer_config_t timer_config = {
-                .clk_src = GPTIMER_CLK_SRC_DEFAULT,
-                .direction = GPTIMER_COUNT_UP,
-                .resolution_hz = 1000000,  // 1 MHz = 1µs resolution
-            };
+            gptimer_config_t timer_config = {};
+            timer_config.clk_src = GPTIMER_CLK_SRC_DEFAULT;
+            timer_config.direction = GPTIMER_COUNT_UP;
+            timer_config.resolution_hz = 1000000;  // 1 MHz = 1 us resolution
 
             err = gptimer_new_timer(&timer_config, reinterpret_cast<gptimer_handle_t*>(&mIsrContext.gptimer_handle)); // ok reinterpret cast
             if (err != ESP_OK) {

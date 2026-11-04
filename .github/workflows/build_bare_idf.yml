@@ -1,0 +1,114 @@
+name: bare_idf
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [master]
+    paths:
+      - 'src/**'
+      - '!src/platforms/arm/**'
+      - '!src/platforms/wasm/**'
+      - '!src/platforms/avr/**'
+      - 'src/platforms/esp/**'
+      - 'ci/**'
+      - 'CMakeLists.txt'
+      - '.github/workflows/build_bare_idf.yml'
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+    branches: [master]
+
+jobs:
+  build:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.event_name == 'push' ||
+      (github.event_name == 'pull_request' &&
+       github.event.pull_request.head.repo.full_name == github.repository &&
+       (contains(github.event.pull_request.labels.*.name, 'ci-full') ||
+        contains(github.event.pull_request.labels.*.name, 'ci-platform:esp32dev_idf5_component') ||
+        contains(github.event.pull_request.labels.*.name, 'ci-platform:esp*')))
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        # Chips are paired with the IDF releases that actually support them:
+        # esp32c6 needs 5.1+, esp32p4 needs 5.3+, and 4.4 predates both.
+        # Every entry must LINK (the assert step checks the .elf and .bin).
+        include:
+          - idf: v5.5
+            target: esp32
+          - idf: v5.5
+            target: esp32s3
+          - idf: v5.5
+            target: esp32c3
+          - idf: v5.5
+            target: esp32c6
+          - idf: v5.5
+            target: esp32p4
+          - idf: v5.1
+            target: esp32
+          - idf: v5.1
+            target: esp32s3
+          - idf: v4.4
+            target: esp32
+          - idf: v4.4
+            target: esp32s3
+          - idf: v6.0
+            target: esp32
+          - idf: v6.0
+            target: esp32s3
+          - idf: v6.0
+            target: esp32c3
+          - idf: v6.0
+            target: esp32c6
+          - idf: v6.0
+            target: esp32p4
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure, compile and link without Arduino
+        env:
+          IDF_IMAGE: espressif/idf:${{ matrix.idf }}
+          IDF_TARGET: ${{ matrix.target }}
+        run: |
+          docker run --rm \
+            -v "$GITHUB_WORKSPACE:/project" -w /project \
+            "$IDF_IMAGE" \
+            idf.py -C ci/idf_app set-target "$IDF_TARGET" build
+      - name: Assert linked application and report binary size
+        env:
+          IDF_VERSION: ${{ matrix.idf }}
+          IDF_TARGET: ${{ matrix.target }}
+        run: |
+          test -s ci/idf_app/build/fastled_bare_idf.elf
+          test -s ci/idf_app/build/fastled_bare_idf.bin
+          bytes=$(stat -c %s ci/idf_app/build/fastled_bare_idf.bin)
+          echo "Bare IDF $IDF_VERSION / $IDF_TARGET: $bytes bytes"
+          echo "Bare IDF $IDF_VERSION / $IDF_TARGET: $bytes bytes" >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bare-idf-${{ matrix.idf }}-${{ matrix.target }}
+          path: |
+            ci/idf_app/build/fastled_bare_idf.bin
+            ci/idf_app/build/fastled_bare_idf.elf
+            ci/idf_app/build/fastled_bare_idf.map
+            ci/idf_app/build/project_description.json
+          if-no-files-found: error
+      - name: Preserve configure and compile failure evidence
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bare-idf-failure-${{ matrix.idf }}-${{ matrix.target }}
+          path: |
+            ci/idf_app/build/log/
+            ci/idf_app/build/compile_commands.json
+            ci/idf_app/build/project_description.json
+            ci/idf_app/build/CMakeCache.txt
+          if-no-files-found: warn
