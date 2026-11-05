@@ -155,7 +155,7 @@ public:
 template<int DATA_PIN, typename TIMING, EOrder RGB_ORDER>
 class MockClocklessController : public CPixelLEDController<RGB_ORDER>, public IData {
 public:
-    template<Bus B, Core CORE>
+    template<Bus B, Priority PRIORITY = Priority::Auto>
     using WithWorker = MockClocklessController<DATA_PIN, TIMING, RGB_ORDER>;
 
     fl::vector<uint8_t> capturedBytes;
@@ -178,9 +178,9 @@ public:
     }
 };
 
-FL_TEST_CASE("UCS7604 worker rebinding preserves its 16-bit preamble encoder #5001") {
+FL_TEST_CASE("UCS7604 priority rebinding preserves its 16-bit preamble encoder #5001") {
     using Original = UCS7604Controller16bitT<10, RGB, MockClocklessController>;
-    using Rebound = Original::WithWorker<Bus::AUTO, Core::Core1>;
+    using Rebound = Original::WithWorker<Bus::AUTO, Priority::Medium>;
     Original original;
     Rebound controller;
     original.init();
@@ -200,10 +200,10 @@ FL_TEST_CASE("UCS7604 worker rebinding preserves its 16-bit preamble encoder #50
     FL_CHECK_EQ(sizeof(Original), sizeof(Rebound));
 }
 
-FL_TEST_CASE("WS2816 worker rebinding preserves 48-bit output #5001") {
+FL_TEST_CASE("WS2816 priority rebinding preserves 48-bit output #5001") {
     using Delegate = MockClocklessController<10, TIMING_WS2812_800KHZ, RGB>;
     using Original = WS2816ControllerImpl<RGB, Delegate>;
-    using Rebound = Original::WithWorker<Bus::AUTO, Core::Core1>;
+    using Rebound = Original::WithWorker<Bus::AUTO, Priority::Medium>;
     Original original;
     Rebound controller;
     CRGB leds[] = {CRGB::Red, CRGB::Green};
