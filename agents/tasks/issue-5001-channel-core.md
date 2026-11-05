@@ -1,6 +1,14 @@
 # Channel-only LED worker core affinity
 
-Implement the accepted design on current master
+This is the historical implementation and validation record for #5022
+(`e5016e7c09f082bb2e9f4ed332532a99b43e9ea7`). Its accepted behavior retained
+legacy priority templates while removing core templates. The subsequent
+channel-only scheduling change removes legacy priority templates as well;
+see the [current API and migration guidance](../../src/fl/channels/README.md#esp32-s3-lcdi2s-clockless-worker-scheduling).
+The measurements and validation below belong to #5022 and are preserved as
+historical evidence, not new measurements of the scheduling follow-up.
+
+Implement the design accepted at that time on master
 `302a26ea9742c1a9570d5b24e5a56948761f9f8d`.
 
 - [x] Verify failing tests for legacy core-template removal, then debug GREEN.

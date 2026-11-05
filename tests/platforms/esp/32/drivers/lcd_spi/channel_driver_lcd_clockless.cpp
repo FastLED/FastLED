@@ -8,7 +8,6 @@
 #include "platforms/esp/32/drivers/lcd_spi/lcd_spi_peripheral_mock.h"
 #include "fl/channels/data.h"
 #include "fl/channels/config.h"
-#include "fl/channels/worker_policy.h"
 #include "fl/channels/wave3.h"
 #include "fl/channels/wave8.h"
 #include "fl/chipsets/led_timing.h"
@@ -154,7 +153,6 @@ FL_TEST_CASE("ChannelDriverLcdClockless - worker configuration is shared and imm
     FL_REQUIRE_TRUE(driver.configureWorker(config));
     FL_CHECK_TRUE(driver.configureWorker(config));
     FL_CHECK_TRUE(driver.configureWorker(WorkerConfig()));
-    FL_CHECK_TRUE(detail::WorkerPolicy<Priority::High>::apply(driver));
 
     WorkerConfig conflicting = config;
     conflicting.core = Core::Core0;
@@ -172,7 +170,6 @@ FL_TEST_CASE("ChannelDriverLcdClockless - worker configuration is shared and imm
     FL_CHECK_EQ(driver.workerDiagnostics().observedCore, -1);
     FL_CHECK_TRUE(driver.configureWorker(config));
     FL_CHECK_FALSE(driver.configureWorker(conflicting));
-    FL_CHECK_TRUE(detail::WorkerPolicy<Priority::High>::apply(driver));
     FL_CHECK_EQ(driver.workerDiagnostics().core, 1);
     LcdSpiPeripheralMock::instance().simulateTransmitComplete();
     FL_CHECK(driver.poll() == IChannelDriver::DriverState::READY);

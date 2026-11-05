@@ -1,5 +1,9 @@
 # Lessons Learned
 
+- Treat the requested final scheduling boundary as authoritative: when both
+  core affinity and priority belong to Channels, remove both from legacy
+  templates instead of preserving an intermediate priority-only API.
+
 - Worker affinity defaults must use the automatic policy (`fl::Core::Auto`);
   fixed core 1 is an explicit application choice, not a library default.
   Auto preserves legacy backend behavior; do not reinterpret it as a new

@@ -364,9 +364,9 @@ FL_TEST_CASE("WS2814 enables RGBW with white in byte four") {
     FL_CHECK_EQ(white_bytes[3], 255);
 }
 
-FL_TEST_CASE("priority rebinding preserves fixed RGBW chipset constructors #5001") {
-    using Ws2814 = WS2814<1, RGB>::WithWorker<Bus::AUTO, Priority::Medium>;
-    using Lc8816e = LC8816E<6, GRB>::WithWorker<Bus::AUTO, Priority::Medium>;
+FL_TEST_CASE("bus rebinding preserves fixed RGBW chipset constructors #5001") {
+    using Ws2814 = WS2814<1, RGB>::WithBus<Bus::AUTO>;
+    using Lc8816e = LC8816E<6, GRB>::WithBus<Bus::AUTO>;
     Ws2814 ws2814;
     Lc8816e lc8816e;
     FL_CHECK_TRUE(ws2814.getRgbw().active());

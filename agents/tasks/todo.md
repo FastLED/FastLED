@@ -1,5 +1,13 @@
 # Task Tracker
 
+## Channels-only LED worker scheduling (#5001 follow-up)
+
+- [x] Remove both core affinity and priority from legacy API selection, retain
+  ChannelConfig scheduling, and validate the production paths.
+- [ ] Push and merge the reviewed feature PR after full platform/native CI.
+
+Detailed plan and evidence: `issue-5001-channel-scheduling.md`.
+
 ## ESP flash recovery after #5003
 
 - [x] Freeze fresh Blink image-flash baselines on ESP32, S3, C3 and C6 with matching fbuild/toolchains.

@@ -9,9 +9,10 @@ At #5018, `FastLED.addLeds()` accepted a trailing `fl::Priority` after
 remained supported. Runtime channels used `config.options.mWorker.priority`.
 Both accepted `Auto` (default), `High`, `Medium`, and `Low`.
 
-The current API removes the legacy core argument: priority follows the bus
-(or SPI bus-instance index), and explicit affinity belongs to channel
-configuration. See the [current API and migration guidance](../../src/fl/channels/README.md#esp32-s3-lcdi2s-clockless-worker-scheduling).
+The current API removes both legacy worker arguments: explicit core affinity
+and priority belong to channel configuration, while legacy templates retain
+only chipset, pin, bus, and bus-instance selection. See the
+[current API and migration guidance](../../src/fl/channels/README.md#esp32-s3-lcdi2s-clockless-worker-scheduling).
 
 The LCD/I2S clockless worker maps a new `Auto` worker to `High`, preserving
 its old priority. On the current ESP32 SDK, High is 23

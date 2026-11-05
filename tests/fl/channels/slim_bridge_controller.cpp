@@ -148,7 +148,7 @@ using WorkerTestChipset = SlimBridgeController<PIN, TIMING_WS2812_800KHZ,
 
 struct BusOnlyCustomRebind {
     template<Bus B>
-    using WithWorker = WorkerTestChipset<27, RGB>::WithWorker<B>;
+    using WithBus = WorkerTestChipset<27, RGB>::WithBus<B>;
 };
 
 template<typename API>
@@ -168,6 +168,24 @@ auto acceptsSpiTemplateCore(int) -> decltype(
 
 template<typename API>
 fl::false_type acceptsSpiTemplateCore(...);
+
+template<typename API>
+auto acceptsClocklessTemplatePriority(int) -> decltype(
+    fl::declval<API&>().template addLeds<WS2812B, 27, RGB,
+        Bus::FLEX_IO, Priority::High>(static_cast<CRGB*>(nullptr), 1),
+    fl::true_type());
+
+template<typename API>
+fl::false_type acceptsClocklessTemplatePriority(...);
+
+template<typename API>
+auto acceptsSpiTemplatePriority(int) -> decltype(
+    fl::declval<API&>().template addLedsSpiChannel<APA102, 5, 6, RGB,
+        1000000, Bus::SPI, 0, Priority::High>(static_cast<CRGB*>(nullptr), 1),
+    fl::true_type());
+
+template<typename API>
+fl::false_type acceptsSpiTemplatePriority(...);
 
 /// Reset the mock + manager registration to a known state before each test.
 struct SlimBridgeFixture {
@@ -228,30 +246,34 @@ FL_TEST_CASE("SlimBridgeController::registerWithManager is idempotent across ins
     FL_CHECK_EQ(registerCallCount(), before + 1);
 }
 
-FL_TEST_CASE("Legacy addLeds templates do not accept worker core settings #5001") {
+FL_TEST_CASE("Legacy addLeds templates do not accept worker scheduling settings #5001") {
     FL_CHECK_FALSE(decltype(acceptsClocklessTemplateCore<CFastLED>(0))::value);
     FL_CHECK_FALSE(decltype(acceptsSpiTemplateCore<CFastLED>(0))::value);
+    FL_CHECK_FALSE(decltype(acceptsClocklessTemplatePriority<CFastLED>(0))::value);
+    FL_CHECK_FALSE(decltype(acceptsSpiTemplatePriority<CFastLED>(0))::value);
 }
 
 FL_TEST_CASE("addLeds bus rebinding preserves default storage and worker policy #5001") {
     using Original = WS2812<27, RGB>;
-    using Automatic = detail::ClocklessWorkerController<Original,
+    using Automatic = detail::ClocklessBusController<Original,
         DefaultBus<ClocklessChipset>::value>::type;
     // Preserve platform hooks when Auto selects the original transport.
     FL_CHECK_TRUE((fl::is_same<Original, Automatic>::value));
     using Default = WorkerTestChipset<27, RGB>;
-    using Rebound = Default::WithWorker<Bus::AUTO>;
+    using Rebound = Default::WithBus<Bus::AUTO>;
     FL_CHECK_EQ(sizeof(Rebound), sizeof(Default));
     constexpr Bus bus = DefaultBus<ClocklessChipset>::value == Bus::BIT_BANG
         ? Bus::RMT : Bus::BIT_BANG;
-    using ExplicitBus = detail::ClocklessWorkerController<Default, bus>::type;
-    using CustomBus = detail::ClocklessWorkerController<BusOnlyCustomRebind, bus>::type;
+    using ExplicitBus = detail::ClocklessBusController<Default, bus>::type;
+    using CustomBus = detail::ClocklessBusController<BusOnlyCustomRebind, bus>::type;
     using Expected = SlimBridgeController<27, TIMING_WS2812_800KHZ,
         RGB, 280, BusTraits<bus>>;
     FL_CHECK_TRUE((fl::is_same<ExplicitBus, Expected>::value));
     FL_CHECK_TRUE((fl::is_same<CustomBus, Expected>::value));
     auto& driver = mockDriverInstance();
     driver.acceptWorker = false;
+    driver.requestedCore = Core::Core1;
+    driver.requestedPriority = Priority::Medium;
     driver.workerConfigCount = 0;
     driver.enqueueCount = 0;
     CRGB leds[1] = {CRGB::Red};
@@ -264,42 +286,9 @@ FL_TEST_CASE("addLeds bus rebinding preserves default storage and worker policy 
     });
     controller.showLeds(255);
     FL_CHECK_EQ(driver.workerConfigCount, 0);
+    FL_CHECK_EQ(driver.requestedCore, Core::Core1);
+    FL_CHECK_EQ(driver.requestedPriority, Priority::Medium);
     FL_CHECK_EQ(driver.enqueueCount, 1);
-}
-
-template<Priority PRIORITY, fl::u8 PIN>
-void checkAddLedsWorkerPriority() {
-    using Default = WorkerTestChipset<PIN, RGB>;
-    using Explicit = typename Default::template WithWorker<Bus::AUTO, PRIORITY>;
-    FL_CHECK_EQ(sizeof(Explicit), sizeof(Default));
-    auto& driver = mockDriverInstance();
-    driver.acceptWorker = true;
-    driver.workerConfigCount = 0;
-    driver.enqueueCount = 0;
-    CRGB leds[1] = {CRGB::Red};
-    auto& controller = FastLED.addLeds<WorkerTestChipset, PIN, RGB,
-        Bus::AUTO, PRIORITY>(leds, 1);
-    auto cleanup = fl::make_scope_exit([&]() {
-        controller.setLeds(nullptr, 0);
-        controller.removeFromDrawList();
-        driver.acceptWorker = true;
-    });
-    // Priority-only requests must configure the worker during construction,
-    // even though the core remains automatic.
-    FL_CHECK_GT(driver.workerConfigCount, 0);
-    FL_CHECK_EQ(driver.requestedCore, Core::Auto);
-    FL_CHECK_EQ(driver.requestedPriority, PRIORITY);
-    controller.showLeds(255);
-    FL_CHECK_EQ(driver.enqueueCount, 1);
-    driver.acceptWorker = false;
-    controller.showLeds(255);
-    FL_CHECK_EQ(driver.enqueueCount, 1);
-}
-
-FL_TEST_CASE("addLeds accepts named worker priorities without growing controllers #5001") {
-    checkAddLedsWorkerPriority<Priority::High, 24>();
-    checkAddLedsWorkerPriority<Priority::Medium, 25>();
-    checkAddLedsWorkerPriority<Priority::Low, 26>();
 }
 
 FL_TEST_CASE("Default worker facade avoids backend dispatch #5001") {
@@ -516,17 +505,11 @@ struct CountingWorkerDriverTraits : DirectDriverTraits {
     }
 };
 
-FL_TEST_CASE("Auto worker priority construction does not access the driver singleton #5001") {
+FL_TEST_CASE("Legacy bus rebinding does not access the driver singleton at construction #5001") {
     using Automatic = SlimBridgeController<7, TIMING_WS2812_800KHZ, RGB, 280,
         CountingWorkerDriverTraits, 0, true>;
-    using Rebound = Automatic::WithWorker<Bus::AUTO>;
-    using High = Automatic::WithWorker<Bus::AUTO, Priority::High>;
-    using Medium = Automatic::WithWorker<Bus::AUTO, Priority::Medium>;
-    using Low = Automatic::WithWorker<Bus::AUTO, Priority::Low>;
+    using Rebound = Automatic::WithBus<Bus::AUTO>;
     FL_CHECK_EQ(sizeof(Automatic), sizeof(Rebound));
-    FL_CHECK_EQ(sizeof(Automatic), sizeof(High));
-    FL_CHECK_EQ(sizeof(Automatic), sizeof(Medium));
-    FL_CHECK_EQ(sizeof(Automatic), sizeof(Low));
     CountingWorkerDriverTraits::accesses() = 0;
     directDriverInstance().acceptWorker = true;
     {
@@ -536,24 +519,6 @@ FL_TEST_CASE("Auto worker priority construction does not access the driver singl
     {
         Rebound rebound;
         FL_CHECK_EQ(CountingWorkerDriverTraits::accesses(), 0);
-    }
-    {
-        High high;
-        FL_CHECK_EQ(CountingWorkerDriverTraits::accesses(), 1);
-        FL_CHECK_EQ(directDriverInstance().requestedPriority, Priority::High);
-        FL_CHECK_EQ(directDriverInstance().requestedCore, Core::Auto);
-    }
-    {
-        Medium medium;
-        FL_CHECK_EQ(CountingWorkerDriverTraits::accesses(), 2);
-        FL_CHECK_EQ(directDriverInstance().requestedPriority, Priority::Medium);
-        FL_CHECK_EQ(directDriverInstance().requestedCore, Core::Auto);
-    }
-    {
-        Low low;
-        FL_CHECK_EQ(CountingWorkerDriverTraits::accesses(), 3);
-        FL_CHECK_EQ(directDriverInstance().requestedPriority, Priority::Low);
-        FL_CHECK_EQ(directDriverInstance().requestedCore, Core::Auto);
     }
 }
 
