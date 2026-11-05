@@ -24,6 +24,10 @@ mod tests {
         assert_eq!(test_main_lines("\nint main(int argc, char** argv) {\n"), vec![2]);
         assert_eq!(test_main_lines("int\nmain() {}\n"), vec![2]);
         assert_eq!(test_main_lines("#else\nvoid main(void) {\n#endif\n"), vec![2]);
+        assert_eq!(test_main_lines("static int\nmain() {}\n"), vec![2]);
+        assert_eq!(test_main_lines("int __attribute__((used))\nmain() {}\n"), vec![2]);
+        assert_eq!(test_main_lines("unsigned main() {}\n"), vec![1]);
+        assert_eq!(test_main_lines("int main() { return run();\n}\n"), vec![1]);
     }
 
     #[test]

@@ -23,6 +23,8 @@ FL_TEST_CASE("HTTP server registers routes") {
         return fl::http_response::ok().json(response);
     });
 
+#else
+    FL_WARN("Networking not available - test skipped");
 #endif
 }
 

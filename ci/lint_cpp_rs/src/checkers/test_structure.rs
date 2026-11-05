@@ -290,7 +290,14 @@ impl FileContentChecker for TestMainChecker {
             let typed = found.as_str().trim_start() != "main"
                 && !found.as_str().trim_start().starts_with("main ")
                 && !found.as_str().trim_start().starts_with("main(");
-            if tail.ends_with(';') || (!typed && previous.map(|l| l.trim()) != Some("int")) {
+            let declares_type = |l: &str| {
+                let l = l.trim();
+                !l.ends_with([';', '{', '}'])
+                    && l.split(|c: char| !c.is_alphanumeric() && c != '_')
+                        .any(|word| matches!(word, "int" | "void" | "auto" | "unsigned"))
+            };
+            let prototype = tail.ends_with(';') && !tail.contains('{');
+            if prototype || (!typed && !previous.is_some_and(|l| declares_type(l))) {
                 continue;
             }
             let annotated = [Some(index), index.checked_sub(1)]
