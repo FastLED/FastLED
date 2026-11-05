@@ -13,7 +13,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import pytest
-from running_process import RunningProcess
+from running_process import CalledProcessError, RunningProcess
 
 from ci import software_spi_audit as audit
 from ci.software_spi_audit import (
@@ -1262,8 +1262,98 @@ def test_real_spi_audit_wrapper_from_outside_checkout_writes_correct_report(
     assert "Software SPI audit RED" in result.stdout
     actual = json.loads(report.read_text(encoding="utf-8"))
     assert actual["baseline"] == audit.BASELINE_COMMIT
-    assert actual["baseline_files"] == 2986
-    assert "src/fastspi.h" in actual["source_accounting"]
+    assert actual["required_findings"] == list(REQUIRED_FINDINGS)
+    assert actual["complete"] is False
+    # Prove project identity/current enumeration independently of whether this
+    # checkout contains the pinned history. Hosted shallow checkouts need not.
+    current = _current_sources(root)
+    assert current["src/fastspi.h"] == (root / "src/fastspi.h").read_bytes()
+    assert "src/platforms/shared/spi_bitbang/generic_software_spi.h" in current
+    baseline_command = [
+        "git",
+        "ls-tree",
+        "-r",
+        "-z",
+        audit.BASELINE_COMMIT,
+        "--",
+        "src",
+    ]
+    baseline = RunningProcess.run(
+        baseline_command,
+        cwd=root,
+        check=False,
+        timeout=30,
+        capture_output=True,
+        encoding="utf-8",
+        errors="strict",
+    )
+    if baseline.returncode == 0:
+        assert actual["baseline_files"] == BASELINE_SOURCE_COUNT
+        assert actual["current_files"] == len(current)
+        for path, source in current.items():
+            assert actual["source_accounting"][path]["current_sha256"] == digest(source)
+    else:
+        # Accept only the exact real-Git missing-baseline failure, never an
+        # arbitrary audit RED or a fabricated empty successful inventory.
+        assert baseline.returncode == 128
+        missing = CalledProcessError(baseline.returncode, baseline_command)
+        assert actual["errors"] == [f"audit input/runtime error: {missing}"]
+        assert actual["baseline_files"] == 0
+        assert actual["current_files"] == 0
+        assert actual["source_accounting"] == {}
+
+
+def test_cli_real_git_missing_pinned_baseline_remains_fail_closed(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # A fresh real repository deterministically lacks the pinned commit even
+    # when the surrounding developer checkout has full history. Do not mock
+    # Git, the baseline loader or the audit's rejection path.
+    for name in (
+        "GIT_DIR",
+        "GIT_WORK_TREE",
+        "GIT_COMMON_DIR",
+        "GIT_OBJECT_DIRECTORY",
+        "GIT_ALTERNATE_OBJECT_DIRECTORIES",
+    ):
+        monkeypatch.delenv(name, raising=False)
+    RunningProcess.run(
+        ["git", "init", "--quiet", "--initial-branch=audit-fixture"],
+        cwd=tmp_path,
+        check=True,
+        timeout=10,
+        capture_output=True,
+        encoding="utf-8",
+        errors="replace",
+    )
+    source = tmp_path / "src" / "present.h"
+    source.parent.mkdir()
+    source.write_bytes(b"struct Present {};\n")
+    assert _current_sources(tmp_path) == {"src/present.h": source.read_bytes()}
+    with pytest.raises(CalledProcessError) as missing:
+        audit._baseline_objects(tmp_path)
+    assert missing.value.returncode == 128
+    assert missing.value.cmd == [
+        "git",
+        "ls-tree",
+        "-r",
+        "-z",
+        audit.BASELINE_COMMIT,
+        "--",
+        "src",
+    ]
+    report = tmp_path / "missing-baseline-report.json"
+    monkeypatch.setattr(audit, "ROOT", tmp_path)
+    monkeypatch.setattr(sys, "argv", ["spi-audit", "--report", str(report)])
+    assert audit.main() == 1
+    actual = json.loads(report.read_text(encoding="utf-8"))
+    assert actual["baseline"] == audit.BASELINE_COMMIT
+    assert actual["required_findings"] == list(REQUIRED_FINDINGS)
+    assert actual["errors"] == [f"audit input/runtime error: {missing.value}"]
+    assert actual["baseline_files"] == 0
+    assert actual["current_files"] == 0
+    assert actual["source_accounting"] == {}
     assert actual["complete"] is False
 
 
