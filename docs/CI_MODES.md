@@ -43,8 +43,9 @@ jobs.
 `master` merges through a GitHub merge queue. `CI summary` in `ci-labels.yml`
 is the one required check: on PRs it covers label and catalog validation, and on
 `merge_group` it also covers Linux/Windows native smoke and Linux `CompileTests`
-against the exact merge result. Add labels before enqueueing to get broader PR
-coverage; labels do not expand the queue run.
+against the exact merge result. Fork PRs skip `validate`, so a green `CI summary`
+on a fork PR does not confirm label or catalog validation. Add labels before
+enqueueing to get broader PR coverage; labels do not expand the queue run.
 
 One historical ordinary source-change PR used 128.89 runner-minutes across
 20 PR workflows
