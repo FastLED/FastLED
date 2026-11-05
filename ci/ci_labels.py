@@ -123,6 +123,8 @@ def select(event_name: str, event: dict, labels: dict[str, list[str]]) -> Select
         return Selection("manual-catalog", event.get("after", ""), [])
     if event_name == "push":
         return Selection("minimal", event.get("after", ""), [])
+    if event_name == "merge_group":
+        return Selection("minimal", event["merge_group"]["head_sha"], [])
     if event_name != "pull_request":
         raise ValueError(f"unsupported event: {event_name}")
     pr = event["pull_request"]

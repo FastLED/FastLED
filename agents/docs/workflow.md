@@ -45,6 +45,10 @@ Guidelines for how agents should approach work in the FastLED project.
 - Zero context switching required from the user
 - Go fix failing CI tests without being told how
 
+## Landing PRs Through the Merge Queue
+
+`master` is protected by the `main merge queue` ruleset (squash, required `CI summary`). Land every PR with `gh pr merge <N> --squash` once `CI summary` is green; GitHub adds it to the queue, runs `ci-labels.yml` plus the native smoke jobs on the exact merge result, and merges on success. A failed queue run ejects the PR, so fix and enqueue again. `--admin` bypasses the queue: reserve it for repairing a broken queue or a human-approved emergency.
+
 ## CodeRabbit Review Loop
 
 When CodeRabbit posts review comments on a PR, run `/address-reviews` before any `gh pr merge`. The skill fetches open comments, classifies each, applies fixes for valid findings, and replies to threads. The pre-merge hook blocks merge while unresolved CodeRabbit threads remain. Security-critical findings are routed to a human — never auto-fixed. Max 3 iterations per PR; if CodeRabbit keeps asking after three rounds, stop and flag a human reviewer.
