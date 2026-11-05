@@ -578,8 +578,8 @@ def test_pinned_registry_keeps_every_discovered_child_and_query_miss() -> None:
     assert BASELINE_SOURCE_COUNT == 2986
     assert {finding["issue"] for finding in REQUIRED_FINDINGS} == set(
         range(5025, 5054)
-    ) | {5055, 5056, 5057, 5059, 5060, 5061, 5062, 5063, 5064, 5065}
-    assert len(REQUIRED_FINDINGS) == 39
+    ) | {5055, 5056, 5057, 5059, 5060, 5061, 5062, 5063, 5064, 5065, 5066}
+    assert len(REQUIRED_FINDINGS) == 40
     assert "src/platforms/shared/spi_bitbang/spi_block_32.h" in SEMANTIC_REQUIRED_PATHS
     assert (
         "src/platforms/shared/spi_bitbang/spi_isr_engine.cpp.hpp"
@@ -2104,6 +2104,56 @@ def test_objectfled_spi_pin_restore_registry_requires_real_gpio_reuse() -> None:
     assert check_evidence(
         [finding], [], {helper: b"actual helper identity needs executable proof"}
     ), "registry metadata cannot prove connected-bank restoration or GPIO reuse"
+
+
+def test_my9221_ddr_timing_registry_requires_independent_protocol_timing() -> None:
+    finding = next((row for row in REQUIRED_FINDINGS if row["issue"] == 5066), None)
+    assert finding is not None, (
+        "independent direct FastPin MY9221 DDR timing #5066 remains required"
+    )
+    source = "src/fl/chipsets/my9221.h"
+    assert finding["id"] == "my9221-ddr-timing"
+    assert finding["sources"] == [source]
+    assert set(finding["dependencies"]) == {
+        "src/FastLED.h",
+        "src/chipsets.h",
+        "src/pixeltypes.h",
+        "src/fl/system/fastpin.h",
+        "src/fl/system/fastpin_base.h",
+        "src/platforms/fastpin.h",
+        "src/fl/system/delay.h",
+        "src/platforms/delay.h",
+    }
+    assert set(finding["entrypoints"]) == {
+        "MY9221Controller::init",
+        "MY9221Controller::writeBit",
+        "MY9221Controller::sendWord",
+        "MY9221Controller::sendLed",
+        "MY9221Controller::latch",
+        "MY9221Controller::showPixels",
+        "CFastLED::addLeds-MY9221-mapping-and-legacy-channel-selection",
+    }
+    assert set(finding["required_configurations"]) == {
+        "both-DDR-data-edges-DI-setup-and-hold-at-least-10ns",
+        "DCKI-high-and-low-50ns-to-7200ns-supported-target-CPU-boundaries",
+        "four-DI-latch-pulses-high-over-70ns-low-over-230ns",
+        "idle-start-prelatch-over-220us-and-poststop-over-200ns-plus-N-times-10ns",
+        "valid-chain-bounds-partial-chip-zero-padding-RGB-command-payload-order",
+        "repeated-frames-and-empty-boundary-with-independent-timing-oracle",
+        "actual-vendor-FastPin-CPU-compiler-codegen-and-unsupported-rejection",
+    }
+    assert set(finding["concerns"]) == {
+        "actual-built-in-and-legacy-channel-producers-use-independent-direct-FastPin-DDR",
+        "generic-software-SPI-timing-proof-does-not-cover-MY9221",
+        "dual-edge-protocol-preserved-not-single-edge-SPI-substitution",
+        "restore-missing-data-waits-latch-pulse-waits-and-poststop-wait-mutations-fail",
+        "existing-208-bit-order-golden-model-cannot-certify-phase-timing",
+        "intentional-unused-SPI_SPEED-is-not-a-separate-defect",
+        "source-missing-guarantees-not-measured-short-pulses-electrical-proof-separate",
+    }
+    assert check_evidence(
+        [finding], [], {source: b"registry identity cannot prove DDR timing"}
+    ), "mandatory metadata cannot replace production timing/codegen evidence"
 
 
 INIT_CLOCK_LOW_CASE = (

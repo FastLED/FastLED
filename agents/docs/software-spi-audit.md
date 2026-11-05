@@ -83,7 +83,7 @@ their existing checks; malformed versioned documents cannot fall back to them.
 No complete reviewed manifest is supplied by this loader change. Classification
 metadata is source-review input, never execution or target-configuration proof.
 
-The registry currently contains 39 distinct required findings. Native AVR
+The registry currently contains 40 distinct required findings. Native AVR
 selected-bit predicates (#5052) and peripheral/GPIO handoff (#5055) are separate
 requirements even though both bind to `fastspi_avr.h`. The latter covers all
 five UBRR1/UBRR0/SPI0_CTRLA/SPSR/SPSR0 method variants, prior-byte shifter drain,
@@ -167,6 +167,18 @@ mutations remain required. The current proxy exposes no `writeBit`, so no active
 SM16716 producer through it is claimed. A direct backend protocol case remains
 relevant; public callable correctness is not waived by an absent selector.
 Registry presence is unresolved bookkeeping, not a protocol fix or target proof.
+
+MY9221 DDR timing (#5066) is a separate required implementation. Its built-in
+and legacy selectors reach direct FastPin data writes/clock toggles and four DI
+latch pulses, bypassing GenericSoftwareSPIOutput. Required evidence must cover
+both-edge setup/hold and clock minimum/maximum duration, every latch pulse,
+cascade-dependent post-stop timing, chain padding/order and repeated frames on
+actual supported vendor pins/CPU/compiler configurations. Restoring omitted
+phase/latch/stop waits must fail an independent timing oracle; the existing
+bit-order golden model alone cannot establish timing. This source-confirmed
+missing guarantee is not a measured short pulse or electrical-compliance claim.
+The intentionally unused SPI_SPEED compatibility parameter is not a separate
+defect, and ordinary single-edge SPI must not replace this DDR protocol.
 
 Focused validation commands:
 

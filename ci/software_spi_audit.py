@@ -667,6 +667,48 @@ REQUIRED_FINDINGS = (
             "SDK-source-configuration-and-producer-identity-bound-no-physical-claim",
         ],
     ),
+    _required(
+        "my9221-ddr-timing",
+        5066,
+        "src/fl/chipsets/my9221.h",
+        [
+            "MY9221Controller::init",
+            "MY9221Controller::writeBit",
+            "MY9221Controller::sendWord",
+            "MY9221Controller::sendLed",
+            "MY9221Controller::latch",
+            "MY9221Controller::showPixels",
+            "CFastLED::addLeds-MY9221-mapping-and-legacy-channel-selection",
+        ],
+        [
+            "both-DDR-data-edges-DI-setup-and-hold-at-least-10ns",
+            "DCKI-high-and-low-50ns-to-7200ns-supported-target-CPU-boundaries",
+            "four-DI-latch-pulses-high-over-70ns-low-over-230ns",
+            "idle-start-prelatch-over-220us-and-poststop-over-200ns-plus-N-times-10ns",
+            "valid-chain-bounds-partial-chip-zero-padding-RGB-command-payload-order",
+            "repeated-frames-and-empty-boundary-with-independent-timing-oracle",
+            "actual-vendor-FastPin-CPU-compiler-codegen-and-unsupported-rejection",
+        ],
+        dependencies=[
+            "src/FastLED.h",
+            "src/chipsets.h",
+            "src/pixeltypes.h",
+            "src/fl/system/fastpin.h",
+            "src/fl/system/fastpin_base.h",
+            "src/platforms/fastpin.h",
+            "src/fl/system/delay.h",
+            "src/platforms/delay.h",
+        ],
+        concerns=[
+            "actual-built-in-and-legacy-channel-producers-use-independent-direct-FastPin-DDR",
+            "generic-software-SPI-timing-proof-does-not-cover-MY9221",
+            "dual-edge-protocol-preserved-not-single-edge-SPI-substitution",
+            "restore-missing-data-waits-latch-pulse-waits-and-poststop-wait-mutations-fail",
+            "existing-208-bit-order-golden-model-cannot-certify-phase-timing",
+            "intentional-unused-SPI_SPEED-is-not-a-separate-defect",
+            "source-missing-guarantees-not-measured-short-pulses-electrical-proof-separate",
+        ],
+    ),
 )
 
 # Semantic candidates missed by the original five query families. Keep them
