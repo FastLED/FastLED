@@ -1,5 +1,11 @@
 # Task Tracker
 
+## Generic engine worker macros
+
+- [x] Implement opt-in core/priority defaults with Channel precedence and
+  unchanged unsupported peripherals; see `engine-worker-macros.md`.
+- [ ] Validate, review, push and merge the implementation.
+
 ## Channels-only LED worker scheduling (#5001 follow-up)
 
 - [x] Remove both core affinity and priority from legacy API selection, retain
