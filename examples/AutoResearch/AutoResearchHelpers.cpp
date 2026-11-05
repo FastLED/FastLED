@@ -6,8 +6,11 @@
 #endif
 #include <FastLED.h>
 #include <Arduino.h>
+#include "AutoResearchSoftwareSpiPins.h"
 
-using IncludeOrderOutput = ::SoftwareSPIOutput<0, 1, DATA_RATE_MHZ(1)>;
+using IncludeOrderOutput =
+    ::SoftwareSPIOutput<software_spi_probe::kDataPin,
+                        software_spi_probe::kClockPin, DATA_RATE_MHZ(1)>;
 
 extern "C" FL_KEEP_ALIVE FL_NO_INLINE void software_spi_probe_fastled_first_init() {
     IncludeOrderOutput output;

@@ -1630,6 +1630,24 @@ CLEARCORE_SAME53 = Board(
 )
 
 
+# Chipintelli CI1306: fbuild supplies the pinned vendor recipe/toolchain.
+# Keep board hardware data in fbuild's descriptor; these are build profiles.
+CI1306 = Board(
+    board_name="ci1306",
+    platform="ci13xx",
+    framework="arduino",
+)
+
+CI1306_NO_LTO = Board(
+    board_name="ci1306_nolto",
+    real_board_name="ci1306",
+    platform="ci13xx",
+    framework="arduino",
+    build_unflags=["-flto"],
+    build_flags=["-fno-lto"],
+)
+
+
 def _make_board_map(boards: list[Board]) -> dict[str, Board]:
     # make board map, but assert on duplicate board names
     board_map: dict[str, Board] = {}

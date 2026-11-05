@@ -20,9 +20,11 @@ only for a sibling sub-variant.
 """
 
 import re
+import shutil
 from pathlib import Path
 
 import pytest
+from running_process import RunningProcess
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -151,3 +153,85 @@ def test_qtpy_m0_onboard_neopixel_mapping() -> None:
     qtpy = blocks["ADAFRUIT_QTPY_M0"]
     assert qtpy["mappings"].get(11) == (18, 0)
     assert qtpy["defaults"].get("FL_PIN_CLOCKLESS_1") == 11
+
+
+def _ci13_pin_configuration(defines: dict[str, int]) -> str:
+    """Preprocess actual pin-table/default directives without vendor C++ bodies.
+
+    This projects only configuration directives and literal pin registrations;
+    it supplies no SDK types, GPIO implementation or copied SPI writer.
+    """
+    compiler = next(
+        (path for name in ("clang++", "g++") if (path := shutil.which(name))),
+        None,
+    )
+    assert compiler is not None, "host preprocessor required for pin configuration"
+    header = SRC / "platforms/ci13xx/fastpin_ci13xx.h"
+    projected = []
+    for line in header.read_text(encoding="utf-8").splitlines():
+        if re.match(r"^\s*#\s*(if|ifdef|ifndef|else|elif|endif)\b", line):
+            projected.append(line)
+        elif re.match(r"^\s*#\s*define\s+FL_PIN_", line):
+            projected.append(line)
+        elif re.match(r"^_FL_CI13XX_DEFPIN\(\d+", line):
+            projected.append(line)
+    source = "\n".join(projected)
+    defaults = (SRC / "platforms/default_pins.h").read_text(encoding="utf-8")
+    source += "\n" + "\n".join(
+        line
+        for line in defaults.splitlines()
+        if not re.fullmatch(r"\s*#\s*pragma\s+once\s*", line)
+    )
+    source += "\nCI13_SELECTED FL_PIN_SPI_DATA_1 FL_PIN_SPI_CLOCK_1\n"
+    result = RunningProcess.run(
+        [compiler, "-E", "-P", "-x", "c++"]
+        + [f"-D{name}={value}" for name, value in defines.items()]
+        + ["-"],
+        input=source,
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+    assert result.returncode == 0, result.stderr
+    return result.stdout
+
+
+@pytest.mark.parametrize(
+    "board", ("ARDUINO_CI1306", "ARDUINO_CI1302", "ARDUINO_CI1303")
+)
+@pytest.mark.parametrize("crystal", (0, 1))
+def test_ci13_spi_defaults_select_common_valid_pins(board: str, crystal: int) -> None:
+    output = _ci13_pin_configuration({board: 1, "USE_EXTERNAL_CRYSTAL_OSC": crystal})
+    mappings = {
+        int(pin): (port, int(bit))
+        for pin, port, bit in re.findall(
+            r"_FL_CI13XX_DEFPIN\((\d+),\s*(_FL_CI13XX_P[A-D]),\s*(\d+)\)", output
+        )
+    }
+    assert mappings[2] == ("_FL_CI13XX_PA", 2)
+    assert mappings[3] == ("_FL_CI13XX_PA", 3)
+    assert re.search(r"CI13_SELECTED\s+2\s+3\b", output), output
+    if board == "ARDUINO_CI1306" or crystal:
+        assert 0 not in mappings and 1 not in mappings
+
+
+@pytest.mark.parametrize("forced", (0, 1))
+def test_ci13_spi_defaults_survive_forced_pins_and_honor_overrides(forced: int) -> None:
+    defines = {"ARDUINO_CI1306": 1}
+    if forced:
+        defines["FASTLED_FORCE_SOFTWARE_PINS"] = 1
+    assert re.search(r"CI13_SELECTED\s+2\s+3\b", _ci13_pin_configuration(defines))
+    defines.update(FL_PIN_SPI_DATA_1=5, FL_PIN_SPI_CLOCK_1=6)
+    assert re.search(r"CI13_SELECTED\s+5\s+6\b", _ci13_pin_configuration(defines))
+
+
+def test_ci13_software_spi_probe_consumes_platform_pin_defaults() -> None:
+    probe = (
+        REPO_ROOT / "examples/AutoResearch/AutoResearchSoftwareSpiPins.h"
+    ).read_text(encoding="utf-8")
+    ci13, other = probe.split("#else", 1)
+    assert "#if defined(FL_IS_CI13XX)" in ci13
+    assert re.search(r"kDataPin\s*=\s*FL_PIN_SPI_DATA_1\s*;", ci13)
+    assert re.search(r"kClockPin\s*=\s*FL_PIN_SPI_CLOCK_1\s*;", ci13)
+    assert re.search(r"kDataPin\s*=\s*0\s*;", other)
+    assert re.search(r"kClockPin\s*=\s*1\s*;", other)

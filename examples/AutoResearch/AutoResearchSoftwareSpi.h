@@ -5,15 +5,17 @@
 #include <FastLED.h>
 #include "fl/stl/span.h"
 #include "fl/stl/static_assert.h"
+#include "AutoResearchSoftwareSpiPins.h"
 
 namespace software_spi_probe {
-using Output = ::SoftwareSPIOutput<0, 1, DATA_RATE_MHZ(1)>;
+using Output = ::SoftwareSPIOutput<kDataPin, kClockPin, DATA_RATE_MHZ(1)>;
+// CI13xx deliberately reuses PA2/PA3 here; this is not a second pin-pair proof.
 using AlternateOutput = ::SoftwareSPIOutput<2, 3, DATA_RATE_MHZ(1)>;
 #if !defined(FASTLED_FORCE_SOFTWARE_PINS)
 // The forced common pin API lacks validpin(); keep real writer instantiation
 // below so that this mode's register safety is still inspected (#5056).
-FL_STATIC_ASSERT(fl::FastPin<0>::validpin(), "audit data pin must exist");
-FL_STATIC_ASSERT(fl::FastPin<1>::validpin(), "audit clock pin must exist");
+FL_STATIC_ASSERT(fl::FastPin<kDataPin>::validpin(), "audit data pin must exist");
+FL_STATIC_ASSERT(fl::FastPin<kClockPin>::validpin(), "audit clock pin must exist");
 FL_STATIC_ASSERT(fl::FastPin<2>::validpin(), "alternate audit data pin must exist");
 FL_STATIC_ASSERT(fl::FastPin<3>::validpin(), "alternate audit clock pin must exist");
 #endif
@@ -23,7 +25,7 @@ FL_STATIC_ASSERT(fl::FastPin<3>::validpin(), "alternate audit clock pin must exi
 // boundary independently. They use the actual selected production policy.
 #define FL_SPI_DELAY_PROBE(COUNT) \
     extern "C" FL_KEEP_ALIVE FL_NO_INLINE void software_spi_probe_delay_##COUNT() { \
-        fl::BitbangPin<fl::FastPin<1>>::template delay<COUNT>(); \
+        fl::BitbangPin<fl::FastPin<software_spi_probe::kClockPin>>::template delay<COUNT>(); \
     }
 FL_SPI_DELAY_PROBE(0)
 FL_SPI_DELAY_PROBE(1)
@@ -41,7 +43,7 @@ FL_SPI_DELAY_PROBE(2147483648)
 // Retained but never called: real vendor codegen for zero/tiny/odd/long
 // defaults, including a phase above AVR's signed16 cycle_t range.
 extern "C" FL_KEEP_ALIVE FL_NO_INLINE void software_spi_probe_delay_boundaries() {
-    using Timing = fl::BitbangPin<fl::FastPin<1>>;
+    using Timing = fl::BitbangPin<fl::FastPin<software_spi_probe::kClockPin>>;
 #if !defined(ESP8266)
     Timing::template delay<-100>();
 #endif
@@ -53,7 +55,9 @@ extern "C" FL_KEEP_ALIVE FL_NO_INLINE void software_spi_probe_delay_boundaries()
     Timing::template delay<57>();
     Timing::template delay<40000>();
     Timing::template delay<2147483648ll>();
-    fl::GenericSoftwareSPIOutput<0, 1, 80000>::writeByte(0x81);
+    fl::GenericSoftwareSPIOutput<software_spi_probe::kDataPin,
+                                 software_spi_probe::kClockPin,
+                                 80000>::writeByte(0x81);
 }
 
 extern "C" FL_KEEP_ALIVE FL_NO_INLINE void software_spi_probe_init() {
@@ -80,7 +84,7 @@ extern "C" FL_KEEP_ALIVE FL_NO_INLINE void software_spi_probe_pixels(::PixelCont
 }
 
 extern "C" FL_KEEP_ALIVE FL_NO_INLINE void software_spi_probe_atomic(fl::u8 value) {
-    fl::BitbangPin<fl::FastPin<0>>::template write<0>(value);
+    fl::BitbangPin<fl::FastPin<software_spi_probe::kDataPin>>::template write<0>(value);
 }
 
 // A second pair exercises distinct physical masks on boards such as ClearCore

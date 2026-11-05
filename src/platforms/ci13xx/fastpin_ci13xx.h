@@ -9,6 +9,15 @@
 #include "fl/system/arduino.h"
 #include "fl/system/fastpin_base.h"
 
+// PA2/PA3 are GPIOs common to CI1302/CI1303/CI1306, including crystal builds.
+// Keep defaults available when hardware FastPin is explicitly disabled too.
+#ifndef FL_PIN_SPI_DATA_1
+#define FL_PIN_SPI_DATA_1 2
+#endif
+#ifndef FL_PIN_SPI_CLOCK_1
+#define FL_PIN_SPI_CLOCK_1 3
+#endif
+
 namespace fl {
 
 #if defined(FASTLED_FORCE_SOFTWARE_PINS)
