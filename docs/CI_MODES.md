@@ -40,6 +40,12 @@ the emitted catalog with GitHub labels. Existing `platform:` labels are
 metadata and never select jobs. Fork PRs cannot execute board or selection
 jobs.
 
+`master` merges through a GitHub merge queue. `CI summary` in `ci-labels.yml`
+is the one required check: on PRs it covers label and catalog validation, and on
+`merge_group` it also covers Linux/Windows native smoke and Linux `CompileTests`
+against the exact merge result. Add labels before enqueueing to get broader PR
+coverage; labels do not expand the queue run.
+
 One historical ordinary source-change PR used 128.89 runner-minutes across
 20 PR workflows
 ([head `cd48ec4`](https://github.com/FastLED/FastLED/pull/4418)); the merged
