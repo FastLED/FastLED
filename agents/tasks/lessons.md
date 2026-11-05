@@ -1,5 +1,12 @@
 # Lessons Learned
 
+- A bus-rebinding test must observe the selected bus as well as encoded bytes.
+  Returning the same mock delegate type for every bus can hide dropped
+  rebinding. Explicit bus requests must either be applied or rejected;
+  platform-default equality alone does not prove a custom controller uses it.
+  When the requested transport is already a controller base, retain its native
+  wrapper hooks and verify actual capture/initialization behavior as well.
+
 - Treat the requested final scheduling boundary as authoritative: when both
   core affinity and priority belong to Channels, remove both from legacy
   templates instead of preserving an intermediate priority-only API.

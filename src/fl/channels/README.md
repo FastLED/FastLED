@@ -170,11 +170,19 @@ Pinning can protect another core from worker preemption, but DMA/cache/bus
 contention remains. A busy selected core or a lower priority can delay refills;
 validate long multi-chunk strips under application load.
 
-Custom chipset controllers with constructor behavior or encoding overrides
-must provide their own `WithBus<Bus>` alias that retains those hooks
-around the rebound transport. Inheriting a plain transport's alias alone does
-not preserve custom behavior. Built-in fixed-RGBW and 16-bit wrappers provide
-this composition. Rename custom `WithWorker` aliases to `WithBus` and remove
+When changing transports, custom chipset controllers with constructor behavior
+or encoding overrides must provide their own `WithBus<Bus>` alias that retains
+those hooks around the rebound transport. An inherited plain transport alias
+alone does not preserve custom behavior when changing buses. Built-in
+fixed-RGBW and 16-bit wrappers provide this composition. `Bus::AUTO` retains the original controller. An explicit
+bus uses `WithBus<B>` whenever available, including the platform default.
+If that alias names an existing base of the original controller, the original
+controller is retained, preserving its native initialization and encoding hooks
+for that transport. Otherwise, the rebound type is selected.
+A native controller without this alias may retain its platform default bus;
+an explicit non-default bus requires the alias and otherwise fails to compile.
+On platforms without a Channel default bus, only `Bus::AUTO` has this fallback.
+Rename custom `WithWorker` aliases to `WithBus` and remove
 their scheduling arguments; worker settings belong to channel configuration.
 
 ### Channel API (Recommended)

@@ -43,3 +43,24 @@ No fresh flash or RAM savings measurement is claimed.
 Publication completion is proved by the follow-up PR's current review,
 exact-head full CI coverage and merge record, rather than this pre-publication
 snapshot.
+
+## Hosted review follow-up
+
+PR #5023 review identified bus-selection edge cases in the renamed helper:
+an explicit non-default bus without a rebind alias must not be silently
+ignored, and an explicit platform-default bus must apply an available custom
+alias. Wrapper tests must observe the selected bus as well as output bytes.
+These findings require focused RED/GREEN coverage and renewed validation;
+merge remains pending.
+
+The explicit-bus regression first failed its two assertions in debug mode
+(9.63 seconds). A second regression against the real host controller exposed
+lost native capture when selecting the same transport (10.52 seconds).
+The helper now retains a controller when the rebound transport is already its
+base, preserving native initialization, refresh limits and capture hooks.
+Different explicit buses still rebind; unsupported non-default buses reject.
+Focused debug tests pass (56.70 seconds for the bridge and 29.03 seconds for
+UCS7604), the canonical S3 build passes (2m14s), lint passes, and independent
+review of the six-file follow-up is clean. Final full native debug validation
+passes all 330 unit groups and 95 examples (291.34 seconds including rebuild).
+Fresh exact-head hosted CI and final review clearance remain publication gates.

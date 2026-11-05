@@ -25,6 +25,7 @@
 #include "fl/stl/type_traits.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/memory_resource.h"
+#include "platforms/shared/active_strip_data/active_strip_data.h"
 #include "test.h"
 
 using namespace fl;
@@ -151,6 +152,16 @@ struct BusOnlyCustomRebind {
     using WithBus = WorkerTestChipset<27, RGB>::WithBus<B>;
 };
 
+struct NativeBusController {};
+
+template<typename Controller, Bus B>
+auto hasClocklessBusController(int) -> decltype(
+    static_cast<typename detail::ClocklessBusController<Controller, B>::type*>(nullptr),
+    fl::true_type());
+
+template<typename Controller, Bus B>
+fl::false_type hasClocklessBusController(...);
+
 template<typename API>
 auto acceptsClocklessTemplateCore(int) -> decltype(
     fl::declval<API&>().template addLeds<WS2812B, 27, RGB,
@@ -230,6 +241,15 @@ class CountingHookController : public TestController {
     }
 };
 
+// Models native wrappers such as RP PIO and RMT that inherit WithBus while
+// providing initialization and refresh-rate hooks of their own.
+class NativeHookController : public ClocklessController<26, TIMING_WS2812_800KHZ, RGB> {
+  public:
+    static bool& initialized() { static bool value = false; return value; }
+    void init() FL_NO_EXCEPT override { initialized() = true; }
+    u16 getMaxRefreshRate() const FL_NO_EXCEPT override { return 400; }
+};
+
 }  // namespace slim_bridge_test
 
 using namespace slim_bridge_test;
@@ -255,8 +275,7 @@ FL_TEST_CASE("Legacy addLeds templates do not accept worker scheduling settings 
 
 FL_TEST_CASE("addLeds bus rebinding preserves default storage and worker policy #5001") {
     using Original = WS2812<27, RGB>;
-    using Automatic = detail::ClocklessBusController<Original,
-        DefaultBus<ClocklessChipset>::value>::type;
+    using Automatic = detail::ClocklessBusController<Original, Bus::AUTO>::type;
     // Preserve platform hooks when Auto selects the original transport.
     FL_CHECK_TRUE((fl::is_same<Original, Automatic>::value));
     using Default = WorkerTestChipset<27, RGB>;
@@ -289,6 +308,45 @@ FL_TEST_CASE("addLeds bus rebinding preserves default storage and worker policy 
     FL_CHECK_EQ(driver.requestedCore, Core::Core1);
     FL_CHECK_EQ(driver.requestedPriority, Priority::Medium);
     FL_CHECK_EQ(driver.enqueueCount, 1);
+}
+
+FL_TEST_CASE("Explicit clockless buses rebind or reject unsupported controllers #5001") {
+    constexpr Bus platformBus = DefaultBus<ClocklessChipset>::value;
+    constexpr Bus otherBus = platformBus == Bus::BIT_BANG ? Bus::RMT : Bus::BIT_BANG;
+    using BoundElsewhere = WorkerTestChipset<27, RGB>::WithBus<otherBus>;
+    using Selected = detail::ClocklessBusController<BoundElsewhere, platformBus>::type;
+    using Expected = BoundElsewhere::WithBus<platformBus>;
+    FL_CHECK_TRUE((fl::is_same<Selected, Expected>::value));
+    FL_CHECK_FALSE((decltype(hasClocklessBusController<NativeBusController, otherBus>(0))::value));
+    FL_CHECK_TRUE((decltype(hasClocklessBusController<NativeBusController, Bus::AUTO>(0))::value));
+    FL_CHECK_TRUE((decltype(hasClocklessBusController<NativeBusController, platformBus>(0))::value));
+}
+
+FL_TEST_CASE("Explicit native bus preserves stub capture and native wrapper hooks #5001") {
+    using Native = ClocklessController<26, TIMING_WS2812_800KHZ, RGB>;
+    using Selected = detail::ClocklessBusController<Native, Bus::BIT_BANG>::type;
+    FL_CHECK_TRUE((fl::is_same<Selected, Native>::value));
+    using SelectedHooks = detail::ClocklessBusController<NativeHookController, Bus::BIT_BANG>::type;
+    FL_CHECK_TRUE((fl::is_same<SelectedHooks, NativeHookController>::value));
+    SelectedHooks hooked;
+    NativeHookController::initialized() = false;
+    hooked.init();
+    FL_CHECK_EQ(hooked.getMaxRefreshRate(), 400);
+    FL_CHECK_TRUE(NativeHookController::initialized());
+    auto& strips = ActiveStripData::Instance();
+    strips.onBeginFrame();
+    auto cleanup = fl::make_scope_exit([&]() { strips.onBeginFrame(); });
+    Selected controller;
+    CRGB leds[] = {CRGB::Red};
+    controller.setLeds(leds, 1);
+    controller.showLeds(255);
+    FL_CHECK_EQ(strips.getData().size(), 1u);
+    if (strips.getData().empty()) { return; }
+    const auto& bytes = strips.getData().begin()->second;
+    FL_REQUIRE_EQ(bytes.size(), 3u);
+    FL_CHECK_EQ(bytes[0], 255);
+    FL_CHECK_EQ(bytes[1], 0);
+    FL_CHECK_EQ(bytes[2], 0);
 }
 
 FL_TEST_CASE("Default worker facade avoids backend dispatch #5001") {
