@@ -4,8 +4,11 @@
 
 #include "fl/stl/asio/http/server.h"
 #include "fl/log/log.h"
+#include "test.h"
 
-int main() {
+FL_TEST_FILE(FL_FILEPATH) {
+
+FL_TEST_CASE("HTTP server registers routes") {
 #ifdef FASTLED_HAS_NETWORKING
     fl::HttpServer server;
 
@@ -20,10 +23,7 @@ int main() {
         return fl::http_response::ok().json(response);
     });
 
-    FL_WARN("HTTP server API test passed");
-#else
-    FL_WARN("Networking not available - test skipped");
 #endif
-
-    return 0;
 }
+
+} // FL_TEST_FILE

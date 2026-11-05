@@ -8,6 +8,7 @@ constexpr fl::EmitterProfile kTinyProfile = fl::EmitterProfile::rgb(
     fl::Chromaticity(.150f, .060f), 1.0f, 1.0f, 1.0f);
 }
 
+// allow-test-main: TINY ABI cannot link the host-tier shared test objects
 int main() {
     CRGB leds[1] = {};
     fl::ChannelConfig config("tiny-static", fl::ClocklessChipset(), leds, RGB);

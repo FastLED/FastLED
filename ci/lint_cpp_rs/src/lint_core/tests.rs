@@ -10,6 +10,58 @@ mod tests {
         }
     }
 
+    fn test_main_lines(content: &str) -> Vec<usize> {
+        TestMainChecker
+            .check_file_content(&file("tests/fl/x.cpp", content))
+            .into_iter()
+            .map(|(line, _)| line)
+            .collect()
+    }
+
+    #[test]
+    fn test_main_flags_definitions() {
+        assert_eq!(test_main_lines("int main() {}\n"), vec![1]);
+        assert_eq!(test_main_lines("\nint main(int argc, char** argv) {\n"), vec![2]);
+        assert_eq!(test_main_lines("int\nmain() {}\n"), vec![2]);
+        assert_eq!(test_main_lines("#else\nvoid main(void) {\n#endif\n"), vec![2]);
+    }
+
+    #[test]
+    fn test_main_escape_hatch_requires_reason_and_adjacency() {
+        assert!(test_main_lines("int main() {} // allow-test-main: probe\n").is_empty());
+        assert!(test_main_lines("// allow-test-main: probe\nint main() {}\n").is_empty());
+        assert_eq!(test_main_lines("// allow-test-main:\nint main() {}\n"), vec![1]);
+        assert_eq!(test_main_lines("// allow-test-main\nint main() {}\n"), vec![1]);
+        assert_eq!(test_main_lines("// allow-test-main: x\n\nint main() {}\n"), vec![1, 3]);
+        assert_eq!(test_main_lines("// allow-test-main: x\nint y;\n"), vec![1]);
+    }
+
+    #[test]
+    fn test_main_ignores_non_definitions() {
+        for src in [
+            "// int main() {}\n",
+            "/*\nint main() {}\n*/\n",
+            "const char* s = \"int main() {\";\n",
+            "const char* s = R\"(\nint main() {}\n)\";\n",
+            "int fl_main(int argc) {}\n",
+            "int run_main() {}\n",
+            "int (*main)(int);\n",
+            "int main();\n",
+            "int x = Foo::main(1);\n",
+            "main();\n",
+        ] {
+            assert!(test_main_lines(src).is_empty(), "{src}");
+        }
+    }
+
+    #[test]
+    fn test_main_scope() {
+        let root = Path::new(".");
+        assert!(TestMainChecker.should_process_file("tests/fl/log/x.cpp", root));
+        assert!(!TestMainChecker.should_process_file("tests/profile/audio/x.cpp", root));
+        assert!(!TestMainChecker.should_process_file("src/fl/x.cpp", root));
+    }
+
     #[test]
     fn raw_alignas_flags_code_but_not_macros_or_comments() {
         let checker = RawAlignasChecker;

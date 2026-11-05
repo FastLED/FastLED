@@ -138,6 +138,7 @@ extern "C" TEST_DLL_EXPORT int run_tests(int argc, const char** argv) {
 
 #else
 // Standard mode: Define main function
+// allow-test-main: harness entry point when not built as a test DLL
 int main(int argc, char** argv) {
     return testing_detail::fl_main(argc, argv);
 }
