@@ -38,6 +38,13 @@ def test_default_and_label_removal_do_not_run_boards() -> None:
     assert select("push", {"after": "b" * 40}, LABELS).cells == []
 
 
+def test_merge_group_runs_the_minimal_set_at_the_queue_sha() -> None:
+    event = {"merge_group": {"head_sha": "c" * 40}}
+    selection = select("merge_group", event, LABELS)
+    assert selection.cells == []
+    assert selection.sha == "c" * 40
+
+
 def test_full_covers_every_board_job_and_overrides_selectors() -> None:
     full = select("pull_request", pr_event(["ci-full", "ci-platform:teensy41"]), LABELS)
     assert full.mode == "full"
