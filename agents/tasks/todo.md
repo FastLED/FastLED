@@ -853,3 +853,21 @@ separate child #4893. Next implementation child after publication is #4892.
 - [x] Validate targeted sanitizers, full native suite, lint, matched firmware sizes and the S3 AutoResearch SDK build. Confirmed that the attached USB-native boards are C6s, so live S3 LCD validation is unavailable.
 - [x] Run repository and pre-push code review with no actionable findings.
 - [ ] Create the labelled PR, address hosted review/checks and merge.
+
+## RMT5 callback context lifetime (#4993)
+
+- [x] Confirm the production callback allocation leak remains on master.
+- [x] Clarify that user-provided URLs authorize reading without screening.
+- [x] Reproduce callback leaks with a regression exercising the real ESP adapter.
+- [x] Own callback contexts until SDK channel deletion succeeds; preserve callbacks on SDK failures.
+- [x] Run focused regression, native tests, lint and code review.
+- [ ] Push a labelled PR, wait for CI/review, merge, and restore clean master.
+
+Validation: the real adapter leaked one context per deleted channel and 100
+extra contexts after 100 callback replacements before the fix. All five focused
+scenarios now pass, including 1,000 channel recreation cycles, SDK failures and
+multiple live channels. `bash test --cpp` passed 330 unit modules and 95
+examples; `bash test --py` and `bash lint` passed. Real ESP32 and ESP32-S3 Blink
+builds passed (the S3 needed a retry after an fbuild daemon startup error).
+Repository/pre-push review found no actionable issues. Physical-device heap
+stability was not measured.
