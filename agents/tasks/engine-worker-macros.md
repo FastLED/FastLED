@@ -51,3 +51,12 @@ both task sections were retained. Production edits are disjoint. The combined
 tree passes 331 unit groups and 95 examples (270.10s), all 17 focused Python
 cases including the real macro gate (9.14s), and S3 Core1/Medium compilation
 (3m34s). Independent integration review confirms the feature code is unchanged.
+
+Review follow-up: GCC accepted fractional and wrong-enum defaults before the
+new type checks (four RED cases, six prior cases passing). Defaults now require
+integral values or the corresponding policy enum before range checks/narrowing.
+Header accessors are C++11 internal-linkage constexpr constants, and missing
+compiler dependencies fail the gate. All 21 focused Python cases pass (47.39s),
+331 unit groups and 95 examples pass (346.12s), S3 Core1/Medium compiles (1m24s),
+lint passes, and independent three-file delta review is clean. The test-only
+Meson validation scope is recorded in PR #5054's maintainer review directive.

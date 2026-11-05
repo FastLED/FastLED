@@ -79,17 +79,17 @@ constexpr int kLcdWorkerDefaultPriority =
 FL_STATIC_ASSERT(kLcdWorkerPriorityCount > 1 && kLcdWorkerPriorityCount <= 256,
                  "LCD worker priorities must fit in a byte");
 
-FL_STATIC_ASSERT(static_cast<fl::i32>(detail::engineWorkerDefaultCore()) < kLcdWorkerCoreCount,
+FL_STATIC_ASSERT(static_cast<fl::i32>(detail::kEngineWorkerDefaultCore) < kLcdWorkerCoreCount,
                  "FL_ENGINE_WORKER_CORE selects an unavailable LCD worker core");
 
 constexpr Core resolveLcdWorkerCore(Core core) FL_NO_EXCEPT {
     return core != Core::Auto ? core
-        : detail::engineWorkerDefaultCore() == Core::Auto ? Core::Any
-        : detail::engineWorkerDefaultCore();
+        : detail::kEngineWorkerDefaultCore == Core::Auto ? Core::Any
+        : detail::kEngineWorkerDefaultCore;
 }
 
 constexpr Priority lcdWorkerPriorityPolicy(Priority priority) FL_NO_EXCEPT {
-    return priority != Priority::Auto ? priority : detail::engineWorkerDefaultPriority();
+    return priority != Priority::Auto ? priority : detail::kEngineWorkerDefaultPriority;
 }
 
 constexpr u8 resolveLcdWorkerPriority(Priority priority) FL_NO_EXCEPT {
