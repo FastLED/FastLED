@@ -6,7 +6,7 @@ Baseline: `94dab9c6b720ea277ec9177c93129c7dc646c5c3`.
 ## Plan
 
 - [x] Research the shared production writer and establish the parent issue.
-- [x] Run three disjoint Sol discovery audits; verify 27 native child relationships.
+- [x] Run three disjoint Sol discovery audits; verify 29 native child relationships (including judge-discovered gaps).
 - [ ] Consolidate all source candidates, platform aliases and negative findings.
 - [x] Read the children back and choose a serial implementation order.
 - [ ] Establish a generated discovery gate coupled to behavioral evidence.
@@ -33,6 +33,8 @@ discovery results back; implementation agents run serially.
 - Apollo3 has a direct platform include route; central FastPin dispatch alone
   cannot establish its reachability.
 - Runtime SPIBusManager and BitBangChannelDriver loops are separate candidates.
+- Native AVR SPI/UART GPIO methods (#5052) and SAMD SERCOM GPIO handoff
+  (#5053) invalidate broad hardware-only exclusions; classify per entrypoint.
 - Legacy duplicate headers, pin banks and inverted mappings need explicit cases.
 - The baseline denominator includes all 2,986 tracked `src` files, including
   zero-query matches; five query families currently identify 160 candidates.
@@ -62,8 +64,16 @@ chip without evidence. Do not claim hardware measurements for unattached boards.
 
 ## Next steps
 
-The sole implementation agent is writing RED fixtures for #5031. The parent
-will run and record RED before allowing its implementation. Then fix #5051
-and #5027 rate correctness, #5032 shared delay, and each backend/runtime child
-serially. The independent judge must look for omitted configurations, vacuous
-gates and source/manifest drift.
+The #5031 foundation has 20 passing Python tests and passing actual generic
+writer traces in normal/debug mode. A restored production three-store helper
+mutation fails operation-count assertions; restoration returns GREEN. The
+inverted-clock production target stays RED for the real #5044 defect (41 sampled
+bits instead of 40). The audit CLI accounts for all 2,986 baseline/current
+source files and leaves all 29 required findings unresolved. No target runner
+or fabricated receipt is accepted as proof.
+
+After the foundation lint handoff, prioritize #5044 to turn its observed RED
+GREEN, then #5052 AVR bit selection, #5051/#5027 rate correctness, #5032 shared
+delay and the remaining backend/runtime children serially. #5031 remains open
+until real execution/configuration/mutation runners and a valid positive
+control are wired. The judge must independently certify the final result.
