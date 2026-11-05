@@ -64,7 +64,7 @@ chip without evidence. Do not claim hardware measurements for unattached boards.
 
 ## Next steps
 
-The #5031 foundation has 27 passing Python tests and passing actual generic
+The #5031 foundation has 31 passing Python tests and passing actual generic
 writer traces in normal/debug mode. The inverted-clock target is GREEN for
 #5044, and three actual production mutations fail during execution. The audit
 CLI accounts for all 2,986 baseline/current source files. There were 31 native
@@ -108,7 +108,8 @@ restore to the fixed source. Real stock ClearCore builds pass with normal and
 forced-atomic mode, including production streaming on IO0/1 and IO2/3. The
 forced-software-pin integration probe initially failed actual header declarations
 and left unsafe NoMap use in the main object (#5056). It now builds after the
-shared fallback fix; include-order and real mapped-target controls remain. The judge confirmed the
+shared fallback fix. Both include orders and the real Uno forced mapped-pin
+control also pass. The judge confirmed the
 enabled SAME53 restored-three-store mutation (24 versus 16 stores) with a
 matching object hash, alongside host 73 versus 49 and 149 versus 101 store
 counts. Source-bound final records and complete gate certification remain
@@ -155,11 +156,24 @@ mapped controls and existing stub GPIO callbacks. Baseline execution faulted on
 an actual null-pointer write in `lo()` (GDB registers and ELF source location
 retained). Fixed debug tests pass. Restoring the old component and independently
 removing generic null-port routing both fail during execution; restored fixed
-source returns GREEN. Real ClearCore forced and normal builds pass. Explicit
-include order, a real mapped forced-pin target and audit-runner integration
-remain; no physical measurements are claimed.
+source returns GREEN. Real ClearCore forced, normal and atomic builds pass.
+Both include orders pass on ClearCore and Uno; Uno's retained final ELF proves
+actual mapping-table initialization and byte-width register operations. The
+fixed native runner fingerprints and executes the forced-pin target. The judge
+accepted these scoped results; #5031 run-backed acceptance is still unfinished.
+No physical measurements are claimed for ClearCore or Uno.
 
 The divider-16 native test first exposed an independent missing
 `fl::delaycycles<0>()` link symbol under #5032. Divider 8 isolates #5056 without
 replacing the production delay implementation. The zero-delay defect remains
 required work; the isolated test does not establish its correctness.
+
+## First implementation PR validation
+
+Root's broad native run passed 334 unit targets and 95 examples. All 31 focused
+Python tests pass in normal and development mode, and full repository lint
+passes. The actual audit runner executes all three native targets successfully
+while overall completion remains RED: 2,986 baseline files, 2,987 current files,
+32 required findings and 3,162 unresolved checks. The judge reviewed all 39
+changed files in `579ddbb51..ace1b6455` with no blocking code findings. This is
+validation for the first production fix batch, not final platform certification.
