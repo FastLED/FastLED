@@ -46,9 +46,8 @@ using namespace fl;
 
 namespace { // anonymous namespace for forced software SPI tests
 
-// Divider8 uses the existing <=10 delay branch to isolate GPIO correctness.
-// Divider16 currently links an unavailable delaycycles<0> specialization; that
-// independent default-delay defect remains tracked by #5032, not mocked here.
+// Keep the original divider8 GPIO regression distinct from the divider16
+// default-policy linkage regression below. Neither substitutes a delay policy.
 using NoMapOutput = GenericSoftwareSPIOutput<206, 207, 8>;
 using MappedOutput = GenericSoftwareSPIOutput<208, 209, 8>;
 
@@ -102,6 +101,36 @@ void checkBytes(const Capture& capture, fl::span<const u8> expected) {
 }
 
 } // anonymous namespace for forced software SPI tests
+
+// No test delay policy: exercise the actual default timing component, including
+// non-positive arguments that previously needed unavailable fl specializations.
+FL_TEST_CASE("Default SPI timing supports signed boundaries and bounded long requests (#5032)") {
+    using Policy = fl::BitbangPin<fl::FastPin<207>>;
+    Policy::delay<-100>();
+    Policy::delay<-1>();
+    Policy::delay<0>();
+    Policy::delay<1>();
+    Policy::delay<2>();
+    Policy::delay<3>();
+    Policy::delay<55>();
+    Policy::delay<57>();
+    Policy::delay<4096>();
+    Policy::delay<40000>();
+    Policy::delay<2147483648ll>();
+    FL_CHECK_FALSE(Policy::kCalibratedTiming);
+}
+
+// Divider16 exposed the original undefined fl::delaycycles<0> link symbol.
+// This executes the actual writer independently of the cycle-recording policy.
+FL_TEST_CASE("Default software SPI divider16 links and preserves GPIO payload (#5032)") {
+    Capture capture;
+    fl::GenericSoftwareSPIOutput<206, 207, 16> output;
+    output.init();
+    capture.clear();
+    u8 input[] = {0x81};
+    output.writeBytes(input, 1);
+    checkBytes(capture, input);
+}
 
 FL_TEST_CASE("Forced NoPinMap production SPI bulk must use real logical pin writes (#5056)") {
     Capture capture;

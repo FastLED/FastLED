@@ -139,19 +139,22 @@ all unrelated bits, including high-bit sentinels, so narrowing a production
 word to eight bits cannot pass as width coverage.
 
 The audit-only AutoResearch branch instantiates the actual software-SPI writer
-on logical pins 0/1 and 2/3 and retains `software_spi_probe_*` functions in the sketch
-object for target disassembly. Its setup/loop are empty: compilation does not
-drive pins or establish electrical timing. The branch is absent from normal
-AutoResearch builds. Use the existing compile wrapper, with a 15-minute or
-longer build deadline:
+on logical pins 0/1 and 2/3. Its setup retains `software_spi_probe_*` function
+addresses through volatile RAM accesses, forcing their dependencies to survive
+final linking. It never calls the GPIO or delay probes; loop is empty. This
+does not drive pins or establish electrical timing. The branch is absent from
+normal AutoResearch builds. Use the existing compile wrapper, with a 15-minute
+or longer build deadline:
 
 ```sh
-bash compile clearcore --examples AutoResearch --no-filter --defines FL_SOFTWARE_SPI_COMPILE_PROBE=1 --build-info .build/software-spi-clearcore-5044-build-info.json
-bash compile clearcore --examples AutoResearch --no-filter --defines FL_SOFTWARE_SPI_COMPILE_PROBE=1,FAST_SPI_INTERRUPTS_WRITE_PINS=1 --build-info .build/software-spi-clearcore-5044-atomic-build-info.json
+FBUILD_DEV_MODE=1 bash compile clearcore --examples AutoResearch --no-filter --defines FL_SOFTWARE_SPI_COMPILE_PROBE=1 --build-info .build/software-spi-clearcore-5044-build-info.json
+FBUILD_DEV_MODE=1 bash compile clearcore --examples AutoResearch --no-filter --defines FL_SOFTWARE_SPI_COMPILE_PROBE=1,FAST_SPI_INTERRUPTS_WRITE_PINS=1 --build-info .build/software-spi-clearcore-5044-atomic-build-info.json
 ```
 
-Inspect the retained sketch object from each build with that toolchain's
-objdump. Check scalar/atomic reversed OUTCLR (logical high) and OUTSET (logical
+Inspect retained symbols and instructions in the final ELF from each build
+with that toolchain's objdump. An object can contain unresolved delay calls
+that section garbage collection hides during linking; an object-only success
+is insufficient. Check scalar/atomic reversed OUTCLR (logical high) and OUTSET (logical
 low), bulk/repeat/pixel full-OUT words, native pin setup, register width, and
 minimum delays. Save each build's object/disassembly before the next build.
 ClearCore IO0-IO3 permit exclusive-port streaming with all conservative padding
@@ -173,3 +176,40 @@ Required restored-defect mutations, with restoration and GREEN after each:
   models and unrelated-bit preservation assertions must fail.
 
 These commands and mutations are verification procedures, not passing results.
+
+## Shared default timing (#5032)
+
+`BitbangTiming` provides a SPI-local inline backend; it does not change the
+global clockless `fl::delaycycles` API. Nonpositive requests emit no padding.
+Phase arithmetic and template arguments use `i64`, preserving the full `u32`
+SPI divider range even when AVR's unrelated `cycle_t` is signed 16-bit.
+Uncalibrated policies request the full rounded-up half-period or 35 ns floor,
+whichever is larger, without subtracting unproved call or GPIO costs.
+ESP8266 explicitly retains its existing calibrated policy and GPIO16 exception.
+
+AVR uses compiler cycle-delay builtins with bounded arguments. Cortex-M and
+the nine reviewed ESP32 application-core targets use retained instruction
+padding and bounded counted loops. Two additions per requested cycle use a
+documented maximum issue-width bound; they do not assume NOP latency or credit
+dependent-instruction stalls. This intentionally overpads single-issue cores.
+ESP32 does not poll per-core counters: migration and SDK counter rewrites must
+not prematurely end a wait. Its guarantee assumes the actual CPU clock never
+exceeds configured `F_CPU`; slower clocks and preemption add time. Pico SDK
+minimum-cycle waits are used where available. CI13xx and the ESP8266 forced
+fallback retain their startup-dependent cycle-counter contracts. Stub/WASM
+timing establishes logical behavior only. Unrecognized hardware targets require
+a reviewed backend for positive waits; zero remains a no-op.
+
+The retained leaf probes cover counts 0, 1, 2, 3, 15, 16, 17, 55, 57, 40,000
+and 2^31. Inspect actual target code for tiny inline padding, correct loop
+initialization/backedges/tails, bounded emitted size, and absence of old
+out-of-line calls or ESP32 counter polling. Literal native phase budgets
+include odd dividers, 80,000 and `u32` maximum, but those observations alone
+do not establish target timing. Restore the old out-of-line backend and the
+old assumed-overhead accounting independently; each must fail its intended
+linkage or production-argument check, then return GREEN after restoration.
+
+CPU padding, vendor compilation and retained code do not prove peripheral
+write completion, electrical pulse widths or exact requested throughput.
+Physical claims require separate measurements. The #5032 acceptance matrix,
+including CI13xx target compilation, remains required before closing it.

@@ -114,8 +114,23 @@ template <int Model> void checkInitClock() {
     fl::FastPin<221 + Model * 2>::setOutput();
     fl::FastPin<221 + Model * 2>::hi();
     trace.clearTrace();
-    Output output;
+    FL_REQUIRE_FALSE(trace.clockLow());
+    struct ReleaseObserver : fl::Selectable {
+        explicit ReleaseObserver(SpiTraceFixture<Model>& value) : trace(value) {}
+        void select() FL_NO_EXCEPT override {}
+        void release() FL_NO_EXCEPT override {
+            ++releases;
+            clock_was_low = trace.clockLow();
+        }
+        bool isSelected() FL_NO_EXCEPT override { return false; }
+        SpiTraceFixture<Model>& trace;
+        int releases = 0;
+        bool clock_was_low = false;
+    } observer(trace);
+    Output output(&observer);
     output.init();
+    FL_CHECK_EQ(observer.releases, 1);
+    FL_CHECK(observer.clock_was_low);
     FL_CHECK(trace.clockLow());
     trace.clearTrace();
     Output::writeByte(0xa5);

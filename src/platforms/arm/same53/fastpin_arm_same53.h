@@ -97,17 +97,13 @@ template <> class FastPin<1> : public ClearCoreFastPin<1, 1> {};
 template <> class FastPin<2> : public ClearCoreFastPin<2, 6> {};
 template <> class FastPin<3> : public ClearCoreFastPin<3, 7> {};
 
-template <u8 PIN> struct BitbangPin<FastPin<PIN>> {
+template <u8 PIN> struct BitbangPin<FastPin<PIN>> : BitbangTiming {
     static constexpr bool kAtomicWrite = true;
     // IO0-IO3 share full-width Group0 OUT. Streaming retains conservative
     // padding and requires exclusive port ownership; interrupt-safe output
     // continues to use the reversed atomic destinations below.
     static constexpr bool kTwoWriteStream = PIN < 4;
     static constexpr cycle_t kMinWriteCycles = 0;
-    template <cycle_t CYCLES>
-    FASTLED_FORCE_INLINE static void delay() FL_NO_EXCEPT {
-        fl::delaycycles<CYCLES>();
-    }
     template <u8 BIT>
     FASTLED_FORCE_INLINE static void write(u8 value) FL_NO_EXCEPT {
         // sport/cport express connector levels: OUTCLR raises an active-low

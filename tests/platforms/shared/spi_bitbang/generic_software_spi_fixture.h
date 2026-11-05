@@ -30,6 +30,8 @@ template <int Model> struct SpiTraceState {
     volatile Word ports[2] = {};
     fl::vector<fl::u8> sampled;
     int writes = 0;
+    fl::vector<fl::cycle_t> high_cycles;
+    fl::vector<fl::cycle_t> low_cycles;
     int high_delays = 0;
     int low_delays = 0;
     bool last_clock = false;
@@ -63,6 +65,8 @@ template <int Model> struct SpiTraceState {
     void clearTrace() {
         sampled.clear();
         writes = 0;
+        high_cycles.clear();
+        low_cycles.clear();
         high_delays = 0;
         low_delays = 0;
         last_clock = logicalClock();
@@ -136,15 +140,20 @@ template <int Model, bool Clock> class SpiTracePin {
     }
 };
 
-template <int Model, class Pin> struct SpiTracePolicy {
+template <int Model, class Pin> struct SpiTracePolicy : fl::BitbangTiming {
     static constexpr bool kAtomicWrite = Model == 7 || Model == 16;
     static constexpr bool kTwoWriteStream = SpiTraceState<Model>::kStream;
     static constexpr fl::cycle_t kMinWriteCycles = 0;
     template <fl::cycle_t Cycles> static void delay() {
         FL_STATIC_ASSERT(Cycles >= 0, "negative requested GPIO padding");
         auto& state = SpiTraceState<Model>::get();
-        if (state.logicalClock()) ++state.high_delays;
-        else ++state.low_delays;
+        if (state.logicalClock()) {
+            ++state.high_delays;
+            state.high_cycles.push_back(Cycles);
+        } else {
+            ++state.low_delays;
+            state.low_cycles.push_back(Cycles);
+        }
     }
     template <fl::u8 Bit> static void write(fl::u8 value) {
         // A pin write is the instrumentation boundary, not a copied SPI loop.
@@ -207,9 +216,9 @@ FL_SPI_TRACE_MODEL(17, 254, 255)
 
 namespace { // anonymous namespace for generic_software_spi fixture
 
-template <int Model> class SpiTraceFixture {
+template <int Model, fl::u32 Divider = 16> class SpiTraceFixture {
   public:
-    using Output = fl::GenericSoftwareSPIOutput<220 + Model * 2, 221 + Model * 2, 16>;
+    using Output = fl::GenericSoftwareSPIOutput<220 + Model * 2, 221 + Model * 2, Divider>;
     void reset() { state().reset(); }
     void clearTrace() { state().clearTrace(); }
     const fl::vector<fl::u8>& bits() const { return state().sampled; }
@@ -217,6 +226,8 @@ template <int Model> class SpiTraceFixture {
     bool clockLow() const { return !state().logicalClock(); }
     bool unrelatedPreserved() const { return state().preserved; }
     bool dataStable() const { return state().data_stable; }
+    const fl::vector<fl::cycle_t>& highCycles() const { return state().high_cycles; }
+    const fl::vector<fl::cycle_t>& lowCycles() const { return state().low_cycles; }
     int highDelayCalls() const { return state().high_delays; }
     int lowDelayCalls() const { return state().low_delays; }
     void injectInterference(bool enabled) { state().interference = enabled; }

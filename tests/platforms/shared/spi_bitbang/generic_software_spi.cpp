@@ -23,6 +23,41 @@ void checkBits(fl::span<const u8> actual, fl::span<const u8> bytes) {
     }
 }
 
+// Independent requested-period oracle: the literal half-period values below
+// round odd dividers UP. No assumed call/GPIO cycles are subtracted. Recorded
+// template arguments prove production accounting, not physical elapsed time.
+template <u32 Divider, i64 RequestedHalf> void checkRequestedPhaseCycles() {
+    SpiTraceFixture<4, Divider> trace;
+    using Output = typename SpiTraceFixture<4, Divider>::Output;
+    trace.reset();
+    Output::template writeBit<0>(1);
+    FL_REQUIRE_EQ(trace.highCycles().size(), 2);
+    FL_REQUIRE_EQ(trace.lowCycles().size(), 1);
+    // Independently convert the required 35ns floor, rounding UP.
+    const cycle_t minimum = (static_cast<u64>(FL_CPU_FREQUENCY()) * 35 + 999999999) / 1000000000;
+    const cycle_t budget = RequestedHalf > minimum ? RequestedHalf : minimum;
+    FL_CHECK_EQ(trace.highCycles()[0], budget);
+    FL_CHECK_EQ(trace.highCycles()[1], 0);
+    FL_CHECK_EQ(trace.lowCycles()[0], budget);
+    FL_CHECK_GE(trace.highCycles()[0] + trace.highCycles()[1], RequestedHalf);
+    FL_CHECK_GE(trace.lowCycles()[0], minimum);
+}
+
+FL_TEST_CASE("Software SPI records full requested phase budgets at divider boundaries") {
+    checkRequestedPhaseCycles<0, 0>();
+    checkRequestedPhaseCycles<1, 1>();
+    checkRequestedPhaseCycles<2, 1>();
+    checkRequestedPhaseCycles<3, 2>();
+    checkRequestedPhaseCycles<10, 5>();
+    checkRequestedPhaseCycles<11, 6>();
+    checkRequestedPhaseCycles<12, 6>();
+    checkRequestedPhaseCycles<16, 8>();
+    checkRequestedPhaseCycles<121, 61>();
+    checkRequestedPhaseCycles<1000, 500>();
+    checkRequestedPhaseCycles<80000, 40000>();
+    checkRequestedPhaseCycles<4294967295u, 2147483648ll>();
+}
+
 struct AdjustBytes {
     static int& adjusted() { static int value = 0; return value; }
     static int& posted() { static int value = -1; return value; }
@@ -178,8 +213,23 @@ FL_TEST_CASE("Software SPI production init establishes low clock before first by
     fl::FastPin<229>::hi();
     trace.clearTrace();
 
-    Output output;
+    FL_REQUIRE_FALSE(trace.clockLow());
+    struct ReleaseObserver : fl::Selectable {
+        explicit ReleaseObserver(SpiTraceFixture<4>& value) : trace(value) {}
+        void select() FL_NO_EXCEPT override {}
+        void release() FL_NO_EXCEPT override {
+            ++releases;
+            clock_was_low = trace.clockLow();
+        }
+        bool isSelected() FL_NO_EXCEPT override { return false; }
+        SpiTraceFixture<4>& trace;
+        int releases = 0;
+        bool clock_was_low = false;
+    } observer(trace);
+    Output output(&observer);
     output.init();
+    FL_CHECK_EQ(observer.releases, 1);
+    FL_CHECK(observer.clock_was_low);
     FL_CHECK(trace.clockLow());
     Output::writeByte(0xa5);
     const u8 expected[] = {0xa5};

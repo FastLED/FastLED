@@ -14,7 +14,7 @@
 
 #if defined(FL_SOFTWARE_SPI_COMPILE_PROBE)
 #include "AutoResearchSoftwareSpi.h"
-void setup() {}
+void setup() { softwareSpiProbeKeepLinked(); }
 void loop() {}
 #elif !FL_PLATFORM_HAS_LARGE_MEMORY
 #include "AutoResearchLowMemory.h"

@@ -54,7 +54,7 @@ class GenericSoftwareSPIOutput {
 		BitbangPin<fl::FastPin<DATA_PIN>>::kTwoWriteStream &&
 		BitbangPin<fl::FastPin<CLOCK_PIN>>::kTwoWriteStream;
 	static constexpr bool kNeedsGpioPadding = bitbangPhaseDelay(
-		static_cast<cycle_t>(SPI_SPEED / 2 + (SPI_SPEED & 1)),
+		static_cast<i64>(SPI_SPEED / 2 + (SPI_SPEED & 1)),
 		cycles_from_ns(35, FL_CPU_FREQUENCY()),
 		BitbangPin<fl::FastPin<CLOCK_PIN>>::kMinWriteCycles) > 0;
 	FASTLED_FORCE_INLINE static bool useAtomicWrites() FL_NO_EXCEPT {
@@ -185,31 +185,21 @@ public:
 	#define CLOCK_HI_DELAY do { delayNanoseconds((DELAY_NS/4)); } while(0);
 	#define CLOCK_LO_DELAY do { delayNanoseconds((DELAY_NS/4)); } while(0);
 #else
-	/// We want to make sure that the clock pulse is held high for a minimum of 35 ns.
-	#define MIN_DELAY ((NS(35)>3) ? (NS(35) - 3) : 1)
-
-	/// Half the requested bit period, in cycles, for SPI_SPEED > 10.
+	// Only a calibrated platform may retain the legacy call/GPIO credits.
+	// Other platforms receive the full rounded-up half-period or 35ns floor,
+	// whichever is larger. No call, branch or MMIO latency is assumed.
+	static constexpr bool kCalibratedTiming = BitbangPin<fl::FastPin<CLOCK_PIN>>::kCalibratedTiming;
+	static constexpr i64 kRequestedPhase = static_cast<i64>(SPI_SPEED / 2 + (SPI_SPEED & 1));
+	static constexpr i64 kConservativePhase = bitbangPhaseDelay(
+		kRequestedPhase, cycles_from_ns(35, FL_CPU_FREQUENCY()), 0);
+	#define MIN_DELAY (kCalibratedTiming ? ((NS(35)>3) ? (NS(35)-3) : 1) : kConservativePhase)
 	#define FL_SPI_HALF_PERIOD ((SPI_SPEED - 6) / 2)
-
-	/// Extra cycles to add on top of MIN_DELAY to reach the requested half period.
-	///
-	/// SPI_SPEED is unsigned, so `FL_SPI_HALF_PERIOD - MIN_DELAY` wraps to ~4e9
-	/// whenever the requested half period is shorter than the 35ns minimum
-	/// pulse -- which then becomes the CYCLES template argument of
-	/// delaycycles<>. That is the #974 failure: on a Teensy 3.6 (180 MHz,
-	/// MIN_DELAY = 4) a plain DATA_RATE_MHZ(4) yields SPI_SPEED = 12, so
-	/// (12-6)/2 - 4 = -1 wraps to 4294967295 cycles of NOP. Clamp to zero
-	/// instead: MIN_DELAY has already been emitted and it is longer than the
-	/// half period being asked for, so no additional delay is owed.
 	#define FL_SPI_HI_EXTRA_DELAY \
-		((SPI_SPEED > 10) \
+		(kCalibratedTiming ? ((SPI_SPEED > 10) \
 			? ((FL_SPI_HALF_PERIOD > MIN_DELAY) ? (FL_SPI_HALF_PERIOD - MIN_DELAY) : 0) \
-			: (SPI_SPEED))
-
-	/// Delay for the clock signal 'high' period
+			: SPI_SPEED) : 0)
 	#define CLOCK_HI_DELAY do { BitbangPin<fl::FastPin<CLOCK_PIN>>::template delay<MIN_DELAY>(); BitbangPin<fl::FastPin<CLOCK_PIN>>::template delay<FL_SPI_HI_EXTRA_DELAY>(); } while(0);
-	/// Delay for the clock signal 'low' period
-	#define CLOCK_LO_DELAY do { BitbangPin<fl::FastPin<CLOCK_PIN>>::template delay<((SPI_SPEED > 10) ? FL_SPI_HALF_PERIOD : (SPI_SPEED))>(); } while(0);
+	#define CLOCK_LO_DELAY do { BitbangPin<fl::FastPin<CLOCK_PIN>>::template delay<(kCalibratedTiming ? ((SPI_SPEED > 10) ? FL_SPI_HALF_PERIOD : SPI_SPEED) : kConservativePhase)>(); } while(0);
 #endif
 
 	/// Write the BIT'th bit out via SPI, setting the data pin then strobing the clock
