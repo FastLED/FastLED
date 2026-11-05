@@ -14,7 +14,7 @@
 // Portable fl::Priority policy, never a raw scheduler priority. High means
 // at networking priority or above, biased above; Medium is below networking.
 // Low is generally not recommended for timing-sensitive engine workers.
-// Auto (0) retains the backend's existing default.
+// Auto (0) retains the backend's existing default: High on the LCD/I2S worker.
 #ifndef FL_ENGINE_WORKER_PRIORITY
 #define FL_ENGINE_WORKER_PRIORITY 0
 #endif

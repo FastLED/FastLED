@@ -255,20 +255,30 @@ engine_worker_defaults_lib = static_library('fastled_engine_worker_defaults',
   cpp_args: base_compile_args + test_abs_include_args + engine_worker_default_args + [
     '-DFASTLED_BUILDING_DLL',
   ],
+  pic: true,
   implicit_include_directories: false,
   build_by_default: false,
   install: false
 )
-engine_worker_defaults_runtime = executable('engine_worker_defaults_runtime',
+engine_worker_defaults_runtime = shared_library('engine_worker_defaults_runtime',
   'fl/channels/engine_worker_defaults.cpp',
-  cpp_args: test_abs_include_args + unit_test_compile_args + engine_worker_default_args,
-  link_args: unit_test_link_args,
-  link_with: engine_worker_defaults_lib,
+  objects: shared_test_objects,
+  cpp_args: test_abs_include_args + unit_test_compile_args + engine_worker_default_args + [
+    '-DTEST_DLL_MODE',
+  ],
+  link_args: host_machine.system() == 'windows'
+    ? unit_test_link_args + ['-ldbghelp', '-lpsapi'] : unit_test_link_args,
+  link_with: [engine_worker_defaults_lib, crash_handler_lib],
+  name_prefix: '',
   implicit_include_directories: false,
   build_by_default: false,
   install: false
 )
-test('engine_worker_defaults_runtime', engine_worker_defaults_runtime)
+test('engine_worker_defaults_runtime', runner_exe,
+  args: [engine_worker_defaults_runtime.full_path()],
+  workdir: meson.project_source_root(),
+  depends: [engine_worker_defaults_runtime],
+)
 
 # Build each test as a DLL with shared PCH
 foreach test_name : test_names

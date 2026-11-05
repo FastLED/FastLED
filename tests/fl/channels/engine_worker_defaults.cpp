@@ -1,4 +1,6 @@
-// Standalone variant: linked only against the matching production library.
+// Isolated variant: linked only against the matching production library.
+#include "test.h"
+
 #include "FastLED.h"
 #include "fl/channels/config.h"
 #include "fl/channels/data.h"
@@ -6,7 +8,8 @@
 #include "fl/stl/shared_ptr.h"
 #include "platforms/esp/32/drivers/lcd_spi/channel_driver_lcd_clockless.h"
 #include "platforms/esp/32/drivers/lcd_spi/lcd_spi_peripheral_mock.h"
-#include "fl/stl/cstdio.h"
+
+FL_TEST_FILE(FL_FILEPATH) {
 
 using namespace fl;
 using namespace fl::detail;
@@ -26,22 +29,18 @@ void transmit(ChannelDriverLcdClockless& driver) {
     driver.enqueue(ChannelData::create(5, makeTimingConfig<TIMING_WS2812_800KHZ>(), fl::move(bytes)));
     driver.show();
 }
-
-#define REQUIRE_VARIANT(condition) do { \
-    if (!(condition)) { fl::println("worker defaults failed: " #condition); return 1; } \
-} while (false)
 }
 
-int main() {
-    REQUIRE_VARIANT(WorkerConfig{}.isDefault());
+FL_TEST_CASE("Worker defaults reach the real LCD driver") {
+    FL_REQUIRE(WorkerConfig{}.isDefault());
     CRGB leds[1] = {};
     ChannelConfig channel("defaults", ClocklessChipset(), leds, RGB);
-    REQUIRE_VARIANT(channel.options.mWorker.isDefault());
+    FL_REQUIRE(channel.options.mWorker.isDefault());
     UnsupportedDriver unsupported;
-    REQUIRE_VARIANT(unsupported.configureWorker(WorkerConfig{}));
+    FL_REQUIRE(unsupported.configureWorker(WorkerConfig{}));
     WorkerConfig explicitConfig;
     explicitConfig.priority = Priority::Low;
-    REQUIRE_VARIANT(!unsupported.configureWorker(explicitConfig));
+    FL_REQUIRE(!unsupported.configureWorker(explicitConfig));
 
     auto& mock = LcdSpiPeripheralMock::instance();
     auto peripheral = fl::make_shared_no_tracking<ILcdSpiPeripheral>(mock);
@@ -49,18 +48,18 @@ int main() {
     {
         mock.reset();
         ChannelDriverLcdClockless driver(peripheral);
-        REQUIRE_VARIANT(driver.configureWorker(WorkerConfig{}));
-        REQUIRE_VARIANT(driver.workerDiagnostics().core == -2);
+        FL_REQUIRE(driver.configureWorker(WorkerConfig{}));
+        FL_REQUIRE(driver.workerDiagnostics().core == -2);
         transmit(driver);
-        REQUIRE_VARIANT(driver.workerDiagnostics().core == 1);
-        REQUIRE_VARIANT(driver.workerDiagnostics().priority == 12);
+        FL_REQUIRE(driver.workerDiagnostics().core == 1);
+        FL_REQUIRE(driver.workerDiagnostics().priority == 12);
         WorkerConfig matching;
         matching.core = Core::Core1;
         matching.priority = Priority::Medium;
-        REQUIRE_VARIANT(driver.configureWorker(matching));
+        FL_REQUIRE(driver.configureWorker(matching));
         matching.core = Core::Core0;
-        REQUIRE_VARIANT(!driver.configureWorker(matching));
-        REQUIRE_VARIANT(driver.configureWorker(WorkerConfig{}));
+        FL_REQUIRE(!driver.configureWorker(matching));
+        FL_REQUIRE(driver.configureWorker(WorkerConfig{}));
         mock.simulateTransmitComplete();
         driver.poll();
     }
@@ -72,20 +71,20 @@ int main() {
         WorkerConfig config;
         if (scenario != 1) { config.core = Core::Core0; }
         if (scenario != 0) { config.priority = Priority::Low; }
-        REQUIRE_VARIANT(driver.configureWorker(WorkerConfig{}));
-        REQUIRE_VARIANT(driver.configureWorker(config));
+        FL_REQUIRE(driver.configureWorker(WorkerConfig{}));
+        FL_REQUIRE(driver.configureWorker(config));
         WorkerConfig conflicting;
         conflicting.core = scenario == 1 ? Core::Core0 : Core::Core1;
-        REQUIRE_VARIANT(!driver.configureWorker(conflicting));
+        FL_REQUIRE(!driver.configureWorker(conflicting));
         transmit(driver);
-        REQUIRE_VARIANT(driver.workerDiagnostics().core == (scenario == 1 ? 1 : 0));
-        REQUIRE_VARIANT(driver.workerDiagnostics().priority == (scenario == 0 ? 12 : 1));
-        REQUIRE_VARIANT(driver.configureWorker(config));
+        FL_REQUIRE(driver.workerDiagnostics().core == (scenario == 1 ? 1 : 0));
+        FL_REQUIRE(driver.workerDiagnostics().priority == (scenario == 0 ? 12 : 1));
+        FL_REQUIRE(driver.configureWorker(config));
         config.priority = Priority::High;
-        REQUIRE_VARIANT(!driver.configureWorker(config));
+        FL_REQUIRE(!driver.configureWorker(config));
         mock.simulateTransmitComplete();
         driver.poll();
     }
-    fl::println("engine worker defaults runtime passed");
-    return 0;
 }
+
+} // FL_TEST_FILE

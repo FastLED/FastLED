@@ -117,7 +117,7 @@ Build-wide engine defaults can also be supplied as compiler definitions:
 
 ```text
 -DFL_ENGINE_WORKER_CORE=fl::Core::Core1
--DFL_ENGINE_WORKER_PRIORITY=fl::Priority::Medium
+-DFL_ENGINE_WORKER_PRIORITY=fl::Priority::High
 ```
 
 These portable defaults are currently honored by the LCD/I2S clockless engine.
