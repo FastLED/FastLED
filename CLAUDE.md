@@ -72,6 +72,7 @@ See `agents/docs/build-system.md` for full command execution rules and forbidden
   - NEVER push directly to `master`/`main`.
   - NEVER force-push to `master`/`main` (or any branch with an open PR others may be reviewing).
   - If changes exist on `master`, move them: `git checkout -b feat/<topic>` carries the working-tree changes to a feature branch, then commit + push + open a PR there.
+- **Land PRs through the merge queue:** `gh pr merge <N> --squash` enqueues once `CI summary` and review requirements pass. `--admin` bypasses the queue; do not use it for routine work. See `agents/docs/workflow.md`.
 - **Recovery pattern for uncommitted changes on `master`:**
   1. `git status` — confirm scope
   2. `git checkout -b <descriptive-branch>` — changes follow to new branch
