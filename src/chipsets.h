@@ -643,9 +643,9 @@ class WS2816ControllerImpl
 
 public:
     using ControllerBaseT = DELEGATE;
-    template<fl::Bus B, fl::Core CORE>
-    using WithWorker = WS2816ControllerImpl<RGB_ORDER,
-        typename fl::detail::ClocklessWorkerController<ControllerBaseT, B, CORE>::type>;
+    template<fl::Bus B>
+    using WithBus = WS2816ControllerImpl<RGB_ORDER,
+        typename fl::detail::ClocklessBusController<ControllerBaseT, B>::type>;
 
 	// ControllerT is a helper class.  It subclasses the device controller class
 	// and has three methods to call the three protected methods we use.

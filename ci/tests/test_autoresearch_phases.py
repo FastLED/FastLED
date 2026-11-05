@@ -1483,7 +1483,7 @@ class TestParseArgsAndBuildCommands:
             parlio=False,
             lcd=True,
             legacy=True,
-            worker_core="1",
+            worker_core="auto",
             environment_positional="esp32s3_opi_psram8",
             project_dir=fake_project_dir,
             tx_pin=1,
@@ -1495,6 +1495,20 @@ class TestParseArgsAndBuildCommands:
         assert isinstance(result, RunContext)
         assert result.json_rpc_commands[0]["params"]["lanePins"] == [1, 3, 4, 5, 6, 7]
         assert not _legacy_lane_rx_overlap(args, 6, "esp32s3_opi_psram8")
+
+    @pytest.mark.parametrize("core", ["0", "1", "any", "calling"])
+    def test_lcd_legacy_rejects_explicit_worker_core(
+        self, fake_project_dir: Path, core: str
+    ) -> None:
+        args = _make_args(
+            parlio=False,
+            lcd=True,
+            legacy=True,
+            worker_core=core,
+            environment_positional="esp32s3_opi_psram8",
+            project_dir=fake_project_dir,
+        )
+        assert _parse_args_and_build_commands(args) == 1
 
     @pytest.mark.parametrize("pins", ["1,1", "1,2", "3,4", "1,49", "1,bad"])
     def test_lcd_lane_pins_reject_invalid_wiring(

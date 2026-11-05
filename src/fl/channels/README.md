@@ -62,44 +62,36 @@ This removes unrelated driver singleton allocations, registration callback stora
 
 ### ESP32-S3 LCD clockless worker affinity
 
-Clockless `addLeds<>` overloads accept a worker core after the bus:
-
-```cpp
-FastLED.addLeds<WS2812B, 4, GRB,
-               fl::Bus::FLEX_IO, fl::Core::Core1>(leds, NUM_LEDS);
-```
-
-This uses the slim controller: affinity is a template constant, with no new
-per-controller field or runtime `Channel` object. The shared LCD engine stores
-its worker settings once. Channel-based SPI overloads append the core after
-the existing bus-instance index; drivers without a configurable worker reject
-explicit requests. LCD SPI itself has no corresponding encoding worker.
+Worker core and priority are selected through `ChannelConfig::options.mWorker`.
+Legacy `addLeds<>` templates select the chipset, pins, bus, and bus instance;
+they preserve the driver's default worker scheduling. To configure scheduling,
+use a channel configuration as shown below. The shared LCD engine stores its
+worker settings once. LCD SPI itself has no corresponding encoding worker.
 
 The full-rate channel-based SPI overload has this template order:
 
 ```cpp
 template<ESPIChipsets CHIPSET, fl::u8 DATA_PIN, fl::u8 CLOCK_PIN,
          fl::EOrder RGB_ORDER, fl::u32 SPI_DATA_RATE,
-         fl::Bus B = fl::Bus::AUTO, fl::u8 B_WHICH = 0,
-         fl::Core CORE = fl::Core::Auto>
+         fl::Bus B = fl::Bus::AUTO, fl::u8 B_WHICH = 0>
 CLEDController& addLeds(CRGB* data, int nLedsOrOffset,
                         int nLedsIfOffset = 0);
 
 FastLED.addLeds<APA102, 23, 18, RGB, DATA_RATE_MHZ(10),
-               fl::Bus::SPI, 0, fl::Core::Auto>(leds, NUM_LEDS);
+               fl::Bus::SPI, 0>(leds, NUM_LEDS);
 ```
 
 This example preserves the selected SPI driver's default scheduling. An
 explicit core requires a driver with a configurable worker; it does not add
 a worker to a synchronous SPI driver.
 
-Template core selection adds no per-controller fields. Worker configuration
-and diagnostics add two driver vtable entries on ESP32-S3 (8 bytes per
-concrete driver vtable with 32-bit pointers), shared by all its strips.
+Worker configuration and diagnostics add two driver vtable entries on
+ESP32-S3 (8 bytes per concrete driver vtable with 32-bit pointers), shared by
+all its strips.
 Platforms without a configurable worker retain default rejecting methods
 without those entries.
 
-Runtime channels use the same engine configuration:
+Configure the worker when adding a channel:
 
 ```cpp
 fl::ChannelConfig config(4,
@@ -146,7 +138,7 @@ contention remains. A busy selected core or a lower priority can delay refills;
 validate long multi-chunk strips under application load.
 
 Custom chipset controllers with constructor behavior or encoding overrides
-must provide their own `WithWorker<Bus, Core>` alias that retains those hooks
+must provide their own `WithBus<Bus>` alias that retains those hooks
 around the rebound transport. Inheriting a plain transport's alias alone does
 not preserve custom behavior. Built-in fixed-RGBW and 16-bit wrappers provide
 this composition.

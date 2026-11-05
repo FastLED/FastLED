@@ -1708,7 +1708,6 @@ void autoResearchChipsetTimingLegacy(fl::AutoResearchConfig& config,
 
         auto proxy = fl::make_unique<LegacyClocklessProxy>(
             pin, leds, numLeds, chipset, config.legacy_rgbw,
-            config.tx_configs[i].options.mWorker.core,
             fl::strcmp(config.driver_name, "LCD_CLOCKLESS") == 0);
         if (!proxy->valid()) {
             FL_ERROR("Legacy proxy invalid for lane " << i << " (pin " << pin

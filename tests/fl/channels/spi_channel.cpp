@@ -589,10 +589,8 @@ FL_TEST_CASE("spiEncoderForChipset speed override") {
     FL_CHECK_EQ(enc.clock_hz, 6000000u);
 }
 
-FL_TEST_CASE("Slim SPI affinity adds no controller storage and must be honored #5001") {
+FL_TEST_CASE("Slim SPI legacy controller does not configure worker affinity #5001") {
     using DefaultController = SlimSpiBridgeController<SpiChipset::APA102, RGB, Bus::AUTO, 0>;
-    using PinnedController = SlimSpiBridgeController<SpiChipset::APA102, RGB, Bus::AUTO, 0, Core::Core1>;
-    FL_CHECK_EQ(sizeof(DefaultController), sizeof(PinnedController));
 
     auto mock = fl::make_shared<SpiCaptureMock>("SPI_WORKER_POLICY");
     auto& manager = ChannelManager::instance();
@@ -601,15 +599,11 @@ FL_TEST_CASE("Slim SPI affinity adds no controller storage and must be honored #
     CRGB leds[2] = {CRGB::Red, CRGB::Blue};
     SpiChipsetConfig cfg(5, 6, SpiEncoder::apa102());
     {
-        PinnedController controller(cfg);
+        DefaultController controller(cfg);
         controller.setLeds(leds, 2);
         controller.showLeds(255);
-        FL_CHECK_EQ(mock->enqueueCount, 0);
-        FL_CHECK(mock->requestedCore == Core::Core1);
-
-        mock->acceptWorker = true;
-        controller.showLeds(255);
         FL_CHECK_EQ(mock->enqueueCount, 1);
+        FL_CHECK(mock->requestedCore == Core::Auto);
         controller.setLeds(nullptr, 0);
     }
     manager.removeDriver(mock);

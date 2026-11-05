@@ -900,6 +900,12 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
                       requested == "0" ? fl::Core::Core0 :
                       requested == "1" ? fl::Core::Core1 :
                       requested == "any" ? fl::Core::Any : fl::Core::CallingCore;
+        if (use_legacy_api && worker_core != fl::Core::Auto) {
+            response.set("success", false);
+            response.set("error", "UnsupportedWorkerCoreLegacyApi");
+            response.set("message", "Explicit worker core selection requires the Channel API");
+            return response;
+        }
         bool plain_ws2812b = !legacy_rgbw;
         for (const auto chipset : legacy_chipsets) {
             plain_ws2812b = plain_ws2812b &&
