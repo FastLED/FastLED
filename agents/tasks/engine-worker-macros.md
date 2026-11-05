@@ -60,3 +60,11 @@ compiler dependencies fail the gate. All 21 focused Python cases pass (47.39s),
 331 unit groups and 95 examples pass (346.12s), S3 Core1/Medium compiles (1m24s),
 lint passes, and independent three-file delta review is clean. The test-only
 Meson validation scope is recorded in PR #5054's maintainer review directive.
+
+Compiler portability follow-up: with only project executables on PATH, the
+original system-compiler lookup failed despite the bundled compiler being
+available (two RED cases). The gate now prefers `clang-tool-chain-cpp`, retains
+system fallbacks, and still fails if no compiler exists. All ten invalid cases
+pass using only the bundled toolchain (2.22s), and all 21 focused cases pass
+(7.56s). Lint and independent one-file delta review pass; production C++ is
+unchanged from the validated 331-unit/95-example and SDK builds above.

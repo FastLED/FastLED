@@ -24,7 +24,11 @@ from running_process import RunningProcess
     ],
 )
 def test_invalid_worker_default_rejected(tmp_path: Path, definition: str) -> None:
-    compiler = shutil.which("g++") or shutil.which("clang++")
+    compiler = (
+        shutil.which("clang-tool-chain-cpp")
+        or shutil.which("g++")
+        or shutil.which("clang++")
+    )
     if compiler is None:
         pytest.fail("host C++ compiler required for worker-default validation")
     source = tmp_path / "invalid.cpp"
