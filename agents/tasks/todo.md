@@ -1,5 +1,16 @@
 # Task Tracker
 
+## ESP8266 block streaming throughput (#4966)
+
+- [x] Identify the attached ESP8266 through a live probe and measure unchanged firmware.
+- [x] Establish GPIO4/16 generic bit-bang throughput bounds from vendor documentation, generated code and direct device measurements; retain these pins.
+- [x] Add failing exhaustive register-selection coverage before implementing the branchless data writer.
+- [ ] Optimize the production transmit path; measure throughput and verify actual output over multiple blocks.
+- [ ] Run repository validation and code review, push and merge the PR, then return to master.
+
+Completion requires measured evidence against the applicable hardware limit;
+an unverified optimization or an active-clock frequency alone is insufficient.
+
 ## ESP flash recovery after #5003
 
 - [x] Freeze fresh Blink image-flash baselines on ESP32, S3, C3 and C6 with matching fbuild/toolchains.

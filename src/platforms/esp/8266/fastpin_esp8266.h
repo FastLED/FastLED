@@ -7,6 +7,8 @@
 #include "fl/system/pin.h"  // For PinMode, PinValue enums
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/noexcept.h"
+#include "platforms/shared/spi_bitbang/bitbang_pin.h"
+#include "platforms/delaycycles.h"
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_DEPRECATED_REGISTER
@@ -149,6 +151,26 @@ _FL_DEFPIN(8,15); _FL_DEFPIN(9,3); _FL_DEFPIN(10,1);
 #endif
 
 #define HAS_HARDWARE_PIN_SUPPORT
+
+template <u8 PIN> struct BitbangPin<FastPin<PIN>> {
+    static constexpr bool kAtomicWrite = true;
+    template <fl::cycle_t CYCLES>
+    FASTLED_FORCE_INLINE static void delay() FL_NO_EXCEPT {
+        // The dispatch header exposes the inline template at global scope.
+        // fl::delaycycles only has an out-of-line definition at this callsite;
+        // calling it would pay CALL/RET three times for every transmitted bit.
+        ::delaycycles<CYCLES>();
+    }
+    template <u8 BIT>
+    FASTLED_FORCE_INLINE static void write(u8 value) FL_NO_EXCEPT {
+        if (FastPin<PIN>::kRealPin < 16) {
+            writeBitSetClear<BIT>(value, FastPin<PIN>::mask(), &GPOS, &GPOC);
+        } else {
+            // GPIO16 belongs to the RTC block, with no W1TS/W1TC registers.
+            GP16O = (GP16O & ~1UL) | ((value >> BIT) & 1U);
+        }
+    }
+};
 }  // namespace fl
 
 FL_DISABLE_WARNING_POP

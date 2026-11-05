@@ -1,5 +1,17 @@
 # Lessons Learned
 
+- Preserve the original pins and backend when optimizing a reported bit-bang
+  issue. Optimizing native HSPI on different pins does not solve generic
+  software SPI performance; establish that contract before exploring alternatives.
+
+- ESP8266 AutoResearch RPC handlers can run outside the Arduino suspendable
+  continuation. Calling Arduino `yield()` there panics in `__yield`; keep
+  microbenchmarks bounded and follow the existing non-yielding frame harness.
+
+- Hardware inventories in prior reports can be stale. Re-probe the current
+  device before ruling out a target, especially when the user confirms it
+  is attached; a shared USB bridge identity does not identify the MCU.
+
 - Worker affinity defaults must use the automatic policy (`fl::Core::Auto`);
   fixed core 1 is an explicit application choice, not a library default.
   Auto preserves legacy backend behavior; do not reinterpret it as a new

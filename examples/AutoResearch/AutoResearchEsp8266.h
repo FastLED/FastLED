@@ -420,6 +420,90 @@ inline fl::u32 hspiAppliedHz() {
     return fl::esp8266::kHspiSourceHz / (pre * n);  // ok platform specific - the same fixed-source decode; no core API exposes it
 }
 
+#if defined(FASTLED_ESP8266_RAW_PIN_ORDER) // ok platform specific - the benchmark requires actual GPIO4/16 and no inverse pin mapping API exists
+FASTLED_FORCE_INLINE void bitbangFloorBit() {
+    fl::FastPin<4>::hi();
+    fl::FastPin<16>::hi();
+    fl::FastPin<16>::lo();
+}
+
+template <int MHZ>
+inline fl::json bitbangStreamAt(int nBytes, int frames, int mode) {
+    static fl::u8 bytes[512];
+    const int n = nBytes < 1 ? 1 : (nBytes > 512 ? 512 : nBytes);
+    const int count = frames < 1 ? 1 : (frames > 100 ? 100 : frames);
+    for (int i = 0; i < n; ++i) bytes[i] = static_cast<fl::u8>(i * 37 + 11);
+    fl::GenericSoftwareSPIOutput<4, 16, DATA_RATE_MHZ(MHZ)> spi;
+    spi.init();
+    fl::FastPin<16>::lo();
+    fl::u32 best = 0xFFFFFFFF;
+    for (int frame = 0; frame < count; ++frame) {
+        __sync_synchronize(); // ok platform specific - begin with an empty Xtensa store buffer
+        const fl::u32 start = cycles();
+        if (mode == 2) {
+            // Calibration: minimum ordered GPIO work, constant data and no
+            // optional pacing. This is a lower bound, not a payload writer.
+            for (int i = 0; i < n; ++i) {
+                bitbangFloorBit(); bitbangFloorBit();
+                bitbangFloorBit(); bitbangFloorBit();
+                bitbangFloorBit(); bitbangFloorBit();
+                bitbangFloorBit(); bitbangFloorBit();
+            }
+        } else if (mode == 3) {
+            // Isolate the RTC register's sustained write latency. Eight
+            // writes per input byte; this mode does not transmit SPI data.
+            for (int i = 0; i < n; ++i) {
+                fl::FastPin<16>::hi(); fl::FastPin<16>::hi();
+                fl::FastPin<16>::hi(); fl::FastPin<16>::hi();
+                fl::FastPin<16>::hi(); fl::FastPin<16>::hi();
+                fl::FastPin<16>::hi(); fl::FastPin<16>::hi();
+            }
+        } else if (mode == 1) {
+            for (int i = 0; i < n; ++i) spi.writeByte(bytes[i]);
+        } else {
+            spi.writeBytes(bytes, n);
+        }
+        __sync_synchronize(); // ok platform specific - drain the Xtensa store buffer before stopping the transmit timer
+        const fl::u32 elapsed = cycles() - start;
+        if (elapsed < best) best = elapsed;
+        fl::FastPin<16>::lo();
+    }
+    const fl::i64 cpuHz = static_cast<fl::i64>(system_get_cpu_freq()) * 1000000; // ok platform specific - convert the actual ESP8266 cycle counter to throughput
+    fl::json r = fl::json::object();
+    r.set("success", true);
+    r.set("bytes", static_cast<fl::i64>(n));
+    r.set("frames", static_cast<fl::i64>(count));
+    r.set("mode", static_cast<fl::i64>(mode));
+    r.set("requested_mhz", static_cast<fl::i64>(MHZ));
+    r.set("cpu_hz", cpuHz);
+    r.set("min_cycles", static_cast<fl::i64>(best));
+    const fl::i64 rate = best ? static_cast<fl::i64>(n) * 8 * cpuHz / best : 0;
+    if (mode == 3) r.set("gpio_writes_per_second", rate);
+    else r.set("bits_per_second", rate);
+    return r;
+}
+
+inline fl::json bitbangStream(int nBytes, int frames, int mode, int mhz, int cpuMhz) {
+    const fl::u8 previous = system_get_cpu_freq(); // ok platform specific - compare the RTC-limited writer at both supported ESP8266 CPU frequencies
+    if (cpuMhz == 80 || cpuMhz == 160) {
+        system_update_cpu_freq(cpuMhz); // ok platform specific - temporary benchmark setting, restored before returning
+    }
+    fl::json r;
+    if (mhz == 12) r = bitbangStreamAt<12>(nBytes, frames, mode);
+    else if (mhz == 40) r = bitbangStreamAt<40>(nBytes, frames, mode);
+    else r = bitbangStreamAt<6>(nBytes, frames, mode);
+    system_update_cpu_freq(previous); // ok platform specific - preserve the application's CPU frequency after calibration
+    return r;
+}
+#else
+inline fl::json bitbangStream(int, int, int, int, int) {
+    fl::json r = fl::json::object();
+    r.set("success", false);
+    r.set("error", "the bit-bang benchmark requires raw pin order");
+    return r;
+}
+#endif
+
 inline fl::json apa102RateReport(fl::json r, fl::i64 minUs, int nLeds, int mhz,
                                  fl::u32 hz) {
     const fl::i64 bytes = apa102WireBytes(nLeds);
@@ -557,14 +641,14 @@ inline fl::json apa102ShowMhz(int nLeds, int frames, int mhz) {
 constexpr int kHspiLoopBytes = 96;
 
 struct HspiLoopbackState {
-    fl::u8 got[kHspiLoopBytes];
+    volatile fl::u8 got[kHspiLoopBytes];
     // Staged here rather than on the handler's stack: this file already split
     // its bind functions to stay inside 4 KB of loop stack, and the pattern is
     // fully derivable, so the bytes cost nothing in .bss.
     fl::u8 tx[kHspiLoopBytes];
-    int bits;
-    int rising;
-    int falling;
+    volatile int bits;
+    volatile int rising;
+    volatile int falling;
     fl::u32 mosiMask;
     fl::u32 sckMask;
 };
@@ -698,6 +782,57 @@ inline fl::json apa102HspiLoopbackAt(int mosiPin, int sckPin) {
     r.set("wifi_opmode", static_cast<fl::i64>(wifi_get_opmode()));  // ok platform specific - ESP8266 bring-up bench measures raw SoC behavior; no core API exposes it
     return r;
 }
+
+#if defined(FASTLED_ESP8266_RAW_PIN_ORDER) // ok platform specific - this loopback verifies actual GPIO4/16, which have no inverse pin-map API
+inline fl::json bitbangLoopback(int pattern, int sensePin) {
+    if (sensePin != 0 && sensePin != 5 && sensePin != 12 && sensePin != 15) {
+        return hspiPinError("sense pin must be GPIO0,5,12 or15; connect GPIO16 to it");
+    }
+    fl::GenericSoftwareSPIOutput<4, 16, DATA_RATE_KHZ(50)> spi;
+    spi.init();
+    (fl::pinMode)(sensePin, fl::PinMode::Input);
+    fl::FastPin<16>::hi();
+    fl::delayMicroseconds(50);
+    const bool high = (GPI & (1UL << sensePin)) != 0; // ok platform specific - read the physical clock jumper, not the output latch
+    fl::FastPin<16>::lo();
+    fl::delayMicroseconds(50);
+    const bool low = (GPI & (1UL << sensePin)) == 0; // ok platform specific - read the physical clock jumper, not the output latch
+    if (!high || !low) return hspiPinError("GPIO16 clock jumper does not follow high/low");
+
+    HspiLoopbackState& s = hspiLoopbackState();
+    hspiLoopbackActive() = &s;
+    s.mosiMask = 1UL << 4;
+    s.sckMask = 1UL << sensePin;
+    s.bits = s.rising = s.falling = 0;
+    for (int i = 0; i < kHspiLoopBytes; ++i) {
+        s.got[i] = 0;
+        s.tx[i] = pattern < 0 ? hspiPattern(i) : static_cast<fl::u8>(pattern);
+    }
+    attachInterrupt(digitalPinToInterrupt(sensePin), hspiSckSample, RISING); // ok platform specific - capture the physical clock edges; no neutral GPIO interrupt API exists
+    const fl::u32 start = micros();
+    spi.writeBytes(s.tx, kHspiLoopBytes);
+    spi.endTransaction();
+    const fl::u32 elapsed = micros() - start;
+    detachInterrupt(digitalPinToInterrupt(sensePin)); // ok platform specific - release the vendor GPIO edge capture installed above
+    int bad = 0;
+    for (int i = 0; i < kHspiLoopBytes; ++i) {
+        if (s.got[i] != s.tx[i]) ++bad;
+    }
+    fl::json r = fl::json::object();
+    r.set("success", s.bits == kHspiLoopBytes * 8 && bad == 0);
+    r.set("bytes", static_cast<fl::i64>(kHspiLoopBytes));
+    r.set("bits", static_cast<fl::i64>(s.bits));
+    r.set("bad_bytes", static_cast<fl::i64>(bad));
+    r.set("elapsed_us", static_cast<fl::i64>(elapsed));
+    r.set("pattern", static_cast<fl::i64>(pattern));
+    r.set("requested_khz", static_cast<fl::i64>(50));
+    return r;
+}
+#else
+inline fl::json bitbangLoopback(int, int) {
+    return hspiPinError("the bit-bang loopback requires raw pin order");
+}
+#endif
 
 // A sense pin has to be one of the pins that stay usable while the RPC console
 // and the bus under test are busy: 1 and 3 are UART0 (the console), 2 is the
@@ -1072,6 +1207,14 @@ FL_NO_INLINE inline void bindEsp8266HspiRpcs(fl::Remote& remote) {
 // A third frame for the same reason: keep every bind's temporaries in a frame
 // small enough for the 4 KB loop stack.
 FL_NO_INLINE inline void bindEsp8266HspiBenchRpcs(fl::Remote& remote) {
+    remote.bind("bitbangLoopback", [](const fl::json& args) -> fl::json {
+        return bitbangLoopback(rpcArgInt(args, 0, -1), rpcArgInt(args, 1, 5));
+    });
+    remote.bind("bitbangStream", [](const fl::json& args) -> fl::json {
+        return bitbangStream(rpcArgInt(args, 0, 512), rpcArgInt(args, 1, 20),
+                             rpcArgInt(args, 2, 0), rpcArgInt(args, 3, 6),
+                             rpcArgInt(args, 4, 0));
+    });
     remote.bind("apa102ShowBitbang", [](const fl::json& args) -> fl::json {
         return apa102ShowBitbang(rpcArgInt(args, 0, 0), rpcArgInt(args, 1, 1));
     });
