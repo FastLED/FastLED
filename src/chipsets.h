@@ -11,7 +11,7 @@
 #include "fl/stl/static_assert.h"
 #include "fl/stl/bit_cast.h"
 #include "fl/stl/unique_ptr.h"
-#include "fl/channels/worker_policy.h"
+#include "fl/channels/clockless_bus_controller.h"
 #include "fl/chipsets/fixed_rgbw_controller.h"
 #include "pixel_iterator.h"
 #include "crgb.h"
@@ -643,9 +643,9 @@ class WS2816ControllerImpl
 
 public:
     using ControllerBaseT = DELEGATE;
-    template<fl::Bus B, fl::Core CORE, fl::Priority PRIORITY = fl::Priority::Auto>
-    using WithWorker = WS2816ControllerImpl<RGB_ORDER,
-        typename fl::detail::ClocklessWorkerController<ControllerBaseT, B, CORE, PRIORITY>::type>;
+    template<fl::Bus B>
+    using WithBus = WS2816ControllerImpl<RGB_ORDER,
+        typename fl::detail::ClocklessBusController<ControllerBaseT, B>::type>;
 
 	// ControllerT is a helper class.  It subclasses the device controller class
 	// and has three methods to call the three protected methods we use.

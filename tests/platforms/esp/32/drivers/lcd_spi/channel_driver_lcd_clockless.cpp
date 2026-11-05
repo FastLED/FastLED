@@ -170,6 +170,7 @@ FL_TEST_CASE("ChannelDriverLcdClockless - worker configuration is shared and imm
     FL_CHECK_EQ(driver.workerDiagnostics().observedCore, -1);
     FL_CHECK_TRUE(driver.configureWorker(config));
     FL_CHECK_FALSE(driver.configureWorker(conflicting));
+    FL_CHECK_EQ(driver.workerDiagnostics().core, 1);
     LcdSpiPeripheralMock::instance().simulateTransmitComplete();
     FL_CHECK(driver.poll() == IChannelDriver::DriverState::READY);
 }

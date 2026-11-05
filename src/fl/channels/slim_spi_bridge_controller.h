@@ -46,7 +46,6 @@
 #include "cpixel_ledcontroller.h"
 #include "fl/channels/data.h"
 #include "fl/channels/driver.h"
-#include "fl/channels/worker_policy.h"
 #include "fl/channels/manager.h"
 #include "fl/channels/bus.h"
 #include "fl/channels/bus_traits.h"  // IWYU pragma: keep (DriverTraits<Bus::X> satisfies the DriverTraits contract)
@@ -76,10 +75,7 @@ void registerNativeSpiDriver() FL_NO_EXCEPT;
 ///                    platform (see `kBus` below).
 /// @tparam B_WHICH    Bus instance index, for platforms with more than one
 ///                    instance of a given bus kind.
-/// @tparam CORE       Worker affinity, with no per-controller configuration storage.
-/// @tparam PRIORITY   Named worker priority, inherited by default.
-template <fl::SpiChipset CHIPSET, EOrder RGB_ORDER, fl::Bus B, fl::u8 B_WHICH,
-          Core CORE = Core::Auto, Priority PRIORITY = Priority::Auto>
+template <fl::SpiChipset CHIPSET, EOrder RGB_ORDER, fl::Bus B, fl::u8 B_WHICH>
 class SlimSpiBridgeController : public CPixelLEDController<RGB_ORDER> {
 public:
     /// The bus actually used after resolving `Bus::AUTO` -- mirrors
@@ -121,11 +117,6 @@ protected:
         if (!driver) {
             return;
         }
-        if (!detail::WorkerPolicy<CORE, PRIORITY>::apply(*driver)) {
-            FL_ERROR("SlimSpiBridgeController: worker configuration rejected - dropping frame");
-            return;
-        }
-
         // (A1) Respect runtime driver enable/disable: ChannelManager is the
         // single source of truth. A disabled driver means "drop this frame",
         // not "enqueue and hope" -- silently enqueuing to a disabled driver

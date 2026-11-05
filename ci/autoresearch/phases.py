@@ -1275,6 +1275,11 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
                         if driver != "LCD_CLOCKLESS":
                             print("Error: --worker-core requires --lcd")
                             return 1
+                        if args.legacy and args.worker_core != "auto":
+                            print(
+                                "Error: explicit --worker-core requires the Channels API; remove --legacy"
+                            )
+                            return 1
                         test_config["workerCore"] = args.worker_core
                     if args.tight_timing:
                         if (

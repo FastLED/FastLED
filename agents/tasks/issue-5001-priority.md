@@ -1,9 +1,18 @@
 # Named worker priorities (#5001)
 
-`FastLED.addLeds()` accepts a trailing `fl::Priority` after `fl::Core`.
-Runtime channels use `config.options.mWorker.priority`. Both accept `Auto`
-(default), `High`, `Medium`, and `Low`. Existing default/core-only addLeds
-calls and custom core-only rebind aliases remain supported.
+This is the historical implementation and validation record for #5018
+(`302a26ea9742c1a9570d5b24e5a56948761f9f8d`). It records the API and evidence
+at that revision, before the channel-only core-affinity follow-up.
+
+At #5018, `FastLED.addLeds()` accepted a trailing `fl::Priority` after
+`fl::Core`, and existing default/core-only calls and core-aware rebind aliases
+remained supported. Runtime channels used `config.options.mWorker.priority`.
+Both accepted `Auto` (default), `High`, `Medium`, and `Low`.
+
+The current API removes both legacy worker arguments: explicit core affinity
+and priority belong to channel configuration, while legacy templates retain
+only chipset, pin, bus, and bus-instance selection. See the
+[current API and migration guidance](../../src/fl/channels/README.md#esp32-s3-lcdi2s-clockless-worker-scheduling).
 
 The LCD/I2S clockless worker maps a new `Auto` worker to `High`, preserving
 its old priority. On the current ESP32 SDK, High is 23
@@ -13,6 +22,9 @@ and late changes remain rejected. Classic ESP32 I2S has no configurable task;
 explicit worker settings on unsupported backends are rejected.
 
 ## Memory evidence
+
+These are the historical measurements for adding named priorities in #5018,
+not measurements of the subsequent core-template removal.
 
 Matched baseline: `f9beb26cee26d48a6d7213c1c1464f157a133754`.
 Both measurements used fbuild 2.5.51, default Blink profiles, GCC 14.2.0 /

@@ -19,7 +19,6 @@
 #include "cpixel_ledcontroller.h"
 #include "fl/channels/data.h"
 #include "fl/channels/driver.h"
-#include "fl/channels/worker_policy.h"
 #include "fl/channels/manager.h"
 #include "fl/channels/bus_traits.h"  // IWYU pragma: keep (DriverTraits<Bus::X> satisfies the DriverTraits contract)
 #include "fl/channels/config.h"
@@ -143,23 +142,20 @@ struct SlimBridgeShowPolicy<true, true> : SlimBridgeShowPolicy<true, false> {
 ///                     use FL_SLIM_BRIDGE_DIRECT_SHOW=0/1.
 /// @tparam BATCHED_DIRECT_SHOW Flush direct drivers at endShowLeds(). Only
 ///                     enable for drivers that consume multiple queued strips.
-/// @tparam CORE       Worker affinity, inherited by default.
-/// @tparam PRIORITY   Named worker priority, inherited by default.
 template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER, int WAIT_TIME, typename DriverTraits,
           int XTRA0 = 0, bool DIRECT_SHOW = SlimBridgeDirectShow<>::value,
-          bool BATCHED_DIRECT_SHOW = false, Core CORE = Core::Auto,
-          Priority PRIORITY = Priority::Auto>
+          bool BATCHED_DIRECT_SHOW = false>
 class SlimBridgeController : public CPixelLEDController<RGB_ORDER> {
     using Policy = SlimBridgeShowPolicy<DIRECT_SHOW, BATCHED_DIRECT_SHOW>;
 
 public:
-    /// Rebind only the scheduling/bus policy; retain the compile-time chipset
+    /// Rebind only the bus; retain the compile-time chipset
     /// timing and slim storage rather than constructing a runtime Channel.
-    template<Bus B, Core C, Priority P = Priority::Auto>
-    using WithWorker = SlimBridgeController<DATA_PIN, TIMING, RGB_ORDER,
+    template<Bus B>
+    using WithBus = SlimBridgeController<DATA_PIN, TIMING, RGB_ORDER,
         WAIT_TIME, typename fl::conditional<B == Bus::AUTO, DriverTraits,
                                             BusTraits<B>>::type,
-        XTRA0, DIRECT_SHOW, BATCHED_DIRECT_SHOW, C, P>;
+        XTRA0, DIRECT_SHOW, BATCHED_DIRECT_SHOW>;
 
     SlimBridgeController() FL_NO_EXCEPT {
         ChipsetTimingConfig timing = makeTimingConfig<TIMING>();
@@ -173,9 +169,6 @@ public:
         // A clockless controller bound to a unified parallel-IO bus needs
         // that engine's clockless pipeline linked (#4793).
         detail::enable_clockless<DriverTraits>();
-        if (CORE != Core::Auto || PRIORITY != Priority::Auto) {
-            detail::WorkerPolicy<CORE, PRIORITY>::apply(DriverTraits::instance());
-        }
         mData = ChannelData::create(DATA_PIN, timing, fl::vector_psram<u8>(),
                                      ChannelPixelFormat::RGB);
         FL_STATIC_ASSERT(XTRA0 >= 0 && XTRA0 <= 32, "XTRA0 out of range");
@@ -203,11 +196,6 @@ public:
 protected:
     void showPixels(PixelController<RGB_ORDER>& pixels) FL_NO_EXCEPT override {
         IChannelDriver& driver = DriverTraits::instance();
-
-        if (!detail::WorkerPolicy<CORE, PRIORITY>::apply(driver)) {
-            FL_ERROR("SlimBridgeController: worker configuration rejected - dropping frame");
-            return;
-        }
 
         // (A1) Respect runtime driver enable/disable: ChannelManager is the
         // single source of truth. A disabled driver means "drop this frame",

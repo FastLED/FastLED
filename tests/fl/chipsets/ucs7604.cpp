@@ -152,11 +152,12 @@ public:
 };
 
 /// Mock clockless controller that captures byte output
-template<int DATA_PIN, typename TIMING, EOrder RGB_ORDER>
-class MockClocklessController : public CPixelLEDController<RGB_ORDER>, public IData {
+template<int DATA_PIN, typename TIMING, EOrder RGB_ORDER, Bus BUS>
+class BusMockClocklessController : public CPixelLEDController<RGB_ORDER>, public IData {
 public:
-    template<Bus B, Core CORE>
-    using WithWorker = MockClocklessController<DATA_PIN, TIMING, RGB_ORDER>;
+    template<Bus B>
+    using WithBus = BusMockClocklessController<DATA_PIN, TIMING, RGB_ORDER, B>;
+    static constexpr Bus bus = BUS;
 
     fl::vector<uint8_t> capturedBytes;
 
@@ -178,11 +179,18 @@ public:
     }
 };
 
-FL_TEST_CASE("UCS7604 worker rebinding preserves its 16-bit preamble encoder #5001") {
+// Keep the three-argument custom-controller template contract.
+template<int DATA_PIN, typename TIMING, EOrder RGB_ORDER>
+using MockClocklessController = BusMockClocklessController<DATA_PIN, TIMING, RGB_ORDER, Bus::AUTO>;
+
+FL_TEST_CASE("UCS7604 bus rebinding preserves its 16-bit preamble encoder #5001") {
     using Original = UCS7604Controller16bitT<10, RGB, MockClocklessController>;
-    using Rebound = Original::WithWorker<Bus::AUTO, Core::Core1>;
+    constexpr Bus bus = detail::ClocklessDefaultBus<ClocklessChipset>::value == Bus::RMT
+        ? Bus::BIT_BANG : Bus::RMT;
+    using Rebound = Original::WithBus<bus>;
     Original original;
     Rebound controller;
+    FL_CHECK_FALSE((fl::is_same<Original, Rebound>::value));
     original.init();
     controller.init();
     CRGB leds[] = {CRGB::Red};
@@ -192,6 +200,7 @@ FL_TEST_CASE("UCS7604 worker rebinding preserves its 16-bit preamble encoder #50
     original.showLeds(255);
     controller.setLeds(fl::span<CRGB>(leds, 1));
     controller.showLeds(255);
+    FL_CHECK_EQ(controller.getDelegate().bus, bus);
     const auto& bytes = controller.getDelegate().capturedBytes;
     FL_REQUIRE_GE(bytes.size(), 23u); // 15-byte header + one RGBW16 pixel.
     FL_CHECK_EQ(bytes[0], 0xFF);
@@ -200,12 +209,15 @@ FL_TEST_CASE("UCS7604 worker rebinding preserves its 16-bit preamble encoder #50
     FL_CHECK_EQ(sizeof(Original), sizeof(Rebound));
 }
 
-FL_TEST_CASE("WS2816 worker rebinding preserves 48-bit output #5001") {
+FL_TEST_CASE("WS2816 bus rebinding preserves 48-bit output #5001") {
     using Delegate = MockClocklessController<10, TIMING_WS2812_800KHZ, RGB>;
     using Original = WS2816ControllerImpl<RGB, Delegate>;
-    using Rebound = Original::WithWorker<Bus::AUTO, Core::Core1>;
+    constexpr Bus bus = detail::ClocklessDefaultBus<ClocklessChipset>::value == Bus::RMT
+        ? Bus::BIT_BANG : Bus::RMT;
+    using Rebound = Original::WithBus<bus>;
     Original original;
     Rebound controller;
+    FL_CHECK_FALSE((fl::is_same<Original, Rebound>::value));
     CRGB leds[] = {CRGB::Red, CRGB::Green};
     original.setDither(DISABLE_DITHER);
     controller.setDither(DISABLE_DITHER);
@@ -213,6 +225,7 @@ FL_TEST_CASE("WS2816 worker rebinding preserves 48-bit output #5001") {
     original.showLeds(255);
     controller.setLeds(fl::span<CRGB>(leds, 2));
     controller.showLeds(255);
+    FL_CHECK_EQ(controller.getDelegateForTesting().bus, bus);
     const auto& bytes = controller.getDelegateForTesting().capturedBytes;
     FL_REQUIRE_EQ(bytes.size(), 12u);
     FL_CHECK(bytes == original.getDelegateForTesting().capturedBytes);

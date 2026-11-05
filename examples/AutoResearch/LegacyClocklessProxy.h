@@ -133,35 +133,18 @@ inline const char* legacyClocklessBoundDriverName() {
 #endif
 }
 
-template<fl::Core CORE>
-struct LegacyWorkerTemplateCore {
-    template<int PIN>
-    static CLEDController* create(CRGB* leds, int numLeds) FL_NO_EXCEPT {
-        return &FastLED.addLeds<WS2812B, PIN, RGB,
-            fl::Bus::FLEX_IO, CORE, fl::Priority::High>(leds, numLeds);
-    }
-};
-
-template<>
-struct LegacyWorkerTemplateCore<fl::Core::Auto> {
-    template<int PIN>
-    static CLEDController* create(CRGB* leds, int numLeds) FL_NO_EXCEPT {
-        return &FastLED.addLeds<WS2812B, PIN, RGB,
-            fl::Bus::FLEX_IO>(leds, numLeds);
-    }
-};
-
 template<bool SUPPORTED>
-struct LegacyWorkerTemplate {
-    template<int PIN, fl::Core CORE>
+struct LegacyLcdTemplate {
+    template<int PIN>
     static CLEDController* create(CRGB*, int) FL_NO_EXCEPT { return nullptr; }
 };
 
 template<>
-struct LegacyWorkerTemplate<true> {
-    template<int PIN, fl::Core CORE>
+struct LegacyLcdTemplate<true> {
+    template<int PIN>
     static CLEDController* create(CRGB* leds, int numLeds) FL_NO_EXCEPT {
-        return LegacyWorkerTemplateCore<CORE>::template create<PIN>(leds, numLeds);
+        return &FastLED.addLeds<WS2812B, PIN, RGB,
+            fl::Bus::FLEX_IO>(leds, numLeds);
     }
 };
 
@@ -185,26 +168,14 @@ class LegacyClocklessProxy {
     // they outlive every proxy. Only enabled while the test owns its buffer.
     fl::shared_ptr<CLEDController> mStaticController;
 
-    template<int PIN, fl::Core CORE>
+    template<int PIN>
     void createLcd(CRGB* leds, int numLeds) FL_NO_EXCEPT {
-        auto* controller = LegacyWorkerTemplate<
+        auto* controller = LegacyLcdTemplate<
             fl::BusWorkerAffinitySupported<fl::Bus::FLEX_IO>::value>::
-                template create<PIN, CORE>(leds, numLeds);
+                template create<PIN>(leds, numLeds);
         mStaticController = controller ? fl::make_shared_no_tracking(*controller)
                                        : fl::shared_ptr<CLEDController>();
         if (mStaticController) { mStaticController->setEnabled(true); }
-    }
-
-    template<int PIN>
-    void createLcd(CRGB* leds, int numLeds, fl::Core core) FL_NO_EXCEPT {
-        switch (core) {
-        case fl::Core::Auto: createLcd<PIN, fl::Core::Auto>(leds, numLeds); break;
-        case fl::Core::Core0: createLcd<PIN, fl::Core::Core0>(leds, numLeds); break;
-        case fl::Core::Core1: createLcd<PIN, fl::Core::Core1>(leds, numLeds); break;
-        case fl::Core::Any: createLcd<PIN, fl::Core::Any>(leds, numLeds); break;
-        case fl::Core::CallingCore: createLcd<PIN, fl::Core::CallingCore>(leds, numLeds); break;
-        default: break;
-        }
     }
 
     CLEDController* controller() const FL_NO_EXCEPT {
@@ -251,19 +222,18 @@ public:
         int pin, CRGB* leds, int numLeds,
         LegacyClocklessChipset chipset = LegacyClocklessChipset::WS2812B,
         bool rgbw = false,
-        fl::Core worker_core = fl::Core::Auto,
         bool lcd_worker = false) {
         if (lcd_worker) {
             switch (pin) {
-            case 0: createLcd<0>(leds, numLeds, worker_core); break;
-            case 1: createLcd<1>(leds, numLeds, worker_core); break;
-            case 2: createLcd<2>(leds, numLeds, worker_core); break;
-            case 3: createLcd<3>(leds, numLeds, worker_core); break;
-            case 4: createLcd<4>(leds, numLeds, worker_core); break;
-            case 5: createLcd<5>(leds, numLeds, worker_core); break;
-            case 6: createLcd<6>(leds, numLeds, worker_core); break;
-            case 7: createLcd<7>(leds, numLeds, worker_core); break;
-            case 8: createLcd<8>(leds, numLeds, worker_core); break;
+            case 0: createLcd<0>(leds, numLeds); break;
+            case 1: createLcd<1>(leds, numLeds); break;
+            case 2: createLcd<2>(leds, numLeds); break;
+            case 3: createLcd<3>(leds, numLeds); break;
+            case 4: createLcd<4>(leds, numLeds); break;
+            case 5: createLcd<5>(leds, numLeds); break;
+            case 6: createLcd<6>(leds, numLeds); break;
+            case 7: createLcd<7>(leds, numLeds); break;
+            case 8: createLcd<8>(leds, numLeds); break;
             default: break;
             }
             return;

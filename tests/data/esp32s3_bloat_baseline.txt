@@ -1,3 +1,13 @@
+# RMT5 callback lifetime (#4993): use hardware-bounded callback slots rather
+# than leaking one heap context on each channel recreation. Matched local
+# master -> fix: image_flash 320368 -> 320327 (-41 B), attributed RAM
+# 22451 -> 22499 (+48 B for four stable callback slots). The previous pin is
+# already below current master's matched image. Record the measured fixed
+# image without changing the 320503 B flash or 40016 B RAM budget ceilings.
+# Exact-head hosted run 41942044216 on 44f9dc8127 measures image_flash
+# 320359 B and attributed RAM 22499 B: the known 32 B local/hosted offset.
+# Pin the hosted measurement; neither budget ceiling changes.
+#
 # ESP flash recovery: share READY/DRAINING wait loops without adding fields
 # or removing default error diagnostics. Matched local ESP32-S3 Blink measures
 # image_flash 320427 -> 320259 (-168 B), attributed RAM unchanged at 22451 B.
@@ -399,4 +409,4 @@
 # the CI Blink report contains no ResponseLutsQ16 symbol. The local fbuild
 # symbol total remains ~4 KB higher for the same source (FastLED/fbuild#1456),
 # so this ratchet uses the CI measurement from PR #4511.
-320291
+320359
