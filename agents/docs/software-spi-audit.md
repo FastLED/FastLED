@@ -54,7 +54,28 @@ matrices, restored-defect evidence or physical measurements. Full classification
 coverage and run-backed resolution of changed sources remain required before
 the overall audit can pass.
 
-The registry currently contains 34 distinct required findings. Native AVR
+Reviewed baseline classifications use a versioned JSON document with exactly
+`schema_version: 1`, `baseline` (the pinned baseline commit) and `files` keys.
+`files` maps every pinned source path to `baseline_blob_oid`, `baseline_sha256`,
+`disposition`, `role`, `findings`, `reason` and `source_evidence`. Evidence anchors
+contain an integer `line` and the literal source-line `text`; aliases alone also
+declare `canonical`. Roles describe negative, dependency, forwarding-alias,
+dispatch, delay, implementation or pin-map responsibilities. Unknown dispositions
+remain explicit errors. Unknown keys, Boolean version/line values, malformed
+records and duplicate JSON keys are rejected; duplicate-key rejection also
+applies to a supplied findings file.
+
+Use `bash spi-audit --classifications <reviewed-v1.json> --report <report.json>`
+to load reviewed source bindings. The loader independently verifies the exact
+pinned Git path set, blob identities, SHA-256 hashes and literal anchors against
+baseline bytes. It validates aliases against those baseline bytes, while current
+new, changed or deleted sources still produce RED errors. Hashes are never
+refreshed to authorize changed code. Legacy path-keyed diagnostic rows retain
+their existing checks; malformed versioned documents cannot fall back to them.
+No complete reviewed manifest is supplied by this loader change. Classification
+metadata is source-review input, never execution or target-configuration proof.
+
+The registry currently contains 35 distinct required findings. Native AVR
 selected-bit predicates (#5052) and peripheral/GPIO handoff (#5055) are separate
 requirements even though both bind to `fastspi_avr.h`. The latter covers all
 five UBRR1/UBRR0/SPI0_CTRLA/SPSR/SPSR0 method variants, prior-byte shifter drain,
@@ -89,6 +110,15 @@ SM16716's 25 bits per pixel and 50-bit header, real Xtensa/RISC-V/Arduino builds
 and preservation of byte-only APA102 output. Each method needs its own restored
 defect signal and a true single-bit API, proved whole-protocol fallback or
 explicit rejection. These are unresolved evidence slots, not completed fixes.
+
+The guarded public `ArdunioCoreSPIOutput` single-bit method (#5061) separately
+requires proof for its empty `writeBit` body and `FLAG_START_BIT` pixel caller.
+The D51 guard/include inputs are bound dependencies. No current in-tree selector
+has been established; that limitation does not waive a public callable positive.
+Real Arduino SDK instantiation, selected-bit payloads, start-bit pixels,
+bit-byte-bit transitions, peripheral drain/mux ownership and state restoration
+remain unresolved. A true single-bit implementation or explicit compile-time
+rejection must be verified, and restoring the empty body must fail its test.
 
 Focused validation commands:
 

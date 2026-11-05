@@ -11,6 +11,7 @@ import sys
 from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 import pytest
 from running_process import CalledProcessError, RunningProcess
@@ -1427,3 +1428,359 @@ def test_baseline_blob_reader_preserves_real_git_binary_bytes(tmp_path: Path) ->
     assert isinstance(actual, bytes)
     assert actual == payload
     assert digest(actual) == digest(payload)
+
+
+@dataclass
+class ReviewedBaselineFixture:
+    root: Path
+    sources: dict[str, bytes]
+    objects: dict[str, str]
+    document: dict[str, Any]
+    blob_reads: list[str]
+
+
+@pytest.fixture
+def reviewed_baseline(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> ReviewedBaselineFixture:
+    # The independent Git-tree fixture is not derived from the manifest being
+    # validated. No real repository/test execution is claimed by this fixture.
+    canonical = "src/platforms/shared/spi_bitbang/generic_software_spi.h"
+    forward = "src/platforms/shared/spi_bitbang/forward.h"
+    sources = {
+        canonical: b"void emit() { *reg = value; }\n",
+        forward: b'#pragma once\n#include "generic_software_spi.h"\n',
+    }
+    objects = {path: audit._git_blob_digest(source) for path, source in sources.items()}
+    files: dict[str, dict[str, object]] = {}
+    for path, source in sources.items():
+        files[path] = {
+            "baseline_blob_oid": objects[path],
+            "baseline_sha256": digest(source),
+            "disposition": "positive" if path == canonical else "alias",
+            "role": "implementation" if path == canonical else "forwarding-alias",
+            "findings": ["production-gate"] if path == canonical else [],
+            "reason": "Reviewed source fixture, with literal baseline evidence below.",
+            "source_evidence": [
+                {"line": 1, "text": source.decode("ascii").splitlines()[0]}
+            ],
+        }
+        if path == forward:
+            files[path]["canonical"] = canonical
+    document = {"schema_version": 1, "baseline": audit.BASELINE_COMMIT, "files": files}
+    reads: list[str] = []
+
+    def read_blob(_root: Path, object_id: str) -> bytes:
+        reads.append(object_id)
+        return next(
+            source for path, source in sources.items() if objects[path] == object_id
+        )
+
+    monkeypatch.setattr(audit, "_baseline_objects", lambda _root: dict(objects))
+    monkeypatch.setattr(audit, "_read_baseline_blob", read_blob, raising=False)
+    return ReviewedBaselineFixture(tmp_path, sources, objects, document, reads)
+
+
+def test_reviewed_baseline_loader_accepts_exact_source_bound_classification_only(
+    reviewed_baseline: ReviewedBaselineFixture,
+) -> None:
+    fixture = reviewed_baseline
+    loaded = audit.load_baseline_classifications(
+        fixture.root, fixture.document, fixture.sources
+    )
+    assert loaded.errors == []
+    assert set(loaded.rows) == set(fixture.objects)
+    assert fixture.blob_reads == [], (
+        "unchanged current bytes can be reused only after Git blob identity matches"
+    )
+    for path in fixture.sources:
+        assert loaded.rows[path]["source_sha256"] == digest(fixture.sources[path])
+    assert audit.check_evidence(audit.REQUIRED_FINDINGS, [], fixture.sources)
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    [
+        "missing",
+        "extra",
+        "wrong-baseline",
+        "bad-blob",
+        "bad-sha256",
+        "unknown-role",
+        "unknown-finding",
+        "empty-reason",
+        "empty-evidence",
+        "wrong-anchor",
+        "claim-flag",
+    ],
+)
+def test_reviewed_baseline_loader_rejects_incomplete_or_unverified_rows(
+    reviewed_baseline: ReviewedBaselineFixture,
+    mutation: str,
+) -> None:
+    fixture = reviewed_baseline
+    document = json.loads(json.dumps(fixture.document))
+    files = document["files"]
+    path = next(iter(fixture.sources))
+    row = files[path]
+    if mutation == "missing":
+        del files[path]
+    elif mutation == "extra":
+        files["src/unreviewed-extra.h"] = dict(row)
+    elif mutation == "wrong-baseline":
+        document["baseline"] = "0" * 40
+    elif mutation == "bad-blob":
+        row["baseline_blob_oid"] = "0" * 40
+    elif mutation == "bad-sha256":
+        row["baseline_sha256"] = "0" * 64
+    elif mutation == "unknown-role":
+        row["role"] = "assume-fast-enough"
+    elif mutation == "unknown-finding":
+        row["findings"] = ["not-in-fixed-registry"]
+    elif mutation == "empty-reason":
+        row["reason"] = "  "
+    elif mutation == "empty-evidence":
+        row["source_evidence"] = []
+    elif mutation == "wrong-anchor":
+        row["source_evidence"] = [{"line": 1, "text": "invented source evidence"}]
+    else:
+        row["status"] = "PASS"
+    loaded = audit.load_baseline_classifications(
+        fixture.root, document, fixture.sources
+    )
+    assert loaded.errors, (
+        "review metadata cannot substitute for exact pinned source classification"
+    )
+
+
+def test_reviewed_baseline_loader_preserves_explicit_unknown_instead_of_default_negative(
+    reviewed_baseline: ReviewedBaselineFixture,
+) -> None:
+    fixture = reviewed_baseline
+    path = next(iter(fixture.sources))
+    fixture.document["files"][path]["disposition"] = "unknown"
+    fixture.document["files"][path]["findings"] = []
+    fixture.document["files"][path]["reason"] = (
+        "A newly discovered fixture entrypoint remains unclassified pending source review."
+    )
+    loaded = audit.load_baseline_classifications(
+        fixture.root, fixture.document, fixture.sources
+    )
+    assert loaded.rows[path]["disposition"] == "unknown"
+    assert "unknown" in " ".join(loaded.errors).lower()
+
+
+def test_reviewed_baseline_loader_fetches_changed_source_but_never_refreshes_its_hash(
+    reviewed_baseline: ReviewedBaselineFixture,
+) -> None:
+    fixture = reviewed_baseline
+    path = next(iter(fixture.sources))
+    current = dict(fixture.sources)
+    current[path] = b"void changedOutput() { *reg = changed; }\n"
+    loaded = audit.load_baseline_classifications(
+        fixture.root, fixture.document, current
+    )
+    assert fixture.blob_reads == [fixture.objects[path]]
+    assert loaded.rows[path]["source_sha256"] == digest(fixture.sources[path])
+    assert loaded.rows[path]["source_sha256"] != digest(current[path])
+    assert "changed" in " ".join(loaded.errors).lower()
+
+
+def test_reviewed_baseline_loader_verifies_alias_against_real_baseline_source(
+    reviewed_baseline: ReviewedBaselineFixture,
+) -> None:
+    fixture = reviewed_baseline
+    path = "src/platforms/shared/spi_bitbang/forward.h"
+    fixture.sources[path] = b"void independentOutput() { *reg = value; }\n"
+    fixture.objects[path] = audit._git_blob_digest(fixture.sources[path])
+    row = fixture.document["files"][path]
+    row["baseline_blob_oid"] = fixture.objects[path]
+    row["baseline_sha256"] = digest(fixture.sources[path])
+    row["source_evidence"] = [
+        {"line": 1, "text": fixture.sources[path].decode("ascii").strip()}
+    ]
+    loaded = audit.load_baseline_classifications(
+        fixture.root, fixture.document, fixture.sources
+    )
+    assert "alias" in " ".join(loaded.errors).lower()
+
+
+def test_cli_loads_reviewed_classification_without_turning_missing_execution_green(
+    reviewed_baseline: ReviewedBaselineFixture,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    fixture = reviewed_baseline
+    classification = fixture.root / "reviewed.json"
+    classification.write_text(json.dumps(fixture.document), encoding="utf-8")
+    report = fixture.root / "report.json"
+    monkeypatch.setattr(audit, "ROOT", fixture.root)
+    monkeypatch.setattr(audit, "_current_sources", lambda _root: dict(fixture.sources))
+    monkeypatch.setattr(audit, "_ignored_boundaries", lambda _root: [])
+    monkeypatch.setattr(audit, "_check_ignore_policy", lambda _root: [])
+    monkeypatch.setattr(audit, "SEMANTIC_REQUIRED_PATHS", frozenset())
+    (fixture.root / ".gitignore").write_text("", encoding="utf-8")
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "spi-audit",
+            "--classifications",
+            str(classification),
+            "--report",
+            str(report),
+        ],
+    )
+    assert audit.main() == 1
+    result = json.loads(report.read_text(encoding="utf-8"))
+    assert result["baseline_files"] == len(fixture.objects)
+    assert result["complete"] is False
+    for path in fixture.sources:
+        actual = result["source_accounting"][path]["classification"]
+        assert actual["role"] == fixture.document["files"][path]["role"]
+        assert actual["disposition"] != "unknown"
+    assert any("runner not wired" in error for error in result["errors"])
+    assert not any("unclassified source:" in error for error in result["errors"])
+
+
+@pytest.mark.parametrize(
+    ("target", "field", "value"),
+    [
+        ("top", "schema_version", True),
+        ("anchor", "line", True),
+        ("top", "files", []),
+        ("row", None, []),
+        ("row", "findings", {}),
+        ("row", "role", []),
+        ("row", "reason", []),
+        ("row", "source_evidence", {}),
+        ("anchor", "text", {}),
+        ("top", "status", "PASS"),
+        ("top", "complete", True),
+        ("top", "executions", [{"returncode": 0}]),
+        ("row", "status", "PASS"),
+        ("anchor", "complete", True),
+        ("row", "canonical", "src/unrelated.h"),
+    ],
+)
+def test_reviewed_loader_rejects_boolean_indices_nested_types_and_claim_keys(
+    reviewed_baseline: ReviewedBaselineFixture,
+    target: str,
+    field: str | None,
+    value: object,
+) -> None:
+    fixture = reviewed_baseline
+    document = json.loads(json.dumps(fixture.document))
+    path = next(iter(fixture.sources))
+    if target == "row" and field is None:
+        document["files"][path] = value
+    else:
+        destination = document if target == "top" else document["files"][path]
+        if target == "anchor":
+            destination = destination["source_evidence"][0]
+        destination[field] = value
+    loaded = audit.load_baseline_classifications(
+        fixture.root, document, fixture.sources
+    )
+    assert loaded.errors, "malformed review data must produce structured schema errors"
+    assert all(isinstance(error, str) for error in loaded.errors)
+    assert any(
+        "classification schema" in error or "invalid reviewed classification" in error
+        for error in loaded.errors
+    ), "unrelated source/evidence errors must not conceal malformed input acceptance"
+
+
+@pytest.mark.parametrize("duplicate", ["top-key", "path-key"])
+def test_cli_rejects_raw_duplicate_classification_json_keys(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, duplicate: str
+) -> None:
+    sources = configure_tooling_cli(tmp_path, monkeypatch)
+    rows = negative_rows(sources)
+    path = next(iter(sources))
+    row = json.dumps(rows[path])
+    # Raw JSON is essential: constructing a dict first would erase the defect.
+    text = (
+        '{"schema_version":1,"schema_version":1,"baseline":'
+        + json.dumps(audit.BASELINE_COMMIT)
+        + ',"files":{}}'
+        if duplicate == "top-key"
+        else "{"
+        + json.dumps(path)
+        + ":"
+        + row
+        + ","
+        + json.dumps(path)
+        + ":"
+        + row
+        + "}"
+    )
+    classification = tmp_path / "reviewed.json"
+    classification.write_text(text, encoding="utf-8")
+    report = tmp_path / "report.json"
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "spi-audit",
+            "--classifications",
+            str(classification),
+            "--report",
+            str(report),
+        ],
+    )
+    assert audit.main() == 1
+    errors = json.loads(report.read_text(encoding="utf-8"))["errors"]
+    assert any("duplicate JSON key" in error for error in errors), (
+        "global unwired-runner RED must not conceal acceptance of duplicate input keys"
+    )
+
+
+def test_reviewed_loader_reads_deleted_pinned_source_and_keeps_deletion_red(
+    reviewed_baseline: ReviewedBaselineFixture,
+) -> None:
+    fixture = reviewed_baseline
+    path = next(iter(fixture.sources))
+    current = {name: source for name, source in fixture.sources.items() if name != path}
+    loaded = audit.load_baseline_classifications(
+        fixture.root, fixture.document, current
+    )
+    assert fixture.blob_reads == [fixture.objects[path]]
+    assert loaded.rows[path]["source_sha256"] == digest(fixture.sources[path])
+    assert f"deleted source requires run-backed disposition: {path}" in loaded.errors
+
+
+def test_reviewed_loader_validates_changed_alias_against_pinned_bytes_only(
+    reviewed_baseline: ReviewedBaselineFixture,
+) -> None:
+    fixture = reviewed_baseline
+    path = "src/platforms/shared/spi_bitbang/forward.h"
+    current = dict(fixture.sources)
+    current[path] = b"void independentCurrentWriter() { *reg = value; }\n"
+    loaded = audit.load_baseline_classifications(
+        fixture.root, fixture.document, current
+    )
+    assert fixture.blob_reads == [fixture.objects[path]]
+    assert loaded.rows[path]["source_sha256"] == digest(fixture.sources[path])
+    assert (
+        f"changed/rerouted source requires run-backed disposition: {path}"
+        in loaded.errors
+    )
+    assert not any("not a pure forwarder" in error for error in loaded.errors), (
+        "current changes cannot replace the pinned source used to validate reviewed aliases"
+    )
+
+
+def test_global_registry_detects_known_finding_swap_on_wrong_source() -> None:
+    rows: dict[str, dict[str, Any]] = {}
+    for finding in REQUIRED_FINDINGS:
+        for path in finding["sources"]:
+            row = rows.setdefault(path, {"disposition": "positive", "findings": []})
+            row["findings"].append(finding["id"])
+    assert check_required_findings(REQUIRED_FINDINGS, REQUIRED_FINDINGS, rows) == []
+    finding = next(entry for entry in REQUIRED_FINDINGS if entry["issue"] == 5061)
+    path = finding["sources"][0]
+    rows[path]["findings"] = [
+        "production-gate"
+    ]  # Known, but belongs to another source.
+    errors = check_required_findings(REQUIRED_FINDINGS, REQUIRED_FINDINGS, rows)
+    assert f"required GPIO entrypoint declassified: {finding['id']} in {path}" in errors

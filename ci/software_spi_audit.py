@@ -12,6 +12,7 @@ import json
 import posixpath
 import re
 from collections.abc import Mapping, Sequence
+from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
 from tempfile import NamedTemporaryFile
 
@@ -1043,6 +1044,184 @@ def _baseline_sources(
     return sources
 
 
+BASELINE_CLASSIFICATION_ROLES = frozenset(
+    {
+        "negative",
+        "dependency",
+        "forwarding-alias",
+        "dispatch",
+        "delay",
+        "implementation",
+        "pin-map",
+    }
+)
+
+
+@dataclass
+class BaselineClassifications:
+    rows: dict[str, object]
+    errors: list[str]
+    versioned: bool = True
+
+
+def _reviewed_files(document: object) -> Mapping[str, object]:
+    if not isinstance(document, Mapping) or set(document) != {
+        "schema_version",
+        "baseline",
+        "files",
+    }:
+        raise ValueError(
+            "reviewed classification document requires exact schema_version/baseline/files keys"
+        )
+    if type(document["schema_version"]) is not int or document["schema_version"] != 1:
+        raise ValueError("reviewed classification schema_version must be integer 1")
+    if document["baseline"] != BASELINE_COMMIT:
+        raise ValueError(
+            "reviewed classification baseline must match the pinned Git commit"
+        )
+    files = document["files"]
+    if not isinstance(files, Mapping) or any(
+        not isinstance(path, str) for path in files
+    ):
+        raise ValueError("reviewed files must map string paths to classification rows")
+    return files
+
+
+def _check_reviewed_anchors(evidence: object, source: bytes) -> None:
+    if not isinstance(evidence, list) or not evidence:
+        raise ValueError("source_evidence must contain literal baseline line anchors")
+    lines = source.splitlines()
+    for anchor in evidence:
+        if not isinstance(anchor, Mapping) or set(anchor) != {"line", "text"}:
+            raise ValueError("source anchor requires exact line/text keys")
+        line, text = anchor["line"], anchor["text"]
+        if type(line) is not int or line < 1 or line > len(lines):
+            raise ValueError("source anchor line must identify an actual baseline line")
+        if (
+            not isinstance(text, str)
+            or not text.strip()
+            or text != lines[line - 1].decode("utf-8", errors="replace")
+        ):
+            raise ValueError("source anchor text must equal its literal baseline line")
+
+
+def _reviewed_row(row: object, source: bytes, object_id: str) -> dict[str, object]:
+    if not isinstance(row, Mapping):
+        raise ValueError("reviewed classification row must be an object")
+    fields = {
+        "baseline_blob_oid",
+        "baseline_sha256",
+        "disposition",
+        "role",
+        "findings",
+        "reason",
+        "source_evidence",
+    }
+    if row.get("disposition") == "alias":
+        fields.add("canonical")
+    if set(row) != fields:
+        raise ValueError(
+            "reviewed row has missing/unknown keys; canonical belongs only to aliases"
+        )
+    if row["baseline_blob_oid"] != object_id or row["baseline_sha256"] != source_digest(
+        source
+    ):
+        raise ValueError("reviewed row must bind the actual pinned Git blob and SHA256")
+    disposition, role = row["disposition"], row["role"]
+    if not isinstance(disposition, str) or disposition not in DISPOSITIONS | {
+        "unknown"
+    }:
+        raise ValueError("reviewed row has an unknown disposition")
+    if not isinstance(role, str) or role not in BASELINE_CLASSIFICATION_ROLES:
+        raise ValueError("reviewed row has an unknown role")
+    if not isinstance(row["reason"], str) or not row["reason"].strip():
+        raise ValueError("reviewed row requires a nonempty reason")
+    bindings = row["findings"]
+    known = {finding["id"] for finding in REQUIRED_FINDINGS}
+    if not isinstance(bindings, list) or any(
+        not isinstance(identity, str) or identity not in known for identity in bindings
+    ):
+        raise ValueError("reviewed findings must be a list of known finding identities")
+    if len(set(bindings)) != len(bindings) or (
+        disposition == "positive" and not bindings
+    ):
+        raise ValueError("reviewed findings must be unique and nonempty for positives")
+    if disposition == "alias" and (
+        not isinstance(row["canonical"], str) or not row["canonical"]
+    ):
+        raise ValueError("reviewed alias requires a canonical source path")
+    _check_reviewed_anchors(row["source_evidence"], source)
+    return {**row, "source_sha256": source_digest(source)}
+
+
+def load_baseline_classifications(
+    root: Path, document: object, current: Mapping[str, bytes]
+) -> BaselineClassifications:
+    """Bind review bookkeeping to the independent Git tree, never execution proof."""
+    rows: dict[str, object] = {}
+    errors: list[str] = []
+    objects = _baseline_objects(root)
+    try:
+        files = _reviewed_files(document)
+    except ValueError as error:
+        return BaselineClassifications(
+            rows, [f"reviewed classification schema: {error}"]
+        )
+    for path in sorted(set(files) - set(objects)):
+        errors.append(f"reviewed classification outside pinned baseline: {path}")
+    sources = _baseline_sources(root, objects, current)
+    for path, object_id in objects.items():
+        source = sources[path]
+        if _git_blob_digest(source) != object_id:
+            raise ValueError(f"pinned baseline blob byte integrity failed: {path}")
+        if path not in files:
+            errors.append(f"missing reviewed baseline classification: {path}")
+            continue
+        try:
+            rows[path] = _reviewed_row(files[path], source, object_id)
+        except ValueError as error:
+            errors.append(f"invalid reviewed classification {path}: {error}")
+    for path, row in rows.items():
+        if not isinstance(row, Mapping):
+            continue
+        if row["disposition"] == "unknown":
+            errors.append(f"unresolved unknown baseline classification: {path}")
+        elif row["disposition"] == "alias":
+            errors.extend(_check_alias(path, row, sources, rows))
+    errors.extend(_source_changes(objects, current))
+    return BaselineClassifications(rows, errors)
+
+
+def _unique_json_object(pairs: list[tuple[str, object]]) -> dict[str, object]:
+    result: dict[str, object] = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError(f"duplicate JSON key: {key!r}")
+        result[key] = value
+    return result
+
+
+def _read_audit_json(path: Path) -> object:
+    return json.loads(
+        path.read_text(encoding="utf-8"), object_pairs_hook=_unique_json_object
+    )
+
+
+def _classification_input(
+    root: Path, path: Path | None, current: Mapping[str, bytes]
+) -> BaselineClassifications:
+    if path is None:
+        return BaselineClassifications({}, [], versioned=False)
+    document = _read_audit_json(path)
+    # Retain the original diagnostic path-keyed input, with all existing gate
+    # checks. A versioned/malformed document can never fall back to raw rows.
+    if isinstance(document, dict) and all(
+        isinstance(key, str) and key.startswith("src/") for key in document
+    ):
+        return BaselineClassifications(document, [], versioned=False)
+    return load_baseline_classifications(root, document, current)
+
+
 def _native_support_input_paths(root: Path) -> list[str]:
     """All tracked/nonignored CI and test inputs plus root launch/build files."""
     result = RunningProcess.run(
@@ -1179,24 +1358,21 @@ def main() -> int:
         current = _current_sources(ROOT)
         baseline_sources = _baseline_sources(ROOT, baseline, current)
         ignored = _ignored_boundaries(ROOT)
-        parsed_rows = (
-            json.loads(args.classifications.read_text(encoding="utf-8"))
-            if args.classifications
-            else {}
-        )
+        classifications = _classification_input(ROOT, args.classifications, current)
         findings = (
-            json.loads(args.findings.read_text(encoding="utf-8"))
+            _read_audit_json(args.findings)
             if args.findings
             else list(REQUIRED_FINDINGS)
         )
-        if not isinstance(parsed_rows, dict) or not isinstance(findings, list):
+        if not isinstance(findings, list):
             raise ValueError(
                 "classifications must be an object and findings must be a list"
             )
-        rows = parsed_rows
+        rows = classifications.rows
         for path, (disposition, reason) in PINNED_EXCLUSIONS.items():
             if (
-                path in current
+                not classifications.versioned
+                and path in current
                 and path in baseline
                 and _git_blob_digest(current[path]) == baseline[path]
             ):
@@ -1209,6 +1385,7 @@ def main() -> int:
                     },
                 )
         errors = _source_changes(baseline, current)
+        errors.extend(classifications.errors)
         errors.extend(_check_ignored_boundaries(ignored))
         errors.extend(_check_ignore_policy(ROOT))
         errors.extend(check_inventory(baseline_sources, current, rows))
