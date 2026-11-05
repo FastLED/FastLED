@@ -1,8 +1,8 @@
+# Lessons Learned
+
 - Before asking for hardware rewiring, scan the attached safe GPIO pairs in both
   directions. Use the user-authorized current wiring for generic bit-bang tests;
   keep original GPIO4/16 RTC measurements separate from GPIO4/14 results.
-
-# Lessons Learned
 
 - Preserve the original pins and backend when optimizing a reported bit-bang
   issue. Optimizing native HSPI on different pins does not solve generic

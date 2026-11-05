@@ -12,6 +12,7 @@
 
 Completion requires measured evidence against the applicable hardware limit;
 an unverified optimization or an active-clock frequency alone is insufficient.
+
 ## Channels-only LED worker scheduling (#5001 follow-up)
 
 - [x] Remove both core affinity and priority from legacy API selection, retain

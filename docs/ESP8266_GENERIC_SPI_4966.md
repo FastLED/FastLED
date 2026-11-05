@@ -49,7 +49,7 @@ templates remain compiled for F_CPU=80 MHz, so the runtime 160 MHz comparison
 measures maximum throughput at a deliberately unattainable 40 MHz request;
 it does not establish requested-rate compliance at other CPU settings.
 
-## What limits this pair
+## Original GPIO4/16: RTC clock limit
 
 GPIO16 is part of the RTC block, rather than the normal GPIO bank
 ([Espressif Technical Reference, section 2.2.5](https://documentation.espressif.com/esp8266-technical_reference_en.pdf)).
