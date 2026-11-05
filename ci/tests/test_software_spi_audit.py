@@ -6,6 +6,7 @@ real target configuration receipts must be collected separately.
 """
 
 import hashlib
+from dataclasses import dataclass
 from pathlib import Path
 
 import pytest
@@ -17,6 +18,7 @@ from ci.software_spi_audit import (
     SEMANTIC_REQUIRED_PATHS,
     _check_ignored_boundaries,
     _current_sources,
+    _run_native_traces,
     check_evidence,
     check_inventory,
     check_required_findings,
@@ -226,8 +228,10 @@ def test_complete_entrypoint_declarations_are_not_execution_proof() -> None:
 
 def test_pinned_registry_keeps_every_discovered_child_and_query_miss() -> None:
     assert BASELINE_SOURCE_COUNT == 2986
-    assert {finding["issue"] for finding in REQUIRED_FINDINGS} == set(range(5025, 5054))
-    assert len(REQUIRED_FINDINGS) == 29
+    assert {finding["issue"] for finding in REQUIRED_FINDINGS} == set(
+        range(5025, 5054)
+    ) | {5055, 5056, 5057}
+    assert len(REQUIRED_FINDINGS) == 32
     assert "src/platforms/shared/spi_bitbang/spi_block_32.h" in SEMANTIC_REQUIRED_PATHS
     assert (
         "src/platforms/shared/spi_bitbang/spi_isr_engine.cpp.hpp"
@@ -292,3 +296,195 @@ def test_ignore_rule_cannot_hide_a_new_platform_backend() -> None:
     ]
     assert _check_ignored_boundaries(generated) == []
     assert _check_ignored_boundaries(generated + ["src/platforms/new/"])
+
+
+def test_samd_native_gpio_registry_binds_the_actual_production_method() -> None:
+    finding = next(entry for entry in REQUIRED_FINDINGS if entry["issue"] == 5053)
+    assert finding["sources"] == ["src/platforms/arm/sam/fastspi_arm_sam.h"]
+    assert "SAMDHardwareSPIOutput::writeBit" in finding["entrypoints"]
+    assert "src/platforms/arm/sam/fastspi_arm_samd.hpp" in finding["dependencies"]
+
+
+def test_avr_native_handoff_is_separate_from_selected_bit_predicate_evidence() -> None:
+    handoff = next(
+        (entry for entry in REQUIRED_FINDINGS if entry["issue"] == 5055), None
+    )
+    assert handoff is not None, (
+        "native mux/drain/restore concern #5055 must remain required"
+    )
+    predicate = next(entry for entry in REQUIRED_FINDINGS if entry["issue"] == 5052)
+    assert handoff["id"] != predicate["id"]
+    assert handoff["sources"] == ["src/platforms/avr/fastspi_avr.h"]
+    assert set(handoff["required_configurations"]) == {
+        "UBRR1",
+        "UBRR0",
+        "SPI0_CTRLA",
+        "SPSR",
+        "SPSR0",
+    }
+    assert set(handoff["entrypoints"]) == {
+        "AVRUSART1SPIOutput::writeBit [UBRR1]",
+        "AVRUSART0SPIOutput::writeBit [UBRR0]",
+        "AVRHardwareSPIOutput::writeBit [SPI0_CTRLA]",
+        "AVRHardwareSPIOutput::writeBit [SPSR]",
+        "AVRHardwareSPIOutput::writeBit [SPSR0]",
+    }
+    assert set(handoff["concerns"]) == {
+        "prior-byte-shifter-drain",
+        "peripheral-mux-release",
+        "prior-state-restore",
+        "following-byte-transfer",
+    }
+    assert set(handoff["dependencies"]) == {
+        "src/fl/chipsets/sm16716.h",
+        "src/platforms/shared/spi_pixel_writer.h",
+    }
+    # Predicate-only claims cannot certify peripheral ownership handoff.
+    sources = {path: b"native source input\n" for path in handoff["sources"]}
+    assert check_evidence(
+        [handoff],
+        [{"finding": predicate["id"], "status": "passed"}],
+        sources,
+    )
+
+
+def test_forced_no_pinmap_fallback_is_a_required_shared_safety_finding() -> None:
+    finding = next(
+        (entry for entry in REQUIRED_FINDINGS if entry["issue"] == 5056), None
+    )
+    assert finding is not None, (
+        "forced NoPinMap fallback safety #5056 must remain required"
+    )
+    assert finding["id"] == "forced-software-no-pinmap"
+    assert finding["sources"] == ["src/fl/system/fastpin_base.h"]
+    assert set(finding["entrypoints"]) == {
+        "FastPin<>::_init [FASTLED_FORCE_SOFTWARE_PINS]",
+        "FastPin<> GPIO operations [FASTLED_NO_PINMAP]",
+        "GenericSoftwareSPIOutput scalar/bulk/pixel forced-pin paths",
+    }
+    assert set(finding["required_configurations"]) == {
+        "ClearCore-forced-NoPinMap",
+        "Arduino-NoPinMap-before-FastLED",
+        "Arduino-NoPinMap-after-FastLED",
+        "Arduino-pinmap-forced-control",
+    }
+    assert set(finding["concerns"]) == {
+        "safe-Arduino-GPIO-fallback",
+        "no-null-register-snapshots",
+        "no-unproven-whole-port-streaming",
+        "Arduino-declarations-include-order",
+    }
+    assert set(finding["dependencies"]) == {
+        "src/fastled_config.h",
+        "src/fl/system/arduino.h",
+        "src/platforms/fastpin.h",
+        "src/platforms/shared/spi_bitbang/generic_software_spi.h",
+        "src/platforms/arm/same53/led_sysdefs_arm_same53.h",
+    }
+
+
+def test_clock_low_initialization_has_independent_first_edge_requirements() -> None:
+    finding = next(
+        (entry for entry in REQUIRED_FINDINGS if entry["issue"] == 5057), None
+    )
+    assert finding is not None, (
+        "logical clock LOW initialization #5057 must remain required"
+    )
+    assert finding["id"] == "generic-init-clock-low"
+    assert finding["sources"] == [
+        "src/platforms/shared/spi_bitbang/generic_software_spi.h"
+    ]
+    assert finding["entrypoints"] == ["GenericSoftwareSPIOutput::init"]
+    assert set(finding["required_configurations"]) == {
+        "normal-same-port",
+        "normal-independent-ports",
+        "inverted-same-port",
+        "inverted-independent-ports",
+        "stream-8bit",
+        "stream-16bit",
+        "stream-32bit",
+    }
+    assert set(finding["concerns"]) == {
+        "logical-idle-low-before-release",
+        "primed-high-first-byte-eight-rises",
+        "normal-and-inverted-pin-semantics",
+        "scalar-bulk-stream-independent-port",
+    }
+    assert finding["dependencies"] == ["src/fl/system/fastpin.h"]
+
+
+@dataclass
+class NativeProcessResult:
+    returncode: int
+    stdout: str
+
+
+NATIVE_TEST_INPUTS = (
+    "tests/platforms/shared/spi_bitbang/generic_software_spi.cpp",
+    "tests/platforms/shared/spi_bitbang/generic_software_spi_inverted.cpp",
+    "tests/platforms/shared/spi_bitbang/generic_software_spi_fixture.h",
+)
+
+
+def prepare_native_inputs(root: Path) -> dict[str, bytes]:
+    sources = {"src/production.h": b"original production input\n"}
+    for name in (*sources, *NATIVE_TEST_INPUTS):
+        path = root / name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(sources.get(name, b"original test input\n"))
+    return sources
+
+
+@pytest.mark.parametrize("changed", ["src/production.h", *NATIVE_TEST_INPUTS])
+def test_native_run_invalidates_every_changed_fingerprinted_input(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    changed: str,
+) -> None:
+    sources = prepare_native_inputs(tmp_path)
+    calls: list[list[str]] = []
+
+    def run(command: list[str], **_options: object) -> NativeProcessResult:
+        calls.append(command)
+        (tmp_path / changed).write_bytes(b"changed during execution\n")
+        return NativeProcessResult(0, "fake runner result; not production evidence\n")
+
+    monkeypatch.setattr("ci.software_spi_audit.RunningProcess.run", run)
+    monkeypatch.setattr(
+        "ci.software_spi_audit._current_sources",
+        lambda root: {name: (root / name).read_bytes() for name in sources},
+    )
+    with pytest.raises(ValueError, match="inputs changed"):
+        _run_native_traces(tmp_path, sources)
+    assert len(calls) == 1
+
+
+def test_quick_native_failure_immediately_runs_same_target_debug_and_preserves_both(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    sources = prepare_native_inputs(tmp_path)
+    calls: list[list[str]] = []
+
+    def run(command: list[str], **_options: object) -> NativeProcessResult:
+        calls.append(command)
+        if len(calls) == 1:
+            return NativeProcessResult(1, "original quick failure\n")
+        return NativeProcessResult(0, "debug or later target success\n")
+
+    monkeypatch.setattr("ci.software_spi_audit.RunningProcess.run", run)
+    monkeypatch.setattr("ci.software_spi_audit._current_sources", lambda _root: sources)
+    records = _run_native_traces(tmp_path, sources)
+    assert calls == [
+        ["bash", "test", "generic_software_spi"],
+        ["bash", "test", "generic_software_spi", "--debug"],
+        ["bash", "test", "generic_software_spi_inverted", "--debug"],
+    ]
+    assert [record["returncode"] for record in records] == [1, 0, 0]
+    assert len({record["log"] for record in records}) == 3
+    assert (tmp_path / str(records[0]["log"])).read_text(
+        encoding="utf-8"
+    ) == "original quick failure\n"
+    assert (tmp_path / str(records[1]["log"])).read_text(
+        encoding="utf-8"
+    ) == "debug or later target success\n"

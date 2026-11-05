@@ -27,6 +27,8 @@ def _required(
     source: str,
     entrypoints: list[str],
     configurations: list[str],
+    dependencies: list[str] | None = None,
+    concerns: list[str] | None = None,
 ) -> dict[str, object]:
     return {
         "id": identity,
@@ -34,6 +36,8 @@ def _required(
         "sources": [source],
         "entrypoints": entrypoints,
         "required_configurations": configurations,
+        "dependencies": dependencies or [],
+        "concerns": concerns or [],
     }
 
 
@@ -277,9 +281,88 @@ REQUIRED_FINDINGS = (
     _required(
         "samd-sercom-gpio",
         5053,
-        "src/platforms/arm/sam/fastspi_arm_samd.hpp",
-        ["SAMDSPIOutput::writeBit", "SM16716 header", "free pixel writer start-bit"],
+        "src/platforms/arm/sam/fastspi_arm_sam.h",
+        [
+            "SAMDHardwareSPIOutput::writeBit",
+            "SM16716 header",
+            "free pixel writer start-bit",
+        ],
         ["SAMD21-SERCOM-GPIO", "SAMD51-SERCOM-GPIO"],
+        dependencies=["src/platforms/arm/sam/fastspi_arm_samd.hpp"],
+    ),
+    _required(
+        "avr-native-handoff",
+        5055,
+        "src/platforms/avr/fastspi_avr.h",
+        [
+            "AVRUSART1SPIOutput::writeBit [UBRR1]",
+            "AVRUSART0SPIOutput::writeBit [UBRR0]",
+            "AVRHardwareSPIOutput::writeBit [SPI0_CTRLA]",
+            "AVRHardwareSPIOutput::writeBit [SPSR]",
+            "AVRHardwareSPIOutput::writeBit [SPSR0]",
+        ],
+        ["UBRR1", "UBRR0", "SPI0_CTRLA", "SPSR", "SPSR0"],
+        dependencies=[
+            "src/fl/chipsets/sm16716.h",
+            "src/platforms/shared/spi_pixel_writer.h",
+        ],
+        concerns=[
+            "prior-byte-shifter-drain",
+            "peripheral-mux-release",
+            "prior-state-restore",
+            "following-byte-transfer",
+        ],
+    ),
+    _required(
+        "forced-software-no-pinmap",
+        5056,
+        "src/fl/system/fastpin_base.h",
+        [
+            "FastPin<>::_init [FASTLED_FORCE_SOFTWARE_PINS]",
+            "FastPin<> GPIO operations [FASTLED_NO_PINMAP]",
+            "GenericSoftwareSPIOutput scalar/bulk/pixel forced-pin paths",
+        ],
+        [
+            "ClearCore-forced-NoPinMap",
+            "Arduino-NoPinMap-before-FastLED",
+            "Arduino-NoPinMap-after-FastLED",
+            "Arduino-pinmap-forced-control",
+        ],
+        dependencies=[
+            "src/fastled_config.h",
+            "src/fl/system/arduino.h",
+            "src/platforms/fastpin.h",
+            "src/platforms/shared/spi_bitbang/generic_software_spi.h",
+            "src/platforms/arm/same53/led_sysdefs_arm_same53.h",
+        ],
+        concerns=[
+            "safe-Arduino-GPIO-fallback",
+            "no-null-register-snapshots",
+            "no-unproven-whole-port-streaming",
+            "Arduino-declarations-include-order",
+        ],
+    ),
+    _required(
+        "generic-init-clock-low",
+        5057,
+        "src/platforms/shared/spi_bitbang/generic_software_spi.h",
+        ["GenericSoftwareSPIOutput::init"],
+        [
+            "normal-same-port",
+            "normal-independent-ports",
+            "inverted-same-port",
+            "inverted-independent-ports",
+            "stream-8bit",
+            "stream-16bit",
+            "stream-32bit",
+        ],
+        dependencies=["src/fl/system/fastpin.h"],
+        concerns=[
+            "logical-idle-low-before-release",
+            "primed-high-first-byte-eight-rises",
+            "normal-and-inverted-pin-semantics",
+            "scalar-bulk-stream-independent-port",
+        ],
     ),
 )
 
@@ -492,7 +575,14 @@ def check_required_findings(
         if finding is None:
             errors.append(f"required production entrypoint missing: {identity}")
             continue
-        for field in ("issue", "sources", "required_configurations", "entrypoints"):
+        for field in (
+            "issue",
+            "sources",
+            "required_configurations",
+            "entrypoints",
+            "dependencies",
+            "concerns",
+        ):
             if finding.get(field) != entry.get(field):
                 errors.append(f"required {field} changed or removed: {identity}")
         paths = entry.get("sources", [])
@@ -658,6 +748,26 @@ def _source_changes(
     return errors
 
 
+def _native_input_hashes(root: Path, sources: Mapping[str, bytes]) -> dict[str, str]:
+    inputs = {path: source_digest(data) for path, data in sorted(sources.items())}
+    for name in (
+        "tests/platforms/shared/spi_bitbang/generic_software_spi.cpp",
+        "tests/platforms/shared/spi_bitbang/generic_software_spi_inverted.cpp",
+        "tests/platforms/shared/spi_bitbang/generic_software_spi_fixture.h",
+    ):
+        inputs[name] = source_digest((root / name).read_bytes())
+    return inputs
+
+
+def _check_native_inputs(root: Path, expected: Mapping[str, str]) -> None:
+    try:
+        actual = _native_input_hashes(root, _current_sources(root))
+    except OSError as error:
+        raise ValueError("native trace inputs changed or became unreadable") from error
+    if actual != expected:
+        raise ValueError("native trace inputs changed during execution")
+
+
 def _run_native_traces(
     root: Path, sources: Mapping[str, bytes]
 ) -> list[dict[str, object]]:
@@ -666,16 +776,11 @@ def _run_native_traces(
         ("bash", "test", "generic_software_spi"),
         ("bash", "test", "generic_software_spi_inverted", "--debug"),
     )
-    inputs = {path: source_digest(data) for path, data in sorted(sources.items())}
-    for name in (
-        "tests/platforms/shared/spi_bitbang/generic_software_spi.cpp",
-        "tests/platforms/shared/spi_bitbang/generic_software_spi_inverted.cpp",
-        "tests/platforms/shared/spi_bitbang/generic_software_spi_fixture.h",
-    ):
-        inputs[name] = source_digest((root / name).read_bytes())
+    inputs = _native_input_hashes(root, sources)
     input_digest = source_digest(json.dumps(inputs, sort_keys=True).encode("utf-8"))
     records: list[dict[str, object]] = []
-    for command in commands:
+
+    def execute(command: tuple[str, ...]) -> int:
         result = RunningProcess.run(
             list(command),
             cwd=root,
@@ -685,7 +790,8 @@ def _run_native_traces(
             encoding="utf-8",
             errors="replace",
         )
-        log = root / ".build" / f"spi-audit-{command[2]}.log"
+        mode = "debug" if "--debug" in command else "quick"
+        log = root / ".build" / f"spi-audit-{command[2]}-{mode}.log"
         log.parent.mkdir(parents=True, exist_ok=True)
         log.write_text(result.stdout, encoding="utf-8")
         records.append(
@@ -699,8 +805,18 @@ def _run_native_traces(
                 "scope": "host GPIO semantics only; no vendor, instruction or physical claim",
             }
         )
-    if sources != _current_sources(root):
-        raise ValueError("production sources changed during trace execution")
+        # Source AND test/fixture changes invalidate the entire execution before
+        # another target (or a debug rerun) can be mistaken for comparable proof.
+        _check_native_inputs(root, inputs)
+        return result.returncode
+
+    _check_native_inputs(root, inputs)
+    for command in commands:
+        returncode = execute(command)
+        if returncode != 0 and "--debug" not in command:
+            # Keep the quick failure and its distinct log/record even if debug
+            # succeeds. A diagnostic rerun cannot turn the original failure green.
+            execute((*command, "--debug"))
     return records
 
 
