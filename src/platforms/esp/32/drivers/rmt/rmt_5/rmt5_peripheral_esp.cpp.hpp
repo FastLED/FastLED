@@ -45,6 +45,11 @@ FL_EXTERN_C_BEGIN
 #include "soc/soc_caps.h"  // IWYU pragma: keep
 FL_EXTERN_C_END
 
+// IDF 6 moved the RMT instance/channel counts from SoC caps to the HAL.
+#if !defined(SOC_RMT_TX_CANDIDATES_PER_GROUP)
+#include "hal/rmt_ll.h"  // IWYU pragma: keep
+#endif
+
 // ESP-IDF 5.2+ compatibility: ESP_CACHE_MSYNC_FLAG_DIR_C2M.
 // Centralized so every driver gets the same shim regardless of unity-build
 // include order. See FastLED #2619 for the lcd_spi / rmt5 ordering bug that
@@ -75,6 +80,12 @@ FL_NO_INLINE FL_COLD void emitRmt5EncoderCreateFailure(
 
 // Forward declare the encoder implementation (defined at end of file)
 struct Rmt5EncoderImpl;
+
+#if defined(SOC_RMT_TX_CANDIDATES_PER_GROUP)
+static constexpr size_t kTxCallbackSlots = SOC_RMT_GROUPS * SOC_RMT_TX_CANDIDATES_PER_GROUP;
+#else
+static constexpr size_t kTxCallbackSlots = RMT_LL_INST_NUM * RMT_LL_TX_CANDIDATES_PER_INST;
+#endif
 
 // Stable ISR user data, owned by the peripheral until the SDK releases the
 // channel. A hardware-bounded slot avoids allocating on channel recreation.
@@ -120,8 +131,7 @@ public:
     bool rebindTxPin(void* channel_handle, int pin) FL_NO_EXCEPT override;
 
 private:
-    fl::array<TxCallbackContext,
-              SOC_RMT_GROUPS * SOC_RMT_TX_CANDIDATES_PER_GROUP> mTxCallbacks;
+    fl::array<TxCallbackContext, kTxCallbackSlots> mTxCallbacks;
 
     /// @brief Disable cache sync after ESP_ERR_INVALID_ARG error
     ///

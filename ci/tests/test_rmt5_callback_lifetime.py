@@ -19,8 +19,10 @@ SDK = r"""
 #include <cstdio>
 #include <new>
 #include <array>
+#if TEST_IDF_MAJOR < 6
 #define SOC_RMT_GROUPS 1
 #define SOC_RMT_TX_CANDIDATES_PER_GROUP 4
+#endif
 #define FL_IS_ESP32 1
 #define FASTLED_RMT5 1
 #define FL_NO_EXCEPT noexcept
@@ -35,16 +37,18 @@ SDK = r"""
 #define FL_MEMORY_BARRIER ((void)0)
 #define FL_FALLTHROUGH [[fallthrough]]
 #define ESP_IDF_VERSION_VAL(a,b,c) ((a)*10000+(b)*100+(c))
-#define ESP_IDF_VERSION ESP_IDF_VERSION_VAL(5,1,0)
-#define ESP_IDF_VERSION_6_OR_HIGHER 0
+#define ESP_IDF_VERSION ESP_IDF_VERSION_VAL(TEST_IDF_MAJOR,1,0)
+#define ESP_IDF_VERSION_6_OR_HIGHER (TEST_IDF_MAJOR >= 6)
 using esp_err_t = int;
-constexpr int ESP_OK=0, ESP_ERR_INVALID_ARG=1, ESP_ERR_TIMEOUT=2;
+constexpr int ESP_OK=0, ESP_ERR_INVALID_ARG=1, ESP_ERR_TIMEOUT=2, ESP_ERR_INVALID_STATE=3;
 constexpr int ESP_LOG_NONE=0, ESP_LOG_WARN=0, RMT_CLK_SRC_DEFAULT=0, MALLOC_CAP_DMA=0;
 constexpr int ESP_CACHE_MSYNC_FLAG_DIR_C2M=1, ESP_CACHE_MSYNC_FLAG_UNALIGNED=2;
 using TickType_t = unsigned;
 constexpr TickType_t portMAX_DELAY=~0u;
 #define pdMS_TO_TICKS(x) (x)
 using gpio_num_t = int;
+struct gpio_io_config_t { unsigned sig_out=0, oe=0, fun_sel=0; };
+inline esp_err_t gpio_get_io_config(gpio_num_t, gpio_io_config_t*) { return ESP_ERR_INVALID_ARG; }
 struct rmt_channel_t;
 using rmt_channel_handle_t = rmt_channel_t*;
 struct rmt_tx_done_event_data_t {};
@@ -53,7 +57,7 @@ using rmt_tx_done_callback_t = bool (*)(rmt_channel_handle_t,
 struct rmt_tx_event_callbacks_t { rmt_tx_done_callback_t on_trans_done; };
 struct rmt_channel_t { rmt_tx_event_callbacks_t callbacks{}; void* context=nullptr; };
 struct rmt_tx_channel_config_t {
-    int gpio_num, clk_src; unsigned resolution_hz;
+    int gpio_num, clk_src, intr_priority; unsigned resolution_hz;
     size_t mem_block_symbols, trans_queue_depth;
     struct { unsigned invert_out, with_dma, io_od_mode, io_loop_back; } flags;
 };
@@ -97,6 +101,7 @@ inline esp_err_t rmt_tx_register_event_callbacks(rmt_channel_handle_t channel,
 }
 inline esp_err_t rmt_enable(rmt_channel_handle_t) { return ESP_OK; }
 inline esp_err_t rmt_disable(rmt_channel_handle_t) { return ESP_OK; }
+inline esp_err_t rmt_tx_switch_gpio(rmt_channel_handle_t, gpio_num_t, bool) { return ESP_OK; }
 inline esp_err_t rmt_transmit(rmt_channel_handle_t, rmt_encoder_handle_t,
     const void*, size_t, const rmt_transmit_config_t*) { return ESP_OK; }
 inline esp_err_t rmt_tx_wait_all_done(rmt_channel_handle_t, TickType_t) { return ESP_OK; }
@@ -238,8 +243,10 @@ int main(int argc, char**) {
 """
 
 
-@pytest.fixture(scope="module")
-def callback_binary(tmp_path_factory: pytest.TempPathFactory) -> Path:
+@pytest.fixture(scope="module", params=[5, 6], ids=["idf5", "idf6"])
+def callback_binary(
+    tmp_path_factory: pytest.TempPathFactory, request: pytest.FixtureRequest
+) -> Path:
     compiler = shutil.which("clang++") or shutil.which("g++")
     if compiler is None:
         pytest.skip("host C++ compiler unavailable")
@@ -275,6 +282,12 @@ def callback_binary(tmp_path_factory: pytest.TempPathFactory) -> Path:
         path = directory / name
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text('#include "sdk.h"\n', encoding="utf-8")
+    hal = directory / "hal/rmt_ll.h"
+    hal.parent.mkdir(parents=True, exist_ok=True)
+    hal.write_text(
+        "#define RMT_LL_INST_NUM 1\n#define RMT_LL_TX_CANDIDATES_PER_INST 4\n",
+        encoding="utf-8",
+    )
     source = directory / "main.cpp"
     source.write_text(f'#include "{SOURCE}"\n' + HARNESS, encoding="utf-8")
     binary = directory / "callbacks.exe"
@@ -283,6 +296,7 @@ def callback_binary(tmp_path_factory: pytest.TempPathFactory) -> Path:
             compiler,
             "-std=c++17",
             "-O0",
+            f"-DTEST_IDF_MAJOR={request.param}",
             "-I",
             str(directory),
             "-I",

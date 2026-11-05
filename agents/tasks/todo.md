@@ -881,3 +881,10 @@ Final focused regressions, 330 native modules/95 examples and the local size
 gate pass. Hosted run 41942044216 on 44f9dc8127 measured image_flash 320359 B
 and attributed RAM 22499 B (the known 32 B local/hosted offset); the size pin
 now records that exact hosted result. Both fixed budgets passed.
+
+Final IDF 6 board coverage caught removed `SOC_RMT_*` count names. A second
+RED/GREEN regression now compiles all five lifetime scenarios against both
+SDK 5 and SDK 6 layouts (ten cases). SDK 6 selects the official RMT HAL
+instance/TX counts; SDK 5 keeps its SoC counts. Native tests, lint and the
+size gate pass again, with unchanged SDK 5 image size. The real IDF 6
+Blink/Test/DriverTest builds remain required before merge.
