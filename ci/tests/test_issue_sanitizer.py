@@ -810,6 +810,48 @@ class TestRun(unittest.TestCase):
         self.assertFalse(outcome.verdict.sanitized)
         self.assertEqual(github.removed, [(4912, SANITIZED_LABEL)])
 
+    def _labelled_event(self, login: str, user_type: str = "User") -> dict[str, Any]:
+        return {
+            "action": "created",
+            "issue": {"number": 4912, "labels": [{"name": SANITIZED_LABEL}]},
+            "sender": {"login": login, "type": user_type},
+        }
+
+    def test_maintainer_event_keeps_label_without_screening(self) -> None:
+        github = FakeGitHub(fake_container(labels=[SANITIZED_LABEL]), [])
+        args = self.event_args(self._labelled_event("ZacKees"))
+        outcome = run(
+            args, github=github, jev=FakeJev(signals(instruction_override=0.9))
+        )
+        self.assertTrue(outcome.verdict.sanitized)
+        self.assertEqual(outcome.verdict.reason, "trusted_event")
+        self.assertEqual(github.removed, [])
+
+    def test_external_event_still_revokes_the_label(self) -> None:
+        github = FakeGitHub(fake_container(labels=[SANITIZED_LABEL]), [])
+        args = self.event_args(self._labelled_event("outsideuser"))
+        outcome = run(
+            args, github=github, jev=FakeJev(signals(instruction_override=0.9))
+        )
+        self.assertFalse(outcome.verdict.sanitized)
+        self.assertEqual(github.removed, [(4912, SANITIZED_LABEL)])
+
+    def test_bot_with_maintainer_login_still_revokes(self) -> None:
+        github = FakeGitHub(fake_container(labels=[SANITIZED_LABEL]), [])
+        args = self.event_args(self._labelled_event("zackees", "Bot"))
+        run(args, github=github, jev=FakeJev(signals(instruction_override=0.9)))
+        self.assertEqual(github.removed, [(4912, SANITIZED_LABEL)])
+
+    def test_maintainer_event_on_unlabelled_container_still_screens(self) -> None:
+        event = self._labelled_event("zackees")
+        event["issue"]["labels"] = []
+        github = FakeGitHub(fake_container(), [])
+        args = self.event_args(event)
+        outcome = run(
+            args, github=github, jev=FakeJev(signals(instruction_override=0.9))
+        )
+        self.assertFalse(outcome.verdict.sanitized)
+
     def test_trusted_issue_never_asks_the_judge(self) -> None:
         github = FakeGitHub(fake_container(author="zackees", association="OWNER"), [])
         judge = FakeJev(signals())

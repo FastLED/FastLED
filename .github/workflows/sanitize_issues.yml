@@ -69,7 +69,10 @@ permissions:
 concurrency:
   # One run per container: an edit that lands while a run is in flight would
   # otherwise race the label writes with a stale corpus.
-  group: sanitize-${{ github.event.issue.number || github.event.pull_request.number || inputs.issue }}
+  # A maintainer event on a labelled container is a no-op (see the script), so it
+  # gets a group of its own: it must never cancel an external run before that
+  # run has revoked the label.
+  group: sanitize-${{ github.event.issue.number || github.event.pull_request.number || inputs.issue }}${{ (github.event.sender.login == 'zackees' && github.event.sender.type != 'Bot' && (contains(github.event.issue.labels.*.name, 'sanitized') || contains(github.event.pull_request.labels.*.name, 'sanitized'))) && format('-maintainer-{0}', github.run_id) || '' }}
   cancel-in-progress: true
 
 jobs:

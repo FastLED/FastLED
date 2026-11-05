@@ -1169,6 +1169,31 @@ def resolve_target(args: argparse.Namespace, github: GitHubClient) -> tuple[str,
     return kind, number
 
 
+def trusted_event_keeps_label(args: argparse.Namespace) -> bool:
+    """True when a maintainer event on a sanitized container needs no screen.
+
+    The maintainer's own text is never judged, so it cannot change a verdict on
+    the container's external text; revoking would only erase a valid claim. An
+    unlabelled container is still screened, and a dispatch always re-screens.
+    """
+    if args.issue:
+        return False
+    event_path = args.event_path or os.environ.get("GITHUB_EVENT_PATH")
+    if not event_path:
+        return False
+    event = as_dict(json.loads(Path(event_path).read_text(encoding="utf-8")))
+    sender = as_dict(event.get("sender"))
+    if str(sender.get("login") or "").lower() not in TRUSTED_LOGINS:
+        return False
+    if str(sender.get("type") or "") == "Bot":
+        return False
+    container = as_dict(event.get("issue")) or as_dict(event.get("pull_request"))
+    labels = container.get("labels")
+    return isinstance(labels, list) and any(
+        as_dict(label).get("name") == SANITIZED_LABEL for label in labels
+    )
+
+
 def run(
     args: argparse.Namespace,
     github: GitHubClient | None = None,
@@ -1191,6 +1216,20 @@ def run(
             raise SanitizerError("GITHUB_TOKEN (or GH_TOKEN) is not set")
         github = GitHubClient(token, repo)
     kind, number = resolve_target(args, github)
+    if trusted_event_keeps_label(args):
+        verdict = Verdict(decision=DECISION_SANITIZE, reason="trusted_event")
+        corpus = Corpus(target=f"{kind} #{number}")
+        print(f"{corpus.target}: trusted maintainer event, label kept, not screened")
+        return RunOutcome(
+            container=corpus.target,
+            number=number,
+            verdict=verdict,
+            corpus=corpus,
+            labels_before=[SANITIZED_LABEL],
+            labels_after=[SANITIZED_LABEL],
+            actions=[],
+            dry_run=args.dry_run,
+        )
     # Revoke before any API read: even a failed container/comment fetch must
     # leave the previous safety claim invalid. A missing label is harmless.
     revoked = False
