@@ -577,8 +577,8 @@ def test_pinned_registry_keeps_every_discovered_child_and_query_miss() -> None:
     assert BASELINE_SOURCE_COUNT == 2986
     assert {finding["issue"] for finding in REQUIRED_FINDINGS} == set(
         range(5025, 5054)
-    ) | {5055, 5056, 5057, 5059, 5060, 5061}
-    assert len(REQUIRED_FINDINGS) == 35
+    ) | {5055, 5056, 5057, 5059, 5060, 5061, 5062, 5063}
+    assert len(REQUIRED_FINDINGS) == 37
     assert "src/platforms/shared/spi_bitbang/spi_block_32.h" in SEMANTIC_REQUIRED_PATHS
     assert (
         "src/platforms/shared/spi_bitbang/spi_isr_engine.cpp.hpp"
@@ -1784,3 +1784,97 @@ def test_global_registry_detects_known_finding_swap_on_wrong_source() -> None:
     ]  # Known, but belongs to another source.
     errors = check_required_findings(REQUIRED_FINDINGS, REQUIRED_FINDINGS, rows)
     assert f"required GPIO entrypoint declassified: {finding['id']} in {path}" in errors
+
+
+def test_parallel_spi_target_backend_registry_requires_actual_vendor_selection() -> (
+    None
+):
+    finding = next((row for row in REQUIRED_FINDINGS if row["issue"] == 5062), None)
+    assert finding is not None, (
+        "public parallel SPI target register selection #5062 remains required"
+    )
+    prefix = "src/platforms/shared/spi_bitbang/"
+    assert finding["id"] == "parallel-spi-target-backend"
+    assert set(finding["sources"]) == {prefix + "spi_platform.h"}
+    assert set(finding["dependencies"]) == {
+        *(prefix + f"spi_block_{width}.h" for width in (1, 2, 4, 8, 16, 32)),
+        prefix + "spi_isr_engine.cpp.hpp",
+        prefix + "spi_isr_engine.h",
+        "src/fl/channels/spi/parallel_device.h",
+        "src/fl/channels/spi/parallel_device.cpp.hpp",
+    }
+    assert set(finding["entrypoints"]) == {
+        "FL_GPIO_WRITE_SET / FL_GPIO_WRITE_CLEAR target selection",
+        *(f"SpiBlock{width}::transmit" for width in (1, 2, 4, 8, 16, 32)),
+        "fl_parallel_spi_isr GPIO writes",
+    }
+    assert set(finding["required_configurations"]) == {
+        "real-classic-ESP32-Xtensa-vendor-registers",
+        "real-ESP32-C3-C2-RISC-V-vendor-registers",
+        "non-ESP-target-explicit-rejection",
+        "explicit-custom-backend-contract",
+        "all-six-blocking-callers-and-shared-ISR-engine",
+        "empty-final-repeated-transfer-and-unrelated-GPIO",
+    }
+    assert set(finding["concerns"]) == {
+        "public-direct-callable-no-active-ParallelDevice-producer-claim",
+        "actual-vendor-register-identity-bank-and-operation-width",
+        "host-simulation-does-not-prove-target-addresses",
+        "restored-unconditional-C3-C2-address-mutation-must-fail",
+        "independent-caller-configuration-evidence",
+    }
+    assert check_evidence(
+        [finding], [], {prefix + "spi_platform.h": b"target input"}
+    ), "registry declarations cannot certify real SDK register selection"
+
+
+def test_parallel_spi_pin_mapping_registry_preserves_independent_api_contracts() -> (
+    None
+):
+    finding = next((row for row in REQUIRED_FINDINGS if row["issue"] == 5063), None)
+    assert finding is not None, (
+        "public parallel pin-index/mask validation #5063 remains required"
+    )
+    prefix = "src/platforms/shared/spi_bitbang/"
+    assert finding["id"] == "parallel-spi-pin-mapping"
+    assert set(finding["sources"]) == {
+        *(prefix + f"spi_block_{width}.h" for width in (1, 2, 4, 8, 16, 32)),
+        *(prefix + f"spi_isr_{width}.h" for width in (1, 2, 4)),
+    }
+    assert set(finding["dependencies"]) == {
+        prefix + "spi_platform.h",
+        prefix + "spi_isr_engine.h",
+        prefix + "spi_isr_engine.cpp.hpp",
+        *(prefix + f"spi_isr_{width}.h" for width in (8, 16, 32)),
+        "src/fl/channels/spi/parallel_device.h",
+        "src/fl/channels/spi/parallel_device.cpp.hpp",
+    }
+    assert set(finding["entrypoints"]) == {
+        *(f"SpiBlock{width}::setPinMapping" for width in (1, 2, 4, 8, 16, 32)),
+        *(
+            f"SpiIsr{width}::{method}"
+            for width in (1, 2, 4)
+            for method in ("setPinMapping", "setPinMappingWithMask")
+        ),
+    }
+    assert set(finding["required_configurations"]) == {
+        "pin-indices-31-32-255-and-unsigned-int-width-boundaries",
+        "duplicate-data-and-data-clock-collisions",
+        "failed-reconfiguration-preserves-prior-valid-state",
+        "all-six-blocking-and-ISR1-2-4-pin-and-mask-variants",
+        "ISR8-16-32-separate-raw-mask-contracts",
+        "32-independent-data-plus-clock-one-bank-rejection-or-real-bank-model",
+        "real-vendor-bank-width-and-host-undefined-shift-detection",
+        "valid-edges-unrelated-pins-empty-and-repeated-transfer",
+    }
+    assert set(finding["concerns"]) == {
+        "validate-before-shift-index-state-change-or-GPIO",
+        "independent-implementations-are-not-forwarding-aliases",
+        "raw-mask-APIs-are-not-pin-index-APIs",
+        "public-direct-callable-no-active-ParallelDevice-producer-claim",
+        "restored-unchecked-mapping-mutations-must-fail-independently",
+        "invalid-input-must-not-write-GPIO-or-alias-bits",
+    }
+    assert check_evidence(
+        [finding], [], {path: b"mapping input" for path in finding["sources"]}
+    ), "required mappings cannot certify validation or target bank behavior"

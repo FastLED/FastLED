@@ -75,7 +75,7 @@ their existing checks; malformed versioned documents cannot fall back to them.
 No complete reviewed manifest is supplied by this loader change. Classification
 metadata is source-review input, never execution or target-configuration proof.
 
-The registry currently contains 35 distinct required findings. Native AVR
+The registry currently contains 37 distinct required findings. Native AVR
 selected-bit predicates (#5052) and peripheral/GPIO handoff (#5055) are separate
 requirements even though both bind to `fastspi_avr.h`. The latter covers all
 five UBRR1/UBRR0/SPI0_CTRLA/SPSR/SPSR0 method variants, prior-byte shifter drain,
@@ -119,6 +119,22 @@ Real Arduino SDK instantiation, selected-bit payloads, start-bit pixels,
 bit-byte-bit transitions, peripheral drain/mux ownership and state restoration
 remain unresolved. A true single-bit implementation or explicit compile-time
 rejection must be verified, and restoring the empty body must fail its test.
+
+Parallel SPI target backend selection (#5062) requires real vendor register/bank
+identity for the platform macros, all six independent blocking transmitters and
+the shared ISR engine. Classic ESP32, C3/C2, unsupported non-ESP rejection and
+explicit custom backends need separate evidence. Restoring unconditional C3/C2
+addresses must fail; host simulation cannot certify hardware register addresses.
+
+Parallel SPI pin mapping (#5063) separately requires all six blocking mapping
+methods and ISR1/2/4 pin-index and mask variants. Invalid indices, integer-width
+boundaries, duplicate pins, clock collisions and failed reconfiguration must
+preserve valid state without GPIO writes or undefined shifts. ISR8/16/32 raw
+masks have a separate contract; 32 independent data pins plus clock cannot
+silently alias one bank. Each independent old mapping defect needs a restored
+mutation failure. Both findings concern public callable implementations;
+`ParallelDevice` currently rejects its begin/write routes, so no active producer
+through that wrapper is claimed. Registry bindings do not discharge these tests.
 
 Focused validation commands:
 
