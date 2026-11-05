@@ -80,8 +80,21 @@ baseline bytes. It validates aliases against those baseline bytes, while current
 new, changed or deleted sources still produce RED errors. Hashes are never
 refreshed to authorize changed code. Legacy path-keyed diagnostic rows retain
 their existing checks; malformed versioned documents cannot fall back to them.
-No complete reviewed manifest is supplied by this loader change. Classification
-metadata is source-review input, never execution or target-configuration proof.
+The reviewed baseline input is supplied at
+`ci/fixtures/software_spi_audit/reviewed_baseline.json`, with all 2,986 pinned
+source paths and all 41 mandatory finding associations. Use it explicitly:
+
+```sh
+bash spi-audit --classifications ci/fixtures/software_spi_audit/reviewed_baseline.json --report .build/software-spi-audit-report.json
+```
+
+Its adjacent README and compact provenance record exact manifest/checkpoint
+identities and review-depth limits; initial inventories and scoped independent
+reviews are not promoted into an every-line independent reread claim. This is
+source accounting, never execution or target-configuration proof. New/changed/
+deleted source obligations and all required target/configuration/mutation
+checks remain RED until actual fixed runners establish their evidence. CLI
+default behavior is unchanged.
 
 The registry currently contains 41 distinct required findings. Native AVR
 selected-bit predicates (#5052) and peripheral/GPIO handoff (#5055) are separate
