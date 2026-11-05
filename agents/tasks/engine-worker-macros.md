@@ -44,3 +44,10 @@ both macros unset (3m17s). Full lint and independent 12-file review are clean.
 
 Hosted publication remains pending; the PR's exact-head CI, review and merge
 record prove completion beyond this pre-publication snapshot.
+
+Integration: master advanced to `94dab9c6b720ea277ec9177c93129c7dc646c5c3`
+(#5021, generic ESP8266 SPI). The only merge conflict was the task tracker;
+both task sections were retained. Production edits are disjoint. The combined
+tree passes 331 unit groups and 95 examples (270.10s), all 17 focused Python
+cases including the real macro gate (9.14s), and S3 Core1/Medium compilation
+(3m34s). Independent integration review confirms the feature code is unchanged.

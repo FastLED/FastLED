@@ -62,8 +62,9 @@ This removes unrelated driver singleton allocations, registration callback stora
 
 ### ESP32-S3 LCD/I2S clockless worker scheduling
 
-Worker core affinity and priority are configured only through the Channels
-API's `ChannelConfig::options.mWorker`. Legacy `addLeds<>` templates select
+Per-channel worker core affinity and priority use the Channels API's
+`ChannelConfig::options.mWorker`; build-wide defaults are described below.
+Legacy `addLeds<>` templates select
 the chipset, pins, bus, and bus instance; they do not configure worker
 scheduling.
 
@@ -144,12 +145,13 @@ on the first transmission. `Core0` and `Core1` select an available RTOS core.
 Pinning does not follow subsequent `show()` calls between cores and does not
 configure interrupt affinity.
 
-`Priority::Auto` inherits an already configured worker's policy. A new LCD/I2S
-clockless worker defaults to `High`, preserving its previous scheduling:
+`Priority::Auto` inherits an already configured worker's policy or an honored
+compile-time default. Without an override, a new LCD/I2S clockless worker
+defaults to `High`, preserving its previous scheduling:
 
 | Priority | ESP32 FreeRTOS priority (`configMAX_PRIORITIES = 25`) |
 |---|---:|
-| `Auto` (new worker) / `High` | `configMAX_PRIORITIES - 2` = 23 |
+| `Auto` (no override) / `High` | `configMAX_PRIORITIES - 2` = 23 |
 | `Medium` | `configMAX_PRIORITIES / 2` = 12 |
 | `Low` | 1 |
 

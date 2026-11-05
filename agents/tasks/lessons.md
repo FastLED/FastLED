@@ -1,5 +1,20 @@
 # Lessons Learned
 
+- Before asking for hardware rewiring, scan the attached safe GPIO pairs in both
+  directions. Use the user-authorized current wiring for generic bit-bang tests;
+  keep original GPIO4/16 RTC measurements separate from GPIO4/14 results.
+
+- Preserve the original pins and backend when optimizing a reported bit-bang
+  issue. Optimizing native HSPI on different pins does not solve generic
+  software SPI performance; establish that contract before exploring alternatives.
+
+- ESP8266 AutoResearch RPC handlers can run outside the Arduino suspendable
+  continuation. Calling Arduino `yield()` there panics in `__yield`; keep
+  microbenchmarks bounded and follow the existing non-yielding frame harness.
+
+- Hardware inventories in prior reports can be stale. Re-probe the current
+  device before ruling out a target, especially when the user confirms it
+  is attached; a shared USB bridge identity does not identify the MCU.
 - A bus-rebinding test must observe the selected bus as well as encoded bytes.
   Returning the same mock delegate type for every bus can hide dropped
   rebinding. Explicit bus requests must either be applied or rejected;
