@@ -18,6 +18,7 @@ struct AvrPinTrace {
     static bool sampled;
     static int risingEdges;
     static int fallingEdges;
+    static int unrelatedWrites;
 
     static void reset() {
         data = false;
@@ -25,6 +26,7 @@ struct AvrPinTrace {
         sampled = false;
         risingEdges = 0;
         fallingEdges = 0;
+        unrelatedWrites = 0;
     }
 };
 bool AvrPinTrace::data = false;
@@ -32,6 +34,7 @@ bool AvrPinTrace::clock = false;
 bool AvrPinTrace::sampled = false;
 int AvrPinTrace::risingEdges = 0;
 int AvrPinTrace::fallingEdges = 0;
+int AvrPinTrace::unrelatedWrites = 0;
 
 constexpr u8 kAvrTestDataPin = 1;
 constexpr u8 kAvrTestClockPin = 2;
@@ -41,6 +44,8 @@ template <u8 PIN> struct AvrRecordingPin {
     static void hi() {
         if (PIN == kAvrTestDataPin) {
             AvrPinTrace::data = true;
+        } else if (PIN != kAvrTestClockPin) {
+            ++AvrPinTrace::unrelatedWrites;
         } else if (!AvrPinTrace::clock) {
             AvrPinTrace::clock = true;
             AvrPinTrace::sampled = AvrPinTrace::data;
@@ -50,6 +55,8 @@ template <u8 PIN> struct AvrRecordingPin {
     static void lo() {
         if (PIN == kAvrTestDataPin) {
             AvrPinTrace::data = false;
+        } else if (PIN != kAvrTestClockPin) {
+            ++AvrPinTrace::unrelatedWrites;
         } else if (AvrPinTrace::clock) {
             AvrPinTrace::clock = false;
             ++AvrPinTrace::fallingEdges;
@@ -168,6 +175,7 @@ template <typename Output, u8 BIT> void checkBit() {
         FL_REQUIRE_EQ(AvrPinTrace::risingEdges, 1);
         FL_REQUIRE_EQ(AvrPinTrace::fallingEdges, 1);
         FL_REQUIRE_FALSE(AvrPinTrace::clock);
+        FL_REQUIRE_EQ(AvrPinTrace::unrelatedWrites, 0);
     }
 }
 
