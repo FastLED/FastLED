@@ -8,4 +8,6 @@
 #include "platforms/esp/8266/my9221_emitter.h" // IWYU pragma: keep
 #elif defined(FL_IS_ESP32) && !defined(FASTLED_STUB_IMPL) && !defined(FL_IS_WASM)
 #include "platforms/esp/32/my9221_emitter.h" // IWYU pragma: keep
+#elif defined(FL_IS_RP) && !defined(FASTLED_STUB_IMPL) && !defined(FL_IS_WASM)
+#include "platforms/arm/rp/rpcommon/my9221_emitter.h" // IWYU pragma: keep
 #endif

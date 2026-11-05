@@ -83,7 +83,7 @@ their existing checks; malformed versioned documents cannot fall back to them.
 No complete reviewed manifest is supplied by this loader change. Classification
 metadata is source-review input, never execution or target-configuration proof.
 
-The registry currently contains 40 distinct required findings. Native AVR
+The registry currently contains 41 distinct required findings. Native AVR
 selected-bit predicates (#5052) and peripheral/GPIO handoff (#5055) are separate
 requirements even though both bind to `fastspi_avr.h`. The latter covers all
 five UBRR1/UBRR0/SPI0_CTRLA/SPSR/SPSR0 method variants, prior-byte shifter drain,
@@ -348,3 +348,13 @@ CPU padding, vendor compilation and retained code do not prove peripheral
 write completion, electrical pulse widths or exact requested throughput.
 Physical claims require separate measurements. The #5032 acceptance matrix,
 including CI13xx target compilation, remains required before closing it.
+
+
+ESP32 forced FastPin selection (#5067) remains independently unresolved. Native
+explicit specializations currently override the forced primary template, even
+with `FASTLED_NO_PINMAP`; #5056 fallback safety does not prove this selection.
+Acceptance requires actual SDK selected-type and fallback-call proof for Xtensa
+and RISC-V, forced on/off and pin-map configurations, generic SPI and MY9221
+producers, and restoration of the unguarded specializations must fail the
+selection oracle. Macro presence and a native IRAM ELF cannot satisfy this
+requirement; fallback cache placement and phase timing remain separate.

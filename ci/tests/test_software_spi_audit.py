@@ -578,8 +578,8 @@ def test_pinned_registry_keeps_every_discovered_child_and_query_miss() -> None:
     assert BASELINE_SOURCE_COUNT == 2986
     assert {finding["issue"] for finding in REQUIRED_FINDINGS} == set(
         range(5025, 5054)
-    ) | {5055, 5056, 5057, 5059, 5060, 5061, 5062, 5063, 5064, 5065, 5066}
-    assert len(REQUIRED_FINDINGS) == 40
+    ) | {5055, 5056, 5057, 5059, 5060, 5061, 5062, 5063, 5064, 5065, 5066, 5067}
+    assert len(REQUIRED_FINDINGS) == 41
     assert "src/platforms/shared/spi_bitbang/spi_block_32.h" in SEMANTIC_REQUIRED_PATHS
     assert (
         "src/platforms/shared/spi_bitbang/spi_isr_engine.cpp.hpp"
@@ -2128,6 +2128,9 @@ def test_my9221_ddr_timing_registry_requires_independent_protocol_timing() -> No
         "src/platforms/shared/my9221_typed_emitter.h",
         "src/platforms/esp/8266/my9221_emitter.h",
         "src/platforms/esp/32/my9221_emitter.h",
+        "src/platforms/arm/rp/rpcommon/my9221_emitter.h",
+        "src/platforms/arm/rp/rp2040/fastpin_arm_rp2040.h",
+        "src/platforms/arm/rp/rp2350/fastpin_arm_rp2350.h",
         "src/platforms/esp/fastpin_esp.h",
         "src/platforms/esp/32/core/fastpin_esp32.h",
         "src/platforms/esp/8266/fastpin_esp8266.h",
@@ -2171,6 +2174,55 @@ def test_my9221_ddr_timing_registry_requires_independent_protocol_timing() -> No
     assert check_evidence(
         [finding], [], {source: b"registry identity cannot prove DDR timing"}
     ), "mandatory metadata cannot replace production timing/codegen evidence"
+
+
+def test_esp32_forced_fastpin_registry_requires_actual_selection_proof() -> None:
+    finding = next((row for row in REQUIRED_FINDINGS if row["issue"] == 5067), None)
+    assert finding is not None, "ESP32 forced selection #5067 remains required"
+    assert finding["id"] == "esp32-forced-fastpin-selection"
+    source = "src/platforms/esp/32/core/fastpin_esp32.h"
+    assert finding["sources"] == [source]
+    assert set(finding["entrypoints"]) == {
+        "FastPin<0..63>-explicit-native-specialization-selection",
+        "ForcedSoftwarePin::hi-lo-toggle-and-NoPinMap-fallback",
+        "GenericSoftwareSPIOutput-production-FastPin-selection",
+        "MY9221Controller-production-FastPin-selection",
+    }
+    assert set(finding["required_configurations"]) == {
+        "forced-on-off-with-and-without-FASTLED_NO_PINMAP",
+        "actual-Xtensa-and-RISC-V-SDK-type-and-executed-route-proof",
+        "valid-invalid-pins-and-user-C++-constant-expression-exclusion-masks",
+        "generic-software-SPI-and-independent-MY9221-producers",
+        "restore-old-unguarded-native-specializations-mutation-rejected",
+    }
+    assert set(finding["dependencies"]) == {
+        "src/fl/system/fastpin.h",
+        "src/fl/system/fastpin_base.h",
+        "src/fl/system/forced_software_pin.h",
+        "src/platforms/fastpin.h",
+        "src/platforms/esp/fastpin_esp.h",
+        "src/platforms/generic_pin.h",
+        "src/platforms/is_platform.h",
+        "src/platforms/esp/is_esp.h",
+        "src/platforms/shared/spi_bitbang/generic_software_spi.h",
+        "src/fastspi.h",
+        "src/FastLED.h",
+        "src/fl/chipsets/my9221.h",
+        "src/platforms/my9221_emitter.h",
+        "src/platforms/shared/my9221_typed_emitter.h",
+        "src/platforms/esp/32/my9221_emitter.h",
+    }
+    assert set(finding["concerns"]) == {
+        "explicit-native-specializations-currently-override-forced-primary",
+        "NoPinMap-safety-5056-does-not-prove-ESP32-forced-selection",
+        "macro-appearance-and-native-IRAM-ELF-do-not-prove-fallback-route",
+        "real-selected-type-and-Arduino-fallback-calls-required",
+        "forced-provider-cache-placement-and-phase-timing-remain-independent",
+        "old-unguarded-restoration-must-fail-selection-oracle-not-compilation-incidental-error",
+    }
+    assert check_evidence([finding], [], {source: b"unproved actual selection"}), (
+        "registry and native IRAM metadata cannot certify forced fallback selection"
+    )
 
 
 INIT_CLOCK_LOW_CASE = (
