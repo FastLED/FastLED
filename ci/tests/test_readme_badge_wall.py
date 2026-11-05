@@ -20,6 +20,8 @@ NON_BOARD_BUILD_WORKFLOWS = {
 # These profiles intentionally reuse another workflow, are aliases/fallbacks,
 # or are exercised outside the per-board badge wall.
 KNOWN_UNBADGED_ALL_BOARD_ALIASES = {
+    "ci1306",  # Software-SPI timing probe profile, not a README build badge.
+    "ci1306_nolto",  # Non-LTO variant of the same timing probe profile.
     "digispark-tiny",
     "esp32dev_heapdbg",
     "esp32dev_qemu",
