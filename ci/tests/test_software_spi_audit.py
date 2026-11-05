@@ -61,19 +61,64 @@ def test_source_mutations_cannot_shrink_or_silently_reclassify_inventory(
         "src/platforms/pin.h": b"void writeBit();\n",
         "src/platforms/spi_output_template.h": b'#include "pin.h"\n',
     }
+    rows = {
+        path: inventory_row(source, "dependency") for path, source in sources.items()
+    }
+    assert check_inventory(sources, sources, rows) == []
+    objects = {path: audit._git_blob_digest(source) for path, source in sources.items()}
+    assert audit._source_changes(objects, sources) == []
     current = dict(sources)
     if mutation == "new_backend":
         # No SPI keyword: discovering files must precede pattern matching.
         current["src/platforms/new/output.h"] = b"void emit() { *reg = value; }\n"
+        expected_inventory = [
+            "new source requires review and evidence: src/platforms/new/output.h"
+        ]
+        expected_changes = [
+            "new source requires run-backed disposition: src/platforms/new/output.h"
+        ]
     elif mutation == "remove_token":
         current["src/platforms/pin.h"] = b"void emit();\n"
+        expected_inventory = [
+            "changed source requires review and evidence: src/platforms/pin.h"
+        ]
+        expected_changes = [
+            "changed/rerouted source requires run-backed disposition: src/platforms/pin.h"
+        ]
     elif mutation == "rename":
         current["src/platforms/renamed.h"] = current.pop("src/platforms/pin.h")
+        expected_inventory = [
+            "deleted source requires disposition: src/platforms/pin.h",
+            "new source requires review and evidence: src/platforms/renamed.h",
+        ]
+        expected_changes = [
+            "deleted source requires run-backed disposition: src/platforms/pin.h",
+            "new source requires run-backed disposition: src/platforms/renamed.h",
+        ]
     elif mutation == "delete":
         del current["src/platforms/pin.h"]
+        expected_inventory = [
+            "deleted source requires disposition: src/platforms/pin.h"
+        ]
+        expected_changes = [
+            "deleted source requires run-backed disposition: src/platforms/pin.h"
+        ]
     else:
         current["src/platforms/spi_output_template.h"] = b'#include "other.h"\n'
-    assert check_inventory(sources, current, negative_rows(sources))
+        expected_inventory = [
+            "changed source requires review and evidence: src/platforms/spi_output_template.h"
+        ]
+        expected_changes = [
+            "changed/rerouted source requires run-backed disposition: src/platforms/spi_output_template.h"
+        ]
+    # Keep every row valid and hash-current, including new/renamed entries. An
+    # incidental stale hash, negative disposition or missing row cannot catch
+    # removal of the actual new/changed/deleted-source check.
+    rows.update(
+        {path: inventory_row(source, "dependency") for path, source in current.items()}
+    )
+    assert sorted(check_inventory(sources, current, rows)) == sorted(expected_inventory)
+    assert sorted(audit._source_changes(objects, current)) == sorted(expected_changes)
 
 
 def test_deleting_a_zero_match_row_fails_even_when_all_matches_are_classified() -> None:
@@ -81,9 +126,14 @@ def test_deleting_a_zero_match_row_fails_even_when_all_matches_are_classified() 
         "src/platforms/pin.h": b"void writeBit();\n",
         "src/no_matches.h": b"struct Colour {};\n",
     }
-    rows = negative_rows(sources)
+    rows = {
+        path: inventory_row(source, "dependency") for path, source in sources.items()
+    }
+    assert check_inventory(sources, sources, rows) == []
     del rows["src/no_matches.h"]
-    assert "unclassified" in " ".join(check_inventory(sources, sources, rows))
+    assert check_inventory(sources, sources, rows) == [
+        "unclassified source: src/no_matches.h"
+    ]
 
 
 def test_query_miss_semantic_emitter_cannot_be_marked_unrelated() -> None:
@@ -395,6 +445,18 @@ def test_false_coverage_does_not_replace_real_evidence() -> None:
         }
     ]
     assert check_evidence(findings, claims, sources)
+
+
+def test_external_claims_alone_cannot_pass_without_unrelated_positive_findings() -> (
+    None
+):
+    # This isolates the external-claim rejection branch. It is not a whole-audit
+    # positive control: the real CLI separately requires its pinned findings.
+    assert check_evidence([], [], {}) == []
+    claims = [{"finding": "unverified", "status": "PASS", "command": ["true"]}]
+    assert check_evidence([], claims, {}) == [
+        "unverified: unverified external claim is not execution evidence"
+    ]
 
 
 def test_unresolved_production_configuration_remains_red() -> None:
@@ -1154,7 +1216,11 @@ def test_cli_deleted_source_uses_actual_pinned_git_bytes_in_inventory(
     result = json.loads(report.read_text(encoding="utf-8"))
     assert result["baseline_files"] == 2
     assert result["current_files"] == 1
-    assert any("deleted source" in error for error in result["errors"])
+    assert (
+        "deleted source requires run-backed disposition: src/deleted.h"
+        in result["errors"]
+    )
+    assert "deleted source requires disposition: src/deleted.h" in result["errors"]
     if classify_deleted:
         assert not any(
             "classification outside source universe" in error
