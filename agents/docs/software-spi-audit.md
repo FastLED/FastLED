@@ -172,24 +172,44 @@ Focused validation commands:
 
 - `uv run pytest ci/tests/test_software_spi_audit.py -q` tests gate rejection
   behavior. Passing these tests is not completion evidence for the audit.
-- `bash test generic_software_spi` executes the actual production generic writer
+- `bash test generic_software_spi --clean` executes the actual production generic writer
   against GPIO observation models: 8/16/32-bit registers, same/different ports,
   scalar/word/bulk/repeat/pixel paths, callbacks/start bits, streaming store
   counts, atomic interference and phase-delay/select/release observations.
-- `bash test generic_software_spi_inverted --debug` checks the #5044 inverted
+- `bash test generic_software_spi_inverted --debug --clean` checks the #5044 inverted
   bulk-clock regression. Its original five-byte reproducer failed with 41
   sampled bits instead of 40 before the fix. Additional cases cover all 256
   byte values and all eight scalar bit positions, independently inverted data
   and clock, legacy/streaming paths, and independent-port atomic writes.
-- `bash spi-audit --run-native` executes those fixed native targets and records
-  their actual exit codes, source/test input fingerprint and output log hashes.
-  A manifest cannot supply another command or a success receipt.
+- `UV_NO_SYNC=1 bash spi-audit --run-native` executes the three fixed native
+  targets with `--clean`, retaining a failed quick run and its immediate debug
+  rerun. A cached test-result summary is not fresh host execution; ordinary
+  compiler zccache hits are permitted. Exit codes, source/test fingerprints and
+  exact log hashes are recorded. A manifest cannot supply another command or a
+  success receipt.
   Fingerprints include tracked/nonignored CI and test code plus root launcher
   and build definitions; ignored generated dependencies are excluded. Log hashes
   cover the same encoded bytes saved to disk, including on Windows.
-- The fixed native inventory also executes `bash test forced_software_pin --debug`
+- The fixed native inventory also executes `bash test forced_software_pin --debug --clean`
   and fingerprints `tests/fl/system/forced_software_pin.cpp`. This is host
   fallback behavior evidence; it does not certify vendor include-order builds.
+
+The same `--run-native` path also invokes the fixed isolated #5057 runner. It
+builds and executes the exact production init testcase in four stages: baseline,
+missing-clock-LOW mutation, LOW-after-release mutation, and exact restoration.
+The JSON report's `init_clock_low_proof` preserves its entire internally produced
+typed provenance: retained workspace, source/input identities, tool identities,
+Meson options/configuration/environment digests, executed compiler/link commands,
+logs/binary/PCH/dependency hashes, Gitlink identity and host32-fixture4 scope.
+Per-stage raw generated configuration snapshots remain in the retained attempt.
+The source checkout is retained under the owned `~/.clud/worktrees` root and
+stage artifacts under `.build/spi-init-proof`; exact source restoration is checked
+on every exit. Failure, timeout or restoration errors keep `complete=false` and
+report the retained attempt path. No external provenance document is loaded as
+proof, and this host32 subproof clears no broader required configuration slot.
+A previous accepted isolated run is dated evidence, not a substitute for the
+fresh CLI execution. Target/vendor/other-width/codegen and physical obligations
+remain unresolved in the overall audit.
 
 The `spi-audit` wrapper anchors execution to its own repository directory and
 project, so invocation from another working directory cannot select a foreign

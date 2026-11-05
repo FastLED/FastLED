@@ -530,6 +530,7 @@ def compile_meson(
     quiet: bool = False,
     verbose: bool = False,
     build_mode: Optional[str] = None,
+    verbose_commands: bool = False,
 ) -> CompileResult:
     """
     Compile using Meson.
@@ -539,6 +540,7 @@ def compile_meson(
         target: Specific target to build (None = all)
         quiet: Suppress banner and progress output (used during target fallback retries)
         verbose: Enable verbose output with section banners
+        verbose_commands: Print actual backend commands (default unchanged).
         build_mode: Build mode string for display (e.g., "quick", "debug", "release").
                     If None, derived from build directory name.
 
@@ -546,6 +548,8 @@ def compile_meson(
         CompileResult with success flag and error_output (empty on success).
     """
     cmd = [get_meson_executable(), "compile", "-C", str(build_dir)]
+    if verbose_commands:
+        cmd.append("--verbose")
 
     # Derive build mode from build directory name if not provided
     if build_mode is None:

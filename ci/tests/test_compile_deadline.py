@@ -367,3 +367,38 @@ def test_streaming_stale_recovery_gets_only_remaining_compile_time(
     )
     assert streaming_runner.run_streaming_path(ctx) is sentinel
     assert attempts == [600.0, 595.0]
+
+
+@pytest.mark.parametrize("verbose_commands", [None, False, True])
+def test_compile_verbose_commands_forwarding(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, verbose_commands: bool | None
+) -> None:
+    # Command-construction control, never compiler execution/proof.
+    build_dir = tmp_path / "meson-debug"
+    build_dir.mkdir()
+    monkeypatch.setattr(compile_mod, "get_meson_executable", lambda: "managed-meson")
+    monkeypatch.setattr(compile_mod, "check_ninja_skip", lambda *_: False)
+    monkeypatch.setattr(
+        compile_mod,
+        "_run_precompile_passes",
+        lambda *_: NativeInputState(build_dir, {}, changed=False),
+    )
+    monkeypatch.setattr(compile_mod, "native_source_content_hash", lambda: "fixture")
+    monkeypatch.setattr(compile_mod, "kill_stale_runner_processes", lambda *_: 0)
+    commands: list[list[str]] = []
+
+    def capture(command: list[str], **_kwargs: object) -> None:
+        commands.append(command)
+        raise RuntimeError("captured managed command")
+
+    monkeypatch.setattr(compile_mod, "RunningProcess", capture)
+    options = {} if verbose_commands is None else {"verbose_commands": verbose_commands}
+    result = compile_mod.compile_meson(
+        build_dir, target="smoke", quiet=True, build_mode="debug", **options
+    )
+    assert not result.success
+    assert "captured managed command" in result.error_output
+    expected = ["managed-meson", "compile", "-C", str(build_dir)]
+    if verbose_commands:
+        expected.append("--verbose")
+    assert commands == [[*expected, "smoke"]]

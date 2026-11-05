@@ -12,11 +12,16 @@ import json
 import posixpath
 import re
 from collections.abc import Mapping, Sequence
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from pathlib import Path, PurePosixPath
 from tempfile import NamedTemporaryFile
+from typing import TYPE_CHECKING
 
 from running_process import CalledProcessError, RunningProcess, TimeoutExpired
+
+
+if TYPE_CHECKING:
+    from ci.software_spi_init_proof import InitProof
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -1433,6 +1438,115 @@ def _classification_input(
     return load_baseline_classifications(root, document, current)
 
 
+_INIT_CLOCK_LOW_CASE = (
+    "Software SPI production init establishes low clock before first byte"
+)
+
+
+def _init_clock_low_mutants(source: bytes) -> dict[str, bytes]:
+    """Prepare two exact init mutations; never write a checkout or grant proof."""
+    start = b"\tvoid init() FL_NO_EXCEPT {\n"
+    if source.count(start) != 1:
+        raise ValueError("init mutation requires one exact production init body")
+    begin = source.index(start)
+    end = source.find(b"\t}\n", begin)
+    if end < 0:
+        raise ValueError("init mutation requires a complete production init body")
+    low = b"\t\tfl::FastPin<CLOCK_PIN>::lo();\n"
+    release = b"\t\trelease();\n"
+    pair = low + release
+    body = source[begin:end]
+    if body.count(pair) != 1 or body.count(low) != 1 or body.count(release) != 1:
+        raise ValueError("init clock mutation requires unique LOW before release")
+    offset = begin + body.index(pair)
+    prefix, suffix = source[:offset], source[offset + len(pair) :]
+    return {
+        "missing-clock-low": prefix + release + suffix,
+        "clock-low-after-release": prefix + release + low + suffix,
+    }
+
+
+def _validate_init_clock_low_output(stage: str, returncode: int, output: str) -> None:
+    """Check diagnostic shape only; logs alone never establish executed proof.
+
+    The future runner must separately authenticate build/run provenance, binary
+    freshness and all source/tool inputs. This helper returns no evidence object.
+    """
+    mutants = {"missing-clock-low", "clock-low-after-release"}
+    if stage not in {"baseline", "restored", *mutants}:
+        raise ValueError("unknown init trace stage")
+    mutation = stage in mutants
+    if type(returncode) is not int or returncode != (1 if mutation else 0):
+        raise ValueError("init trace runtime exit does not match stage")
+    # An expected assertion must not mask a broken build, loader or runtime.
+    # This remains diagnostic rejection, never authentication of execution.
+    incidental = re.compile(
+        r"fatal error:|\berror:|addresssanitizer|undefinedbehaviorsanitizer|"
+        r"threadsanitizer|memorysanitizer|leaksanitizer|runtime error:|"
+        r"terminate called|segmentation fault|traceback \(most recent call last\)|"
+        r"uncaught exception|unhandled exception",
+        re.IGNORECASE,
+    )
+    if incidental.search(output):
+        raise ValueError("init trace contains incidental build or runtime error")
+    lines = output.splitlines()
+    if stage == "missing-clock-low":
+        # Real REQUIRE uses _exit(1): no accumulated CHECK/case/summary output
+        # is reachable. The fixed runner binds the selected case and binary;
+        # this parser only requires its sole intended runtime assertion.
+        failures = [line for line in lines if "FAILED:" in line]
+        if (
+            len(failures) != 1
+            or not re.fullmatch(
+                r"REQUIRE FAILED: .*generic_software_spi\.cpp:\d+: 7 == 8", failures[0]
+            )
+            or any(
+                line.startswith("FAIL:") or "[doctest] test cases:" in line
+                for line in lines
+            )
+        ):
+            raise ValueError(
+                "init trace lacks sole intended seven versus eight edge assertion"
+            )
+        return
+    summary = (
+        "[doctest] test cases: 1 | 0 passed | 1 failed"
+        if mutation
+        else "[doctest] test cases: 1 | 1 passed | 0 failed"
+    )
+    summaries = [line.strip() for line in lines if "[doctest] test cases:" in line]
+    if summaries != [summary]:
+        raise ValueError("init trace requires exactly one executed test case")
+    case = re.escape(_INIT_CLOCK_LOW_CASE)
+    if not mutation:
+        if f"PASS: {_INIT_CLOCK_LOW_CASE}" not in lines or any(
+            "FAILED:" in line or line.startswith("FAIL:") for line in lines
+        ):
+            raise ValueError("init trace lacks passing exact runtime case")
+        return
+    cases = [line for line in lines if line.startswith("FAIL:")]
+    if len(cases) != 1 or not re.fullmatch(
+        rf"FAIL: {case} at .*generic_software_spi\.cpp:\d+", cases[0]
+    ):
+        raise ValueError("init trace lacks failing exact runtime case")
+    assertions = [line for line in lines if re.match(r"\s+.*\.cpp:\d+: ", line)]
+    if (
+        len(assertions) != 1
+        or not re.fullmatch(
+            r"  .*generic_software_spi\.cpp:\d+: observer\.clock_was_low", assertions[0]
+        )
+        or any("FAILED:" in line for line in lines)
+    ):
+        raise ValueError("init trace lacks sole release observer assertion")
+
+
+def _run_init_clock_low_proof(root: Path) -> "InitProof":
+    """Run the fixed isolated host32 sub-obligation; never authorize a slot."""
+    from ci.software_spi_init_proof import run_init_clock_low_proof
+
+    return run_init_clock_low_proof(root)
+
+
 def _native_support_input_paths(root: Path) -> list[str]:
     """All tracked/nonignored CI and test inputs plus root launch/build files."""
     result = RunningProcess.run(
@@ -1489,9 +1603,9 @@ def _run_native_traces(
 ) -> list[dict[str, object]]:
     """Execute fixed in-repo tests; no command is accepted from a manifest."""
     commands = (
-        ("bash", "test", "generic_software_spi"),
-        ("bash", "test", "generic_software_spi_inverted", "--debug"),
-        ("bash", "test", "forced_software_pin", "--debug"),
+        ("bash", "test", "generic_software_spi", "--clean"),
+        ("bash", "test", "generic_software_spi_inverted", "--debug", "--clean"),
+        ("bash", "test", "forced_software_pin", "--debug", "--clean"),
     )
     inputs = _native_input_hashes(root, sources)
     input_digest = source_digest(json.dumps(inputs, sort_keys=True).encode("utf-8"))
@@ -1512,9 +1626,19 @@ def _run_native_traces(
         log.parent.mkdir(parents=True, exist_ok=True)
         output_bytes = result.stdout.encode("utf-8")
         log.write_bytes(output_bytes)
+        # A test-result fingerprint hit is not a new host execution. Compiler
+        # zccache hits remain valid: they still link/load/run the current test.
+        cached_test = bool(
+            re.search(
+                r"(?im)^\s*(?:\d+(?:\.\d+)?\s+){0,2}\d+/\d+\s+CACHED\b", result.stdout
+            )
+        )
         records.append(
             {
-                "kind": "host_production_gpio_trace",
+                "kind": "cached_test_summary"
+                if cached_test
+                else "host_production_gpio_trace",
+                "fresh_execution": not cached_test,
                 "command": list(command),
                 "returncode": result.returncode,
                 "input_sha256": input_digest,
@@ -1538,6 +1662,19 @@ def _run_native_traces(
     return records
 
 
+def _serialize_init_clock_low_proof(proof: "InitProof") -> dict[str, object]:
+    """Serialize internally executed provenance; never parse/grant proof claims."""
+
+    def encode_path(value: object) -> str:
+        if isinstance(value, Path):
+            return str(value)
+        raise ValueError(
+            f"unsupported internal proof serialization: {type(value).__name__}"
+        )
+
+    return json.loads(json.dumps(asdict(proof), default=encode_path))
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -1551,7 +1688,7 @@ def main() -> int:
     parser.add_argument(
         "--run-native",
         action="store_true",
-        help="run only fixed production GPIO trace targets",
+        help="run fixed fresh host traces and isolated four-stage host32 init proof; broader audit stays unresolved",
     )
     parser.add_argument(
         "--report", type=Path, default=ROOT / ".build/software-spi-audit-report.json"
@@ -1562,6 +1699,7 @@ def main() -> int:
     rows: dict[str, object] = {}
     ignored: list[str] = []
     executions: list[dict[str, object]] = []
+    init_clock_low_proof: dict[str, object] | None = None
     errors: list[str] = []
     ignore_policy_sha256: str | None = None
     try:
@@ -1611,6 +1749,14 @@ def main() -> int:
         for execution in executions:
             if execution["returncode"] != 0:
                 errors.append(f"fixed production trace failed: {execution['command']}")
+            if execution.get("fresh_execution") is False:
+                errors.append(
+                    f"fixed production trace returned cached test summary: {execution['command']}"
+                )
+        if args.run_native:
+            init_clock_low_proof = _serialize_init_clock_low_proof(
+                _run_init_clock_low_proof(ROOT)
+            )
         if (ROOT / ".gitignore").is_file():
             ignore_policy_sha256 = source_digest((ROOT / ".gitignore").read_bytes())
     except (OSError, ValueError, CalledProcessError, TimeoutExpired) as error:
@@ -1634,6 +1780,8 @@ def main() -> int:
             for path in sorted(set(baseline) | set(current))
         },
         "executions": executions,
+        "init_clock_low_proof": init_clock_low_proof,
+        "init_clock_low_proof_limitation": "Internally executed host32 fixture4 subproof only; no vendor/other-width certification, external receipt acceptance or required-slot clearing.",
         "errors": errors,
         "complete": not errors,
         "limitation": "Foundation: target/codegen/restored-defect runners and run-backed source-change resolution remain unwired.",

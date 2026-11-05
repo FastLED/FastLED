@@ -7,6 +7,7 @@ real target configuration receipts must be collected separately.
 
 import hashlib
 import json
+import os
 import sys
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -1015,10 +1016,10 @@ def test_quick_native_failure_immediately_runs_same_target_debug_and_preserves_b
     monkeypatch.setattr("ci.software_spi_audit._current_sources", lambda _root: sources)
     records = _run_native_traces(tmp_path, sources)
     assert calls == [
-        ["bash", "test", "generic_software_spi"],
-        ["bash", "test", "generic_software_spi", "--debug"],
-        ["bash", "test", "generic_software_spi_inverted", "--debug"],
-        ["bash", "test", "forced_software_pin", "--debug"],
+        ["bash", "test", "generic_software_spi", "--clean"],
+        ["bash", "test", "generic_software_spi", "--clean", "--debug"],
+        ["bash", "test", "generic_software_spi_inverted", "--debug", "--clean"],
+        ["bash", "test", "forced_software_pin", "--debug", "--clean"],
     ]
     assert [record["returncode"] for record in records] == [1, 0, 0, 0]
     assert len({record["log"] for record in records}) == 4
@@ -1047,9 +1048,9 @@ def test_fixed_native_runner_executes_forced_pin_debug_without_manifest_commands
     monkeypatch.setattr("ci.software_spi_audit._current_sources", lambda _root: sources)
     records = _run_native_traces(tmp_path, sources)
     assert calls == [
-        ["bash", "test", "generic_software_spi"],
-        ["bash", "test", "generic_software_spi_inverted", "--debug"],
-        ["bash", "test", "forced_software_pin", "--debug"],
+        ["bash", "test", "generic_software_spi", "--clean"],
+        ["bash", "test", "generic_software_spi_inverted", "--debug", "--clean"],
+        ["bash", "test", "forced_software_pin", "--debug", "--clean"],
     ]
     assert [record["command"] for record in records] == calls
     assert [record["returncode"] for record in records] == [0, 0, 0]
@@ -2103,3 +2104,941 @@ def test_objectfled_spi_pin_restore_registry_requires_real_gpio_reuse() -> None:
     assert check_evidence(
         [finding], [], {helper: b"actual helper identity needs executable proof"}
     ), "registry metadata cannot prove connected-bank restoration or GPIO reuse"
+
+
+INIT_CLOCK_LOW_CASE = (
+    "Software SPI production init establishes low clock before first byte"
+)
+
+
+def test_init_clock_low_mutants_change_only_actual_init_order() -> None:
+    # Real production bytes, not a copied SPI algorithm or SDK fixture.
+    path = audit.ROOT / "src/platforms/shared/spi_bitbang/generic_software_spi.h"
+    original = path.read_bytes()
+    mutants = audit._init_clock_low_mutants(original)
+    low = b"\t\tfl::FastPin<CLOCK_PIN>::lo();\n"
+    release = b"\t\trelease();\n"
+    assert set(mutants) == {"missing-clock-low", "clock-low-after-release"}
+    assert low + release in original
+    assert mutants["missing-clock-low"] == original.replace(low + release, release, 1)
+    assert mutants["clock-low-after-release"] == original.replace(
+        low + release, release + low, 1
+    )
+    assert path.read_bytes() == original, "mutation preparation must not edit checkout"
+    with pytest.raises(ValueError, match="init|mutation|clock"):
+        audit._init_clock_low_mutants(original.replace(low + release, release))
+
+
+def init_clock_low_output(stage: str) -> str:
+    # Diagnostic-parser controls ONLY. These strings never authorize evidence.
+    prefix = f"FAIL: {INIT_CLOCK_LOW_CASE} at generic_software_spi.cpp:208\n"
+    if stage == "missing-clock-low":
+        return "REQUIRE FAILED: generic_software_spi.cpp:17: 7 == 8\n"
+    if stage == "clock-low-after-release":
+        return (
+            prefix
+            + "  generic_software_spi.cpp:232: observer.clock_was_low\n"
+            + "[doctest] test cases: 1 | 0 passed | 1 failed\n"
+        )
+    return (
+        f"PASS: {INIT_CLOCK_LOW_CASE}\n[doctest] test cases: 1 | 1 passed | 0 failed\n"
+    )
+
+
+@pytest.mark.parametrize(
+    "stage", ["baseline", "restored", "missing-clock-low", "clock-low-after-release"]
+)
+def test_init_clock_low_diagnostic_parser_has_nonvacuous_controls(stage: str) -> None:
+    code = 1 if stage in {"missing-clock-low", "clock-low-after-release"} else 0
+    # Validation returns no executable proof/token/receipt, only accepts the log.
+    assert (
+        audit._validate_init_clock_low_output(stage, code, init_clock_low_output(stage))
+        is None
+    )
+
+
+@pytest.mark.parametrize(
+    ("stage", "code", "output"),
+    [
+        ("missing-clock-low", 1, "fatal error: missing header\n"),
+        ("missing-clock-low", 124, "timeout\n"),
+        ("missing-clock-low", 1, "[doctest] test cases: 0 | 0 passed | 0 failed\n"),
+        ("missing-clock-low", 0, init_clock_low_output("baseline")),
+        ("missing-clock-low", 1, init_clock_low_output("clock-low-after-release")),
+        (
+            "missing-clock-low",
+            1,
+            init_clock_low_output("missing-clock-low").replace("7 == 8", "6 == 8"),
+        ),
+        (
+            "missing-clock-low",
+            1,
+            init_clock_low_output("missing-clock-low").replace(
+                "generic_software_spi.cpp", "unrelated.cpp"
+            ),
+        ),
+        ("clock-low-after-release", 1, "REQUIRE FAILED: 7 == 8\n"),
+        ("baseline", 0, "build succeeded; stale binary not executed\n"),
+        ("restored", 1, init_clock_low_output("missing-clock-low")),
+        ("unknown-stage", 0, init_clock_low_output("baseline")),
+    ],
+)
+def test_init_clock_low_diagnostic_parser_rejects_incidental_failures(
+    stage: str, code: int, output: str
+) -> None:
+    with pytest.raises(ValueError, match="init|stage|runtime|assertion|case|trace"):
+        audit._validate_init_clock_low_output(stage, code, output)
+
+
+def test_init_clock_low_fixture_diagnostics_cannot_resolve_evidence_slot() -> None:
+    finding = next(f for f in REQUIRED_FINDINGS if f["issue"] == 5057)
+    claims = [
+        {
+            "finding": finding["id"],
+            "configuration": "normal-same-port",
+            "command": ["bash", "test", "generic_software_spi", "--clean", "--debug"],
+            "stages": {
+                stage: init_clock_low_output(stage)
+                for stage in (
+                    "baseline",
+                    "missing-clock-low",
+                    "clock-low-after-release",
+                    "restored",
+                )
+            },
+            "compiler": "clang 21.1.5",
+            "status": "PASS",
+        }
+    ]
+    errors = check_evidence(
+        [finding],
+        claims,
+        {path: (audit.ROOT / path).read_bytes() for path in finding["sources"]},
+    )
+    assert any("normal-same-port: unresolved" in error for error in errors)
+    assert any("unverified external claim" in error for error in errors)
+
+
+def test_init_clock_low_host32_claim_cannot_certify_width_or_target_matrix() -> None:
+    finding = next(f for f in REQUIRED_FINDINGS if f["issue"] == 5057)
+    claim = {
+        "finding": finding["id"],
+        "configuration": "normal-same-port",
+        "scope": "host32-fixture4-only",
+        "register_width": 32,
+        "vendor_integration": False,
+        "stages": {
+            stage: init_clock_low_output(stage)
+            for stage in (
+                "baseline",
+                "missing-clock-low",
+                "clock-low-after-release",
+                "restored",
+            )
+        },
+    }
+    errors = check_evidence(
+        [finding],
+        [claim],
+        {path: (audit.ROOT / path).read_bytes() for path in finding["sources"]},
+    )
+    # Even genuine host32 execution cannot discharge a broader original slot;
+    # this hand-authored diagnostic fixture additionally proves no execution.
+    for configuration in finding["required_configurations"]:
+        assert any(
+            f"{finding['id']}/{configuration}: unresolved" in error for error in errors
+        ), f"host32 must not waive unproved original obligation: {configuration}"
+
+
+@pytest.mark.parametrize(
+    "incidental",
+    [
+        "fatal error: fixture_dependency.h: No such file or directory",
+        "ERROR: AddressSanitizer: heap-buffer-overflow",
+        "runtime error: index 8 out of bounds for type unsigned char[8]",
+        "terminate called after throwing an instance of std::runtime_error",
+        "Segmentation fault (core dumped)",
+        "Traceback (most recent call last):\nRuntimeError: loader failed",
+    ],
+)
+@pytest.mark.parametrize("stage", ["missing-clock-low", "clock-low-after-release"])
+def test_init_clock_low_expected_assertion_does_not_mask_incidental_error(
+    stage: str, incidental: str
+) -> None:
+    # Parser-only diagnostic fixture, never production execution evidence.
+    transcript = init_clock_low_output(stage) + incidental + "\n"
+    with pytest.raises(
+        ValueError, match="error|exception|sanitizer|runtime|fatal|trace"
+    ):
+        audit._validate_init_clock_low_output(stage, 1, transcript)
+
+
+@pytest.mark.skipif(
+    os.environ.get("FASTLED_RUN_SPI_INIT_PROOF") != "1",
+    reason="requires four real managed debug builds and isolated source mutations",
+)
+def test_init_clock_low_real_isolated_runner_binds_execution_and_restores() -> None:
+    # This positive control MUST execute real production builds. Unit fixture logs
+    # and hand-authored JSON cannot satisfy it. Root runs this explicitly.
+    source_name = "src/platforms/shared/spi_bitbang/generic_software_spi.h"
+    before = audit._native_input_hashes(audit.ROOT, audit._current_sources(audit.ROOT))
+    original = (audit.ROOT / source_name).read_bytes()
+    expected_sources = {
+        "baseline": original,
+        **audit._init_clock_low_mutants(original),
+        "restored": original,
+    }
+    proof = audit._run_init_clock_low_proof(audit.ROOT)
+    assert proof.finding == "generic-init-clock-low"
+    assert proof.scope == "host32-fixture4-only"
+    assert proof.workspace != audit.ROOT
+    assert proof.workspace.parent == Path.home() / ".clud" / "worktrees"
+    assert proof.workspace.name.startswith("fastled3-wt-spi-init-proof-")
+    assert [stage.name for stage in proof.stages] == list(expected_sources)
+    assert (proof.workspace / source_name).read_bytes() == original
+    assert (
+        audit._native_input_hashes(audit.ROOT, audit._current_sources(audit.ROOT))
+        == before
+    ), "isolated mutation must never alter original tracked/support inputs"
+    for stage in proof.stages:
+        assert stage.source_sha256 == digest(expected_sources[stage.name])
+        assert stage.inputs_before == stage.inputs_after
+        assert stage.inputs_before[source_name] == stage.source_sha256
+        for name in (
+            "tests/platforms/shared/spi_bitbang/generic_software_spi.cpp",
+            "tests/platforms/shared/spi_bitbang/generic_software_spi_fixture.h",
+            "tests/shared/fl_unittest.cpp",
+            "src/platforms/posix/run_unit_test.hpp",
+            "src/platforms/run_unit_test.h",
+            "tests/meson.build",
+            "test",
+            "test.py",
+        ):
+            assert stage.inputs_before[name] == before[name]
+        assert stage.tools_before == stage.tools_after
+        for tool in ("compiler", "linker", "loader"):
+            identity = stage.tools_before[tool]
+            assert identity.path.is_absolute()
+            assert identity.sha256 == digest(identity.path.read_bytes())
+            assert identity.version.strip()
+        assert stage.build_returncode == 0
+        assert stage.rebuilt_source == source_name
+        assert stage.binary_path.is_file()
+        assert stage.binary_sha256 == digest(stage.binary_path.read_bytes())
+        assert stage.build_log.is_file() and stage.runtime_log.is_file()
+        assert stage.build_log_sha256 == digest(stage.build_log.read_bytes())
+        assert stage.runtime_log_sha256 == digest(stage.runtime_log.read_bytes())
+        assert stage.runtime_command[1] == str(stage.binary_path)
+        assert stage.runtime_command[2:] == [
+            f"--test-case={INIT_CLOCK_LOW_CASE}",
+            "--success",
+            "--no-colors",
+        ]
+        audit._validate_init_clock_low_output(
+            stage.name, stage.runtime_returncode, stage.runtime_log.read_text()
+        )
+    assert len({stage.binary_sha256 for stage in proof.stages[:3]}) == 3
+    finding = next(f for f in REQUIRED_FINDINGS if f["issue"] == 5057)
+    errors = check_evidence([finding], [], audit._current_sources(audit.ROOT))
+    for configuration in finding["required_configurations"]:
+        assert any(f"/{configuration}: unresolved" in error for error in errors), (
+            "authentic host32 sub-obligation must not waive broader configuration"
+        )
+
+
+def test_init_clock_low_runner_rejects_missing_inputs_before_execution(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def forbidden_execution(*_args: object, **_kwargs: object) -> None:
+        pytest.fail("missing production/test inputs must reject before any process")
+
+    monkeypatch.setattr(audit.RunningProcess, "run", forbidden_execution)
+    with pytest.raises(ValueError, match="input|source|fixture|repository"):
+        audit._run_init_clock_low_proof(tmp_path)
+
+
+def test_init_clock_low_external_provenance_never_authenticates_execution(
+    tmp_path: Path,
+) -> None:
+    finding = next(f for f in REQUIRED_FINDINGS if f["issue"] == 5057)
+    claim = {
+        "finding": finding["id"],
+        "configuration": "normal-same-port",
+        "scope": "host32-fixture4-only",
+        "binary_path": str(tmp_path / "missing-generic_software_spi.so"),
+        "binary_sha256": "0" * 64,
+        "source_sha256": "1" * 64,
+        "tools_before": {"compiler": {"path": "/invented/clang", "sha256": "2" * 64}},
+        "tools_after": {"compiler": {"path": "/invented/clang", "sha256": "2" * 64}},
+        "status": "PASS",
+    }
+    errors = check_evidence(
+        [finding],
+        [claim],
+        {path: (audit.ROOT / path).read_bytes() for path in finding["sources"]},
+    )
+    assert any("unverified external claim" in error for error in errors)
+    assert any("normal-same-port: unresolved" in error for error in errors)
+
+
+def test_init_clock_low_actual_require_abort_needs_no_unreachable_summary() -> None:
+    # Verbatim stdout captured by root from the actual selected managed loader.
+    # REQUIRE calls _exit(1), so accumulated CHECK/case summaries cannot print.
+    captured = (
+        "Runner watchdog enabled (60.0 seconds)\n"
+        "Pre-initializing CoroutineRunner singleton\n"
+        "CoroutineRunner singleton pre-initialized successfully\n"
+        "src/fl/channels/manager.cpp.hpp(47): INFO: ChannelManager: Initializing\n"
+        "src/fl/channels/manager.cpp.hpp(200): INFO: ChannelManager: Added driver 'BIT_BANG' (priority 0, caps: CLOCKLESS|SPI)\n"
+        "REQUIRE FAILED: ../../tests/platforms/shared/spi_bitbang/generic_software_spi.cpp:17: 7 == 8"
+    )
+    assert (
+        audit._validate_init_clock_low_output("missing-clock-low", 1, captured) is None
+    )
+
+
+def test_init_clock_low_actual_late_low_reports_accumulated_observer_failure() -> None:
+    # Verbatim failure grammar captured from the selected real managed loader.
+    captured = (
+        f"FAIL: {INIT_CLOCK_LOW_CASE} at ../../tests/platforms/shared/spi_bitbang/generic_software_spi.cpp:208\n"
+        "  ../../tests/platforms/shared/spi_bitbang/generic_software_spi.cpp:232: observer.clock_was_low\n"
+        "[doctest] test cases: 1 | 0 passed | 1 failed\n"
+    )
+    assert (
+        audit._validate_init_clock_low_output("clock-low-after-release", 1, captured)
+        is None
+    )
+
+
+def init_proof_gitlink_fixture(root: Path, name: str, registered: bool) -> str:
+    RunningProcess.run(
+        ["git", "init", "--quiet", "--initial-branch=audit-fixture"],
+        cwd=root,
+        check=True,
+        timeout=10,
+        capture_output=True,
+        encoding="utf-8",
+        errors="strict",
+    )
+    oid = "074d09b3d004b54a00210c9231fdc190b3522940"
+    if registered:
+        (root / ".gitmodules").write_text(
+            '[submodule "wiki"]\n\tpath = wiki\n'
+            "\turl = https://github.com/fastled/fastled.wiki.git\n"
+        )
+    RunningProcess.run(
+        ["git", "update-index", "--add", "--cacheinfo", f"160000,{oid},{name}"],
+        cwd=root,
+        check=True,
+        timeout=10,
+        capture_output=True,
+        encoding="utf-8",
+        errors="strict",
+    )
+    return oid
+
+
+def test_init_clock_low_snapshot_preserves_reviewed_docs_gitlink_identity(
+    tmp_path: Path,
+) -> None:
+    from ci import software_spi_init_proof as proof
+
+    oid = init_proof_gitlink_fixture(tmp_path, "wiki", True)
+    inputs = proof._snapshot_inputs(tmp_path)
+    assert "wiki" not in inputs.files, (
+        "Gitlink is identity, never copied as source bytes"
+    )
+    assert set(inputs.gitlinks) == {"wiki"}
+    assert inputs.gitlinks["wiki"].mode == "160000"
+    assert inputs.gitlinks["wiki"].oid == oid
+    assert "documentation" in inputs.gitlinks["wiki"].reason
+    assert ".gitmodules" in inputs.files
+
+
+@pytest.mark.parametrize(
+    "path", ["src/vendor", "tests/vendor", "ci/vendor", "unknown_docs"]
+)
+def test_init_clock_low_snapshot_rejects_native_or_unreviewed_gitlinks(
+    tmp_path: Path, path: str
+) -> None:
+    from ci import software_spi_init_proof as proof
+
+    init_proof_gitlink_fixture(tmp_path, path, True)
+    with pytest.raises(ValueError, match="Gitlink|gitlink|native|unreviewed"):
+        proof._snapshot_inputs(tmp_path)
+
+
+def test_init_clock_low_snapshot_rejects_unregistered_wiki_gitlink(
+    tmp_path: Path,
+) -> None:
+    from ci import software_spi_init_proof as proof
+
+    init_proof_gitlink_fixture(tmp_path, "wiki", False)
+    with pytest.raises(ValueError, match="Gitlink|gitlink|registered|documentation"):
+        proof._snapshot_inputs(tmp_path)
+
+
+@pytest.mark.parametrize("changed", ["fixture", "test", "launcher", "tool"])
+def test_init_clock_low_runner_rejects_between_stage_oracle_or_tool_drift(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, changed: str
+) -> None:
+    # Orchestration-negative control only: expensive build/stage boundaries are
+    # mocked, and this fixture cannot supply authenticated execution evidence.
+    from types import SimpleNamespace
+
+    from ci import software_spi_init_proof as proof
+
+    root, workspace = tmp_path / "root", tmp_path / "workspace"
+    source = b"\tvoid init() FL_NO_EXCEPT {\n\t\tfl::FastPin<CLOCK_PIN>::lo();\n\t\trelease();\n\t}\n"
+    names = {
+        "fixture": "tests/fixture.h",
+        "test": proof.TEST,
+        "launcher": "ci/launcher.py",
+    }
+    for base in (root, workspace):
+        for name in (proof.SOURCE, *names.values()):
+            target = base / name
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(source if name == proof.SOURCE else b"initial input")
+    tool = tmp_path / "compiler"
+    tool.write_bytes(b"initial tool")
+
+    def inputs(base: Path) -> dict[str, str]:
+        return {
+            name: digest((base / name).read_bytes())
+            for name in (proof.SOURCE, *names.values())
+        }
+
+    monkeypatch.setattr(proof, "_snapshot", lambda _root: (workspace, []))
+    monkeypatch.setattr(proof, "_inputs", inputs)
+    monkeypatch.setattr(
+        proof,
+        "_tools",
+        lambda _workspace: {
+            "compiler": proof.ToolIdentity(
+                tool, digest(tool.read_bytes()), "fixture-tool"
+            )
+        },
+    )
+    monkeypatch.setattr(
+        proof,
+        "_run",
+        lambda *_args, **_kwargs: NativeProcessResult(0, "not execution proof"),
+    )
+    # This older orchestration-negative fixture exercises input/tool drift only;
+    # generated-context semantics are independently tested below.
+    monkeypatch.setattr(proof, "_capture_build_context", lambda *_: None)
+    monkeypatch.setattr(proof, "_verify_build_context", lambda *_: None)
+    monkeypatch.setattr(proof, "_planned_commands", lambda *_: ())
+    calls: list[str] = []
+
+    def stage(
+        _workspace: Path,
+        _artifacts: Path,
+        name: str,
+        data: bytes,
+        *_args: object,
+        **_kwargs: object,
+    ) -> object:
+        calls.append(name)
+        (workspace / proof.SOURCE).write_bytes(data)
+        if len(calls) == 1:
+            target = tool if changed == "tool" else workspace / names[changed]
+            target.write_bytes(b"changed between stages, stable during later stages")
+        return SimpleNamespace(binary_sha256=digest(name.encode()))
+
+    monkeypatch.setattr(proof, "_stage", stage)
+    with pytest.raises(ValueError, match="input|tool|identity|manifest|changed"):
+        proof.run_init_clock_low_proof(root)
+    assert calls == ["baseline"], "drift must reject before next production stage"
+    assert (workspace / proof.SOURCE).read_bytes() == source
+
+
+def init_clock_low_build_context_fixture(workspace: Path) -> dict[str, str]:
+    # Generated-configuration fixture only; it cannot authorize execution proof.
+    build = workspace / ".build/meson-debug"
+    info = build / "meson-info"
+    info.mkdir(parents=True)
+    options = [
+        {"name": "buildtype", "value": "debug", "type": "combo"},
+        {"name": "debug", "value": True, "type": "boolean"},
+        {"name": "optimization", "value": "0", "type": "combo"},
+        {"name": "b_sanitize", "value": "none", "type": "combo"},
+        {"name": "b_pch", "value": True, "type": "boolean"},
+        {"name": "native_linker", "value": "/managed/reld", "type": "string"},
+    ]
+    (info / "intro-buildoptions.json").write_text(json.dumps(options))
+    (info / "intro-compilers.json").write_text(
+        json.dumps(
+            {"host": {"cpp": {"exelist": ["/managed/ctc-clang++"], "id": "clang"}}}
+        )
+    )
+    (info / "intro-machines.json").write_text(json.dumps({"host": {"system": "linux"}}))
+    (build / "tu.rsp").write_text("-O0 -g -DKEEP=1")
+    command = "/managed/ctc-clang++ @tu.rsp -c ../../tests/platforms/shared/spi_bitbang/generic_software_spi.cpp -o tests/generic.o"
+    (build / "compile_commands.json").write_text(
+        json.dumps(
+            [
+                {
+                    "directory": str(build),
+                    "file": "../../tests/platforms/shared/spi_bitbang/generic_software_spi.cpp",
+                    "command": command,
+                    "output": "tests/generic.o",
+                }
+            ]
+        )
+    )
+    (build / "build.ninja").write_text(
+        "include rules.ninja\nbuild tests/generic.o: cpp ../../tests/platforms/shared/spi_bitbang/generic_software_spi.cpp\n"
+    )
+    (build / "rules.ninja").write_text(
+        "rule cpp\n command = /managed/ctc-clang++ @tu.rsp -c $in -o $out\n"
+    )
+    return {
+        "PATH": "/managed",
+        "CXXFLAGS": "",
+        "LD_LIBRARY_PATH": str(build / "ci/meson/native"),
+        "FASTLED_TEST_TIMEOUT": "60",
+    }
+
+
+@pytest.mark.parametrize(
+    "changed",
+    [
+        "cpp_args",
+        "debug",
+        "b_sanitize",
+        "b_pch",
+        "native_linker",
+        "compiler",
+        "response",
+        "recipe",
+        "CXXFLAGS",
+        "CPPFLAGS",
+        "LDFLAGS",
+        "PATH",
+        "LD_LIBRARY_PATH",
+        "ASAN_OPTIONS",
+        "FASTLED_TEST_TIMEOUT",
+    ],
+)
+def test_init_clock_low_build_context_rejects_generated_or_environment_drift(
+    tmp_path: Path, changed: str
+) -> None:
+    from ci import software_spi_init_proof as proof
+
+    environment = init_clock_low_build_context_fixture(tmp_path)
+    initial = proof._capture_build_context(tmp_path, environment)
+    # The unchanged control validates context only, never a runtime outcome.
+    proof._verify_build_context(tmp_path, environment, initial)
+    build = tmp_path / ".build/meson-debug"
+    option_file = build / "meson-info/intro-buildoptions.json"
+    if changed in {"debug", "b_sanitize", "b_pch", "native_linker", "cpp_args"}:
+        options = json.loads(option_file.read_text())
+        values = {
+            "debug": False,
+            "b_sanitize": "address",
+            "b_pch": False,
+            "native_linker": "/other/reld",
+            "cpp_args": ["-DDRIFT=1"],
+        }
+        matching = [row for row in options if row["name"] == changed]
+        if matching:
+            matching[0]["value"] = values[changed]
+        else:
+            options.append({"name": changed, "value": values[changed], "type": "array"})
+        option_file.write_text(json.dumps(options))
+    elif changed == "compiler":
+        path = build / "meson-info/intro-compilers.json"
+        data = json.loads(path.read_text())
+        data["host"]["cpp"]["exelist"] = ["/other/ctc-clang++"]
+        path.write_text(json.dumps(data))
+    elif changed in {"response", "recipe"}:
+        path = build / ("tu.rsp" if changed == "response" else "rules.ninja")
+        path.write_text(path.read_text() + " -DDRIFT=1")
+    else:
+        environment[changed] = "changed between stages, stable during next stage"
+    with pytest.raises(
+        ValueError, match="context|configuration|environment|recipe|changed"
+    ):
+        proof._verify_build_context(tmp_path, environment, initial)
+
+
+@pytest.mark.parametrize(
+    "output",
+    [
+        "[1/1] Compiling C++ object tests/generic.o",
+        "/managed/ctc-clang++ @tu.rsp -DDRIFT=1 -c ../../tests/platforms/shared/spi_bitbang/generic_software_spi.cpp -o tests/generic.o",
+        "/managed/ctc-clang++ @tu.rsp -c ../../tests/platforms/shared/spi_bitbang/generic_software_spi.cpp -o tests/wrong.o",
+    ],
+)
+def test_init_clock_low_executed_argv_mismatch_rejected(
+    tmp_path: Path, output: str
+) -> None:
+    from ci import software_spi_init_proof as proof
+
+    environment = init_clock_low_build_context_fixture(tmp_path)
+    context = proof._capture_build_context(tmp_path, environment)
+    with pytest.raises(ValueError, match="executed|command|argv|compilation"):
+        proof._validate_executed_compile_command(output, context)
+
+
+def test_init_clock_low_run_uses_provisioned_environment_and_snapshot_imports(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # A real Python child checks import isolation only, not SDK/compiler proof.
+    import os
+    import sys
+
+    from ci import software_spi_init_proof as proof
+
+    snapshot = tmp_path / "snapshot"
+    (snapshot / "ci").mkdir(parents=True)
+    (snapshot / "ci/__init__.py").write_text("SNAPSHOT_SENTINEL = 'owned snapshot'\n")
+    foreign = tmp_path / "foreign"
+    (foreign / "ci").mkdir(parents=True)
+    (foreign / "ci/__init__.py").write_text(
+        "raise RuntimeError('foreign ci imported')\n"
+    )
+    monkeypatch.setenv("VIRTUAL_ENV", sys.prefix)
+    monkeypatch.setenv("UV_PROJECT_ENVIRONMENT", str(tmp_path / "wrong-environment"))
+    monkeypatch.setenv("PYTHONPATH", str(foreign))
+    (snapshot / ".build/child").mkdir(parents=True)
+    code = (
+        "import os; os.chdir('.build/child'); import ci,json; print(json.dumps({'ci': ci.__file__, "
+        "'sentinel': ci.SNAPSHOT_SENTINEL, 'uv': os.environ['UV_PROJECT_ENVIRONMENT'], "
+        "'pythonpath': os.environ['PYTHONPATH']}))"
+    )
+    result = proof._run(
+        [sys.executable, "-c", code], snapshot, tmp_path / "child.log", build=False
+    )
+    assert result.returncode == 0, result.stdout
+    data = json.loads(result.stdout)
+    assert Path(data["ci"]).resolve() == (snapshot / "ci/__init__.py").resolve()
+    assert data["sentinel"] == "owned snapshot"
+    assert Path(data["uv"]).resolve() == Path(sys.prefix).resolve()
+    assert data["pythonpath"].split(os.pathsep) == [str(snapshot)]
+
+
+def test_init_clock_low_build_context_accepts_same_semantic_regeneration(
+    tmp_path: Path,
+) -> None:
+    # Context normalization only: these opaque bytes never constitute proof.
+    from ci import software_spi_init_proof as proof
+
+    env = init_clock_low_build_context_fixture(tmp_path)
+    build = tmp_path / ".build/meson-debug"
+    private = build / "meson-private"
+    private.mkdir()
+    for name in ("build.dat", "coredata.dat", "meson_test_setup.dat"):
+        (private / name).write_bytes(b"opaque serialization A\x00")
+    initial = proof._capture_build_context(tmp_path, env)
+    for name in ("build.dat", "coredata.dat", "meson_test_setup.dat"):
+        (private / name).write_bytes(b"opaque serialization B\x00")
+    ninja = build / "build.ninja"
+    ninja.write_text("# regenerated serialization comment\n\n" + ninja.read_text())
+    proof._verify_build_context(tmp_path, env, initial)
+
+
+@pytest.mark.parametrize(
+    "name", ["pch.ninja", "link.ninja", "meson_native.txt", "config.h"]
+)
+def test_init_clock_low_build_context_rejects_non_tu_configuration_drift(
+    tmp_path: Path, name: str
+) -> None:
+    from ci import software_spi_init_proof as proof
+
+    env = init_clock_low_build_context_fixture(tmp_path)
+    build = tmp_path / ".build/meson-debug"
+    path = build / name
+    path.write_text(
+        "rule pch\n command = compiler -DKEEP=1\n"
+        if name.endswith(".ninja")
+        else "#define KEEP 1\n"
+    )
+    initial = proof._capture_build_context(tmp_path, env)
+    path.write_text(path.read_text().replace("KEEP", "DRIFT"))
+    with pytest.raises(ValueError, match="context|configuration|recipe|changed"):
+        proof._verify_build_context(tmp_path, env, initial)
+
+
+@pytest.mark.parametrize("target", ["runner", "generic_software_spi"])
+def test_init_clock_low_build_script_configures_only_bootstrap(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, target: str
+) -> None:
+    # Executes the actual orchestration script with API boundary doubles, not a
+    # compiler/SDK or a purported successful behavioral-proof transcript.
+    import sys
+    from types import SimpleNamespace
+
+    from ci import software_spi_init_proof as proof
+    from ci.meson import build_config
+    from ci.meson import compile as compile_mod
+
+    calls: list[str] = []
+
+    def setup(*_args: object, **_kwargs: object) -> bool:
+        calls.append("configure")
+        return True
+
+    def compile_target(*_args: object, **kwargs: object) -> object:
+        calls.append("compile")
+        assert kwargs["target"] == target
+        assert kwargs["verbose_commands"] is True
+        return SimpleNamespace(success=True)
+
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(sys, "argv", ["proof-script", target])
+    monkeypatch.setattr(build_config, "setup_meson_build", setup)
+    monkeypatch.setattr(compile_mod, "compile_meson", compile_target)
+    with pytest.raises(SystemExit) as result:
+        exec(proof.BUILD_SCRIPT, {})
+    assert result.value.code == 0
+    assert calls == (["configure", "compile"] if target == "runner" else ["compile"])
+
+
+def test_init_clock_low_retains_raw_generated_configuration_for_diagnosis(
+    tmp_path: Path,
+) -> None:
+    from ci import software_spi_init_proof as proof
+
+    workspace, retained = tmp_path / "workspace", tmp_path / "retained"
+    init_clock_low_build_context_fixture(workspace)
+    private = workspace / ".build/meson-debug/meson-private"
+    private.mkdir()
+    raw = b"opaque vendor serialization\x00\xff"
+    (private / "coredata.dat").write_bytes(raw)
+    proof._retain_generated_configuration(workspace, retained)
+    assert (retained / "meson-private/coredata.dat").read_bytes() == raw
+    assert (retained / "build.ninja").read_bytes() == (
+        workspace / ".build/meson-debug/build.ninja"
+    ).read_bytes()
+    manifest = json.loads((retained / "manifest.json").read_text())
+    assert manifest["meson-private/coredata.dat"] == digest(raw)
+
+
+def init_clock_low_captured_verbose_command() -> tuple[object, str]:
+    from ci import software_spi_init_proof as proof
+
+    # Verbatim real selected-TU log + configured argv, retained from failed
+    # attempt3m8vb7fs. Grammar fixture only; it cannot authenticate a proof.
+    data = json.loads(
+        (Path(__file__).parent / "fixtures/spi_init_verbose_command.json").read_text()
+    )
+    context = proof.BuildContext(
+        {}, {}, tuple(data["compile_argv"]), Path(data["directory"])
+    )
+    return context, data["verbose_line"]
+
+
+@pytest.mark.parametrize("timestamps", [0, 1, 2])
+def test_init_clock_low_actual_verbose_timestamp_prefixes(timestamps: int) -> None:
+    from ci import software_spi_init_proof as proof
+
+    context, captured = init_clock_low_captured_verbose_command()
+    assert captured.startswith("20.77 20.77 [33/43] ")
+    raw = captured.removeprefix("20.77 20.77 ")
+    output = "20.77 " * timestamps + raw
+    proof._validate_executed_compile_command(output, context)
+
+
+@pytest.mark.parametrize(
+    "changed",
+    [
+        "arbitrary-prefix",
+        "three-timestamps",
+        "changed-flags",
+        "changed-source",
+        "changed-output",
+        "duplicate-execution",
+    ],
+)
+def test_init_clock_low_actual_verbose_prefix_does_not_hide_argv_drift(
+    changed: str,
+) -> None:
+    from ci import software_spi_init_proof as proof
+
+    context, captured = init_clock_low_captured_verbose_command()
+    if changed == "arbitrary-prefix":
+        output = "untrusted-prefix " + captured
+    elif changed == "three-timestamps":
+        output = "20.77 " + captured
+    elif changed == "changed-flags":
+        output = captured.replace(" -O0 ", " -O2 ", 1)
+    elif changed == "changed-source":
+        output = captured.replace("generic_software_spi.cpp", "different_writer.cpp")
+    elif changed == "changed-output":
+        output = captured.replace(" -o ", " -o wrong-output ", 1)
+    else:
+        output = captured + "\n" + captured
+    with pytest.raises(ValueError, match="executed|command|argv|compilation"):
+        proof._validate_executed_compile_command(output, context)
+
+
+def init_clock_low_schema_only_proof(workspace: Path) -> object:
+    # Typed serialization fixture only, returned by a monkeypatched internal
+    # runner. This is never accepted by check_evidence as execution proof.
+    from ci import software_spi_init_proof as proof
+
+    tool = proof.ToolIdentity(workspace / "compiler", "a" * 64, "schema-fixture")
+    context = proof.BuildContext(
+        {"native-config": "b" * 64},
+        {"PATH": "c" * 64},
+        ("compiler", "-c", proof.TEST),
+        workspace,
+    )
+    stages = []
+    for name in (
+        "baseline",
+        "missing-clock-low",
+        "clock-low-after-release",
+        "restored",
+    ):
+        stages.append(
+            proof.InitStage(
+                name=name,
+                source_sha256="d" * 64,
+                inputs_before={proof.TEST: "e" * 64},
+                inputs_after={proof.TEST: "e" * 64},
+                tools_before={"compiler": tool},
+                tools_after={"compiler": tool},
+                build_returncode=0,
+                rebuilt_source=proof.SOURCE,
+                binary_path=workspace / name / "test.so",
+                binary_sha256="f" * 64,
+                build_log=workspace / name / "build.log",
+                build_log_sha256="1" * 64,
+                runtime_log=workspace / name / "runtime.log",
+                runtime_log_sha256="2" * 64,
+                runtime_command=["loader", "test.so", "--test-case=" + proof.CASE],
+                runtime_returncode=0 if name in {"baseline", "restored"} else 1,
+                runtime_dependencies={"PCH": "3" * 64, "core.so": "4" * 64},
+                build_context=context,
+                executed_commands=(("compiler", "-c", proof.TEST),),
+            )
+        )
+    return proof.InitProof(
+        "generic-init-clock-low",
+        "host32-fixture4-only",
+        workspace,
+        stages,
+        {"wiki": proof.GitlinkInput("160000", "5" * 40, "reviewed docs")},
+    )
+
+
+def test_cli_run_native_invokes_fixed_init_proof_and_serializes_full_provenance(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    configure_tooling_cli(tmp_path, monkeypatch)
+    calls: list[Path] = []
+    typed = init_clock_low_schema_only_proof(tmp_path / "retained")
+
+    def run(root: Path) -> object:
+        calls.append(root)
+        return typed
+
+    monkeypatch.setattr(audit, "_run_native_traces", lambda *_: [])
+    monkeypatch.setattr(audit, "_run_init_clock_low_proof", run)
+    report = tmp_path / "audit.json"
+    monkeypatch.setattr(
+        sys, "argv", ["spi-audit", "--run-native", "--report", str(report)]
+    )
+    assert audit.main() == 1
+    assert calls == [tmp_path]
+    document = json.loads(report.read_text())
+    assert document["complete"] is False
+    assert any("runner not wired" in error for error in document["errors"])
+    from dataclasses import asdict
+
+    actual = document["init_clock_low_proof"]
+    assert actual == json.loads(json.dumps(asdict(typed), default=str))
+    assert actual["scope"] == "host32-fixture4-only"
+    assert actual["workspace"] == str(typed.workspace)
+    assert actual["gitlinks"]["wiki"]["mode"] == "160000"
+    assert [stage["name"] for stage in actual["stages"]] == [
+        stage.name for stage in typed.stages
+    ]
+    for saved, stage in zip(actual["stages"], typed.stages):
+        assert saved["inputs_before"] == stage.inputs_before
+        assert saved["inputs_after"] == stage.inputs_after
+        assert (
+            saved["tools_before"]["compiler"]["sha256"]
+            == stage.tools_before["compiler"].sha256
+        )
+        assert saved["tools_after"] == saved["tools_before"]
+        assert (
+            saved["build_context"]["configuration"] == stage.build_context.configuration
+        )
+        assert saved["build_context"]["environment"] == stage.build_context.environment
+        assert saved["executed_commands"] == [
+            list(command) for command in stage.executed_commands
+        ]
+        assert saved["runtime_command"] == stage.runtime_command
+        assert saved["runtime_dependencies"] == stage.runtime_dependencies
+        for key in ("binary_path", "build_log", "runtime_log"):
+            assert saved[key] == str(getattr(stage, key))
+        for key in (
+            "binary_sha256",
+            "build_log_sha256",
+            "runtime_log_sha256",
+            "source_sha256",
+        ):
+            assert saved[key] == getattr(stage, key)
+
+
+@pytest.mark.parametrize("failure", ["compile failure", "timeout", "restore failure"])
+def test_cli_init_proof_failure_stays_red_and_preserves_retained_path(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    failure: str,
+) -> None:
+    configure_tooling_cli(tmp_path, monkeypatch)
+    monkeypatch.setattr(audit, "_run_native_traces", lambda *_: [])
+    retained = tmp_path / "owned-retained-attempt"
+
+    def run(_root: Path) -> None:
+        raise ValueError(f"init proof {failure}; retained {retained}")
+
+    monkeypatch.setattr(audit, "_run_init_clock_low_proof", run)
+    report = tmp_path / "failed.json"
+    monkeypatch.setattr(
+        sys, "argv", ["spi-audit", "--run-native", "--report", str(report)]
+    )
+    assert audit.main() == 1
+    document = json.loads(report.read_text())
+    assert document["complete"] is False
+    assert not document.get("init_clock_low_proof")
+    assert any(
+        failure in error and str(retained) in error for error in document["errors"]
+    )
+
+
+@pytest.mark.parametrize("cached", [False, True])
+def test_native_trace_requires_uncached_test_execution_not_compiler_cache_misses(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    cached: bool,
+) -> None:
+    sources = prepare_native_inputs(tmp_path)
+    output = (
+        "1/1 CACHED (previous test result)\n"
+        if cached
+        else "zccache cache hit\n1/1 PASS\n"
+    )
+    patch_native_runner(
+        monkeypatch, lambda *_args, **_kwargs: NativeProcessResult(0, output)
+    )
+    monkeypatch.setattr(audit, "_current_sources", lambda _root: sources)
+    records = _run_native_traces(tmp_path, sources)
+    assert len(records) == 3
+    assert all("--clean" in record["command"] for record in records)
+    assert all("--no-fingerprint" not in record["command"] for record in records)
+    if cached:
+        assert all(
+            record["kind"] != "host_production_gpio_trace"
+            or record.get("fresh_execution") is False
+            for record in records
+        ), "cached test summaries are not fresh production traces"
+    else:
+        assert all(record["kind"] == "host_production_gpio_trace" for record in records)
