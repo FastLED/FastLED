@@ -122,6 +122,7 @@ LABEL_SPECS: dict[str, tuple[str, str]] = {
 # Authors whose text is not screened: the maintainer's own words are trusted by
 # definition, as are repository members and invited collaborators. Bot text
 # is screened too: integrations can relay attacker-controlled content.
+# Keep in sync with the maintainer concurrency group in sanitize_issues.yml.
 TRUSTED_LOGINS: frozenset[str] = frozenset({"zackees"})
 TRUSTED_ASSOCIATIONS: frozenset[str] = frozenset({"OWNER", "MEMBER", "COLLABORATOR"})
 
