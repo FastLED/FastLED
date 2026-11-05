@@ -68,3 +68,8 @@ system fallbacks, and still fails if no compiler exists. All ten invalid cases
 pass using only the bundled toolchain (2.22s), and all 21 focused cases pass
 (7.56s). Lint and independent one-file delta review pass; production C++ is
 unchanged from the validated 331-unit/95-example and SDK builds above.
+
+Final review annotation follow-up: the compiler union, temporary source Path,
+and process results have explicit types. All 21 focused tests pass (10.32s),
+lint passes, and independent annotation-only review is clean. Production C++
+and its validation remain unchanged.

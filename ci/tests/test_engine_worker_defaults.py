@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 
 import pytest
-from running_process import RunningProcess
+from running_process import CompletedProcess, RunningProcess
 
 
 @pytest.mark.parametrize(
@@ -24,18 +24,18 @@ from running_process import RunningProcess
     ],
 )
 def test_invalid_worker_default_rejected(tmp_path: Path, definition: str) -> None:
-    compiler = (
+    compiler: str | None = (
         shutil.which("clang-tool-chain-cpp")
         or shutil.which("g++")
         or shutil.which("clang++")
     )
     if compiler is None:
         pytest.fail("host C++ compiler required for worker-default validation")
-    source = tmp_path / "invalid.cpp"
+    source: Path = tmp_path / "invalid.cpp"
     source.write_text(
         '#include "fl/channels/engine_worker_defaults.h"\n', encoding="utf-8"
     )
-    result = RunningProcess.run(
+    result: CompletedProcess[str] = RunningProcess.run(
         [
             compiler,
             "-std=c++11",
@@ -59,7 +59,7 @@ def test_invalid_worker_default_rejected(tmp_path: Path, definition: str) -> Non
     sys.platform != "linux", reason="isolated native variant gate runs on Linux"
 )
 def test_engine_worker_defaults_runtime() -> None:
-    result = RunningProcess.run(
+    result: CompletedProcess[str] = RunningProcess.run(
         ["bash", "test", "--unit", "engine_worker_defaults_runtime", "--debug"],
         cwd=Path(__file__).resolve().parents[2],
         timeout=900,
