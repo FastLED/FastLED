@@ -61,8 +61,9 @@ Use `--lcd --worker-core 1` to validate LCD clockless output together with the
 worker's resolved and observed affinity. A priority-5 coroutine on Core 0
 performs 1 ms CPU work passes and yields between passes; the response reports
 its pass count and maximum elapsed pass duration. This is synthetic scheduling
-load, not a W5500 or Wi-Fi latency benchmark. Explicit worker core settings
-require the Channels API. Use `--legacy --worker-core auto` to observe the
+load, not a W5500 or Wi-Fi latency benchmark. Explicit worker scheduling
+settings require the Channels API. AutoResearch exposes `--worker-core` for
+channel tests; it has no priority input option. Use `--legacy --worker-core auto` to observe the
 legacy `FastLED.addLeds<..., Bus::FLEX_IO>` path's default worker policy
 instead. The legacy LCD fixture supports plain WS2812B only.
 
