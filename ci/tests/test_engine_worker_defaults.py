@@ -14,6 +14,7 @@ from running_process import CompletedProcess, RunningProcess
         "FL_ENGINE_WORKER_CORE=256",
         "FL_ENGINE_WORKER_CORE=2",
         "FL_ENGINE_WORKER_CORE=-4",
+        "FL_ENGINE_WORKER_CORE=18446744073709551613ULL",
         "FL_ENGINE_WORKER_CORE=-3.5",
         "FL_ENGINE_WORKER_CORE=fl::Priority::Auto",
         "FL_ENGINE_WORKER_PRIORITY=256",
@@ -24,13 +25,9 @@ from running_process import CompletedProcess, RunningProcess
     ],
 )
 def test_invalid_worker_default_rejected(tmp_path: Path, definition: str) -> None:
-    compiler: str | None = (
-        shutil.which("clang-tool-chain-cpp")
-        or shutil.which("g++")
-        or shutil.which("clang++")
-    )
+    compiler: str | None = shutil.which("clang-tool-chain-cpp")
     if compiler is None:
-        pytest.fail("host C++ compiler required for worker-default validation")
+        pytest.fail("clang-tool-chain-cpp required for worker-default validation")
     source: Path = tmp_path / "invalid.cpp"
     source.write_text(
         '#include "fl/channels/engine_worker_defaults.h"\n', encoding="utf-8"

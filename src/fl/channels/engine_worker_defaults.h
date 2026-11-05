@@ -34,7 +34,11 @@ FL_STATIC_ASSERT((fl::is_integral<EngineWorkerPriorityType>::value ||
                  "FL_ENGINE_WORKER_PRIORITY must be a valid fl::Priority policy");
 
 // Validate before narrowing into the byte-sized enums (256 must not wrap Auto).
-FL_STATIC_ASSERT(static_cast<fl::i64>(FL_ENGINE_WORKER_CORE) >= -3 &&
+// Unsigned values are range-checked first: 2^64-3 would otherwise cast to -3.
+FL_STATIC_ASSERT((fl::is_signed<EngineWorkerCoreType>::value ||
+                      fl::is_same<EngineWorkerCoreType, Core>::value ||
+                      static_cast<fl::u64>(FL_ENGINE_WORKER_CORE) <= 1) &&
+                     static_cast<fl::i64>(FL_ENGINE_WORKER_CORE) >= -3 &&
                      static_cast<fl::i64>(FL_ENGINE_WORKER_CORE) <= 1,
                  "FL_ENGINE_WORKER_CORE must be a valid fl::Core policy");
 FL_STATIC_ASSERT(static_cast<fl::i64>(FL_ENGINE_WORKER_PRIORITY) >= 0 &&
