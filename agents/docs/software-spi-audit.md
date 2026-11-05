@@ -83,7 +83,7 @@ their existing checks; malformed versioned documents cannot fall back to them.
 No complete reviewed manifest is supplied by this loader change. Classification
 metadata is source-review input, never execution or target-configuration proof.
 
-The registry currently contains 38 distinct required findings. Native AVR
+The registry currently contains 39 distinct required findings. Native AVR
 selected-bit predicates (#5052) and peripheral/GPIO handoff (#5055) are separate
 requirements even though both bind to `fastspi_avr.h`. The latter covers all
 five UBRR1/UBRR0/SPI0_CTRLA/SPSR/SPSR0 method variants, prior-byte shifter drain,
@@ -108,6 +108,18 @@ methods cannot be covered by generic-template success. Each implementation needs
 all-bit/all-value and protocol evidence, with mux release, shifter drain, state
 restoration and following-byte transfer, or a proved whole-protocol fallback.
 The registry declaration does not satisfy those unresolved requirements.
+
+ObjectFLED SPI pin restoration (#5065) requires actual init/show/wait/deinit
+evidence through the direct AutoResearch `objectfledSpiSelfTest` RPC. Its
+hardware-assisted GPIO serializer remaps selected pads from GPIO6 to GPIO1;
+ordinary vendor `pinMode` does not restore that GPR26 selection. Tests must prove
+safe DMA drain and restoration of bank, mux, pad, direction and latch state,
+including failed initialization, timeout cleanup, unrelated bits and subsequent
+ordinary GPIO/FastPin reuse. Restoring the old missing-bank-restore and omitted
+pad/state paths must independently fail. The channel engine's `canHandle`
+lookup is not claimed as an emitting producer. Concurrent whole-bank writer
+coordination remains a separate unproved concern. Registry/source bindings do
+not fix this defect or supply target execution or physical measurements.
 
 Native ESP32 single-bit output (#5060) requires separate proof for the SPI proxy,
 ESP-IDF implementation and independent Arduino implementation. Substituting a

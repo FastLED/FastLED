@@ -624,6 +624,44 @@ REQUIRED_FINDINGS = (
             "restored-no-flush-and-pending-state-bypass-mutations-fail-separately",
         ],
     ),
+    _required(
+        "objectfled-spi-pin-restore",
+        5065,
+        "src/platforms/arm/teensy/teensy4_common/drivers/objectfled/objectfled_spi_mode.cpp.hpp",
+        [
+            "fl::objectfled_spi_init",
+            "fl::objectfled_spi_show",
+            "fl::objectfled_spi_wait",
+            "fl::objectfled_spi_deinit",
+            "AutoResearch::objectfledSpiSelfTest-RPC",
+        ],
+        [
+            "real-Teensy4-SDK-GPR26-and-CORE_PIN14_PORTREG-GPIO6",
+            "both-selected-pads-GPIO6-and-other-supported-prior-states",
+            "GPR26-mux-pad-GDIR-latch-restore-and-unrelated-bits",
+            "actual-init-show-wait-deinit-and-repeated-frames",
+            "allocation-failure-partial-init-and-timeout-cleanup",
+            "ordinary-pinMode-digitalWrite-and-FastPin-reuse-after-deinit",
+            "DMA-drain-before-safe-bank-and-pin-state-restoration",
+        ],
+        dependencies=[
+            "src/platforms/arm/teensy/teensy4_common/drivers/objectfled/objectfled_spi_mode.h",
+            "src/platforms/arm/teensy/teensy4_common/drivers/objectfled/channel_engine_objectfled.cpp.hpp",
+            "src/platforms/arm/teensy/teensy4_common/fastpin_arm_mxrt1062.h",
+            "src/platforms/arm/teensy/is_teensy.h",
+            "src/third_party/object_fled/src/ObjectFLEDDmaManager.h",
+            "src/third_party/object_fled/src/ObjectFLEDDmaManager.cpp.hpp",
+        ],
+        concerns=[
+            "actual-AutoResearch-direct-init-show-deinit-producer",
+            "channel-canHandle-lookup-is-not-an-emitting-producer",
+            "hardware-assisted-GPIO-serializer-not-FIFO-only-exclusion",
+            "real-vendor-pinMode-does-not-restore-GPR26",
+            "restored-no-GPR-restore-and-omitted-pad-state-mutations-fail-separately",
+            "whole-bank-concurrent-writer-question-remains-separate-unproven",
+            "SDK-source-configuration-and-producer-identity-bound-no-physical-claim",
+        ],
+    ),
 )
 
 # Semantic candidates missed by the original five query families. Keep them

@@ -577,8 +577,8 @@ def test_pinned_registry_keeps_every_discovered_child_and_query_miss() -> None:
     assert BASELINE_SOURCE_COUNT == 2986
     assert {finding["issue"] for finding in REQUIRED_FINDINGS} == set(
         range(5025, 5054)
-    ) | {5055, 5056, 5057, 5059, 5060, 5061, 5062, 5063, 5064}
-    assert len(REQUIRED_FINDINGS) == 38
+    ) | {5055, 5056, 5057, 5059, 5060, 5061, 5062, 5063, 5064, 5065}
+    assert len(REQUIRED_FINDINGS) == 39
     assert "src/platforms/shared/spi_bitbang/spi_block_32.h" in SEMANTIC_REQUIRED_PATHS
     assert (
         "src/platforms/shared/spi_bitbang/spi_isr_engine.cpp.hpp"
@@ -2054,3 +2054,52 @@ def test_teensy4_native_pending_bits_registry_requires_independent_completion() 
     assert check_evidence(
         [finding], [], {path: b"native LPSPI input" for path in finding["sources"]}
     ), "registry rows cannot prove native pending-bit completion"
+
+
+def test_objectfled_spi_pin_restore_registry_requires_real_gpio_reuse() -> None:
+    finding = next((row for row in REQUIRED_FINDINGS if row["issue"] == 5065), None)
+    assert finding is not None, (
+        "ObjectFLED SPI pin-bank restoration defect #5065 remains required"
+    )
+    prefix = "src/platforms/arm/teensy/teensy4_common/"
+    helper = prefix + "drivers/objectfled/objectfled_spi_mode.cpp.hpp"
+    assert finding["id"] == "objectfled-spi-pin-restore"
+    assert finding["sources"] == [helper]
+    assert set(finding["dependencies"]) == {
+        prefix + "drivers/objectfled/objectfled_spi_mode.h",
+        prefix + "drivers/objectfled/channel_engine_objectfled.cpp.hpp",
+        prefix + "fastpin_arm_mxrt1062.h",
+        "src/platforms/arm/teensy/is_teensy.h",
+        "src/third_party/object_fled/src/ObjectFLEDDmaManager.h",
+        "src/third_party/object_fled/src/ObjectFLEDDmaManager.cpp.hpp",
+    }
+    assert set(finding["entrypoints"]) == {
+        "fl::objectfled_spi_init",
+        "fl::objectfled_spi_show",
+        "fl::objectfled_spi_wait",
+        "fl::objectfled_spi_deinit",
+        "AutoResearch::objectfledSpiSelfTest-RPC",
+    }
+    assert set(finding["required_configurations"]) == {
+        "real-Teensy4-SDK-GPR26-and-CORE_PIN14_PORTREG-GPIO6",
+        "both-selected-pads-GPIO6-and-other-supported-prior-states",
+        "GPR26-mux-pad-GDIR-latch-restore-and-unrelated-bits",
+        "actual-init-show-wait-deinit-and-repeated-frames",
+        "allocation-failure-partial-init-and-timeout-cleanup",
+        "ordinary-pinMode-digitalWrite-and-FastPin-reuse-after-deinit",
+        "DMA-drain-before-safe-bank-and-pin-state-restoration",
+    }
+    assert set(finding["concerns"]) == {
+        "actual-AutoResearch-direct-init-show-deinit-producer",
+        "channel-canHandle-lookup-is-not-an-emitting-producer",
+        "hardware-assisted-GPIO-serializer-not-FIFO-only-exclusion",
+        "real-vendor-pinMode-does-not-restore-GPR26",
+        "restored-no-GPR-restore-and-omitted-pad-state-mutations-fail-separately",
+        "whole-bank-concurrent-writer-question-remains-separate-unproven",
+        "SDK-source-configuration-and-producer-identity-bound-no-physical-claim",
+    }
+    assert all(path.startswith("src/") for path in finding["sources"])
+    assert all(path.startswith("src/") for path in finding["dependencies"])
+    assert check_evidence(
+        [finding], [], {helper: b"actual helper identity needs executable proof"}
+    ), "registry metadata cannot prove connected-bank restoration or GPIO reuse"
