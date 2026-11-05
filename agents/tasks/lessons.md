@@ -607,3 +607,10 @@
   station/client before requesting private network credentials. The host does
   not need a Wi-Fi adapter. Use TLS for HTTPS tests and distinguish local
   transport evidence from reproduction against the public internet endpoint.
+
+## Isolate API-removal footprint spikes (#5001)
+
+- Keep the caller on the same API in before/after measurements. Removing a
+  template parameter from legacy `addLeds<>` must be measured with legacy
+  calls on both sides. A migration to full Channels is a separate experiment
+  and must not be presented as the removal's memory effect.

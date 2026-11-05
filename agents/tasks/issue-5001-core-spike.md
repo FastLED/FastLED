@@ -1,8 +1,10 @@
 # Spike: worker configuration only in the Channels API
 
-Removing core template arguments provides no useful memory savings in the
-measured ordinary legacy sketch. Migrating a legacy caller that needs core
-pinning to configured Channels increases its footprint in this experiment.
+The primary comparison keeps the sketch on legacy `addLeds<>` before and
+after removing core template arguments. It saves **0 flash bytes and
+0 static DRAM bytes**. No runtime Channels API calls are compiled in these
+legacy cases. The earlier migration comparison changed APIs and must not be
+used as the result of the requested removal spike.
 This is an experimental branch; the breaking API change is not merged.
 
 ## Matched measurements
@@ -15,26 +17,21 @@ Six WS2812B strips, 170 LEDs each, GPIO 1–6, ESP32-S3 LCD clockless
 | Before: legacy, default worker | 321,915 | 322,032 | 26,076 |
 | After: legacy, default worker | 321,915 | 322,032 | 26,076 |
 | Before: legacy, template Core1 | 322,107 | 322,224 | 26,076 |
-| Before: configured Channel, Core1/priority 23 | 341,631 | 341,744 | 26,844 |
-| After: configured Channel, Core1/priority 23 | 341,627 | 341,744 | 26,844 |
 
 - Default legacy removal: **0 flash / 0 static DRAM saved**.
-- Unchanged configured-channel control: 4 fewer allocated image bytes,
-  **0 firmware-binary bytes / 0 static DRAM saved**. This tiny difference
-  does not support a practical footprint benefit.
-- Migrating the pinned legacy sketch to the after-channel sketch:
-  **+19,520 allocated flash bytes, +19,520 firmware-binary bytes,
-  +768 static DRAM bytes**, before accounting for runtime heap usage.
-- Before removal, requesting a legacy core costs only 192 flash bytes and
-  no additional static DRAM in this sketch.
+- Formerly explicit Core1 legacy call changed to the new legacy call without
+  a core argument: **192 flash bytes / 0 static DRAM saved**. This also removes
+  that caller's affinity request; it is not equivalent scheduling behavior.
+- The primary before/after comparison keeps the same default scheduling.
 
 ## What RAM means here
 
-The target ELF size probes report `sizeof(WS2812B<1, GRB>) == 52` and
-`sizeof(fl::Channel) == 340` before and after. Core selection added no
-per-controller field. Full Channels allocate their objects dynamically;
-static DRAM does not include those allocations, shared-pointer bookkeeping,
-frame allocations, or FreeRTOS task stacks. No free-heap measurement or
+The target ELF size probe reports `sizeof(WS2812B<1, GRB>) == 52` before and
+after. Core selection added no per-controller field. The legacy cases do not
+construct full Channel objects. The shared harness also contains a constant
+Channel-size probe; `sizeof` does not construct an object or link its runtime
+API. Probe overhead is identical in both revisions. Static DRAM does not
+measure runtime heap or FreeRTOS task stacks. No free-heap measurement or
 on-device run is claimed.
 
 The DRAM column sums `.dram0.data`, `.dram0.bss`, and `.noinit` directly
@@ -46,8 +43,7 @@ The raw fbuild RAM headline includes that reservation. Symbol-attributed RAM
 is another metric and is not used as physical RAM here.
 
 Allocated image flash sums allocated, file-backed ELF sections, independently
-of symbol aliases. Firmware binary size is also shown because padding absorbs
-the four-byte difference in the channel control.
+of symbol aliases. Firmware binary size is also shown independently.
 
 ## Scope and provenance
 
@@ -61,8 +57,8 @@ Candidate: the production source delta in this spike branch.
 - Defines: `FL_LOG_LEVEL=0`, `CORE_SPIKE_MODE=0`, `1`, or `2`.
 - Mode 0 is default legacy; mode 1 is baseline-only legacy Core1; mode 2
   is configured Channel Core1/priority 23, equal to the legacy LCD priority.
-- Both APIs explicitly select `Bus::FLEX_IO`; the channel measurement uses
-  `FastLED.add<Bus::FLEX_IO>(cfg)`, avoiding the all-driver runtime bundle.
+- The primary tests explicitly select `Bus::FLEX_IO` through legacy
+  `FastLED.addLeds<>` on both revisions.
 - Identical sketch source and pixel arrays across before/after controls.
   Two four-byte volatile size probes appear in every build.
 - SDK/build caches are preserved. No driver code, worker configuration,
@@ -90,14 +86,34 @@ symbol reports and `metrics.json` remain in ignored
 Publication scope is a draft spike PR for review, with native and ESP32-S3
 hosted coverage selected at creation. Production merge is a separate decision.
 
-The recommendation is to treat this as API simplification, not a memory
-optimization. Requiring the full Channel path for affinity is a substantial
-cost for this specific caller and should be an explicit product decision.
+The legacy-only result supports treating removal as API simplification;
+ordinary legacy callers show no measured memory saving.
+
+## Separate migration experiment (excluded from removal result)
+
+The earlier report also measured replacing legacy calls with configured full
+Channels. That changes the controller implementation and retained runtime
+machinery, so its growth is not a cost caused by removing template arguments.
+It is retained here only to explain the misleading earlier comparison.
+This auxiliary caller used typed `FastLED.add<Bus::FLEX_IO>(cfg)`, so the
+increase did not come from enrolling every available driver.
+
+| Auxiliary build | Allocated image flash | Firmware binary | Static DRAM data+BSS |
+|---|---:|---:|---:|
+| Before: configured Channel, Core1/priority 23 | 341,631 | 341,744 | 26,844 |
+| After: configured Channel, Core1/priority 23 | 341,627 | 341,744 | 26,844 |
+
+The full Channel object is 340 bytes and is allocated dynamically; it is not
+constructed in the primary legacy tests. None of these migration figures
+belongs in the legacy-removal savings result.
 
 ## Reproduction sketch
 
 Use this in the existing AutoResearch scratch target, preserving its original
-contents for restoration. Mode 1 intentionally compiles only on the baseline.
+contents for restoration. Use **mode 0 on both revisions** for the requested
+legacy-only comparison. Mode 1 intentionally compiles only on the baseline.
+Mode 2 belongs solely to the separate migration experiment above; its
+`FastLED.add(cfg)` calls are preprocessed out of modes 0 and 1.
 
 ```cpp
 #include <FastLED.h>
