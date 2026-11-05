@@ -1878,3 +1878,118 @@ def test_parallel_spi_pin_mapping_registry_preserves_independent_api_contracts()
     assert check_evidence(
         [finding], [], {path: b"mapping input" for path in finding["sources"]}
     ), "required mappings cannot certify validation or target bank behavior"
+
+
+@pytest.fixture
+def reviewed_binary_baseline(
+    reviewed_baseline: ReviewedBaselineFixture,
+) -> ReviewedBaselineFixture:
+    fixture = reviewed_baseline
+    path = "src/fixture/module.wasm"
+    source = b"\x00asm\x01\x00\x00\x00\xff\r\n"
+    fixture.sources[path] = source
+    fixture.objects[path] = audit._git_blob_digest(source)
+    fixture.document["files"][path] = {
+        "baseline_blob_oid": fixture.objects[path],
+        "baseline_sha256": digest(source),
+        "disposition": "dependency",
+        "role": "dependency",
+        "findings": [],
+        "reason": "Literal executable-module fixture; byte identity alone does not establish its execution context.",
+        "source_evidence": [{"kind": "bytes", "offset": 0, "hex": "0061736d"}],
+    }
+    return fixture
+
+
+def test_reviewed_binary_anchor_binds_bytes_without_execution_proof(
+    reviewed_binary_baseline: ReviewedBaselineFixture,
+) -> None:
+    fixture = reviewed_binary_baseline
+    loaded = audit.load_baseline_classifications(
+        fixture.root, fixture.document, fixture.sources
+    )
+    assert loaded.errors == []
+    assert loaded.rows["src/fixture/module.wasm"]["source_sha256"] == digest(
+        b"\x00asm\x01\x00\x00\x00\xff\r\n"
+    )
+    assert audit.check_evidence(REQUIRED_FINDINGS, [], fixture.sources), (
+        "binary source binding cannot certify execution or waive target requirements"
+    )
+
+
+@pytest.mark.parametrize(
+    "anchor",
+    [
+        {"kind": "bytes", "offset": 0, "hex": ""},
+        {"kind": "bytes", "offset": 0, "hex": "0"},
+        {"kind": "bytes", "offset": 0, "hex": "GG"},
+        {"kind": "bytes", "offset": 8, "hex": "FF"},
+        {"kind": "bytes", "offset": 0, "hex": "00 61"},
+        {"kind": "bytes", "offset": 0, "hex": 0},
+        {"kind": "byte", "offset": 0, "hex": "00"},
+        {"kind": "bytes", "offset": True, "hex": "00"},
+        {"kind": "bytes", "offset": -1, "hex": "00"},
+        {"kind": "bytes", "offset": "0", "hex": "00"},
+        {"kind": "bytes", "offset": 11, "hex": "00"},
+        {"kind": "bytes", "offset": 10, "hex": "0a00"},
+        {"kind": "bytes", "offset": 0, "hex": "ff"},
+        {"kind": "bytes", "offset": 0, "hex": "00", "status": "PASS"},
+    ],
+)
+def test_reviewed_binary_anchor_rejects_malformed_or_mismatched_evidence(
+    reviewed_binary_baseline: ReviewedBaselineFixture, anchor: object
+) -> None:
+    fixture = reviewed_binary_baseline
+    path = "src/fixture/module.wasm"
+    fixture.document["files"][path]["source_evidence"] = [anchor]
+    loaded = audit.load_baseline_classifications(
+        fixture.root, fixture.document, fixture.sources
+    )
+    assert any(
+        f"invalid reviewed classification {path}:" in error for error in loaded.errors
+    )
+
+
+@pytest.mark.parametrize("mutation", ["blob", "sha256", "claim"])
+def test_reviewed_binary_anchor_cannot_replace_whole_file_binding_or_schema(
+    reviewed_binary_baseline: ReviewedBaselineFixture, mutation: str
+) -> None:
+    fixture = reviewed_binary_baseline
+    path = "src/fixture/module.wasm"
+    row = fixture.document["files"][path]
+    if mutation == "claim":
+        row["status"] = "PASS"
+    else:
+        row["baseline_blob_oid" if mutation == "blob" else "baseline_sha256"] = "0" * (
+            40 if mutation == "blob" else 64
+        )
+    loaded = audit.load_baseline_classifications(
+        fixture.root, fixture.document, fixture.sources
+    )
+    assert any(
+        f"invalid reviewed classification {path}:" in error for error in loaded.errors
+    )
+
+
+@pytest.mark.parametrize("mutation", ["changed", "deleted", "new"])
+def test_reviewed_binary_source_changes_remain_red_with_pinned_identity(
+    reviewed_binary_baseline: ReviewedBaselineFixture, mutation: str
+) -> None:
+    fixture = reviewed_binary_baseline
+    path = "src/fixture/module.wasm"
+    current = dict(fixture.sources)
+    if mutation == "changed":
+        current[path] = b"\x00asm\x02\x00\x00\x00\xff\r\n"
+        expected = f"changed/rerouted source requires run-backed disposition: {path}"
+    elif mutation == "deleted":
+        del current[path]
+        expected = f"deleted source requires run-backed disposition: {path}"
+    else:
+        current["src/new-module.wasm"] = b"\x00asm\x01\x00\x00\x00"
+        expected = "new source requires run-backed disposition: src/new-module.wasm"
+    loaded = audit.load_baseline_classifications(
+        fixture.root, fixture.document, current
+    )
+    assert expected in loaded.errors
+    assert loaded.rows[path]["source_sha256"] == digest(fixture.sources[path])
+    assert fixture.blob_reads == ([] if mutation == "new" else [fixture.objects[path]])

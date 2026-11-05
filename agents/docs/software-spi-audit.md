@@ -65,6 +65,14 @@ remain explicit errors. Unknown keys, Boolean version/line values, malformed
 records and duplicate JSON keys are rejected; duplicate-key rejection also
 applies to a supplied findings file.
 
+Binary evidence may instead use exactly `{"kind":"bytes","offset":0,"hex":"0061736d"}`.
+The offset must be a nonnegative integer (not Boolean), and hex must contain
+nonempty lowercase byte pairs matching the exact baseline slice within bounds.
+Whole-file Git blob and SHA-256 bindings remain mandatory. Byte anchors establish
+review identity only; they do not make an executable WASM module a noncode asset,
+waive context/reachability review or certify execution. Empty evidence remains
+invalid, and new, changed or deleted binary files retain their RED obligations.
+
 Use `bash spi-audit --classifications <reviewed-v1.json> --report <report.json>`
 to load reviewed source bindings. The loader independently verifies the exact
 pinned Git path set, blob identities, SHA-256 hashes and literal anchors against

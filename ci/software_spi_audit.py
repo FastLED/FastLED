@@ -1186,11 +1186,35 @@ def _reviewed_files(document: object) -> Mapping[str, object]:
     return files
 
 
+def _check_reviewed_byte_anchor(anchor: Mapping[str, object], source: bytes) -> None:
+    if set(anchor) != {"kind", "offset", "hex"} or anchor["kind"] != "bytes":
+        raise ValueError("byte anchor requires exact kind/offset/hex keys")
+    offset, encoded = anchor["offset"], anchor["hex"]
+    if type(offset) is not int or offset < 0:
+        raise ValueError("byte anchor offset must be a nonnegative integer")
+    if (
+        not isinstance(encoded, str)
+        or re.fullmatch(r"(?:[0-9a-f]{2})+", encoded) is None
+    ):
+        raise ValueError(
+            "byte anchor hex must be nonempty canonical lowercase byte pairs"
+        )
+    expected = bytes.fromhex(encoded)
+    if (
+        offset + len(expected) > len(source)
+        or source[offset : offset + len(expected)] != expected
+    ):
+        raise ValueError("byte anchor must equal actual in-bounds baseline bytes")
+
+
 def _check_reviewed_anchors(evidence: object, source: bytes) -> None:
     if not isinstance(evidence, list) or not evidence:
-        raise ValueError("source_evidence must contain literal baseline line anchors")
+        raise ValueError("source_evidence must contain literal baseline anchors")
     lines = source.splitlines()
     for anchor in evidence:
+        if isinstance(anchor, Mapping) and "kind" in anchor:
+            _check_reviewed_byte_anchor(anchor, source)
+            continue
         if not isinstance(anchor, Mapping) or set(anchor) != {"line", "text"}:
             raise ValueError("source anchor requires exact line/text keys")
         line, text = anchor["line"], anchor["text"]
