@@ -50,6 +50,8 @@
 #include "fl/stl/span.h"
 #include "fl/stl/string.h"
 #include "fl/stl/vector.h"
+#include "fl/stl/allocator.h"
+#include "fl/stl/malloc.h"
 #include "crgb.h"
 #include "test.h"
 
@@ -90,6 +92,171 @@ template <> class FastPin<91> {
     static void strobe() { toggle(); toggle(); }
 };
 }  // namespace fl
+
+namespace { // anonymous namespace for spi_legacy_golden timing observation
+
+// Virtual GPIO/time observations only. This model does not serialize bits and
+// its nanoseconds are schedule units, not host wall time or target measurements.
+struct My9221TimeEvent {
+    enum Kind { Data, Clock, Wait } kind;
+    fl::u64 ns;
+    bool data;
+    bool clock;
+    bool interrupts_enabled;
+};
+
+struct My9221TimeState {
+    fl::u64 ns = 0;
+    bool data = false;
+    bool clock = false;
+    bool interrupts_enabled = true;
+    int guard_entries = 0;
+    fl::vector<My9221TimeEvent> events;
+
+    void pin(bool clock_pin, bool level) {
+        ++ns; // Explicit one-nanosecond model cost per GPIO operation.
+        bool& previous = clock_pin ? clock : data;
+        if (previous == level) return;
+        previous = level;
+        events.push_back({clock_pin ? My9221TimeEvent::Clock : My9221TimeEvent::Data,
+                          ns, data, clock, interrupts_enabled});
+    }
+
+    void wait(fl::u64 duration) {
+        ns += duration;
+        events.push_back({My9221TimeEvent::Wait, ns, data, clock, interrupts_enabled});
+    }
+};
+
+My9221TimeState& my9221TimeState() {
+    static My9221TimeState state;
+    return state;
+}
+
+void checkMy9221Timing(const My9221TimeState& state,
+                        const fl::vector<My9221TimeEvent>& edges,
+                        fl::size last_clock_index, fl::u64 stop_bound_ns) {
+    fl::vector<My9221TimeEvent> pulses;
+    for (fl::size i = last_clock_index + 1; i < state.events.size(); ++i) {
+        const My9221TimeEvent& event = state.events[i];
+        FL_CHECK_FALSE(event.clock); // DCKI remains parked throughout latch.
+        // Final payload HIGH may require an initial DI parking fall. It is
+        // not a fifth latch pulse; still verify the final data hold interval.
+        if (event.kind == My9221TimeEvent::Data && pulses.empty() && !event.data) {
+            FL_CHECK_GE(event.ns - edges.back().ns, static_cast<fl::u64>(10));
+            continue;
+        }
+        if (event.kind == My9221TimeEvent::Data) pulses.push_back(event);
+    }
+    FL_REQUIRE_EQ(pulses.size(), static_cast<fl::size>(8));
+    for (fl::size pulse = 0; pulse < 4; ++pulse) {
+        const My9221TimeEvent& high = pulses[pulse * 2];
+        const My9221TimeEvent& low = pulses[pulse * 2 + 1];
+        FL_CHECK_TRUE(high.data);
+        FL_CHECK_FALSE(low.data);
+        const fl::u64 latch_high_ns = low.ns - high.ns;
+        // Independent literal manufacturer bounds, not production constants.
+        // Intended initial RED: consecutive production hi/lo gives1 model ns.
+        FL_REQUIRE_GT(latch_high_ns, static_cast<fl::u64>(70));
+        const fl::u64 low_end = pulse < 3 ? pulses[pulse * 2 + 2].ns : state.ns;
+        FL_CHECK_GT(low_end - low.ns, static_cast<fl::u64>(230));
+    }
+    FL_CHECK_GT(pulses[0].ns - edges.back().ns, static_cast<fl::u64>(220000));
+    FL_CHECK_GT(state.ns - pulses.back().ns, stop_bound_ns);
+    for (fl::size i = 0; i < edges.size(); ++i) {
+        if (i > 0) {
+            const fl::u64 phase = edges[i].ns - edges[i - 1].ns;
+            FL_CHECK_GE(phase, static_cast<fl::u64>(50));
+            FL_CHECK_LE(phase, static_cast<fl::u64>(7200));
+        }
+        fl::u64 previous_data_change = 0;
+        fl::u64 next_data_change = state.ns;
+        for (const My9221TimeEvent& event : state.events) {
+            if (event.kind != My9221TimeEvent::Data) continue;
+            if (event.ns <= edges[i].ns) previous_data_change = event.ns;
+            else { next_data_change = event.ns; break; }
+        }
+        FL_CHECK_GE(edges[i].ns - previous_data_change, static_cast<fl::u64>(10));
+        FL_CHECK_GE(next_data_change - edges[i].ns, static_cast<fl::u64>(10));
+    }
+}
+
+struct My9221AllocationControl {
+    bool reject = false;
+    int rejected = 0;
+};
+My9221AllocationControl& my9221AllocationControl() {
+    static My9221AllocationControl control;
+    return control;
+}
+void* my9221ControlledAllocate(fl::size bytes) {
+    if (my9221AllocationControl().reject && bytes == 130) {
+        ++my9221AllocationControl().rejected;
+        return nullptr;
+    }
+    return fl::malloc(bytes);
+}
+void my9221ControlledFree(void* ptr) { fl::free(ptr); }
+
+} // anonymous namespace for spi_legacy_golden timing observation
+
+namespace fl {
+
+// Pins92/93 are unused by this host target. Real SAM block code also names
+// those numbers, but that platform implementation is not selected here.
+template <> class FastPin<92> {
+  public:
+    typedef volatile RwReg* port_ptr_t;
+    typedef RwReg port_t;
+    static void setOutput() {}
+    static void setInput() {}
+    static void hi() { my9221TimeState().pin(false, true); }
+    static void lo() { my9221TimeState().pin(false, false); }
+    static void toggle() { my9221TimeState().pin(false, !my9221TimeState().data); }
+    static void strobe() { toggle(); toggle(); }
+};
+
+template <> class FastPin<93> {
+  public:
+    typedef volatile RwReg* port_ptr_t;
+    typedef RwReg port_t;
+    static void setOutput() {}
+    static void setInput() {}
+    static void hi() { my9221TimeState().pin(true, true); }
+    static void lo() { my9221TimeState().pin(true, false); }
+    static void toggle() { my9221TimeState().pin(true, !my9221TimeState().clock); }
+    static void strobe() { toggle(); toggle(); }
+};
+
+namespace detail {
+
+// Declare the observation seam without requiring production to implement it.
+// Unchanged MY9221Controller still compiles and executes, then fails the actual
+// event-width assertion. A future default policy must bind real waits separately.
+template <int DATA_PIN, fl::u8 CLOCK_PIN> struct My9221Timing;
+template <> struct My9221Timing<92, 93> {
+    // Model only: real targets must supply a prior-state-preserving guard.
+    struct Guard {
+        bool previous;
+        Guard() : previous(my9221TimeState().interrupts_enabled) {
+            ++my9221TimeState().guard_entries;
+            my9221TimeState().interrupts_enabled = false;
+        }
+        ~Guard() { my9221TimeState().interrupts_enabled = previous; }
+        Guard(const Guard&) = delete;
+        Guard& operator=(const Guard&) = delete;
+    };
+    template <fl::u32 NS> static void waitNanoseconds() {
+        my9221TimeState().wait(NS);
+    }
+    static void waitMicroseconds(fl::u32 us) {
+        my9221TimeState().wait(static_cast<fl::u64>(us) * 1000);
+    }
+    static fl::u64 nowNanoseconds() { return my9221TimeState().ns; }
+};
+
+} // namespace detail
+} // namespace fl
 
 FL_TEST_FILE(FL_FILEPATH) {
 
@@ -696,6 +863,171 @@ FL_TEST_CASE("MY9221 legacy SPI-channel addLeds uses bit-bang MY9221Controller, 
             got = static_cast<fl::u16>((got << 1) | bits[w * 16 + b]);
         }
         FL_CHECK_EQ(got, expectedWords[w]);
+    }
+}
+
+
+FL_TEST_CASE("MY9221 public controller observes DDR and four timed DI latch pulses") {
+    SpiLegacyGoldenFixture fixture;
+    static CRGB leds[4] = {CRGB(0x10, 0x20, 0x30), CRGB(0xFF, 0x00, 0x80),
+                           CRGB(0x01, 0x02, 0x03), CRGB(0x00, 0x00, 0x00)};
+    CLEDController& controller =
+        FastLED.addLedsSpiChannel<MY9221, 92, 93, RGB>(leds, 4);
+    controller.setDither(DISABLE_DITHER);
+    My9221TimeState& state = my9221TimeState();
+    state.ns = 0;
+    state.data = false;
+    state.clock = false;
+    state.events.clear();
+    FastLED.show(); // Actual public production controller, never a copied writer.
+
+    fl::vector<My9221TimeEvent> edges;
+    fl::size last_clock_index = 0;
+    for (fl::size i = 0; i < state.events.size(); ++i) {
+        if (state.events[i].kind == My9221TimeEvent::Clock) {
+            edges.push_back(state.events[i]);
+            last_clock_index = i;
+        }
+    }
+    FL_REQUIRE_EQ(edges.size(), static_cast<fl::size>(208));
+    const fl::u16 expected_words[13] = {
+        0x0010, 0, 0, 0, 1, 2, 3, 0xFF, 0, 0x80, 0x10, 0x20, 0x30,
+    };
+    for (int word = 0; word < 13; ++word) {
+        fl::u16 sampled = 0;
+        for (int bit = 0; bit < 16; ++bit) {
+            sampled = static_cast<fl::u16>((sampled << 1) |
+                                          (edges[word * 16 + bit].data ? 1 : 0));
+        }
+        FL_CHECK_EQ(sampled, expected_words[word]);
+    }
+
+    checkMy9221Timing(state, edges, last_clock_index, 210);
+}
+
+
+FL_TEST_CASE("MY9221 partial BGR chains repeat with final HIGH and cascade stop") {
+    SpiLegacyGoldenFixture fixture;
+    CRGB leds[17];
+    for (CRGB& led : leds) led = CRGB(1, 0x55, 0x80);
+    // Host controller destructor removes this real producer from the draw list.
+    MY9221Controller<92, 93, BGR> controller;
+    controller.init();
+    controller.setDither(DISABLE_DITHER);
+    const fl::u16 full[13] = {
+        0x10, 0x80, 0x55, 1, 0x80, 0x55, 1, 0x80, 0x55, 1, 0x80, 0x55, 1};
+    const fl::u16 one[13] = {0x10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x80, 0x55, 1};
+    const fl::u16 three[13] = {0x10, 0, 0, 0, 0x80, 0x55, 1, 0x80, 0x55, 1, 0x80, 0x55, 1};
+    const int lengths[] = {1, 3, 17};
+    for (int count : lengths) {
+        controller.setLeds(leds, count);
+        for (int repeat = 0; repeat < 2; ++repeat) {
+            My9221TimeState& state = my9221TimeState();
+            state.ns = 0; state.data = false; state.clock = false; state.events.clear();
+            controller.showLeds(255); // Public production entrypoint.
+            fl::vector<My9221TimeEvent> edges;
+            fl::size last_clock_index = 0;
+            for (fl::size i = 0; i < state.events.size(); ++i) {
+                if (state.events[i].kind == My9221TimeEvent::Clock) {
+                    edges.push_back(state.events[i]); last_clock_index = i;
+                }
+            }
+            const int chips = count == 17 ? 5 : 1;
+            FL_REQUIRE_EQ(edges.size(), static_cast<fl::size>(chips * 208));
+            FL_CHECK_TRUE(edges.back().data);
+            for (int chip = 0; chip < chips; ++chip) {
+                const fl::u16* expected = chip < chips - 1 ? full : (count == 3 ? three : one);
+                for (int word = 0; word < 13; ++word) {
+                    fl::u16 sampled = 0;
+                    for (int bit = 0; bit < 16; ++bit) {
+                        sampled = static_cast<fl::u16>((sampled << 1) |
+                            (edges[(chip * 13 + word) * 16 + bit].data ? 1 : 0));
+                    }
+                    FL_CHECK_EQ(sampled, expected[word]);
+                }
+            }
+            // N=5 requires >250ns. The240ns DI low wait alone cannot pass.
+            checkMy9221Timing(state, edges, last_clock_index, count == 17 ? 250 : 210);
+        }
+    }
+    controller.setLeds(leds, 0);
+    My9221TimeState& state = my9221TimeState();
+    state.ns = 0; state.events.clear();
+    controller.showLeds(255);
+    FL_CHECK_TRUE(state.events.empty());
+    FL_CHECK_EQ(state.ns, static_cast<fl::u64>(0));
+}
+
+FL_TEST_CASE("MY9221 real dynamic reserve failure emits no partial frame and retries") {
+    SpiLegacyGoldenFixture fixture;
+    CRGB leds[17] = {};
+    MY9221Controller<92, 93, RGB> controller; // Fresh real dynamic scratch vector.
+    controller.init();
+    controller.setLeds(leds, 17);
+    controller.setDither(DISABLE_DITHER);
+    My9221TimeState& state = my9221TimeState();
+    state.ns = 0; state.data = false; state.clock = false; state.events.clear();
+    state.interrupts_enabled = true;
+    state.guard_entries = 0;
+    My9221AllocationControl& allocation = my9221AllocationControl();
+    allocation.rejected = 0;
+    allocation.reject = true;
+    // In this host target the default resource uses fl::Malloc->Alloc. Reject
+    // the actual130-byte vector reserve, not an exposed/fixed scratch stand-in.
+    fl::SetPSRamAllocator(my9221ControlledAllocate, my9221ControlledFree);
+    auto restore = fl::make_scope_exit([] {
+        my9221AllocationControl().reject = false;
+        fl::SetPSRamAllocator(fl::malloc, fl::free); // Known host default route.
+    });
+    controller.showLeds(255);
+    FL_CHECK_EQ(allocation.rejected, 1);
+    FL_CHECK_EQ(state.guard_entries, 0);
+    FL_CHECK_TRUE(state.interrupts_enabled);
+    FL_CHECK_TRUE(state.events.empty());
+    FL_CHECK_EQ(state.ns, static_cast<fl::u64>(0));
+    allocation.reject = false;
+    controller.showLeds(255);
+    fl::size edges = 0;
+    for (const My9221TimeEvent& event : state.events) {
+        if (event.kind == My9221TimeEvent::Clock) ++edges;
+    }
+    FL_CHECK_EQ(edges, static_cast<fl::size>(1040));
+}
+
+FL_TEST_CASE("MY9221 public emission guards edges and restores prior interrupt state") {
+    SpiLegacyGoldenFixture fixture;
+    CRGB leds[1] = {CRGB(1, 2, 3)};
+    MY9221Controller<92, 93, RGB> controller;
+    controller.init();
+    controller.setDither(DISABLE_DITHER);
+    My9221TimeState& state = my9221TimeState();
+    auto restore = fl::make_scope_exit([&state] { state.interrupts_enabled = true; });
+    for (bool initially_enabled : {true, false}) {
+        controller.setLeds(leds, 1);
+        state.ns = 0; state.data = false; state.clock = false; state.events.clear();
+        state.interrupts_enabled = initially_enabled;
+        state.guard_entries = 0;
+        controller.showLeds(255);
+        fl::size edges = 0;
+        for (const My9221TimeEvent& event : state.events) {
+            if (event.kind == My9221TimeEvent::Clock) {
+                ++edges;
+                FL_CHECK_FALSE(event.interrupts_enabled);
+            }
+            // The long minimum-only latch wait must not extend the mask.
+            if (event.kind == My9221TimeEvent::Wait && event.ns > 220000) {
+                FL_CHECK_EQ(event.interrupts_enabled, initially_enabled);
+            }
+        }
+        FL_CHECK_EQ(edges, static_cast<fl::size>(208));
+        FL_CHECK_EQ(state.guard_entries, 1);
+        FL_CHECK_EQ(state.interrupts_enabled, initially_enabled);
+        controller.setLeds(leds, 0);
+        state.events.clear(); state.guard_entries = 0;
+        controller.showLeds(255);
+        FL_CHECK_TRUE(state.events.empty());
+        FL_CHECK_EQ(state.guard_entries, 0);
+        FL_CHECK_EQ(state.interrupts_enabled, initially_enabled);
     }
 }
 

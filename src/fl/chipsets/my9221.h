@@ -29,6 +29,10 @@
 #include "fl/stl/noexcept.h"
 #include "fl/system/fastpin.h"
 #include "fl/system/delay.h"
+#include "fl/stl/vector.h"
+#include "fl/log/log.h"
+#include "fl/stl/static_assert.h"
+#include "platforms/my9221_emitter.h"
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -46,6 +50,9 @@ template <int DATA_PIN, fl::u8 CLOCK_PIN, EOrder RGB_ORDER = RGB, fl::u32 SPI_SP
 class MY9221Controller : public CPixelLEDController<RGB_ORDER> {
 	typedef fl::FastPin<DATA_PIN> DataPin;
 	typedef fl::FastPin<CLOCK_PIN> ClockPin;
+	typedef fl::detail::My9221Timing<DATA_PIN, CLOCK_PIN> Timing;
+	fl::vector<fl::u16> mFrame; // 13 words (26 bytes) per configured chip.
+	fl::u32 mStopDelayUs = 1;
 
 	/// Command word: 8-bit grayscale (CMD[9:8]=00), APDM waveform (CMD[4]=1).
 	static constexpr fl::u16 kCommandWord = 0x0010;
@@ -53,44 +60,69 @@ class MY9221Controller : public CPixelLEDController<RGB_ORDER> {
 	/// Datasheet latch: hold DCKI low for >220 us after last data, then pulse DI 4x.
 	static constexpr fl::u32 kLatchDelayUs = 230;
 
-	FASTLED_FORCE_INLINE void writeBit(fl::u8 bit) FL_NO_EXCEPT {
-		if (bit) {
-			DataPin::hi();
-		} else {
-			DataPin::lo();
-		}
-		// Dual-edge: one toggle clocks one bit.
-		ClockPin::toggle();
-	}
-
-	/// Shift out one 16-bit word MSB-first, one clock edge per bit.
-	void sendWord(fl::u16 data) FL_NO_EXCEPT {
-		for (int i = 0; i < 16; ++i) {
-			writeBit((data & 0x8000) ? 1 : 0);
-			data = static_cast<fl::u16>(data << 1);
-		}
-	}
-
-	void sendLed(fl::u8 c0, fl::u8 c1, fl::u8 c2) FL_NO_EXCEPT {
-		sendWord(c0);
-		sendWord(c1);
-		sendWord(c2);
-	}
 
 	void latch() FL_NO_EXCEPT {
 		ClockPin::lo();
 		DataPin::lo();
-		fl::delayMicroseconds(kLatchDelayUs);
+		Timing::waitMicroseconds(kLatchDelayUs);
 
 		// Four DI pulses while DCKI is held low.
 		for (int i = 0; i < 4; ++i) {
-			DataPin::hi();
-			DataPin::lo();
-		}
-	}
+            DataPin::hi();
+            Timing::template waitNanoseconds<80>(); // Request >70ns; target codegen remains separately verified.
+            DataPin::lo();
+            Timing::template waitNanoseconds<240>(); // Request >230ns; not a physical measurement.
+        }
+        Timing::waitMicroseconds(mStopDelayUs);
+    }
+
+    bool prepareFrame(PixelController<RGB_ORDER>& pixels) FL_NO_EXCEPT {
+        mFrame.clear();
+        if (pixels.mLenRemaining <= 0) return false;
+        const fl::size count = static_cast<fl::size>(pixels.mLenRemaining);
+        const fl::size chips = count / 4 + (count % 4 != 0 ? 1 : 0);
+        if (chips > static_cast<fl::size>(-1) / 26) {
+            FL_WARN("MY9221 frame exceeds addressable storage");
+            return false;
+        }
+        const fl::u64 stop_us = (200ULL + static_cast<fl::u64>(chips) * 10) / 1000 + 1;
+        if (stop_us > static_cast<fl::u32>(-1)) {
+            FL_WARN("MY9221 cascade stop exceeds supported delay range");
+            return false;
+        }
+        const fl::size words = chips * 13;
+        // reserve leaves capacity unchanged when the resource returns null;
+        // check before resize so no element write can exceed actual capacity.
+        mFrame.reserve(words);
+        if (mFrame.capacity() < words) {
+            FL_WARN("MY9221 could not allocate complete frame");
+            return false;
+        }
+        mFrame.resize(words);
+        if (mFrame.size() != words) return false;
+        mStopDelayUs = static_cast<fl::u32>(stop_us);
+        fl::size pos = 0;
+        while (pixels.has(1)) {
+            fl::u8 ch[4][3] = {};
+            for (int led = 0; led < 4 && pixels.has(1); ++led) {
+                ch[led][0] = pixels.loadAndScale0();
+                ch[led][1] = pixels.loadAndScale1();
+                ch[led][2] = pixels.loadAndScale2();
+                pixels.advanceData();
+                pixels.stepDithering();
+            }
+            mFrame[pos++] = kCommandWord;
+            for (int out = 3; out >= 0; --out) {
+                mFrame[pos++] = ch[out][0];
+                mFrame[pos++] = ch[out][1];
+                mFrame[pos++] = ch[out][2];
+            }
+        }
+        return pos == words;
+    }
 
 public:
-	MY9221Controller() FL_NO_EXCEPT {}
+	MY9221Controller() FL_NO_EXCEPT : mFrame(fl::detail::my9221FrameResource()) {}
 
 	virtual void init() FL_NO_EXCEPT {
 		DataPin::setOutput();
@@ -102,36 +134,16 @@ public:
 
 protected:
 	/// @copydoc CPixelLEDController::showPixels()
-	virtual void showPixels(PixelController<RGB_ORDER> & pixels) FL_NO_EXCEPT {
-		// Ensure known idle levels before the first edge.
-		DataPin::lo();
-		ClockPin::lo();
+    virtual void showPixels(PixelController<RGB_ORDER>& pixels) FL_NO_EXCEPT {
+        // No allocation, pixel scaling or dithering occurs between active
+        // edges, including chip boundaries. Empty/failed frames emit nothing.
+        if (!prepareFrame(pixels)) return;
+        const fl::u16* frame = mFrame.data();
+        const fl::size words = mFrame.size();
+        fl::detail::My9221EmitterDispatch<DATA_PIN, CLOCK_PIN>::run(frame, words);
+        latch();
+        // Target WCET/cache/NMI bounds remain separate requirements:
+        // interrupt masking and minimum waits alone do not prove <=7200ns.
 
-		while (pixels.has(1)) {
-			fl::u8 ch[4][3] = {
-				{0, 0, 0},
-				{0, 0, 0},
-				{0, 0, 0},
-				{0, 0, 0}
-			};
-
-			// Map up to 4 CRGB pixels onto one chip: LED0->OUT0 .. LED3->OUT3.
-			for (int led = 0; led < 4 && pixels.has(1); ++led) {
-				ch[led][0] = pixels.loadAndScale0();
-				ch[led][1] = pixels.loadAndScale1();
-				ch[led][2] = pixels.loadAndScale2();
-				pixels.advanceData();
-				pixels.stepDithering();
-			}
-
-			sendWord(kCommandWord);
-
-			// Hardware shift order is OUT3, OUT2, OUT1, OUT0.
-			for (int out = 3; out >= 0; --out) {
-				sendLed(ch[out][0], ch[out][1], ch[out][2]);
-			}
-		}
-
-		latch();
 	}
 };

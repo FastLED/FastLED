@@ -180,6 +180,24 @@ missing guarantee is not a measured short pulse or electrical-compliance claim.
 The intentionally unused SPI_SPEED compatibility parameter is not a separate
 defect, and ordinary single-edge SPI must not replace this DDR protocol.
 
+Run `UV_NO_SYNC=1 bash test spi_legacy_golden --debug --clean` for the public
+MY9221 pin/time observation cases. They cover partial/repeated BGR chains,
+five-chip stop timing, final-HIGH parking, allocation failure/retry and prior
+interrupt states. Virtual nanoseconds establish requested scheduling only.
+Removing the stop wait must fail the five-chip case: the final 240ns low wait
+already satisfies the one-chip stop bound and is insufficient as that control.
+
+ESP8266 GCC10.3 ignores the tested template-member section attributes; even an
+inline specialized facade can leave literals in flash. Inspect the actual ELF
+for the ordinary kernel, selected FastPin callbacks, their literal pools and
+all masked-region callees. An IRAM annotation or successful build is not proof.
+Separately check the real vendor interrupt backend: changing AVR SREG restore
+to unconditional `sei` must be rejected even though it compiles. The host
+specialized guard cannot establish that vendor behavior. Retained manual runs
+remain feasibility evidence until a managed adapter binds the actual inputs,
+commands, configuration, artifacts and independent rejection controls; they
+must not clear the seven MY9221 requirement groups through imported receipts.
+
 Focused validation commands:
 
 - `uv run pytest ci/tests/test_software_spi_audit.py -q` tests gate rejection
