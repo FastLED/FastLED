@@ -83,7 +83,7 @@ their existing checks; malformed versioned documents cannot fall back to them.
 No complete reviewed manifest is supplied by this loader change. Classification
 metadata is source-review input, never execution or target-configuration proof.
 
-The registry currently contains 37 distinct required findings. Native AVR
+The registry currently contains 38 distinct required findings. Native AVR
 selected-bit predicates (#5052) and peripheral/GPIO handoff (#5055) are separate
 requirements even though both bind to `fastspi_avr.h`. The latter covers all
 five UBRR1/UBRR0/SPI0_CTRLA/SPSR/SPSR0 method variants, prior-byte shifter drain,
@@ -143,6 +143,18 @@ silently alias one bank. Each independent old mapping defect needs a restored
 mutation failure. Both findings concern public callable implementations;
 `ParallelDevice` currently rejects its begin/write routes, so no active producer
 through that wrapper is claimed. Registry bindings do not discharge these tests.
+
+Native Teensy4 pending bits (#5064) require independent proof for the canonical
+and legacy `Teensy4HardwareSPIOutput` bodies. Their public bit API buffers partial
+groups while completion methods currently fail to flush them, and raw repeat
+writes bypass pending state. Partial counts 1–7, 8, 9 and mixed byte/word/repeat/
+pixel operations must preserve exact order and drain before select release;
+completed frames must not leak pending bits into a later transaction. Real
+LPSPI frame-width/ownership evidence and separate restored-no-flush/bypass
+mutations remain required. The current proxy exposes no `writeBit`, so no active
+SM16716 producer through it is claimed. A direct backend protocol case remains
+relevant; public callable correctness is not waived by an absent selector.
+Registry presence is unresolved bookkeeping, not a protocol fix or target proof.
 
 Focused validation commands:
 

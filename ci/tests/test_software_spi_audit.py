@@ -577,8 +577,8 @@ def test_pinned_registry_keeps_every_discovered_child_and_query_miss() -> None:
     assert BASELINE_SOURCE_COUNT == 2986
     assert {finding["issue"] for finding in REQUIRED_FINDINGS} == set(
         range(5025, 5054)
-    ) | {5055, 5056, 5057, 5059, 5060, 5061, 5062, 5063}
-    assert len(REQUIRED_FINDINGS) == 37
+    ) | {5055, 5056, 5057, 5059, 5060, 5061, 5062, 5063, 5064}
+    assert len(REQUIRED_FINDINGS) == 38
     assert "src/platforms/shared/spi_bitbang/spi_block_32.h" in SEMANTIC_REQUIRED_PATHS
     assert (
         "src/platforms/shared/spi_bitbang/spi_isr_engine.cpp.hpp"
@@ -1993,3 +1993,64 @@ def test_reviewed_binary_source_changes_remain_red_with_pinned_identity(
     assert expected in loaded.errors
     assert loaded.rows[path]["source_sha256"] == digest(fixture.sources[path])
     assert fixture.blob_reads == ([] if mutation == "new" else [fixture.objects[path]])
+
+
+def test_teensy4_native_pending_bits_registry_requires_independent_completion() -> None:
+    finding = next((row for row in REQUIRED_FINDINGS if row["issue"] == 5064), None)
+    assert finding is not None, (
+        "public native LPSPI pending-bit loss #5064 remains required"
+    )
+    prefix = "src/platforms/arm/teensy/teensy4_common/"
+    assert finding["id"] == "teensy4-native-pending-bits"
+    assert set(finding["sources"]) == {
+        prefix + "fastspi_arm_mxrt1062.h",
+        "src/platforms/arm/mxrt1062/fastspi_arm_mxrt1062.h",
+    }
+    assert set(finding["entrypoints"]) == {
+        "Teensy4HardwareSPIOutput::" + method
+        for method in (
+            "writeBit",
+            "writeByte",
+            "writeWord",
+            "writeBytesValueRaw",
+            "writeBytesValue",
+            "writeBytes",
+            "writePixels",
+            "init",
+            "select",
+            "waitFully",
+            "release",
+            "endTransaction",
+            "finalizeTransmission",
+        )
+    }
+    assert set(finding["dependencies"]) == {
+        prefix + "lpspi/lpspi_bus.h",
+        prefix + "lpspi/lpspi_hardware.h",
+        "src/platforms/arm/mxrt1062/spi_device_proxy.h",
+        "src/platforms/spi_output_template.h",
+        "src/platforms/arm/teensy/is_teensy.h",
+        "src/fl/chipsets/sm16716.h",
+        "src/platforms/shared/spi_pixel_writer.h",
+    }
+    assert set(finding["required_configurations"]) == {
+        "both-independent-canonical-and-legacy-headers-real-Teensy-SDK",
+        "all-BIT0-7-zero-one-payloads",
+        "partial-counts1-7-8-9-and-larger-tails",
+        "bit-byte-bit-word-repeat-raw-bulk-and-pixel-start-bits",
+        "wait-finalize-release-end-reselect-and-reinitialize",
+        "all-supported-LPSPI-indices-or-explicit-rejection",
+        "direct-backend-SM16716-two-bit-six-byte-two-bit-header",
+        "byte-only-preservation-and-unrelated-peripheral-pin-state",
+    }
+    assert set(finding["concerns"]) == {
+        "public-callable-positive-without-active-proxy-writeBit-producer",
+        "independent-header-bodies-are-not-forwarding-aliases",
+        "complete-pending-bits-before-select-release-or-explicitly-reject",
+        "exact-bit-count-order-drain-and-no-cross-frame-pending-state",
+        "restored-no-flush-and-pending-state-bypass-mutations-fail-separately",
+        "real-LPSPI-frame-width-ownership-and-SDK-evidence",
+    }
+    assert check_evidence(
+        [finding], [], {path: b"native LPSPI input" for path in finding["sources"]}
+    ), "registry rows cannot prove native pending-bit completion"
