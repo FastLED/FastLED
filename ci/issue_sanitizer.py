@@ -1170,6 +1170,15 @@ def resolve_target(args: argparse.Namespace, github: GitHubClient) -> tuple[str,
     return kind, number
 
 
+def event_label_names(event: dict[str, Any]) -> list[str]:
+    """Label names on the event's container, as the payload reports them."""
+    container = as_dict(event.get("issue")) or as_dict(event.get("pull_request"))
+    labels = container.get("labels")
+    if not isinstance(labels, list):
+        return []
+    return [str(as_dict(label).get("name") or "") for label in labels]
+
+
 def trusted_event_keeps_label(args: argparse.Namespace) -> bool:
     """True when a maintainer event on a sanitized container needs no screen.
 
@@ -1188,11 +1197,10 @@ def trusted_event_keeps_label(args: argparse.Namespace) -> bool:
         return False
     if str(sender.get("type") or "") == "Bot":
         return False
-    container = as_dict(event.get("issue")) or as_dict(event.get("pull_request"))
-    labels = container.get("labels")
-    return isinstance(labels, list) and any(
-        as_dict(label).get("name") == SANITIZED_LABEL for label in labels
-    )
+    # GitHub label names, and the workflow's contains(), ignore case.
+    return SANITIZED_LABEL.lower() in {
+        name.lower() for name in event_label_names(event)
+    }
 
 
 def run(
@@ -1221,13 +1229,17 @@ def run(
         verdict = Verdict(decision=DECISION_SANITIZE, reason="trusted_event")
         corpus = Corpus(target=f"{kind} #{number}")
         print(f"{corpus.target}: trusted maintainer event, label kept, not screened")
+        event_path = args.event_path or os.environ["GITHUB_EVENT_PATH"]
+        labels = event_label_names(
+            as_dict(json.loads(Path(event_path).read_text(encoding="utf-8")))
+        )
         return RunOutcome(
-            container=corpus.target,
+            container=kind,
             number=number,
             verdict=verdict,
             corpus=corpus,
-            labels_before=[SANITIZED_LABEL],
-            labels_after=[SANITIZED_LABEL],
+            labels_before=labels,
+            labels_after=list(labels),
             actions=[],
             dry_run=args.dry_run,
         )

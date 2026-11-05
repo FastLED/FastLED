@@ -827,6 +827,15 @@ class TestRun(unittest.TestCase):
         self.assertEqual(outcome.verdict.reason, "trusted_event")
         self.assertEqual(github.removed, [])
 
+    def test_maintainer_event_matches_label_case_and_reports_all_labels(self) -> None:
+        event = self._labelled_event("zackees")
+        event["issue"]["labels"] = [{"name": "Sanitized"}, {"name": "type: bug"}]
+        github = FakeGitHub(fake_container(labels=["Sanitized"]), [])
+        outcome = run(self.event_args(event), github=github, jev=FakeJev(signals()))
+        self.assertEqual(github.removed, [])
+        self.assertEqual(outcome.container, "issue")
+        self.assertEqual(outcome.labels_after, ["Sanitized", "type: bug"])
+
     def test_external_event_still_revokes_the_label(self) -> None:
         github = FakeGitHub(fake_container(labels=[SANITIZED_LABEL]), [])
         args = self.event_args(self._labelled_event("outsideuser"))
