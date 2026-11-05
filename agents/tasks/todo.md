@@ -878,4 +878,6 @@ callback contexts; matched local master -> fix measures image_flash
 320368 -> 320327 (-41 B) and attributed RAM 22451 -> 22499 (+48 B).
 The size pin records that measured image; the fixed ceilings are unchanged.
 Final focused regressions, 330 native modules/95 examples and the local size
-gate pass. Hosted validation must confirm the exact PR image before merge.
+gate pass. Hosted run 41942044216 on 44f9dc8127 measured image_flash 320359 B
+and attributed RAM 22499 B (the known 32 B local/hosted offset); the size pin
+now records that exact hosted result. Both fixed budgets passed.
