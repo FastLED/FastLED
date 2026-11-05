@@ -13,8 +13,9 @@ import posixpath
 import re
 from collections.abc import Mapping, Sequence
 from pathlib import Path, PurePosixPath
+from tempfile import NamedTemporaryFile
 
-from running_process import RunningProcess
+from running_process import CalledProcessError, RunningProcess, TimeoutExpired
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -568,7 +569,7 @@ def _check_alias(
     path: str,
     row: Mapping[str, object],
     current: Mapping[str, bytes],
-    classifications: Mapping[str, Mapping[str, object]],
+    classifications: Mapping[str, object],
 ) -> list[str]:
     canonical = row.get("canonical")
     if not isinstance(canonical, str) or canonical not in current:
@@ -595,7 +596,7 @@ def _check_alias(
             return [f"alias cycle does not terminate in an implementation: {path}"]
         visited.add(cursor)
         target_row = classifications.get(cursor)
-        if target_row is None:
+        if not isinstance(target_row, Mapping):
             return [
                 f"alias canonical source requires classification: {path} -> {cursor}"
             ]
@@ -627,7 +628,7 @@ def _check_positive_findings(path: str, row: Mapping[str, object]) -> list[str]:
 def check_inventory(
     baseline: Mapping[str, bytes],
     current: Mapping[str, bytes],
-    classifications: Mapping[str, Mapping[str, object]],
+    classifications: Mapping[str, object],
 ) -> list[str]:
     """Check the entire supplied source universe, independently of token hits.
 
@@ -637,6 +638,10 @@ def check_inventory(
     review hash alone must not authorize a change or certify behavioral proof.
     """
     errors: list[str] = []
+    if not isinstance(classifications, Mapping) or any(
+        not isinstance(path, str) for path in classifications
+    ):
+        return ["classification schema requires a mapping of string paths"]
     for path in sorted(set(baseline) | set(current)):
         if path not in baseline:
             errors.append(f"new source requires review and evidence: {path}")
@@ -649,16 +654,23 @@ def check_inventory(
         if row is None:
             errors.append(f"unclassified source: {path}")
             continue
+        if not isinstance(row, Mapping):
+            errors.append(f"classification schema requires an object row: {path}")
+            continue
         source = current.get(path, baseline.get(path, b""))
         if row.get("source_sha256") != source_digest(source):
             errors.append(f"stale classification source hash: {path}")
         disposition = row.get("disposition")
-        if disposition not in DISPOSITIONS:
+        if not isinstance(disposition, str) or disposition not in DISPOSITIONS:
             errors.append(f"unknown disposition: {path}")
-        if not isinstance(row.get("reason"), str) or not str(row["reason"]).strip():
+        reason = row.get("reason")
+        if not isinstance(reason, str) or not reason.strip():
             errors.append(f"missing classification reason: {path}")
         if any(pattern.search(source) for pattern in SEMANTIC_PATTERNS):
-            if disposition not in SEMANTIC_DISPOSITIONS:
+            if (
+                not isinstance(disposition, str)
+                or disposition not in SEMANTIC_DISPOSITIONS
+            ):
                 errors.append(f"semantic candidate needs explicit disposition: {path}")
         if disposition == "alias":
             errors.extend(_check_alias(path, row, current, classifications))
@@ -687,6 +699,9 @@ def check_evidence(
     errors: list[str] = []
     seen: set[str] = set()
     for finding in findings:
+        if not isinstance(finding, Mapping):
+            errors.append("finding schema requires an object record")
+            continue
         identity = finding.get("id")
         if not isinstance(identity, str) or not identity:
             errors.append("finding missing implementation identity")
@@ -714,6 +729,9 @@ def check_evidence(
             )
 
     for claim in claims:
+        if not isinstance(claim, Mapping):
+            errors.append("evidence schema requires an object record")
+            continue
         identity = claim.get("finding", "unknown")
         errors.append(
             f"{identity}: unverified external claim is not execution evidence"
@@ -724,7 +742,7 @@ def check_evidence(
 def check_required_findings(
     required: Sequence[Mapping[str, object]],
     proposed: Sequence[Mapping[str, object]],
-    classifications: Mapping[str, Mapping[str, object]],
+    classifications: Mapping[str, object],
 ) -> list[str]:
     """Bind editable findings to an independently pinned entrypoint registry.
 
@@ -735,6 +753,9 @@ def check_required_findings(
     errors: list[str] = []
     by_id: dict[str, Mapping[str, object]] = {}
     for finding in proposed:
+        if not isinstance(finding, Mapping):
+            errors.append("proposed finding schema requires an object record")
+            continue
         identity = finding.get("id")
         if not isinstance(identity, str) or not identity:
             errors.append("proposed finding missing identity")
@@ -771,6 +792,11 @@ def check_required_findings(
                 errors.append(f"registry source path malformed: {identity}")
                 continue
             row = classifications.get(path, {})
+            if not isinstance(row, Mapping):
+                errors.append(
+                    f"required source classification schema is not an object: {path}"
+                )
+                continue
             bindings = row.get("findings", [row.get("finding")])
             if (
                 row.get("disposition") != "positive"
@@ -925,15 +951,105 @@ def _source_changes(
     return errors
 
 
+def _read_baseline_blob(root: Path, object_id: str) -> bytes:
+    """Read actual binary blob content, never substitute the Git OID string."""
+    if not isinstance(object_id, str) or not re.fullmatch(r"[0-9a-f]{40}", object_id):
+        raise ValueError("invalid pinned baseline Git blob identity")
+    cache_dir = root / ".build" / "software-spi-baseline-blobs"
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    cache = cache_dir / f"{object_id}.blob"
+    if cache.is_file():
+        cached = cache.read_bytes()
+        if _git_blob_digest(cached) == object_id:
+            return cached
+
+    # The installed RunningProcess capture API reconstructs line output, even
+    # in binary mode. Redirect through existing Bash instead of decoding a blob.
+    # Each call owns a closed staging file; concurrent readers never share it.
+    with NamedTemporaryFile(
+        dir=cache_dir, prefix=f".{object_id}-", suffix=".stage", delete=False
+    ) as staging_file:
+        staging = Path(staging_file.name)
+    try:
+        RunningProcess.run(
+            [
+                "bash",
+                "-c",
+                'git cat-file blob "$1" > "$2"',
+                "spi-audit-read-blob",
+                object_id,
+                staging.resolve().as_posix(),
+            ],
+            cwd=root,
+            check=True,
+            timeout=30,
+            capture_output=True,
+            encoding="utf-8",
+            errors="replace",
+        )
+        source = staging.read_bytes()
+        if _git_blob_digest(source) != object_id:
+            raise ValueError(f"pinned baseline blob byte integrity failed: {object_id}")
+        staging.replace(cache)
+        return source
+    finally:
+        if staging.exists():
+            # One failed artifact per OID bounds diagnostic output; unique
+            # partial staging files do not accumulate after failed reads.
+            staging.replace(cache_dir / f"{object_id}.failed")
+
+
+def _baseline_sources(
+    root: Path, baseline: Mapping[str, str], current: Mapping[str, bytes]
+) -> dict[str, bytes]:
+    sources: dict[str, bytes] = {}
+    for path, object_id in baseline.items():
+        source = current.get(path)
+        if source is None or _git_blob_digest(source) != object_id:
+            source = _read_baseline_blob(root, object_id)
+        sources[path] = source
+    return sources
+
+
+def _native_support_input_paths(root: Path) -> list[str]:
+    """All tracked/nonignored CI and test inputs plus root launch/build files."""
+    result = RunningProcess.run(
+        [
+            "git",
+            "ls-files",
+            "-z",
+            "--cached",
+            "--others",
+            "--exclude-standard",
+            "--",
+            "ci",
+            "tests",
+            "test",
+            "test.py",
+            "meson.build",
+            "meson.options",
+            "pyproject.toml",
+            ".gitignore",
+            "spi-audit",
+            "ci-native",
+        ],
+        cwd=root,
+        check=True,
+        timeout=30,
+        capture_output=True,
+        encoding="utf-8",
+        errors="strict",
+    )
+    return sorted(set(result.stdout.split("\0")) - {""})
+
+
 def _native_input_hashes(root: Path, sources: Mapping[str, bytes]) -> dict[str, str]:
     inputs = {path: source_digest(data) for path, data in sorted(sources.items())}
-    for name in (
-        "tests/platforms/shared/spi_bitbang/generic_software_spi.cpp",
-        "tests/platforms/shared/spi_bitbang/generic_software_spi_inverted.cpp",
-        "tests/platforms/shared/spi_bitbang/generic_software_spi_fixture.h",
-        "tests/fl/system/forced_software_pin.cpp",
-    ):
-        inputs[name] = source_digest((root / name).read_bytes())
+    for name in _native_support_input_paths(root):
+        path = root / name
+        if path.is_symlink():
+            raise ValueError(f"native support input symlink requires review: {name}")
+        inputs[name] = source_digest(path.read_bytes())
     return inputs
 
 
@@ -972,7 +1088,8 @@ def _run_native_traces(
         mode = "debug" if "--debug" in command else "quick"
         log = root / ".build" / f"spi-audit-{command[2]}-{mode}.log"
         log.parent.mkdir(parents=True, exist_ok=True)
-        log.write_text(result.stdout, encoding="utf-8")
+        output_bytes = result.stdout.encode("utf-8")
+        log.write_bytes(output_bytes)
         records.append(
             {
                 "kind": "host_production_gpio_trace",
@@ -980,7 +1097,7 @@ def _run_native_traces(
                 "returncode": result.returncode,
                 "input_sha256": input_digest,
                 "log": log.relative_to(root).as_posix(),
-                "log_sha256": source_digest(result.stdout.encode("utf-8")),
+                "log_sha256": source_digest(output_bytes),
                 "scope": "host GPIO semantics only; no vendor, instruction or physical claim",
             }
         )
@@ -1018,11 +1135,19 @@ def main() -> int:
         "--report", type=Path, default=ROOT / ".build/software-spi-audit-report.json"
     )
     args = parser.parse_args()
+    baseline: dict[str, str] = {}
+    current: dict[str, bytes] = {}
+    rows: dict[str, object] = {}
+    ignored: list[str] = []
+    executions: list[dict[str, object]] = []
+    errors: list[str] = []
+    ignore_policy_sha256: str | None = None
     try:
         baseline = _baseline_objects(ROOT)
         current = _current_sources(ROOT)
+        baseline_sources = _baseline_sources(ROOT, baseline, current)
         ignored = _ignored_boundaries(ROOT)
-        rows = (
+        parsed_rows = (
             json.loads(args.classifications.read_text(encoding="utf-8"))
             if args.classifications
             else {}
@@ -1032,10 +1157,11 @@ def main() -> int:
             if args.findings
             else list(REQUIRED_FINDINGS)
         )
-        if not isinstance(rows, dict) or not isinstance(findings, list):
+        if not isinstance(parsed_rows, dict) or not isinstance(findings, list):
             raise ValueError(
                 "classifications must be an object and findings must be a list"
             )
+        rows = parsed_rows
         for path, (disposition, reason) in PINNED_EXCLUSIONS.items():
             if (
                 path in current
@@ -1053,7 +1179,7 @@ def main() -> int:
         errors = _source_changes(baseline, current)
         errors.extend(_check_ignored_boundaries(ignored))
         errors.extend(_check_ignore_policy(ROOT))
-        errors.extend(check_inventory(current, current, rows))
+        errors.extend(check_inventory(baseline_sources, current, rows))
         errors.extend(check_required_findings(REQUIRED_FINDINGS, findings, rows))
         for path in sorted(SEMANTIC_REQUIRED_PATHS):
             if path not in current or path not in rows:
@@ -1065,40 +1191,46 @@ def main() -> int:
         for execution in executions:
             if execution["returncode"] != 0:
                 errors.append(f"fixed production trace failed: {execution['command']}")
-        report = {
-            "baseline": BASELINE_COMMIT,
-            "baseline_files": len(baseline),
-            "current_files": len(current),
-            "ignored_generated_boundaries": ignored,
-            "ignore_policy_sha256": source_digest((ROOT / ".gitignore").read_bytes()),
-            "required_findings": list(REQUIRED_FINDINGS),
-            "source_accounting": {
-                path: {
-                    "baseline_git_blob": baseline.get(path),
-                    "current_sha256": source_digest(current[path])
-                    if path in current
-                    else None,
-                    "classification": rows.get(path, {"disposition": "unknown"}),
-                }
-                for path in sorted(set(baseline) | set(current))
-            },
-            "executions": executions,
-            "errors": errors,
-            "complete": not errors,
-            "limitation": "Foundation: target/codegen/restored-defect runners and run-backed source-change resolution remain unwired.",
-        }
+        if (ROOT / ".gitignore").is_file():
+            ignore_policy_sha256 = source_digest((ROOT / ".gitignore").read_bytes())
+    except (OSError, ValueError, CalledProcessError, TimeoutExpired) as error:
+        errors.append(f"audit input/runtime error: {error}")
+
+    report = {
+        "baseline": BASELINE_COMMIT,
+        "baseline_files": len(baseline),
+        "current_files": len(current),
+        "ignored_generated_boundaries": ignored,
+        "ignore_policy_sha256": ignore_policy_sha256,
+        "required_findings": list(REQUIRED_FINDINGS),
+        "source_accounting": {
+            path: {
+                "baseline_git_blob": baseline.get(path),
+                "current_sha256": source_digest(current[path])
+                if path in current
+                else None,
+                "classification": rows.get(path, {"disposition": "unknown"}),
+            }
+            for path in sorted(set(baseline) | set(current))
+        },
+        "executions": executions,
+        "errors": errors,
+        "complete": not errors,
+        "limitation": "Foundation: target/codegen/restored-defect runners and run-backed source-change resolution remain unwired.",
+    }
+    try:
         args.report.parent.mkdir(parents=True, exist_ok=True)
-        args.report.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
-        print(
-            f"Software SPI audit {'RED' if errors else 'PASS'}: "
-            f"{len(baseline)} baseline files, {len(current)} current files, "
-            f"{len(REQUIRED_FINDINGS)} required findings, {len(errors)} unresolved checks."
-        )
-        print(f"Full source accounting and evidence gaps: {args.report}")
-        return 1 if errors else 0
-    except (OSError, ValueError) as error:
-        print(f"Software SPI audit RED: {error}")
+        args.report.write_bytes((json.dumps(report, indent=2) + "\n").encode("utf-8"))
+    except OSError as error:
+        print(f"Software SPI audit RED: could not write report: {error}")
         return 1
+    print(
+        f"Software SPI audit {'RED' if errors else 'PASS'}: "
+        f"{len(baseline)} baseline files, {len(current)} current files, "
+        f"{len(REQUIRED_FINDINGS)} required findings, {len(errors)} unresolved checks."
+    )
+    print(f"Full source accounting and evidence gaps: {args.report}")
+    return 1 if errors else 0
 
 
 if __name__ == "__main__":

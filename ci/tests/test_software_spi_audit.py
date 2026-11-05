@@ -6,12 +6,16 @@ real target configuration receipts must be collected separately.
 """
 
 import hashlib
+import json
+import sys
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 
 import pytest
 from running_process import RunningProcess
 
+from ci import software_spi_audit as audit
 from ci.software_spi_audit import (
     BASELINE_SOURCE_COUNT,
     REQUIRED_FINDINGS,
@@ -552,7 +556,7 @@ def test_current_universe_excludes_ignored_dependencies_but_keeps_new_backends(
             errors="replace",
         )
 
-    git("init", "--quiet")
+    git("init", "--quiet", "--initial-branch=audit-fixture")
     (tmp_path / "src").mkdir()
     (tmp_path / "src/base.h").write_text("struct Base {};\n", encoding="utf-8")
     (tmp_path / ".gitignore").write_text("node_modules/\n", encoding="utf-8")
@@ -811,6 +815,21 @@ NATIVE_TEST_INPUTS = (
     "tests/platforms/shared/spi_bitbang/generic_software_spi_inverted.cpp",
     "tests/platforms/shared/spi_bitbang/generic_software_spi_fixture.h",
     "tests/fl/system/forced_software_pin.cpp",
+    "test",
+    "test.py",
+    "meson.build",
+    "meson.options",
+    "pyproject.toml",
+    "tests/meson.build",
+    "tests/test.h",
+    "tests/test_pch.h",
+    "tests/test_config.py",
+    "tests/shared/runner.cpp",
+    "tests/shared/fl_unittest.h",
+    "ci/meson/native/meson.build",
+    "ci/meson/runner.py",
+    "ci/util/meson_runner.py",
+    "ci/util/keep_editable_fbuild.sh",
 )
 
 
@@ -820,7 +839,32 @@ def prepare_native_inputs(root: Path) -> dict[str, bytes]:
         path = root / name
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes(sources.get(name, b"original test input\n"))
+    (root / ".gitignore").write_bytes(b"node_modules/\n.build/\n")
+    RunningProcess.run(
+        ["git", "init", "--quiet", "--initial-branch=audit-fixture"],
+        cwd=root,
+        check=True,
+        timeout=10,
+        capture_output=True,
+        encoding="utf-8",
+        errors="replace",
+    )
     return sources
+
+
+def patch_native_runner(
+    monkeypatch: pytest.MonkeyPatch, run: Callable[..., object]
+) -> None:
+    # Keep real Git enumeration in these fixtures; fake only the expensive native
+    # target execution. Otherwise support-input fingerprint coverage is vacuous.
+    actual_run = RunningProcess.run
+
+    def dispatch(command: list[str], **options: object) -> object:
+        if command[:2] == ["bash", "test"]:
+            return run(command, **options)
+        return actual_run(command, **options)
+
+    monkeypatch.setattr(audit.RunningProcess, "run", dispatch)
 
 
 @pytest.mark.parametrize("changed", ["src/production.h", *NATIVE_TEST_INPUTS])
@@ -837,7 +881,7 @@ def test_native_run_invalidates_every_changed_fingerprinted_input(
         (tmp_path / changed).write_bytes(b"changed during execution\n")
         return NativeProcessResult(0, "fake runner result; not production evidence\n")
 
-    monkeypatch.setattr("ci.software_spi_audit.RunningProcess.run", run)
+    patch_native_runner(monkeypatch, run)
     monkeypatch.setattr(
         "ci.software_spi_audit._current_sources",
         lambda root: {name: (root / name).read_bytes() for name in sources},
@@ -860,7 +904,7 @@ def test_quick_native_failure_immediately_runs_same_target_debug_and_preserves_b
             return NativeProcessResult(1, "original quick failure\n")
         return NativeProcessResult(0, "debug or later target success\n")
 
-    monkeypatch.setattr("ci.software_spi_audit.RunningProcess.run", run)
+    patch_native_runner(monkeypatch, run)
     monkeypatch.setattr("ci.software_spi_audit._current_sources", lambda _root: sources)
     records = _run_native_traces(tmp_path, sources)
     assert calls == [
@@ -892,7 +936,7 @@ def test_fixed_native_runner_executes_forced_pin_debug_without_manifest_commands
             0, "fake runner control-flow result, not behavioral proof\n"
         )
 
-    monkeypatch.setattr("ci.software_spi_audit.RunningProcess.run", run)
+    patch_native_runner(monkeypatch, run)
     monkeypatch.setattr("ci.software_spi_audit._current_sources", lambda _root: sources)
     records = _run_native_traces(tmp_path, sources)
     assert calls == [
@@ -902,3 +946,284 @@ def test_fixed_native_runner_executes_forced_pin_debug_without_manifest_commands
     ]
     assert [record["command"] for record in records] == calls
     assert [record["returncode"] for record in records] == [0, 0, 0]
+
+
+def test_native_fingerprint_excludes_ignored_generated_dependency_inputs(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    sources = prepare_native_inputs(tmp_path)
+    generated = tmp_path / "ci/docker_utils/node_modules/package/generated.js"
+    generated.parent.mkdir(parents=True)
+    generated.write_bytes(b"generated dependency input\n")
+
+    def run(_command: list[str], **_options: object) -> NativeProcessResult:
+        generated.write_bytes(b"dependency changed during run\n")
+        return NativeProcessResult(0, "runner control fixture, not production proof\n")
+
+    patch_native_runner(monkeypatch, run)
+    monkeypatch.setattr(audit, "_current_sources", lambda _root: sources)
+    records = _run_native_traces(tmp_path, sources)
+    assert [record["returncode"] for record in records] == [0, 0, 0]
+
+
+def test_native_log_digest_matches_saved_bytes_under_windows_text_newlines(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    sources = prepare_native_inputs(tmp_path)
+    original_write_text = Path.write_text
+
+    def windows_write_text(path: Path, text: str, **options: object) -> int:
+        if path.suffix == ".log":
+            # Simulate Windows text-mode newline translation on any host.
+            encoded = text.replace("\n", "\r\n").encode("utf-8")
+            path.write_bytes(encoded)
+            return len(text)
+        return original_write_text(path, text, **options)
+
+    monkeypatch.setattr(Path, "write_text", windows_write_text)
+    patch_native_runner(
+        monkeypatch, lambda *_args, **_kwargs: NativeProcessResult(0, "first\nsecond\n")
+    )
+    monkeypatch.setattr(audit, "_current_sources", lambda _root: sources)
+    records = _run_native_traces(tmp_path, sources)
+    for record in records:
+        assert (
+            digest((tmp_path / str(record["log"])).read_bytes()) == record["log_sha256"]
+        )
+
+
+@pytest.mark.parametrize(
+    "malformation",
+    [
+        "nonobject-row",
+        "unhashable-disposition",
+        "nonstring-reason",
+        "unhashable-canonical",
+        "nonobject-alias-chain",
+    ],
+)
+def test_nested_classification_schema_errors_are_structured_not_exceptions(
+    malformation: str,
+) -> None:
+    sources = {
+        "src/a.h": b'#pragma once\n#include "z.h"\n',
+        "src/z.h": b"struct Z {};\n",
+    }
+    rows = {
+        path: inventory_row(source, "dependency") for path, source in sources.items()
+    }
+    if malformation == "nonobject-row":
+        rows["src/a.h"] = 7
+    elif malformation == "unhashable-disposition":
+        rows["src/a.h"]["disposition"] = []
+    elif malformation == "nonstring-reason":
+        rows["src/a.h"]["reason"] = {"not": "a string"}
+    elif malformation == "unhashable-canonical":
+        rows["src/a.h"] = inventory_row(sources["src/a.h"], "alias", canonical=[])
+    else:
+        rows["src/a.h"] = inventory_row(
+            sources["src/a.h"], "alias", canonical="src/z.h"
+        )
+        rows["src/z.h"] = "not an object"
+    errors = check_inventory(sources, sources, rows)
+    assert errors
+    assert all(isinstance(error, str) for error in errors)
+
+
+def configure_tooling_cli(
+    root: Path, monkeypatch: pytest.MonkeyPatch
+) -> dict[str, bytes]:
+    sources = {"src/pin.h": b"struct Pin {};\n"}
+    monkeypatch.setattr(audit, "ROOT", root)
+    monkeypatch.setattr(
+        audit,
+        "_baseline_objects",
+        lambda _root: {
+            path: audit._git_blob_digest(source) for path, source in sources.items()
+        },
+    )
+    monkeypatch.setattr(audit, "_current_sources", lambda _root: dict(sources))
+    monkeypatch.setattr(audit, "_ignored_boundaries", lambda _root: [])
+    monkeypatch.setattr(audit, "_check_ignore_policy", lambda _root: [])
+    monkeypatch.setattr(audit, "SEMANTIC_REQUIRED_PATHS", frozenset())
+    (root / ".gitignore").write_bytes(b"")
+    return sources
+
+
+@pytest.mark.parametrize("malformation", ["row", "findings-entry", "top-level"])
+def test_cli_malformed_nested_json_writes_a_red_report(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    malformation: str,
+) -> None:
+    sources = configure_tooling_cli(tmp_path, monkeypatch)
+    classifications: object = negative_rows(sources)
+    findings: object = list(audit.REQUIRED_FINDINGS)
+    if malformation == "row":
+        classifications = {"src/pin.h": 7}
+    elif malformation == "findings-entry":
+        findings = ["not a finding object"]
+    else:
+        classifications = ["not a row mapping"]
+    classes_file = tmp_path / "classifications.json"
+    findings_file = tmp_path / "findings.json"
+    report = tmp_path / "report.json"
+    classes_file.write_text(json.dumps(classifications), encoding="utf-8")
+    findings_file.write_text(json.dumps(findings), encoding="utf-8")
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "spi-audit",
+            "--classifications",
+            str(classes_file),
+            "--findings",
+            str(findings_file),
+            "--report",
+            str(report),
+        ],
+    )
+    assert audit.main() == 1
+    result = json.loads(report.read_text(encoding="utf-8"))
+    assert result["complete"] is False
+    assert result["errors"] and all(
+        isinstance(error, str) for error in result["errors"]
+    )
+
+
+@pytest.mark.parametrize("classify_deleted", [False, True])
+def test_cli_deleted_source_uses_actual_pinned_git_bytes_in_inventory(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    classify_deleted: bool,
+) -> None:
+    def git(*arguments: str) -> str:
+        result = RunningProcess.run(
+            ["git", *arguments],
+            cwd=tmp_path,
+            check=True,
+            timeout=10,
+            capture_output=True,
+            encoding="utf-8",
+            errors="replace",
+        )
+        return result.stdout.strip()
+
+    git("init", "--quiet", "--initial-branch=audit-fixture")
+    sources = {
+        "src/keep.h": b"struct Keep {};\n",
+        "src/deleted.h": b"struct Deleted {};\n",
+    }
+    for name, source in sources.items():
+        path = tmp_path / name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(source)
+    (tmp_path / ".gitignore").write_bytes(b"")
+    git("add", "src", ".gitignore")
+    git(
+        "-c",
+        "user.name=Audit Fixture",
+        "-c",
+        "user.email=audit@example.invalid",
+        "commit",
+        "--quiet",
+        "-m",
+        "baseline fixture",
+    )
+    baseline_commit = git("rev-parse", "HEAD")
+    # Move out of src instead of deleting; the Git index still records the blob.
+    (tmp_path / "src/deleted.h").rename(tmp_path / "moved-outside-src.h")
+    rows = negative_rows(sources)
+    if not classify_deleted:
+        del rows["src/deleted.h"]
+    classes_file = tmp_path / "classifications.json"
+    classes_file.write_text(json.dumps(rows), encoding="utf-8")
+    report = tmp_path / "report.json"
+    monkeypatch.setattr(audit, "ROOT", tmp_path)
+    monkeypatch.setattr(audit, "BASELINE_COMMIT", baseline_commit)
+    monkeypatch.setattr(audit, "BASELINE_SOURCE_COUNT", 2)
+    monkeypatch.setattr(audit, "SEMANTIC_REQUIRED_PATHS", frozenset())
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        ["spi-audit", "--classifications", str(classes_file), "--report", str(report)],
+    )
+    assert audit.main() == 1
+    result = json.loads(report.read_text(encoding="utf-8"))
+    assert result["baseline_files"] == 2
+    assert result["current_files"] == 1
+    assert any("deleted source" in error for error in result["errors"])
+    if classify_deleted:
+        assert not any(
+            "classification outside source universe" in error
+            for error in result["errors"]
+        )
+        assert not any(
+            "stale classification source hash: src/deleted.h" in error
+            for error in result["errors"]
+        )
+    else:
+        assert "unclassified source: src/deleted.h" in result["errors"]
+
+
+def test_real_spi_audit_wrapper_from_outside_checkout_writes_correct_report(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    root = Path(audit.__file__).resolve().parents[1]
+    report = tmp_path / "outside-cwd-report.json"
+    decoy = tmp_path / "ci"
+    decoy.mkdir()
+    (decoy / "__init__.py").write_bytes(b"")
+    (decoy / "software_spi_audit.py").write_bytes(
+        b'raise SystemExit("foreign module selected")\n'
+    )
+    for name in ("PYTHONPATH", "PYTHONSAFEPATH", "UV_PROJECT", "UV_WORKING_DIRECTORY"):
+        monkeypatch.delenv(name, raising=False)
+    monkeypatch.setenv("UV_NO_SYNC", "1")
+    result = RunningProcess.run(
+        ["bash", str(root / "spi-audit"), "--report", str(report)],
+        cwd=tmp_path,
+        check=False,
+        timeout=90,
+        capture_output=True,
+        encoding="utf-8",
+        errors="replace",
+    )
+    assert result.returncode == 1, "unwired audit completion remains RED"
+    assert "Software SPI audit RED" in result.stdout
+    actual = json.loads(report.read_text(encoding="utf-8"))
+    assert actual["baseline"] == audit.BASELINE_COMMIT
+    assert actual["baseline_files"] == 2986
+    assert "src/fastspi.h" in actual["source_accounting"]
+    assert actual["complete"] is False
+
+
+def test_baseline_blob_reader_preserves_real_git_binary_bytes(tmp_path: Path) -> None:
+    payload = b"\x00\xff\r\ncaf\xc3\xa9\ntrailing\x00\r\n"
+    binary = tmp_path / "blob.bin"
+    binary.write_bytes(payload)
+    RunningProcess.run(
+        ["git", "init", "--quiet", "--initial-branch=audit-fixture"],
+        cwd=tmp_path,
+        check=True,
+        timeout=10,
+        capture_output=True,
+        encoding="utf-8",
+        errors="replace",
+    )
+    created = RunningProcess.run(
+        ["git", "hash-object", "-w", str(binary)],
+        cwd=tmp_path,
+        check=True,
+        timeout=10,
+        capture_output=True,
+        encoding="utf-8",
+        errors="replace",
+    )
+    actual = audit._read_baseline_blob(tmp_path, created.stdout.strip())
+    assert isinstance(actual, bytes)
+    assert actual == payload
+    assert digest(actual) == digest(payload)

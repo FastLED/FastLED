@@ -1,3 +1,4 @@
 #!/usr/bin/env bash
 set -euo pipefail
-uv run python -m ci.software_spi_audit "$@"
+audit_root="$(CDPATH= cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+(cd -- "$audit_root" && uv run --project "$audit_root" python -m ci.software_spi_audit "$@")

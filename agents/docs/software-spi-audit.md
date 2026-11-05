@@ -12,6 +12,11 @@ platform implementation.
 Changed, missing, renamed and rerouted source remains unresolved until there is
 review and run-backed evidence; changing a classification hash is insufficient.
 The report accounts for all paths in `.build/software-spi-audit-report.json`.
+Inventory validation uses actual pinned baseline bytes for changed/deleted
+sources, reading their Git blobs lazily. Unchanged current bytes are reused only
+after their Git blob identity matches. A Git object ID is not source content.
+Malformed JSON records produce a structured RED report rather than bypassing
+classification through a traceback.
 
 The required entrypoint/configuration registry is independent of editable
 findings. Mixed hardware/GPIO headers have method-level requirements, including
@@ -101,9 +106,16 @@ Focused validation commands:
 - `bash spi-audit --run-native` executes those fixed native targets and records
   their actual exit codes, source/test input fingerprint and output log hashes.
   A manifest cannot supply another command or a success receipt.
+  Fingerprints include tracked/nonignored CI and test code plus root launcher
+  and build definitions; ignored generated dependencies are excluded. Log hashes
+  cover the same encoded bytes saved to disk, including on Windows.
 - The fixed native inventory also executes `bash test forced_software_pin --debug`
   and fingerprints `tests/fl/system/forced_software_pin.cpp`. This is host
   fallback behavior evidence; it does not certify vendor include-order builds.
+
+The `spi-audit` wrapper anchors execution to its own repository directory and
+project, so invocation from another working directory cannot select a foreign
+`ci.software_spi_audit` module.
 
 The foundation deliberately reports RED for all unwired positive findings.
 Native GPIO models establish production-template semantics only. They do not
