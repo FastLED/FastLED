@@ -9,9 +9,10 @@ positive finding. Ordinary unit tests may pass while audit completion stays RED.
 import argparse
 import hashlib
 import json
+import posixpath
 import re
 from collections.abc import Mapping, Sequence
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 from running_process import RunningProcess
 
@@ -24,7 +25,7 @@ BASELINE_SOURCE_COUNT = 2986
 def _required(
     identity: str,
     issue: int,
-    source: str,
+    source: str | list[str],
     entrypoints: list[str],
     configurations: list[str],
     dependencies: list[str] | None = None,
@@ -33,7 +34,7 @@ def _required(
     return {
         "id": identity,
         "issue": issue,
-        "sources": [source],
+        "sources": [source] if isinstance(source, str) else list(source),
         "entrypoints": entrypoints,
         "required_configurations": configurations,
         "dependencies": dependencies or [],
@@ -365,6 +366,81 @@ REQUIRED_FINDINGS = (
             "scalar-bulk-stream-independent-port",
         ],
     ),
+    _required(
+        "kl26-native-bit",
+        5059,
+        [
+            "src/platforms/arm/teensy/teensy_lc/fastspi_arm_kl26.h",
+            "src/platforms/arm/kl26/fastspi_arm_kl26.h",
+        ],
+        [
+            "ARMHardwareSPIOutput::writeBit [teensy_lc canonical]",
+            "ARMHardwareSPIOutput::writeBit [kl26 legacy]",
+            "Teensy LC SPIOutput<11,13> -> SPI0 0x40076000",
+        ],
+        [
+            "teensy-lc-native-all-bits-all-256-values",
+            "teensy-lc-native-SM16716-start-bits",
+            "teensy-lc-native-SM16716-header",
+            "kl26-legacy-separate",
+            "mux-drain-following-byte",
+        ],
+        dependencies=[
+            "src/platforms/arm/kl26/fastspi_arm_kl26.h",
+            "src/platforms/spi_output_template.h",
+            "src/platforms/arm/teensy/teensy_lc/spi_output_template.h",
+            "src/fl/chipsets/sm16716.h",
+            "src/platforms/shared/spi_pixel_writer.h",
+        ],
+        concerns=[
+            "single-bit-GPIO-waveform-or-whole-protocol-fallback",
+            "prior-byte-shifter-drain",
+            "peripheral-mux-release-and-restore",
+            "following-byte-transfer",
+            "SM16716-one-start-bit-per-pixel",
+            "SM16716-two-header-bits",
+            "legacy-implementation-independent-validation",
+        ],
+    ),
+    _required(
+        "esp32-native-single-bit",
+        5060,
+        [
+            "src/platforms/esp/32/drivers/spi/spi_device_proxy.h",
+            "src/platforms/esp/32/core/fastspi_esp32_idf.h",
+            "src/platforms/arduino/spi/fastspi_esp32_arduino.h",
+        ],
+        [
+            "SPIDeviceProxy::writeBit [single/quad]",
+            "ESP32SPIOutput::writeBit [ESP-IDF]",
+            "ESP32SPIOutput::writeBit [Arduino]",
+        ],
+        [
+            "all-BIT0-7-all-256-values",
+            "ESP32-proxy-single",
+            "ESP32-proxy-quad",
+            "IDF-buffer-and-flush",
+            "bit-byte-bit",
+            "consecutive-frames",
+            "Xtensa-IDF",
+            "RISC-V-IDF",
+            "Arduino-FL_ESP32_SPI_ARDUINO",
+        ],
+        dependencies=[
+            "src/platforms/spi_output_template.h",
+            "src/platforms/esp/32/drivers/spi/spi_output_template.h",
+            "src/platforms/esp/32/core/fastspi_esp32.h",
+            "src/fl/chipsets/sm16716.h",
+            "src/platforms/shared/spi_pixel_writer.h",
+        ],
+        concerns=[
+            "one-clock-per-writeBit",
+            "SM16716-25-bits-per-pixel-and-50-bit-header",
+            "separate-method-restored-defect-mutations",
+            "byte-only-APA102-preservation",
+            "true-single-bit-or-whole-protocol-fallback-or-rejection",
+        ],
+    ),
 )
 
 # Semantic candidates missed by the original five query families. Keep them
@@ -448,6 +524,106 @@ def source_digest(source: bytes) -> str:
     return hashlib.sha256(source).hexdigest()
 
 
+def _pure_forwarded_include(source: bytes) -> str | None:
+    """Recognize one unconditional include, optionally pragma-once/commented.
+
+    This is deliberately narrower than C++ delegation. Any declarations,
+    independent code, extra includes or unsupported conditional dispatch need
+    another explicit disposition/review rather than an alias exemption.
+    """
+    try:
+        text = source.decode("utf-8")
+    except UnicodeDecodeError:
+        return None
+    # Universal logical newlines precede comment recognition. Unsupported line
+    # splices/trigraphs need review; do not simulate their translation phases.
+    text = text.replace("\r\n", "\n").replace("\r", "\n")
+    if "\\" in text or "??" in text:
+        return None
+
+    def remove_comment(match: re.Match[str]) -> str:
+        token = match[0]
+        if token.startswith('"'):
+            return token
+        return "\n" * token.count("\n") or " "
+
+    # Earliest-token order matters: /* inside a // comment cannot consume live
+    # following lines, and comment-shaped text inside a quoted header is literal.
+    text = re.sub(
+        r'"[^"\n]*"|//[^\n]*|/\*.*?\*/',
+        remove_comment,
+        text,
+        flags=re.DOTALL,
+    )
+    lines = [line.strip() for line in text.split("\n") if line.strip()]
+    if lines and re.fullmatch(r"#\s*pragma\s+once", lines[0]):
+        lines = lines[1:]
+    if len(lines) != 1:
+        return None
+    include = re.fullmatch(r'#\s*include\s*"([^"\n]+)"', lines[0])
+    return include[1] if include else None
+
+
+def _check_alias(
+    path: str,
+    row: Mapping[str, object],
+    current: Mapping[str, bytes],
+    classifications: Mapping[str, Mapping[str, object]],
+) -> list[str]:
+    canonical = row.get("canonical")
+    if not isinstance(canonical, str) or canonical not in current:
+        return [f"alias requires an existing canonical source: {path}"]
+    if canonical == path:
+        return [f"alias cannot forward to itself: {path}"]
+    include = _pure_forwarded_include(current.get(path, b""))
+    resolved = None
+    if include:
+        # Match quoted-header search order for the supported repository model:
+        # the forwarding file's directory first, then the project src root.
+        candidates = (
+            posixpath.normpath(str(PurePosixPath(path).parent / include)),
+            posixpath.normpath("src/" + include),
+        )
+        resolved = next((target for target in candidates if target in current), None)
+    if canonical != resolved:
+        return [f"alias source is not a pure forwarder to its canonical source: {path}"]
+
+    visited: set[str] = set()
+    cursor = path
+    while True:
+        if cursor in visited:
+            return [f"alias cycle does not terminate in an implementation: {path}"]
+        visited.add(cursor)
+        target_row = classifications.get(cursor)
+        if target_row is None:
+            return [
+                f"alias canonical source requires classification: {path} -> {cursor}"
+            ]
+        if target_row.get("disposition") != "alias":
+            return []
+        target = target_row.get("canonical")
+        if not isinstance(target, str) or target not in current:
+            return [f"alias chain has an unavailable canonical source: {path}"]
+        cursor = target
+
+
+def _check_positive_findings(path: str, row: Mapping[str, object]) -> list[str]:
+    bindings = row.get("findings")
+    if (
+        not isinstance(bindings, list)
+        or not bindings
+        or any(not isinstance(identity, str) or not identity for identity in bindings)
+    ):
+        return [f"positive source requires a nonempty findings list: {path}"]
+    if len(set(bindings)) != len(bindings):
+        return [f"positive source findings must be unique: {path}"]
+    known = {finding["id"] for finding in REQUIRED_FINDINGS}
+    unknown = set(bindings) - known
+    if unknown:
+        return [f"positive source has unknown findings {sorted(unknown)}: {path}"]
+    return []
+
+
 def check_inventory(
     baseline: Mapping[str, bytes],
     current: Mapping[str, bytes],
@@ -484,10 +660,10 @@ def check_inventory(
         if any(pattern.search(source) for pattern in SEMANTIC_PATTERNS):
             if disposition not in SEMANTIC_DISPOSITIONS:
                 errors.append(f"semantic candidate needs explicit disposition: {path}")
-        if disposition == "alias" and row.get("canonical") not in current:
-            errors.append(f"alias requires an existing canonical source: {path}")
-        if disposition == "positive" and not row.get("finding"):
-            errors.append(f"positive source requires finding identity: {path}")
+        if disposition == "alias":
+            errors.extend(_check_alias(path, row, current, classifications))
+        if disposition == "positive":
+            errors.extend(_check_positive_findings(path, row))
 
     for path in sorted(set(classifications) - set(baseline) - set(current)):
         errors.append(f"classification outside source universe: {path}")

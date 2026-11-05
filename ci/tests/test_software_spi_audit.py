@@ -89,6 +89,286 @@ def test_query_miss_semantic_emitter_cannot_be_marked_unrelated() -> None:
     )
 
 
+def inventory_row(
+    source: bytes, disposition: str, **fields: object
+) -> dict[str, object]:
+    return {
+        "disposition": disposition,
+        "source_sha256": digest(source),
+        "reason": "Source-bound classification fixture; not execution evidence.",
+        **fields,
+    }
+
+
+def test_source_bound_pure_include_alias_is_a_valid_classification() -> None:
+    sources = {
+        "src/platforms/forward.h": b'#pragma once\n#include "real.h"\n',
+        "src/platforms/real.h": b"void emit() { *reg = value; }\n",
+    }
+    rows = {
+        "src/platforms/forward.h": inventory_row(
+            sources["src/platforms/forward.h"],
+            "alias",
+            canonical="src/platforms/real.h",
+        ),
+        "src/platforms/real.h": inventory_row(
+            sources["src/platforms/real.h"], "dependency"
+        ),
+    }
+    assert check_inventory(sources, sources, rows) == []
+
+
+@pytest.mark.parametrize(
+    "forwarder",
+    [
+        b'#if 0\n#include "real.h"\n#endif\n',
+        b'#if UNKNOWN_FEATURE\n#include "real.h"\n#endif\n',
+        b'#define OWN_WRITER() do { *reg = value; } while (0)\n#include "real.h"\n',
+        b'#ifndef FORWARD_H\n#define FORWARD_H\n#include "real.h"\n#else\nstruct Other {};\n#endif\n',
+    ],
+    ids=[
+        "inactive-include",
+        "unknown-condition",
+        "independent-macro-body",
+        "guard-else",
+    ],
+)
+def test_alias_cannot_claim_conditional_or_macro_implementation_as_pure_forwarding(
+    forwarder: bytes,
+) -> None:
+    sources = {
+        "src/platforms/forward.h": forwarder,
+        "src/platforms/real.h": b"void emit() { *reg = value; }\n",
+    }
+    rows = {
+        "src/platforms/forward.h": inventory_row(
+            forwarder,
+            "alias",
+            canonical="src/platforms/real.h",
+        ),
+        "src/platforms/real.h": inventory_row(
+            sources["src/platforms/real.h"], "dependency"
+        ),
+    }
+    assert check_inventory(sources, sources, rows)
+
+
+@pytest.mark.parametrize(
+    "forwarder",
+    [
+        b"// comment " + b"\\" + b'\n#include "real.h"\n',
+        b"// comment " + b"\\" + b'\r\n#include "real.h"\r\n',
+        b'// comment ??/\n#include "real.h"\n',
+        b'// comment ??/\r\n#include "real.h"\r\n',
+    ],
+    ids=["backslash-LF", "backslash-CRLF", "trigraph-LF", "trigraph-CRLF"],
+)
+def test_alias_rejects_line_splices_that_hide_the_include_inside_a_comment(
+    forwarder: bytes,
+) -> None:
+    # C++ line splicing precedes comment removal; on trigraph-enabled targets
+    # ??/ first becomes a backslash. These apparent includes are commented out.
+    # Reject unsupported lexical forms instead of pretending to be a C++ lexer.
+    sources = {
+        "src/platforms/forward.h": forwarder,
+        "src/platforms/real.h": b"void emit() { *reg = value; }\n",
+    }
+    rows = {
+        "src/platforms/forward.h": inventory_row(
+            forwarder,
+            "alias",
+            canonical="src/platforms/real.h",
+        ),
+        "src/platforms/real.h": inventory_row(
+            sources["src/platforms/real.h"], "dependency"
+        ),
+    }
+    assert check_inventory(sources, sources, rows), (
+        "commented-out includes cannot establish an alias"
+    )
+
+
+def test_quoted_alias_include_cannot_skip_a_shadowing_local_header() -> None:
+    sources = {
+        "src/platforms/forward.h": b'#pragma once\n#include "real.h"\n',
+        "src/platforms/real.h": b"void localOutput() { *reg = value; }\n",
+        "src/real.h": b"struct DifferentRootOutput {};\n",
+    }
+    rows = {
+        path: inventory_row(source, "dependency") for path, source in sources.items()
+    }
+    rows["src/platforms/forward.h"] = inventory_row(
+        sources["src/platforms/forward.h"],
+        "alias",
+        canonical="src/real.h",
+    )
+    assert check_inventory(sources, sources, rows), (
+        "quoted includes resolve the existing local header first"
+    )
+
+
+@pytest.mark.parametrize(
+    "live_source",
+    [b'#include "extra.h"\n', b"void ownOutput() { *other = value; }\n"],
+    ids=["live-second-include", "live-independent-writer"],
+)
+def test_alias_comment_delimiters_cannot_erase_live_source(live_source: bytes) -> None:
+    # Neither delimiter is a block-comment token: both occur in // comments.
+    # Removing block-shaped text before recognizing line comments hides code.
+    forwarder = b"// /*\n" + live_source + b'// */\n#pragma once\n#include "real.h"\n'
+    sources = {
+        "src/platforms/forward.h": forwarder,
+        "src/platforms/real.h": b"void emit() { *reg = value; }\n",
+        "src/platforms/extra.h": b"struct Extra {};\n",
+    }
+    rows = {
+        path: inventory_row(source, "dependency") for path, source in sources.items()
+    }
+    rows["src/platforms/forward.h"] = inventory_row(
+        forwarder, "alias", canonical="src/platforms/real.h"
+    )
+    assert check_inventory(sources, sources, rows), (
+        "comment recognition must not delete a live implementation"
+    )
+
+
+@pytest.mark.parametrize(
+    "guard", ["__cplusplus", "FASTLED_FORCE_SOFTWARE_SPI", "FORWARD_H"]
+)
+def test_alias_does_not_infer_unconditional_forwarding_from_macro_guards(
+    guard: str,
+) -> None:
+    # A macro may already be defined. This includes conventional-looking guards:
+    # the conservative contract must not assume their build configuration.
+    forwarder = f'#ifndef {guard}\n#define {guard}\n#include "real.h"\n#endif\n'.encode(
+        "ascii"
+    )
+    sources = {
+        "src/platforms/forward.h": forwarder,
+        "src/platforms/real.h": b"void emit() { *reg = value; }\n",
+    }
+    rows = {
+        "src/platforms/forward.h": inventory_row(
+            forwarder, "alias", canonical="src/platforms/real.h"
+        ),
+        "src/platforms/real.h": inventory_row(
+            sources["src/platforms/real.h"], "dependency"
+        ),
+    }
+    assert check_inventory(sources, sources, rows), (
+        "macro-guard wrappers need explicit dependency/review disposition"
+    )
+
+
+def test_alias_line_comment_cannot_hide_live_code_after_a_lone_cr() -> None:
+    forwarder = b'#pragma once\n#include "real.h"\n// comment\rstruct OwnWriter {};\n'
+    sources = {
+        "src/platforms/forward.h": forwarder,
+        "src/platforms/real.h": b"void emit() { *reg = value; }\n",
+    }
+    rows = {
+        "src/platforms/forward.h": inventory_row(
+            forwarder, "alias", canonical="src/platforms/real.h"
+        ),
+        "src/platforms/real.h": inventory_row(
+            sources["src/platforms/real.h"], "dependency"
+        ),
+    }
+    assert check_inventory(sources, sources, rows), (
+        "logical CR newlines end line comments before live code"
+    )
+
+
+@pytest.mark.parametrize("cycle", ["self", "two-node"])
+def test_alias_graph_must_terminate_in_a_distinct_implementation(cycle: str) -> None:
+    sources = {"src/platforms/a.h": b'#include "a.h"\n'}
+    targets = {"src/platforms/a.h": "src/platforms/a.h"}
+    if cycle == "two-node":
+        sources = {
+            "src/platforms/a.h": b'#include "b.h"\n',
+            "src/platforms/b.h": b'#include "a.h"\n',
+        }
+        targets = {
+            "src/platforms/a.h": "src/platforms/b.h",
+            "src/platforms/b.h": "src/platforms/a.h",
+        }
+    rows = {
+        path: inventory_row(source, "alias", canonical=targets[path])
+        for path, source in sources.items()
+    }
+    assert check_inventory(sources, sources, rows), (
+        "existing paths do not prove a terminating alias"
+    )
+
+
+@pytest.mark.parametrize(
+    "mutation", ["unrelated-canonical", "independent-writer", "include-and-own-writer"]
+)
+def test_alias_metadata_cannot_hide_an_unforwarded_independent_implementation(
+    mutation: str,
+) -> None:
+    sources = {
+        "src/platforms/forward.h": b'#include "real.h"\n',
+        "src/platforms/real.h": b"void emit() { *reg = value; }\n",
+        "src/platforms/unrelated.h": b"struct Unrelated {};\n",
+    }
+    canonical = "src/platforms/real.h"
+    if mutation == "unrelated-canonical":
+        canonical = "src/platforms/unrelated.h"
+    elif mutation == "independent-writer":
+        sources["src/platforms/forward.h"] = b"void emitOwn() { *other = value; }\n"
+    else:
+        sources["src/platforms/forward.h"] += b"void emitOwn() { *other = value; }\n"
+    rows = {
+        path: inventory_row(source, "dependency") for path, source in sources.items()
+    }
+    rows["src/platforms/forward.h"] = inventory_row(
+        sources["src/platforms/forward.h"], "alias", canonical=canonical
+    )
+    assert check_inventory(sources, sources, rows), (
+        "an existing unrelated target cannot substitute for source forwarding"
+    )
+
+
+def test_positive_inventory_row_supports_multiple_known_finding_ids() -> None:
+    path = "src/platforms/shared/spi_bitbang/generic_software_spi.h"
+    sources = {path: b"void writeBit();\n"}
+    rows = {
+        path: inventory_row(
+            sources[path], "positive", findings=["production-gate", "esp32-software"]
+        )
+    }
+    assert check_inventory(sources, sources, rows) == []
+    # A classification positive control is not a behavior/target positive control.
+    required = [
+        entry for entry in REQUIRED_FINDINGS if entry["id"] in rows[path]["findings"]
+    ]
+    assert check_evidence(required, [], sources)
+
+
+@pytest.mark.parametrize(
+    "mutation", ["unknown", "empty", "duplicate", "legacy-only", "wrong-type"]
+)
+def test_positive_inventory_row_rejects_invalid_or_legacy_only_finding_lists(
+    mutation: str,
+) -> None:
+    path = "src/platforms/shared/spi_bitbang/generic_software_spi.h"
+    sources = {path: b"void writeBit();\n"}
+    # A legacy flag must not rescue an invalid plural binding.
+    row = inventory_row(sources[path], "positive", finding="production-gate")
+    if mutation == "unknown":
+        row["findings"] = ["not-a-required-finding"]
+    elif mutation == "empty":
+        row["findings"] = []
+    elif mutation == "duplicate":
+        row["findings"] = ["production-gate", "production-gate"]
+    elif mutation == "wrong-type":
+        row["findings"] = "production-gate"
+    assert check_inventory(sources, sources, {path: row}), (
+        "positive rows require explicit known plural bindings"
+    )
+
+
 def test_false_coverage_does_not_replace_real_evidence() -> None:
     sources = {"src/platforms/output.h": b"void writeBit();\n"}
     findings = [
@@ -230,8 +510,8 @@ def test_pinned_registry_keeps_every_discovered_child_and_query_miss() -> None:
     assert BASELINE_SOURCE_COUNT == 2986
     assert {finding["issue"] for finding in REQUIRED_FINDINGS} == set(
         range(5025, 5054)
-    ) | {5055, 5056, 5057}
-    assert len(REQUIRED_FINDINGS) == 32
+    ) | {5055, 5056, 5057, 5059, 5060}
+    assert len(REQUIRED_FINDINGS) == 34
     assert "src/platforms/shared/spi_bitbang/spi_block_32.h" in SEMANTIC_REQUIRED_PATHS
     assert (
         "src/platforms/shared/spi_bitbang/spi_isr_engine.cpp.hpp"
@@ -412,6 +692,112 @@ def test_clock_low_initialization_has_independent_first_edge_requirements() -> N
         "scalar-bulk-stream-independent-port",
     }
     assert finding["dependencies"] == ["src/fl/system/fastpin.h"]
+
+
+def test_kl26_native_single_bit_protocol_requires_both_independent_implementations() -> (
+    None
+):
+    finding = next(
+        (entry for entry in REQUIRED_FINDINGS if entry["issue"] == 5059), None
+    )
+    assert finding is not None, (
+        "native KL26 missing-bit protocol #5059 must remain required"
+    )
+    assert finding["id"] == "kl26-native-bit"
+    assert finding["id"] != next(
+        entry["id"] for entry in REQUIRED_FINDINGS if entry["issue"] == 5039
+    )
+    canonical = "src/platforms/arm/teensy/teensy_lc/fastspi_arm_kl26.h"
+    legacy = "src/platforms/arm/kl26/fastspi_arm_kl26.h"
+    assert finding["sources"] == [canonical, legacy]
+    assert set(finding["entrypoints"]) == {
+        "ARMHardwareSPIOutput::writeBit [teensy_lc canonical]",
+        "ARMHardwareSPIOutput::writeBit [kl26 legacy]",
+        "Teensy LC SPIOutput<11,13> -> SPI0 0x40076000",
+    }
+    assert set(finding["dependencies"]) == {
+        legacy,
+        "src/platforms/spi_output_template.h",
+        "src/platforms/arm/teensy/teensy_lc/spi_output_template.h",
+        "src/fl/chipsets/sm16716.h",
+        "src/platforms/shared/spi_pixel_writer.h",
+    }
+    assert set(finding["required_configurations"]) == {
+        "teensy-lc-native-all-bits-all-256-values",
+        "teensy-lc-native-SM16716-start-bits",
+        "teensy-lc-native-SM16716-header",
+        "kl26-legacy-separate",
+        "mux-drain-following-byte",
+    }
+    assert set(finding["concerns"]) == {
+        "single-bit-GPIO-waveform-or-whole-protocol-fallback",
+        "prior-byte-shifter-drain",
+        "peripheral-mux-release-and-restore",
+        "following-byte-transfer",
+        "SM16716-one-start-bit-per-pixel",
+        "SM16716-two-header-bits",
+        "legacy-implementation-independent-validation",
+    }
+    assert check_evidence(
+        [finding],
+        [],
+        {path: b"native implementation input\n" for path in finding["sources"]},
+    )
+
+
+def test_esp32_native_single_bit_registry_requires_all_three_real_implementations() -> (
+    None
+):
+    finding = next(
+        (entry for entry in REQUIRED_FINDINGS if entry["issue"] == 5060), None
+    )
+    assert finding is not None, (
+        "native ESP32 byte-for-bit substitution #5060 must remain required"
+    )
+    assert finding["id"] == "esp32-native-single-bit"
+    assert finding["id"] not in {
+        entry["id"] for entry in REQUIRED_FINDINGS if entry["issue"] in {5028, 5051}
+    }
+    assert finding["sources"] == [
+        "src/platforms/esp/32/drivers/spi/spi_device_proxy.h",
+        "src/platforms/esp/32/core/fastspi_esp32_idf.h",
+        "src/platforms/arduino/spi/fastspi_esp32_arduino.h",
+    ]
+    assert set(finding["entrypoints"]) == {
+        "SPIDeviceProxy::writeBit [single/quad]",
+        "ESP32SPIOutput::writeBit [ESP-IDF]",
+        "ESP32SPIOutput::writeBit [Arduino]",
+    }
+    assert set(finding["dependencies"]) == {
+        "src/platforms/spi_output_template.h",
+        "src/platforms/esp/32/drivers/spi/spi_output_template.h",
+        "src/platforms/esp/32/core/fastspi_esp32.h",
+        "src/fl/chipsets/sm16716.h",
+        "src/platforms/shared/spi_pixel_writer.h",
+    }
+    assert set(finding["required_configurations"]) == {
+        "all-BIT0-7-all-256-values",
+        "ESP32-proxy-single",
+        "ESP32-proxy-quad",
+        "IDF-buffer-and-flush",
+        "bit-byte-bit",
+        "consecutive-frames",
+        "Xtensa-IDF",
+        "RISC-V-IDF",
+        "Arduino-FL_ESP32_SPI_ARDUINO",
+    }
+    assert set(finding["concerns"]) == {
+        "one-clock-per-writeBit",
+        "SM16716-25-bits-per-pixel-and-50-bit-header",
+        "separate-method-restored-defect-mutations",
+        "byte-only-APA102-preservation",
+        "true-single-bit-or-whole-protocol-fallback-or-rejection",
+    }
+    assert check_evidence(
+        [finding],
+        [],
+        {path: b"native implementation input\n" for path in finding["sources"]},
+    )
 
 
 @dataclass

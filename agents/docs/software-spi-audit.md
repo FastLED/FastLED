@@ -20,7 +20,36 @@ labels cannot remove those methods. Block/ISR helpers and other semantic query
 misses are named separately. The six known clockless/peripheral/documentation
 exclusions are bound to unchanged baseline sources.
 
-The registry currently contains 32 distinct required findings. Native AVR
+Inventory positive rows use a nonempty, duplicate-free `findings` list of known
+fixed-registry IDs. A legacy singular `finding` alone is insufficient; multiple
+concerns may bind to one source without collapsing their evidence requirements.
+Alias rows require their SHA-bound source to be a pure quoted-include forwarder
+to the declared canonical path, allowing comments and optional pragma once.
+Quoted includes resolve an existing local header before the project `src` root;
+a shadowing local implementation cannot be skipped. Self aliases and cyclic
+chains fail. An unrelated existing file,
+an independent implementation body or an include plus its own writer is not a
+valid alias. C++ delegating wrappers and conditional dispatch outside that narrow
+contract require explicit dependency/review classification rather than an alias
+exemption. Passing source classification still does not certify execution.
+No macro guard is inferred to be unconditional: even a conventional-looking
+`#ifndef` can depend on an already defined build macro. Guard wrappers, inactive
+`#if 0`, unknown feature conditions, independent macro bodies and `#else`
+branches require explicit dependency/unknown review rather than an alias
+exemption. Logical LF/CRLF/CR newlines are normalized before ordered comment
+recognition. Backslash and trigraph forms are conservatively unsupported, so
+translation-phase splices cannot turn a commented-out include into proof.
+Alias chains must terminate at an existing classified source. This narrow
+repository include model does not certify arbitrary external include paths.
+
+These classification checks are deliberately conservative. A valid include
+forwarder and a valid plural finding list are positive controls for source
+accounting only. They do not discharge production execution, target pin/config
+matrices, restored-defect evidence or physical measurements. Full classification
+coverage and run-backed resolution of changed sources remain required before
+the overall audit can pass.
+
+The registry currently contains 34 distinct required findings. Native AVR
 selected-bit predicates (#5052) and peripheral/GPIO handoff (#5055) are separate
 requirements even though both bind to `fastspi_avr.h`. The latter covers all
 five UBRR1/UBRR0/SPI0_CTRLA/SPSR/SPSR0 method variants, prior-byte shifter drain,
@@ -36,6 +65,25 @@ logical LOW before select release and eight rising edges for the first byte
 after a primed-HIGH latch, including normal/inverted and independent-port
 models. Registry presence is bookkeeping; neither finding is certified by its
 declaration or another finding's passing evidence.
+
+Native KL26 single-bit output (#5059) is separate from generic KL26 pin-policy
+work (#5039). Both the Teensy LC canonical header and independent legacy header
+are required source identities. Native SPI0 pins 11/13 reach SM16716 start/header
+bits through the actual dispatch and shared pixel writer; empty native `writeBit`
+methods cannot be covered by generic-template success. Each implementation needs
+all-bit/all-value and protocol evidence, with mux release, shifter drain, state
+restoration and following-byte transfer, or a proved whole-protocol fallback.
+The registry declaration does not satisfy those unresolved requirements.
+
+Native ESP32 single-bit output (#5060) requires separate proof for the SPI proxy,
+ESP-IDF implementation and independent Arduino implementation. Substituting a
+byte of zeroes or ones emits eight clocks for a one-bit request; generic
+software-SPI correctness does not certify those methods. Required cases include
+single/quad routing, buffering/flush, bit-byte-bit transitions, consecutive frames,
+SM16716's 25 bits per pixel and 50-bit header, real Xtensa/RISC-V/Arduino builds
+and preservation of byte-only APA102 output. Each method needs its own restored
+defect signal and a true single-bit API, proved whole-protocol fallback or
+explicit rejection. These are unresolved evidence slots, not completed fixes.
 
 Focused validation commands:
 
