@@ -61,13 +61,14 @@ Use `--lcd --worker-core 1` to validate LCD clockless output together with the
 worker's resolved and observed affinity. A priority-5 coroutine on Core 0
 performs 1 ms CPU work passes and yields between passes; the response reports
 its pass count and maximum elapsed pass duration. This is synthetic scheduling
-load, not a W5500 or Wi-Fi latency benchmark. Add `--legacy` to exercise the
-actual `FastLED.addLeds<..., Bus::FLEX_IO, Core::Core1>` path instead of runtime
-channel settings. The template fixture supports plain WS2812B only.
+load, not a W5500 or Wi-Fi latency benchmark. Explicit worker core settings
+require the Channels API. Use `--legacy --worker-core auto` to observe the
+legacy `FastLED.addLeds<..., Bus::FLEX_IO>` path's default worker policy
+instead. The legacy LCD fixture supports plain WS2812B only.
 
 ```bash
 bash autoresearch esp32s3_opi_psram8 --lcd --worker-core 1 --lanes 1 --strip-sizes 170,700 --frames 4 --timeout 3m
-bash autoresearch esp32s3_opi_psram8 --lcd --worker-core 1 --legacy --lanes 1 --strip-sizes 170,700 --frames 4 --timeout 3m
+bash autoresearch esp32s3_opi_psram8 --lcd --worker-core auto --legacy --lanes 1 --strip-sizes 170,700 --frames 4 --timeout 3m
 ```
 
 The `esp32s3_opi_psram8` profile enables verified 8 MB octal PSRAM with the
@@ -89,7 +90,10 @@ For `--worker-core auto`, acceptance checks the LCD's legacy unpinned policy;
 the legacy fixture omits the template core argument. Failed LCD starts now
 report `DriverState::ERROR` with a reason instead of appearing READY.
 
-#### Recorded ESP32-S3 validation (#5001)
+#### Recorded ESP32-S3 validation before channel-only core affinity (#5001)
+
+The explicit-core legacy commands below record historical validation. They
+are no longer supported; current explicit affinity uses channel settings.
 
 The bench S3 had verified 8 MB octal PSRAM and a TX GPIO 1 → RX GPIO 2
 jumper. Six configured output lanes used GPIOs `1,3,4,5,6,7`; RX measured

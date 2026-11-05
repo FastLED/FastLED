@@ -110,10 +110,10 @@ private:
     fl::vector_psram<u8> mByteBuffer;
 
 public:
-    template<fl::Bus B, fl::Core CORE, fl::Priority PRIORITY = fl::Priority::Auto>
+    template<fl::Bus B, fl::Priority PRIORITY = fl::Priority::Auto>
     using WithWorker = UCS7604ControllerT<DATA_PIN, RGB_ORDER, MODE,
         CHIPSET_TIMING, CLOCKLESS_CONTROLLER,
-        typename detail::ClocklessWorkerController<DELEGATE, B, CORE, PRIORITY>::type>;
+        typename detail::ClocklessWorkerController<DELEGATE, B, PRIORITY>::type>;
 
     UCS7604ControllerT() FL_NO_EXCEPT {}
 

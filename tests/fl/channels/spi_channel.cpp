@@ -592,12 +592,10 @@ FL_TEST_CASE("spiEncoderForChipset speed override") {
     FL_CHECK_EQ(enc.clock_hz, 6000000u);
 }
 
-FL_TEST_CASE("Slim SPI affinity adds no controller storage and must be honored #5001") {
+FL_TEST_CASE("Slim SPI default priority does not configure worker scheduling #5001") {
     using DefaultController = SlimSpiBridgeController<SpiChipset::APA102, RGB, Bus::AUTO, 0>;
-    using PinnedController = SlimSpiBridgeController<SpiChipset::APA102, RGB, Bus::AUTO, 0, Core::Core1>;
-    FL_CHECK_EQ(sizeof(DefaultController), sizeof(PinnedController));
     using PriorityController = SlimSpiBridgeController<SpiChipset::APA102, RGB,
-        Bus::AUTO, 0, Core::Auto, Priority::High>;
+        Bus::AUTO, 0, Priority::High>;
     FL_CHECK_EQ(sizeof(DefaultController), sizeof(PriorityController));
 
     auto mock = fl::make_shared<SpiCaptureMock>("SPI_WORKER_POLICY");
@@ -607,15 +605,12 @@ FL_TEST_CASE("Slim SPI affinity adds no controller storage and must be honored #
     CRGB leds[2] = {CRGB::Red, CRGB::Blue};
     SpiChipsetConfig cfg(5, 6, SpiEncoder::apa102());
     {
-        PinnedController controller(cfg);
+        DefaultController controller(cfg);
         controller.setLeds(leds, 2);
         controller.showLeds(255);
-        FL_CHECK_EQ(mock->enqueueCount, 0);
-        FL_CHECK(mock->requestedCore == Core::Core1);
-
-        mock->acceptWorker = true;
-        controller.showLeds(255);
         FL_CHECK_EQ(mock->enqueueCount, 1);
+        FL_CHECK_EQ(mock->requestedCore, Core::Auto);
+        FL_CHECK_EQ(mock->requestedPriority, Priority::Auto);
         controller.setLeds(nullptr, 0);
     }
     manager.removeDriver(mock);
@@ -629,7 +624,7 @@ FL_TEST_CASE("SPI addLeds dispatch forwards named priority without affinity #500
     FL_REQUIRE_TRUE(manager.setExclusiveDriverByName("SPI_NAMED_PRIORITY"));
     CRGB leds[1] = {CRGB::Red};
     auto& controller = FastLED.addLedsSpiChannel<APA102, 24, 25, RGB,
-        DATA_RATE_MHZ(1), Bus::AUTO, 0, Core::Auto, Priority::Medium>(leds, 1);
+        DATA_RATE_MHZ(1), Bus::AUTO, 0, Priority::Medium>(leds, 1);
     auto removeController = fl::make_scope_exit([&]() {
         controller.setLeds(nullptr, 0);
         controller.removeFromDrawList();

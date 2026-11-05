@@ -11,9 +11,9 @@ namespace detail {
 template<typename Base>
 class FixedRgbwController : public Base {
   public:
-    template<fl::Bus B, fl::Core CORE, fl::Priority PRIORITY = fl::Priority::Auto>
+    template<fl::Bus B, fl::Priority PRIORITY = fl::Priority::Auto>
     using WithWorker = FixedRgbwController<
-        typename ClocklessWorkerController<Base, B, CORE, PRIORITY>::type>;
+        typename ClocklessWorkerController<Base, B, PRIORITY>::type>;
 
     FixedRgbwController() FL_NO_EXCEPT {
         this->setFixedRgbw(fl::RgbwDefault::value());
