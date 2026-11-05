@@ -40,7 +40,7 @@ template <int Data, fl::u8 Clock> struct My9221StaticPins {
     FASTLED_FORCE_INLINE void clockLo() const FL_NO_EXCEPT { fl::FastPin<Clock>::lo(); }
 };
 
-// One serializer body for static pins and the ESP8266 IRAM callback boundary.
+// One serializer body for static pins and the ESP IRAM callback boundaries.
 // Pin operations keep the actual selected FastPin semantics in both routes.
 template <typename Pins, typename Timing> struct My9221Serializer {
     static FASTLED_FORCE_INLINE void writeBit(const Pins& pins, fl::u8 bit) FL_NO_EXCEPT {
@@ -80,7 +80,7 @@ template <typename Pins, typename Timing> struct My9221Serializer {
     }
 };
 
-#if !defined(FL_IS_ESP8266) || defined(FASTLED_STUB_IMPL) || defined(FL_IS_WASM)
+#if (!defined(FL_IS_ESP8266) && !defined(FL_IS_ESP32)) || defined(FASTLED_STUB_IMPL) || defined(FL_IS_WASM)
 template <int Data, fl::u8 Clock> struct My9221EmitterDispatch {
     static FL_NO_INLINE void FL_IRAM run(const fl::u16* frame, fl::size words) FL_NO_EXCEPT {
         const My9221StaticPins<Data, Clock> pins;

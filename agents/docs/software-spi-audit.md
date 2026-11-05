@@ -191,6 +191,13 @@ ESP8266 GCC10.3 ignores the tested template-member section attributes; even an
 inline specialized facade can leave literals in flash. Inspect the actual ELF
 for the ordinary kernel, selected FastPin callbacks, their literal pools and
 all masked-region callees. An IRAM annotation or successful build is not proof.
+ESP32 GCC14.2 also placed the typed emitter in flash in an actual C6 build.
+Its ordinary kernel and callbacks need the same ELF inspection on RISC-V and
+Xtensa SDK configurations. User-defined `FASTLED_UNUSABLE_PIN_MASK` values must
+remain C++ constant expressions: include-only and valid-pin producers must
+compile with typed and named-constexpr masks, while selecting an excluded pin
+must fail its validity assertion. Preserve mandatory SDK/platform exclusions in
+those probes; an unrelated USB-pin assertion is not the expected rejection.
 Separately check the real vendor interrupt backend: changing AVR SREG restore
 to unconditional `sei` must be rejected even though it compiles. The host
 specialized guard cannot establish that vendor behavior. Retained manual runs
