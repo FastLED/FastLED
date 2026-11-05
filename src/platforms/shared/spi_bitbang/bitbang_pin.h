@@ -9,6 +9,15 @@
 
 namespace fl {
 
+/// Additional phase time after known GPIO work, without unsigned underflow.
+/// Both the requested half-period and the minimum pulse must be satisfied.
+constexpr cycle_t bitbangPhaseDelay(cycle_t requested, cycle_t minimum,
+                                    cycle_t work) FL_NO_EXCEPT {
+    return requested > minimum
+        ? (requested > work ? requested - work : 0)
+        : (minimum > work ? minimum - work : 0);
+}
+
 /// One atomic GPIO update, without a data-dependent branch. Platforms with
 /// write-one-to-set/clear registers can use this instead of a port snapshot.
 template <u8 BIT>
@@ -23,6 +32,8 @@ FASTLED_FORCE_INLINE void writeBitSetClear(u8 value, u32 mask,
 /// while the generic SPI writer continues to own bit order and clock timing.
 template <class Pin> struct BitbangPin {
     static constexpr bool kAtomicWrite = false;
+    static constexpr bool kTwoWriteStream = false;
+    static constexpr cycle_t kMinWriteCycles = 0;
     template <fl::cycle_t CYCLES>
     FASTLED_FORCE_INLINE static void delay() FL_NO_EXCEPT {
         fl::delaycycles<CYCLES>();

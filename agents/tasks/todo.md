@@ -5,7 +5,9 @@
 - [x] Identify the attached ESP8266 through a live probe and measure unchanged firmware.
 - [x] Establish GPIO4/16 generic bit-bang throughput bounds from vendor documentation, generated code and direct device measurements; retain these pins.
 - [x] Add failing exhaustive register-selection coverage before implementing the branchless data writer.
-- [ ] Optimize the production transmit path; measure throughput and verify actual output over multiple blocks.
+- [x] Optimize the production transmit path; measure throughput and verify actual output over multiple blocks.
+  Current setup authorized: GPIO4/14 generic output; 41 physical captures pass.
+  Bulk throughput: 5.36 Mbit/s at CPU80, 6.66 Mbit/s at CPU160.
 - [ ] Run repository validation and code review, push and merge the PR, then return to master.
 
 Completion requires measured evidence against the applicable hardware limit;

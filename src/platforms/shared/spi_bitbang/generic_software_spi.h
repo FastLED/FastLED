@@ -50,11 +50,18 @@ class GenericSoftwareSPIOutput {
 	typedef typename fl::FastPin<DATA_PIN>::port_t data_t;
 	typedef typename fl::FastPin<CLOCK_PIN>::port_t clock_t;
 	Selectable 	*mPSelect;  ///< SPI chip select
+	static constexpr bool kCanStreamSamePort =
+		BitbangPin<fl::FastPin<DATA_PIN>>::kTwoWriteStream &&
+		BitbangPin<fl::FastPin<CLOCK_PIN>>::kTwoWriteStream;
+	static constexpr bool kNeedsGpioPadding = bitbangPhaseDelay(
+		static_cast<cycle_t>(SPI_SPEED / 2 + (SPI_SPEED & 1)),
+		cycles_from_ns(35, FL_CPU_FREQUENCY()),
+		BitbangPin<fl::FastPin<CLOCK_PIN>>::kMinWriteCycles) > 0;
 	FASTLED_FORCE_INLINE static bool useAtomicWrites() FL_NO_EXCEPT {
 #ifdef FAST_SPI_INTERRUPTS_WRITE_PINS
 		return true;
 #else
-		// Keep the existing two-store combined-port optimization. Separate
+		// Keep the existing combined-port optimization. Separate
 		// ports can use atomic set/clear writes without whole-port snapshots.
 		return BitbangPin<fl::FastPin<DATA_PIN>>::kAtomicWrite &&
 			fl::FastPin<DATA_PIN>::port() != fl::FastPin<CLOCK_PIN>::port();
@@ -197,8 +204,10 @@ public:
 	template <u8 BIT> __attribute__((always_inline, hot)) inline static void writeBit(u8 b) FL_NO_EXCEPT {
 #ifndef FL_IS_ESP32
 		BitbangPin<fl::FastPin<DATA_PIN>>::template write<BIT>(b);
-		fl::FastPin<CLOCK_PIN>::hi(); CLOCK_HI_DELAY;
-		fl::FastPin<CLOCK_PIN>::lo(); CLOCK_LO_DELAY;
+		fl::FastPin<CLOCK_PIN>::hi();
+		if (kNeedsGpioPadding) { CLOCK_HI_DELAY; }
+		fl::FastPin<CLOCK_PIN>::lo();
+		if (kNeedsGpioPadding) { CLOCK_LO_DELAY; }
 #else
 		//cli();
 		if(b & (1 << BIT)) {
@@ -227,6 +236,40 @@ public:
 	}
 
 private:
+	/// Combine the preceding falling edge with the next data update. This
+	/// helper is used only by the existing exclusive whole-port path.
+	template <u8 BIT> FASTLED_FORCE_INLINE static void writeStreamingBit(
+		u8 b, data_ptr_t port, data_t datahi_clocklo, data_t datalo_clocklo) FL_NO_EXCEPT {
+		const data_t low = (b & (1U << BIT)) ? datahi_clocklo : datalo_clocklo;
+		fl::FastPin<DATA_PIN>::fastset(port, low);
+		if (kNeedsGpioPadding) { CLOCK_LO_DELAY; }
+		fl::FastPin<DATA_PIN>::fastset(port, low | fl::FastPin<CLOCK_PIN>::mask());
+		if (kNeedsGpioPadding) { CLOCK_HI_DELAY; }
+	}
+
+	FASTLED_FORCE_INLINE static void writeByteStreaming(
+		u8 b, data_ptr_t port, data_t datahi_clockhi, data_t datalo_clockhi,
+		data_t datahi_clocklo, data_t datalo_clocklo) FL_NO_EXCEPT {
+		if (!kCanStreamSamePort) {
+			writeByte(b, port, datahi_clockhi, datalo_clockhi, datahi_clocklo, datalo_clocklo);
+			return;
+		}
+		writeStreamingBit<7>(b, port, datahi_clocklo, datalo_clocklo);
+		writeStreamingBit<6>(b, port, datahi_clocklo, datalo_clocklo);
+		writeStreamingBit<5>(b, port, datahi_clocklo, datalo_clocklo);
+		writeStreamingBit<4>(b, port, datahi_clocklo, datalo_clocklo);
+		writeStreamingBit<3>(b, port, datahi_clocklo, datalo_clocklo);
+		writeStreamingBit<2>(b, port, datahi_clocklo, datalo_clocklo);
+		writeStreamingBit<1>(b, port, datahi_clocklo, datalo_clocklo);
+		writeStreamingBit<0>(b, port, datahi_clocklo, datalo_clocklo);
+	}
+
+	FASTLED_FORCE_INLINE static void finishByteStream(bool nonempty) FL_NO_EXCEPT {
+		if (kCanStreamSamePort && nonempty) {
+			fl::FastPin<CLOCK_PIN>::lo(); CLOCK_LO_DELAY;
+		}
+	}
+
 	/// Write the BIT'th bit out via SPI, setting the data pin then strobing the clock, using the passed in pin registers to accelerate access if needed
 	template <u8 BIT> FASTLED_FORCE_INLINE static void writeBit(u8 b, clock_ptr_t clockpin, data_ptr_t datapin) FL_NO_EXCEPT {
 		if(b & (1 << BIT)) {
@@ -338,9 +381,11 @@ public:
 			FASTLED_REGISTER data_t datahi_clocklo = fl::FastPin<DATA_PIN>::hival() & ~fl::FastPin<CLOCK_PIN>::mask();
 			FASTLED_REGISTER data_t datalo_clocklo = fl::FastPin<DATA_PIN>::loval() & ~fl::FastPin<CLOCK_PIN>::mask();
 
+			const bool nonempty = len > 0;
 			while(len--) {
-				writeByte(value, datapin, datahi_clockhi, datalo_clockhi, datahi_clocklo, datalo_clocklo);
+				writeByteStreaming(value, datapin, datahi_clockhi, datalo_clockhi, datahi_clocklo, datalo_clocklo);
 			}
+			finishByteStream(nonempty);
 		}
 		}
 	}
@@ -385,8 +430,9 @@ public:
 			fl::u8 *end = data + len;
 
 			while(data != end) {
-				writeByte(D::adjust(*data++), datapin, datahi_clockhi, datalo_clockhi, datahi_clocklo, datalo_clocklo);
+				writeByteStreaming(D::adjust(*data++), datapin, datahi_clockhi, datalo_clockhi, datahi_clocklo, datalo_clocklo);
 			}
+			finishByteStream(len > 0);
 			// fl::FastPin<CLOCK_PIN>::lo();
 		}
 		}
@@ -462,14 +508,19 @@ public:
 
 			while(pixels.has(1)) {
 				if(FLAGS & FLAG_START_BIT) {
-					writeBit<0>(1, datapin, datahi_clockhi, datalo_clockhi, datahi_clocklo, datalo_clocklo);
+					if (kCanStreamSamePort) {
+						writeStreamingBit<0>(1, datapin, datahi_clocklo, datalo_clocklo);
+					} else {
+						writeBit<0>(1, datapin, datahi_clockhi, datalo_clockhi, datahi_clocklo, datalo_clocklo);
+					}
 				}
-				writeByte(D::adjust(pixels.loadAndScale0()), datapin, datahi_clockhi, datalo_clockhi, datahi_clocklo, datalo_clocklo);
-				writeByte(D::adjust(pixels.loadAndScale1()), datapin, datahi_clockhi, datalo_clockhi, datahi_clocklo, datalo_clocklo);
-				writeByte(D::adjust(pixels.loadAndScale2()), datapin, datahi_clockhi, datalo_clockhi, datahi_clocklo, datalo_clocklo);
+				writeByteStreaming(D::adjust(pixels.loadAndScale0()), datapin, datahi_clockhi, datalo_clockhi, datahi_clocklo, datalo_clocklo);
+				writeByteStreaming(D::adjust(pixels.loadAndScale1()), datapin, datahi_clockhi, datalo_clockhi, datahi_clocklo, datalo_clocklo);
+				writeByteStreaming(D::adjust(pixels.loadAndScale2()), datapin, datahi_clockhi, datalo_clockhi, datahi_clocklo, datalo_clocklo);
 				pixels.advanceData();
 				pixels.stepDithering();
 			}
+			finishByteStream(len > 0);
 		}
 		}
 		D::postBlock(len, this);

@@ -421,21 +421,37 @@ inline fl::u32 hspiAppliedHz() {
 }
 
 #if defined(FASTLED_ESP8266_RAW_PIN_ORDER) // ok platform specific - the benchmark requires actual GPIO4/16 and no inverse pin mapping API exists
+template <int CLOCK>
 FASTLED_FORCE_INLINE void bitbangFloorBit() {
     fl::FastPin<4>::hi();
-    fl::FastPin<16>::hi();
-    fl::FastPin<16>::lo();
+    fl::FastPin<CLOCK>::hi();
+    fl::FastPin<CLOCK>::lo();
 }
 
-template <int MHZ>
+FASTLED_FORCE_INLINE void bitbangFloorPair(volatile fl::u32* port,
+                                         fl::u32 low, fl::u32 high) {
+    fl::FastPin<4>::fastset(port, low);
+    fl::FastPin<4>::fastset(port, high);
+}
+
+template <int MHZ, int CLOCK>
 inline fl::json bitbangStreamAt(int nBytes, int frames, int mode) {
     static fl::u8 bytes[512];
     const int n = nBytes < 1 ? 1 : (nBytes > 512 ? 512 : nBytes);
     const int count = frames < 1 ? 1 : (frames > 100 ? 100 : frames);
     for (int i = 0; i < n; ++i) bytes[i] = static_cast<fl::u8>(i * 37 + 11);
-    fl::GenericSoftwareSPIOutput<4, 16, DATA_RATE_MHZ(MHZ)> spi;
+    fl::GenericSoftwareSPIOutput<4, CLOCK, DATA_RATE_MHZ(MHZ)> spi;
     spi.init();
-    fl::FastPin<16>::lo();
+    fl::FastPin<CLOCK>::lo();
+    const auto port = fl::FastPin<4>::port();
+    const fl::u32 lowWord = fl::FastPin<4>::hival() & ~fl::FastPin<CLOCK>::mask();
+    const fl::u32 highWord = lowWord | fl::FastPin<CLOCK>::mask();
+    if (mode == 4 && port != fl::FastPin<CLOCK>::port()) {
+        fl::json error = fl::json::object();
+        error.set("success", false);
+        error.set("error", "two-write calibration requires a shared GPIO port");
+        return error;
+    }
     fl::u32 best = 0xFFFFFFFF;
     for (int frame = 0; frame < count; ++frame) {
         __sync_synchronize(); // ok platform specific - begin with an empty Xtensa store buffer
@@ -444,19 +460,27 @@ inline fl::json bitbangStreamAt(int nBytes, int frames, int mode) {
             // Calibration: minimum ordered GPIO work, constant data and no
             // optional pacing. This is a lower bound, not a payload writer.
             for (int i = 0; i < n; ++i) {
-                bitbangFloorBit(); bitbangFloorBit();
-                bitbangFloorBit(); bitbangFloorBit();
-                bitbangFloorBit(); bitbangFloorBit();
-                bitbangFloorBit(); bitbangFloorBit();
+                bitbangFloorBit<CLOCK>(); bitbangFloorBit<CLOCK>();
+                bitbangFloorBit<CLOCK>(); bitbangFloorBit<CLOCK>();
+                bitbangFloorBit<CLOCK>(); bitbangFloorBit<CLOCK>();
+                bitbangFloorBit<CLOCK>(); bitbangFloorBit<CLOCK>();
             }
+        } else if (mode == 4) {
+            for (int i = 0; i < n; ++i) {
+                bitbangFloorPair(port, lowWord, highWord); bitbangFloorPair(port, lowWord, highWord);
+                bitbangFloorPair(port, lowWord, highWord); bitbangFloorPair(port, lowWord, highWord);
+                bitbangFloorPair(port, lowWord, highWord); bitbangFloorPair(port, lowWord, highWord);
+                bitbangFloorPair(port, lowWord, highWord); bitbangFloorPair(port, lowWord, highWord);
+            }
+            fl::FastPin<CLOCK>::lo();
         } else if (mode == 3) {
-            // Isolate the RTC register's sustained write latency. Eight
+            // Isolate the clock register's sustained write latency. Eight
             // writes per input byte; this mode does not transmit SPI data.
             for (int i = 0; i < n; ++i) {
-                fl::FastPin<16>::hi(); fl::FastPin<16>::hi();
-                fl::FastPin<16>::hi(); fl::FastPin<16>::hi();
-                fl::FastPin<16>::hi(); fl::FastPin<16>::hi();
-                fl::FastPin<16>::hi(); fl::FastPin<16>::hi();
+                fl::FastPin<CLOCK>::hi(); fl::FastPin<CLOCK>::hi();
+                fl::FastPin<CLOCK>::hi(); fl::FastPin<CLOCK>::hi();
+                fl::FastPin<CLOCK>::hi(); fl::FastPin<CLOCK>::hi();
+                fl::FastPin<CLOCK>::hi(); fl::FastPin<CLOCK>::hi();
             }
         } else if (mode == 1) {
             for (int i = 0; i < n; ++i) spi.writeByte(bytes[i]);
@@ -466,13 +490,15 @@ inline fl::json bitbangStreamAt(int nBytes, int frames, int mode) {
         __sync_synchronize(); // ok platform specific - drain the Xtensa store buffer before stopping the transmit timer
         const fl::u32 elapsed = cycles() - start;
         if (elapsed < best) best = elapsed;
-        fl::FastPin<16>::lo();
+        fl::FastPin<CLOCK>::lo();
     }
     const fl::i64 cpuHz = static_cast<fl::i64>(system_get_cpu_freq()) * 1000000; // ok platform specific - convert the actual ESP8266 cycle counter to throughput
     fl::json r = fl::json::object();
     r.set("success", true);
     r.set("bytes", static_cast<fl::i64>(n));
     r.set("frames", static_cast<fl::i64>(count));
+    r.set("data_pin", static_cast<fl::i64>(4));
+    r.set("clock_pin", static_cast<fl::i64>(CLOCK));
     r.set("mode", static_cast<fl::i64>(mode));
     r.set("requested_mhz", static_cast<fl::i64>(MHZ));
     r.set("cpu_hz", cpuHz);
@@ -483,20 +509,26 @@ inline fl::json bitbangStreamAt(int nBytes, int frames, int mode) {
     return r;
 }
 
-inline fl::json bitbangStream(int nBytes, int frames, int mode, int mhz, int cpuMhz) {
+template <int CLOCK>
+inline fl::json bitbangStreamRate(int nBytes, int frames, int mode, int mhz) {
+    if (mhz == 12) return bitbangStreamAt<12, CLOCK>(nBytes, frames, mode);
+    if (mhz == 40) return bitbangStreamAt<40, CLOCK>(nBytes, frames, mode);
+    return bitbangStreamAt<6, CLOCK>(nBytes, frames, mode);
+}
+
+inline fl::json bitbangStream(int nBytes, int frames, int mode, int mhz, int cpuMhz, int clockPin) {
     const fl::u8 previous = system_get_cpu_freq(); // ok platform specific - compare the RTC-limited writer at both supported ESP8266 CPU frequencies
     if (cpuMhz == 80 || cpuMhz == 160) {
         system_update_cpu_freq(cpuMhz); // ok platform specific - temporary benchmark setting, restored before returning
     }
     fl::json r;
-    if (mhz == 12) r = bitbangStreamAt<12>(nBytes, frames, mode);
-    else if (mhz == 40) r = bitbangStreamAt<40>(nBytes, frames, mode);
-    else r = bitbangStreamAt<6>(nBytes, frames, mode);
+    if (clockPin == 14) r = bitbangStreamRate<14>(nBytes, frames, mode, mhz);
+    else r = bitbangStreamRate<16>(nBytes, frames, mode, mhz);
     system_update_cpu_freq(previous); // ok platform specific - preserve the application's CPU frequency after calibration
     return r;
 }
 #else
-inline fl::json bitbangStream(int, int, int, int, int) {
+inline fl::json bitbangStream(int, int, int, int, int, int) {
     fl::json r = fl::json::object();
     r.set("success", false);
     r.set("error", "the bit-bang benchmark requires raw pin order");
@@ -784,52 +816,104 @@ inline fl::json apa102HspiLoopbackAt(int mosiPin, int sckPin) {
 }
 
 #if defined(FASTLED_ESP8266_RAW_PIN_ORDER) // ok platform specific - this loopback verifies actual GPIO4/16, which have no inverse pin-map API
-inline fl::json bitbangLoopback(int pattern, int sensePin) {
+template <int CLOCK>
+inline fl::json bitbangLoopbackAt(int pattern, int sensePin, int dataSense,
+                                 int nBytes, int writerMode) {
     if (sensePin != 0 && sensePin != 5 && sensePin != 12 && sensePin != 15) {
-        return hspiPinError("sense pin must be GPIO0,5,12 or15; connect GPIO16 to it");
+        return hspiPinError("sense pin must be GPIO0,5,12 or15; connect the selected clock pin to it");
     }
-    fl::GenericSoftwareSPIOutput<4, 16, DATA_RATE_KHZ(50)> spi;
+    const int n = nBytes < 0 ? 0 : (nBytes > kHspiLoopBytes ? kHspiLoopBytes : nBytes);
+    if (writerMode < 0 || writerMode > 4 || ((writerMode == 2 || writerMode == 3) && n % 3 != 0) || (writerMode == 3 && n > 90) ||
+        (writerMode == 1 && pattern < 0)) {
+        return hspiPinError("pixel counts need whole RGB pixels; start-bit mode allows 30 pixels; repeat mode needs a constant pattern");
+    }
+    fl::GenericSoftwareSPIOutput<4, CLOCK, DATA_RATE_KHZ(50)> spi;
     spi.init();
     (fl::pinMode)(sensePin, fl::PinMode::Input);
-    fl::FastPin<16>::hi();
+    if (dataSense != 4) (fl::pinMode)(dataSense, fl::PinMode::Input);
+    fl::FastPin<CLOCK>::hi();
     fl::delayMicroseconds(50);
     const bool high = (GPI & (1UL << sensePin)) != 0; // ok platform specific - read the physical clock jumper, not the output latch
-    fl::FastPin<16>::lo();
+    fl::FastPin<CLOCK>::lo();
     fl::delayMicroseconds(50);
     const bool low = (GPI & (1UL << sensePin)) == 0; // ok platform specific - read the physical clock jumper, not the output latch
-    if (!high || !low) return hspiPinError("GPIO16 clock jumper does not follow high/low");
+    if (!high || !low) return hspiPinError("selected clock jumper does not follow high/low");
+
+    // The remaining fitted jumper checks preservation of an unrelated output.
+    const bool probeUnrelated = sensePin != 12 && sensePin != 13;
+    if (probeUnrelated) {
+        (fl::pinMode)(13, fl::PinMode::Input);
+        (fl::digitalWrite)(12, fl::PinValue::High);
+        (fl::pinMode)(12, fl::PinMode::Output);
+    }
 
     HspiLoopbackState& s = hspiLoopbackState();
     hspiLoopbackActive() = &s;
-    s.mosiMask = 1UL << 4;
+    s.mosiMask = 1UL << dataSense;
     s.sckMask = 1UL << sensePin;
     s.bits = s.rising = s.falling = 0;
     for (int i = 0; i < kHspiLoopBytes; ++i) {
         s.got[i] = 0;
         s.tx[i] = pattern < 0 ? hspiPattern(i) : static_cast<fl::u8>(pattern);
     }
+    CRGB leds[kHspiLoopBytes / 3];
+    for (int i = 0; i < n / 3; ++i) {
+        leds[i] = CRGB(s.tx[i * 3], s.tx[i * 3 + 1], s.tx[i * 3 + 2]);
+    }
     attachInterrupt(digitalPinToInterrupt(sensePin), hspiSckSample, RISING); // ok platform specific - capture the physical clock edges; no neutral GPIO interrupt API exists
     const fl::u32 start = micros();
-    spi.writeBytes(s.tx, kHspiLoopBytes);
+    if (writerMode == 1) {
+        spi.writeBytesValueRaw(static_cast<fl::u8>(pattern), n);
+    } else if (writerMode == 4) {
+        for (int i = 0; i < n; ++i) spi.writeByte(s.tx[i]);
+    } else if (writerMode >= 2) {
+        PixelController<RGB> pixels(leds, n / 3, ColorAdjustment::noAdjustment(), DISABLE_DITHER);
+        if (writerMode == 3) spi.template writePixels<FLAG_START_BIT, DATA_NOP, RGB>(pixels);
+        else spi.template writePixels<0, DATA_NOP, RGB>(pixels);
+    } else {
+        spi.writeBytes(s.tx, n);
+    }
     spi.endTransaction();
     const fl::u32 elapsed = micros() - start;
     detachInterrupt(digitalPinToInterrupt(sensePin)); // ok platform specific - release the vendor GPIO edge capture installed above
-    int bad = 0;
-    for (int i = 0; i < kHspiLoopBytes; ++i) {
-        if (s.got[i] != s.tx[i]) ++bad;
+    const bool clockLow = (GPI & (1UL << sensePin)) == 0; // ok platform specific - verify the physical clock has returned low at API completion
+    const bool unrelatedHigh = !probeUnrelated || (fl::digitalRead)(13) == fl::PinValue::High;
+    if (probeUnrelated) (fl::pinMode)(12, fl::PinMode::Input);
+    const int expectedBits = writerMode == 3 ? (n / 3) * 25 : n * 8;
+    int badBits = 0;
+    for (int bit = 0; bit < expectedBits; ++bit) {
+        bool expected = true;
+        if (writerMode != 3 || bit % 25 != 0) {
+            const int payloadBit = writerMode == 3 ? (bit / 25) * 24 + bit % 25 - 1 : bit;
+            expected = (s.tx[payloadBit / 8] & (0x80 >> (payloadBit % 8))) != 0;
+        }
+        const bool actual = (s.got[bit / 8] & (0x80 >> (bit % 8))) != 0;
+        if (actual != expected) ++badBits;
     }
     fl::json r = fl::json::object();
-    r.set("success", s.bits == kHspiLoopBytes * 8 && bad == 0);
-    r.set("bytes", static_cast<fl::i64>(kHspiLoopBytes));
+    r.set("success", s.bits == expectedBits && s.rising == expectedBits && badBits == 0 && clockLow && unrelatedHigh);
+    r.set("bytes", static_cast<fl::i64>(n));
     r.set("bits", static_cast<fl::i64>(s.bits));
-    r.set("bad_bytes", static_cast<fl::i64>(bad));
+    r.set("rising_edges", static_cast<fl::i64>(s.rising));
+    r.set("bad_bits", static_cast<fl::i64>(badBits));
+    r.set("clock_low", clockLow);
+    r.set("unrelated_output_preserved", unrelatedHigh);
+    r.set("unrelated_output_tested", probeUnrelated);
+    r.set("writer_mode", static_cast<fl::i64>(writerMode));
     r.set("elapsed_us", static_cast<fl::i64>(elapsed));
     r.set("pattern", static_cast<fl::i64>(pattern));
+    r.set("clock_pin", static_cast<fl::i64>(CLOCK));
+    r.set("data_sense_pin", static_cast<fl::i64>(dataSense));
+    r.set("clock_sense_pin", static_cast<fl::i64>(sensePin));
     r.set("requested_khz", static_cast<fl::i64>(50));
     return r;
 }
+inline fl::json bitbangLoopback(int pattern, int sensePin, int clockPin, int nBytes, int writerMode) {
+    if (clockPin == 14) return bitbangLoopbackAt<14>(pattern, sensePin, 2, nBytes, writerMode);
+    return bitbangLoopbackAt<16>(pattern, sensePin, 4, nBytes, writerMode);
+}
 #else
-inline fl::json bitbangLoopback(int, int) {
+inline fl::json bitbangLoopback(int, int, int, int, int) {
     return hspiPinError("the bit-bang loopback requires raw pin order");
 }
 #endif
@@ -1208,12 +1292,13 @@ FL_NO_INLINE inline void bindEsp8266HspiRpcs(fl::Remote& remote) {
 // small enough for the 4 KB loop stack.
 FL_NO_INLINE inline void bindEsp8266HspiBenchRpcs(fl::Remote& remote) {
     remote.bind("bitbangLoopback", [](const fl::json& args) -> fl::json {
-        return bitbangLoopback(rpcArgInt(args, 0, -1), rpcArgInt(args, 1, 5));
+        return bitbangLoopback(rpcArgInt(args, 0, -1), rpcArgInt(args, 1, 5), rpcArgInt(args, 2, 16),
+                               rpcArgInt(args, 3, 96), rpcArgInt(args, 4, 0));
     });
     remote.bind("bitbangStream", [](const fl::json& args) -> fl::json {
         return bitbangStream(rpcArgInt(args, 0, 512), rpcArgInt(args, 1, 20),
                              rpcArgInt(args, 2, 0), rpcArgInt(args, 3, 6),
-                             rpcArgInt(args, 4, 0));
+                             rpcArgInt(args, 4, 0), rpcArgInt(args, 5, 16));
     });
     remote.bind("apa102ShowBitbang", [](const fl::json& args) -> fl::json {
         return apa102ShowBitbang(rpcArgInt(args, 0, 0), rpcArgInt(args, 1, 1));

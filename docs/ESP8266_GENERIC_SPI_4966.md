@@ -1,7 +1,53 @@
-# ESP8266 generic software SPI on GPIO4/16
+# ESP8266 generic software SPI throughput
 
-Investigation of #4966 keeps GPIO4 as data and GPIO16 as clock. All reported
-transfers use `GenericSoftwareSPIOutput`; native HSPI remains unchanged.
+Investigation of #4966 measures the original GPIO4/16 pair and the subsequently
+authorized current wiring, GPIO4/14. All payload transfers use
+`GenericSoftwareSPIOutput`; native HSPI remains unchanged.
+
+## Current wiring: normal GPIO bank
+
+Three bidirectional pin scans confirmed GPIO4↔2, GPIO14↔5 and GPIO12↔13.
+The target uses GPIO4 for data and GPIO14 for clock; external senses are GPIO2
+and GPIO5. GPIO12→13 checks preservation of an unrelated output.
+
+The same-port bulk writer now combines the preceding falling edge with the
+next data value, then raises the clock: two stores per bit plus one final
+clock-low store per nonempty stream. The old combined-port writer used three
+stores per bit. This applies to byte blocks, repeated bytes and pixel blocks,
+including optional pixel start bits. Public individual byte writes retain
+their atomic data/clock sequence. Explicit atomic mode and separate-port
+pairs retain their existing path.
+
+The ESP8266 policy avoids optional phase padding when a conservative measured
+normal-GPIO store floor (six 80 MHz APB cycles) already covers the requested
+half-period and 35 ns minimum pulse. GPIO16 is excluded. Longer delays use
+a bounded unsigned CCOUNT wait rather than expanding thousands of inline NOPs;
+this also prevents flash overflow in the 50 kHz capture fixture.
+
+Measured on ESP8266EX, Arduino core 3.1.2, Wi-Fi disabled, 512 bytes, minimum
+of 60 frames, with the highest compile-time rate request:
+
+| CPU | Earlier bulk writer | Optimized bulk writer | Bare two-store calibration |
+| --- | ---: | ---: | ---: |
+| 80 MHz | 3.10 Mbit/s | 5.36 Mbit/s | 5.71 Mbit/s |
+| 160 MHz | 4.42 Mbit/s | 6.66 Mbit/s | 6.67 Mbit/s |
+
+At 160 MHz, lengths 32, 64, 128, 256 and 512 take 6306, 12450, 24738,
+49314 and 98466 cycles. The sustained slope is exactly 192 cycles/byte
+(24 cycles/bit), matching the bare two-store calibration, with a fixed API
+overhead. At 80 MHz, the variable-data writer remains below the constant-data
+calibration; no claim of reaching that CPU setting’s absolute floor is made.
+
+All 41 physical 50 kHz captures pass: varied and single-bit patterns, empty
+blocks, short tails, repeated values, RGB pixels, pixel start bits and public
+byte calls. Each checks the expected bit sequence and exact edge count, final
+clock-low state and preservation of GPIO12→13. Slow capture proves ordering
+and API boundaries; it does not establish full-speed electrical margins.
+
+The fixture changes CPU frequency temporarily and restores it. Its rate
+templates remain compiled for F_CPU=80 MHz, so the runtime 160 MHz comparison
+measures maximum throughput at a deliberately unattainable 40 MHz request;
+it does not establish requested-rate compliance at other CPU settings.
 
 ## What limits this pair
 
@@ -26,7 +72,7 @@ inside the RTC-write cost; increasing `DATA_RATE_MHZ` cannot remove that cost.
 
 The public byte writer now selects the ESP8266 set/clear register without a
 data-dependent branch. Generic block writes on separate ports use that same
-atomic path; ordinary same-port pairs retain their combined two-store path.
+atomic path; ordinary same-port pairs use the two-store streaming path described above.
 GPIO16 data writes use its RTC register separately. Pin-number mapping still
 comes from `FastPin::kRealPin`.
 
@@ -60,7 +106,7 @@ for 4096 writes. Doubling CPU frequency doubles cycles per RTC write, so it
 does not double this pin pair's wire rate. The fixture restores the previous
 CPU frequency before returning.
 
-## Reproduction and remaining verification
+## Reproduction
 
 ```bash
 FBUILD_DEV_MODE=1 bash autoresearch esp8266 --upload-port /dev/ttyUSB0 --timeout 15m --skip-lint
@@ -78,12 +124,18 @@ nested in `params`, as in `{"params":[[512,30,0,6]]}`:
 - `bitbangStream [512,30,0,6,160]`: repeat at 160 MHz, then restore CPU frequency
 - `bitbangLoopback [-1,5]`: varied 96-byte capture at 50 kHz
 
-For loopback, connect GPIO16 (D0) to GPIO5 (D1). The ISR reads data directly
-from GPIO4's input register. Constant patterns 0, 255, 170 and 85 can replace
-the first loopback argument. The slow capture validates byte ordering on
-physical pins; it does not establish a full-speed electrical waveform.
+Current-wiring commands (the final argument selects GPIO14):
 
-The current board has no detected GPIO16-to-GPIO5 jumper, so physical byte
-capture and merge remain pending. A successful timing benchmark is not a
-substitute for that capture. Final validation, hosted review and merge are
-also tracked in `agents/tasks/todo.md`.
+- `bitbangStream [512,60,0,40,80,14]`: optimized bulk API at CPU80
+- `bitbangStream [512,60,0,40,160,14]`: optimized bulk API at CPU160
+- `bitbangStream [512,60,4,40,160,14]`: bare two-store calibration
+- `bitbangLoopback [-1,5,14,96,0]`: varied bytes, external data sense GPIO2
+- `bitbangLoopback [170,5,14,96,1]`: repeated raw value
+- `bitbangLoopback [-1,5,14,96,2]`: RGB pixel block
+- `bitbangLoopback [-1,5,14,90,3]`: RGB pixels with start bits
+- `bitbangLoopback [-1,5,14,96,4]`: individual public byte calls
+
+For the original GPIO4/16 pair, physical byte capture remains unverified:
+GPIO16 has no detected jumper. Its timing results above must not be confused
+with the successful GPIO4/14 captures. Repository and hosted validation are
+tracked in `agents/tasks/todo.md` and PR #5021.
