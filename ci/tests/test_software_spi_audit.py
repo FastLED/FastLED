@@ -576,8 +576,8 @@ def test_pinned_registry_keeps_every_discovered_child_and_query_miss() -> None:
     assert BASELINE_SOURCE_COUNT == 2986
     assert {finding["issue"] for finding in REQUIRED_FINDINGS} == set(
         range(5025, 5054)
-    ) | {5055, 5056, 5057, 5059, 5060}
-    assert len(REQUIRED_FINDINGS) == 34
+    ) | {5055, 5056, 5057, 5059, 5060, 5061}
+    assert len(REQUIRED_FINDINGS) == 35
     assert "src/platforms/shared/spi_bitbang/spi_block_32.h" in SEMANTIC_REQUIRED_PATHS
     assert (
         "src/platforms/shared/spi_bitbang/spi_isr_engine.cpp.hpp"
@@ -864,6 +864,50 @@ def test_esp32_native_single_bit_registry_requires_all_three_real_implementation
         [],
         {path: b"native implementation input\n" for path in finding["sources"]},
     )
+
+
+def test_arduino_core_public_bit_registry_remains_required_without_a_selector() -> None:
+    finding = next(
+        (entry for entry in REQUIRED_FINDINGS if entry["issue"] == 5061), None
+    )
+    assert finding is not None, (
+        "guarded callable ArdunioCoreSPIOutput missing-bit #5061 is unresolved "
+        "even without a current in-tree selector"
+    )
+    assert finding["id"] == "arduino-core-native-single-bit"
+    assert finding["sources"] == ["src/platforms/fastspi_arduino_core.h"]
+    assert set(finding["entrypoints"]) == {
+        "ArdunioCoreSPIOutput::writeBit",
+        "ArdunioCoreSPIOutput::writePixels [FLAG_START_BIT]",
+    }
+    assert set(finding["dependencies"]) == {
+        "src/platforms/arm/d51/fastpin_arm_d51.h",
+        "src/platforms/arm/d51/fastled_arm_d51.h",
+        "src/platforms/spi_output_template.h",
+        "src/fastspi_types.h",
+        "src/pixel_controller.h",
+    }
+    assert set(finding["required_configurations"]) == {
+        "ARDUNIO_CORE_SPI-defined",
+        "D51-guard-and-include-route",
+        "public-direct-instantiation-on-real-Arduino-SDK",
+        "BIT0-BIT3-BIT7-zero-one-payloads",
+        "FLAG_START_BIT-pixels",
+        "bit-byte-bit-and-state-restoration",
+    }
+    assert set(finding["concerns"]) == {
+        "guarded-public-callable-positive",
+        "no-current-in-tree-selector-not-a-negative",
+        "one-clock-per-writeBit",
+        "true-single-bit-or-explicit-compile-time-rejection",
+        "peripheral-drain-mux-ownership-and-restoration",
+        "restored-empty-body-mutation-must-fail",
+    }
+    assert check_evidence(
+        [finding],
+        [],
+        {path: b"guarded public implementation input\n" for path in finding["sources"]},
+    ), "a required row alone cannot prove callable protocol correctness"
 
 
 @dataclass

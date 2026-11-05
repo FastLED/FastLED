@@ -442,6 +442,38 @@ REQUIRED_FINDINGS = (
             "true-single-bit-or-whole-protocol-fallback-or-rejection",
         ],
     ),
+    _required(
+        "arduino-core-native-single-bit",
+        5061,
+        "src/platforms/fastspi_arduino_core.h",
+        [
+            "ArdunioCoreSPIOutput::writeBit",
+            "ArdunioCoreSPIOutput::writePixels [FLAG_START_BIT]",
+        ],
+        [
+            "ARDUNIO_CORE_SPI-defined",
+            "D51-guard-and-include-route",
+            "public-direct-instantiation-on-real-Arduino-SDK",
+            "BIT0-BIT3-BIT7-zero-one-payloads",
+            "FLAG_START_BIT-pixels",
+            "bit-byte-bit-and-state-restoration",
+        ],
+        dependencies=[
+            "src/platforms/arm/d51/fastpin_arm_d51.h",
+            "src/platforms/arm/d51/fastled_arm_d51.h",
+            "src/platforms/spi_output_template.h",
+            "src/fastspi_types.h",
+            "src/pixel_controller.h",
+        ],
+        concerns=[
+            "guarded-public-callable-positive",
+            "no-current-in-tree-selector-not-a-negative",
+            "one-clock-per-writeBit",
+            "true-single-bit-or-explicit-compile-time-rejection",
+            "peripheral-drain-mux-ownership-and-restoration",
+            "restored-empty-body-mutation-must-fail",
+        ],
+    ),
 )
 
 # Semantic candidates missed by the original five query families. Keep them
