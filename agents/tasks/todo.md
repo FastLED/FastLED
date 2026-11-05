@@ -859,7 +859,7 @@ separate child #4893. Next implementation child after publication is #4892.
 - [x] Confirm the production callback allocation leak remains on master.
 - [x] Clarify that user-provided URLs authorize reading without screening.
 - [x] Reproduce callback leaks with a regression exercising the real ESP adapter.
-- [x] Own callback contexts until SDK channel deletion succeeds; preserve callbacks on SDK failures.
+- [x] Keep stable hardware-bounded callback slots until SDK channel deletion succeeds; preserve callbacks on SDK failures.
 - [x] Run focused regression, native tests, lint and code review.
 - [ ] Push a labelled PR, wait for CI/review, merge, and restore clean master.
 
@@ -871,3 +871,11 @@ examples; `bash test --py` and `bash lint` passed. Real ESP32 and ESP32-S3 Blink
 builds passed (the S3 needed a retry after an fbuild daemon startup error).
 Repository/pre-push review found no actionable issues. Physical-device heap
 stability was not measured.
+
+Hosted size validation rejected the initial shared-pointer ownership (+184 B
+over the fixed flash ceiling). The final slot implementation allocates no
+callback contexts; matched local master -> fix measures image_flash
+320368 -> 320327 (-41 B) and attributed RAM 22451 -> 22499 (+48 B).
+The size pin records that measured image; the fixed ceilings are unchanged.
+Final focused regressions, 330 native modules/95 examples and the local size
+gate pass. Hosted validation must confirm the exact PR image before merge.

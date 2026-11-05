@@ -18,7 +18,9 @@ SDK = r"""
 #include <cstdlib>
 #include <cstdio>
 #include <new>
-#include <memory>
+#include <array>
+#define SOC_RMT_GROUPS 1
+#define SOC_RMT_TX_CANDIDATES_PER_GROUP 4
 #define FL_IS_ESP32 1
 #define FASTLED_RMT5 1
 #define FL_NO_EXCEPT noexcept
@@ -110,7 +112,7 @@ inline void esp_log_level_set(const char*, int) {}
 inline void* heap_caps_aligned_alloc(size_t, size_t size, int) { return std::malloc(size); }
 inline void heap_caps_free(void* ptr) { std::free(ptr); }
 namespace fl {
-using std::shared_ptr; using std::make_shared;
+using std::array;
 using u8=uint8_t; using u32=uint32_t; using u64=uint64_t;
 inline void delayMicroseconds(unsigned) {}
 struct ChipsetTiming { u32 T1, T2, T3, RESET; };
@@ -203,7 +205,11 @@ int main(int argc, char**) {
             REQUIRE(peripheral.createTxChannel(config, &others[i]));
             REQUIRE(peripheral.registerTxCallback(others[i], onDone, &states[i]));
         }
-        // Remove a middle context, then the list head, leaving the tail live.
+        // Replacement must work even when every hardware callback slot is in use.
+        REQUIRE(peripheral.registerTxCallback(handle, onDone, &second));
+        REQUIRE(fire(handle, event));
+        REQUIRE(second.calls==1);
+        // Release channels out of order while the remaining callbacks stay live.
         REQUIRE(peripheral.deleteChannel(others[0]));
         REQUIRE(fire(others[1], event));
         REQUIRE(fire(others[2], event));
@@ -253,7 +259,7 @@ def callback_binary(tmp_path_factory: pytest.TempPathFactory) -> Path:
         "fl/stl/bit_cast.h",
         "fl/stl/compiler_control.h",
         "fl/stl/noexcept.h",
-        "fl/stl/shared_ptr.h",
+        "fl/stl/array.h",
         "driver/gpio.h",
         "driver/rmt_tx.h",
         "esp_cache.h",
@@ -262,6 +268,7 @@ def callback_binary(tmp_path_factory: pytest.TempPathFactory) -> Path:
         "freertos/FreeRTOS.h",
         "esp_rom_gpio.h",
         "soc/gpio_sig_map.h",
+        "soc/soc_caps.h",
         "platforms/esp/esp_cache_compat.h",
     ]
     for name in headers:

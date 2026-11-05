@@ -22,7 +22,7 @@
 #include "fl/log/log.h"
 #include "fl/log/log.h"
 #include "fl/stl/bit_cast.h"
-#include "fl/stl/shared_ptr.h"
+#include "fl/stl/array.h"
 
 // Include ESP-IDF headers ONLY in .cpp file
 FL_EXTERN_C_BEGIN
@@ -42,6 +42,7 @@ FL_EXTERN_C_BEGIN
 // IWYU pragma: begin_keep
 #include "soc/gpio_sig_map.h"  // For RMT_SIG_OUT0_IDX etc.
 // IWYU pragma: end_keep
+#include "soc/soc_caps.h"  // IWYU pragma: keep
 FL_EXTERN_C_END
 
 // ESP-IDF 5.2+ compatibility: ESP_CACHE_MSYNC_FLAG_DIR_C2M.
@@ -76,12 +77,11 @@ FL_NO_INLINE FL_COLD void emitRmt5EncoderCreateFailure(
 struct Rmt5EncoderImpl;
 
 // Stable ISR user data, owned by the peripheral until the SDK releases the
-// channel. The list contains only callbacks for currently live channels.
+// channel. A hardware-bounded slot avoids allocating on channel recreation.
 struct TxCallbackContext {
     void* channel_handle = nullptr;
-    Rmt5TxDoneCallback callback = nullptr;
-    void* user_ctx = nullptr;
-    fl::shared_ptr<TxCallbackContext> next;
+    Rmt5TxDoneCallback callback;
+    void* user_ctx;
 };
 
 //=============================================================================
@@ -120,7 +120,8 @@ public:
     bool rebindTxPin(void* channel_handle, int pin) FL_NO_EXCEPT override;
 
 private:
-    fl::shared_ptr<TxCallbackContext> mTxCallbacks;
+    fl::array<TxCallbackContext,
+              SOC_RMT_GROUPS * SOC_RMT_TX_CANDIDATES_PER_GROUP> mTxCallbacks;
 
     /// @brief Disable cache sync after ESP_ERR_INVALID_ARG error
     ///
@@ -239,14 +240,11 @@ bool Rmt5PeripheralESPImpl::deleteChannel(void* channel_handle) FL_NO_EXCEPT {
 
     // A failed SDK deletion may still deliver callbacks. Only release their
     // user data after rmt_del_channel() has successfully removed the channel.
-    auto* slot = &mTxCallbacks;
-    while (*slot) {
-        if ((*slot)->channel_handle == channel_handle) {
-            auto next = (*slot)->next;
-            *slot = next;
+    for (auto& ctx : mTxCallbacks) {
+        if (ctx.channel_handle == channel_handle) {
+            ctx.channel_handle = nullptr;
             break;
         }
-        slot = &(*slot)->next;
     }
 
     FL_LOG_RMT("RMT5_PERIPH: Channel deleted successfully");
@@ -385,13 +383,19 @@ bool Rmt5PeripheralESPImpl::registerTxCallback(void* channel_handle,
         return false;
     }
 
-    auto ctx = fl::make_shared<TxCallbackContext>();
-    if (!ctx) {
+    TxCallbackContext* ctx = nullptr;
+    for (auto& candidate : mTxCallbacks) {
+        if (candidate.channel_handle == channel_handle) {
+            ctx = &candidate;
+            break;
+        }
+        if (candidate.channel_handle == nullptr) {
+            ctx = &candidate;
+        }
+    }
+    if (ctx == nullptr) {
         return false;
     }
-    ctx->channel_handle = channel_handle;
-    ctx->callback = callback;
-    ctx->user_ctx = user_ctx;
 
     // Configure callbacks structure with our wrapper
     rmt_tx_event_callbacks_t cbs = {};
@@ -399,22 +403,17 @@ bool Rmt5PeripheralESPImpl::registerTxCallback(void* channel_handle,
 
     // Delegate to ESP-IDF
     rmt_channel_handle_t channel = static_cast<rmt_channel_handle_t>(channel_handle);
-    esp_err_t err = rmt_tx_register_event_callbacks(channel, &cbs, ctx.get());
+    esp_err_t err = rmt_tx_register_event_callbacks(channel, &cbs, ctx);
     if (err != ESP_OK) {
         FL_LOG_RMT("RMT5_PERIPH: Failed to register callback: " << esp_err_to_name(err));
         return false;
     }
 
-    // Registration is allowed only on a disabled SDK channel. Replace the
-    // previous context only after success, preserving it if registration fails.
-    auto* slot = &mTxCallbacks;
-    while (*slot && (*slot)->channel_handle != channel_handle) {
-        slot = &(*slot)->next;
-    }
-    if (*slot) {
-        ctx->next = (*slot)->next;
-    }
-    *slot = ctx;
+    // The engine registers before enabling newly created channels. Update the
+    // installed context only after success, preserving it on SDK failure.
+    ctx->channel_handle = channel_handle;
+    ctx->callback = callback;
+    ctx->user_ctx = user_ctx;
 
     FL_LOG_RMT("RMT5_PERIPH: TX callback registered successfully");
     return true;
