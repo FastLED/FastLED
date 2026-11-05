@@ -8,15 +8,15 @@ authorized current wiring, GPIO4/14. All payload transfers use
 
 Three bidirectional pin scans confirmed GPIO4↔2, GPIO14↔5 and GPIO12↔13.
 The target uses GPIO4 for data and GPIO14 for clock; external senses are GPIO2
-and GPIO5. GPIO12→13 checks preservation of an unrelated output.
+and GPIO5. GPIO12→13 checks the final level of an unrelated output.
 
 The same-port bulk writer now combines the preceding falling edge with the
 next data value, then raises the clock: two stores per bit plus one final
 clock-low store per nonempty stream. The old combined-port writer used three
 stores per bit. This applies to byte blocks, repeated bytes and pixel blocks,
 including optional pixel start bits. Public individual byte writes retain
-their atomic data/clock sequence. Explicit atomic mode and separate-port
-pairs retain their existing path.
+their atomic data/clock sequence. Explicit atomic mode and ESP8266
+separate-port pairs use the atomic single-byte path for block writes.
 
 The ESP8266 policy avoids optional phase padding when a conservative measured
 normal-GPIO store floor (six 80 MHz APB cycles) already covers the requested
@@ -41,7 +41,8 @@ calibration; no claim of reaching that CPU setting’s absolute floor is made.
 All 41 physical 50 kHz captures pass: varied and single-bit patterns, empty
 blocks, short tails, repeated values, RGB pixels, pixel start bits and public
 byte calls. Each checks the expected bit sequence and exact edge count, final
-clock-low state and preservation of GPIO12→13. Slow capture proves ordering
+clock-low state and the final high level on GPIO12→13. This does not detect transient changes
+on that unrelated pin. Slow capture proves ordering
 and API boundaries; it does not establish full-speed electrical margins.
 
 The fixture changes CPU frequency temporarily and restores it. Its rate

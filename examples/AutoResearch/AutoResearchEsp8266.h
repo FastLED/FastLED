@@ -517,6 +517,12 @@ inline fl::json bitbangStreamRate(int nBytes, int frames, int mode, int mhz) {
 }
 
 inline fl::json bitbangStream(int nBytes, int frames, int mode, int mhz, int cpuMhz, int clockPin) {
+    if (clockPin != 14 && clockPin != 16) {
+        fl::json error = fl::json::object();
+        error.set("success", false);
+        error.set("error", "clock pin must be 14 or 16");
+        return error;
+    }
     const fl::u8 previous = system_get_cpu_freq(); // ok platform specific - compare the RTC-limited writer at both supported ESP8266 CPU frequencies
     if (cpuMhz == 80 || cpuMhz == 160) {
         system_update_cpu_freq(cpuMhz); // ok platform specific - temporary benchmark setting, restored before returning
@@ -839,7 +845,7 @@ inline fl::json bitbangLoopbackAt(int pattern, int sensePin, int dataSense,
     const bool low = (GPI & (1UL << sensePin)) == 0; // ok platform specific - read the physical clock jumper, not the output latch
     if (!high || !low) return hspiPinError("selected clock jumper does not follow high/low");
 
-    // The remaining fitted jumper checks preservation of an unrelated output.
+    // The remaining fitted jumper checks the final level of an unrelated output.
     const bool probeUnrelated = sensePin != 12 && sensePin != 13;
     if (probeUnrelated) {
         (fl::pinMode)(13, fl::PinMode::Input);
@@ -897,7 +903,7 @@ inline fl::json bitbangLoopbackAt(int pattern, int sensePin, int dataSense,
     r.set("rising_edges", static_cast<fl::i64>(s.rising));
     r.set("bad_bits", static_cast<fl::i64>(badBits));
     r.set("clock_low", clockLow);
-    r.set("unrelated_output_preserved", unrelatedHigh);
+    r.set("unrelated_output_final_high", unrelatedHigh);
     r.set("unrelated_output_tested", probeUnrelated);
     r.set("writer_mode", static_cast<fl::i64>(writerMode));
     r.set("elapsed_us", static_cast<fl::i64>(elapsed));
@@ -909,6 +915,7 @@ inline fl::json bitbangLoopbackAt(int pattern, int sensePin, int dataSense,
     return r;
 }
 inline fl::json bitbangLoopback(int pattern, int sensePin, int clockPin, int nBytes, int writerMode) {
+    if (clockPin != 14 && clockPin != 16) return hspiPinError("clock pin must be 14 or 16");
     if (clockPin == 14) return bitbangLoopbackAt<14>(pattern, sensePin, 2, nBytes, writerMode);
     return bitbangLoopbackAt<16>(pattern, sensePin, 4, nBytes, writerMode);
 }

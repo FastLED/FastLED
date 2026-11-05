@@ -5,31 +5,34 @@ FL_TEST_FILE(FL_FILEPATH) {
 using namespace fl;
 
 namespace {
-template <u8 Bit> void checkSetClear() {
+template <u8 Bit> void checkSetClear(u32 mask) {
     for (int value = 0; value < 256; ++value) {
         volatile u32 set = 0x12345678;
         volatile u32 clear = 0x87654321;
-        writeBitSetClear<Bit>(static_cast<u8>(value), 1UL << 4, &set, &clear);
+        writeBitSetClear<Bit>(static_cast<u8>(value), mask, &set, &clear);
         if (value & (1 << Bit)) {
-            FL_CHECK_EQ(set, 1UL << 4);
+            FL_CHECK_EQ(set, mask);
             FL_CHECK_EQ(clear, 0x87654321);
         } else {
             FL_CHECK_EQ(set, 0x12345678);
-            FL_CHECK_EQ(clear, 1UL << 4);
+            FL_CHECK_EQ(clear, mask);
         }
     }
 }
 } // namespace
 
 FL_TEST_CASE("Bit-bang set-clear writer touches exactly the requested register") {
-    checkSetClear<0>();
-    checkSetClear<1>();
-    checkSetClear<2>();
-    checkSetClear<3>();
-    checkSetClear<4>();
-    checkSetClear<5>();
-    checkSetClear<6>();
-    checkSetClear<7>();
+    const u32 masks[] = {1UL, 1UL << 4, 1UL << 15, 1UL << 31, 0x00F0F00FUL};
+    for (u32 mask : masks) {
+        checkSetClear<0>(mask);
+        checkSetClear<1>(mask);
+        checkSetClear<2>(mask);
+        checkSetClear<3>(mask);
+        checkSetClear<4>(mask);
+        checkSetClear<5>(mask);
+        checkSetClear<6>(mask);
+        checkSetClear<7>(mask);
+    }
 }
 
 FL_TEST_CASE("Bit-bang phase padding meets the requested period and minimum pulse") {
