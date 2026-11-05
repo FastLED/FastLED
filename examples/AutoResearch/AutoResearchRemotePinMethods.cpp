@@ -1,3 +1,6 @@
+// The compile-only SPI audit uses its own retained probes, not the RPC harness.
+#if !defined(FL_SOFTWARE_SPI_COMPILE_PROBE)
+
 // Pin configuration RPC bindings: get/set TX/RX/pair, GPIO connectivity
 // probe, jumper-finder, debug-log toggle, help. GPIO is the implementation;
 // the RPC API is "pins" (the user-facing concept).
@@ -444,3 +447,5 @@ void AutoResearchRemoteControl::bindPinMethods(fl::Remote& remote) {
 }
 
 #endif  // FL_PLATFORM_HAS_LARGE_MEMORY
+
+#endif // !FL_SOFTWARE_SPI_COMPILE_PROBE

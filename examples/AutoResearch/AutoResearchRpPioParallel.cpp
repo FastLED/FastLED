@@ -1,3 +1,6 @@
+// The compile-only SPI audit uses its own retained probes, not the RPC harness.
+#if !defined(FL_SOFTWARE_SPI_COMPILE_PROBE)
+
 // FastLED#3899: "PIO0 + PIO1 simultaneous execution passes without resource
 // collision, stale state machine, or DMA ownership leak."
 //
@@ -309,3 +312,5 @@ fl::json runRpPioParallelResourceTest(const fl::json& args) {
 } // namespace autoresearch
 
 #endif
+
+#endif // !FL_SOFTWARE_SPI_COMPILE_PROBE

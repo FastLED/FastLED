@@ -6,7 +6,7 @@ Baseline: `94dab9c6b720ea277ec9177c93129c7dc646c5c3`.
 ## Plan
 
 - [x] Research the shared production writer and establish the parent issue.
-- [x] Run three disjoint Sol discovery audits; verify 29 native child relationships (including judge-discovered gaps).
+- [x] Run three disjoint Sol discovery audits; verify 32 native child relationships (including judge- and regression-discovered gaps).
 - [ ] Consolidate all source candidates, platform aliases and negative findings.
 - [x] Read the children back and choose a serial implementation order.
 - [ ] Establish a generated discovery gate coupled to behavioral evidence.
@@ -64,16 +64,102 @@ chip without evidence. Do not claim hardware measurements for unattached boards.
 
 ## Next steps
 
-The #5031 foundation has 20 passing Python tests and passing actual generic
-writer traces in normal/debug mode. A restored production three-store helper
-mutation fails operation-count assertions; restoration returns GREEN. The
-inverted-clock production target stays RED for the real #5044 defect (41 sampled
-bits instead of 40). The audit CLI accounts for all 2,986 baseline/current
-source files and leaves all 29 required findings unresolved. No target runner
-or fabricated receipt is accepted as proof.
+The #5031 foundation has 27 passing Python tests and passing actual generic
+writer traces in normal/debug mode. The inverted-clock target is GREEN for
+#5044, and three actual production mutations fail during execution. The audit
+CLI accounts for all 2,986 baseline/current source files. There were 31 native
+children before the new #5057 init-clock finding; the complete gate remains
+unfinished. No target runner or fabricated receipt is accepted as proof.
 
-After the foundation lint handoff, prioritize #5044 to turn its observed RED
-GREEN, then #5052 AVR bit selection, #5051/#5027 rate correctness, #5032 shared
+After the foundation lint handoff, validate #5057's observed first-edge RED
+and minimal logical idle-low initialization fix, then address #5056 forced-pin
+build failures, #5052 AVR bit selection, #5051/#5027 rate correctness, #5032 shared
 delay and the remaining backend/runtime children serially. #5031 remains open
 until real execution/configuration/mutation runners and a valid positive
 control are wired. The judge must independently certify the final result.
+
+## Foundation code review follow-up
+
+The independent Sol judge reviewed pinned `94dab9c6b..579ddbb51` and found
+four medium defects to fix before publishing:
+
+- Correct the SAMD GPIO emitter identity/header in the fixed registry.
+- Exercise upper-word sentinels and high data/clock bits; narrowing must fail.
+- Recheck all fingerprinted test/fixture and source inputs after native execution.
+- Immediately debug-rerun the same native target after any quick-mode failure.
+
+Width coverage is included in the #5044 test work. All four foundation review
+fixes are implemented; the judge accepted the scoped Python follow-up review.
+No final judge
+certification has been granted.
+
+## Additional native AVR finding
+
+Source and Microchip documentation confirmed #5055: USART/SPI GPIO bits need
+peripheral pin ownership release, prior-byte drain, and exact state restoration.
+This is independent of #5052 selected-bit predicates and must be included in
+the fixed gate registry/configurations before final certification.
+
+## Current #5044 evidence
+
+Normal and inverted production debug targets pass. Three actual production
+mutations (old clock words, XOR to OR, u8 narrowing) fail during execution and
+restore to the fixed source. Real stock ClearCore builds pass with normal and
+forced-atomic mode, including production streaming on IO0/1 and IO2/3. The
+forced-software-pin integration probe initially failed actual header declarations
+and left unsafe NoMap use in the main object (#5056). It now builds after the
+shared fallback fix; include-order and real mapped-target controls remain. The judge confirmed the
+enabled SAME53 restored-three-store mutation (24 versus 16 stores) with a
+matching object hash, alongside host 73 versus 49 and 149 versus 101 store
+counts. Source-bound final records and complete gate certification remain
+pending. Existing ESP8266
+regression: all 41 physical captures pass and 512-byte throughput remains
+5.36 Mbit/s at CPU80 and 6.66 Mbit/s at CPU160. No ClearCore physical timing
+measurement is claimed.
+
+## Coverage consolidation review
+
+The judge found further #5031 work before classification data can be accepted:
+
+- ARM's `alias` category includes independent implementations, delay code,
+  dispatch and pin maps. Normalize roles; shared issue ownership is not aliasing.
+- Reject self/cyclic aliases and require source-bound forwarding evidence.
+- Normalize positive rows to a nonempty list of finding IDs; multiple findings
+  share production files. Validate each ID against the fixed registry.
+- Only 356 ARM files have individual research rows. Expand AVR/shared groups
+  against the pinned baseline and retain unknowns for uncovered paths.
+- Runtime pin adapters are dependencies of the runtime manager/channel routes,
+  rather than blanket negatives. Retain method/guard distinctions and legacy
+  independent copies as separate identities.
+
+The classification file must contain all 2,986 baseline paths with hashes,
+reasons and evidence. Current-source changes require separate review/execution
+resolution; refreshing a hash or adding a passed status cannot resolve them.
+The judge has not certified coverage or completion.
+
+## Initialization first-edge follow-up (#5057)
+
+Root observed a genuine debug RED after priming the existing clock latch HIGH:
+production init leaves it HIGH, and the first byte samples seven bits rather
+than eight (`.build/software-spi-init-clock-red.log`). The minimal fix drives
+the clock pin's logical lo() before select release. Normal, inverted, streaming
+and independent-port fixture variants cover the init guarantee without changing
+the edge oracle. Both root debug targets pass, and the judge accepted the scoped
+correctness evidence. This establishes logical initialization, not electrical
+startup or physical timing.
+
+## Forced-pin fallback follow-up (#5056)
+
+Native tests execute the actual extracted forced-pin component, lookup-only
+mapped controls and existing stub GPIO callbacks. Baseline execution faulted on
+an actual null-pointer write in `lo()` (GDB registers and ELF source location
+retained). Fixed debug tests pass. Restoring the old component and independently
+removing generic null-port routing both fail during execution; restored fixed
+source returns GREEN. Real ClearCore forced and normal builds pass. Explicit
+include order, a real mapped forced-pin target and audit-runner integration
+remain; no physical measurements are claimed.
+
+The divider-16 native test first exposed an independent missing
+`fl::delaycycles<0>()` link symbol under #5032. Divider 8 isolates #5056 without
+replacing the production delay implementation. The zero-delay defect remains
+required work; the isolated test does not establish its correctness.

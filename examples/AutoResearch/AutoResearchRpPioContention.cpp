@@ -1,3 +1,6 @@
+// The compile-only SPI audit uses its own retained probes, not the RPC harness.
+#if !defined(FL_SOFTWARE_SPI_COMPILE_PROBE)
+
 // FastLED#1471 hardware reproduction: PIO state-machine contention.
 //
 // The reported symptom was random-coloured LEDs when Adafruit TinyUSB was
@@ -197,3 +200,5 @@ fl::json runRpPioContentionTest() {
 } // namespace autoresearch
 
 #endif
+
+#endif // !FL_SOFTWARE_SPI_COMPILE_PROBE

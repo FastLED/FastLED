@@ -53,6 +53,9 @@ Focused validation commands:
 - `bash spi-audit --run-native` executes those fixed native targets and records
   their actual exit codes, source/test input fingerprint and output log hashes.
   A manifest cannot supply another command or a success receipt.
+- The fixed native inventory also executes `bash test forced_software_pin --debug`
+  and fingerprints `tests/fl/system/forced_software_pin.cpp`. This is host
+  fallback behavior evidence; it does not certify vendor include-order builds.
 
 The foundation deliberately reports RED for all unwired positive findings.
 Native GPIO models establish production-template semantics only. They do not

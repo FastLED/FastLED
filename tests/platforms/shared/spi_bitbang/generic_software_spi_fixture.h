@@ -16,10 +16,16 @@ template <int Model> struct SpiTraceState {
     using Word = fl::conditional_t<Model == 0 || Model == 1 || Model == 8,
         fl::u8, fl::conditional_t<Model == 2 || Model == 3 || Model == 9,
         fl::u16, fl::u32>>;
-    static constexpr bool kSeparate = Model == 1 || Model == 3 || Model == 5 || Model == 7;
-    static constexpr bool kInverted = Model == 6 || Model == 11;
-    static constexpr bool kStream = Model >= 8;
+    static constexpr bool kSeparate = Model == 1 || Model == 3 || Model == 5 || Model == 7 || Model >= 16;
+    static constexpr bool kDataInverted = Model == 6 || Model == 11 || Model == 12 || Model == 14 || Model >= 16;
+    static constexpr bool kClockInverted = Model == 6 || Model == 11 || Model == 13 || Model == 15 || Model >= 16;
+    static constexpr bool kStream = (Model >= 8 && Model <= 11) || Model == 14 || Model == 15;
     static constexpr int kClockBank = kSeparate ? 1 : 0;
+    // Wider models exercise upper GPIO bits, not merely a wider typedef.
+    static constexpr int kDataBit = sizeof(Word) == 1 ? 0 : (sizeof(Word) == 2 ? 8 : 16);
+    static constexpr Word kDataMask = static_cast<Word>(fl::u32{1} << kDataBit);
+    static constexpr Word kClockMask = static_cast<Word>(fl::u32{1} << (kDataBit + 1));
+    static constexpr Word kSentinel = static_cast<Word>((fl::u32{1} << (sizeof(Word) * 8 - 1)) | 0x80);
 
     volatile Word ports[2] = {};
     fl::vector<fl::u8> sampled;
@@ -42,12 +48,13 @@ template <int Model> struct SpiTraceState {
         static SpiTraceState state;
         return state;
     }
-    bool logicalData() const { return bool(ports[0] & 1) != kInverted; }
-    bool logicalClock() const { return bool(ports[kClockBank] & 2) != kInverted; }
+    bool logicalData() const { return bool(ports[0] & kDataMask) != kDataInverted; }
+    bool logicalClock() const { return bool(ports[kClockBank] & kClockMask) != kClockInverted; }
 
     void reset() {
-        ports[0] = static_cast<Word>(0x80 | (kInverted ? 3 : 0));
-        ports[1] = static_cast<Word>(0x80 | (kInverted ? 3 : 0));
+        ports[0] = static_cast<Word>(kSentinel | (kDataInverted ? kDataMask : 0));
+        ports[1] = kSentinel;
+        if (kClockInverted) ports[kClockBank] = static_cast<Word>(ports[kClockBank] | kClockMask);
         interference = false;
         injected = false;
         require_selected = false;
@@ -79,8 +86,11 @@ template <int Model> struct SpiTraceState {
         last_clock = clock;
         last_data = data;
         for (int bank = 0; bank < 2; ++bank) {
-            if (!(ports[bank] & 0x80)) preserved = false;
-            if (injected && !(ports[bank] & 0x40)) preserved = false;
+            const Word owned = static_cast<Word>((bank == 0 ? kDataMask : 0) |
+                (bank == kClockBank ? kClockMask : 0));
+            const Word unrelated = static_cast<Word>(~owned);
+            const Word expected = static_cast<Word>(kSentinel | (injected ? 0x40 : 0));
+            if ((ports[bank] & unrelated) != expected) preserved = false;
         }
         // Simulate an unrelated GPIO owner after the first production store,
         // including after bulk paths have captured their whole-port snapshots.
@@ -98,17 +108,18 @@ template <int Model, bool Clock> class SpiTracePin {
     using port_t = typename State::Word;
     using port_ptr_t = volatile port_t*;
     static constexpr int kBank = Clock ? State::kClockBank : 0;
-    static constexpr port_t mask() { return Clock ? 2 : 1; }
+    static constexpr bool kInverted = Clock ? State::kClockInverted : State::kDataInverted;
+    static constexpr port_t mask() { return Clock ? State::kClockMask : State::kDataMask; }
     static constexpr bool validpin() { return true; }
     static void setOutput() {}
     static void setInput() {}
     static port_ptr_t port() { return &State::get().ports[kBank]; }
     static port_t hival() {
-        return State::kInverted ? static_cast<port_t>(*port() & ~mask())
+        return kInverted ? static_cast<port_t>(*port() & ~mask())
                                 : static_cast<port_t>(*port() | mask());
     }
     static port_t loval() {
-        return State::kInverted ? static_cast<port_t>(*port() | mask())
+        return kInverted ? static_cast<port_t>(*port() | mask())
                                 : static_cast<port_t>(*port() & ~mask());
     }
     static void fastset(port_ptr_t destination, port_t value) {
@@ -126,7 +137,7 @@ template <int Model, bool Clock> class SpiTracePin {
 };
 
 template <int Model, class Pin> struct SpiTracePolicy {
-    static constexpr bool kAtomicWrite = Model == 7;
+    static constexpr bool kAtomicWrite = Model == 7 || Model == 16;
     static constexpr bool kTwoWriteStream = SpiTraceState<Model>::kStream;
     static constexpr fl::cycle_t kMinWriteCycles = 0;
     template <fl::cycle_t Cycles> static void delay() {
@@ -184,6 +195,12 @@ FL_SPI_TRACE_MODEL(8, 236, 237)
 FL_SPI_TRACE_MODEL(9, 238, 239)
 FL_SPI_TRACE_MODEL(10, 240, 241)
 FL_SPI_TRACE_MODEL(11, 242, 243)
+FL_SPI_TRACE_MODEL(12, 244, 245)
+FL_SPI_TRACE_MODEL(13, 246, 247)
+FL_SPI_TRACE_MODEL(14, 248, 249)
+FL_SPI_TRACE_MODEL(15, 250, 251)
+FL_SPI_TRACE_MODEL(16, 252, 253)
+FL_SPI_TRACE_MODEL(17, 254, 255)
 
 #undef FL_SPI_TRACE_MODEL
 } // namespace fl

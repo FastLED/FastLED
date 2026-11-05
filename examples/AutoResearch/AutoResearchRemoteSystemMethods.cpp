@@ -1,3 +1,6 @@
+// The compile-only SPI audit uses its own retained probes, not the RPC harness.
+#if !defined(FL_SOFTWARE_SPI_COMPILE_PROBE)
+
 // System control RPC bindings: device status, debug toggles, driver
 // inventory, RPC ack/health (ping, testNoSerial), and the user-facing
 // runSingleTest/runParallelTest dispatchers. "System" = device control,
@@ -544,3 +547,5 @@ void AutoResearchRemoteControl::bindSystemMethods(fl::Remote& remote) {
 }
 
 #endif  // FL_PLATFORM_HAS_LARGE_MEMORY
+
+#endif // !FL_SOFTWARE_SPI_COMPILE_PROBE

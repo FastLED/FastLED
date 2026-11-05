@@ -331,6 +331,7 @@ REQUIRED_FINDINGS = (
         dependencies=[
             "src/fastled_config.h",
             "src/fl/system/arduino.h",
+            "src/fl/system/forced_software_pin.h",
             "src/platforms/fastpin.h",
             "src/platforms/shared/spi_bitbang/generic_software_spi.h",
             "src/platforms/arm/same53/led_sysdefs_arm_same53.h",
@@ -754,6 +755,7 @@ def _native_input_hashes(root: Path, sources: Mapping[str, bytes]) -> dict[str, 
         "tests/platforms/shared/spi_bitbang/generic_software_spi.cpp",
         "tests/platforms/shared/spi_bitbang/generic_software_spi_inverted.cpp",
         "tests/platforms/shared/spi_bitbang/generic_software_spi_fixture.h",
+        "tests/fl/system/forced_software_pin.cpp",
     ):
         inputs[name] = source_digest((root / name).read_bytes())
     return inputs
@@ -775,6 +777,7 @@ def _run_native_traces(
     commands = (
         ("bash", "test", "generic_software_spi"),
         ("bash", "test", "generic_software_spi_inverted", "--debug"),
+        ("bash", "test", "forced_software_pin", "--debug"),
     )
     inputs = _native_input_hashes(root, sources)
     input_digest = source_digest(json.dumps(inputs, sort_keys=True).encode("utf-8"))

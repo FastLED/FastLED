@@ -377,6 +377,7 @@ def test_forced_no_pinmap_fallback_is_a_required_shared_safety_finding() -> None
     assert set(finding["dependencies"]) == {
         "src/fastled_config.h",
         "src/fl/system/arduino.h",
+        "src/fl/system/forced_software_pin.h",
         "src/platforms/fastpin.h",
         "src/platforms/shared/spi_bitbang/generic_software_spi.h",
         "src/platforms/arm/same53/led_sysdefs_arm_same53.h",
@@ -423,6 +424,7 @@ NATIVE_TEST_INPUTS = (
     "tests/platforms/shared/spi_bitbang/generic_software_spi.cpp",
     "tests/platforms/shared/spi_bitbang/generic_software_spi_inverted.cpp",
     "tests/platforms/shared/spi_bitbang/generic_software_spi_fixture.h",
+    "tests/fl/system/forced_software_pin.cpp",
 )
 
 
@@ -479,12 +481,38 @@ def test_quick_native_failure_immediately_runs_same_target_debug_and_preserves_b
         ["bash", "test", "generic_software_spi"],
         ["bash", "test", "generic_software_spi", "--debug"],
         ["bash", "test", "generic_software_spi_inverted", "--debug"],
+        ["bash", "test", "forced_software_pin", "--debug"],
     ]
-    assert [record["returncode"] for record in records] == [1, 0, 0]
-    assert len({record["log"] for record in records}) == 3
+    assert [record["returncode"] for record in records] == [1, 0, 0, 0]
+    assert len({record["log"] for record in records}) == 4
     assert (tmp_path / str(records[0]["log"])).read_text(
         encoding="utf-8"
     ) == "original quick failure\n"
     assert (tmp_path / str(records[1]["log"])).read_text(
         encoding="utf-8"
     ) == "debug or later target success\n"
+
+
+def test_fixed_native_runner_executes_forced_pin_debug_without_manifest_commands(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    sources = prepare_native_inputs(tmp_path)
+    calls: list[list[str]] = []
+
+    def run(command: list[str], **_options: object) -> NativeProcessResult:
+        calls.append(command)
+        return NativeProcessResult(
+            0, "fake runner control-flow result, not behavioral proof\n"
+        )
+
+    monkeypatch.setattr("ci.software_spi_audit.RunningProcess.run", run)
+    monkeypatch.setattr("ci.software_spi_audit._current_sources", lambda _root: sources)
+    records = _run_native_traces(tmp_path, sources)
+    assert calls == [
+        ["bash", "test", "generic_software_spi"],
+        ["bash", "test", "generic_software_spi_inverted", "--debug"],
+        ["bash", "test", "forced_software_pin", "--debug"],
+    ]
+    assert [record["command"] for record in records] == calls
+    assert [record["returncode"] for record in records] == [0, 0, 0]

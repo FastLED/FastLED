@@ -1,3 +1,6 @@
+// The compile-only SPI audit uses its own retained probes, not the RPC harness.
+#if !defined(FL_SOFTWARE_SPI_COMPILE_PROBE)
+
 // examples/AutoResearch/AutoResearchOta.cpp
 //
 // OTA autoresearch implementation for ESP32.
@@ -695,3 +698,5 @@ fl::json rpOtaUpdateStatus() {
 #endif
 
 #endif  // FL_PLATFORM_HAS_LARGE_MEMORY
+
+#endif // !FL_SOFTWARE_SPI_COMPILE_PROBE

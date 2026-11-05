@@ -170,6 +170,23 @@ FL_TEST_CASE("Software SPI production scalar traces preserve MSB edges and width
     checkProductionScalar<6>();
 }
 
+FL_TEST_CASE("Software SPI production init establishes low clock before first byte") {
+    SpiTraceFixture<4> trace;
+    using Output = SpiTraceFixture<4>::Output;
+    trace.reset();
+    fl::FastPin<229>::setOutput();
+    fl::FastPin<229>::hi();
+    trace.clearTrace();
+
+    Output output;
+    output.init();
+    FL_CHECK(trace.clockLow());
+    Output::writeByte(0xa5);
+    const u8 expected[] = {0xa5};
+    checkBits(trace.bits(), expected);
+    FL_CHECK(trace.clockLow());
+}
+
 FL_TEST_CASE("Software SPI production bulk repeat and callbacks preserve bytes") {
     checkProductionBulk<0>();
     checkProductionBulk<1>();
