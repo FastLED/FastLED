@@ -7,6 +7,8 @@
 #include "fl/system/fastpin_base.h"
 #include "fl/system/pin.h"  // For PinMode, PinValue enums
 #include "fl/stl/noexcept.h"
+#include "fl/stl/type_traits.h"
+#include "platforms/shared/spi_bitbang/bitbang_pin.h"
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_DEPRECATED_REGISTER
@@ -60,6 +62,34 @@ public:
     inline static port_ptr_t sport() __attribute__ ((always_inline)) { return &PORT->Group[_GRP].OUTSET.reg; }
     inline static port_ptr_t cport() __attribute__ ((always_inline)) { return &PORT->Group[_GRP].OUTCLR.reg; }
     inline static port_t mask() __attribute__ ((always_inline)) { return _MASK; }
+};
+
+/// True only for FastPin specializations backed by a real SAMD51 _ARMPIN.
+template <u8 PIN, u8 BIT, u32 MASK, int GRP>
+constexpr bool isD51HardwarePin(const _ARMPIN<PIN, BIT, MASK, GRP>*) { return true; }
+constexpr bool isD51HardwarePin(const void*) { return false; }
+
+/// Exclusive same-group bulk writes stream through the OUT latch; all other data
+/// updates use OUTSET/OUTCLR. kMinWriteCycles stays at its default: no PORT
+/// write latency has been measured here, so existing padding is kept.
+template <u8 PIN> struct BitbangPin<FastPin<PIN>> : BitbangPinDefaults<FastPin<PIN>> {
+    static constexpr bool kAtomicWrite = isD51HardwarePin(static_cast<const FastPin<PIN>*>(nullptr));
+    static constexpr bool kTwoWriteStream = kAtomicWrite;
+    template <u8 BIT>
+    FASTLED_FORCE_INLINE static void write(u8 value) FL_NO_EXCEPT {
+        writeImpl<BIT>(value, fl::integral_constant<bool, kAtomicWrite>());
+    }
+
+  private:
+    template <u8 BIT>
+    FASTLED_FORCE_INLINE static void writeImpl(u8 value, fl::integral_constant<bool, true>) FL_NO_EXCEPT {
+        writeBitSetClear<BIT>(value, FastPin<PIN>::mask(), FastPin<PIN>::sport(), FastPin<PIN>::cport());
+    }
+    // A user-defined FastPin need not have sport()/cport(), so it keeps hi()/lo().
+    template <u8 BIT>
+    FASTLED_FORCE_INLINE static void writeImpl(u8 value, fl::integral_constant<bool, false>) FL_NO_EXCEPT {
+        BitbangPinDefaults<FastPin<PIN>>::template write<BIT>(value);
+    }
 };
 
 #define _R(T) struct __gen_struct_ ## T
