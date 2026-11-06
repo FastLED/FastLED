@@ -7,6 +7,7 @@
 #include "fastspi_types.h"
 #include "platforms/arm/sam/is_sam.h"
 #include "platforms/arm/samd/is_samd.h"
+#include "platforms/shared/spi_bitbang/bitbang_pin.h"
 
 #if defined(FL_IS_SAM)
 #endif
@@ -146,11 +147,7 @@ public:
 		// need to wait for all exisiting data to go out the door, first
 		waitFully();
 		disableSPI();
-		if(b & (1 << BIT)) {
-			FastPin<_DATA_PIN>::hi();
-		} else {
-			FastPin<_DATA_PIN>::lo();
-		}
+		BitbangPin<FastPin<_DATA_PIN>>::template write<BIT>(b);
 
 		FastPin<_CLOCK_PIN>::hi();
 		FastPin<_CLOCK_PIN>::lo();
