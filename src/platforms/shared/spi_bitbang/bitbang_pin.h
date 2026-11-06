@@ -30,7 +30,7 @@ FASTLED_FORCE_INLINE void writeBitSetClear(u8 value, u32 mask,
 
 /// Default pin access; a platform may specialize the data-write operation
 /// while the generic SPI writer continues to own bit order and clock timing.
-template <class Pin> struct BitbangPin {
+template <class Pin> struct BitbangPinDefaults {
     static constexpr bool kAtomicWrite = false;
     static constexpr bool kTwoWriteStream = false;
     static constexpr cycle_t kMinWriteCycles = 0;
@@ -44,5 +44,7 @@ template <class Pin> struct BitbangPin {
         else Pin::lo();
     }
 };
+
+template <class Pin> struct BitbangPin : BitbangPinDefaults<Pin> {};
 
 } // namespace fl
