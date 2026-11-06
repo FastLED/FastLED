@@ -1,0 +1,20 @@
+{
+  "scope": "Runner-only scoped source fixtures derived from committed selection fixtures. Compile-only assertion gating; not built or admitted evidence.",
+  "scope_values": {
+    "both": 0,
+    "arduino_first": 1,
+    "fastled_first": 2
+  },
+  "files": {
+    "esp32_c6_selection_runner_producer.cpp.txt": {
+      "derived_from": "esp32_c6_selection_producer.cpp.txt",
+      "original_sha256": "e2069d475e51d1f87cc181637cf04115e8838bcabd47489f9334585b208902da",
+      "sha256": "82e1207c15010ef360648c76fa7805dbe8b0dd861632ccc6511f02b0df3d7787"
+    },
+    "esp32_c6_selection_runner_startup.cpp.txt": {
+      "derived_from": "esp32_c6_selection_startup.cpp.txt",
+      "original_sha256": "752971fb61effb79e133d4cf80452c6a4fbbbd2670f1a18018a131446182b0c7",
+      "sha256": "7f8186810f3f4e638c33750eb62b12ec2ad144e892c381db77e3b925d5190546"
+    }
+  }
+}

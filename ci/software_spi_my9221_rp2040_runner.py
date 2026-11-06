@@ -109,12 +109,21 @@ def _assess_property(capture: dict, kind: _PropertyKind, stage: str) -> _Assessm
     return _Assessment(errors)
 
 
+@dataclass(frozen=True, slots=True)
+class _StagePropertyFlags:
+    public_producer_reachable: bool
+    callback_arguments_resolved: bool
+    masked_callee_literal_closure: bool
+
+
 def _stage_property_flags(
     kind: _PropertyKind, assessment: _Assessment
-) -> tuple[bool, bool, bool]:
+) -> _StagePropertyFlags:
     if kind in (_PropertyKind.ESP32_C6_MODE, _PropertyKind.ESP32_XTENSA_MODE):
-        return False, False, False
-    return True, True, assessment.irq_analysis is not None or not assessment.errors
+        return _StagePropertyFlags(False, False, False)
+    return _StagePropertyFlags(
+        True, True, assessment.irq_analysis is not None or not assessment.errors
+    )
 
 
 def _mode_helper(kind: _PropertyKind):
@@ -241,6 +250,7 @@ STARTUP_ENVIRONMENT_KEYS = CHILD_ENVIRONMENT_KEYS | frozenset(
         "FBUILD_DEV_MODE",
         "FBUILD_NO_UPDATE_CHECK",
         "FBUILD_EXECUTABLE",
+        "FBUILD_SELF_EVICTION_SECS",
     )
 )
 
@@ -467,7 +477,7 @@ def _tool_identities(
     return tools
 
 
-def _state(
+def _base_state(
     info: dict,
     environment: dict[str, str],
     tools: dict,
@@ -504,6 +514,17 @@ def _state(
             for key, value in environment.items()
         },
     }
+    return result
+
+
+def _state(
+    info: dict,
+    environment: dict[str, str],
+    tools: dict,
+    roots: tuple[Path, ...],
+    project: Path,
+) -> dict:
+    result = _base_state(info, environment, tools, roots, project)
     if info.get("env") == "esp32dev":
         result["planned_configuration"] = xtensa_check.planned_configuration(info)
     if info.get("env") == "esp32c6":
@@ -862,6 +883,7 @@ def _one_stage(
     hashes.update(
         {str(path): _digest(path) for path in saved.rglob("*") if path.is_file()}
     )
+    flags = _stage_property_flags(kind, assessment)
     result = VendorStage(
         name,
         0,
@@ -874,7 +896,9 @@ def _one_stage(
         hashes,
         errors,
         # Mode assessors bind conditional call sites, never root reachability.
-        *_stage_property_flags(kind, assessment),
+        flags.public_producer_reachable,
+        flags.callback_arguments_resolved,
+        flags.masked_callee_literal_closure,
         session.before,
         session.after,
         assessment.irq_analysis,

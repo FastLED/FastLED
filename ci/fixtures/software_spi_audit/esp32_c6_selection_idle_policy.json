@@ -1,0 +1,20 @@
+{
+  "scope": "Source-backed explicit managed test condition, not an accepted execution receipt or a V1 cause finding.",
+  "source_commit": "fb63b020fa751017cef2e7dee93be0e600877967",
+  "environment_key": "FBUILD_SELF_EVICTION_SECS",
+  "seconds": 900,
+  "original_default_seconds": 30,
+  "explicit_nondefault_condition": true,
+  "health_status_is_work_lease": false,
+  "source_reader": "crates/fbuild-daemon/src/context.rs:80",
+  "live_maintenance_reads": [
+    "crates/fbuild-daemon/src/bin/entry/mod.rs:528",
+    "crates/fbuild-daemon/src/bin/entry/mod.rs:531"
+  ],
+  "read_once_at_daemon_init": false,
+  "reproduction_environment": {
+    "FBUILD_SELF_EVICTION_SECS": "900",
+    "UV_NO_SYNC": "1"
+  },
+  "required_binding": "controlled child environment, desired launcher, actual server startup environment and frozen per-submission profile"
+}

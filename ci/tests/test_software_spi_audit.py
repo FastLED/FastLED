@@ -7787,10 +7787,12 @@ def test_xtensa_mode_vendor_encoded_calls_never_assert_broad_route_or_closure(
     from ci import software_spi_my9221_rp2040_runner as runner
 
     assessment = runner._Assessment(errors, irq_analysis=object() if has_irq else None)
+    flags = runner._stage_property_flags(runner._PropertyKind[kind_name], assessment)
     assert (
-        runner._stage_property_flags(runner._PropertyKind[kind_name], assessment)
-        == wanted
-    )
+        flags.public_producer_reachable,
+        flags.callback_arguments_resolved,
+        flags.masked_callee_literal_closure,
+    ) == wanted
 
 
 def test_xtensa_mode_vendor_native_whitelist_rejects_board_kind(tmp_path):
@@ -8152,7 +8154,7 @@ def test_esp32_selection_managed_rejects_architecture_or_profile_mismatch(corrup
         "board": "ESP32_C6_DEVKITC_1",
         "platform": "espressif32",
         "cxx_flags": ["-DF_CPU=160000000L", "-march=rv32imac_zicsr_zifencei"],
-        "cc_path": "/sdk/riscv32-esp-elf-14.2.0_20260121/bin/riscv32-esp-elf-gcc",
+        "cc_path": "/sdk/riscv32-esp-elf-14.2.0_20260121-x86_64-linux-gnu/riscv32-esp-elf/bin/riscv32-esp-elf-gcc",
     }
     selection.validate_c6_profile(info)
     if corruption == "env":
@@ -8372,3 +8374,2080 @@ def test_esp32_selection_managed_global_flags_reject_nonstring_tokens_explicitly
     ]
     with pytest.raises(ValueError):
         selection.validate_global_defines(flags, 1)
+
+
+def _selection_runner_scoped_diagnostics(name: str, project: Path) -> str:
+    # SYNTHETIC full-log parser data, not an actual fail-fast compiler run.
+    arduino = name == "unguarded-mutant-arduino-first"
+    if name not in {"unguarded-mutant-arduino-first", "unguarded-mutant-fastled-first"}:
+        raise ValueError("not a scoped negative")
+    filename = (
+        "esp32_c6_selection_runner_producer.cpp.txt"
+        if arduino
+        else "esp32_c6_selection_runner_startup.cpp.txt"
+    )
+    source = (
+        "src/sketch/AutoResearch.ino"
+        if arduino
+        else "src/sketch/AutoResearchStartupHook.cpp"
+    )
+    build_source = project / (
+        "src/main.cpp" if arduino else "src/sketch/AutoResearchStartupHook.cpp"
+    )
+    lines = (
+        (audit.ROOT / "ci/fixtures/software_spi_audit" / filename)
+        .read_text()
+        .splitlines()
+    )
+    messages = (
+        '#error "forced selection must not advertise hardware pin support"',
+        "static assertion failed: forced GPIO2 must use ForcedSoftwarePin",
+        "static assertion failed: forced GPIO3 must use ForcedSoftwarePin",
+    )
+    output = f"build error: build failed: compilation failed for {build_source}:\n"
+    for message in messages:
+        token = (
+            "must not advertise hardware pin support"
+            if message.startswith("#error")
+            else message.removeprefix("static assertion failed: ")
+        )
+        matches = [index for index, line in enumerate(lines, 1) if token in line]
+        assert len(matches) == 1
+        output += f"{source}:{matches[0]}:1: error: {message}\n"
+    return output
+
+
+ESP32_SELECTION_RUNNER_STAGES = (
+    "native-inverse-control",
+    "baseline",
+    "unguarded-mutant-arduino-first",
+    "unguarded-mutant-fastled-first",
+    "restored",
+)
+
+
+@pytest.mark.parametrize("name", ESP32_SELECTION_RUNNER_STAGES)
+def test_esp32_selection_runner_fixed_cells_and_typed_compile_outcomes(name, tmp_path):
+    from ci import software_spi_esp32_selection_proof as selection
+    from ci import software_spi_esp32_selection_runner as runner
+
+    assert runner.STAGES == ESP32_SELECTION_RUNNER_STAGES
+    assert selection.STAGES == ("baseline", "unguarded-native-mutant", "restored")
+    flags = runner.stage_defines(name)
+    selection.validate_global_defines(
+        flags, None if name == "native-inverse-control" else 1
+    )
+    mutant = name.startswith("unguarded-mutant-")
+    outcome = runner.assess_compile_result(
+        name,
+        1 if mutant else 0,
+        _selection_runner_scoped_diagnostics(name, tmp_path / "project")
+        if mutant
+        else "build completed\n",
+        tmp_path / "project",
+    )
+    assert outcome.returncode == (1 if mutant else 0)
+    assert outcome.expected_compile_failure is mutant
+    assert (
+        outcome.fresh_elf_eligible is False
+        if mutant
+        else outcome.fresh_elf_eligible is True
+    )
+    assert (
+        outcome.fresh_planned_database_eligible is False
+        if mutant
+        else outcome.fresh_planned_database_eligible is True
+    )
+    assert outcome.runtime_gpio_proven is False
+    assert outcome.complete_executed_argv is False
+
+
+@pytest.mark.parametrize(
+    "stages",
+    [
+        (),
+        ("baseline", "unguarded-mutant-arduino-first", "restored"),
+        ("native-inverse-control", "baseline", "restored"),
+        (
+            "baseline",
+            "native-inverse-control",
+            "unguarded-mutant-arduino-first",
+            "restored",
+        ),
+        ESP32_SELECTION_RUNNER_STAGES + ("restored",),
+    ],
+)
+def test_esp32_selection_runner_requires_native_inverse_and_exact_five_stage_sequence(
+    stages,
+):
+    from ci import software_spi_esp32_selection_runner as runner
+
+    runner.validate_stage_sequence(ESP32_SELECTION_RUNNER_STAGES)
+    with pytest.raises(ValueError):
+        runner.validate_stage_sequence(stages)
+
+
+@pytest.mark.parametrize(
+    "name,returncode,output",
+    [
+        ("unguarded-mutant-arduino-first", 0, "build completed"),
+        (
+            "unguarded-mutant-arduino-first",
+            1,
+            "unrelated.cpp:1:1: error: incidental failure",
+        ),
+        ("baseline", 1, "src/sketch/AutoResearch.ino:1:1: error: incidental failure"),
+        ("native-inverse-control", 1, "native control failed"),
+        ("restored", 1, "restoration build failed"),
+        ("unknown", 0, "build completed"),
+    ],
+)
+def test_esp32_selection_runner_does_not_relabel_wrong_compile_outcomes(
+    name, returncode, output, tmp_path
+):
+    from ci import software_spi_esp32_selection_runner as runner
+
+    with pytest.raises(ValueError):
+        runner.assess_compile_result(name, returncode, output, tmp_path / "project")
+
+
+def _selection_runner_schema_stage(tmp_path, name="baseline"):
+    # Synthetic orchestration/schema data ONLY, not a compiler or SDK receipt.
+    from ci import software_spi_esp32_selection_runner as runner
+
+    mutant = name.startswith("unguarded-mutant-")
+    directory = tmp_path / name
+    directory.mkdir(parents=True)
+    log = directory / "build.log"
+    output = (
+        _selection_runner_scoped_diagnostics(name, tmp_path / "project")
+        if mutant
+        else "build completed\n"
+    )
+    log.write_text(output)
+    outcome = runner.assess_compile_result(
+        name, int(mutant), output, tmp_path / "project"
+    )
+    inputs = {
+        "src/platforms/esp/32/core/fastpin_esp32.h": digest(b"controlled bytes"),
+        "examples/AutoResearch/AutoResearch.ino": digest(b"fixed producer"),
+        "examples/AutoResearch/AutoResearchStartupHook.cpp": digest(b"paired producer"),
+    }
+    artifacts = {}
+    configuration = {}
+    if not mutant:
+        for filename in ("firmware.elf", "firmware.bin", "compile_commands.raw.json"):
+            artifact = directory / filename
+            artifact.write_bytes(("synthetic schema placeholder " + filename).encode())
+            artifacts[str(artifact)] = digest(artifact.read_bytes())
+    ini = directory / "platformio.ini"
+    ini.write_text("synthetic schema configuration only")
+    configuration[str(ini)] = digest(ini.read_bytes())
+    return runner.SelectionStage(
+        name=name,
+        project=tmp_path / "project",
+        outcome=outcome,
+        log_path=log,
+        log_sha256=digest(log.read_bytes()),
+        inputs_before=dict(inputs),
+        inputs_after=dict(inputs),
+        staged_sources_expected=dict(inputs),
+        staged_sources_observed=dict(inputs),
+        tools_before={"compiler": "bound tool"},
+        tools_after={"compiler": "bound tool"},
+        profile_before={
+            "cell": "native" if name == "native-inverse-control" else "forced"
+        },
+        profile_after={
+            "cell": "native" if name == "native-inverse-control" else "forced"
+        },
+        serving_engine_before={"pid": 1, "image_sha256": "bound image"},
+        serving_engine_after={"pid": 1, "image_sha256": "bound image"},
+        artifact_sha256s=artifacts,
+        configuration_sha256s=configuration,
+    )
+
+
+@pytest.mark.parametrize(
+    "corruption",
+    [
+        "inputs",
+        "staged-tus",
+        "tools",
+        "profile",
+        "engine",
+        "log",
+        "mutant-fresh-elf",
+        "mutant-fresh-db",
+    ],
+)
+def test_esp32_selection_runner_stage_binding_rejects_drift_and_stale_negative_claims(
+    tmp_path, corruption
+):
+    from dataclasses import replace
+
+    from ci import software_spi_esp32_selection_runner as runner
+
+    stage = _selection_runner_schema_stage(tmp_path, "unguarded-mutant-arduino-first")
+    runner.validate_stage_record(stage)
+    if corruption == "inputs":
+        stage = replace(stage, inputs_after={})
+    elif corruption == "staged-tus":
+        stage = replace(stage, staged_sources_observed={"unrelated.cpp": "hash"})
+    elif corruption == "tools":
+        stage = replace(stage, tools_after={"compiler": "changed tool"})
+    elif corruption == "profile":
+        stage = replace(stage, profile_after={"cell": "native"})
+    elif corruption == "engine":
+        stage = replace(
+            stage, serving_engine_after={"pid": 2, "image_sha256": "bound image"}
+        )
+    elif corruption == "log":
+        stage.log_path.write_text("replaced diagnostic log")
+    elif corruption == "mutant-fresh-elf":
+        stage = replace(stage, outcome=replace(stage.outcome, fresh_elf_eligible=True))
+    else:
+        stage = replace(
+            stage, outcome=replace(stage.outcome, fresh_planned_database_eligible=True)
+        )
+    with pytest.raises(ValueError):
+        runner.validate_stage_record(stage)
+
+
+def test_esp32_selection_runner_native_kind_cannot_execute_in_host_whitelist(tmp_path):
+    from ci import software_spi_init_proof as native
+
+    with pytest.raises(ValueError, match="native|fixed|target"):
+        native._run_proof(tmp_path, native._ProofKind.ESP32_C6_SELECTION)
+
+
+def test_esp32_selection_runner_missing_checkout_never_builds_or_publishes(
+    tmp_path, monkeypatch
+):
+    from ci import software_spi_esp32_selection_runner as runner
+
+    monkeypatch.setattr(
+        audit.RunningProcess,
+        "run",
+        lambda *args, **kwargs: pytest.fail("missing checkout executed"),
+    )
+    with pytest.raises(ValueError, match="source|input|checkout|missing"):
+        runner.run_c6_selection_proof(tmp_path)
+    assert not list(tmp_path.rglob("proof.json"))
+
+
+@pytest.mark.skipif(
+    os.environ.get("FASTLED_RUN_ESP32_C6_SELECTION_PROOF") != "1",
+    reason="requires fixed native/forced/two scoped mutant/restored actual C6 SDK compilations",
+)
+def test_esp32_selection_runner_real_five_stage_acceptance():
+    from ci import software_spi_esp32_selection_proof as selection
+    from ci import software_spi_esp32_selection_runner as runner
+    from ci import software_spi_init_proof as native
+
+    before = native._inputs(audit.ROOT)
+    original = (audit.ROOT / selection.SOURCE).read_bytes()
+    proof = runner.run_c6_selection_proof(audit.ROOT)
+    runner.validate_stage_sequence(tuple(stage.name for stage in proof.stages))
+    assert proof.complete_executed_argv is False
+    assert proof.runtime_gpio_proven is False
+    assert proof.full_finding_qualified is False
+    for stage in proof.stages:
+        runner.validate_stage_record(stage)
+        expected = (
+            selection.unguarded_native_mutant(original)
+            if stage.name.startswith("unguarded-mutant-")
+            else original
+        )
+        assert stage.inputs_before[selection.SOURCE] == digest(expected)
+        assert stage.outcome.returncode == (
+            1 if stage.name.startswith("unguarded-mutant-") else 0
+        )
+        assert stage.outcome.expected_compile_failure is (
+            stage.name.startswith("unguarded-mutant-")
+        )
+        for path, sha in stage.artifact_sha256s.items():
+            assert digest(Path(path).read_bytes()) == sha
+    assert proof.restoration_verified is True
+    assert (audit.ROOT / selection.SOURCE).read_bytes() == original
+    assert native._inputs(audit.ROOT) == before
+    receipt = (
+        audit.ROOT
+        / ".build/spi-esp32-c6-selection-proof"
+        / proof.workspace.name
+        / "proof.json"
+    )
+    assert receipt.is_file()
+
+
+@pytest.mark.parametrize(
+    "field_pair",
+    [
+        ("inputs_before", "inputs_after"),
+        ("staged_sources_expected", "staged_sources_observed"),
+        ("tools_before", "tools_after"),
+        ("profile_before", "profile_after"),
+        ("serving_engine_before", "serving_engine_after"),
+    ],
+)
+def test_esp32_selection_runner_rejects_equal_empty_identity_maps(tmp_path, field_pair):
+    from dataclasses import replace
+
+    from ci import software_spi_esp32_selection_runner as runner
+
+    stage = _selection_runner_schema_stage(tmp_path, "unguarded-mutant-arduino-first")
+    stage = replace(stage, **{name: {} for name in field_pair})
+    with pytest.raises(ValueError):
+        runner.validate_stage_record(stage)
+
+
+@pytest.mark.parametrize(
+    "field_pair,key",
+    [
+        (
+            ("inputs_before", "inputs_after"),
+            "examples/AutoResearch/AutoResearchStartupHook.cpp",
+        ),
+        (
+            ("staged_sources_expected", "staged_sources_observed"),
+            "examples/AutoResearch/AutoResearchStartupHook.cpp",
+        ),
+        (("tools_before", "tools_after"), "compiler"),
+        (("serving_engine_before", "serving_engine_after"), "image_sha256"),
+    ],
+)
+def test_esp32_selection_runner_rejects_equal_maps_missing_mandatory_bindings(
+    tmp_path, field_pair, key
+):
+    from dataclasses import replace
+
+    from ci import software_spi_esp32_selection_runner as runner
+
+    stage = _selection_runner_schema_stage(tmp_path, "unguarded-mutant-arduino-first")
+    changes = {
+        name: {k: v for k, v in getattr(stage, name).items() if k != key}
+        for name in field_pair
+    }
+    with pytest.raises(ValueError):
+        runner.validate_stage_record(replace(stage, **changes))
+
+
+@pytest.mark.parametrize(
+    "corruption", ["missing-artifacts", "missing-config", "changed-artifact"]
+)
+def test_esp32_selection_runner_positive_eligibility_requires_actual_retained_bindings(
+    tmp_path, corruption
+):
+    from dataclasses import replace
+
+    from ci import software_spi_esp32_selection_runner as runner
+
+    stage = _selection_runner_schema_stage(tmp_path)
+    runner.validate_stage_record(stage)
+    if corruption == "missing-artifacts":
+        stage = replace(stage, artifact_sha256s={})
+    elif corruption == "missing-config":
+        stage = replace(stage, configuration_sha256s={})
+    else:
+        Path(next(iter(stage.artifact_sha256s))).write_bytes(b"changed placeholder")
+    with pytest.raises(ValueError):
+        runner.validate_stage_record(stage)
+
+
+@pytest.mark.parametrize("process_returncode", [0, 1])
+def test_esp32_selection_runner_immediate_engine_window_surrounds_both_process_statuses(
+    tmp_path, monkeypatch, process_returncode
+):
+    from types import SimpleNamespace
+
+    from ci import software_spi_esp32_selection_runner as runner
+
+    events = []
+    profile = {"bound": "static profile"}
+    monkeypatch.setattr(
+        runner, "_selection_state", lambda *args: events.append("static") or profile
+    )
+    monkeypatch.setattr(
+        runner.vendor.property_check, "_verify_profile_state", lambda *args: None
+    )
+    monkeypatch.setattr(
+        runner.vendor, "_ensure_stage_engine", lambda *args: events.append("ensure")
+    )
+    monkeypatch.setattr(
+        runner.vendor,
+        "_daemon_identity",
+        lambda workspace, saved, phase, *args: events.append(phase) or {"pid": 1},
+    )
+    monkeypatch.setattr(runner.vendor, "_verify_engine_profile", lambda *args: None)
+    monkeypatch.setattr(runner.vendor, "_verify_serving_engine", lambda *args: None)
+    monkeypatch.setattr(runner.native, "_verify_inputs", lambda *args: None)
+    monkeypatch.setattr(
+        runner.vendor, "_check_staged_sources", lambda *args: events.append("staged")
+    )
+    environment = {"FBUILD_EXECUTABLE": str(tmp_path / "fbuild")}
+    route = f"Running: {tmp_path / 'fbuild'} {tmp_path / '.build/fbuild/esp32c6'} build -e esp32c6 -v\n"
+    process = SimpleNamespace(returncode=process_returncode, stdout=route)
+    monkeypatch.setattr(
+        runner, "_run_c6_compile", lambda *args: events.append("compile") or process
+    )
+    result = runner._selection_build_session(
+        tmp_path,
+        tmp_path / "saved",
+        environment,
+        {},
+        (),
+        profile,
+        {},
+        {},
+        {},
+        "baseline" if process_returncode == 0 else "unguarded-mutant-arduino-first",
+    )
+    assert result.compile_result is process
+    assert events == [
+        "static",
+        "ensure",
+        "build-before",
+        "compile",
+        "build-after",
+        "static",
+        "staged",
+    ]
+
+
+@pytest.mark.parametrize(
+    "exception_kind",
+    ["timeout-valueerror", "launcher-error", "interrupt", "after-engine-error"],
+)
+def test_esp32_selection_runner_never_converts_exceptions_to_designated_compiler_failure(
+    tmp_path, monkeypatch, exception_kind
+):
+    from types import SimpleNamespace
+
+    from ci import software_spi_esp32_selection_runner as runner
+
+    events = []
+    monkeypatch.setattr(
+        runner, "_selection_state", lambda *args: events.append("static") or {}
+    )
+    monkeypatch.setattr(
+        runner.vendor.property_check, "_verify_profile_state", lambda *args: None
+    )
+    monkeypatch.setattr(runner.vendor, "_ensure_stage_engine", lambda *args: None)
+    monkeypatch.setattr(
+        runner.vendor,
+        "_daemon_identity",
+        lambda workspace, saved, phase, *args: events.append(phase) or {"pid": 1},
+    )
+    monkeypatch.setattr(runner.vendor, "_verify_engine_profile", lambda *args: None)
+
+    def verify_after(*args):
+        if exception_kind == "after-engine-error":
+            raise ValueError("engine changed")
+
+    monkeypatch.setattr(runner.vendor, "_verify_serving_engine", verify_after)
+
+    def compile_attempt(*args):
+        events.append("compile")
+        if exception_kind == "interrupt":
+            raise KeyboardInterrupt()
+        if exception_kind == "launcher-error":
+            raise OSError("launcher unavailable")
+        if exception_kind == "timeout-valueerror":
+            raise ValueError("native._run retained timeout")
+        return SimpleNamespace(
+            returncode=1, stdout=_esp32_selection_paired_diagnostics()
+        )
+
+    monkeypatch.setattr(runner, "_run_c6_compile", compile_attempt)
+    expected = (
+        KeyboardInterrupt
+        if exception_kind == "interrupt"
+        else OSError
+        if exception_kind == "launcher-error"
+        else ValueError
+    )
+    with pytest.raises(expected):
+        runner._selection_build_session(
+            tmp_path,
+            tmp_path / "saved",
+            {},
+            {},
+            (),
+            {},
+            {},
+            {},
+            {},
+            "unguarded-mutant-arduino-first",
+        )
+    assert events == ["static", "build-before", "compile", "build-after"]
+    assert not list(tmp_path.rglob("proof.json"))
+
+
+def _selection_runner_cell_configuration(tmp_path, name, corruption="none"):
+    # Synthetic configuration/recipe input, never an executed command receipt.
+    from ci import software_spi_esp32_selection_runner as runner
+
+    project = tmp_path / "project"
+    release = project / ".fbuild/build/release"
+    release.mkdir(parents=True, exist_ok=True)
+    flags = runner.stage_defines(name)
+    ini = project / "platformio.ini"
+    ini.write_text(
+        "[env:esp32c6]\nplatform = espressif32\nboard = esp32-c6-devkitc-1\nbuild_flags = "
+        + " ".join(flags)
+        + "\n"
+    )
+    rows = []
+    for source in ("src/main.cpp", "src/sketch/AutoResearchStartupHook.cpp"):
+        args = [
+            "/sdk/bin/riscv32-esp-elf-g++",
+            "-DF_CPU=160000000L",
+            "-march=rv32imac_zicsr_zifencei",
+            "-I/sdk/include",
+            *flags,
+            "@options.rsp",
+            "-c",
+            source,
+            "-o",
+            source + ".o",
+        ]
+        rows.append({"directory": str(project), "file": source, "arguments": args})
+    response = project / "options.rsp"
+    response.write_text("-fno-exceptions -std=gnu++17\n")
+    info = {"env": "esp32c6", "prog_path": str(release / "firmware.elf")}
+    if corruption == "cpu":
+        rows[0]["arguments"][1] = "-DF_CPU=80000000L"
+    elif corruption == "sdk-flags":
+        rows[0]["arguments"][3] = "-I/unreviewed-sdk/include"
+    elif corruption == "tu-row":
+        rows.pop()
+    elif corruption == "response":
+        response.write_text("-fexceptions -std=gnu++17\n")
+    elif corruption == "output":
+        rows[0]["arguments"][-1] = "changed-output.o"
+    elif corruption == "ini":
+        ini.write_text(ini.read_text().replace("espressif32", "different-platform"))
+    (release / "compile_commands.raw.json").write_text(json.dumps(rows))
+    return runner._capture_cell_configuration(info, name)
+
+
+def test_esp32_selection_runner_cell_configuration_allows_only_native_forced_macro_difference(
+    tmp_path,
+):
+    from ci import software_spi_esp32_selection_runner as runner
+
+    native_cell = _selection_runner_cell_configuration(
+        tmp_path, "native-inverse-control"
+    )
+    forced_cell = _selection_runner_cell_configuration(tmp_path, "baseline")
+    runner._compare_cell_configurations(native_cell, forced_cell)
+
+
+@pytest.mark.parametrize(
+    "corruption", ["cpu", "sdk-flags", "tu-row", "response", "output", "ini"]
+)
+def test_esp32_selection_runner_cell_configuration_rejects_other_recipe_differences(
+    tmp_path, corruption
+):
+    from ci import software_spi_esp32_selection_runner as runner
+
+    native_cell = _selection_runner_cell_configuration(
+        tmp_path, "native-inverse-control"
+    )
+    forced_cell = _selection_runner_cell_configuration(tmp_path, "baseline", corruption)
+    with pytest.raises(ValueError):
+        runner._compare_cell_configurations(native_cell, forced_cell)
+
+
+@pytest.mark.parametrize("name", ["native-inverse-control", "baseline"])
+def test_esp32_selection_runner_own_state_adapter_preserves_base_and_validates_each_cell(
+    tmp_path, monkeypatch, name
+):
+    from ci import software_spi_esp32_selection_runner as runner
+
+    _selection_runner_cell_configuration(tmp_path, name)
+    info = {
+        "env": "esp32c6",
+        "prog_path": str(tmp_path / "project/.fbuild/build/release/firmware.elf"),
+    }
+    base = {
+        "tools": {"compiler": "bound"},
+        "sdk": {"SDKfile": "bound"},
+        "configuration": info,
+        "environment": {"PATH": "bound"},
+    }
+    monkeypatch.setattr(
+        runner.vendor, "_base_state", lambda *args: dict(base), raising=False
+    )
+    observed = runner._selection_state(info, {}, {}, (), tmp_path / "project", name)
+    for key, value in base.items():
+        assert observed[key] == value
+    assert observed["planned_configuration"]
+
+
+@pytest.mark.parametrize("name", ["native-inverse-control", "baseline"])
+@pytest.mark.parametrize(
+    "override",
+    [
+        "-UFASTLED_FORCE_SOFTWARE_PINS",
+        "-Wp,-UFASTLED_FORCE_SOFTWARE_PINS",
+        "-Xpreprocessor -UFASTLED_NO_PINMAP",
+        "-DEXPECT_NO_PINMAP=0",
+    ],
+)
+def test_esp32_selection_runner_rsp_rejects_required_macro_overrides_even_in_equal_cells(
+    tmp_path, name, override
+):
+    from ci import software_spi_esp32_selection_runner as runner
+
+    _selection_runner_cell_configuration(tmp_path, name)
+    project = tmp_path / "project"
+    (project / "options.rsp").write_text("-fno-exceptions " + override + "\n")
+    info = {
+        "env": "esp32c6",
+        "prog_path": str(project / ".fbuild/build/release/firmware.elf"),
+    }
+    with pytest.raises(ValueError):
+        runner._capture_cell_configuration(info, name)
+
+
+@pytest.mark.parametrize(
+    "reference", ["missing", "relative-external", "absolute-external"]
+)
+def test_esp32_selection_runner_recipe_requires_bound_existing_project_response_files(
+    tmp_path, reference
+):
+    from ci import software_spi_esp32_selection_runner as runner
+
+    _selection_runner_cell_configuration(tmp_path, "baseline")
+    project = tmp_path / "project"
+    database = project / ".fbuild/build/release/compile_commands.raw.json"
+    rows = json.loads(database.read_text())
+    external = tmp_path / "external.rsp"
+    external.write_text("-std=gnu++17\n")
+    target = (
+        "missing.rsp"
+        if reference == "missing"
+        else "../external.rsp"
+        if reference == "relative-external"
+        else str(external)
+    )
+    rows[0]["arguments"][rows[0]["arguments"].index("@options.rsp")] = "@" + target
+    database.write_text(json.dumps(rows))
+    info = {
+        "env": "esp32c6",
+        "prog_path": str(project / ".fbuild/build/release/firmware.elf"),
+    }
+    with pytest.raises(ValueError):
+        runner._capture_cell_configuration(info, "baseline")
+
+
+def test_esp32_selection_runner_rejects_contradictory_command_and_arguments(tmp_path):
+    from ci import software_spi_esp32_selection_runner as runner
+
+    _selection_runner_cell_configuration(tmp_path, "baseline")
+    project = tmp_path / "project"
+    database = project / ".fbuild/build/release/compile_commands.raw.json"
+    rows = json.loads(database.read_text())
+    rows[0]["command"] = " ".join(rows[0]["arguments"]).replace(
+        "160000000L", "80000000L"
+    )
+    database.write_text(json.dumps(rows))
+    info = {
+        "env": "esp32c6",
+        "prog_path": str(project / ".fbuild/build/release/firmware.elf"),
+    }
+    with pytest.raises(ValueError):
+        runner._capture_cell_configuration(info, "baseline")
+
+
+@pytest.mark.parametrize("compile_exception", ["launcher", "timeout", "interrupt"])
+def test_esp32_selection_runner_retains_both_compile_and_after_engine_errors(
+    tmp_path, monkeypatch, compile_exception
+):
+    from ci import software_spi_esp32_selection_runner as runner
+
+    saved = tmp_path / "stage"
+    saved.mkdir()
+    monkeypatch.setattr(runner, "_selection_state", lambda *args: {})
+    monkeypatch.setattr(
+        runner.vendor.property_check, "_verify_profile_state", lambda *args: None
+    )
+    monkeypatch.setattr(runner.vendor, "_ensure_stage_engine", lambda *args: None)
+    monkeypatch.setattr(runner.vendor, "_daemon_identity", lambda *args: {"pid": 1})
+    monkeypatch.setattr(runner.vendor, "_verify_engine_profile", lambda *args: None)
+    errors = {
+        "launcher": OSError("compile launcher failed"),
+        "timeout": ValueError("compile deadline expired"),
+        "interrupt": KeyboardInterrupt("compile interrupted"),
+    }
+    original_error = errors[compile_exception]
+
+    def fail_compile(*args):
+        raise original_error
+
+    def fail_after(*args):
+        raise ValueError("after engine binding lost")
+
+    monkeypatch.setattr(runner, "_run_c6_compile", fail_compile)
+    monkeypatch.setattr(runner.vendor, "_verify_serving_engine", fail_after)
+    expected = (
+        KeyboardInterrupt if compile_exception == "interrupt" else (ValueError, OSError)
+    )
+    with pytest.raises(expected):
+        runner._selection_build_session(
+            tmp_path,
+            saved,
+            {},
+            {},
+            (),
+            {},
+            {},
+            {},
+            {},
+            "unguarded-mutant-arduino-first",
+        )
+    records = list(saved.glob("*failure*.json"))
+    assert records, "both errors must survive in owned retained failure diagnostics"
+    text = "\n".join(path.read_text() for path in records)
+    assert str(original_error) in text
+    assert "after engine binding lost" in text
+    assert any(
+        json.loads(path.read_text()).get("complete") is False for path in records
+    )
+    assert not list(tmp_path.rglob("proof.json"))
+
+
+def _selection_runner_schema_attempt(tmp_path):
+    # Typed orchestration fixtures only; no SDK execution or admission evidence.
+    from dataclasses import replace
+
+    from ci import software_spi_esp32_selection_proof as selection
+
+    original = (audit.ROOT / selection.SOURCE).read_bytes()
+    records = []
+    for name in ESP32_SELECTION_RUNNER_STAGES:
+        record = _selection_runner_schema_stage(tmp_path, name)
+        source = (
+            selection.unguarded_native_mutant(original)
+            if name.startswith("unguarded-mutant-")
+            else original
+        )
+        expected = {**record.inputs_before, selection.SOURCE: digest(source)}
+        records.append(
+            replace(
+                record,
+                inputs_before=dict(expected),
+                inputs_after=dict(expected),
+                staged_sources_expected=dict(expected),
+                staged_sources_observed=dict(expected),
+            )
+        )
+    return original, records
+
+
+@pytest.mark.parametrize(
+    "corruption",
+    ["missing-stage", "wrong-order", "missing-artifact", "wrong-source-transition"],
+)
+def test_esp32_selection_runner_whole_attempt_requires_real_bindings_and_exact_source_sequence(
+    tmp_path, corruption
+):
+    from dataclasses import replace
+
+    from ci import software_spi_esp32_selection_proof as selection
+    from ci import software_spi_esp32_selection_runner as runner
+
+    original, records = _selection_runner_schema_attempt(tmp_path)
+    runner.validate_attempt(records, original)
+    if corruption == "missing-stage":
+        records.pop(0)
+    elif corruption == "wrong-order":
+        records[0], records[1] = records[1], records[0]
+    elif corruption == "missing-artifact":
+        records[1] = replace(records[1], artifact_sha256s={})
+    else:
+        bad = dict(records[2].inputs_before)
+        bad[selection.SOURCE] = digest(original)
+        records[2] = replace(
+            records[2],
+            inputs_before=dict(bad),
+            inputs_after=dict(bad),
+            staged_sources_expected=dict(bad),
+            staged_sources_observed=dict(bad),
+        )
+    with pytest.raises(ValueError):
+        runner.validate_attempt(records, original)
+
+
+@dataclass(slots=True)
+class _SelectionEntryLayout:
+    root: Path
+    workspace: Path
+    originals: dict[str, bytes]
+    ini: Path
+    ini_original: bytes
+
+
+def _selection_runner_entry_layout(tmp_path, monkeypatch) -> _SelectionEntryLayout:
+    from ci import software_spi_esp32_selection_proof as selection
+    from ci import software_spi_esp32_selection_runner as runner
+
+    root, workspace = tmp_path / "root", tmp_path / "snapshot"
+    originals = {
+        selection.SOURCE: (audit.ROOT / selection.SOURCE).read_bytes(),
+        "examples/AutoResearch/AutoResearch.ino": b"original example",
+        "examples/AutoResearch/AutoResearchStartupHook.cpp": b"original startup",
+    }
+    for directory in (root, workspace):
+        for relative, content in {
+            **originals,
+            "ci/boards.py": b"boards",
+            "compile": b"wrapper",
+        }.items():
+            path = directory / relative
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(content)
+        fixtures = directory / "ci/fixtures/software_spi_audit"
+        fixtures.mkdir(parents=True)
+        for filename in (
+            "esp32_c6_selection_producer.cpp.txt",
+            "esp32_c6_selection_startup.cpp.txt",
+            "esp32_c6_selection_runner_producer.cpp.txt",
+            "esp32_c6_selection_runner_startup.cpp.txt",
+        ):
+            (fixtures / filename).write_bytes(
+                (audit.ROOT / "ci/fixtures/software_spi_audit" / filename).read_bytes()
+            )
+    ini = workspace / ".build/fbuild/esp32c6/platformio.ini"
+    ini.parent.mkdir(parents=True)
+    ini_original = b"original project flags"
+    ini.write_bytes(ini_original)
+
+    def inputs(directory):
+        return {
+            relative: digest((directory / relative).read_bytes())
+            for relative in originals
+        }
+
+    def verify(directory, expected):
+        if any(
+            not (directory / relative).is_file()
+            or digest((directory / relative).read_bytes()) != sha
+            for relative, sha in expected.items()
+        ):
+            raise ValueError("deliberate frozen input drift")
+        return dict(expected)
+
+    monkeypatch.setattr(runner.native, "_inputs", inputs)
+    monkeypatch.setattr(runner.native, "_verify_inputs", verify)
+    monkeypatch.setattr(runner.native, "_snapshot", lambda *args: (workspace, None))
+    monkeypatch.setattr(runner.vendor, "_environment", lambda *args: {})
+    # Public-CI orchestration fixtures have no private provider cohort context.
+    monkeypatch.setattr(runner, "_verify_provider_cohort", lambda: None, raising=False)
+    # This orchestration fixture has no SDK context; dependency semantics are
+    # independently exercised below and by the actual managed opt-in.
+    monkeypatch.setattr(
+        runner, "_verify_final_dependencies", lambda *args: None, raising=False
+    )
+    monkeypatch.setattr(
+        audit.RunningProcess,
+        "run",
+        lambda *args, **kwargs: pytest.fail(
+            "orchestration unit fixture attempted a real process"
+        ),
+    )
+    return _SelectionEntryLayout(root, workspace, originals, ini, ini_original)
+
+
+@pytest.mark.parametrize("failure", ["stage", "interrupt", "cleanup"])
+def test_esp32_selection_runner_entry_restores_all_originals_and_blocks_publication_on_failure(
+    tmp_path, monkeypatch, failure
+):
+    from ci import software_spi_esp32_selection_runner as runner
+
+    layout = _selection_runner_entry_layout(tmp_path, monkeypatch)
+
+    def fail_stages(*args):
+        for relative in layout.originals:
+            assert (layout.workspace / relative).is_file()
+        (layout.workspace / runner.selection.SOURCE).write_bytes(
+            b"partially mutated header"
+        )
+        layout.ini.write_bytes(b"modified project flags")
+        if failure == "interrupt":
+            raise KeyboardInterrupt("deliberate user interruption")
+        raise ValueError("deliberate stage failure")
+
+    monkeypatch.setattr(runner, "_execute_fixed_stages", fail_stages)
+    if failure == "cleanup":
+        restore = runner.native._restore_sources
+
+        def fail_restore(*args):
+            return restore(*args) + ["deliberate cleanup verification failure"]
+
+        monkeypatch.setattr(runner.native, "_restore_sources", fail_restore)
+    with pytest.raises(KeyboardInterrupt if failure == "interrupt" else ValueError):
+        runner.run_c6_selection_proof(layout.root)
+    for relative, original in layout.originals.items():
+        assert (layout.workspace / relative).read_bytes() == original
+        assert (layout.root / relative).read_bytes() == original
+    assert layout.ini.read_bytes() == layout.ini_original
+    assert not list(layout.root.rglob("proof.json"))
+    failures = list(layout.root.rglob("failure.json"))
+    assert failures and all(
+        json.loads(path.read_text())["complete"] is False for path in failures
+    )
+    if failure == "cleanup":
+        text = "\n".join(path.read_text() for path in failures)
+        assert "deliberate stage failure" in text and "deliberate cleanup" in text
+
+
+def test_esp32_selection_runner_entry_partial_producer_write_failure_is_restored(
+    tmp_path, monkeypatch
+):
+    from ci import software_spi_esp32_selection_runner as runner
+
+    layout = _selection_runner_entry_layout(tmp_path, monkeypatch)
+    original_write = Path.write_bytes
+    injected = False
+    target = layout.workspace / "examples/AutoResearch/AutoResearchStartupHook.cpp"
+
+    def fail_one_write(path, content):
+        nonlocal injected
+        if path == target and not injected:
+            injected = True
+            raise OSError("deliberate producer write failure")
+        return original_write(path, content)
+
+    monkeypatch.setattr(Path, "write_bytes", fail_one_write)
+    monkeypatch.setattr(
+        runner,
+        "_execute_fixed_stages",
+        lambda *args: pytest.fail("partial producer write reached builds"),
+    )
+    with pytest.raises(ValueError, match="retained|failed|write"):
+        runner.run_c6_selection_proof(layout.root)
+    assert injected
+    for relative, original in layout.originals.items():
+        assert (layout.workspace / relative).read_bytes() == original
+    assert layout.ini.read_bytes() == layout.ini_original
+    assert not list(layout.root.rglob("proof.json"))
+
+
+@pytest.mark.parametrize("root_drift", [False, True])
+def test_esp32_selection_runner_publication_happens_only_after_final_restoration_checks(
+    tmp_path, monkeypatch, root_drift
+):
+    from ci import software_spi_esp32_selection_runner as runner
+
+    layout = _selection_runner_entry_layout(tmp_path, monkeypatch)
+    original, records = _selection_runner_schema_attempt(tmp_path / "records")
+    assert original == layout.originals[runner.selection.SOURCE]
+
+    def complete_stages(*args):
+        layout.ini.write_bytes(b"last forced cell flags")
+        if root_drift:
+            (layout.root / runner.selection.SOURCE).write_bytes(
+                b"unrelated concurrent root edit"
+            )
+        return records
+
+    monkeypatch.setattr(runner, "_execute_fixed_stages", complete_stages)
+    publish = runner.vendor._json
+    publications = []
+
+    def observe_publication(path, value):
+        if Path(path).name == "proof.json":
+            assert not root_drift
+            for relative, content in layout.originals.items():
+                assert (layout.workspace / relative).read_bytes() == content
+                assert (layout.root / relative).read_bytes() == content
+            assert layout.ini.read_bytes() == layout.ini_original
+            publications.append(Path(path))
+        return publish(path, value)
+
+    monkeypatch.setattr(runner.vendor, "_json", observe_publication)
+    if root_drift:
+        with pytest.raises(ValueError):
+            runner.run_c6_selection_proof(layout.root)
+        assert not publications
+        assert not list(layout.root.rglob("proof.json"))
+    else:
+        proof = runner.run_c6_selection_proof(layout.root)
+        assert proof.restoration_verified is True
+        assert len(publications) == 1
+
+
+@pytest.mark.parametrize(
+    "case",
+    [
+        "root-valid-parent-missing",
+        "root-valid-parent-conflicting",
+        "root-invalid-parent-valid",
+        "root-cycle-parent-valid",
+        "binding-root-over-parent",
+    ],
+)
+def test_esp32_selection_runner_nested_responses_use_fixed_compiler_working_directory(
+    tmp_path, case
+):
+    from ci import software_spi_esp32_selection_runner as runner
+
+    _selection_runner_cell_configuration(tmp_path, "baseline")
+    project = tmp_path / "project"
+    nested = project / "nested"
+    nested.mkdir()
+    (nested / "outer.rsp").write_text("@inner.rsp\n")
+    (project / "inner.rsp").write_text("-DROOT_CWD_RESPONSE=1\n")
+    if case != "root-valid-parent-missing":
+        (nested / "inner.rsp").write_text("-DPARENT_RESPONSE=1\n")
+    if case == "root-invalid-parent-valid":
+        (project / "inner.rsp").write_text("-UFASTLED_FORCE_SOFTWARE_PINS\n")
+    elif case == "root-cycle-parent-valid":
+        (project / "inner.rsp").write_text("@nested/outer.rsp\n")
+    database = project / ".fbuild/build/release/compile_commands.raw.json"
+    rows = json.loads(database.read_text())
+    rows[0]["arguments"][rows[0]["arguments"].index("@options.rsp")] = (
+        "@nested/outer.rsp"
+    )
+    database.write_text(json.dumps(rows))
+    info = {
+        "env": "esp32c6",
+        "prog_path": str(project / ".fbuild/build/release/firmware.elf"),
+    }
+    if case in {"root-invalid-parent-valid", "root-cycle-parent-valid"}:
+        with pytest.raises(ValueError):
+            runner._capture_cell_configuration(info, "baseline")
+    else:
+        config = runner._capture_cell_configuration(info, "baseline")
+        actual = config.normalized_recipe["recipes"][
+            ".fbuild/build/release/compile_commands.raw.json"
+        ][0]["effective_arguments"]
+        assert "-DROOT_CWD_RESPONSE=1" in actual
+        assert "-DPARENT_RESPONSE=1" not in actual
+        assert str(project / "inner.rsp") in config.hashes
+
+
+@pytest.mark.parametrize(
+    "name,scope",
+    [
+        ("native-inverse-control", 0),
+        ("baseline", 0),
+        ("unguarded-mutant-arduino-first", 1),
+        ("unguarded-mutant-fastled-first", 2),
+        ("restored", 0),
+    ],
+)
+def test_esp32_selection_runner_scoped_five_stages_require_exact_global_assertion_scope(
+    name, scope
+):
+    from ci import software_spi_esp32_selection_proof as selection
+    from ci import software_spi_esp32_selection_runner as runner
+
+    assert runner.STAGES == ESP32_SELECTION_RUNNER_STAGES
+    assert selection.STAGES == ("baseline", "unguarded-native-mutant", "restored")
+    flags = runner.stage_defines(name)
+    assert [
+        flag for flag in flags if flag.startswith("-DFASTLED_SELECTION_ASSERT_SCOPE=")
+    ] == [f"-DFASTLED_SELECTION_ASSERT_SCOPE={scope}"]
+    runner.validate_stage_defines(name, flags)
+
+
+@pytest.mark.parametrize(
+    "corruption",
+    [
+        "missing",
+        "wrong",
+        "duplicate",
+        "functionlike",
+        "undefinition",
+        "no-map",
+        "force-zero",
+        "native-force",
+    ],
+)
+def test_esp32_selection_runner_scoped_flags_cannot_change_fixed_profile_or_assertion_tu(
+    corruption,
+):
+    from ci import software_spi_esp32_selection_runner as runner
+
+    name = (
+        "native-inverse-control"
+        if corruption == "native-force"
+        else "unguarded-mutant-arduino-first"
+    )
+    flags = runner.stage_defines(name)
+    # Independent literal recipe, so absent production scope support cannot hide
+    # malformed-profile controls behind a missing list element.
+    flags = [
+        flag
+        for flag in flags
+        if not flag.startswith("-DFASTLED_SELECTION_ASSERT_SCOPE=")
+    ]
+    flags.append(
+        "-DFASTLED_SELECTION_ASSERT_SCOPE=0"
+        if name == "native-inverse-control"
+        else "-DFASTLED_SELECTION_ASSERT_SCOPE=1"
+    )
+    if corruption == "missing":
+        flags = [flag for flag in flags if "FASTLED_SELECTION_ASSERT_SCOPE" not in flag]
+    elif corruption == "wrong":
+        flags[-1] = "-DFASTLED_SELECTION_ASSERT_SCOPE=2"
+    elif corruption == "duplicate":
+        flags.append("-DFASTLED_SELECTION_ASSERT_SCOPE=1")
+    elif corruption == "functionlike":
+        flags[-1] = "-DFASTLED_SELECTION_ASSERT_SCOPE(x)=1"
+    elif corruption == "undefinition":
+        flags.append("-UFASTLED_SELECTION_ASSERT_SCOPE")
+    elif corruption == "no-map":
+        flags.append("-DFASTLED_NO_PINMAP=0")
+    elif corruption == "force-zero":
+        flags = [
+            flag.replace(
+                "FASTLED_FORCE_SOFTWARE_PINS=1", "FASTLED_FORCE_SOFTWARE_PINS=0"
+            )
+            for flag in flags
+        ]
+    else:
+        flags.append("-DFASTLED_FORCE_SOFTWARE_PINS=1")
+    with pytest.raises(ValueError):
+        runner.validate_stage_defines(name, flags)
+
+
+@pytest.mark.parametrize(
+    "name", ["unguarded-mutant-arduino-first", "unguarded-mutant-fastled-first"]
+)
+def test_esp32_selection_runner_scoped_negative_accepts_only_its_bound_triple_and_envelope(
+    tmp_path, name
+):
+    from ci import software_spi_esp32_selection_runner as runner
+
+    project = tmp_path / "bound-project"
+    output = _selection_runner_scoped_diagnostics(name, project)
+    outcome = runner.assess_compile_result(name, 1, output + output, project)
+    assert outcome.expected_compile_failure and outcome.returncode == 1
+    assert (
+        not outcome.fresh_elf_eligible and not outcome.fresh_planned_database_eligible
+    )
+
+
+@pytest.mark.parametrize(
+    "name", ["unguarded-mutant-arduino-first", "unguarded-mutant-fastled-first"]
+)
+@pytest.mark.parametrize(
+    "corruption",
+    [
+        "other-tu",
+        "missing-family",
+        "wrong-line",
+        "unrelated-error",
+        "wrong-project",
+        "wrong-envelope-tu",
+    ],
+)
+def test_esp32_selection_runner_scoped_negative_rejects_unbound_diagnostics_and_summaries(
+    tmp_path, name, corruption
+):
+    import re
+
+    from ci import software_spi_esp32_selection_runner as runner
+
+    project = tmp_path / "bound-project"
+    output = _selection_runner_scoped_diagnostics(name, project)
+    other = (
+        "unguarded-mutant-fastled-first"
+        if name.endswith("arduino-first")
+        else "unguarded-mutant-arduino-first"
+    )
+    if corruption == "other-tu":
+        output = _selection_runner_scoped_diagnostics(other, project)
+    elif corruption == "missing-family":
+        output = "\n".join(
+            line for line in output.splitlines() if "forced GPIO3" not in line
+        )
+    elif corruption == "wrong-line":
+        output = re.sub(r"(src/sketch/[^:]+):\d+:", r"\1:9999:", output)
+    elif corruption == "unrelated-error":
+        output += "src/other.cpp:1:1: fatal error: unrelated provider defect\n"
+    elif corruption == "wrong-project":
+        output = output.replace(str(project), str(tmp_path / "unbound-project"))
+    else:
+        lines = output.splitlines(keepends=True)
+        lines[0] = _selection_runner_scoped_diagnostics(other, project).splitlines(
+            keepends=True
+        )[0]
+        output = "".join(lines)
+    with pytest.raises(ValueError):
+        runner.assess_compile_result(name, 1, output, project)
+
+
+def test_esp32_selection_runner_scoped_owned_fixtures_gate_only_three_forced_assertions():
+    from ci import software_spi_esp32_selection_runner as runner
+
+    base = audit.ROOT / "ci/fixtures/software_spi_audit"
+    sources = runner.producer_sources(audit.ROOT)
+    provenance = json.loads(
+        (base / "esp32_c6_selection_runner_provenance.json").read_text()
+    )
+    for relative, filename, scope in (
+        (
+            "examples/AutoResearch/AutoResearch.ino",
+            "esp32_c6_selection_runner_producer.cpp.txt",
+            1,
+        ),
+        (
+            "examples/AutoResearch/AutoResearchStartupHook.cpp",
+            "esp32_c6_selection_runner_startup.cpp.txt",
+            2,
+        ),
+    ):
+        content = sources[relative]
+        assert content == (base / filename).read_bytes()
+        assert digest(content) == provenance["files"][filename]["sha256"]
+        source = provenance["files"][filename]["derived_from"]
+        assert (
+            digest((base / source).read_bytes())
+            == provenance["files"][filename]["original_sha256"]
+        )
+        opening = f"#if FASTLED_SELECTION_ASSERT_SCOPE == 0 || FASTLED_SELECTION_ASSERT_SCOPE == {scope}\n".encode()
+        body = content.split(opening, 1)[1].split(
+            b"#endif // selected assertion TU scope", 1
+        )[0]
+        assert body.count(b"static_assert(") == 2 and body.count(b"#error") == 1
+        assert b"#include" not in body and b"GenericSoftwareSPIOutput" not in body
+        assert b"ForcedSoftwarePinMap" not in body
+        remainder = content.split(b"#endif // selected assertion TU scope", 1)[1]
+        assert (
+            b"native GPIO2 control" in remainder
+            and b"native GPIO3 control" in remainder
+        )
+        assert b"ForcedSoftwarePinMap<2>::kHasPinMap" in remainder
+
+
+def test_esp32_selection_runner_scoped_both_negatives_use_identical_exact_production_mutant():
+    from ci import software_spi_esp32_selection_proof as selection
+    from ci import software_spi_esp32_selection_runner as runner
+
+    original = (audit.ROOT / selection.SOURCE).read_bytes()
+    expected = selection.unguarded_native_mutant(original)
+    for name in ESP32_SELECTION_RUNNER_STAGES:
+        assert runner.source_for_stage(original, name) == (
+            expected if name.startswith("unguarded-mutant-") else original
+        )
+
+
+@pytest.mark.parametrize("returncode", [0, 1])
+@pytest.mark.parametrize(
+    "route_error",
+    ["missing", "wrong-client", "wrong-project", "wrong-env", "quoted-prefix", "none"],
+)
+def test_esp32_selection_runner_bound_submission_route_is_required_for_both_actual_statuses(
+    tmp_path, monkeypatch, returncode, route_error
+):
+    from types import SimpleNamespace
+
+    from ci import software_spi_esp32_selection_runner as runner
+
+    environment = {"FBUILD_EXECUTABLE": str(tmp_path / "fbuild")}
+    project = tmp_path / ".build/fbuild/esp32c6"
+    route = f"Running: {tmp_path / 'fbuild'} {project} build -e esp32c6 -v\n"
+    if route_error == "missing":
+        route = "compiler result without submission identity\n"
+    elif route_error == "wrong-client":
+        route = route.replace(str(tmp_path / "fbuild"), str(tmp_path / "other-fbuild"))
+    elif route_error == "wrong-project":
+        route = route.replace(str(project), str(tmp_path / "other-project"))
+    elif route_error == "wrong-env":
+        route = route.replace("-e esp32c6", "-e esp32dev")
+    elif route_error == "quoted-prefix":
+        route = "source excerpt: " + route
+    monkeypatch.setattr(runner, "_selection_state", lambda *args: {})
+    monkeypatch.setattr(
+        runner.vendor.property_check, "_verify_profile_state", lambda *args: None
+    )
+    monkeypatch.setattr(runner.vendor, "_ensure_stage_engine", lambda *args: None)
+    monkeypatch.setattr(runner.vendor, "_daemon_identity", lambda *args: {"pid": 1})
+    monkeypatch.setattr(runner.vendor, "_verify_engine_profile", lambda *args: None)
+    monkeypatch.setattr(runner.vendor, "_verify_serving_engine", lambda *args: None)
+    monkeypatch.setattr(runner.native, "_verify_inputs", lambda *args: None)
+    monkeypatch.setattr(runner.vendor, "_check_staged_sources", lambda *args: None)
+    process = SimpleNamespace(returncode=returncode, stdout=route)
+    monkeypatch.setattr(runner, "_run_c6_compile", lambda *args: process)
+    args = (
+        tmp_path,
+        tmp_path / "saved",
+        environment,
+        {},
+        (),
+        {},
+        {},
+        {},
+        {},
+        "baseline" if returncode == 0 else "unguarded-mutant-arduino-first",
+    )
+    if route_error == "none":
+        assert runner._selection_build_session(*args).compile_result is process
+    else:
+        with pytest.raises(ValueError, match="route|submission"):
+            runner._selection_build_session(*args)
+
+
+@pytest.mark.parametrize("corruption", ["ci-contamination", "missing-extra-src"])
+def test_esp32_selection_runner_staged_record_is_restricted_and_complete_for_staged_inputs(
+    tmp_path, corruption
+):
+    from dataclasses import replace
+
+    from ci import software_spi_esp32_selection_runner as runner
+
+    stage = _selection_runner_schema_stage(tmp_path, "unguarded-mutant-arduino-first")
+    inputs = {
+        **stage.inputs_before,
+        "ci/boards.py": digest(b"not staged"),
+        "src/extra.h": digest(b"also staged"),
+    }
+    staged = {key: value for key, value in inputs.items() if key != "ci/boards.py"}
+    if corruption == "ci-contamination":
+        staged["ci/boards.py"] = inputs["ci/boards.py"]
+    else:
+        staged.pop("src/extra.h")
+    stage = replace(
+        stage,
+        inputs_before=dict(inputs),
+        inputs_after=dict(inputs),
+        staged_sources_expected=dict(staged),
+        staged_sources_observed=dict(staged),
+    )
+    with pytest.raises(ValueError):
+        runner.validate_stage_record(stage)
+
+
+@pytest.mark.parametrize("corruption", ["none", "changed-asset", "missing-paired-tu"])
+def test_esp32_selection_runner_staged_observation_reads_actual_src_and_all_example_files(
+    tmp_path, monkeypatch, corruption
+):
+    from ci import software_spi_esp32_selection_runner as runner
+
+    workspace, project = tmp_path / "workspace", tmp_path / "project"
+    contents = {
+        runner.selection.SOURCE: b"core",
+        "src/extra.h": b"header",
+        runner.EXAMPLE: b"producer",
+        runner.HOOK: b"paired source",
+        "examples/AutoResearch/data/payload.bin": b"asset",
+        "ci/boards.py": b"not staged",
+        "README.md": b"not staged either",
+    }
+    expected = {relative: digest(content) for relative, content in contents.items()}
+    wanted = {
+        relative: sha
+        for relative, sha in expected.items()
+        if relative.startswith("src/") or relative.startswith("examples/AutoResearch/")
+    }
+    for relative, content in contents.items():
+        path = workspace / relative
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(content)
+        if (
+            relative not in wanted
+            or corruption == "missing-paired-tu"
+            and relative == runner.HOOK
+        ):
+            continue
+        staged = (
+            project / "lib/FastLED" / relative.removeprefix("src/")
+            if relative.startswith("src/")
+            else project
+            / "src/sketch"
+            / relative.removeprefix("examples/AutoResearch/")
+        )
+        staged.parent.mkdir(parents=True, exist_ok=True)
+        staged.write_bytes(
+            b"changed"
+            if corruption == "changed-asset" and relative.endswith("payload.bin")
+            else content
+        )
+    monkeypatch.setattr(runner.vendor, "_check_staged_sources", lambda *args: None)
+    if corruption == "none":
+        observed = runner._observe_staged_inputs(workspace, expected, project)
+        assert observed.expected == observed.observed == wanted
+    else:
+        with pytest.raises(ValueError):
+            runner._observe_staged_inputs(workspace, expected, project)
+
+
+@pytest.mark.parametrize(
+    "drift", ["none", "sdk", "tools", "environment", "provider-configuration"]
+)
+def test_esp32_selection_runner_final_dependencies_checked_after_restoration_before_publication(
+    tmp_path, monkeypatch, drift
+):
+    from ci import software_spi_esp32_selection_runner as runner
+
+    layout = _selection_runner_entry_layout(tmp_path, monkeypatch)
+    _, records = _selection_runner_schema_attempt(tmp_path / "records")
+
+    def complete_stages(*args):
+        layout.ini.write_bytes(b"last scoped project flags")
+        return records
+
+    monkeypatch.setattr(runner, "_execute_fixed_stages", complete_stages)
+    calls = []
+
+    def verify_final(*args):
+        for relative, original in layout.originals.items():
+            assert (layout.workspace / relative).read_bytes() == original
+            assert (layout.root / relative).read_bytes() == original
+        assert layout.ini.read_bytes() == layout.ini_original
+        calls.append("final-dependencies")
+        if drift != "none":
+            raise ValueError("deliberate final " + drift + " drift")
+
+    monkeypatch.setattr(
+        runner, "_verify_final_dependencies", verify_final, raising=False
+    )
+    if drift == "none":
+        runner.run_c6_selection_proof(layout.root)
+        assert calls == ["final-dependencies"]
+        assert len(list(layout.root.rglob("proof.json"))) == 1
+    else:
+        with pytest.raises(ValueError):
+            runner.run_c6_selection_proof(layout.root)
+        assert calls == ["final-dependencies"]
+        assert not list(layout.root.rglob("proof.json"))
+        failure = list(layout.root.rglob("failure.json"))
+        assert failure and "deliberate final" in failure[0].read_text()
+
+
+@pytest.mark.parametrize("compile_exception", ["launcher", "timeout", "interrupt"])
+def test_esp32_selection_runner_bootstrap_common_window_retains_compile_and_after_failures(
+    tmp_path, monkeypatch, compile_exception
+):
+    from ci import software_spi_esp32_selection_runner as runner
+
+    saved = tmp_path / "bootstrap"
+    saved.mkdir()
+    monkeypatch.setattr(runner.vendor, "_ensure_stage_engine", lambda *args: None)
+    monkeypatch.setattr(runner.vendor, "_daemon_identity", lambda *args: {"pid": 1})
+    monkeypatch.setattr(runner.vendor, "_verify_engine_profile", lambda *args: None)
+    errors = {
+        "launcher": OSError("bootstrap launcher failed"),
+        "timeout": ValueError("bootstrap native deadline expired"),
+        "interrupt": KeyboardInterrupt("bootstrap interrupted"),
+    }
+    error = errors[compile_exception]
+
+    def compile_fail(*args):
+        raise error
+
+    def after_fail(*args):
+        raise ValueError("bootstrap after engine lost")
+
+    monkeypatch.setattr(runner, "_run_c6_compile", compile_fail)
+    monkeypatch.setattr(runner.vendor, "_verify_serving_engine", after_fail)
+    with pytest.raises(
+        KeyboardInterrupt if compile_exception == "interrupt" else (ValueError, OSError)
+    ):
+        runner._compile_engine_window(
+            tmp_path, saved, {}, {}, {}, "native-inverse-control"
+        )
+    records = list(saved.glob("*failure*.json"))
+    assert records
+    text = "\n".join(path.read_text() for path in records)
+    assert str(error) in text and "bootstrap after engine lost" in text
+    assert not list(tmp_path.rglob("proof.json"))
+
+
+def _selection_runner_final_dependency_context(tmp_path):
+    # Synthetic owned metadata and observation seam: no SDK/compiler execution.
+    from dataclasses import replace
+
+    stage = _selection_runner_schema_stage(tmp_path, "restored")
+    compiler = (
+        tmp_path
+        / "riscv32-esp-elf-14.2.0_20260121-x86_64-linux-gnu/riscv32-esp-elf/bin/riscv32-esp-elf-gcc"
+    )
+    compiler.parent.mkdir(parents=True)
+    compiler.write_bytes(b"synthetic tool identity")
+    project = tmp_path / "workspace/.build/fbuild/esp32c6"
+    release = project / ".fbuild/build/release"
+    release.mkdir(parents=True)
+    database = release / "compile_commands.raw.json"
+    database.write_text("[]")
+    info = {
+        "env": "esp32c6",
+        "board": "ESP32_C6_DEVKITC_1",
+        "platform": "espressif32",
+        "cxx_flags": ["-DF_CPU=160000000L", "-march=rv32imac_zicsr_zifencei"],
+        "cc_path": compiler.as_posix(),
+        "prog_path": str(release / "firmware.elf"),
+    }
+    info_file = tmp_path / "restored/build-info.json"
+    info_file.write_text(json.dumps({"esp32c6": info}))
+    tool = {
+        "path": str(compiler),
+        "sha256": digest(compiler.read_bytes()),
+        "version": "synthetic fixed",
+        "resolved_path": str(compiler),
+        "lookup_path": str(compiler),
+        "symlink_target": None,
+    }
+    profile = {
+        "tools": {"compiler": tool},
+        "sdk": {str(tmp_path / "sdk/header.h"): "frozen SDK hash"},
+        "environment": {
+            "PATH": digest(b"reviewed"),
+            "FBUILD_SELF_EVICTION_SECS": digest(b"900"),
+        },
+        "configuration": {
+            key: value for key, value in info.items() if key != "prog_size"
+        },
+        "planned_configuration": {str(database): digest(database.read_bytes())},
+    }
+    stage = replace(
+        stage,
+        project=project,
+        tools_before=profile["tools"],
+        tools_after=profile["tools"],
+        profile_before=dict(profile),
+        profile_after=dict(profile),
+        artifact_sha256s={
+            **stage.artifact_sha256s,
+            str(info_file): digest(info_file.read_bytes()),
+        },
+    )
+    return stage
+
+
+@pytest.mark.parametrize(
+    "drift", ["none", "sdk", "tools", "environment", "configuration"]
+)
+def test_esp32_selection_runner_direct_final_verifier_compares_actual_observation_to_frozen_base(
+    tmp_path, monkeypatch, drift
+):
+    from copy import deepcopy
+
+    from ci import software_spi_esp32_selection_runner as runner
+
+    stage = _selection_runner_final_dependency_context(tmp_path)
+    observed = deepcopy(
+        {
+            key: stage.profile_before[key]
+            for key in ("tools", "sdk", "environment", "configuration")
+        }
+    )
+    if drift != "none":
+        observed[drift] = {"changed": "one actual observed dependency differs"}
+    calls = []
+
+    def observe(*args):
+        calls.append(args)
+        return observed
+
+    monkeypatch.setattr(runner.vendor, "_base_state", observe)
+    monkeypatch.setattr(
+        runner.vendor, "_environment", lambda *args: {"PATH": "reviewed"}
+    )
+    monkeypatch.setattr(
+        runner.vendor,
+        "_profile_roots",
+        lambda *args: (tmp_path / "sdk", tmp_path / "tools"),
+    )
+    if drift == "none":
+        runner._verify_final_dependencies(tmp_path / "workspace", tmp_path, [stage])
+        assert len(calls) == 1
+    else:
+        with pytest.raises(ValueError):
+            runner._verify_final_dependencies(tmp_path / "workspace", tmp_path, [stage])
+        assert len(calls) == 1, (
+            "drift must reach actual observation, not fail an unrelated setup check"
+        )
+
+
+@pytest.mark.parametrize("missing", ["no-stages", "no-profile", "unbound-build-info"])
+def test_esp32_selection_runner_direct_final_verifier_rejects_missing_owned_context(
+    tmp_path, monkeypatch, missing
+):
+    from dataclasses import replace
+
+    from ci import software_spi_esp32_selection_runner as runner
+
+    stage = _selection_runner_final_dependency_context(tmp_path)
+    stages = [stage]
+    if missing == "no-stages":
+        stages = []
+    elif missing == "no-profile":
+        stages = [replace(stage, profile_before={})]
+    else:
+        stages = [
+            replace(
+                stage,
+                artifact_sha256s={
+                    key: sha
+                    for key, sha in stage.artifact_sha256s.items()
+                    if not key.endswith("build-info.json")
+                },
+            )
+        ]
+    monkeypatch.setattr(
+        runner.vendor,
+        "_base_state",
+        lambda *args: pytest.fail(
+            "missing owned context must reject before observation"
+        ),
+    )
+    with pytest.raises(ValueError):
+        runner._verify_final_dependencies(tmp_path / "workspace", tmp_path, stages)
+
+
+def _selection_provider_cohort_fixture(tmp_path, monkeypatch):
+    # Synthetic file identities only. These bytes are not executable providers
+    # and overriding private pins here grants no managed SDK qualification.
+    from ci import software_spi_esp32_selection_runner as runner
+
+    prefix = tmp_path / "environment"
+    package = prefix / "lib/python3.12/site-packages/fbuild"
+    package.mkdir(parents=True)
+    binary = prefix / "bin"
+    binary.mkdir()
+    python = binary / "python"
+    cli = binary / "fbuild"
+    daemon = binary / "fbuild-daemon"
+    extension = package / "_native.abi3.so"
+    for path, value in (
+        (python, b"synthetic Python identity"),
+        (cli, b"synthetic CLI identity"),
+        (daemon, b"synthetic daemon identity"),
+        (extension, b"synthetic extension identity"),
+    ):
+        path.write_bytes(value)
+    observed = runner._ProviderObservation(
+        prefix=prefix,
+        python=python,
+        package_root=package,
+        cli=cli,
+        daemon=daemon,
+        extension=extension,
+        package_version="2.5.52",
+    )
+    pins = runner._ProviderCohortPins(
+        version="2.5.52",
+        source_commit="fb63b020fa751017cef2e7dee93be0e600877967",
+        cli_sha256=digest(cli.read_bytes()),
+        daemon_sha256=digest(daemon.read_bytes()),
+        extension_sha256=digest(extension.read_bytes()),
+    )
+    monkeypatch.setattr(runner, "_PROVIDER_COHORT_PINS", pins)
+    monkeypatch.setattr(runner, "_observe_provider_cohort", lambda: observed)
+    return observed
+
+
+def test_esp32_selection_provider_cohort_fixed_official_artifact_pins():
+    from ci import software_spi_esp32_selection_runner as runner
+
+    pins = runner._PROVIDER_COHORT_PINS
+    assert pins.version == "2.5.52"
+    assert pins.source_commit == "fb63b020fa751017cef2e7dee93be0e600877967"
+    assert (
+        pins.cli_sha256
+        == "72970a264b551a84c3f3a5e67ad3c0984053959126c7228471c61b6eb01d6e1d"
+    )
+    assert (
+        pins.daemon_sha256
+        == "00a47aeaf9b1f2c2119d0e08e966525fba961d8874a163acbdedc56be2eb4d36"
+    )
+    assert (
+        pins.extension_sha256
+        == "78de1c3251f0676e1d27871ca7dfb18439ea3224d15a9dd4d72e44ca36368b01"
+    )
+
+
+def test_esp32_selection_provider_cohort_hashes_actual_selected_files(
+    tmp_path, monkeypatch
+):
+    from ci import software_spi_esp32_selection_runner as runner
+
+    observed = _selection_provider_cohort_fixture(tmp_path, monkeypatch)
+    cohort = runner._verify_provider_cohort()
+    assert cohort.version == "2.5.52"
+    assert cohort.source_commit == "fb63b020fa751017cef2e7dee93be0e600877967"
+    assert cohort.component_sha256s == {
+        "fbuild": digest(observed.cli.read_bytes()),
+        "fbuild-daemon": digest(observed.daemon.read_bytes()),
+        "_native.abi3.so": digest(observed.extension.read_bytes()),
+    }
+    assert cohort.python_sha256 == digest(observed.python.read_bytes())
+
+
+@pytest.mark.parametrize("component", ["cli", "daemon", "extension"])
+def test_esp32_selection_provider_cohort_rejects_mixed_bytes_despite_matching_version(
+    tmp_path, monkeypatch, component
+):
+    from ci import software_spi_esp32_selection_runner as runner
+
+    observed = _selection_provider_cohort_fixture(tmp_path, monkeypatch)
+    getattr(observed, component).write_bytes(
+        b"different provider but unchanged version metadata"
+    )
+    with pytest.raises(ValueError, match="provider|cohort|hash"):
+        runner._verify_provider_cohort()
+
+
+@pytest.mark.parametrize("component", ["cli", "daemon", "extension"])
+def test_esp32_selection_provider_cohort_rejects_missing_actual_component(
+    tmp_path, monkeypatch, component
+):
+    from ci import software_spi_esp32_selection_runner as runner
+
+    observed = _selection_provider_cohort_fixture(tmp_path, monkeypatch)
+    path = getattr(observed, component)
+    path.rename(path.with_name(path.name + ".retained"))
+    with pytest.raises(ValueError, match="provider|cohort|missing"):
+        runner._verify_provider_cohort()
+
+
+@pytest.mark.parametrize(
+    "foreign", ["package-version", "extension", "interpreter", "package-root"]
+)
+def test_esp32_selection_provider_cohort_rejects_stale_metadata_or_foreign_selected_context(
+    tmp_path, monkeypatch, foreign
+):
+    from dataclasses import replace
+
+    from ci import software_spi_esp32_selection_runner as runner
+
+    observed = _selection_provider_cohort_fixture(tmp_path, monkeypatch)
+    if foreign == "package-version":
+        changed = replace(observed, package_version="2.5.51")
+    elif foreign == "package-root":
+        changed = replace(
+            observed, package_root=tmp_path / "other-environment/site-packages/fbuild"
+        )
+    else:
+        original = observed.extension if foreign == "extension" else observed.python
+        destination = tmp_path / "foreign" / original.name
+        destination.parent.mkdir()
+        destination.write_bytes(original.read_bytes())
+        changed = replace(
+            observed,
+            **{"extension" if foreign == "extension" else "python": destination},
+        )
+    monkeypatch.setattr(runner, "_observe_provider_cohort", lambda: changed)
+    with pytest.raises(ValueError, match="provider|cohort|selected|version"):
+        runner._verify_provider_cohort()
+
+
+def test_esp32_selection_provider_cohort_rejects_before_any_snapshot_launcher_or_build(
+    tmp_path, monkeypatch
+):
+    from ci import software_spi_esp32_selection_runner as runner
+
+    layout = _selection_runner_entry_layout(tmp_path, monkeypatch)
+    calls = []
+
+    def reject():
+        calls.append("provider")
+        raise ValueError("provider cohort mismatch")
+
+    monkeypatch.setattr(runner, "_verify_provider_cohort", reject, raising=False)
+    monkeypatch.setattr(
+        runner.native,
+        "_inputs",
+        lambda *args: pytest.fail("cohort mismatch reached whole-input discovery"),
+    )
+    monkeypatch.setattr(
+        runner.native,
+        "_snapshot",
+        lambda *args: pytest.fail("cohort mismatch created a worktree"),
+    )
+    monkeypatch.setattr(
+        runner.vendor,
+        "_observe_launcher",
+        lambda *args: pytest.fail("cohort mismatch reached launcher ensure"),
+    )
+    with pytest.raises(ValueError, match="provider cohort"):
+        runner.run_c6_selection_proof(layout.root)
+    assert calls == ["provider"]
+    assert not list(layout.root.rglob("proof.json"))
+
+
+@pytest.mark.parametrize("inherited", [None, "30", "1", "3600"])
+def test_esp32_selection_idle_policy_child_environment_is_explicit_fixed900(
+    tmp_path, monkeypatch, inherited
+):
+    from ci import software_spi_esp32_selection_runner as runner
+
+    base = {"PATH": "reviewed path", "FBUILD_EXECUTABLE": str(tmp_path / "fbuild")}
+    if inherited is not None:
+        base["FBUILD_SELF_EVICTION_SECS"] = inherited
+    monkeypatch.setattr(runner.vendor, "_environment", lambda *args: dict(base))
+    environment = runner._selection_environment(tmp_path)
+    assert environment["FBUILD_SELF_EVICTION_SECS"] == "900"
+    assert environment["PATH"] == base["PATH"]
+    assert environment["FBUILD_EXECUTABLE"] == base["FBUILD_EXECUTABLE"]
+
+
+def test_esp32_selection_idle_policy_actual_startup_hash_retains_exact_key_only():
+    from ci import software_spi_my9221_rp2040_runner as vendor
+
+    observed = vendor._startup_environment_hashes(
+        b"FBUILD_SELF_EVICTION_SECS=900\0UNKNOWN_CREDENTIAL=never-record-this\0"
+    )
+    assert observed == {"FBUILD_SELF_EVICTION_SECS": digest(b"900")}
+
+
+@pytest.mark.parametrize("foreign", [None, "30"])
+def test_esp32_selection_idle_policy_foreign_live_engine_rejected_before_any_ensure_or_adoption(
+    tmp_path, monkeypatch, foreign
+):
+    from ci import software_spi_my9221_rp2040_runner as vendor
+
+    desired = {
+        "startup_environment": vendor._startup_environment_hashes(
+            b"FBUILD_SELF_EVICTION_SECS=900\0"
+        )
+    }
+    raw = b"" if foreign is None else f"FBUILD_SELF_EVICTION_SECS={foreign}\0".encode()
+    existing = {"startup_environment": vendor._startup_environment_hashes(raw)}
+    actions = []
+    monkeypatch.setattr(vendor, "_probe_existing_engine", lambda *args: existing)
+    monkeypatch.setattr(
+        vendor, "_ensure_stage_engine", lambda *args: actions.append("ensure")
+    )
+    monkeypatch.setattr(
+        vendor,
+        "_daemon_identity",
+        lambda *args: actions.append("late-adoption") or existing,
+    )
+    monkeypatch.setattr(vendor, "_verify_serving_engine", lambda *args: None)
+    with pytest.raises(ValueError, match="startup|environment|policy"):
+        vendor._prepare_bootstrap_engine(
+            tmp_path,
+            tmp_path / "saved",
+            {"FBUILD_SELF_EVICTION_SECS": "900"},
+            {},
+            desired,
+        )
+    assert actions == []
+
+
+@pytest.mark.parametrize(
+    "phase,name",
+    [("discovery", name) for name in ESP32_SELECTION_RUNNER_STAGES[:4]]
+    + [("certified", name) for name in ESP32_SELECTION_RUNNER_STAGES],
+)
+def test_esp32_selection_idle_policy_same_child_launcher_and_server_condition_all_nine_submissions(
+    tmp_path, monkeypatch, phase, name
+):
+    from types import SimpleNamespace
+
+    from ci import software_spi_esp32_selection_runner as runner
+
+    monkeypatch.setattr(
+        runner.vendor,
+        "_environment",
+        lambda *args: {
+            "PATH": "reviewed",
+            "FBUILD_EXECUTABLE": str(tmp_path / "fbuild"),
+        },
+    )
+    environment = runner._selection_environment(tmp_path)
+    expected_hash = digest(b"900")
+    calls = []
+
+    def ensure(workspace, saved, actual_environment, *args):
+        assert actual_environment["FBUILD_SELF_EVICTION_SECS"] == "900"
+        calls.append("ensure")
+
+    def observe(workspace, saved, stage, actual_environment, *args):
+        assert actual_environment["FBUILD_SELF_EVICTION_SECS"] == "900"
+        return {
+            "startup_environment": runner.vendor._startup_environment_hashes(
+                f"FBUILD_SELF_EVICTION_SECS={actual_environment['FBUILD_SELF_EVICTION_SECS']}\0".encode()
+            )
+        }
+
+    def compile_fixed(workspace, saved, actual_environment, *args):
+        assert actual_environment["FBUILD_SELF_EVICTION_SECS"] == "900"
+        return SimpleNamespace(
+            returncode=0,
+            stdout=f"Running: {tmp_path / 'fbuild'} {tmp_path / '.build/fbuild/esp32c6'} build -e esp32c6 -v\n",
+        )
+
+    monkeypatch.setattr(runner.vendor, "_ensure_stage_engine", ensure)
+    monkeypatch.setattr(runner.vendor, "_daemon_identity", observe)
+    monkeypatch.setattr(runner.vendor, "_verify_engine_profile", lambda *args: None)
+    monkeypatch.setattr(runner.vendor, "_verify_serving_engine", lambda *args: None)
+    monkeypatch.setattr(runner, "_run_c6_compile", compile_fixed)
+    window = runner._compile_engine_window(
+        tmp_path, tmp_path / phase, environment, {}, {}, name
+    )
+    assert calls == ["ensure"]
+    assert (
+        window.before["startup_environment"]["FBUILD_SELF_EVICTION_SECS"]
+        == expected_hash
+    )
+    assert (
+        window.after["startup_environment"]["FBUILD_SELF_EVICTION_SECS"]
+        == expected_hash
+    )
+
+
+@pytest.mark.parametrize("observed_policy", [None, "30"])
+def test_esp32_selection_idle_policy_cannot_disappear_or_drift_from_immutable_engine_profile(
+    tmp_path, observed_policy
+):
+    from ci import software_spi_my9221_rp2040_runner as vendor
+
+    expected = {
+        "startup_environment": vendor._startup_environment_hashes(
+            b"FBUILD_SELF_EVICTION_SECS=900\0"
+        )
+    }
+    raw = (
+        b""
+        if observed_policy is None
+        else f"FBUILD_SELF_EVICTION_SECS={observed_policy}\0".encode()
+    )
+    observed = {"startup_environment": vendor._startup_environment_hashes(raw)}
+    with pytest.raises(ValueError):
+        vendor._verify_engine_profile(tmp_path, "policy-drift", expected, observed)
+
+
+def test_esp32_selection_idle_policy_final_dependency_observation_uses_same_fixed_environment(
+    tmp_path, monkeypatch
+):
+    from copy import deepcopy
+    from dataclasses import replace
+
+    from ci import software_spi_esp32_selection_runner as runner
+
+    stage = _selection_runner_final_dependency_context(tmp_path)
+    profile = deepcopy(stage.profile_before)
+    profile["environment"]["FBUILD_SELF_EVICTION_SECS"] = digest(b"900")
+    stage = replace(stage, profile_before=profile, profile_after=deepcopy(profile))
+    monkeypatch.setattr(
+        runner.vendor, "_environment", lambda *args: {"PATH": "reviewed"}
+    )
+    monkeypatch.setattr(
+        runner.vendor,
+        "_profile_roots",
+        lambda *args: (tmp_path / "sdk", tmp_path / "tools"),
+    )
+    observed = []
+
+    def base_state(info, environment, *args):
+        observed.append(environment)
+        return {
+            **{key: profile[key] for key in ("tools", "sdk", "configuration")},
+            "environment": {
+                key: digest(value.encode()) for key, value in environment.items()
+            },
+        }
+
+    monkeypatch.setattr(runner.vendor, "_base_state", base_state)
+    runner._verify_final_dependencies(tmp_path / "workspace", tmp_path, [stage])
+    assert observed[0]["FBUILD_SELF_EVICTION_SECS"] == "900"
+
+
+def test_esp32_selection_idle_policy_receipt_and_reproduction_declare_changed_condition(
+    tmp_path,
+):
+    from ci import software_spi_esp32_selection_runner as runner
+
+    condition = json.loads(
+        (
+            audit.ROOT
+            / "ci/fixtures/software_spi_audit/esp32_c6_selection_idle_policy.json"
+        ).read_text()
+    )
+    proof = runner.SelectionProof(tmp_path, [], True)
+    assert proof.idle_policy_seconds == condition["seconds"] == 900
+    assert (
+        proof.idle_policy_source_commit
+        == condition["source_commit"]
+        == runner._PROVIDER_COHORT_PINS.source_commit
+    )
+    assert proof.idle_policy_is_default is False
+    assert condition["explicit_nondefault_condition"] is True
+    assert (
+        proof.idle_policy_is_work_lease
+        is condition["health_status_is_work_lease"]
+        is False
+    )
+    assert condition["read_once_at_daemon_init"] is False
+    assert condition["reproduction_environment"] == {
+        "FBUILD_SELF_EVICTION_SECS": "900",
+        "UV_NO_SYNC": "1",
+    }
+    assert condition["live_maintenance_reads"] == [
+        "crates/fbuild-daemon/src/bin/entry/mod.rs:528",
+        "crates/fbuild-daemon/src/bin/entry/mod.rs:531",
+    ]
+
+
+def _selection_actual_c6_namespace_profile() -> dict:
+    # Failed-attempt metadata only; no executable file or admitted receipt.
+    return json.loads(
+        (
+            audit.ROOT
+            / "ci/fixtures/software_spi_audit/esp32_c6_selection_actual_namespace.json"
+        ).read_text()
+    )
+
+
+def test_esp32_selection_actual_namespace_accepts_authentic_retained_toolchain_profile():
+    from pathlib import PurePosixPath
+
+    from ci import software_spi_esp32_selection_proof as selection
+
+    captured = _selection_actual_c6_namespace_profile()
+    assert (
+        list(PurePosixPath(captured["profile"]["cc_path"]).parts[-4:])
+        == captured["required_compiler_suffix"]
+    )
+    selection.validate_c6_profile(captured["profile"])
+
+
+@pytest.mark.parametrize(
+    "corruption",
+    [
+        "wrong-date",
+        "wrong-host",
+        "missing-host",
+        "missing-target",
+        "wrong-target",
+        "missing-bin",
+        "wrong-basename",
+        "extra-namespace-suffix",
+    ],
+)
+def test_esp32_selection_actual_namespace_rejects_wrong_or_missing_compiler_components(
+    corruption,
+):
+    from pathlib import PurePosixPath
+
+    from ci import software_spi_esp32_selection_proof as selection
+
+    info = dict(_selection_actual_c6_namespace_profile()["profile"])
+    parts = list(PurePosixPath(info["cc_path"]).parts)
+    if corruption == "wrong-date":
+        parts[-4] = parts[-4].replace("20260121", "20260122")
+    elif corruption == "wrong-host":
+        parts[-4] = parts[-4].replace("x86_64-linux-gnu", "aarch64-linux-gnu")
+    elif corruption == "missing-host":
+        parts[-4] = "riscv32-esp-elf-14.2.0_20260121"
+    elif corruption == "missing-target":
+        parts.pop(-3)
+    elif corruption == "wrong-target":
+        parts[-3] = "xtensa-esp32-elf"
+    elif corruption == "missing-bin":
+        parts.pop(-2)
+    elif corruption == "wrong-basename":
+        parts[-1] = "riscv32-esp-elf-g++"
+    else:
+        parts[-4] += "-unreviewed"
+    info["cc_path"] = str(PurePosixPath(*parts))
+    with pytest.raises(ValueError):
+        selection.validate_c6_profile(info)

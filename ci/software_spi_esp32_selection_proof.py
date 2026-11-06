@@ -7,7 +7,7 @@ finding configurations are not qualified by these functions.
 """
 
 import re
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 
 SOURCE = "src/platforms/esp/32/core/fastpin_esp32.h"
@@ -170,6 +170,7 @@ def validate_c6_profile(info: dict) -> None:
     """Configuration predicate only; SDK/tool/session identity needs a runner."""
     flags = info.get("cxx_flags", [])
     compiler = info.get("cc_path", "")
+    compiler_parts = PurePosixPath(compiler).parts if isinstance(compiler, str) else ()
     if (
         info.get("env") != "esp32c6"
         or info.get("board") != "ESP32_C6_DEVKITC_1"
@@ -178,7 +179,13 @@ def validate_c6_profile(info: dict) -> None:
         != ["-DF_CPU=160000000L"]
         or [flag for flag in flags if flag.startswith("-march=")]
         != ["-march=rv32imac_zicsr_zifencei"]
-        or "riscv32-esp-elf-14.2.0_20260121/" not in compiler
-        or Path(compiler).name != "riscv32-esp-elf-gcc"
+        # Fixed Linux x86_64 SDK namespace, not a permissive version substring.
+        or compiler_parts[-4:]
+        != (
+            "riscv32-esp-elf-14.2.0_20260121-x86_64-linux-gnu",
+            "riscv32-esp-elf",
+            "bin",
+            "riscv32-esp-elf-gcc",
+        )
     ):
         raise ValueError("unsupported closed C6 selection profile")
