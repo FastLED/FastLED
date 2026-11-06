@@ -4,10 +4,15 @@
 #ifndef __INC_FASTPIN_ARM_LPC11_LEGACY_H
 #define __INC_FASTPIN_ARM_LPC11_LEGACY_H
 
+#include "fl/stl/cstddef.h"
 #include "fl/stl/compiler_control.h"
+#include "fl/stl/noexcept.h"
+#include "fl/stl/static_assert.h"
+#include "fl/stl/type_traits.h"
 #include "fl/system/fastpin_base.h"
 #include "platforms/arm/is_arm.h"
 #include "platforms/arm/lpc/is_lpc.h"
+#include "platforms/shared/spi_bitbang/bitbang_pin.h"
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_DEPRECATED_REGISTER
@@ -55,9 +60,9 @@ namespace fl {
 // against. This local mirror is only consulted when the device header
 // could not be located, which is useful for host-side IDE introspection.
 typedef struct {
-    volatile u32 MASKED_ACCESS[4096];  // 0x0000..0x3FFC -- masked write/read
-    volatile u32 DATA;                 // 0x3FFC alias also lives at MASKED[4095]
-    volatile u32 RESERVED0[1023];      // pad to 0x8000
+    volatile u32 MASKED_ACCESS[4095];  // 0x0000..0x3FF8 -- masked write/read
+    volatile u32 DATA;                 // 0x3FFC -- all twelve bits selected
+    volatile u32 RESERVED0[4096];      // pad to 0x8000
     volatile u32 DIR;                  // 0x8000
     volatile u32 IS;                   // 0x8004 -- interrupt sense (unused here)
     volatile u32 IBE;                  // 0x8008 -- interrupt both edges
@@ -67,6 +72,9 @@ typedef struct {
     volatile u32 MIS;                  // 0x8018 -- masked interrupt status
     volatile u32 IC;                   // 0x801C -- interrupt clear
 } FL_LPC11_LEGACY_GPIO_Type;
+
+FL_STATIC_ASSERT(FL_OFFSETOF(FL_LPC11_LEGACY_GPIO_Type, DATA) == 0x3FFC, "UM10398 DATA offset");
+FL_STATIC_ASSERT(FL_OFFSETOF(FL_LPC11_LEGACY_GPIO_Type, DIR) == 0x8000, "UM10398 DIR offset");
 
 #ifndef LPC_GPIO0
 #define LPC_GPIO0 ((FL_LPC11_LEGACY_GPIO_Type*)(FL_LPC11_LEGACY_GPIO_BASE + 0u * FL_LPC11_LEGACY_GPIO_PORT_STRIDE))
@@ -152,6 +160,36 @@ public:
 
     inline static bool isset() __attribute__((always_inline)) {
         return (gpio()->MASKED_ACCESS[_MASK] & _MASK) != 0;
+    }
+};
+
+/// True only for FastPin specializations backed by the real legacy _ARMPIN.
+template <u8 PIN, u32 MASK, u8 PORT_INDEX>
+constexpr bool isLpc11LegacyHardwarePin(const _ARMPIN_LPC11LEGACY<PIN, MASK, PORT_INDEX>*) { return true; }
+constexpr bool isLpc11LegacyHardwarePin(const void*) { return false; }
+
+/// Data updates store the mask or zero to the pin's masked-access slot. sport() and
+/// cport() are the same address, so the shared set/clear helpers cannot clear a bit
+/// here. kTwoWriteStream stays false: no vendor header or hardware has confirmed the
+/// full-port path. kMinWriteCycles stays at its default, so padding is kept.
+template <u8 PIN> struct BitbangPin<FastPin<PIN>> : BitbangPinDefaults<FastPin<PIN>> {
+    static constexpr bool kAtomicWrite = isLpc11LegacyHardwarePin(static_cast<const FastPin<PIN>*>(nullptr));
+    template <u8 BIT>
+    FASTLED_FORCE_INLINE static void write(u8 value) FL_NO_EXCEPT {
+        writeImpl<BIT>(value, fl::integral_constant<bool, kAtomicWrite>());
+    }
+
+  private:
+    template <u8 BIT>
+    FASTLED_FORCE_INLINE static void writeImpl(u8 value, fl::integral_constant<bool, true>) FL_NO_EXCEPT {
+        u32 selected = static_cast<u32>(0) - ((value >> BIT) & 1U);
+        __asm__ __volatile__("" : "+r"(selected)); // Keeps GCC from restoring a branch.
+        *FastPin<PIN>::sport() = FastPin<PIN>::mask() & selected;
+    }
+    // A user-defined FastPin need not have masked access, so it keeps hi()/lo().
+    template <u8 BIT>
+    FASTLED_FORCE_INLINE static void writeImpl(u8 value, fl::integral_constant<bool, false>) FL_NO_EXCEPT {
+        BitbangPinDefaults<FastPin<PIN>>::template write<BIT>(value);
     }
 };
 
