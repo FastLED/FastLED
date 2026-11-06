@@ -3505,7 +3505,18 @@ def test_my9221_managed_rebuilt_pch_is_source_bound_validation_only(
     library = str(tmp_path / ".build/meson-debug/ci/meson/native/fastled.so")
     external = str(tmp_path / "external/runtime.so")
     common = dict(
-        executed_commands=(("compiler", "-x", "c++-header", "-o", "test_pch.h.pch"),),
+        executed_commands=(
+            (
+                "compiler",
+                "-x",
+                "c++-header",
+                "-o",
+                "test_pch.h.pch",
+                "-Werror=invalid-pch",
+                "-verify-pch",
+                "-fpch-validate-input-files-content",
+            ),
+        ),
         tools_before={"compiler": "fixed"},
         build_context="fixed",
     )
@@ -3558,7 +3569,18 @@ def test_my9221_managed_runtime_dependency_drift_is_never_a_rebuild(
     pch = str(tmp_path / ".build/meson-debug/tests/test_pch.h.pch")
     common = dict(
         source_sha256s={"src/fl/chipsets/my9221.h": "same"},
-        executed_commands=(("compiler", "-x", "c++-header", "-o", "test_pch.h.pch"),),
+        executed_commands=(
+            (
+                "compiler",
+                "-x",
+                "c++-header",
+                "-o",
+                "test_pch.h.pch",
+                "-Werror=invalid-pch",
+                "-verify-pch",
+                "-fpch-validate-input-files-content",
+            ),
+        ),
         tools_before={"compiler": "fixed"},
         build_context="fixed",
     )
