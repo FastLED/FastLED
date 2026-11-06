@@ -25,11 +25,13 @@
 
 #include "platforms/esp/32/drivers/lcd_spi/channel_driver_lcd_clockless.h"
 #include "fl/channels/detail/bit_spread_lut.hpp"
+#include "fl/channels/engine_worker_defaults.h"
 #include "fl/chipsets/led_timing.h"
 #include "fl/log/log.h"
 #include "fl/task/executor.h"
 #include "fl/stl/noexcept.h"
 #include "fl/stl/align.h"
+#include "fl/stl/static_assert.h"
 #include "platforms/memory_barrier.h"
 
 #if defined(FL_IS_ESP32) && !defined(FASTLED_STUB_IMPL)
@@ -70,6 +72,32 @@ constexpr int kLcdWorkerPriorityCount = 25;
 #endif
 constexpr int kLcdWorkerDefaultPriority =
     (kLcdWorkerPriorityCount > 2) ? (kLcdWorkerPriorityCount - 2) : 1;
+
+// Keep scheduler-specific numbers at the platform boundary. Auto retains
+// the existing high-priority LCD/I2S worker policy; no extra task/state is
+// allocated for the named policies.
+FL_STATIC_ASSERT(kLcdWorkerPriorityCount > 1 && kLcdWorkerPriorityCount <= 256,
+                 "LCD worker priorities must fit in a byte");
+
+FL_STATIC_ASSERT(static_cast<fl::i32>(detail::kEngineWorkerDefaultCore) < kLcdWorkerCoreCount,
+                 "FL_ENGINE_WORKER_CORE selects an unavailable LCD worker core");
+
+constexpr Core resolveLcdWorkerCore(Core core) FL_NO_EXCEPT {
+    return core != Core::Auto ? core
+        : detail::kEngineWorkerDefaultCore == Core::Auto ? Core::Any
+        : detail::kEngineWorkerDefaultCore;
+}
+
+constexpr Priority lcdWorkerPriorityPolicy(Priority priority) FL_NO_EXCEPT {
+    return priority != Priority::Auto ? priority : detail::kEngineWorkerDefaultPriority;
+}
+
+constexpr u8 resolveLcdWorkerPriority(Priority priority) FL_NO_EXCEPT {
+    // Configuration validates the enum before storage. Group the two high
+    // policies as a range so size-optimized GCC need not emit a lookup table.
+    return lcdWorkerPriorityPolicy(priority) <= Priority::High ? kLcdWorkerDefaultPriority
+           : lcdWorkerPriorityPolicy(priority) == Priority::Medium ? kLcdWorkerPriorityCount / 2 : 1;
+}
 
 void recordWorkerMaximum(fl::atomic_u32 &maximum, u64 elapsedUs) FL_NO_EXCEPT {
     const u32 elapsed = elapsedUs > 0xffffffffULL
@@ -192,19 +220,15 @@ bool ChannelDriverLcdClockless::configureWorkerImpl(
         (requestedCore < 0 || requestedCore >= kLcdWorkerCoreCount)) {
         return false;
     }
-    if (config.priority.has_value() &&
-        config.priority.value() >= kLcdWorkerPriorityCount) {
+    if (static_cast<u8>(config.priority) > static_cast<u8>(Priority::Low)) {
         return false;
     }
 
-    const Core currentCore = mWorkerConfig.core == Core::Auto
-                                 ? Core::Any : mWorkerConfig.core;
-    const int currentPriority = mWorkerConfig.priority.has_value()
-                                    ? mWorkerConfig.priority.value()
-                                    : kLcdWorkerDefaultPriority;
+    const Core currentCore = resolveLcdWorkerCore(mWorkerConfig.core);
+    const int currentPriority = resolveLcdWorkerPriority(mWorkerConfig.priority);
     const Core core = config.core == Core::Auto ? currentCore : config.core;
-    const int priority = config.priority.has_value()
-                             ? config.priority.value() : currentPriority;
+    const int priority = config.priority == Priority::Auto
+                             ? currentPriority : resolveLcdWorkerPriority(config.priority);
 
     // One LCD peripheral owns one worker. A second strip cannot change its
     // first explicit policy, including before the task has been created.
@@ -213,7 +237,9 @@ bool ChannelDriverLcdClockless::configureWorkerImpl(
     }
 
     mWorkerConfig.core = core;
-    mWorkerConfig.priority = static_cast<u8>(priority);
+    if (config.priority != Priority::Auto) {
+        mWorkerConfig.priority = config.priority;
+    }
     return true;
 }
 
@@ -225,8 +251,7 @@ int ChannelDriverLcdClockless::workerPriority() const FL_NO_EXCEPT {
     if (mWorkerCore == -2) {
         return -1;
     }
-    return mWorkerConfig.priority.has_value()
-               ? mWorkerConfig.priority.value() : kLcdWorkerDefaultPriority;
+    return resolveLcdWorkerPriority(mWorkerConfig.priority);
 }
 
 int ChannelDriverLcdClockless::workerObservedCore() const FL_NO_EXCEPT {
@@ -264,15 +289,13 @@ bool ChannelDriverLcdClockless::ensureWorkerTask() FL_NO_EXCEPT {
     mWorkerRunning.store(false, fl::memory_order_release);
 
     TaskHandle_t handle = nullptr;
-    const UBaseType_t priority = mWorkerConfig.priority.has_value()
-                                    ? mWorkerConfig.priority.value()
-                                    : kLcdWorkerDefaultPriority;
+    const UBaseType_t priority = resolveLcdWorkerPriority(mWorkerConfig.priority);
     BaseType_t core = tskNO_AFFINITY;
-    if (mWorkerConfig.core == Core::CallingCore) {
+    const Core workerCore = resolveLcdWorkerCore(mWorkerConfig.core);
+    if (workerCore == Core::CallingCore) {
         core = xPortGetCoreID();
-    } else if (mWorkerConfig.core == Core::Core0 ||
-               mWorkerConfig.core == Core::Core1) {
-        core = static_cast<BaseType_t>(mWorkerConfig.core);
+    } else if (workerCore == Core::Core0 || workerCore == Core::Core1) {
+        core = static_cast<BaseType_t>(workerCore);
     }
     BaseType_t ok = xTaskCreatePinnedToCore(workerTaskEntry, "fl_lcd_clk",
                                           4096, this, priority, &handle, core);
@@ -286,7 +309,7 @@ bool ChannelDriverLcdClockless::ensureWorkerTask() FL_NO_EXCEPT {
     return true;
 #else
     if (mWorkerCore == -2) {
-        const Core core = mWorkerConfig.core;
+        const Core core = resolveLcdWorkerCore(mWorkerConfig.core);
         mWorkerCore = core == Core::Core0 || core == Core::Core1
                           ? static_cast<i8>(core) : -1;
     }

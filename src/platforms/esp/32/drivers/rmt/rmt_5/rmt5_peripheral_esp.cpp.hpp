@@ -22,6 +22,7 @@
 #include "fl/log/log.h"
 #include "fl/log/log.h"
 #include "fl/stl/bit_cast.h"
+#include "fl/stl/array.h"
 
 // Include ESP-IDF headers ONLY in .cpp file
 FL_EXTERN_C_BEGIN
@@ -41,7 +42,13 @@ FL_EXTERN_C_BEGIN
 // IWYU pragma: begin_keep
 #include "soc/gpio_sig_map.h"  // For RMT_SIG_OUT0_IDX etc.
 // IWYU pragma: end_keep
+#include "soc/soc_caps.h"  // IWYU pragma: keep
 FL_EXTERN_C_END
+
+// IDF 6 moved the RMT instance/channel counts from SoC caps to the HAL.
+#if !defined(SOC_RMT_TX_CANDIDATES_PER_GROUP)
+#include "hal/rmt_ll.h"  // IWYU pragma: keep
+#endif
 
 // ESP-IDF 5.2+ compatibility: ESP_CACHE_MSYNC_FLAG_DIR_C2M.
 // Centralized so every driver gets the same shim regardless of unity-build
@@ -73,6 +80,20 @@ FL_NO_INLINE FL_COLD void emitRmt5EncoderCreateFailure(
 
 // Forward declare the encoder implementation (defined at end of file)
 struct Rmt5EncoderImpl;
+
+#if defined(SOC_RMT_TX_CANDIDATES_PER_GROUP)
+static constexpr size_t kTxCallbackSlots = SOC_RMT_GROUPS * SOC_RMT_TX_CANDIDATES_PER_GROUP;
+#else
+static constexpr size_t kTxCallbackSlots = RMT_LL_INST_NUM * RMT_LL_TX_CANDIDATES_PER_INST;
+#endif
+
+// Stable ISR user data, owned by the peripheral until the SDK releases the
+// channel. A hardware-bounded slot avoids allocating on channel recreation.
+struct TxCallbackContext {
+    void* channel_handle = nullptr;
+    Rmt5TxDoneCallback callback;
+    void* user_ctx;
+};
 
 //=============================================================================
 // Implementation Class (internal)
@@ -110,6 +131,8 @@ public:
     bool rebindTxPin(void* channel_handle, int pin) FL_NO_EXCEPT override;
 
 private:
+    fl::array<TxCallbackContext, kTxCallbackSlots> mTxCallbacks;
+
     /// @brief Disable cache sync after ESP_ERR_INVALID_ARG error
     ///
     /// When esp_cache_msync() returns ESP_ERR_INVALID_ARG, further calls will
@@ -225,6 +248,15 @@ bool Rmt5PeripheralESPImpl::deleteChannel(void* channel_handle) FL_NO_EXCEPT {
         return false;
     }
 
+    // A failed SDK deletion may still deliver callbacks. Only release their
+    // user data after rmt_del_channel() has successfully removed the channel.
+    for (auto& ctx : mTxCallbacks) {
+        if (ctx.channel_handle == channel_handle) {
+            ctx.channel_handle = nullptr;
+            break;
+        }
+    }
+
     FL_LOG_RMT("RMT5_PERIPH: Channel deleted successfully");
     return true;
 }
@@ -333,17 +365,6 @@ bool Rmt5PeripheralESPImpl::waitAllDone(void* channel_handle, u32 timeout_ms) FL
 // ISR Callback Registration
 //=============================================================================
 
-/// @brief Wrapper context for callback forwarding
-///
-/// ESP-IDF's rmt_tx_done_callback_t has a specific signature with typed pointers
-/// (rmt_channel_handle_t, const rmt_tx_done_event_data_t*), but our interface
-/// uses void* for portability with mocks. This wrapper stores the original
-/// callback and user context, allowing a thin ISR wrapper to forward calls.
-struct TxCallbackContext {
-    Rmt5TxDoneCallback callback;
-    void* user_ctx;
-};
-
 /// @brief ISR wrapper that adapts ESP-IDF callback to FastLED callback signature
 ///
 /// This static function matches ESP-IDF's rmt_tx_done_callback_t signature and
@@ -372,14 +393,19 @@ bool Rmt5PeripheralESPImpl::registerTxCallback(void* channel_handle,
         return false;
     }
 
-    // Allocate wrapper context for callback forwarding
-    // Note: This is a small, one-time allocation per channel. The context
-    // lives for the lifetime of the channel and is not freed (channels are
-    // typically created once and reused). For strict correctness, this could
-    // be tracked and freed in deleteChannel(), but the overhead is minimal.
-    TxCallbackContext* ctx = new TxCallbackContext();  // ok bare allocation
-    ctx->callback = callback;
-    ctx->user_ctx = user_ctx;
+    TxCallbackContext* ctx = nullptr;
+    for (auto& candidate : mTxCallbacks) {
+        if (candidate.channel_handle == channel_handle) {
+            ctx = &candidate;
+            break;
+        }
+        if (candidate.channel_handle == nullptr) {
+            ctx = &candidate;
+        }
+    }
+    if (ctx == nullptr) {
+        return false;
+    }
 
     // Configure callbacks structure with our wrapper
     rmt_tx_event_callbacks_t cbs = {};
@@ -390,9 +416,14 @@ bool Rmt5PeripheralESPImpl::registerTxCallback(void* channel_handle,
     esp_err_t err = rmt_tx_register_event_callbacks(channel, &cbs, ctx);
     if (err != ESP_OK) {
         FL_LOG_RMT("RMT5_PERIPH: Failed to register callback: " << esp_err_to_name(err));
-        delete ctx;  // ok bare allocation
         return false;
     }
+
+    // The engine registers before enabling newly created channels. Update the
+    // installed context only after success, preserving it on SDK failure.
+    ctx->channel_handle = channel_handle;
+    ctx->callback = callback;
+    ctx->user_ctx = user_ctx;
 
     FL_LOG_RMT("RMT5_PERIPH: TX callback registered successfully");
     return true;

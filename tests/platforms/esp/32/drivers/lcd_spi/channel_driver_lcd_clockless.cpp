@@ -148,7 +148,7 @@ FL_TEST_CASE("ChannelDriverLcdClockless - worker configuration is shared and imm
 
     WorkerConfig config;
     config.core = Core::Core1;
-    config.priority = 23;
+    config.priority = Priority::High;
     FL_CHECK_EQ(driver.workerDiagnostics().core, -2);
     FL_REQUIRE_TRUE(driver.configureWorker(config));
     FL_CHECK_TRUE(driver.configureWorker(config));
@@ -158,7 +158,7 @@ FL_TEST_CASE("ChannelDriverLcdClockless - worker configuration is shared and imm
     conflicting.core = Core::Core0;
     FL_CHECK_FALSE(driver.configureWorker(conflicting));
     conflicting = config;
-    conflicting.priority = 5;
+    conflicting.priority = Priority::Medium;
     FL_CHECK_FALSE(driver.configureWorker(conflicting));
 
     auto data = createClocklessChannelData(5, 1);
@@ -170,6 +170,7 @@ FL_TEST_CASE("ChannelDriverLcdClockless - worker configuration is shared and imm
     FL_CHECK_EQ(driver.workerDiagnostics().observedCore, -1);
     FL_CHECK_TRUE(driver.configureWorker(config));
     FL_CHECK_FALSE(driver.configureWorker(conflicting));
+    FL_CHECK_EQ(driver.workerDiagnostics().core, 1);
     LcdSpiPeripheralMock::instance().simulateTransmitComplete();
     FL_CHECK(driver.poll() == IChannelDriver::DriverState::READY);
 }
@@ -182,10 +183,37 @@ FL_TEST_CASE("ChannelDriverLcdClockless - invalid worker configuration does not 
     config.core = static_cast<Core>(2);
     FL_CHECK_FALSE(driver.configureWorker(config));
     config.core = Core::Core1;
-    config.priority = 255;
+    config.priority = static_cast<Priority>(255);
     FL_CHECK_FALSE(driver.configureWorker(config));
-    config.priority = 0;
+    config.priority = Priority::Low;
     FL_CHECK_TRUE(driver.configureWorker(config));
+}
+
+FL_TEST_CASE("ChannelDriverLcdClockless - named priorities resolve without changing shared policies") {
+    struct PriorityCase { Priority policy; int resolved; };
+    const PriorityCase cases[] = {
+        {Priority::Auto, 23}, {Priority::High, 23},
+        {Priority::Medium, 12}, {Priority::Low, 1}
+    };
+    for (const auto& entry : cases) {
+        resetMockState();
+        ChannelDriverLcdClockless driver(createMockPeripheral());
+        WorkerConfig config;
+        config.priority = entry.policy;
+        FL_REQUIRE_TRUE(driver.configureWorker(config));
+        auto data = createClocklessChannelData(5, 1);
+        driver.enqueue(data);
+        driver.show();
+        FL_CHECK_EQ(driver.workerDiagnostics().priority, entry.resolved);
+        FL_CHECK_TRUE(driver.configureWorker(WorkerConfig{}));
+        FL_CHECK_EQ(driver.workerDiagnostics().priority, entry.resolved);
+        config.priority = entry.resolved == 23 ? Priority::High : entry.policy;
+        FL_CHECK_TRUE(driver.configureWorker(config));
+        config.priority = entry.resolved == 1 ? Priority::High : Priority::Low;
+        FL_CHECK_FALSE(driver.configureWorker(config));
+        LcdSpiPeripheralMock::instance().simulateTransmitComplete();
+        FL_CHECK(driver.poll() == IChannelDriver::DriverState::READY);
+    }
 }
 
 FL_TEST_CASE("ChannelDriverLcdClockless - Auto preserves unpinned scheduling and rejects late changes") {

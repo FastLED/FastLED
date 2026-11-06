@@ -23,6 +23,7 @@
 #include "pixel_controller.h"
 #include "fastspi_types.h"
 #include "fl/stl/noexcept.h"
+#include "platforms/shared/spi_bitbang/bitbang_pin.h"
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_DEPRECATED_REGISTER
@@ -49,6 +50,23 @@ class GenericSoftwareSPIOutput {
 	typedef typename fl::FastPin<DATA_PIN>::port_t data_t;
 	typedef typename fl::FastPin<CLOCK_PIN>::port_t clock_t;
 	Selectable 	*mPSelect;  ///< SPI chip select
+	static constexpr bool kCanStreamSamePort =
+		BitbangPin<fl::FastPin<DATA_PIN>>::kTwoWriteStream &&
+		BitbangPin<fl::FastPin<CLOCK_PIN>>::kTwoWriteStream;
+	static constexpr bool kNeedsGpioPadding = bitbangPhaseDelay(
+		static_cast<cycle_t>(SPI_SPEED / 2 + (SPI_SPEED & 1)),
+		cycles_from_ns(35, FL_CPU_FREQUENCY()),
+		BitbangPin<fl::FastPin<CLOCK_PIN>>::kMinWriteCycles) > 0;
+	FASTLED_FORCE_INLINE static bool useAtomicWrites() FL_NO_EXCEPT {
+#ifdef FAST_SPI_INTERRUPTS_WRITE_PINS
+		return true;
+#else
+		// Keep the existing combined-port optimization. Separate
+		// ports can use atomic set/clear writes without whole-port snapshots.
+		return BitbangPin<fl::FastPin<DATA_PIN>>::kAtomicWrite &&
+			fl::FastPin<DATA_PIN>::port() != fl::FastPin<CLOCK_PIN>::port();
+#endif
+	}
 
 public:
 	/// Default constructor
@@ -175,15 +193,22 @@ public:
 			: (SPI_SPEED))
 
 	/// Delay for the clock signal 'high' period
-	#define CLOCK_HI_DELAY do { delaycycles<MIN_DELAY>(); delaycycles<FL_SPI_HI_EXTRA_DELAY>(); } while(0);
+	#define CLOCK_HI_DELAY do { BitbangPin<fl::FastPin<CLOCK_PIN>>::template delay<MIN_DELAY>(); BitbangPin<fl::FastPin<CLOCK_PIN>>::template delay<FL_SPI_HI_EXTRA_DELAY>(); } while(0);
 	/// Delay for the clock signal 'low' period
-	#define CLOCK_LO_DELAY do { delaycycles<((SPI_SPEED > 10) ? FL_SPI_HALF_PERIOD : (SPI_SPEED))>(); } while(0);
+	#define CLOCK_LO_DELAY do { BitbangPin<fl::FastPin<CLOCK_PIN>>::template delay<((SPI_SPEED > 10) ? FL_SPI_HALF_PERIOD : (SPI_SPEED))>(); } while(0);
 #endif
 
 	/// Write the BIT'th bit out via SPI, setting the data pin then strobing the clock
 	/// @tparam BIT the bit index in the byte
 	/// @param b the byte to read the bit from
 	template <u8 BIT> __attribute__((always_inline, hot)) inline static void writeBit(u8 b) FL_NO_EXCEPT {
+#ifndef FL_IS_ESP32
+		BitbangPin<fl::FastPin<DATA_PIN>>::template write<BIT>(b);
+		fl::FastPin<CLOCK_PIN>::hi();
+		if (kNeedsGpioPadding) { CLOCK_HI_DELAY; }
+		fl::FastPin<CLOCK_PIN>::lo();
+		if (kNeedsGpioPadding) { CLOCK_LO_DELAY; }
+#else
 		//cli();
 		if(b & (1 << BIT)) {
 			fl::FastPin<DATA_PIN>::hi();
@@ -207,9 +232,44 @@ public:
 #endif
 		}
 		//sei();
+#endif
 	}
 
 private:
+	/// Combine the preceding falling edge with the next data update. This
+	/// helper is used only by the existing exclusive whole-port path.
+	template <u8 BIT> FASTLED_FORCE_INLINE static void writeStreamingBit(
+		u8 b, data_ptr_t port, data_t datahi_clocklo, data_t datalo_clocklo) FL_NO_EXCEPT {
+		const data_t low = (b & (1U << BIT)) ? datahi_clocklo : datalo_clocklo;
+		fl::FastPin<DATA_PIN>::fastset(port, low);
+		if (kNeedsGpioPadding) { CLOCK_LO_DELAY; }
+		fl::FastPin<DATA_PIN>::fastset(port, low | fl::FastPin<CLOCK_PIN>::mask());
+		if (kNeedsGpioPadding) { CLOCK_HI_DELAY; }
+	}
+
+	FASTLED_FORCE_INLINE static void writeByteStreaming(
+		u8 b, data_ptr_t port, data_t datahi_clockhi, data_t datalo_clockhi,
+		data_t datahi_clocklo, data_t datalo_clocklo) FL_NO_EXCEPT {
+		if (!kCanStreamSamePort) {
+			writeByte(b, port, datahi_clockhi, datalo_clockhi, datahi_clocklo, datalo_clocklo);
+			return;
+		}
+		writeStreamingBit<7>(b, port, datahi_clocklo, datalo_clocklo);
+		writeStreamingBit<6>(b, port, datahi_clocklo, datalo_clocklo);
+		writeStreamingBit<5>(b, port, datahi_clocklo, datalo_clocklo);
+		writeStreamingBit<4>(b, port, datahi_clocklo, datalo_clocklo);
+		writeStreamingBit<3>(b, port, datahi_clocklo, datalo_clocklo);
+		writeStreamingBit<2>(b, port, datahi_clocklo, datalo_clocklo);
+		writeStreamingBit<1>(b, port, datahi_clocklo, datalo_clocklo);
+		writeStreamingBit<0>(b, port, datahi_clocklo, datalo_clocklo);
+	}
+
+	FASTLED_FORCE_INLINE static void finishByteStream(bool nonempty) FL_NO_EXCEPT {
+		if (kCanStreamSamePort && nonempty) {
+			fl::FastPin<CLOCK_PIN>::lo(); CLOCK_LO_DELAY;
+		}
+	}
+
 	/// Write the BIT'th bit out via SPI, setting the data pin then strobing the clock, using the passed in pin registers to accelerate access if needed
 	template <u8 BIT> FASTLED_FORCE_INLINE static void writeBit(u8 b, clock_ptr_t clockpin, data_ptr_t datapin) FL_NO_EXCEPT {
 		if(b & (1 << BIT)) {
@@ -292,14 +352,14 @@ public:
 	/// Write multiple bytes of the given value over SPI, without selecting the interface.
 	/// @copydetails GenericSoftwareSPIOutput::writeBytesValue(uint8_t, int)
 	static void writeBytesValueRaw(fl::u8 value, int len) FL_NO_EXCEPT {
-#ifdef FAST_SPI_INTERRUPTS_WRITE_PINS
+		if (useAtomicWrites()) {
 		// TODO: Weird things may happen if software bitbanging SPI output and other pins on the output reigsters are being twiddled.  Need
 		// to allow specifying whether or not exclusive i/o access is allowed during this process, and if i/o access is not allowed fall
 		// back to the degenerative code below
 		while(len--) {
 			writeByte(value);
 		}
-#else
+		} else {
 		FASTLED_REGISTER data_ptr_t datapin = fl::FastPin<DATA_PIN>::port();
 
 		if(fl::FastPin<DATA_PIN>::port() != fl::FastPin<CLOCK_PIN>::port()) {
@@ -321,11 +381,13 @@ public:
 			FASTLED_REGISTER data_t datahi_clocklo = fl::FastPin<DATA_PIN>::hival() & ~fl::FastPin<CLOCK_PIN>::mask();
 			FASTLED_REGISTER data_t datalo_clocklo = fl::FastPin<DATA_PIN>::loval() & ~fl::FastPin<CLOCK_PIN>::mask();
 
+			const bool nonempty = len > 0;
 			while(len--) {
-				writeByte(value, datapin, datahi_clockhi, datalo_clockhi, datahi_clocklo, datalo_clocklo);
+				writeByteStreaming(value, datapin, datahi_clockhi, datalo_clockhi, datahi_clocklo, datalo_clocklo);
 			}
+			finishByteStream(nonempty);
 		}
-#endif
+		}
 	}
 
 	/// Write an array of data to the SPI interface.
@@ -335,12 +397,12 @@ public:
 	/// @todo Need to type this better so that explicit casts into the call aren't required.
 	template <class D> void writeBytes(FASTLED_REGISTER fl::u8 *data, int len) FL_NO_EXCEPT {
 		select();
-#ifdef FAST_SPI_INTERRUPTS_WRITE_PINS
+		if (useAtomicWrites()) {
 		fl::u8 *end = data + len;
 		while(data != end) {
 			writeByte(D::adjust(*data++));
 		}
-#else
+		} else {
 		FASTLED_REGISTER clock_ptr_t clockpin = fl::FastPin<CLOCK_PIN>::port();
 		FASTLED_REGISTER data_ptr_t datapin = fl::FastPin<DATA_PIN>::port();
 
@@ -368,11 +430,12 @@ public:
 			fl::u8 *end = data + len;
 
 			while(data != end) {
-				writeByte(D::adjust(*data++), datapin, datahi_clockhi, datalo_clockhi, datahi_clocklo, datalo_clocklo);
+				writeByteStreaming(D::adjust(*data++), datapin, datahi_clockhi, datalo_clockhi, datahi_clocklo, datalo_clocklo);
 			}
+			finishByteStream(len > 0);
 			// fl::FastPin<CLOCK_PIN>::lo();
 		}
-#endif
+		}
 		D::postBlock(len, this);
 		release();
 	}
@@ -398,7 +461,7 @@ public:
 		select();
 		int len = pixels.mLen;
 
-#ifdef FAST_SPI_INTERRUPTS_WRITE_PINS
+		if (useAtomicWrites()) {
 		// If interrupts or other things may be generating output while we're working on things, then we need
 		// to use this block
 		while(pixels.has(1)) {
@@ -411,7 +474,7 @@ public:
 			pixels.advanceData();
 			pixels.stepDithering();
 		}
-#else
+		} else {
 		// If we can guaruntee that no one else will be writing data while we are running (namely, changing the values of the PORT/PDOR pins)
 		// then we can use a bunch of optimizations in here
 		FASTLED_REGISTER data_ptr_t datapin = fl::FastPin<DATA_PIN>::port();
@@ -445,16 +508,21 @@ public:
 
 			while(pixels.has(1)) {
 				if(FLAGS & FLAG_START_BIT) {
-					writeBit<0>(1, datapin, datahi_clockhi, datalo_clockhi, datahi_clocklo, datalo_clocklo);
+					if (kCanStreamSamePort) {
+						writeStreamingBit<0>(1, datapin, datahi_clocklo, datalo_clocklo);
+					} else {
+						writeBit<0>(1, datapin, datahi_clockhi, datalo_clockhi, datahi_clocklo, datalo_clocklo);
+					}
 				}
-				writeByte(D::adjust(pixels.loadAndScale0()), datapin, datahi_clockhi, datalo_clockhi, datahi_clocklo, datalo_clocklo);
-				writeByte(D::adjust(pixels.loadAndScale1()), datapin, datahi_clockhi, datalo_clockhi, datahi_clocklo, datalo_clocklo);
-				writeByte(D::adjust(pixels.loadAndScale2()), datapin, datahi_clockhi, datalo_clockhi, datahi_clocklo, datalo_clocklo);
+				writeByteStreaming(D::adjust(pixels.loadAndScale0()), datapin, datahi_clockhi, datalo_clockhi, datahi_clocklo, datalo_clocklo);
+				writeByteStreaming(D::adjust(pixels.loadAndScale1()), datapin, datahi_clockhi, datalo_clockhi, datahi_clocklo, datalo_clocklo);
+				writeByteStreaming(D::adjust(pixels.loadAndScale2()), datapin, datahi_clockhi, datalo_clockhi, datahi_clocklo, datalo_clocklo);
 				pixels.advanceData();
 				pixels.stepDithering();
 			}
+			finishByteStream(len > 0);
 		}
-#endif
+		}
 		D::postBlock(len, this);
 		release();
 	}

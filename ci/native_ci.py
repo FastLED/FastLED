@@ -30,6 +30,9 @@ PY_SMOKE = (
     "ci/tests/test_ci_labels.py",
     "ci/tests/test_native_ci_modes.py",
     "ci/tests/test_github_actions_security.py",
+    # Jev content gate: the fail-closed decision table for untrusted issue/PR
+    # text, over hermetic fakes (no network, no key, ~0.3s).
+    "ci/tests/test_issue_sanitizer.py",
     "ci/tests/test_autoresearch_pin_discovery_safety.py",
     "ci/tests/test_compile_example_sharding.py",
     "ci/tests/test_header_singleton_cross_dll.py",

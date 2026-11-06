@@ -194,6 +194,169 @@ impl FileContentChecker for TestPathStructureChecker {
     }
 }
 
+/// Blank comments and string contents, keeping line numbers.
+fn blank_comments_and_strings(content: &str, keep_line_comments: bool) -> Vec<String> {
+    let chars: Vec<char> = content.chars().collect();
+    let mut out = String::with_capacity(content.len());
+    let mut i = 0;
+    while i < chars.len() {
+        let c = chars[i];
+        let next = chars.get(i + 1).copied();
+        if c == '/' && next == Some('/') {
+            while i < chars.len() && chars[i] != '\n' {
+                if keep_line_comments {
+                    out.push(chars[i]);
+                }
+                i += 1;
+            }
+        } else if c == '/' && next == Some('*') {
+            i += 2;
+            while i < chars.len() && !(chars[i] == '*' && chars.get(i + 1) == Some(&'/')) {
+                if chars[i] == '\n' {
+                    out.push('\n');
+                }
+                i += 1;
+            }
+            i = (i + 2).min(chars.len());
+        } else if c == 'R' && next == Some('"') {
+            let mut open = i + 2;
+            while open < chars.len() && chars[open] != '(' && chars[open] != '\n' {
+                open += 1;
+            }
+            let closing: Vec<char> = std::iter::once(')')
+                .chain(chars[i + 2..open].iter().copied())
+                .chain(std::iter::once('"'))
+                .collect();
+            out.push_str("\"\"");
+            i = open;
+            while i < chars.len() && !chars[i..].starts_with(&closing) {
+                if chars[i] == '\n' {
+                    out.push('\n');
+                }
+                i += 1;
+            }
+            i = (i + closing.len()).min(chars.len());
+        } else if c == '"' || c == '\'' {
+            out.push(c);
+            i += 1;
+            while i < chars.len() && chars[i] != c && chars[i] != '\n' {
+                if chars[i] == '\\' {
+                    i += 1;
+                    if chars.get(i) == Some(&'\r') && chars.get(i + 1) == Some(&'\n') {
+                        i += 1;
+                    }
+                    if chars.get(i) == Some(&'\n') {
+                        out.push('\n'); // Continued string: keep line numbers.
+                    }
+                }
+                i += 1;
+            }
+            if chars.get(i) == Some(&c) {
+                out.push(c);
+                i += 1;
+            }
+        } else {
+            out.push(c);
+            i += 1;
+        }
+    }
+    out.split('\n').map(str::to_string).collect()
+}
+
+/// Tests register `FL_TEST_CASE`s for the shared runner; a `main()` in a test
+/// file is never called by it, so its checks silently do not run.
+struct TestMainChecker;
+
+impl FileContentChecker for TestMainChecker {
+    fn name(&self) -> &'static str {
+        "TestMainChecker"
+    }
+
+    fn should_process_file(&self, file_path: &str, project_root: &Path) -> bool {
+        let normalized = normalize_path(file_path);
+        is_under_project_subpath(&normalized, project_root, "tests")
+            && !is_under_project_subpath(&normalized, project_root, "tests/profile")
+            && ends_with_any(&normalized, &[".cpp", ".cc", ".cxx", ".c", ".h", ".hpp", ".ino"])
+    }
+
+    fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
+        let code = blank_comments_and_strings(&file_content.content, false);
+        // Only real line comments can carry the annotation.
+        let raw = blank_comments_and_strings(&file_content.content, true);
+        let reason_at = |index: usize| {
+            raw.get(index)
+                .and_then(|line| regex_allow_test_main().captures(line))
+                .map(|captures| captures.get(1).map_or("", |m| m.as_str()).trim().is_empty())
+        };
+        let mut violations = Vec::new();
+        let mut used = vec![false; raw.len()];
+        for (index, line) in code.iter().enumerate() {
+            // `int main` with its parenthesis on the next code line.
+            let next = code[index + 1..].iter().find(|l| !l.trim().is_empty());
+            let joined;
+            let line = if line.trim_end().ends_with("main")
+                && next.is_some_and(|l| l.trim_start().starts_with('('))
+            {
+                joined = format!("{} {}", line.trim_end(), next.unwrap().trim_start());
+                &joined
+            } else {
+                line
+            };
+            let Some(found) = regex_test_main_definition().find(line) else {
+                continue;
+            };
+            let tail = line[found.end()..].trim_end();
+            let previous = code[..index].iter().rev().find(|l| !l.trim().is_empty());
+            let typed = found.as_str().trim_start() != "main"
+                && !found.as_str().trim_start().starts_with("main ")
+                && !found.as_str().trim_start().starts_with("main(");
+            let declares_type = |l: &str| {
+                let l = l.trim();
+                !l.ends_with([';', '{', '}'])
+                    && l.split(|c: char| !c.is_alphanumeric() && c != '_')
+                        .any(|word| matches!(word, "int" | "void" | "auto" | "unsigned"))
+            };
+            let prototype = tail.ends_with(';') && !tail.contains('{');
+            if prototype || (!typed && !previous.is_some_and(|l| declares_type(l))) {
+                continue;
+            }
+            let annotated = [Some(index), index.checked_sub(1)]
+                .into_iter()
+                .flatten()
+                .find(|&i| reason_at(i).is_some());
+            match annotated {
+                Some(i) => {
+                    used[i] = true;
+                    if reason_at(i) == Some(true) {
+                        violations.push((
+                            i + 1,
+                            "allow-test-main needs a reason: `// allow-test-main: <why>`".to_string(),
+                        ));
+                    }
+                }
+                None => violations.push((
+                    index + 1,
+                    "main() in a test file never runs under the shared runner: use \
+                     FL_TEST_FILE/FL_TEST_CASE, and a dedicated tests/meson.build library \
+                     for flag variants. Only if it truly must be an entry point, add \
+                     `// allow-test-main: <why>`"
+                        .to_string(),
+                )),
+            }
+        }
+        for index in 0..raw.len() {
+            if !used[index] && reason_at(index).is_some() {
+                violations.push((
+                    index + 1,
+                    "allow-test-main has no main() on this or the next line: remove it".to_string(),
+                ));
+            }
+        }
+        violations.sort_by_key(|(line, _)| *line);
+        violations
+    }
+}
+
 struct TestAggregationChecker;
 
 impl FileContentChecker for TestAggregationChecker {

@@ -90,7 +90,7 @@ public:
 
 
 	template <u8 BIT> inline static void writeBit(u8 b) FL_NO_EXCEPT {
-		if(b && (1 << BIT)) {
+		if(b & (1 << BIT)) {
 			FastPin<_DATA_PIN>::hi();
 		} else {
 			FastPin<_DATA_PIN>::lo();
@@ -246,7 +246,7 @@ public:
 
 
 	template <u8 BIT> inline static void writeBit(u8 b) FL_NO_EXCEPT {
-		if(b && (1 << BIT)) {
+		if(b & (1 << BIT)) {
 			FastPin<_DATA_PIN>::hi();
 		} else {
 			FastPin<_DATA_PIN>::lo();
@@ -425,7 +425,7 @@ public:
 
 
 	template <u8 BIT> inline static void writeBit(u8 b) FL_NO_EXCEPT {
-		if(b && (1 << BIT)) {
+		if(b & (1 << BIT)) {
 			FastPin<_DATA_PIN>::hi();
 		} else {
 			FastPin<_DATA_PIN>::lo();

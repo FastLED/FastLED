@@ -7,6 +7,10 @@
 #include "fl/system/pin.h"  // For PinMode, PinValue enums
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/noexcept.h"
+#include "platforms/shared/spi_bitbang/bitbang_pin.h"
+#include "platforms/delaycycles.h"
+#include "platforms/cpu_frequency.h"
+#include <esp8266_peri.h> // IWYU pragma: keep
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_DEPRECATED_REGISTER
@@ -149,6 +153,47 @@ _FL_DEFPIN(8,15); _FL_DEFPIN(9,3); _FL_DEFPIN(10,1);
 #endif
 
 #define HAS_HARDWARE_PIN_SUPPORT
+
+template <u8 PIN> struct BitbangPin<FastPin<PIN>> {
+    static constexpr bool kAtomicWrite = true;
+    static constexpr bool kTwoWriteStream = FastPin<PIN>::kRealPin < 16;
+    // Normal GPIO writes serialize through the 80 MHz peripheral bus. The
+    // measured floor is six bus cycles (12 CPU cycles at 160 MHz); at 80 MHz
+    // the CPU can add another cycle. Keep the conservative six-cycle bound.
+    // GPIO16 uses a different RTC path and is excluded from this optimization.
+    static constexpr cycle_t kMinWriteCycles = FastPin<PIN>::kRealPin < 16
+        ? static_cast<cycle_t>(FL_CPU_FREQUENCY()) * 6 / ESP8266_CLOCK : 0;
+    FASTLED_FORCE_INLINE static u32 cycles() FL_NO_EXCEPT {
+        u32 value;
+        // The core's esp_get_cycle_count() uses this LX106 CCOUNT read.
+        __asm__ __volatile__("rsr %0,ccount" : "=a"(value) : : "memory");
+        return value;
+    }
+    template <fl::cycle_t CYCLES>
+    FASTLED_FORCE_INLINE static void delay() FL_NO_EXCEPT {
+        // The dispatch header exposes the inline template at global scope.
+        // fl::delaycycles only has an out-of-line definition at this callsite;
+        // calling it would pay CALL/RET three times for every transmitted bit.
+        if (CYCLES > 32) {
+            // Large inline NOP sequences overflow small flash profiles and
+            // thrash the instruction cache. A bounded counter wait also
+            // accounts for time spent servicing interrupts during the hold.
+            const u32 start = cycles();
+            while (static_cast<u32>(cycles() - start) < static_cast<u32>(CYCLES)) {}
+        } else {
+            ::delaycycles<CYCLES>();
+        }
+    }
+    template <u8 BIT>
+    FASTLED_FORCE_INLINE static void write(u8 value) FL_NO_EXCEPT {
+        if (FastPin<PIN>::kRealPin < 16) {
+            writeBitSetClear<BIT>(value, FastPin<PIN>::mask(), &GPOS, &GPOC);
+        } else {
+            // GPIO16 belongs to the RTC block, with no W1TS/W1TC registers.
+            GP16O = (GP16O & ~1UL) | ((value >> BIT) & 1U);
+        }
+    }
+};
 }  // namespace fl
 
 FL_DISABLE_WARNING_POP

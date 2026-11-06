@@ -13,7 +13,7 @@
 #include "fl/math/ease.h"
 #include "fl/stl/iterator.h"
 #include "fl/stl/noexcept.h"
-#include "fl/channels/worker_policy.h"
+#include "fl/channels/clockless_bus_controller.h"
 
 /// @file fl/chipsets/ucs7604.h
 /// @brief UCS7604 LED chipset controller implementation for FastLED
@@ -110,10 +110,10 @@ private:
     fl::vector_psram<u8> mByteBuffer;
 
 public:
-    template<fl::Bus B, fl::Core CORE>
-    using WithWorker = UCS7604ControllerT<DATA_PIN, RGB_ORDER, MODE,
+    template<fl::Bus B>
+    using WithBus = UCS7604ControllerT<DATA_PIN, RGB_ORDER, MODE,
         CHIPSET_TIMING, CLOCKLESS_CONTROLLER,
-        typename detail::ClocklessWorkerController<DELEGATE, B, CORE>::type>;
+        typename detail::ClocklessBusController<DELEGATE, B>::type>;
 
     UCS7604ControllerT() FL_NO_EXCEPT {}
 

@@ -60,46 +60,48 @@ This removes unrelated driver singleton allocations, registration callback stora
 
 ## Basic Usage
 
-### ESP32-S3 LCD clockless worker affinity
+### ESP32-S3 LCD/I2S clockless worker scheduling
 
-Clockless `addLeds<>` overloads accept a worker core after the bus:
+Per-channel worker core affinity and priority use the Channels API's
+`ChannelConfig::options.mWorker`; build-wide defaults are described below.
+Legacy `addLeds<>` templates select
+the chipset, pins, bus, and bus instance; they do not configure worker
+scheduling.
 
 ```cpp
 FastLED.addLeds<WS2812B, 4, GRB,
-               fl::Bus::FLEX_IO, fl::Core::Core1>(leds, NUM_LEDS);
+               fl::Bus::FLEX_IO>(leds, NUM_LEDS);
 ```
 
-This uses the slim controller: affinity is a template constant, with no new
-per-controller field or runtime `Channel` object. The shared LCD engine stores
-its worker settings once. Channel-based SPI overloads append the core after
-the existing bus-instance index; drivers without a configurable worker reject
-explicit requests. LCD SPI itself has no corresponding encoding worker.
+This uses the slim controller with the backend's default worker policy and
+no runtime `Channel` object. It also preserves settings already established
+by channels sharing that engine. LCD SPI itself has no corresponding
+encoding worker.
 
 The full-rate channel-based SPI overload has this template order:
 
 ```cpp
 template<ESPIChipsets CHIPSET, fl::u8 DATA_PIN, fl::u8 CLOCK_PIN,
          fl::EOrder RGB_ORDER, fl::u32 SPI_DATA_RATE,
-         fl::Bus B = fl::Bus::AUTO, fl::u8 B_WHICH = 0,
-         fl::Core CORE = fl::Core::Auto>
+         fl::Bus B = fl::Bus::AUTO, fl::u8 B_WHICH = 0>
 CLEDController& addLeds(CRGB* data, int nLedsOrOffset,
                         int nLedsIfOffset = 0);
 
 FastLED.addLeds<APA102, 23, 18, RGB, DATA_RATE_MHZ(10),
-               fl::Bus::SPI, 0, fl::Core::Auto>(leds, NUM_LEDS);
+               fl::Bus::SPI, 0>(leds, NUM_LEDS);
 ```
 
-This example preserves the selected SPI driver's default scheduling. An
-explicit core requires a driver with a configurable worker; it does not add
-a worker to a synchronous SPI driver.
+This example preserves the selected SPI driver's worker policy. Explicit
+channel worker settings require a driver with a configurable worker; they
+do not add a worker to a synchronous SPI driver.
 
-Template core selection adds no per-controller fields. Worker configuration
-and diagnostics add two driver vtable entries on ESP32-S3 (8 bytes per
-concrete driver vtable with 32-bit pointers), shared by all its strips.
+Worker configuration and diagnostics add two driver vtable entries on
+ESP32-S3 (8 bytes per concrete driver vtable with 32-bit pointers), shared
+by all its strips.
 Platforms without a configurable worker retain default rejecting methods
 without those entries.
 
-Runtime channels use the same engine configuration:
+Configure both core and priority when adding a channel:
 
 ```cpp
 fl::ChannelConfig config(4,
@@ -107,17 +109,65 @@ fl::ChannelConfig config(4,
     fl::span<CRGB>(leds, NUM_LEDS), GRB);
 config.options.mBus = fl::Bus::FLEX_IO;
 config.options.mWorker.core = fl::Core::Core1;
-config.options.mWorker.priority = 23; // Optional; normally leave unset.
+config.options.mWorker.priority = fl::Priority::High; // Auto by default.
 auto channel = FastLED.add<fl::Bus::FLEX_IO, fl::ClocklessChipset>(config);
 ```
 
-`Core::Auto` is the default and preserves legacy backend behavior (LCD:
-unpinned; RMT4: first show caller's core). `Any` explicitly
+Build-wide engine defaults can also be supplied as compiler definitions:
+
+```text
+-DFL_ENGINE_WORKER_CORE=fl::Core::Core1
+-DFL_ENGINE_WORKER_PRIORITY=fl::Priority::High
+```
+
+These portable defaults are currently honored by the LCD/I2S clockless engine.
+Other peripherals may honor or ignore them. Define them consistently for every
+translation unit, including library sources; a definition only in a sketch does
+not configure separately compiled drivers. Unset values are numeric Auto defaults
+(`-1` for core, `0` for priority), retaining existing backend behavior.
+They do not change the default `WorkerConfig` or add legacy template arguments.
+Explicit Channel settings override either default before the worker is created.
+The first explicit shared-engine configuration locks its policy; after worker
+creation, conflicting requests are rejected. Core selections must exist on the
+honoring target, and the LCD driver rejects invalid compile-time policies.
+
+**Migration:** remove all worker core and priority template arguments from
+legacy `addLeds<>` calls, including `Core::Auto` and `Priority::Auto`
+placeholders. To keep an explicit scheduling choice, use the channel
+configuration shown above. Neither core nor priority can be supplied through
+the legacy slim-controller templates.
+
+`Core::Auto` is the default and inherits the engine policy, including an honored
+compile-time default. Without an override it preserves legacy backend behavior
+(LCD: unpinned; RMT4: first show caller's core). `Any` explicitly
 requests no affinity, and `CallingCore` captures the core creating the worker
 on the first transmission. `Core0` and `Core1` select an available RTOS core.
 Pinning does not follow subsequent `show()` calls between cores and does not
-configure interrupt affinity. Priority must be less than `configMAX_PRIORITIES`;
-the LCD default remains `configMAX_PRIORITIES - 2` for ordinary configurations.
+configure interrupt affinity.
+
+`Priority::Auto` inherits an already configured worker's policy or an honored
+compile-time default. Without an override, a new LCD/I2S clockless worker
+defaults to `High`, preserving its previous scheduling:
+
+| Priority | ESP32 FreeRTOS priority (`configMAX_PRIORITIES = 25`) |
+|---|---:|
+| `Auto` (no override) / `High` | `configMAX_PRIORITIES - 2` = 23 |
+| `Medium` | `configMAX_PRIORITIES / 2` = 12 |
+| `Low` | 1 |
+
+The enum values are policies, not raw scheduler numbers. `High` should run at
+networking priority or above, biased above when the scheduler supports it;
+`Medium` runs below networking. `Low` is generally not recommended for
+timing-sensitive engine workers. The current LCD mapping above preserves its
+existing High priority of 23. Migrate the previous
+numeric runtime setting `23` to `fl::Priority::High`. Lower priorities allow
+more competing work but can reduce the driver's ability to refill long strips
+in time. Task stack and DMA buffer sizing do not change with priority.
+
+These settings configure an existing worker, not interrupt priority or driver
+selection priority. Classic ESP32 I2S, LCD SPI, and other backends without a
+configurable worker reject explicit policies. Their default paths keep the
+priority mapping and worker configuration code compiled out.
 
 Configure during setup, before concurrent LED activity. All strips sharing
 the engine share one worker. The first explicit configuration establishes its
@@ -145,11 +195,20 @@ Pinning can protect another core from worker preemption, but DMA/cache/bus
 contention remains. A busy selected core or a lower priority can delay refills;
 validate long multi-chunk strips under application load.
 
-Custom chipset controllers with constructor behavior or encoding overrides
-must provide their own `WithWorker<Bus, Core>` alias that retains those hooks
-around the rebound transport. Inheriting a plain transport's alias alone does
-not preserve custom behavior. Built-in fixed-RGBW and 16-bit wrappers provide
-this composition.
+When changing transports, custom chipset controllers with constructor behavior
+or encoding overrides must provide their own `WithBus<Bus>` alias that retains
+those hooks around the rebound transport. An inherited plain transport alias
+alone does not preserve custom behavior when changing buses. Built-in
+fixed-RGBW and 16-bit wrappers provide this composition. `Bus::AUTO` retains the original controller. An explicit
+bus uses `WithBus<B>` whenever available, including the platform default.
+If that alias names an existing base of the original controller, the original
+controller is retained, preserving its native initialization and encoding hooks
+for that transport. Otherwise, the rebound type is selected.
+A native controller without this alias may retain its platform default bus;
+an explicit non-default bus requires the alias and otherwise fails to compile.
+On platforms without a Channel default bus, only `Bus::AUTO` has this fallback.
+Rename custom `WithWorker` aliases to `WithBus` and remove
+their scheduling arguments; worker settings belong to channel configuration.
 
 ### Channel API (Recommended)
 

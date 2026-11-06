@@ -1,5 +1,32 @@
 # Task Tracker
 
+## Generic engine worker macros
+
+- [x] Implement opt-in core/priority defaults with Channel precedence and
+  unchanged unsupported peripherals; see `engine-worker-macros.md`.
+- [ ] Validate, review, push and merge the implementation.
+
+## ESP8266 block streaming throughput (#4966)
+
+- [x] Identify the attached ESP8266 through a live probe and measure unchanged firmware.
+- [x] Establish GPIO4/16 generic bit-bang throughput bounds from vendor documentation, generated code and direct device measurements; retain these pins.
+- [x] Add failing exhaustive register-selection coverage before implementing the branchless data writer.
+- [x] Optimize the production transmit path; measure throughput and verify actual output over multiple blocks.
+  Current setup authorized: GPIO4/14 generic output; 41 physical captures pass.
+  Bulk throughput: 5.36 Mbit/s at CPU80, 6.66 Mbit/s at CPU160.
+- [ ] Run repository validation and code review, push and merge the PR, then return to master.
+
+Completion requires measured evidence against the applicable hardware limit;
+an unverified optimization or an active-clock frequency alone is insufficient.
+
+## Channels-only LED worker scheduling (#5001 follow-up)
+
+- [x] Remove both core affinity and priority from legacy API selection, retain
+  ChannelConfig scheduling, and validate the production paths.
+- [ ] Push and merge the reviewed feature PR after full platform/native CI.
+
+Detailed plan and evidence: `issue-5001-channel-scheduling.md`.
+
 ## ESP flash recovery after #5003
 
 - [x] Freeze fresh Blink image-flash baselines on ESP32, S3, C3 and C6 with matching fbuild/toolchains.
@@ -844,3 +871,47 @@ separate child #4893. Next implementation child after publication is #4892.
 - [ ] Verify the consumer writer controls in hosted CI and merge this separate fix.
 - [ ] Bound generation overlap and model every family from real measurements.
 - [ ] Validate budget and complete required CI before merge.
+
+## Named worker priority (#5001)
+
+- [x] Capture matched Blink image/static-RAM and configuration-layout baselines before production edits.
+- [x] Add red tests for friendly Auto/High/Medium/Low policies, template/runtime forwarding, conflicts, and unchanged controller storage.
+- [x] Implement trailing addLeds priority arguments and channel worker policy; map LCD/I2S Auto to High without per-strip growth.
+- [x] Validate targeted sanitizers, full native suite, lint, matched firmware sizes and the S3 AutoResearch SDK build. Confirmed that the attached USB-native boards are C6s, so live S3 LCD validation is unavailable.
+- [x] Run repository and pre-push code review with no actionable findings.
+- [ ] Create the labelled PR, address hosted review/checks and merge.
+
+## RMT5 callback context lifetime (#4993)
+
+- [x] Confirm the production callback allocation leak remains on master.
+- [x] Clarify that user-provided URLs authorize reading without screening.
+- [x] Reproduce callback leaks with a regression exercising the real ESP adapter.
+- [x] Keep stable hardware-bounded callback slots until SDK channel deletion succeeds; preserve callbacks on SDK failures.
+- [x] Run focused regression, native tests, lint and code review.
+- [ ] Push a labelled PR, wait for CI/review, merge, and restore clean master.
+
+Validation: the real adapter leaked one context per deleted channel and 100
+extra contexts after 100 callback replacements before the fix. All five focused
+scenarios now pass, including 1,000 channel recreation cycles, SDK failures and
+multiple live channels. `bash test --cpp` passed 330 unit modules and 95
+examples; `bash test --py` and `bash lint` passed. Real ESP32 and ESP32-S3 Blink
+builds passed (the S3 needed a retry after an fbuild daemon startup error).
+Repository/pre-push review found no actionable issues. Physical-device heap
+stability was not measured.
+
+Hosted size validation rejected the initial shared-pointer ownership (+184 B
+over the fixed flash ceiling). The final slot implementation allocates no
+callback contexts; matched local master -> fix measures image_flash
+320368 -> 320327 (-41 B) and attributed RAM 22451 -> 22499 (+48 B).
+The size pin records that measured image; the fixed ceilings are unchanged.
+Final focused regressions, 330 native modules/95 examples and the local size
+gate pass. Hosted run 41942044216 on 44f9dc8127 measured image_flash 320359 B
+and attributed RAM 22499 B (the known 32 B local/hosted offset); the size pin
+now records that exact hosted result. Both fixed budgets passed.
+
+Final IDF 6 board coverage caught removed `SOC_RMT_*` count names. A second
+RED/GREEN regression now compiles all five lifetime scenarios against both
+SDK 5 and SDK 6 layouts (ten cases). SDK 6 selects the official RMT HAL
+instance/TX counts; SDK 5 keeps its SoC counts. Native tests, lint and the
+size gate pass again, with unchanged SDK 5 image size. The real IDF 6
+Blink/Test/DriverTest builds remain required before merge.

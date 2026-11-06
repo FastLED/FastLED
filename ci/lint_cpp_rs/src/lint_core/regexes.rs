@@ -374,6 +374,19 @@ fn regex_member_m_underscore() -> &'static Regex {
     })
 }
 
+fn regex_test_main_definition() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| {
+        Regex::new(r#"^\s*(?:(?:extern\s+"[^"]*"|extern|static|inline|FL_\w+)\s+)*(?:(?:(?:un)?signed\s+)?(?:int|void|auto|unsigned|signed)\s+)?main\s*\("#)
+            .unwrap()
+    })
+}
+
+fn regex_allow_test_main() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| Regex::new(r"//\s*allow-test-main\b(?:\s*:\s*(.*?))?\s*$").unwrap())
+}
+
 fn regex_allow_include_after_namespace() -> &'static Regex {
     static VALUE: OnceLock<Regex> = OnceLock::new();
     VALUE.get_or_init(|| Regex::new(r"//\s*allow-include-after-namespace").unwrap())

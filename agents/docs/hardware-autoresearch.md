@@ -23,19 +23,53 @@ Do NOT reason about attachment from memory or from "which board this task is abo
 
 ## Live Device Testing (AI Agents)
 
+### Two Wi-Fi boards: use a peer access point before requesting credentials
+
+When two Wi-Fi-capable boards are attached, use one as a SoftAP and test
+server and the other as a station/client. For example, use an ESP32-C6 as
+the AP and an ESP32dev as the client when investigating repeated HTTPS
+requests (FastLED #5010). A host with Ethernet but no Wi-Fi adapter does not
+prevent this arrangement. Do not make access to a private Wi-Fi password a
+prerequisite for a local network reproducer.
+
+1. Run `fbuild port scan`, then confirm each chip from firmware output;
+   shared USB identities alone do not identify a C6 versus an S3.
+2. Use the canonical AutoResearch sketch for the fixture. Start the peer AP
+   with explicit disposable test credentials and a server on its AP address.
+   HTTPS regressions require a **TLS** server; a plain HTTP server does not
+   exercise TLS connection setup or cleanup. Keep the AP firmware fixed
+   while comparing client library versions.
+3. Flash through `fbuild deploy`, naming each board's discovered port.
+   Confirm AP/server readiness and station association before attributing
+   request failures to FastLED. Bound connection, handshake and read times;
+   log request starts, completions, HTTP status, and server receipt counts.
+4. Compare the same request/cleanup sequence with the requested release and
+   master on the client. For suspected LTO regressions, retain the exact
+   compiler/link flags and use matching LTO and non-LTO controls. Keep the
+   include-only case distinct from cases that actually call FastLED APIs.
+
+A peer AP provides local connectivity, **not internet routing**. A local TLS
+fixture can investigate a second-request hang but does not establish behavior
+against a public endpoint, its certificate chain, DNS, or redirects. Label
+those limits in the results. A disposable self-signed server certificate and
+an insecure test client exercise encrypted transport only, not certificate
+verification; never present that fixture as production TLS configuration.
+
 ### LCD worker scheduling (#5001)
 
 Use `--lcd --worker-core 1` to validate LCD clockless output together with the
 worker's resolved and observed affinity. A priority-5 coroutine on Core 0
 performs 1 ms CPU work passes and yields between passes; the response reports
 its pass count and maximum elapsed pass duration. This is synthetic scheduling
-load, not a W5500 or Wi-Fi latency benchmark. Add `--legacy` to exercise the
-actual `FastLED.addLeds<..., Bus::FLEX_IO, Core::Core1>` path instead of runtime
-channel settings. The template fixture supports plain WS2812B only.
+load, not a W5500 or Wi-Fi latency benchmark. Explicit worker scheduling
+settings require the Channels API. AutoResearch exposes `--worker-core` for
+channel tests; it has no priority input option. Use `--legacy --worker-core auto` to observe the
+legacy `FastLED.addLeds<..., Bus::FLEX_IO>` path's default worker policy
+instead. The legacy LCD fixture supports plain WS2812B only.
 
 ```bash
 bash autoresearch esp32s3_opi_psram8 --lcd --worker-core 1 --lanes 1 --strip-sizes 170,700 --frames 4 --timeout 3m
-bash autoresearch esp32s3_opi_psram8 --lcd --worker-core 1 --legacy --lanes 1 --strip-sizes 170,700 --frames 4 --timeout 3m
+bash autoresearch esp32s3_opi_psram8 --lcd --worker-core auto --legacy --lanes 1 --strip-sizes 170,700 --frames 4 --timeout 3m
 ```
 
 The `esp32s3_opi_psram8` profile enables verified 8 MB octal PSRAM with the
@@ -57,7 +91,10 @@ For `--worker-core auto`, acceptance checks the LCD's legacy unpinned policy;
 the legacy fixture omits the template core argument. Failed LCD starts now
 report `DriverState::ERROR` with a reason instead of appearing READY.
 
-#### Recorded ESP32-S3 validation (#5001)
+#### Recorded ESP32-S3 validation before channel-only core affinity (#5001)
+
+The explicit-core legacy commands below record historical validation. They
+are no longer supported; current explicit affinity uses channel settings.
 
 The bench S3 had verified 8 MB octal PSRAM and a TX GPIO 1 → RX GPIO 2
 jumper. Six configured output lanes used GPIOs `1,3,4,5,6,7`; RX measured
