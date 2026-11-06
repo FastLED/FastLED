@@ -84,6 +84,9 @@ template <u8 PIN, int PORT> struct TracedClock : d21_test::Base<PIN, d21_test::k
         const u32 c = clear;
         set = 0;
         clear = 0;
+        // Apply the aliases to the latch, as the hardware does.
+        volatile u32& latch = d21_test::Reg<0, d21_test::kDr>::r();
+        latch = (latch | s) & ~c;
         d21_test::gEdges.push_back({s != 0, s, c});
         ++d21_test::gClockAliasStores;
         d21_test::Reg<PORT, d21_test::kDr>::r() =
@@ -157,6 +160,7 @@ fl::vector<u8> edgeBytes() {
 }
 
 void checkBytes(const fl::vector<u8>& expected) {
+    FL_REQUIRE_EQ(gEdges.size(), expected.size() * 8); // Rejects stray trailing edges.
     const fl::vector<u8> seen = edgeBytes();
     FL_REQUIRE_EQ(seen.size(), expected.size());
     for (size_t i = 0; i < expected.size(); ++i) {
@@ -227,7 +231,7 @@ FL_TEST_CASE("SAMD21 public writeByte uses set/clear aliases and never snapshots
     SamePort::writeByte(0xA5);
     checkAtomicEdges({0xA5});
     FL_CHECK_EQ(dr0() & kClock, 0U);
-    FL_CHECK_EQ(dr0(), kOther);
+    FL_CHECK_EQ(dr0(), kOther | kData); // 0xA5 ends on a high data bit.
 }
 
 FL_TEST_CASE("SAMD21 split-port bulk writes keep concurrent unrelated changes") {
