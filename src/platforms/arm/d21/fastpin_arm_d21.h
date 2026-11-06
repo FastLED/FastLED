@@ -7,6 +7,7 @@
 #include "fl/system/fastpin_base.h"
 #include "fl/system/pin.h"  // For PinMode, PinValue enums
 #include "fl/stl/noexcept.h"
+#include "platforms/shared/spi_bitbang/bitbang_pin.h"
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_DEPRECATED_REGISTER
@@ -62,12 +63,29 @@ public:
     inline static port_t mask() __attribute__ ((always_inline)) { return _MASK; }
 };
 
+/// True only for FastPin specializations backed by a real SAMD21 _ARMPIN.
+template <u8 PIN, u8 BIT, u32 MASK, int GRP>
+constexpr bool isD21HardwarePin(const _ARMPIN<PIN, BIT, MASK, GRP>*) { return true; }
+constexpr bool isD21HardwarePin(const void*) { return false; }
+
+/// Exclusive same-port bulk writes stream through the OUT latch; all other data
+/// updates use OUTSET/OUTCLR. kMinWriteCycles stays at its default: no IOBUS
+/// write latency has been measured here, so existing padding is kept.
+template <u8 PIN> struct BitbangPin<FastPin<PIN>> : BitbangPinDefaults<FastPin<PIN>> {
+    static constexpr bool kAtomicWrite = isD21HardwarePin(static_cast<const FastPin<PIN>*>(nullptr));
+    static constexpr bool kTwoWriteStream = kAtomicWrite;
+    template <u8 BIT>
+    FASTLED_FORCE_INLINE static void write(u8 value) FL_NO_EXCEPT {
+        writeBitSetClearNoBranch<BIT>(value, FastPin<PIN>::mask(), FastPin<PIN>::sport(), FastPin<PIN>::cport());
+    }
+};
+
 #define _R(T) struct __gen_struct_ ## T
 #define _RD32(T) struct __gen_struct_ ## T { static FASTLED_FORCE_INLINE volatile PortGroup * r() { return T; } };
 
 #define _FL_IO(L) _RD32(GPIO ## L)
 
-#define _FL_DEFPIN(PIN, BIT, L) template<> class FastPin<PIN> : public _ARMPIN<PIN, BIT, 1 << BIT, L> {};
+#define _FL_DEFPIN(PIN, BIT, L) template<> class FastPin<PIN> : public _ARMPIN<PIN, BIT, 1U << BIT, L> {};
 
 // Actual pin definitions
 #if defined(ARDUINO_SAMD_CIRCUITPLAYGROUND_EXPRESS)
