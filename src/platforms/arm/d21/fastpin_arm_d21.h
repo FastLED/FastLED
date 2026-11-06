@@ -7,6 +7,7 @@
 #include "fl/system/fastpin_base.h"
 #include "fl/system/pin.h"  // For PinMode, PinValue enums
 #include "fl/stl/noexcept.h"
+#include "fl/stl/type_traits.h"
 #include "platforms/shared/spi_bitbang/bitbang_pin.h"
 
 FL_DISABLE_WARNING_PUSH
@@ -76,7 +77,18 @@ template <u8 PIN> struct BitbangPin<FastPin<PIN>> : BitbangPinDefaults<FastPin<P
     static constexpr bool kTwoWriteStream = kAtomicWrite;
     template <u8 BIT>
     FASTLED_FORCE_INLINE static void write(u8 value) FL_NO_EXCEPT {
+        writeImpl<BIT>(value, fl::integral_constant<bool, kAtomicWrite>());
+    }
+
+  private:
+    template <u8 BIT>
+    FASTLED_FORCE_INLINE static void writeImpl(u8 value, fl::integral_constant<bool, true>) FL_NO_EXCEPT {
         writeBitSetClearNoBranch<BIT>(value, FastPin<PIN>::mask(), FastPin<PIN>::sport(), FastPin<PIN>::cport());
+    }
+    // A user-defined FastPin need not have sport()/cport(), so it keeps hi()/lo().
+    template <u8 BIT>
+    FASTLED_FORCE_INLINE static void writeImpl(u8 value, fl::integral_constant<bool, false>) FL_NO_EXCEPT {
+        BitbangPinDefaults<FastPin<PIN>>::template write<BIT>(value);
     }
 };
 

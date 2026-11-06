@@ -99,6 +99,19 @@ template <u8 PIN, int PORT> struct TracedClock : d21_test::Base<PIN, d21_test::k
 template <> class FastPin<d21_test::kClockPin> : public TracedClock<d21_test::kClockPin, 0> {};
 template <> class FastPin<d21_test::kOtherPortClockPin> : public TracedClock<d21_test::kOtherPortClockPin, 1> {};
 
+// A user-defined pin without sport()/cport() must still compile and use hi()/lo().
+template <> class FastPin<243> : public ValidPinBase {
+  public:
+    static int sHi;
+    static int sLo;
+    static void hi() { ++sHi; }
+    static void lo() { ++sLo; }
+};
+int FastPin<243>::sHi = 0;
+int FastPin<243>::sLo = 0;
+FL_STATIC_ASSERT(!BitbangPin<FastPin<243>>::kAtomicWrite && !BitbangPin<FastPin<243>>::kTwoWriteStream,
+                 "user-defined pins keep the default policy");
+
 FL_STATIC_ASSERT(BitbangPin<FastPin<d21_test::kDataPin>>::kTwoWriteStream,
                  "SAMD21 hardware pins must stream on an exclusive same-port bus");
 FL_STATIC_ASSERT(BitbangPin<FastPin<d21_test::kDataPin>>::kAtomicWrite,
@@ -198,6 +211,15 @@ FL_TEST_CASE("SAMD21 same-port writeBytesValueRaw and writePixels stream") {
     PixelController<RGB> pixels(leds, 1, ColorAdjustment::noAdjustment(), DISABLE_DITHER);
     spi.writePixels<0, DATA_NOP, RGB>(pixels);
     checkStream({0x12, 0x34, 0x56});
+}
+
+FL_TEST_CASE("SAMD21 user-defined pins without alias registers use hi and lo") {
+    FastPin<243>::sHi = 0;
+    FastPin<243>::sLo = 0;
+    BitbangPin<FastPin<243>>::write<0>(1);
+    BitbangPin<FastPin<243>>::write<1>(1);
+    FL_CHECK_EQ(FastPin<243>::sHi, 1);
+    FL_CHECK_EQ(FastPin<243>::sLo, 1);
 }
 
 FL_TEST_CASE("SAMD21 public writeByte uses set/clear aliases and never snapshots the port") {
