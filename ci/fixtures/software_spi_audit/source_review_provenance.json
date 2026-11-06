@@ -3,8 +3,8 @@
   "baseline": "94dab9c6b720ea277ec9177c93129c7dc646c5c3",
   "manifest": {
     "path": "reviewed_baseline.json",
-    "sha256": "e1f0bb28228cb0b41b8975d466f7fbe5918c863e7393768329b24718c09a1896",
-    "bytes": 14269379,
+    "sha256": "842d083a8cb4ac8ea420229130d7bd16a56f180ef601a0b686424495030a1ff1",
+    "bytes": 14373773,
     "schema_version": 1,
     "source_paths": 2986
   },
@@ -172,6 +172,34 @@
     {
       "id": "esp32-forced-fastpin-selection",
       "issue": 5067
+    },
+    {
+      "id": "esp8266-forced-fastpin-selection",
+      "issue": 5068
+    },
+    {
+      "id": "nrf51-forced-fastpin-selection",
+      "issue": 5069
+    },
+    {
+      "id": "nrf52-variants-forced-fastpin-selection",
+      "issue": 5070
+    },
+    {
+      "id": "giga-forced-fastpin-selection",
+      "issue": 5071
+    },
+    {
+      "id": "mgm240-forced-fastpin-selection",
+      "issue": 5072
+    },
+    {
+      "id": "lpc-modern-forced-fastpin-selection",
+      "issue": 5073
+    },
+    {
+      "id": "lpc-legacy-forced-fastpin-selection",
+      "issue": 5074
     }
   ],
   "review_method": {
@@ -524,7 +552,12 @@
     "No manual runtime receipts, binaries or logs are accepted through this sidecar; the existing loader consumes only reviewed_baseline.json.",
     "Full pinned path/blob/SHA/anchor and strict alias checks remain enforced independently by the existing version1 loader.",
     "Current changed/new/deleted sources remain RED; baseline hashes must never be refreshed to authorize a fix.",
-    "All41 findings retain required target/configuration/mutation obligations; source classification does not clear them or certify physical timing.",
+    "All48 findings retain required target/configuration/mutation obligations; source classification does not clear them or certify physical timing.",
     "Historical ignored checkpoint digests identify review records only; those local paths are not portable executable proof."
-  ]
+  ],
+  "additional_forced_selection_review": {
+    "plan_sha256": "96a5a0fdbd090c3e033526e06e9eb3c88fbe9d4e42c134dc4c072395d583916d",
+    "scope": "Eight pinned definition/invocation rows retain baseline OID/SHA; seven new associations. Targeted guard/definition review, not complete second source reread. Current query hashes are not baseline hashes. No runtime receipts or execution certification.",
+    "unselected_canonical_limit": "An unselected canonical F4 implementation is not intrinsically protected if referenced; selectors/configurations require actual route proof."
+  }
 }

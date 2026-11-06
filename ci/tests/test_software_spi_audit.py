@@ -578,8 +578,28 @@ def test_pinned_registry_keeps_every_discovered_child_and_query_miss() -> None:
     assert BASELINE_SOURCE_COUNT == 2986
     assert {finding["issue"] for finding in REQUIRED_FINDINGS} == set(
         range(5025, 5054)
-    ) | {5055, 5056, 5057, 5059, 5060, 5061, 5062, 5063, 5064, 5065, 5066, 5067}
-    assert len(REQUIRED_FINDINGS) == 41
+    ) | {
+        5055,
+        5056,
+        5057,
+        5059,
+        5060,
+        5061,
+        5062,
+        5063,
+        5064,
+        5065,
+        5066,
+        5067,
+        5068,
+        5069,
+        5070,
+        5071,
+        5072,
+        5073,
+        5074,
+    }
+    assert len(REQUIRED_FINDINGS) == 48
     assert "src/platforms/shared/spi_bitbang/spi_block_32.h" in SEMANTIC_REQUIRED_PATHS
     assert (
         "src/platforms/shared/spi_bitbang/spi_isr_engine.cpp.hpp"
@@ -3161,3 +3181,637 @@ def test_native_trace_requires_uncached_test_execution_not_compiler_cache_misses
         ), "cached test summaries are not fresh production traces"
     else:
         assert all(record["kind"] == "host_production_gpio_trace" for record in records)
+
+
+# MY9221 adapter scaffolding contracts. These pure/helper tests are not runtime
+# evidence; only the opt-in acceptance below may execute the actual fixed runner.
+MY_SCHEDULE_CONTROLLER = "src/fl/chipsets/my9221.h"
+MY_SCHEDULE_SERIALIZER = "src/platforms/shared/my9221_typed_emitter.h"
+MY_SCHEDULE_CASE = (
+    "MY9221 public controller observes DDR and four timed DI latch pulses"
+)
+MY_SCHEDULE_CHAIN_CASE = (
+    "MY9221 partial BGR chains repeat with final HIGH and cascade stop"
+)
+MY_SCHEDULE_CASES = (
+    MY_SCHEDULE_CASE,
+    MY_SCHEDULE_CHAIN_CASE,
+    "MY9221 real dynamic reserve failure emits no partial frame and retries",
+    "MY9221 public emission guards edges and restores prior interrupt state",
+)
+MY_SCHEDULE_MUTATIONS = {
+    "missing-latch-high-wait": (
+        MY_SCHEDULE_CONTROLLER,
+        b"Timing::template waitNanoseconds<80>();",
+    ),
+    "missing-latch-low-wait": (
+        MY_SCHEDULE_CONTROLLER,
+        b"Timing::template waitNanoseconds<240>();",
+    ),
+    "missing-data-setup-wait": (
+        MY_SCHEDULE_SERIALIZER,
+        b"Timing::template waitNanoseconds<10>();",
+    ),
+    "missing-data-hold-phase-wait": (
+        MY_SCHEDULE_SERIALIZER,
+        b"Timing::template waitNanoseconds<50>();",
+    ),
+    "missing-cascade-stop-wait": (
+        MY_SCHEDULE_CONTROLLER,
+        b"Timing::waitMicroseconds(mStopDelayUs);",
+    ),
+}
+MY_SCHEDULE_STAGES = ("baseline", *MY_SCHEDULE_MUTATIONS, "restored")
+
+
+def my_schedule_sources() -> dict[str, bytes]:
+    return {
+        path: (audit.ROOT / path).read_bytes()
+        for path in (MY_SCHEDULE_CONTROLLER, MY_SCHEDULE_SERIALIZER)
+    }
+
+
+def test_my9221_managed_schedule_mutants_touch_only_prescribed_production_call() -> (
+    None
+):
+    original = my_schedule_sources()
+    before = dict(original)
+    mutants = audit._my9221_schedule_mutants(original)
+    assert original == before, "mutation preparation cannot alter caller source bytes"
+    assert tuple(mutants) == tuple(MY_SCHEDULE_MUTATIONS)
+    for stage, (changed_path, call) in MY_SCHEDULE_MUTATIONS.items():
+        assert set(mutants[stage]) == set(original)
+        assert original[changed_path].count(call) == 1
+        for path, source in original.items():
+            expected = source.replace(call, b"", 1) if path == changed_path else source
+            assert mutants[stage][path] == expected
+
+
+@pytest.mark.parametrize("defect", ["missing", "duplicate", "unexpected-source"])
+def test_my9221_managed_schedule_mutation_preparation_rejects_ambiguous_source(
+    defect: str,
+) -> None:
+    original = my_schedule_sources()
+    call = MY_SCHEDULE_MUTATIONS["missing-data-setup-wait"][1]
+    if defect == "missing":
+        original[MY_SCHEDULE_SERIALIZER] = original[MY_SCHEDULE_SERIALIZER].replace(
+            call, b""
+        )
+    elif defect == "duplicate":
+        original[MY_SCHEDULE_SERIALIZER] += b"\n" + call
+    else:
+        original["src/untrusted.h"] = b"caller-selected mutation target"
+    with pytest.raises(ValueError, match="source|pattern|mutation|call"):
+        audit._my9221_schedule_mutants(original)
+
+
+@pytest.mark.parametrize(
+    "names",
+    [
+        MY_SCHEDULE_STAGES[:-1],
+        MY_SCHEDULE_STAGES[1:],
+        (*MY_SCHEDULE_STAGES[:2], MY_SCHEDULE_STAGES[1], *MY_SCHEDULE_STAGES[3:]),
+        (*MY_SCHEDULE_STAGES[:-1], "caller-approved"),
+        tuple(reversed(MY_SCHEDULE_STAGES)),
+    ],
+)
+def test_my9221_managed_schedule_rejects_missing_corrupt_or_reordered_stages(
+    names: tuple[str, ...],
+) -> None:
+    with pytest.raises(ValueError, match="stage|sequence|mutation|restor"):
+        audit._validate_my9221_stage_sequence(names)
+
+
+def test_my9221_managed_schedule_exact_stage_catalog_is_validation_only() -> None:
+    audit._validate_my9221_stage_sequence(MY_SCHEDULE_STAGES)
+    finding = next(row for row in REQUIRED_FINDINGS if row["issue"] == 5066)
+    errors = check_evidence([finding], [], audit._current_sources(audit.ROOT))
+    for configuration in finding["required_configurations"]:
+        assert any(f"/{configuration}: unresolved" in error for error in errors)
+
+
+def test_my9221_managed_schedule_runner_rejects_missing_inputs_before_process(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def forbidden(*_args: object, **_kwargs: object) -> None:
+        pytest.fail("missing source/oracle must reject before managed execution")
+
+    monkeypatch.setattr(audit.RunningProcess, "run", forbidden)
+    with pytest.raises(ValueError, match="source|input|fixture|repository"):
+        audit._run_my9221_host_schedule_proof(tmp_path)
+
+
+def test_my9221_managed_schedule_external_claim_cannot_clear_any_full_group() -> None:
+    finding = next(row for row in REQUIRED_FINDINGS if row["issue"] == 5066)
+    claims = [
+        {
+            "finding": finding["id"],
+            "configuration": configuration,
+            "scope": "host92-93-requested-schedule-and-public-controller-only",
+            "status": "PASS",
+            "stages": list(MY_SCHEDULE_STAGES),
+        }
+        for configuration in finding["required_configurations"]
+    ]
+    errors = check_evidence([finding], claims, audit._current_sources(audit.ROOT))
+    assert any("external" in error for error in errors)
+    for configuration in finding["required_configurations"]:
+        assert any(f"/{configuration}: unresolved" in error for error in errors)
+
+
+@pytest.mark.skipif(
+    os.environ.get("FASTLED_RUN_MY9221_PROOF") != "1",
+    reason="requires seven actual isolated managed debug builds and runtime mutants",
+)
+def test_my9221_managed_host_schedule_real_acceptance() -> None:
+    from ci import software_spi_init_proof as native
+
+    original = my_schedule_sources()
+    before = native._inputs(audit.ROOT)
+    expected = {
+        "baseline": original,
+        **audit._my9221_schedule_mutants(original),
+        "restored": original,
+    }
+    proof = audit._run_my9221_host_schedule_proof(audit.ROOT)
+    assert proof.finding == "my9221-ddr-timing"
+    assert proof.scope == "host92-93-requested-schedule-and-public-controller-only"
+    assert proof.workspace.parent == Path.home() / ".clud" / "worktrees"
+    assert proof.workspace.name.startswith("fastled3-wt-spi-my9221-proof-")
+    assert proof.workspace != audit.ROOT
+    assert [stage.name for stage in proof.stages] == list(MY_SCHEDULE_STAGES)
+    for stage in proof.stages:
+        assert stage.source_sha256s == {
+            path: digest(raw) for path, raw in expected[stage.name].items()
+        }
+        assert stage.inputs_before == stage.inputs_after
+        expected_inputs = dict(before)
+        expected_inputs.update(stage.source_sha256s)
+        assert stage.inputs_before == expected_inputs
+        assert stage.tools_before == proof.stages[0].tools_before
+        assert stage.build_context == proof.stages[0].build_context
+        if stage is not proof.stages[0]:
+            native._validate_my9221_dependencies(
+                proof.workspace, proof.stages[proof.stages.index(stage) - 1], stage
+            )
+        for path, raw in expected[stage.name].items():
+            assert stage.inputs_before[path] == digest(raw)
+        assert (
+            stage.inputs_before["tests/fl/channels/spi_legacy_golden.cpp"]
+            == before["tests/fl/channels/spi_legacy_golden.cpp"]
+        )
+        assert stage.tools_before == stage.tools_after
+        assert stage.build_returncode == 0
+        assert stage.rebuilt_source == "tests/fl/channels/spi_legacy_golden.cpp"
+        assert stage.executed_commands and stage.build_context.compile_argv
+        assert stage.binary_sha256 == digest(stage.binary_path.read_bytes())
+        assert stage.build_log_sha256 == digest(stage.build_log.read_bytes())
+        assert stage.runtime_dependencies
+        cases = (
+            MY_SCHEDULE_CASES
+            if stage.name in {"baseline", "restored"}
+            else (
+                MY_SCHEDULE_CHAIN_CASE
+                if stage.name == "missing-cascade-stop-wait"
+                else MY_SCHEDULE_CASE,
+            )
+        )
+        assert tuple(run.case for run in stage.executions) == cases
+        for run in stage.executions:
+            assert run.command[1] == str(stage.binary_path)
+            assert run.command[2:] == [
+                f"--test-case={run.case}",
+                "--success",
+                "--no-colors",
+            ]
+            assert run.log_sha256 == digest(run.log.read_bytes())
+            assert run.returncode == (
+                0 if stage.name in {"baseline", "restored"} else 1
+            )
+            audit._validate_my9221_schedule_output(
+                stage.name, run.case, run.returncode, run.log.read_text()
+            )
+        for identity in stage.tools_before.values():
+            assert identity.path.is_absolute() and identity.version.strip()
+            assert identity.sha256 == digest(identity.path.read_bytes())
+    assert len({stage.binary_sha256 for stage in proof.stages[:-1]}) == 6
+    for path, raw in original.items():
+        assert (proof.workspace / path).read_bytes() == raw
+    assert native._inputs(audit.ROOT) == before
+    finding = next(row for row in REQUIRED_FINDINGS if row["issue"] == 5066)
+    errors = check_evidence([finding], [], audit._current_sources(audit.ROOT))
+    for configuration in finding["required_configurations"]:
+        assert any(f"/{configuration}: unresolved" in error for error in errors), (
+            "host virtual schedule cannot certify complete target/configuration groups"
+        )
+
+
+@pytest.mark.parametrize(
+    ("stage", "case", "diagnostic"),
+    [
+        ("missing-latch-high-wait", MY_SCHEDULE_CASE, "1 > 70"),
+        ("missing-latch-low-wait", MY_SCHEDULE_CASE, "1 > 230"),
+        ("missing-data-setup-wait", MY_SCHEDULE_CASE, "1 >= 10"),
+        ("missing-data-hold-phase-wait", MY_SCHEDULE_CASE, "12 >= 50"),
+        ("missing-cascade-stop-wait", MY_SCHEDULE_CHAIN_CASE, "240 > 250"),
+    ],
+)
+@pytest.mark.parametrize(
+    "incidental", ["AddressSanitizer: bad access", "fatal error: compilation failed"]
+)
+def test_my9221_managed_schedule_intended_diagnostic_cannot_mask_incidental_failure(
+    stage: str,
+    case: str,
+    diagnostic: str,
+    incidental: str,
+) -> None:
+    # Parser rejection fixtures only: expressions come from real manual runtime
+    # observations, but this hand-written transcript grants NO execution proof.
+    transcript = (
+        f"FAIL: {case} at ../../tests/fl/channels/spi_legacy_golden.cpp:870\n"
+        f"  ../../tests/fl/channels/spi_legacy_golden.cpp:160: {diagnostic}\n"
+        "[doctest] test cases: 1 | 0 passed | 1 failed\n" + incidental
+    )
+    with pytest.raises(ValueError, match="error|sanitizer|fatal|incidental|diagnostic"):
+        audit._validate_my9221_schedule_output(stage, case, 1, transcript)
+
+
+@pytest.mark.parametrize(
+    "diagnostic", ["240 > 210", "0 == 1040", "240 > 250\n  other.cpp:1: false"]
+)
+def test_my9221_managed_schedule_stop_requires_only_intended_five_chip_failure(
+    diagnostic: str,
+) -> None:
+    transcript = (
+        f"FAIL: {MY_SCHEDULE_CHAIN_CASE} at ../../tests/fl/channels/spi_legacy_golden.cpp:909\n"
+        f"  ../../tests/fl/channels/spi_legacy_golden.cpp:165: {diagnostic}\n"
+        "[doctest] test cases: 1 | 0 passed | 1 failed\n"
+    )
+    with pytest.raises(
+        ValueError, match="assertion|diagnostic|failure|bound|five|oracle"
+    ):
+        audit._validate_my9221_schedule_output(
+            "missing-cascade-stop-wait", MY_SCHEDULE_CHAIN_CASE, 1, transcript
+        )
+
+
+@pytest.mark.parametrize("failure", ["compile failure", "timeout", "restore failure"])
+def test_my9221_managed_schedule_cli_records_failed_internal_attempt_without_scope_grant(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    failure: str,
+) -> None:
+    # This mocks orchestration, not execution or authenticated proof creation.
+    configure_tooling_cli(tmp_path, monkeypatch)
+    monkeypatch.setattr(audit, "_run_native_traces", lambda *_: [])
+    monkeypatch.setattr(
+        audit,
+        "_run_init_clock_low_proof",
+        lambda *_: init_clock_low_schema_only_proof(tmp_path),
+    )
+    calls: list[Path] = []
+    retained = tmp_path / "retained-my9221-attempt"
+
+    def failed(root: Path) -> None:
+        calls.append(root)
+        raise ValueError(f"MY9221 proof {failure}; retained {retained}")
+
+    monkeypatch.setattr(audit, "_run_my9221_host_schedule_proof", failed, raising=False)
+    report = tmp_path / "my9221-cli.json"
+    monkeypatch.setattr(
+        sys, "argv", ["spi-audit", "--run-native", "--report", str(report)]
+    )
+    assert audit.main() == 1
+    assert calls == [tmp_path], (
+        "--run-native must invoke only the fixed internal MY adapter"
+    )
+    document = json.loads(report.read_text())
+    assert document["complete"] is False
+    assert not document.get("my9221_host_schedule_proof")
+    assert any(
+        failure in error and str(retained) in error for error in document["errors"]
+    )
+
+
+# Runner validation controls only: these synthetic stage records are never proof.
+def test_my9221_managed_rebuilt_pch_is_source_bound_validation_only(
+    tmp_path: Path,
+) -> None:
+    from types import SimpleNamespace
+
+    from ci import software_spi_init_proof as native
+
+    pch = str(tmp_path / ".build/meson-debug/tests/test_pch.h.pch")
+    library = str(tmp_path / ".build/meson-debug/ci/meson/native/fastled.so")
+    external = str(tmp_path / "external/runtime.so")
+    common = dict(
+        executed_commands=(("compiler", "-x", "c++-header", "-o", "test_pch.h.pch"),),
+        tools_before={"compiler": "fixed"},
+        build_context="fixed",
+    )
+    before = SimpleNamespace(
+        runtime_dependencies={
+            pch: "old-pch",
+            library: "fixed-lib",
+            external: "fixed-external",
+        },
+        source_sha256s={"src/fl/chipsets/my9221.h": "original"},
+        **common,
+    )
+    after = SimpleNamespace(
+        runtime_dependencies={
+            pch: "rebuilt-pch",
+            library: "fixed-lib",
+            external: "fixed-external",
+        },
+        source_sha256s={"src/fl/chipsets/my9221.h": "prescribed-mutant"},
+        **common,
+    )
+    native._validate_my9221_dependencies(tmp_path, before, after)
+    # A legitimate derived-byte delta must not grant any configuration coverage.
+    finding = next(row for row in REQUIRED_FINDINGS if row["issue"] == 5066)
+    assert check_evidence([finding], [], audit._current_sources(audit.ROOT))
+    for field in ("external", "missing", "commands", "tools", "context"):
+        bad = SimpleNamespace(**vars(after))
+        bad.runtime_dependencies = dict(after.runtime_dependencies)
+        if field == "external":
+            bad.runtime_dependencies[external] = "drift"
+        elif field == "missing":
+            del bad.runtime_dependencies[pch]
+        elif field == "commands":
+            bad.executed_commands = ()
+        elif field == "tools":
+            bad.tools_before = {"compiler": "drift"}
+        else:
+            bad.build_context = "drift"
+        with pytest.raises(ValueError):
+            native._validate_my9221_dependencies(tmp_path, before, bad)
+
+
+def test_my9221_managed_runtime_dependency_drift_is_never_a_rebuild(
+    tmp_path: Path,
+) -> None:
+    from types import SimpleNamespace
+
+    from ci import software_spi_init_proof as native
+
+    pch = str(tmp_path / ".build/meson-debug/tests/test_pch.h.pch")
+    common = dict(
+        source_sha256s={"src/fl/chipsets/my9221.h": "same"},
+        executed_commands=(("compiler", "-x", "c++-header", "-o", "test_pch.h.pch"),),
+        tools_before={"compiler": "fixed"},
+        build_context="fixed",
+    )
+    before = SimpleNamespace(runtime_dependencies={pch: "before"}, **common)
+    after = SimpleNamespace(runtime_dependencies={pch: "after"}, **common)
+    with pytest.raises(ValueError, match="dependenc"):
+        native._validate_my9221_dependencies(tmp_path, before, after)
+
+
+@pytest.mark.parametrize("failure", ["write", "read"])
+def test_my9221_managed_restore_attempts_both_headers_after_first_error(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, failure: str
+) -> None:
+    from ci import software_spi_init_proof as native
+
+    original = {
+        "controller.h": b"controller-original",
+        "serializer.h": b"serializer-original",
+    }
+    for path in original:
+        (tmp_path / path).write_bytes(b"mutated")
+    write = Path.write_bytes
+    read = Path.read_bytes
+    attempted = []
+
+    def fail_write(path: Path, data: bytes) -> int:
+        attempted.append(path.name)
+        if failure == "write" and path.name == "controller.h":
+            raise OSError("controller write blocked")
+        return write(path, data)
+
+    def fail_read(path: Path) -> bytes:
+        if failure == "read" and path.name == "controller.h":
+            raise OSError("controller verification blocked")
+        return read(path)
+
+    monkeypatch.setattr(Path, "write_bytes", fail_write)
+    monkeypatch.setattr(Path, "read_bytes", fail_read)
+    errors = native._restore_sources(tmp_path, original)
+    assert attempted == ["controller.h", "serializer.h"]
+    assert read(tmp_path / "serializer.h") == original["serializer.h"]
+    assert errors and "controller.h" in str(errors)
+    assert "blocked" in str(errors)
+    assert not (tmp_path / "proof.json").exists()
+
+
+@pytest.mark.parametrize(
+    "issue,source",
+    [
+        (5068, "src/platforms/esp/8266/fastpin_esp8266.h"),
+        (5069, "src/platforms/arm/nrf51/fastpin_arm_nrf51.h"),
+        (5070, "src/platforms/arm/nrf52/fastpin_arm_nrf52_variants.h"),
+        (5071, "src/platforms/arm/giga/armpin.h"),
+        (5072, "src/platforms/arm/mgm240/fastpin_arm_mgm240.h"),
+        (5073, "src/platforms/arm/lpc/fastpin_arm_lpc.h"),
+        (5074, "src/platforms/arm/lpc/fastpin_arm_lpc11_legacy.h"),
+    ],
+)
+def test_additional_forced_selection_findings_remain_required(
+    issue: int, source: str
+) -> None:
+    row = next(item for item in REQUIRED_FINDINGS if item["issue"] == issue)
+    assert source in row["sources"]
+    assert "src/fl/system/forced_software_pin.h" in row["dependencies"]
+    assert "force-on/NO_PINMAP Arduino fallback" in row["required_configurations"]
+    assert (
+        "restored unguarded specialization must fail the selected-type/route oracle"
+        in row["required_configurations"]
+    )
+    assert check_evidence([row], [], audit._current_sources(audit.ROOT))
+
+
+def my9221_actual_setup_transcript() -> str:
+    fixture = audit.ROOT / "ci/fixtures/software_spi_audit/my9221_setup_runtime.json"
+    data = json.loads(fixture.read_text())
+    assert digest(data["output"].encode()) == data["sha256"]
+    return data["output"]
+
+
+def test_my9221_managed_actual_setup_preamble_and_changes_are_intended() -> None:
+    output = my9221_actual_setup_transcript()
+    assert output.count(":179: 4 >= 10") == 1
+    assert output.count(":179: 1 >= 10") == 18
+    audit._validate_my9221_schedule_output(
+        "missing-data-setup-wait", MY_SCHEDULE_CASE, 1, output
+    )
+
+
+@pytest.mark.parametrize(
+    "old,new",
+    [
+        (":179: 4 >= 10", ":179: 5 >= 10"),
+        (":179: 4 >= 10", ":179: 4 >= 9"),
+        (":179: 4 >= 10", ":180: 4 >= 10"),
+        (":179: 1 >= 10", ":179: 2 >= 10"),
+        (":179: 1 >= 10", ":179: 1 >= 9"),
+        (":179: 1 >= 10", ":146: 1 >= 10"),
+    ],
+)
+def test_my9221_managed_setup_capture_rejects_other_values_bounds_and_lines(
+    old: str, new: str
+) -> None:
+    with pytest.raises(ValueError):
+        audit._validate_my9221_schedule_output(
+            "missing-data-setup-wait",
+            MY_SCHEDULE_CASE,
+            1,
+            my9221_actual_setup_transcript().replace(old, new, 1),
+        )
+
+
+@pytest.mark.parametrize(
+    "tail", ["", "fatal error: unrelated failure", "AddressSanitizer: bad access"]
+)
+def test_my9221_managed_setup_preamble_cannot_replace_required_one_ns_failure(
+    tail: str,
+) -> None:
+    output = my9221_actual_setup_transcript()
+    output = "\n".join(
+        line for line in output.splitlines() if ":179: 1 >= 10" not in line
+    )
+    with pytest.raises(ValueError):
+        audit._validate_my9221_schedule_output(
+            "missing-data-setup-wait", MY_SCHEDULE_CASE, 1, output + tail
+        )
+
+
+def test_my9221_managed_hold_derived_phase_and_datahold_families_only() -> None:
+    # Derived from unchanged real oracle lines169/180 and exact selected payload;
+    # parser validation only, pending actual captured hold-mutant execution.
+    output = (
+        f"FAIL: {MY_SCHEDULE_CASE} at ../../tests/fl/channels/spi_legacy_golden.cpp:870\n"
+        f"  ../../tests/fl/channels/spi_legacy_golden.cpp:169: 12 >= 50\n"
+        f"  ../../tests/fl/channels/spi_legacy_golden.cpp:180: 1 >= 10\n"
+        "[doctest] test cases: 1 | 0 passed | 1 failed\n"
+    )
+    audit._validate_my9221_schedule_output(
+        "missing-data-hold-phase-wait", MY_SCHEDULE_CASE, 1, output
+    )
+    for old, new in [
+        (":169:", ":146:"),
+        ("12 >= 50", "12 >= 49"),
+        (":180:", ":179:"),
+        ("1 >= 10", "2 >= 10"),
+    ]:
+        with pytest.raises(ValueError):
+            audit._validate_my9221_schedule_output(
+                "missing-data-hold-phase-wait",
+                MY_SCHEDULE_CASE,
+                1,
+                output.replace(old, new, 1),
+            )
+
+
+@pytest.mark.parametrize(
+    "changed",
+    [
+        "compiler",
+        "compiler-launcher",
+        "linker",
+        "bridge-linker",
+        "cache-launcher",
+        "python",
+        "ninja",
+        "loader",
+    ],
+)
+@pytest.mark.parametrize("when", ["before", "after"])
+def test_my9221_managed_tool_drift_retains_all_identities_before_rejection(
+    tmp_path: Path, changed: str, when: str
+) -> None:
+    from ci import software_spi_init_proof as proof
+
+    # Diagnostic serialization/control only: constructed identities confer no proof.
+    names = (
+        "compiler",
+        "compiler-launcher",
+        "linker",
+        "bridge-linker",
+        "cache-launcher",
+        "python",
+        "ninja",
+        "loader",
+    )
+    expected = {
+        name: proof.ToolIdentity(
+            tmp_path / name, digest(name.encode()), "fixture-version"
+        )
+        for name in names
+    }
+    before = dict(expected)
+    after = dict(expected)
+    drifted = before if when == "before" else after
+    drifted[changed] = proof.ToolIdentity(
+        tmp_path / changed, digest(b"changed"), "changed-version"
+    )
+    with pytest.raises(ValueError, match="tool"):
+        proof._verify_tool_identities(
+            tmp_path, "runtime-0-after", expected, before, after
+        )
+    record = json.loads((tmp_path / "tool-identities-runtime-0-after.json").read_text())
+    assert record["phase"] == "runtime-0-after"
+    assert record["changed_names"] == [changed]
+    for field, identities in (
+        ("expected", expected),
+        ("before", before),
+        ("after", after),
+    ):
+        assert set(record[field]) == set(names)
+        for name, identity in identities.items():
+            assert record[field][name] == {
+                "path": str(identity.path),
+                "sha256": identity.sha256,
+                "version": identity.version,
+            }
+    assert set(record) == {
+        "phase",
+        "changed_names",
+        "changed_fields",
+        "expected",
+        "before",
+        "after",
+    }
+    assert record["changed_fields"] == {changed: ["sha256", "version"]}
+    assert not (tmp_path / "proof.json").exists()
+
+
+def test_my9221_managed_bootstrap_tool_identities_retained_without_proof(
+    tmp_path: Path,
+) -> None:
+    from ci import software_spi_init_proof as proof
+
+    names = (
+        "compiler",
+        "compiler-launcher",
+        "linker",
+        "bridge-linker",
+        "cache-launcher",
+        "python",
+        "ninja",
+        "loader",
+    )
+    identities = {
+        name: proof.ToolIdentity(
+            tmp_path / name, digest(name.encode()), "fixture-version"
+        )
+        for name in names
+    }
+    proof._verify_tool_identities(
+        tmp_path, "bootstrap", identities, identities, identities
+    )
+    record = json.loads((tmp_path / "tool-identities-bootstrap.json").read_text())
+    assert record["changed_names"] == []
+    assert record["expected"] == record["before"] == record["after"]
+    assert set(record["expected"]) == set(names)
+    assert not (tmp_path / "proof.json").exists()

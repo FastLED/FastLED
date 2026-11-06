@@ -111581,12 +111581,13 @@
     "src/platforms/arm/giga/armpin.h": {
       "baseline_blob_oid": "47535dd2e245cbf18d0098d34ec34cf5fdee880b",
       "baseline_sha256": "98a45961bae471b3d9dbdb85a0ca3be029c6e0c939c0367e9b344252f2237fdb",
-      "disposition": "dependency",
+      "disposition": "positive",
       "role": "implementation",
       "findings": [
-        "stm32"
+        "stm32",
+        "giga-forced-fastpin-selection"
       ],
-      "reason": "Defines actual FastPin GPIO operations/register semantics. This source retains its own implementation identity even where a legacy copy resembles another file.",
+      "reason": "Defines actual FastPin GPIO operations/register semantics. This source retains its own implementation identity even where a legacy copy resembles another file. Targeted additional source-confirmed forced-selection concern #5071: explicit native FastPin specializations override the forced primary on the selected platform/variant. Actual forced fallback and timing qualification remain unresolved.",
       "source_evidence": [
         {
           "line": 4,
@@ -111667,6 +111668,10 @@
         {
           "line": 49,
           "text": "    inline static port_t mask() __attribute__ ((always_inline)) { return _MASK; }"
+        },
+        {
+          "line": 13,
+          "text": "#define _FL_DEFPIN(PIN, BIT, L) template<> class FastPin<PIN> : public _ARMPIN<PIN, BIT, 1 << BIT, _R(GPIO ## L)> {};"
         }
       ]
     },
@@ -111747,12 +111752,13 @@
     "src/platforms/arm/giga/fastpin_arm_giga.h": {
       "baseline_blob_oid": "76196b67ef993bd9a61f127aa2cf4f055ae52638",
       "baseline_sha256": "d33dcf3599e372f53da6b57c1b964c03b54cd6d6548dd4788cee203726c9d638",
-      "disposition": "dependency",
+      "disposition": "positive",
       "role": "pin-map",
       "findings": [
-        "stm32"
+        "stm32",
+        "giga-forced-fastpin-selection"
       ],
-      "reason": "Declares board-to-port/bit FastPin specializations/mapping. GPIO operation bodies live in a distinct template; mapping and package/core guards remain independent evidence.",
+      "reason": "Declares board-to-port/bit FastPin specializations/mapping. GPIO operation bodies live in a distinct template; mapping and package/core guards remain independent evidence. Targeted additional source-confirmed forced-selection concern #5071: explicit native FastPin specializations override the forced primary on the selected platform/variant. Actual forced fallback and timing qualification remain unresolved.",
       "source_evidence": [
         {
           "line": 6,
@@ -111789,6 +111795,578 @@
         {
           "line": 205,
           "text": "#endif // __INC_FASTPIN_ARM_STM32"
+        },
+        {
+          "line": 34,
+          "text": "_FL_DEFPIN(83, 0, A);"
+        },
+        {
+          "line": 35,
+          "text": "_FL_DEFPIN(66, 1, A);"
+        },
+        {
+          "line": 36,
+          "text": "_FL_DEFPIN(3, 2, A);"
+        },
+        {
+          "line": 37,
+          "text": "_FL_DEFPIN(2, 3, A);"
+        },
+        {
+          "line": 38,
+          "text": "_FL_DEFPIN(84, 4, A);"
+        },
+        {
+          "line": 39,
+          "text": "_FL_DEFPIN(85, 5, A);"
+        },
+        {
+          "line": 40,
+          "text": "_FL_DEFPIN(56, 6, A);"
+        },
+        {
+          "line": 41,
+          "text": "_FL_DEFPIN(5, 7, A);"
+        },
+        {
+          "line": 42,
+          "text": "//_FL_DEFPIN(UART7_RX, 8, A);"
+        },
+        {
+          "line": 43,
+          "text": "_FL_DEFPIN(1, 9, A);"
+        },
+        {
+          "line": 44,
+          "text": "//_FL_DEFPIN(BT_ON, 10, A);"
+        },
+        {
+          "line": 45,
+          "text": "//_FL_DEFPIN(USB-OTG-FS_DM, 11, A);"
+        },
+        {
+          "line": 46,
+          "text": "//_FL_DEFPIN(USB-OTG-FS_DP, 12, A);"
+        },
+        {
+          "line": 47,
+          "text": "//_FL_DEFPIN(SWDIO, 13, A);"
+        },
+        {
+          "line": 48,
+          "text": "//_FL_DEFPIN(SWCLK, 14, A);"
+        },
+        {
+          "line": 49,
+          "text": "//_FL_DEFPIN(U9 Power Switch, 15, A);"
+        },
+        {
+          "line": 52,
+          "text": "_FL_DEFPIN(78, 0, B);"
+        },
+        {
+          "line": 53,
+          "text": "_FL_DEFPIN(79, 1, B);"
+        },
+        {
+          "line": 54,
+          "text": "_FL_DEFPIN(47, 2, B);"
+        },
+        {
+          "line": 55,
+          "text": "_FL_DEFPIN(91, 3, B);"
+        },
+        {
+          "line": 56,
+          "text": "_FL_DEFPIN(7, 4, B);"
+        },
+        {
+          "line": 57,
+          "text": "_FL_DEFPIN(93, 5, B);"
+        },
+        {
+          "line": 58,
+          "text": "_FL_DEFPIN(101, 6, B);"
+        },
+        {
+          "line": 59,
+          "text": "_FL_DEFPIN(0, 7, B);"
+        },
+        {
+          "line": 60,
+          "text": "_FL_DEFPIN(8, 8, B);"
+        },
+        {
+          "line": 61,
+          "text": "_FL_DEFPIN(9, 9, B);"
+        },
+        {
+          "line": 62,
+          "text": "//_FL_DEFPIN(WL_ON, 10, B);"
+        },
+        {
+          "line": 63,
+          "text": "_FL_DEFPIN(20, 11, B);"
+        },
+        {
+          "line": 64,
+          "text": "_FL_DEFPIN(74, 12, B);"
+        },
+        {
+          "line": 65,
+          "text": "_FL_DEFPIN(94, 13, B);"
+        },
+        {
+          "line": 68,
+          "text": "_FL_DEFPIN(82, 0, C);"
+        },
+        {
+          "line": 69,
+          "text": "_FL_DEFPIN(73, 1, C);"
+        },
+        {
+          "line": 70,
+          "text": "_FL_DEFPIN(81, 2, C);"
+        },
+        {
+          "line": 71,
+          "text": "_FL_DEFPIN(80, 3, C);"
+        },
+        {
+          "line": 72,
+          "text": "_FL_DEFPIN(76, 4, C);"
+        },
+        {
+          "line": 73,
+          "text": "_FL_DEFPIN(77, 5, C);"
+        },
+        {
+          "line": 74,
+          "text": "_FL_DEFPIN(68, 6, C);"
+        },
+        {
+          "line": 75,
+          "text": "_FL_DEFPIN(15, 7, C);"
+        },
+        {
+          "line": 76,
+          "text": "//_FL_DEFPIN(D0, 8, C);"
+        },
+        {
+          "line": 77,
+          "text": "//_FL_DEFPIN(D1, 9, C);"
+        },
+        {
+          "line": 78,
+          "text": "//_FL_DEFPIN(D2, 10, C);"
+        },
+        {
+          "line": 79,
+          "text": "//_FL_DEFPIN(D3, 11, C);"
+        },
+        {
+          "line": 80,
+          "text": "//_FL_DEFPIN(CLK, 12, C);"
+        },
+        {
+          "line": 81,
+          "text": "//_FL_DEFPIN(BOOT0_BUTTON, 13, C);"
+        },
+        {
+          "line": 84,
+          "text": "//_FL_DEFPIN(FMC_D3, 0, D);"
+        },
+        {
+          "line": 85,
+          "text": "//_FL_DEFPIN(FMC_D2, 1, D);"
+        },
+        {
+          "line": 86,
+          "text": "//_FL_DEFPIN(SDMMC1_CMD, 2, D);"
+        },
+        {
+          "line": 87,
+          "text": "_FL_DEFPIN(75, 3, D);"
+        },
+        {
+          "line": 88,
+          "text": "_FL_DEFPIN(67, 4, D);"
+        },
+        {
+          "line": 89,
+          "text": "_FL_DEFPIN(18, 5, D);"
+        },
+        {
+          "line": 90,
+          "text": "_FL_DEFPIN(19, 6, D);"
+        },
+        {
+          "line": 91,
+          "text": "_FL_DEFPIN(90, 7, D);"
+        },
+        {
+          "line": 92,
+          "text": "//_FL_DEFPIN(FMC_DQ13, 8, D);"
+        },
+        {
+          "line": 93,
+          "text": "//_FL_DEFPIN(FMC_DQ14, 9, D);"
+        },
+        {
+          "line": 94,
+          "text": "//_FL_DEFPIN(FMC_DQ15, 10, D);"
+        },
+        {
+          "line": 95,
+          "text": "//_FL_DEFPIN(SI/IO0, 11, D);"
+        },
+        {
+          "line": 96,
+          "text": "//_FL_DEFPIN(SO/IO1, 12, D);"
+        },
+        {
+          "line": 97,
+          "text": "_FL_DEFPIN(6, 13, D);"
+        },
+        {
+          "line": 98,
+          "text": "//_FL_DEFPIN(FMC_D0, 14, D);"
+        },
+        {
+          "line": 99,
+          "text": "//_FL_DEFPIN(FMC_D1, 14, D);"
+        },
+        {
+          "line": 102,
+          "text": "//_FL_DEFPIN(FMC_DQML, 0, E);"
+        },
+        {
+          "line": 103,
+          "text": "//_FL_DEFPIN(FMC_DQMH, 1, E);"
+        },
+        {
+          "line": 104,
+          "text": "//_FL_DEFPIN(QUADSPI_BK2-IO1, 2, E);"
+        },
+        {
+          "line": 105,
+          "text": "_FL_DEFPIN(88, 3, E);"
+        },
+        {
+          "line": 106,
+          "text": "_FL_DEFPIN(49, 4, E);"
+        },
+        {
+          "line": 107,
+          "text": "_FL_DEFPIN(51, 5, E);"
+        },
+        {
+          "line": 108,
+          "text": "_FL_DEFPIN(40, 6, E);"
+        },
+        {
+          "line": 109,
+          "text": "//_FL_DEFPIN(FMC_DQ4, 7, E);"
+        },
+        {
+          "line": 110,
+          "text": "//_FL_DEFPIN(FMC_DQ5, 8, E);"
+        },
+        {
+          "line": 111,
+          "text": "//_FL_DEFPIN(FMC_DQ6, 9, E);"
+        },
+        {
+          "line": 112,
+          "text": "//_FL_DEFPIN(FMC_DQ7, 10, E);"
+        },
+        {
+          "line": 113,
+          "text": "//_FL_DEFPIN(FMC_DQ8, 11, E);"
+        },
+        {
+          "line": 114,
+          "text": "//_FL_DEFPIN(FMC_DQ9, 12, E);"
+        },
+        {
+          "line": 115,
+          "text": "//_FL_DEFPIN(FMC_DQ10, 13, E);"
+        },
+        {
+          "line": 116,
+          "text": "//_FL_DEFPIN(FMC_DQ11, 14, E);"
+        },
+        {
+          "line": 117,
+          "text": "//_FL_DEFPIN(FMC_DQ2, 15, E);"
+        },
+        {
+          "line": 120,
+          "text": "//_FL_DEFPIN(FMC_A10, 0, G);"
+        },
+        {
+          "line": 121,
+          "text": "//_FL_DEFPIN(FMC_A11, 1, G);"
+        },
+        {
+          "line": 122,
+          "text": "//_FL_DEFPIN(FMC_A12, 2, G);"
+        },
+        {
+          "line": 123,
+          "text": "//_FL_DEFPIN(BT_WAKE_H, 3, G);"
+        },
+        {
+          "line": 124,
+          "text": "//_FL_DEFPIN(FMC_BA0, 4, G);"
+        },
+        {
+          "line": 125,
+          "text": "//_FL_DEFPIN(FMC_BA1, 5, G);"
+        },
+        {
+          "line": 126,
+          "text": "//_FL_DEFPIN(CS, 6, G);"
+        },
+        {
+          "line": 127,
+          "text": "_FL_DEFPIN(53, 7, G);"
+        },
+        {
+          "line": 128,
+          "text": "_FL_DEFPIN(89, 9, G);"
+        },
+        {
+          "line": 129,
+          "text": "_FL_DEFPIN(44, 10, G);"
+        },
+        {
+          "line": 130,
+          "text": "_FL_DEFPIN(62, 11, G);"
+        },
+        {
+          "line": 131,
+          "text": "_FL_DEFPIN(24, 12, G);"
+        },
+        {
+          "line": 132,
+          "text": "_FL_DEFPIN(14, 14, G);"
+        },
+        {
+          "line": 133,
+          "text": "//_FL_DEFPIN(FMC_SDNCAS, 15, G);"
+        },
+        {
+          "line": 136,
+          "text": "//_FL_DEFPIN(FMC_SDCKE0, 2, H);"
+        },
+        {
+          "line": 137,
+          "text": "//_FL_DEFPIN(FMC_SDNCS, 3, H);"
+        },
+        {
+          "line": 138,
+          "text": "_FL_DEFPIN(21, 4, H);"
+        },
+        {
+          "line": 139,
+          "text": "//_FL_DEFPIN(FMC_SDNWE, 5, H);"
+        },
+        {
+          "line": 140,
+          "text": "_FL_DEFPIN(13, 6, H);"
+        },
+        {
+          "line": 141,
+          "text": "//_FL_DEFPIN(BT_WAKE_D, 7, H);"
+        },
+        {
+          "line": 142,
+          "text": "_FL_DEFPIN(55, 8, H);"
+        },
+        {
+          "line": 143,
+          "text": "_FL_DEFPIN(65, 9, H);"
+        },
+        {
+          "line": 144,
+          "text": "_FL_DEFPIN(64, 10, H);"
+        },
+        {
+          "line": 145,
+          "text": "_FL_DEFPIN(63, 11, H);"
+        },
+        {
+          "line": 146,
+          "text": "_FL_DEFPIN(102, 12, H);"
+        },
+        {
+          "line": 147,
+          "text": "_FL_DEFPIN(16, 13, H);"
+        },
+        {
+          "line": 148,
+          "text": "_FL_DEFPIN(61, 14, H);"
+        },
+        {
+          "line": 149,
+          "text": "_FL_DEFPIN(46, 15, H);"
+        },
+        {
+          "line": 152,
+          "text": "_FL_DEFPIN(69, 0, I);"
+        },
+        {
+          "line": 153,
+          "text": "_FL_DEFPIN(70, 1, I);"
+        },
+        {
+          "line": 154,
+          "text": "_FL_DEFPIN(71, 2, I);"
+        },
+        {
+          "line": 155,
+          "text": "_FL_DEFPIN(72, 3, I);"
+        },
+        {
+          "line": 156,
+          "text": "_FL_DEFPIN(60, 4, I);"
+        },
+        {
+          "line": 157,
+          "text": "_FL_DEFPIN(54, 5, I);"
+        },
+        {
+          "line": 158,
+          "text": "_FL_DEFPIN(59, 6, I);"
+        },
+        {
+          "line": 159,
+          "text": "_FL_DEFPIN(58, 7, I);"
+        },
+        {
+          "line": 160,
+          "text": "_FL_DEFPIN(17, 9, I);"
+        },
+        {
+          "line": 161,
+          "text": "_FL_DEFPIN(43, 10, I);"
+        },
+        {
+          "line": 162,
+          "text": "_FL_DEFPIN(50, 11, I);"
+        },
+        {
+          "line": 163,
+          "text": "_FL_DEFPIN(86, 12, I);"
+        },
+        {
+          "line": 164,
+          "text": "_FL_DEFPIN(45, 13, I);"
+        },
+        {
+          "line": 165,
+          "text": "_FL_DEFPIN(39, 14, I);"
+        },
+        {
+          "line": 166,
+          "text": "_FL_DEFPIN(42, 15, I);"
+        },
+        {
+          "line": 169,
+          "text": "_FL_DEFPIN(25, 0, J);"
+        },
+        {
+          "line": 170,
+          "text": "_FL_DEFPIN(27, 1, J);"
+        },
+        {
+          "line": 171,
+          "text": "_FL_DEFPIN(29, 2, J);"
+        },
+        {
+          "line": 172,
+          "text": "_FL_DEFPIN(31, 3, J);"
+        },
+        {
+          "line": 173,
+          "text": "_FL_DEFPIN(33, 4, J);"
+        },
+        {
+          "line": 174,
+          "text": "_FL_DEFPIN(35, 5, J);"
+        },
+        {
+          "line": 175,
+          "text": "_FL_DEFPIN(37, 6, J);"
+        },
+        {
+          "line": 176,
+          "text": "_FL_DEFPIN(38, 7, J);"
+        },
+        {
+          "line": 177,
+          "text": "_FL_DEFPIN(4, 8, J);"
+        },
+        {
+          "line": 178,
+          "text": "_FL_DEFPIN(57, 9, J);"
+        },
+        {
+          "line": 179,
+          "text": "_FL_DEFPIN(11, 10, J);"
+        },
+        {
+          "line": 180,
+          "text": "_FL_DEFPIN(12, 11, J);"
+        },
+        {
+          "line": 181,
+          "text": "_FL_DEFPIN(22, 12, J);"
+        },
+        {
+          "line": 182,
+          "text": "_FL_DEFPIN(87, 13, J);"
+        },
+        {
+          "line": 183,
+          "text": "_FL_DEFPIN(26, 14, J);"
+        },
+        {
+          "line": 184,
+          "text": "_FL_DEFPIN(28, 15, J);"
+        },
+        {
+          "line": 187,
+          "text": "_FL_DEFPIN(48, 0, K);"
+        },
+        {
+          "line": 188,
+          "text": "_FL_DEFPIN(10, 1, K);"
+        },
+        {
+          "line": 189,
+          "text": "_FL_DEFPIN(52, 2, K);"
+        },
+        {
+          "line": 190,
+          "text": "_FL_DEFPIN(30, 3, K);"
+        },
+        {
+          "line": 191,
+          "text": "_FL_DEFPIN(32, 4, K);"
+        },
+        {
+          "line": 192,
+          "text": "_FL_DEFPIN(34, 5, K);"
+        },
+        {
+          "line": 193,
+          "text": "_FL_DEFPIN(36, 6, K);"
+        },
+        {
+          "line": 194,
+          "text": "_FL_DEFPIN(41, 7, K);"
         }
       ]
     },
@@ -114798,9 +115376,10 @@
       "role": "implementation",
       "findings": [
         "lpc-legacy",
-        "lpc-modern"
+        "lpc-modern",
+        "lpc-modern-forced-fastpin-selection"
       ],
-      "reason": "Defines actual FastPin GPIO operations/register semantics. This source retains its own implementation identity even where a legacy copy resembles another file. Required current registry source association: #5042 (lpc-modern); unresolved production/configuration and restored-defect evidence remains required.",
+      "reason": "Defines actual FastPin GPIO operations/register semantics. This source retains its own implementation identity even where a legacy copy resembles another file. Required current registry source association: #5042 (lpc-modern); unresolved production/configuration and restored-defect evidence remains required. Targeted additional source-confirmed forced-selection concern #5073: explicit native FastPin specializations override the forced primary on the selected platform/variant. Actual forced fallback and timing qualification remain unresolved.",
       "source_evidence": [
         {
           "line": 7,
@@ -114949,6 +115528,42 @@
         {
           "line": 135,
           "text": "    inline static port_t     mask()  __attribute__((always_inline)) { return _MASK; }"
+        },
+        {
+          "line": 142,
+          "text": "#define _FL_DEFPIN(PIN) template<> class FastPin<PIN> : public _ARMPIN<PIN, (1u << (PIN))> {};"
+        },
+        {
+          "line": 148,
+          "text": "_FL_DEFPIN(0);  _FL_DEFPIN(1);  _FL_DEFPIN(2);  _FL_DEFPIN(3);"
+        },
+        {
+          "line": 149,
+          "text": "_FL_DEFPIN(4);  _FL_DEFPIN(5);  _FL_DEFPIN(6);  _FL_DEFPIN(7);"
+        },
+        {
+          "line": 150,
+          "text": "_FL_DEFPIN(8);  _FL_DEFPIN(9);  _FL_DEFPIN(10); _FL_DEFPIN(11);"
+        },
+        {
+          "line": 151,
+          "text": "_FL_DEFPIN(12); _FL_DEFPIN(13); _FL_DEFPIN(14); _FL_DEFPIN(15);"
+        },
+        {
+          "line": 152,
+          "text": "_FL_DEFPIN(16); _FL_DEFPIN(17); _FL_DEFPIN(18); _FL_DEFPIN(19);"
+        },
+        {
+          "line": 153,
+          "text": "_FL_DEFPIN(20); _FL_DEFPIN(21); _FL_DEFPIN(22); _FL_DEFPIN(23);"
+        },
+        {
+          "line": 154,
+          "text": "_FL_DEFPIN(24); _FL_DEFPIN(25); _FL_DEFPIN(26); _FL_DEFPIN(27);"
+        },
+        {
+          "line": 155,
+          "text": "_FL_DEFPIN(28); _FL_DEFPIN(29); _FL_DEFPIN(30); _FL_DEFPIN(31);"
         }
       ]
     },
@@ -114958,9 +115573,10 @@
       "disposition": "positive",
       "role": "implementation",
       "findings": [
-        "lpc-legacy"
+        "lpc-legacy",
+        "lpc-legacy-forced-fastpin-selection"
       ],
-      "reason": "Defines actual FastPin GPIO operations/register semantics. This source retains its own implementation identity even where a legacy copy resembles another file. Required current registry source association: #5043 (lpc-legacy); unresolved production/configuration and restored-defect evidence remains required.",
+      "reason": "Defines actual FastPin GPIO operations/register semantics. This source retains its own implementation identity even where a legacy copy resembles another file. Required current registry source association: #5043 (lpc-legacy); unresolved production/configuration and restored-defect evidence remains required. Targeted additional source-confirmed forced-selection concern #5074: explicit native FastPin specializations override the forced primary on the selected platform/variant. Actual forced fallback and timing qualification remain unresolved.",
       "source_evidence": [
         {
           "line": 7,
@@ -115097,6 +115713,62 @@
         {
           "line": 151,
           "text": "    inline static port_t     mask()  __attribute__((always_inline)) { return _MASK; }"
+        },
+        {
+          "line": 158,
+          "text": "#define _FL_DEFPIN_LPC11LEGACY(PIN) \\"
+        },
+        {
+          "line": 159,
+          "text": "    template<> class FastPin<PIN> : public _ARMPIN_LPC11LEGACY<PIN, \\"
+        },
+        {
+          "line": 164,
+          "text": "_FL_DEFPIN_LPC11LEGACY(0);  _FL_DEFPIN_LPC11LEGACY(1);  _FL_DEFPIN_LPC11LEGACY(2);  _FL_DEFPIN_LPC11LEGACY(3);"
+        },
+        {
+          "line": 165,
+          "text": "_FL_DEFPIN_LPC11LEGACY(4);  _FL_DEFPIN_LPC11LEGACY(5);  _FL_DEFPIN_LPC11LEGACY(6);  _FL_DEFPIN_LPC11LEGACY(7);"
+        },
+        {
+          "line": 166,
+          "text": "_FL_DEFPIN_LPC11LEGACY(8);  _FL_DEFPIN_LPC11LEGACY(9);  _FL_DEFPIN_LPC11LEGACY(10); _FL_DEFPIN_LPC11LEGACY(11);"
+        },
+        {
+          "line": 168,
+          "text": "_FL_DEFPIN_LPC11LEGACY(12); _FL_DEFPIN_LPC11LEGACY(13); _FL_DEFPIN_LPC11LEGACY(14); _FL_DEFPIN_LPC11LEGACY(15);"
+        },
+        {
+          "line": 169,
+          "text": "_FL_DEFPIN_LPC11LEGACY(16); _FL_DEFPIN_LPC11LEGACY(17); _FL_DEFPIN_LPC11LEGACY(18); _FL_DEFPIN_LPC11LEGACY(19);"
+        },
+        {
+          "line": 170,
+          "text": "_FL_DEFPIN_LPC11LEGACY(20); _FL_DEFPIN_LPC11LEGACY(21); _FL_DEFPIN_LPC11LEGACY(22); _FL_DEFPIN_LPC11LEGACY(23);"
+        },
+        {
+          "line": 172,
+          "text": "_FL_DEFPIN_LPC11LEGACY(24); _FL_DEFPIN_LPC11LEGACY(25); _FL_DEFPIN_LPC11LEGACY(26); _FL_DEFPIN_LPC11LEGACY(27);"
+        },
+        {
+          "line": 173,
+          "text": "_FL_DEFPIN_LPC11LEGACY(28); _FL_DEFPIN_LPC11LEGACY(29); _FL_DEFPIN_LPC11LEGACY(30); _FL_DEFPIN_LPC11LEGACY(31);"
+        },
+        {
+          "line": 174,
+          "text": "_FL_DEFPIN_LPC11LEGACY(32); _FL_DEFPIN_LPC11LEGACY(33); _FL_DEFPIN_LPC11LEGACY(34); _FL_DEFPIN_LPC11LEGACY(35);"
+        },
+        {
+          "line": 176,
+          "text": "_FL_DEFPIN_LPC11LEGACY(36); _FL_DEFPIN_LPC11LEGACY(37); _FL_DEFPIN_LPC11LEGACY(38); _FL_DEFPIN_LPC11LEGACY(39);"
+        },
+        {
+          "line": 177,
+          "text": "_FL_DEFPIN_LPC11LEGACY(40); _FL_DEFPIN_LPC11LEGACY(41); _FL_DEFPIN_LPC11LEGACY(42); _FL_DEFPIN_LPC11LEGACY(43);"
+        },
+        {
+          "line": 178,
+          "text": "_FL_DEFPIN_LPC11LEGACY(44); _FL_DEFPIN_LPC11LEGACY(45); _FL_DEFPIN_LPC11LEGACY(46); _FL_DEFPIN_LPC11LEGACY(47);"
         }
       ]
     },
@@ -116651,9 +117323,10 @@
       "disposition": "positive",
       "role": "implementation",
       "findings": [
-        "mgm240"
+        "mgm240",
+        "mgm240-forced-fastpin-selection"
       ],
-      "reason": "Defines actual FastPin GPIO operations/register semantics. This source retains its own implementation identity even where a legacy copy resembles another file. Required current registry source association: #5041 (mgm240); unresolved production/configuration and restored-defect evidence remains required.",
+      "reason": "Defines actual FastPin GPIO operations/register semantics. This source retains its own implementation identity even where a legacy copy resembles another file. Required current registry source association: #5041 (mgm240); unresolved production/configuration and restored-defect evidence remains required. Targeted additional source-confirmed forced-selection concern #5072: explicit native FastPin specializations override the forced primary on the selected platform/variant. Actual forced fallback and timing qualification remain unresolved.",
       "source_evidence": [
         {
           "line": 17,
@@ -116802,6 +117475,114 @@
         {
           "line": 140,
           "text": "        return GPIO_PinInGet(_PORT_STRUCT::port(), _PIN_NUMBER) != 0;"
+        },
+        {
+          "line": 150,
+          "text": "#define _FL_DEFPIN(PIN, BIT, PORT_LETTER, MASK) template<> class FastPin<PIN> : public _ARMPIN<MASK, __generated_struct_GPIO_PORT_##PORT_LETTER, PORT_NUM_##PORT_LETTER, BIT> {};"
+        },
+        {
+          "line": 162,
+          "text": "_FL_DEFPIN(0,  0, A, (1 << 0));   // D0/RX  - PA00"
+        },
+        {
+          "line": 163,
+          "text": "_FL_DEFPIN(1,  1, A, (1 << 1));   // D1/TX  - PA01"
+        },
+        {
+          "line": 164,
+          "text": "_FL_DEFPIN(2,  2, A, (1 << 2));   // D2     - PA02"
+        },
+        {
+          "line": 165,
+          "text": "_FL_DEFPIN(3,  3, A, (1 << 3));   // D3/PWM - PA03"
+        },
+        {
+          "line": 166,
+          "text": "_FL_DEFPIN(4,  4, A, (1 << 4));   // D4     - PA04"
+        },
+        {
+          "line": 167,
+          "text": "_FL_DEFPIN(5,  5, A, (1 << 5));   // D5/PWM - PA05"
+        },
+        {
+          "line": 168,
+          "text": "_FL_DEFPIN(6,  6, A, (1 << 6));   // D6/PWM - PA06"
+        },
+        {
+          "line": 169,
+          "text": "_FL_DEFPIN(7,  7, A, (1 << 7));   // D7     - PA07"
+        },
+        {
+          "line": 170,
+          "text": "_FL_DEFPIN(8,  0, B, (1 << 0));   // D8     - PB00"
+        },
+        {
+          "line": 171,
+          "text": "_FL_DEFPIN(9,  1, B, (1 << 1));   // D9/PWM - PB01"
+        },
+        {
+          "line": 172,
+          "text": "_FL_DEFPIN(10, 2, B, (1 << 2));   // D10/SS - PB02"
+        },
+        {
+          "line": 173,
+          "text": "_FL_DEFPIN(11, 3, B, (1 << 3));   // D11/MOSI - PB03"
+        },
+        {
+          "line": 174,
+          "text": "_FL_DEFPIN(12, 4, B, (1 << 4));   // D12/MISO - PB04"
+        },
+        {
+          "line": 175,
+          "text": "_FL_DEFPIN(13, 5, B, (1 << 5));   // D13/SCK/LED - PB05"
+        },
+        {
+          "line": 178,
+          "text": "_FL_DEFPIN(14, 0, C, (1 << 0));   // A0 - PC00"
+        },
+        {
+          "line": 179,
+          "text": "_FL_DEFPIN(15, 1, C, (1 << 1));   // A1 - PC01"
+        },
+        {
+          "line": 180,
+          "text": "_FL_DEFPIN(16, 2, C, (1 << 2));   // A2 - PC02"
+        },
+        {
+          "line": 181,
+          "text": "_FL_DEFPIN(17, 3, C, (1 << 3));   // A3 - PC03"
+        },
+        {
+          "line": 182,
+          "text": "_FL_DEFPIN(18, 4, C, (1 << 4));   // A4/SDA - PC04"
+        },
+        {
+          "line": 183,
+          "text": "_FL_DEFPIN(19, 5, C, (1 << 5));   // A5/SCL - PC05"
+        },
+        {
+          "line": 184,
+          "text": "_FL_DEFPIN(20, 6, C, (1 << 6));   // A6 - PC06"
+        },
+        {
+          "line": 185,
+          "text": "_FL_DEFPIN(21, 7, C, (1 << 7));   // A7 - PC07"
+        },
+        {
+          "line": 188,
+          "text": "_FL_DEFPIN(22, 0, D, (1 << 0));   // D22 - PD00"
+        },
+        {
+          "line": 189,
+          "text": "_FL_DEFPIN(23, 1, D, (1 << 1));   // D23 - PD01"
+        },
+        {
+          "line": 190,
+          "text": "_FL_DEFPIN(24, 2, D, (1 << 2));   // D24 - PD02"
+        },
+        {
+          "line": 191,
+          "text": "_FL_DEFPIN(25, 3, D, (1 << 3));   // D25 - PD03"
         }
       ]
     },
@@ -118201,12 +118982,13 @@
     "src/platforms/arm/nrf51/fastpin_arm_nrf51.h": {
       "baseline_blob_oid": "04218f0a2660e34186ca5064b75269384d002d08",
       "baseline_sha256": "9a06b3acfa64cae167268c02a7c1760066af6eb1842d08f0c175d285979d43c9",
-      "disposition": "dependency",
+      "disposition": "positive",
       "role": "implementation",
       "findings": [
-        "nrf51"
+        "nrf51",
+        "nrf51-forced-fastpin-selection"
       ],
-      "reason": "Defines actual FastPin GPIO operations/register semantics. This source retains its own implementation identity even where a legacy copy resembles another file.",
+      "reason": "Defines actual FastPin GPIO operations/register semantics. This source retains its own implementation identity even where a legacy copy resembles another file. Targeted additional source-confirmed forced-selection concern #5069: explicit native FastPin specializations override the forced primary on the selected platform/variant. Actual forced fallback and timing qualification remain unresolved.",
       "source_evidence": [
         {
           "line": 7,
@@ -118339,6 +119121,46 @@
         {
           "line": 104,
           "text": "    inline static port_t mask() __attribute__ ((always_inline)) { return _MASK; }"
+        },
+        {
+          "line": 61,
+          "text": "#define _FL_DEFPIN(PIN) template<> class FastPin<PIN> : public _ARMPIN<PIN, 1 << PIN, \\"
+        },
+        {
+          "line": 110,
+          "text": "#define _FL_DEFPIN(PIN) template<> class FastPin<PIN> : public _ARMPIN<PIN, 1 << PIN> {};"
+        },
+        {
+          "line": 115,
+          "text": "_FL_DEFPIN(0); _FL_DEFPIN(1); _FL_DEFPIN(2); _FL_DEFPIN(3);"
+        },
+        {
+          "line": 116,
+          "text": "_FL_DEFPIN(4); _FL_DEFPIN(5); _FL_DEFPIN(6); _FL_DEFPIN(7);"
+        },
+        {
+          "line": 117,
+          "text": "_FL_DEFPIN(8); _FL_DEFPIN(9); _FL_DEFPIN(10); _FL_DEFPIN(11);"
+        },
+        {
+          "line": 118,
+          "text": "_FL_DEFPIN(12); _FL_DEFPIN(13); _FL_DEFPIN(14); _FL_DEFPIN(15);"
+        },
+        {
+          "line": 119,
+          "text": "_FL_DEFPIN(16); _FL_DEFPIN(17); _FL_DEFPIN(18); _FL_DEFPIN(19);"
+        },
+        {
+          "line": 120,
+          "text": "_FL_DEFPIN(20); _FL_DEFPIN(21); _FL_DEFPIN(22); _FL_DEFPIN(23);"
+        },
+        {
+          "line": 121,
+          "text": "_FL_DEFPIN(24); _FL_DEFPIN(25); _FL_DEFPIN(26); _FL_DEFPIN(27);"
+        },
+        {
+          "line": 122,
+          "text": "_FL_DEFPIN(28); _FL_DEFPIN(29); _FL_DEFPIN(30); _FL_DEFPIN(31);"
         }
       ]
     },
@@ -119184,12 +120006,13 @@
     "src/platforms/arm/nrf52/fastpin_arm_nrf52_variants.h": {
       "baseline_blob_oid": "00932decc095c6c54693d95d14234e526e460dfc",
       "baseline_sha256": "d1874d37698c26ce1bd1f1954097dd093e18efba15391a4235b4d4cbe3d3605e",
-      "disposition": "dependency",
+      "disposition": "positive",
       "role": "pin-map",
       "findings": [
-        "nrf52"
+        "nrf52",
+        "nrf52-variants-forced-fastpin-selection"
       ],
-      "reason": "Declares board-to-port/bit FastPin specializations/mapping. GPIO operation bodies live in a distinct template; mapping and package/core guards remain independent evidence.",
+      "reason": "Declares board-to-port/bit FastPin specializations/mapping. GPIO operation bodies live in a distinct template; mapping and package/core guards remain independent evidence. Targeted additional source-confirmed forced-selection concern #5070: explicit native FastPin specializations override the forced primary on the selected platform/variant. Actual forced fallback and timing qualification remain unresolved.",
       "source_evidence": [
         {
           "line": 4,
@@ -119766,6 +120589,2738 @@
         {
           "line": 1266,
           "text": "#endif // __FASTPIN_ARM_NRF52_VARIANTS_H"
+        },
+        {
+          "line": 32,
+          "text": "//     _FL_DEFPIN(3, 15, 1);"
+        },
+        {
+          "line": 33,
+          "text": "//     _FL_DEFPIN(3, 47, 1);"
+        },
+        {
+          "line": 36,
+          "text": "//     _DEFPIN_ARM_IDENTITY_P1(47);"
+        },
+        {
+          "line": 37,
+          "text": "//     _FL_DEFPIN(47, 15, 1);"
+        },
+        {
+          "line": 38,
+          "text": "//     _FL_DEFPIN(47, 47, 1);"
+        },
+        {
+          "line": 42,
+          "text": "    template<> class fl::FastPin<ARDUINO_PIN> :              \\"
+        },
+        {
+          "line": 51,
+          "text": "#define _FL_DEFPIN(ARDUINO_PIN, BOARD_PIN, BOARD_PORT)   \\"
+        },
+        {
+          "line": 52,
+          "text": "    template<> class fl::FastPin<ARDUINO_PIN> :              \\"
+        },
+        {
+          "line": 61,
+          "text": "#define _DEFPIN_ARM_IDENTITY_P0(ARDUINO_PIN)      \\"
+        },
+        {
+          "line": 62,
+          "text": "    template<> class fl::FastPin<ARDUINO_PIN> :       \\"
+        },
+        {
+          "line": 71,
+          "text": "#define _DEFPIN_ARM_IDENTITY_P1(ARDUINO_PIN)      \\"
+        },
+        {
+          "line": 72,
+          "text": "    template<> class fl::FastPin<ARDUINO_PIN> :       \\"
+        },
+        {
+          "line": 106,
+          "text": "    #define _FL_DEFPIN_NFC(ARDUINO_PIN, BOARD_PIN, BOARD_PORT) \\"
+        },
+        {
+          "line": 107,
+          "text": "        _FL_DEFPIN(ARDUINO_PIN, BOARD_PIN, BOARD_PORT)"
+        },
+        {
+          "line": 109,
+          "text": "    #define _FL_DEFPIN_NFC(ARDUINO_PIN, BOARD_PIN, BOARD_PORT) \\"
+        },
+        {
+          "line": 114,
+          "text": "    #define _FL_DEFPIN_USR_LED(ARDUINO_PIN, BOARD_PIN, BOARD_PORT) \\"
+        },
+        {
+          "line": 115,
+          "text": "        _FL_DEFPIN(ARDUINO_PIN, BOARD_PIN, BOARD_PORT)"
+        },
+        {
+          "line": 117,
+          "text": "    #define _FL_DEFPIN_USR_LED(ARDUINO_PIN, BOARD_PIN, BOARD_PORT) \\"
+        },
+        {
+          "line": 134,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0( 0); // xtal 1"
+        },
+        {
+          "line": 135,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0( 1); // xtal 2"
+        },
+        {
+          "line": 136,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0( 2); // a0"
+        },
+        {
+          "line": 137,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0( 3); // a1"
+        },
+        {
+          "line": 138,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0( 4); // a2"
+        },
+        {
+          "line": 139,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0( 5); // a3"
+        },
+        {
+          "line": 140,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0( 6); // TXD"
+        },
+        {
+          "line": 141,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0( 7); // GPIO #7"
+        },
+        {
+          "line": 142,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0( 8); // RXD"
+        },
+        {
+          "line": 143,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0( 9); // NFC1"
+        },
+        {
+          "line": 144,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0(10); // NFC2"
+        },
+        {
+          "line": 145,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0(11); // GPIO #11"
+        },
+        {
+          "line": 146,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0(12); // SCK"
+        },
+        {
+          "line": 147,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0(13); // MOSI"
+        },
+        {
+          "line": 148,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0(14); // MISO"
+        },
+        {
+          "line": 149,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0(15); // GPIO #15"
+        },
+        {
+          "line": 150,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0(16); // GPIO #16"
+        },
+        {
+          "line": 151,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0(17); // LED #1 (red)"
+        },
+        {
+          "line": 152,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0(18); // SWO"
+        },
+        {
+          "line": 153,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0(19); // LED #2 (blue)"
+        },
+        {
+          "line": 154,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0(20); // DFU"
+        },
+        {
+          "line": 155,
+          "text": "    // _DEFPIN_ARM_IDENTITY_P0(21); // Reset -- not valid to use for FastLED?"
+        },
+        {
+          "line": 156,
+          "text": "    // _DEFPIN_ARM_IDENTITY_P0(22); // Factory Reset -- not vaild to use for FastLED?"
+        },
+        {
+          "line": 157,
+          "text": "    // _DEFPIN_ARM_IDENTITY_P0(23); // N/A"
+        },
+        {
+          "line": 158,
+          "text": "    // _DEFPIN_ARM_IDENTITY_P0(24); // N/A"
+        },
+        {
+          "line": 159,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0(25); // SDA"
+        },
+        {
+          "line": 160,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0(26); // SCL"
+        },
+        {
+          "line": 161,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0(27); // GPIO #27"
+        },
+        {
+          "line": 162,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0(28); // A4"
+        },
+        {
+          "line": 163,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0(29); // A5"
+        },
+        {
+          "line": 164,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0(30); // A6"
+        },
+        {
+          "line": 165,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0(31); // A7"
+        },
+        {
+          "line": 182,
+          "text": "    _FL_DEFPIN( 8, 13, 0); // P0.13 -- D8 / Neopixels"
+        },
+        {
+          "line": 192,
+          "text": "    // _FL_DEFPIN(14, 26, 0); // P0.26 -- A0   / D12  / Audio Out"
+        },
+        {
+          "line": 193,
+          "text": "    _FL_DEFPIN(15,  2, 0);    // P0.02 -- A1   /  D6"
+        },
+        {
+          "line": 194,
+          "text": "    _FL_DEFPIN(16, 29, 0);    // P0.29 -- A2   /  D9"
+        },
+        {
+          "line": 195,
+          "text": "    _FL_DEFPIN(17,  3, 0);    // P0.03 -- A3   / D10"
+        },
+        {
+          "line": 196,
+          "text": "    _FL_DEFPIN(18,  4, 0);    // P0.04 -- A4   /  D3  / SCL"
+        },
+        {
+          "line": 197,
+          "text": "    _FL_DEFPIN(19,  5, 0);    // P0.05 -- A5   /  D2  / SDA"
+        },
+        {
+          "line": 198,
+          "text": "    _FL_DEFPIN(20, 30, 0);    // P0.30 -- A6   /  D0  / UART RX"
+        },
+        {
+          "line": 199,
+          "text": "    _FL_DEFPIN(21, 14, 0);    // P0.14 -- AREF /  D1  / UART TX"
+        },
+        {
+          "line": 213,
+          "text": "    _FL_DEFPIN( 0, 25, 0); // D0  is P0.25 -- UART TX"
+        },
+        {
+          "line": 214,
+          "text": "    //_FL_DEFPIN( 1, 24, 0); // D1  is P0.24 -- UART RX"
+        },
+        {
+          "line": 215,
+          "text": "    _FL_DEFPIN( 2, 10, 0); // D2  is P0.10 -- NFC2"
+        },
+        {
+          "line": 216,
+          "text": "    _FL_DEFPIN( 3, 47, 1); // D3  is P1.15 -- PIN_LED1 (red)"
+        },
+        {
+          "line": 217,
+          "text": "    _FL_DEFPIN( 4, 42, 1); // D4  is P1.10 -- PIN_LED2 (blue)"
+        },
+        {
+          "line": 218,
+          "text": "    _FL_DEFPIN( 5, 40, 1); // D5  is P1.08 -- SPI/SS"
+        },
+        {
+          "line": 219,
+          "text": "    _FL_DEFPIN( 6,  7, 0); // D6  is P0.07"
+        },
+        {
+          "line": 220,
+          "text": "    _FL_DEFPIN( 7, 34, 1); // D7  is P1.02 -- PIN_DFU (UIButton)"
+        },
+        {
+          "line": 223,
+          "text": "    _FL_DEFPIN( 8, 16, 0); // D8  is P0.16 -- PIN_NEOPIXEL"
+        },
+        {
+          "line": 224,
+          "text": "    _FL_DEFPIN( 9, 26, 0); // D9  is P0.26"
+        },
+        {
+          "line": 225,
+          "text": "    _FL_DEFPIN(10, 27, 0); // D10 is P0.27"
+        },
+        {
+          "line": 226,
+          "text": "    _FL_DEFPIN(11,  6, 0); // D11 is P0.06"
+        },
+        {
+          "line": 227,
+          "text": "    _FL_DEFPIN(12,  8, 0); // D12 is P0.08"
+        },
+        {
+          "line": 228,
+          "text": "    _FL_DEFPIN(13, 41, 1); // D13 is P1.09"
+        },
+        {
+          "line": 229,
+          "text": "    _FL_DEFPIN(14,  4, 0); // D14 is P0.04 -- A0"
+        },
+        {
+          "line": 230,
+          "text": "    _FL_DEFPIN(15,  5, 0); // D15 is P0.05 -- A1"
+        },
+        {
+          "line": 233,
+          "text": "    _FL_DEFPIN(16, 30, 0); // D16 is P0.30 -- A2"
+        },
+        {
+          "line": 234,
+          "text": "    _FL_DEFPIN(17, 28, 0); // D17 is P0.28 -- A3"
+        },
+        {
+          "line": 235,
+          "text": "    _FL_DEFPIN(18,  2, 0); // D18 is P0.02 -- A4"
+        },
+        {
+          "line": 236,
+          "text": "    _FL_DEFPIN(19,  3, 0); // D19 is P0.03 -- A5"
+        },
+        {
+          "line": 237,
+          "text": "    //_FL_DEFPIN(20, 29, 0); // D20 is P0.29 -- A6 -- Connected to battery!"
+        },
+        {
+          "line": 238,
+          "text": "    //_FL_DEFPIN(21, 31, 0); // D21 is P0.31 -- A7 -- AREF"
+        },
+        {
+          "line": 239,
+          "text": "    _FL_DEFPIN(22, 12, 0); // D22 is P0.12 -- SDA"
+        },
+        {
+          "line": 240,
+          "text": "    _FL_DEFPIN(23, 11, 0); // D23 is P0.11 -- SCL"
+        },
+        {
+          "line": 243,
+          "text": "    _FL_DEFPIN(24, 15, 0); // D24 is P0.15 -- PIN_SPI_MISO"
+        },
+        {
+          "line": 244,
+          "text": "    _FL_DEFPIN(25, 13, 0); // D25 is P0.13 -- PIN_SPI_MOSI"
+        },
+        {
+          "line": 245,
+          "text": "    _FL_DEFPIN(26, 14, 0); // D26 is P0.14 -- PIN_SPI_SCK"
+        },
+        {
+          "line": 246,
+          "text": "    //_FL_DEFPIN(27, 19, 0); // D27 is P0.19 -- PIN_QSPI_SCK"
+        },
+        {
+          "line": 247,
+          "text": "    //_FL_DEFPIN(28, 20, 0); // D28 is P0.20 -- PIN_QSPI_CS"
+        },
+        {
+          "line": 248,
+          "text": "    //_FL_DEFPIN(29, 17, 0); // D29 is P0.17 -- PIN_QSPI_DATA0"
+        },
+        {
+          "line": 249,
+          "text": "    //_FL_DEFPIN(30, 22, 0); // D30 is P0.22 -- PIN_QSPI_DATA1"
+        },
+        {
+          "line": 250,
+          "text": "    //_FL_DEFPIN(31, 23, 0); // D31 is P0.23 -- PIN_QSPI_DATA2"
+        },
+        {
+          "line": 253,
+          "text": "    //_FL_DEFPIN(32, 21, 0); // D32 is P0.21 -- PIN_QSPI_DATA3"
+        },
+        {
+          "line": 254,
+          "text": "    //_FL_DEFPIN(33,  9, 0); // D33 is NFC1, only accessible via test point"
+        },
+        {
+          "line": 268,
+          "text": "    _FL_DEFPIN( 0, 25, 0); // D0  is P0.25 -- UART TX"
+        },
+        {
+          "line": 270,
+          "text": "    _FL_DEFPIN( 2, 10, 0); // D2  is P0.10 -- NFC2"
+        },
+        {
+          "line": 271,
+          "text": "    _FL_DEFPIN( 3, 43, 1); // D3  is P1.11 "
+        },
+        {
+          "line": 272,
+          "text": "    _FL_DEFPIN( 4, 42, 1); // D4  is P1.10 -- PIN_LED2 (blue)"
+        },
+        {
+          "line": 273,
+          "text": "    _FL_DEFPIN( 5, 40, 1); // D5  is P1.08 -- SPI/SS"
+        },
+        {
+          "line": 274,
+          "text": "    _FL_DEFPIN( 6,  7, 0); // D6  is P0.07"
+        },
+        {
+          "line": 275,
+          "text": "    _FL_DEFPIN( 7, 34, 1); // D7  is P1.02 -- PIN_DFU (UIButton)"
+        },
+        {
+          "line": 278,
+          "text": "    _FL_DEFPIN( 8, 16, 0); // D8  is P0.16 -- PIN_NEOPIXEL"
+        },
+        {
+          "line": 279,
+          "text": "    _FL_DEFPIN( 9, 26, 0); // D9  is P0.26"
+        },
+        {
+          "line": 280,
+          "text": "    _FL_DEFPIN(10, 27, 0); // D10 is P0.27"
+        },
+        {
+          "line": 281,
+          "text": "    _FL_DEFPIN(11,  6, 0); // D11 is P0.06"
+        },
+        {
+          "line": 282,
+          "text": "    _FL_DEFPIN(12,  8, 0); // D12 is P0.08"
+        },
+        {
+          "line": 283,
+          "text": "    _FL_DEFPIN(13, 41, 1); // D13 is P1.09 -- PIN_LED1 (red)"
+        },
+        {
+          "line": 284,
+          "text": "    _FL_DEFPIN(14,  4, 0); // D14 is P0.04 -- A0"
+        },
+        {
+          "line": 285,
+          "text": "    _FL_DEFPIN(15,  5, 0); // D15 is P0.05 -- A1"
+        },
+        {
+          "line": 288,
+          "text": "    _FL_DEFPIN(16, 30, 0); // D16 is P0.30 -- A2"
+        },
+        {
+          "line": 289,
+          "text": "    _FL_DEFPIN(17, 28, 0); // D17 is P0.28 -- A3"
+        },
+        {
+          "line": 290,
+          "text": "    _FL_DEFPIN(18,  2, 0); // D18 is P0.02 -- A4"
+        },
+        {
+          "line": 291,
+          "text": "    _FL_DEFPIN(19,  3, 0); // D19 is P0.03 -- A5"
+        },
+        {
+          "line": 294,
+          "text": "    _FL_DEFPIN(22, 12, 0); // D22 is P0.12 -- SDA"
+        },
+        {
+          "line": 295,
+          "text": "    _FL_DEFPIN(23, 11, 0); // D23 is P0.11 -- SCL"
+        },
+        {
+          "line": 298,
+          "text": "    _FL_DEFPIN(24, 15, 0); // D24 is P0.15 -- PIN_SPI_MISO"
+        },
+        {
+          "line": 299,
+          "text": "    _FL_DEFPIN(25, 13, 0); // D25 is P0.13 -- PIN_SPI_MOSI"
+        },
+        {
+          "line": 300,
+          "text": "    _FL_DEFPIN(26, 14, 0); // D26 is P0.14 -- PIN_SPI_SCK"
+        },
+        {
+          "line": 323,
+          "text": "    _FL_DEFPIN( 0, 25, 0); // D0  is P0.25 (UART TX)"
+        },
+        {
+          "line": 324,
+          "text": "    _FL_DEFPIN( 1, 24, 0); // D1  is P0.24 (UART RX)"
+        },
+        {
+          "line": 325,
+          "text": "    _FL_DEFPIN( 2, 10, 1); // D2  is P1.10 "
+        },
+        {
+          "line": 326,
+          "text": "    _FL_DEFPIN( 3,  4, 1); // D3  is P1.04 "
+        },
+        {
+          "line": 327,
+          "text": "    _FL_DEFPIN( 4, 11, 1); // D4  is P1.11 "
+        },
+        {
+          "line": 328,
+          "text": "    _FL_DEFPIN( 5, 12, 1); // D5  is P1.12 "
+        },
+        {
+          "line": 329,
+          "text": "    _FL_DEFPIN( 6, 14, 1); // D6  is P1.14"
+        },
+        {
+          "line": 330,
+          "text": "    _FL_DEFPIN( 7, 26, 0); // D7  is P0.26"
+        },
+        {
+          "line": 331,
+          "text": "    _FL_DEFPIN( 8, 27, 0); // D8  is P0.27"
+        },
+        {
+          "line": 332,
+          "text": "    _FL_DEFPIN( 9, 12, 0); // D9  is P0.12"
+        },
+        {
+          "line": 333,
+          "text": "    _FL_DEFPIN(10,  6, 0); // D10 is P0.06 "
+        },
+        {
+          "line": 334,
+          "text": "    _FL_DEFPIN(11,  8, 0); // D11 is P0.08 "
+        },
+        {
+          "line": 335,
+          "text": "    _FL_DEFPIN(12,  9, 1); // D12 is P1.09 "
+        },
+        {
+          "line": 336,
+          "text": "    _FL_DEFPIN(13, 14, 0); // D13 is P0.14 "
+        },
+        {
+          "line": 337,
+          "text": "    _FL_DEFPIN(14,  4, 0); // D14 is P0.04 (A0)"
+        },
+        {
+          "line": 338,
+          "text": "    _FL_DEFPIN(15,  5, 0); // D15 is P0.05 (A1)"
+        },
+        {
+          "line": 339,
+          "text": "    _FL_DEFPIN(16, 28, 0); // D16 is P0.28 (A2)"
+        },
+        {
+          "line": 340,
+          "text": "    _FL_DEFPIN(17, 30, 0); // D17 is P0.30 (A3)"
+        },
+        {
+          "line": 341,
+          "text": "    _FL_DEFPIN(18,  2, 0); // D18 is P0.02 (A4)"
+        },
+        {
+          "line": 342,
+          "text": "    _FL_DEFPIN(19,  3, 0); // D19 is P0.03 (A5)"
+        },
+        {
+          "line": 343,
+          "text": "    _FL_DEFPIN(20, 29, 0); // D20 is P0.29 (A6, battery)"
+        },
+        {
+          "line": 344,
+          "text": "    _FL_DEFPIN(21, 31, 0); // D21 is P0.31 (A7, ARef)"
+        },
+        {
+          "line": 345,
+          "text": "    _FL_DEFPIN(22, 15, 0); // D22 is P0.15 (SDA)"
+        },
+        {
+          "line": 346,
+          "text": "    _FL_DEFPIN(23, 16, 0); // D23 is P0.16 (SCL)"
+        },
+        {
+          "line": 347,
+          "text": "    _FL_DEFPIN(24, 11, 0); // D24 is P0.11 (SPI MISO)"
+        },
+        {
+          "line": 348,
+          "text": "    _FL_DEFPIN(25,  8, 1); // D25 is P1.08 (SPI MOSI)"
+        },
+        {
+          "line": 349,
+          "text": "    _FL_DEFPIN(26,  7, 0); // D26 is P0.07 (SPI SCK )"
+        },
+        {
+          "line": 350,
+          "text": "    //_FL_DEFPIN(27, 19, 0); // D27 is P0.19 (QSPI CLK   )"
+        },
+        {
+          "line": 351,
+          "text": "    //_FL_DEFPIN(28, 20, 0); // D28 is P0.20 (QSPI CS    )"
+        },
+        {
+          "line": 352,
+          "text": "    //_FL_DEFPIN(29, 17, 0); // D29 is P0.17 (QSPI Data 0)"
+        },
+        {
+          "line": 353,
+          "text": "    //_FL_DEFPIN(30, 23, 0); // D30 is P0.23 (QSPI Data 1)"
+        },
+        {
+          "line": 354,
+          "text": "    //_FL_DEFPIN(31, 22, 0); // D31 is P0.22 (QSPI Data 2)"
+        },
+        {
+          "line": 355,
+          "text": "    //_FL_DEFPIN(32, 21, 0); // D32 is P0.21 (QSPI Data 3)"
+        },
+        {
+          "line": 356,
+          "text": "    _FL_DEFPIN(33, 13, 1); // D33 is P1.13 LED1"
+        },
+        {
+          "line": 357,
+          "text": "    _FL_DEFPIN(34, 15, 1); // D34 is P1.15 LED2"
+        },
+        {
+          "line": 358,
+          "text": "    _FL_DEFPIN(35, 13, 0); // D35 is P0.13 NeoPixel"
+        },
+        {
+          "line": 359,
+          "text": "    _FL_DEFPIN(36,  0, 1); // D36 is P1.02 Switch"
+        },
+        {
+          "line": 360,
+          "text": "    _FL_DEFPIN(37,  0, 1); // D37 is P1.00 SWO/DFU"
+        },
+        {
+          "line": 361,
+          "text": "    _FL_DEFPIN(38,  9, 0); // D38 is P0.09 NFC1"
+        },
+        {
+          "line": 362,
+          "text": "    _FL_DEFPIN(39, 10, 0); // D39 is P0.10 NFC2"
+        },
+        {
+          "line": 386,
+          "text": "        _FL_DEFPIN( 0,  1, 1); // D0  is P1.01 "
+        },
+        {
+          "line": 387,
+          "text": "        _FL_DEFPIN( 1,  2, 1); // D1  is P1.02 "
+        },
+        {
+          "line": 388,
+          "text": "        _FL_DEFPIN( 2,  3, 1); // D2  is P1.03"
+        },
+        {
+          "line": 389,
+          "text": "        _FL_DEFPIN( 3,  4, 1); // D3  is P1.04 "
+        },
+        {
+          "line": 390,
+          "text": "        _FL_DEFPIN( 4,  5, 1); // D4  is P1.05 "
+        },
+        {
+          "line": 391,
+          "text": "        _FL_DEFPIN( 5,  6, 1); // D5  is P1.06 "
+        },
+        {
+          "line": 392,
+          "text": "        _FL_DEFPIN( 6,  7, 1); // D6  is P1.07 (BUTTON1 option)"
+        },
+        {
+          "line": 393,
+          "text": "        _FL_DEFPIN( 7,  8, 1); // D7  is P1.08 (BUTTON2 option)"
+        },
+        {
+          "line": 394,
+          "text": "        _FL_DEFPIN( 8, 10, 1); // D8  is P1.10 "
+        },
+        {
+          "line": 395,
+          "text": "        _FL_DEFPIN( 9, 11, 1); // D9  is P1.11 "
+        },
+        {
+          "line": 396,
+          "text": "        _FL_DEFPIN(10, 12, 1); // D10 is P1.12 "
+        },
+        {
+          "line": 397,
+          "text": "        _FL_DEFPIN(11, 13, 1); // D11 is P1.13 "
+        },
+        {
+          "line": 398,
+          "text": "        _FL_DEFPIN(12, 14, 1); // D12 is P1.14"
+        },
+        {
+          "line": 399,
+          "text": "        _FL_DEFPIN(13, 15, 1); // D13 is P1.15 "
+        },
+        {
+          "line": 402,
+          "text": "        _FL_DEFPIN(14,  3, 0); // D14 / A0 is P0.03"
+        },
+        {
+          "line": 403,
+          "text": "        _FL_DEFPIN(15,  4, 0); // D15 / A1 is P0.04"
+        },
+        {
+          "line": 404,
+          "text": "        _FL_DEFPIN(16, 28, 0); // D16 / A2 is P0.28"
+        },
+        {
+          "line": 405,
+          "text": "        _FL_DEFPIN(17, 29, 0); // D17 / A3 is P0.29"
+        },
+        {
+          "line": 407,
+          "text": "        //_FL_DEFPIN(18, 30, 0); // D18 could be one of two pins: A4 would be P0.30, SDA would be P0.26"
+        },
+        {
+          "line": 408,
+          "text": "        //_FL_DEFPIN(19, 31, 0); // D19 could be one of two pins: A5 would be P0.31, SCL would be P0.27"
+        },
+        {
+          "line": 413,
+          "text": "        _FL_DEFPIN( 0,  1, 1); // D0  is P1.01"
+        },
+        {
+          "line": 414,
+          "text": "        _FL_DEFPIN( 1,  2, 1); // D1  is P1.02"
+        },
+        {
+          "line": 415,
+          "text": "        _FL_DEFPIN( 2,  3, 1); // D2  is P1.03"
+        },
+        {
+          "line": 416,
+          "text": "        _FL_DEFPIN( 3,  4, 1); // D3  is P1.04"
+        },
+        {
+          "line": 417,
+          "text": "        _FL_DEFPIN( 4,  5, 1); // D4  is P1.05"
+        },
+        {
+          "line": 418,
+          "text": "        _FL_DEFPIN( 5,  6, 1); // D5  is P1.06"
+        },
+        {
+          "line": 419,
+          "text": "        _FL_DEFPIN( 6,  7, 1); // D6  is P1.07 (BUTTON1 option)"
+        },
+        {
+          "line": 420,
+          "text": "        _FL_DEFPIN( 7,  8, 1); // D7  is P1.08 (BUTTON2 option)"
+        },
+        {
+          "line": 421,
+          "text": "        _FL_DEFPIN( 8, 10, 1); // D8  is P1.10"
+        },
+        {
+          "line": 422,
+          "text": "        _FL_DEFPIN( 9, 11, 1); // D9  is P1.11"
+        },
+        {
+          "line": 423,
+          "text": "        _FL_DEFPIN(10, 12, 1); // D10 is P1.12"
+        },
+        {
+          "line": 424,
+          "text": "        _FL_DEFPIN(11, 13, 1); // D11 is P1.13"
+        },
+        {
+          "line": 425,
+          "text": "        _FL_DEFPIN(12, 14, 1); // D12 is P1.14"
+        },
+        {
+          "line": 426,
+          "text": "        _FL_DEFPIN(13, 15, 1); // D13 is P1.15"
+        },
+        {
+          "line": 429,
+          "text": "        _FL_DEFPIN(14, 10, 0); // D14 is P0.10"
+        },
+        {
+          "line": 430,
+          "text": "        _FL_DEFPIN(15,  9, 0); // D15 is P0.09"
+        },
+        {
+          "line": 431,
+          "text": "        _FL_DEFPIN(16,  8, 0); // D16 is P0.08"
+        },
+        {
+          "line": 432,
+          "text": "        _FL_DEFPIN(17,  7, 0); // D17 is P0.07"
+        },
+        {
+          "line": 433,
+          "text": "        _FL_DEFPIN(18,  6, 0); // D14 is P0.06"
+        },
+        {
+          "line": 434,
+          "text": "        _FL_DEFPIN(19,  5, 0); // D15 is P0.05"
+        },
+        {
+          "line": 436,
+          "text": "        //_FL_DEFPIN(20,  1, 0); // D20 could be one of two pins: D20 on lower header would be P0.01, SDA would be P0.26"
+        },
+        {
+          "line": 437,
+          "text": "        //_FL_DEFPIN(21,  0, 0); // D21 could be one of two pins: D21 on lower header would be P0.00, SCL would be P0.27"
+        },
+        {
+          "line": 441,
+          "text": "        _FL_DEFPIN(22, 11, 0); // D22 is P0.11"
+        },
+        {
+          "line": 442,
+          "text": "        _FL_DEFPIN(23, 12, 0); // D23 is P0.12"
+        },
+        {
+          "line": 443,
+          "text": "        _FL_DEFPIN(24, 13, 0); // D24 is P0.13"
+        },
+        {
+          "line": 444,
+          "text": "        _FL_DEFPIN(25, 14, 0); // D25 is P0.14"
+        },
+        {
+          "line": 445,
+          "text": "        _FL_DEFPIN(26, 15, 0); // D26 is P0.15"
+        },
+        {
+          "line": 446,
+          "text": "        _FL_DEFPIN(27, 16, 0); // D27 is P0.16"
+        },
+        {
+          "line": 447,
+          "text": "        // _FL_DEFPIN(28, 17, 0); // D28 is P0.17 (QSPI !CS )"
+        },
+        {
+          "line": 448,
+          "text": "        // _FL_DEFPIN(29, 18, 0); // D29 is P0.18 (RESET)"
+        },
+        {
+          "line": 449,
+          "text": "        // _FL_DEFPIN(30, 19, 0); // D30 is P0.19 (QSPI CLK)"
+        },
+        {
+          "line": 450,
+          "text": "        // _FL_DEFPIN(31, 20, 0); // D31 is P0.20 (QSPI DIO0)"
+        },
+        {
+          "line": 451,
+          "text": "        // _FL_DEFPIN(32, 21, 0); // D32 is P0.21 (QSPI DIO1)"
+        },
+        {
+          "line": 452,
+          "text": "        // _FL_DEFPIN(33, 22, 0); // D33 is P0.22 (QSPI DIO2)"
+        },
+        {
+          "line": 453,
+          "text": "        // _FL_DEFPIN(34, 23, 0); // D34 is P0.23 (QSPI DIO3)"
+        },
+        {
+          "line": 454,
+          "text": "        _FL_DEFPIN(35, 24, 0); // D35 is P0.24"
+        },
+        {
+          "line": 455,
+          "text": "        _FL_DEFPIN(36, 25, 0); // D36 is P0.25"
+        },
+        {
+          "line": 456,
+          "text": "        _FL_DEFPIN(37,  0, 1); // D37 is P1.00"
+        },
+        {
+          "line": 457,
+          "text": "        _FL_DEFPIN(38,  9, 1); // D38 is P1.09"
+        },
+        {
+          "line": 458,
+          "text": "        // _FL_DEFPIN(39, , 0); // D39 is P0."
+        },
+        {
+          "line": 464,
+          "text": "        _FL_DEFPIN(54,  3, 0); // D54 / A0 is P0.03"
+        },
+        {
+          "line": 465,
+          "text": "        _FL_DEFPIN(55,  4, 0); // D55 / A1 is P0.04"
+        },
+        {
+          "line": 466,
+          "text": "        _FL_DEFPIN(56, 28, 0); // D56 / A2 is P0.28"
+        },
+        {
+          "line": 467,
+          "text": "        _FL_DEFPIN(57, 29, 0); // D57 / A3 is P0.29"
+        },
+        {
+          "line": 468,
+          "text": "        _FL_DEFPIN(58, 30, 0); // D58 / A4 is P0.30"
+        },
+        {
+          "line": 469,
+          "text": "        _FL_DEFPIN(59, 31, 0); // D59 / A5 is P0.31"
+        },
+        {
+          "line": 473,
+          "text": "        _DEFPIN_ARM_IDENTITY_P0( 0); // P0.00 (XL1 .. ensure SB4 bridged, SB2 cut)"
+        },
+        {
+          "line": 474,
+          "text": "        _DEFPIN_ARM_IDENTITY_P0( 1); // P0.01 (XL2 .. ensure SB3 bridged, SB1 cut)"
+        },
+        {
+          "line": 475,
+          "text": "        _DEFPIN_ARM_IDENTITY_P0( 2); // P0.02 (AIN0)"
+        },
+        {
+          "line": 476,
+          "text": "        _DEFPIN_ARM_IDENTITY_P0( 3); // P0.03 (AIN1)"
+        },
+        {
+          "line": 477,
+          "text": "        _DEFPIN_ARM_IDENTITY_P0( 4); // P0.04 (AIN2 / UART CTS option)"
+        },
+        {
+          "line": 478,
+          "text": "        _DEFPIN_ARM_IDENTITY_P0( 5); // P0.05 (AIN3 / UART RTS)"
+        },
+        {
+          "line": 479,
+          "text": "        _DEFPIN_ARM_IDENTITY_P0( 6); // P0.06 (UART TxD)"
+        },
+        {
+          "line": 480,
+          "text": "        _DEFPIN_ARM_IDENTITY_P0( 7); // P0.07 (TRACECLK / UART CTS default)"
+        },
+        {
+          "line": 481,
+          "text": "        _DEFPIN_ARM_IDENTITY_P0( 8); // P0.08 (UART RxD)"
+        },
+        {
+          "line": 482,
+          "text": "        _DEFPIN_ARM_IDENTITY_P0( 9); // P0.09 (NFC1)"
+        },
+        {
+          "line": 483,
+          "text": "        _DEFPIN_ARM_IDENTITY_P0(10); // P0.10 (NFC2)"
+        },
+        {
+          "line": 484,
+          "text": "        _DEFPIN_ARM_IDENTITY_P0(11); // P0.11 (TRACEDATA2 / BUTTON1 default)"
+        },
+        {
+          "line": 485,
+          "text": "        _DEFPIN_ARM_IDENTITY_P0(12); // P0.12 (TRACEDATA1 / BUTTON2 default)"
+        },
+        {
+          "line": 486,
+          "text": "        _DEFPIN_ARM_IDENTITY_P0(13); // P0.13 (LED1)"
+        },
+        {
+          "line": 487,
+          "text": "        _DEFPIN_ARM_IDENTITY_P0(14); // P0.14 (LED2)"
+        },
+        {
+          "line": 488,
+          "text": "        _DEFPIN_ARM_IDENTITY_P0(15); // P0.15 (LED3)"
+        },
+        {
+          "line": 489,
+          "text": "        _DEFPIN_ARM_IDENTITY_P0(16); // P0.16 (LED4)"
+        },
+        {
+          "line": 490,
+          "text": "        //_DEFPIN_ARM_IDENTITY_P0(17); // P0.17 (QSPI !CS )"
+        },
+        {
+          "line": 491,
+          "text": "        //_DEFPIN_ARM_IDENTITY_P0(18); // P0.18 (RESET)"
+        },
+        {
+          "line": 492,
+          "text": "        //_DEFPIN_ARM_IDENTITY_P0(19); // P0.19 (QSPI CLK )"
+        },
+        {
+          "line": 493,
+          "text": "        //_DEFPIN_ARM_IDENTITY_P0(20); // P0.20 (QSPI DIO0)"
+        },
+        {
+          "line": 494,
+          "text": "        //_DEFPIN_ARM_IDENTITY_P0(21); // P0.21 (QSPI DIO1)"
+        },
+        {
+          "line": 495,
+          "text": "        //_DEFPIN_ARM_IDENTITY_P0(22); // P0.22 (QSPI DIO2)"
+        },
+        {
+          "line": 496,
+          "text": "        //_DEFPIN_ARM_IDENTITY_P0(23); // P0.23 (QSPI DIO3)"
+        },
+        {
+          "line": 497,
+          "text": "        _DEFPIN_ARM_IDENTITY_P0(24); // P0.24 (BUTTON3)"
+        },
+        {
+          "line": 498,
+          "text": "        _DEFPIN_ARM_IDENTITY_P0(25); // P0.25 (BUTTON4)"
+        },
+        {
+          "line": 499,
+          "text": "        _DEFPIN_ARM_IDENTITY_P0(26); // P0.26"
+        },
+        {
+          "line": 500,
+          "text": "        _DEFPIN_ARM_IDENTITY_P0(27); // P0.27"
+        },
+        {
+          "line": 501,
+          "text": "        _DEFPIN_ARM_IDENTITY_P0(28); // P0.28 (AIN4)"
+        },
+        {
+          "line": 502,
+          "text": "        _DEFPIN_ARM_IDENTITY_P0(29); // P0.29 (AIN5)"
+        },
+        {
+          "line": 503,
+          "text": "        _DEFPIN_ARM_IDENTITY_P0(30); // P0.30 (AIN6)"
+        },
+        {
+          "line": 504,
+          "text": "        _DEFPIN_ARM_IDENTITY_P0(31); // P0.31 (AIN7)"
+        },
+        {
+          "line": 505,
+          "text": "        _DEFPIN_ARM_IDENTITY_P0(32); // P1.00 (SWO / TRACEDATA0)"
+        },
+        {
+          "line": 506,
+          "text": "        _DEFPIN_ARM_IDENTITY_P0(33); // P1.01 "
+        },
+        {
+          "line": 507,
+          "text": "        _DEFPIN_ARM_IDENTITY_P0(34); // P1.02"
+        },
+        {
+          "line": 508,
+          "text": "        _DEFPIN_ARM_IDENTITY_P0(35); // P1.03"
+        },
+        {
+          "line": 509,
+          "text": "        _DEFPIN_ARM_IDENTITY_P0(36); // P1.04"
+        },
+        {
+          "line": 510,
+          "text": "        _DEFPIN_ARM_IDENTITY_P0(37); // P1.05"
+        },
+        {
+          "line": 511,
+          "text": "        _DEFPIN_ARM_IDENTITY_P0(38); // P1.06"
+        },
+        {
+          "line": 512,
+          "text": "        _DEFPIN_ARM_IDENTITY_P0(39); // P1.07 (BUTTON1 option)"
+        },
+        {
+          "line": 513,
+          "text": "        _DEFPIN_ARM_IDENTITY_P0(40); // P1.08 (BUTTON2 option)"
+        },
+        {
+          "line": 514,
+          "text": "        _DEFPIN_ARM_IDENTITY_P0(41); // P1.09 (TRACEDATA3)"
+        },
+        {
+          "line": 515,
+          "text": "        _DEFPIN_ARM_IDENTITY_P0(42); // P1.10"
+        },
+        {
+          "line": 516,
+          "text": "        _DEFPIN_ARM_IDENTITY_P0(43); // P1.11"
+        },
+        {
+          "line": 517,
+          "text": "        _DEFPIN_ARM_IDENTITY_P0(44); // P1.12"
+        },
+        {
+          "line": 518,
+          "text": "        _DEFPIN_ARM_IDENTITY_P0(45); // P1.13"
+        },
+        {
+          "line": 519,
+          "text": "        _DEFPIN_ARM_IDENTITY_P0(46); // P1.14"
+        },
+        {
+          "line": 520,
+          "text": "        _DEFPIN_ARM_IDENTITY_P0(47); // P1.15"
+        },
+        {
+          "line": 537,
+          "text": "    _FL_DEFPIN( 0, 25, 0); // D0  is P0.25 (UART RX)"
+        },
+        {
+          "line": 538,
+          "text": "    _FL_DEFPIN( 1, 24, 0); // D1  is P0.24 (UART TX)"
+        },
+        {
+          "line": 539,
+          "text": "    _FL_DEFPIN( 2,  2, 1); // D2  is P1.02"
+        },
+        {
+          "line": 540,
+          "text": "    _FL_DEFPIN( 3,  6, 0); // D3  is P0.06 LED"
+        },
+        {
+          "line": 541,
+          "text": "    _FL_DEFPIN( 4, 29, 0); // D4  is P0.29 UIButton"
+        },
+        {
+          "line": 542,
+          "text": "    _FL_DEFPIN( 5, 27, 0); // D5  is P0.27"
+        },
+        {
+          "line": 543,
+          "text": "    _FL_DEFPIN( 6,  9, 1); // D6  is P1.09 (DotStar Clock)"
+        },
+        {
+          "line": 544,
+          "text": "    _FL_DEFPIN( 7,  8, 1); // D7  is P1.08"
+        },
+        {
+          "line": 545,
+          "text": "    _FL_DEFPIN( 8,  8, 0); // D8  is P0.08 (DotStar Data)"
+        },
+        {
+          "line": 546,
+          "text": "    _FL_DEFPIN( 9,  7, 0); // D9  is P0.07"
+        },
+        {
+          "line": 547,
+          "text": "    _FL_DEFPIN(10,  5, 0); // D10 is P0.05"
+        },
+        {
+          "line": 548,
+          "text": "    _FL_DEFPIN(11, 26, 0); // D11 is P0.26"
+        },
+        {
+          "line": 549,
+          "text": "    _FL_DEFPIN(12, 11, 0); // D12 is P0.11"
+        },
+        {
+          "line": 550,
+          "text": "    _FL_DEFPIN(13, 12, 0); // D13 is P0.12"
+        },
+        {
+          "line": 553,
+          "text": "    _FL_DEFPIN(14,  4, 0); // D14 is P0.04 (A0)"
+        },
+        {
+          "line": 554,
+          "text": "    _FL_DEFPIN(15, 30, 0); // D15 is P0.30 (A1)"
+        },
+        {
+          "line": 555,
+          "text": "    _FL_DEFPIN(16, 28, 0); // D16 is P0.28 (A2)"
+        },
+        {
+          "line": 556,
+          "text": "    _FL_DEFPIN(17, 31, 0); // D17 is P0.31 (A3)"
+        },
+        {
+          "line": 557,
+          "text": "    _FL_DEFPIN(18,  2, 0); // D18 is P0.02 (A4)"
+        },
+        {
+          "line": 558,
+          "text": "    _FL_DEFPIN(19,  3, 0); // D19 is P0.03 (A5)"
+        },
+        {
+          "line": 559,
+          "text": "    _FL_DEFPIN(20,  5, 0); // D20 is P0.05 (A6/D10)"
+        },
+        {
+          "line": 562,
+          "text": "    _FL_DEFPIN(21, 16, 0); // D21 is P0.16 (SDA)"
+        },
+        {
+          "line": 563,
+          "text": "    _FL_DEFPIN(22, 14, 0); // D22 is P0.14 (SCL)"
+        },
+        {
+          "line": 566,
+          "text": "    _FL_DEFPIN(23, 20, 0); // D23 is P0.20 (SPI MISO)"
+        },
+        {
+          "line": 567,
+          "text": "    _FL_DEFPIN(24, 15, 0); // D24 is P0.15 (SPI MOSI)"
+        },
+        {
+          "line": 568,
+          "text": "    _FL_DEFPIN(25, 13, 0); // D25 is P0.13 (SPI SCK )"
+        },
+        {
+          "line": 571,
+          "text": "    _FL_DEFPIN(26, 19, 0); // D26 is P0.19 (QSPI CLK)"
+        },
+        {
+          "line": 572,
+          "text": "    _FL_DEFPIN(27, 23, 0); // D27 is P0.23 (QSPI CS)"
+        },
+        {
+          "line": 573,
+          "text": "    _FL_DEFPIN(28, 21, 0); // D28 is P0.21 (QSPI Data 0)"
+        },
+        {
+          "line": 574,
+          "text": "    _FL_DEFPIN(29, 22, 0); // D29 is P0.22 (QSPI Data 1)"
+        },
+        {
+          "line": 575,
+          "text": "    _FL_DEFPIN(30,  0, 1); // D30 is P1.00 (QSPI Data 2)"
+        },
+        {
+          "line": 576,
+          "text": "    _FL_DEFPIN(31, 17, 0); // D31 is P0.17 (QSPI Data 3)"
+        },
+        {
+          "line": 591,
+          "text": "    _FL_DEFPIN( 0, 26, 0); // D0  is P0.26"
+        },
+        {
+          "line": 592,
+          "text": "    _FL_DEFPIN( 1, 27, 0); // D1  is P0.27"
+        },
+        {
+          "line": 593,
+          "text": "    _FL_DEFPIN( 2, 22, 0); // D2  is P0.22 (SPI SS  )"
+        },
+        {
+          "line": 594,
+          "text": "    _FL_DEFPIN( 3, 23, 0); // D3  is P0.23 (SPI MOSI)"
+        },
+        {
+          "line": 595,
+          "text": "    _FL_DEFPIN( 4, 24, 0); // D4  is P0.24 (SPI MISO, also A3)"
+        },
+        {
+          "line": 596,
+          "text": "    _FL_DEFPIN( 5, 25, 0); // D5  is P0.25 (SPI SCK )"
+        },
+        {
+          "line": 597,
+          "text": "    _FL_DEFPIN( 6, 16, 0); // D6  is P0.16 (UIButton)"
+        },
+        {
+          "line": 598,
+          "text": "    _FL_DEFPIN( 7, 19, 0); // D7  is P0.19 (R)"
+        },
+        {
+          "line": 599,
+          "text": "    _FL_DEFPIN( 8, 18, 0); // D8  is P0.18 (G)"
+        },
+        {
+          "line": 600,
+          "text": "    _FL_DEFPIN( 9, 17, 0); // D9  is P0.17 (B)"
+        },
+        {
+          "line": 601,
+          "text": "    _FL_DEFPIN(10, 11, 0); // D10 is P0.11 (SCL)"
+        },
+        {
+          "line": 602,
+          "text": "    _FL_DEFPIN(11, 12, 0); // D11 is P0.12 (DRDYn)"
+        },
+        {
+          "line": 603,
+          "text": "    _FL_DEFPIN(12, 13, 0); // D12 is P0.13 (SDA)"
+        },
+        {
+          "line": 604,
+          "text": "    _FL_DEFPIN(13, 14, 0); // D13 is P0.17 (INT)"
+        },
+        {
+          "line": 605,
+          "text": "    _FL_DEFPIN(14, 15, 0); // D14 is P0.15 (INT1)"
+        },
+        {
+          "line": 606,
+          "text": "    _FL_DEFPIN(15, 20, 0); // D15 is P0.20 (INT2)"
+        },
+        {
+          "line": 607,
+          "text": "    _FL_DEFPIN(16,  2, 0); // D16 is P0.02 (A0)"
+        },
+        {
+          "line": 608,
+          "text": "    _FL_DEFPIN(17,  3, 0); // D17 is P0.03 (A1)"
+        },
+        {
+          "line": 609,
+          "text": "    _FL_DEFPIN(18,  4, 0); // D18 is P0.04 (A2)"
+        },
+        {
+          "line": 610,
+          "text": "    _FL_DEFPIN(19, 24, 0); // D19 is P0.24 (A3, also D4/SPI MISO) -- is this right?"
+        },
+        {
+          "line": 611,
+          "text": "    _FL_DEFPIN(20, 29, 0); // D20 is P0.29 (A4)"
+        },
+        {
+          "line": 612,
+          "text": "    _FL_DEFPIN(21, 30, 0); // D21 is P0.30 (A5)"
+        },
+        {
+          "line": 613,
+          "text": "    _FL_DEFPIN(22, 31, 0); // D22 is P0.31 (A6)"
+        },
+        {
+          "line": 614,
+          "text": "    _FL_DEFPIN(23,  8, 0); // D23 is P0.08 (RX)"
+        },
+        {
+          "line": 615,
+          "text": "    _FL_DEFPIN(24,  6, 0); // D24 is P0.06 (TX)"
+        },
+        {
+          "line": 616,
+          "text": "    _FL_DEFPIN(25,  5, 0); // D25 is P0.05 (RTS)"
+        },
+        {
+          "line": 617,
+          "text": "    _FL_DEFPIN(26,  7, 0); // D26 is P0.07 (CTS)"
+        },
+        {
+          "line": 631,
+          "text": "    _FL_DEFPIN( 0, 14, 0); // D0  is P0.14 (RX)"
+        },
+        {
+          "line": 632,
+          "text": "    _FL_DEFPIN( 1, 13, 0); // D1  is P0.13 (TX)"
+        },
+        {
+          "line": 633,
+          "text": "    _FL_DEFPIN( 2, 12, 0); // D2  is P0.12"
+        },
+        {
+          "line": 634,
+          "text": "    _FL_DEFPIN( 3, 11, 0); // D3  is P0.11 (SPI MOSI)"
+        },
+        {
+          "line": 635,
+          "text": "    _FL_DEFPIN( 4,  8, 0); // D4  is P0.08 (SPI MISO)"
+        },
+        {
+          "line": 636,
+          "text": "    _FL_DEFPIN( 5,  7, 0); // D5  is P0.07 (SPI SCK )"
+        },
+        {
+          "line": 637,
+          "text": "    _FL_DEFPIN( 6,  6, 0); // D6  is P0.06"
+        },
+        {
+          "line": 638,
+          "text": "    _FL_DEFPIN( 7, 27, 0); // D7  is P0.27"
+        },
+        {
+          "line": 639,
+          "text": "    _FL_DEFPIN( 8, 26, 0); // D8  is P0.26"
+        },
+        {
+          "line": 640,
+          "text": "    _FL_DEFPIN( 9, 25, 0); // D9  is P0.25"
+        },
+        {
+          "line": 641,
+          "text": "    _FL_DEFPIN(10,  5, 0); // D10 is P0.05 (A3)"
+        },
+        {
+          "line": 642,
+          "text": "    _FL_DEFPIN(11,  4, 0); // D11 is P0.04 (A2)"
+        },
+        {
+          "line": 643,
+          "text": "    _FL_DEFPIN(12,  3, 0); // D12 is P0.03 (A1)"
+        },
+        {
+          "line": 644,
+          "text": "    _FL_DEFPIN(13,  2, 0); // D13 is P0.02 (A0 / AREF)"
+        },
+        {
+          "line": 645,
+          "text": "    _FL_DEFPIN(14, 23, 0); // D14 is P0.23"
+        },
+        {
+          "line": 646,
+          "text": "    _FL_DEFPIN(15, 22, 0); // D15 is P0.22"
+        },
+        {
+          "line": 647,
+          "text": "    _FL_DEFPIN(16, 18, 0); // D16 is P0.18"
+        },
+        {
+          "line": 648,
+          "text": "    _FL_DEFPIN(17, 16, 0); // D17 is P0.16"
+        },
+        {
+          "line": 649,
+          "text": "    _FL_DEFPIN(18, 15, 0); // D18 is P0.15"
+        },
+        {
+          "line": 650,
+          "text": "    _FL_DEFPIN(19, 24, 0); // D19 is P0.24"
+        },
+        {
+          "line": 651,
+          "text": "    _FL_DEFPIN(20, 28, 0); // D20 is P0.28 (A4)"
+        },
+        {
+          "line": 652,
+          "text": "    _FL_DEFPIN(21, 29, 0); // D21 is P0.29 (A5)"
+        },
+        {
+          "line": 653,
+          "text": "    _FL_DEFPIN(22, 30, 0); // D22 is P0.30 (A6)"
+        },
+        {
+          "line": 654,
+          "text": "    _FL_DEFPIN(23, 31, 0); // D23 is P0.31 (A7)"
+        },
+        {
+          "line": 655,
+          "text": "    _FL_DEFPIN(24, 19, 0); // D24 is P0.19 (RED LED)"
+        },
+        {
+          "line": 656,
+          "text": "    _FL_DEFPIN(25, 20, 0); // D25 is P0.20 (GREEN LED)"
+        },
+        {
+          "line": 657,
+          "text": "    _FL_DEFPIN(26, 17, 0); // D26 is P0.17 (BLUE LED)"
+        },
+        {
+          "line": 672,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0( 0); // P0.00"
+        },
+        {
+          "line": 673,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0( 1); // P0.01"
+        },
+        {
+          "line": 674,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0( 2); // P0.02 (A0 / SDA / AREF)"
+        },
+        {
+          "line": 675,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0( 3); // P0.03 (A1 / SCL )"
+        },
+        {
+          "line": 676,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0( 4); // P0.04 (A2)"
+        },
+        {
+          "line": 677,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0( 5); // P0.05 (A3)"
+        },
+        {
+          "line": 678,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0( 6); // P0.06"
+        },
+        {
+          "line": 679,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0( 7); // P0.07 (RX)"
+        },
+        {
+          "line": 680,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0( 8); // P0.08 (TX)"
+        },
+        {
+          "line": 681,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0( 9); // P0.09"
+        },
+        {
+          "line": 682,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0(10); // P0.10"
+        },
+        {
+          "line": 683,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0(11); // P0.11 (SPI MISO)"
+        },
+        {
+          "line": 684,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0(12); // P0.12 (SPI MOSI)"
+        },
+        {
+          "line": 685,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0(13); // P0.13 (SPI SCK )"
+        },
+        {
+          "line": 686,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0(14); // P0.14 (SPI SS  )"
+        },
+        {
+          "line": 687,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0(15); // P0.15"
+        },
+        {
+          "line": 688,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0(16); // P0.16"
+        },
+        {
+          "line": 689,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0(17); // P0.17 (BLUE LED)"
+        },
+        {
+          "line": 690,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0(18); // P0.18"
+        },
+        {
+          "line": 691,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0(19); // P0.19 (RED LED)"
+        },
+        {
+          "line": 692,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0(20); // P0.20 (GREEN LED)"
+        },
+        {
+          "line": 693,
+          "text": "    // _DEFPIN_ARM_IDENTITY_P0(21); // P0.21 (RESET)"
+        },
+        {
+          "line": 694,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0(22); // P0.22"
+        },
+        {
+          "line": 695,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0(23); // P0.23"
+        },
+        {
+          "line": 696,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0(24); // P0.24"
+        },
+        {
+          "line": 697,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0(25); // P0.25"
+        },
+        {
+          "line": 698,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0(26); // P0.26"
+        },
+        {
+          "line": 699,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0(27); // P0.27"
+        },
+        {
+          "line": 700,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0(28); // P0.28 (A4)"
+        },
+        {
+          "line": 701,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0(29); // P0.29 (A5)"
+        },
+        {
+          "line": 702,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0(30); // P0.30 (A6)"
+        },
+        {
+          "line": 703,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0(31); // P0.31 (A7)"
+        },
+        {
+          "line": 717,
+          "text": "    _FL_DEFPIN( 0, 11, 0); // D0  is P0.11"
+        },
+        {
+          "line": 718,
+          "text": "    _FL_DEFPIN( 1, 12, 0); // D1  is P0.12"
+        },
+        {
+          "line": 719,
+          "text": "    _FL_DEFPIN( 2, 13, 0); // D2  is P0.13"
+        },
+        {
+          "line": 720,
+          "text": "    _FL_DEFPIN( 3, 14, 0); // D3  is P0.14"
+        },
+        {
+          "line": 721,
+          "text": "    _FL_DEFPIN( 4, 15, 0); // D4  is P0.15"
+        },
+        {
+          "line": 722,
+          "text": "    _FL_DEFPIN( 5, 16, 0); // D5  is P0.16"
+        },
+        {
+          "line": 723,
+          "text": "    _FL_DEFPIN( 6, 17, 0); // D6  is P0.17"
+        },
+        {
+          "line": 724,
+          "text": "    _FL_DEFPIN( 7, 18, 0); // D7  is P0.18"
+        },
+        {
+          "line": 725,
+          "text": "    _FL_DEFPIN( 8, 19, 0); // D8  is P0.19"
+        },
+        {
+          "line": 726,
+          "text": "    _FL_DEFPIN( 9, 20, 0); // D9  is P0.20"
+        },
+        {
+          "line": 727,
+          "text": "    _FL_DEFPIN(10, 22, 0); // D10 is P0.22 (SPI SS  )"
+        },
+        {
+          "line": 728,
+          "text": "    _FL_DEFPIN(11, 23, 0); // D11 is P0.23 (SPI MOSI)"
+        },
+        {
+          "line": 729,
+          "text": "    _FL_DEFPIN(12, 24, 0); // D12 is P0.24 (SPI MISO)"
+        },
+        {
+          "line": 730,
+          "text": "    _FL_DEFPIN(13, 25, 0); // D13 is P0.25 (SPI SCK / LED)"
+        },
+        {
+          "line": 731,
+          "text": "    _FL_DEFPIN(14,  3, 0); // D14 is P0.03 (A0)"
+        },
+        {
+          "line": 732,
+          "text": "    _FL_DEFPIN(15,  4, 0); // D15 is P0.04 (A1)"
+        },
+        {
+          "line": 733,
+          "text": "    _FL_DEFPIN(16, 28, 0); // D16 is P0.28 (A2)"
+        },
+        {
+          "line": 734,
+          "text": "    _FL_DEFPIN(17, 29, 0); // D17 is P0.29 (A3)"
+        },
+        {
+          "line": 735,
+          "text": "    _FL_DEFPIN(18, 30, 0); // D18 is P0.30 (A4)"
+        },
+        {
+          "line": 736,
+          "text": "    _FL_DEFPIN(19, 31, 0); // D19 is P0.31 (A5)"
+        },
+        {
+          "line": 737,
+          "text": "    _FL_DEFPIN(20, 26, 0); // D20 is P0.26 (SDA)"
+        },
+        {
+          "line": 738,
+          "text": "    _FL_DEFPIN(21, 27, 0); // D21 is P0.27 (SCL)"
+        },
+        {
+          "line": 739,
+          "text": "    _FL_DEFPIN(22,  8, 0); // D22 is P0.08 (RX)"
+        },
+        {
+          "line": 740,
+          "text": "    _FL_DEFPIN(23,  6, 0); // D23 is P0.06 (TX)"
+        },
+        {
+          "line": 741,
+          "text": "    _FL_DEFPIN(24,  2, 0); // D24 is P0.02 (AREF)"
+        },
+        {
+          "line": 755,
+          "text": "    _FL_DEFPIN( 0, 30, 0); // D0  is P0.30 (A0 / RX)"
+        },
+        {
+          "line": 756,
+          "text": "    _FL_DEFPIN( 1, 29, 0); // D1  is P0.29 (A1 / TX)"
+        },
+        {
+          "line": 757,
+          "text": "    _FL_DEFPIN( 2, 28, 0); // D2  is P0.28 (A2 / SDA)"
+        },
+        {
+          "line": 758,
+          "text": "    _FL_DEFPIN( 3,  2, 0); // D3  is P0.02 (A3 / SCL)"
+        },
+        {
+          "line": 759,
+          "text": "    _FL_DEFPIN( 4,  5, 0); // D4  is P0.05 (A4)"
+        },
+        {
+          "line": 760,
+          "text": "    _FL_DEFPIN( 5,  4, 0); // D5  is P0.04 (A5)"
+        },
+        {
+          "line": 761,
+          "text": "    _FL_DEFPIN( 6,  3, 0); // D6  is P0.03 (SPI SS  )"
+        },
+        {
+          "line": 762,
+          "text": "    _FL_DEFPIN( 7,  6, 0); // D7  is P0.06 (SPI MOSI)"
+        },
+        {
+          "line": 763,
+          "text": "    _FL_DEFPIN( 8,  7, 0); // D8  is P0.07 (SPI MISO)"
+        },
+        {
+          "line": 764,
+          "text": "    _FL_DEFPIN( 9,  8, 0); // D9  is P0.08 (SPI SCK )"
+        },
+        {
+          "line": 765,
+          "text": "    // _FL_DEFPIN(10, 21, 0); // D10 is P0.21 (RESET)"
+        },
+        {
+          "line": 766,
+          "text": "    _FL_DEFPIN(13, 11, 0); // D11 is P0.11 (LED)"
+        },
+        {
+          "line": 780,
+          "text": "    _FL_DEFPIN( 0, 11, 0); // D0  is P0.11"
+        },
+        {
+          "line": 781,
+          "text": "    _FL_DEFPIN( 1, 12, 0); // D1  is P0.12"
+        },
+        {
+          "line": 782,
+          "text": "    _FL_DEFPIN( 2, 13, 0); // D2  is P0.13 (BUTTON1)"
+        },
+        {
+          "line": 783,
+          "text": "    _FL_DEFPIN( 3, 14, 0); // D3  is P0.14 (BUTTON2)"
+        },
+        {
+          "line": 784,
+          "text": "    _FL_DEFPIN( 4, 15, 0); // D4  is P0.15 (BUTTON3)"
+        },
+        {
+          "line": 785,
+          "text": "    _FL_DEFPIN( 5, 16, 0); // D5  is P0.16 (BUTTON4)"
+        },
+        {
+          "line": 786,
+          "text": "    _FL_DEFPIN( 6, 17, 0); // D6  is P0.17 (LED1)"
+        },
+        {
+          "line": 787,
+          "text": "    _FL_DEFPIN( 7, 18, 0); // D7  is P0.18 (LED2)"
+        },
+        {
+          "line": 788,
+          "text": "    _FL_DEFPIN( 8, 19, 0); // D8  is P0.19 (LED3)"
+        },
+        {
+          "line": 789,
+          "text": "    _FL_DEFPIN( 9, 20, 0); // D9  is P0.20 (LED4)"
+        },
+        {
+          "line": 790,
+          "text": "    _FL_DEFPIN(10, 22, 0); // D10 is P0.22 (SPI SS  )"
+        },
+        {
+          "line": 791,
+          "text": "    _FL_DEFPIN(11, 23, 0); // D11 is P0.23 (SPI MOSI)"
+        },
+        {
+          "line": 792,
+          "text": "    _FL_DEFPIN(12, 24, 0); // D12 is P0.24 (SPI MISO)"
+        },
+        {
+          "line": 793,
+          "text": "    _FL_DEFPIN(13, 25, 0); // D13 is P0.25 (SPI SCK / LED)"
+        },
+        {
+          "line": 794,
+          "text": "    _FL_DEFPIN(14,  3, 0); // D14 is P0.03 (A0)"
+        },
+        {
+          "line": 795,
+          "text": "    _FL_DEFPIN(15,  4, 0); // D15 is P0.04 (A1)"
+        },
+        {
+          "line": 796,
+          "text": "    _FL_DEFPIN(16, 28, 0); // D16 is P0.28 (A2)"
+        },
+        {
+          "line": 797,
+          "text": "    _FL_DEFPIN(17, 29, 0); // D17 is P0.29 (A3)"
+        },
+        {
+          "line": 798,
+          "text": "    _FL_DEFPIN(18, 30, 0); // D18 is P0.30 (A4)"
+        },
+        {
+          "line": 799,
+          "text": "    _FL_DEFPIN(19, 31, 0); // D19 is P0.31 (A5)"
+        },
+        {
+          "line": 800,
+          "text": "    _FL_DEFPIN(20,  5, 0); // D20 is P0.05 (A6)"
+        },
+        {
+          "line": 801,
+          "text": "    _FL_DEFPIN(21,  2, 0); // D21 is P0.02 (A7 / AREF)"
+        },
+        {
+          "line": 802,
+          "text": "    _FL_DEFPIN(22, 26, 0); // D22 is P0.26 (SDA)"
+        },
+        {
+          "line": 803,
+          "text": "    _FL_DEFPIN(23, 27, 0); // D23 is P0.27 (SCL)"
+        },
+        {
+          "line": 804,
+          "text": "    _FL_DEFPIN(24,  8, 0); // D24 is P0.08 (RX)"
+        },
+        {
+          "line": 805,
+          "text": "    _FL_DEFPIN(25,  6, 0); // D25 is P0.06 (TX)"
+        },
+        {
+          "line": 819,
+          "text": "    //_FL_DEFPIN( 0, 25, 0); // D0  is P0.xx (near radio!)"
+        },
+        {
+          "line": 820,
+          "text": "    //_FL_DEFPIN( 1, 26, 0); // D1  is P0.xx (near radio!)"
+        },
+        {
+          "line": 821,
+          "text": "    //_FL_DEFPIN( 2, 27, 0); // D2  is P0.xx (near radio!)"
+        },
+        {
+          "line": 822,
+          "text": "    //_FL_DEFPIN( 3, 28, 0); // D3  is P0.xx (near radio!)"
+        },
+        {
+          "line": 823,
+          "text": "    //_FL_DEFPIN( 4, 29, 0); // D4  is P0.xx (Not connected, near radio!)"
+        },
+        {
+          "line": 824,
+          "text": "    //_FL_DEFPIN( 5, 30, 0); // D5  is P0.xx (LED1, near radio!)"
+        },
+        {
+          "line": 825,
+          "text": "    //_FL_DEFPIN( 6, 31, 0); // D6  is P0.xx (LED2, near radio!)"
+        },
+        {
+          "line": 826,
+          "text": "    _FL_DEFPIN( 7,  2, 0); // D7  is P0.xx (SDA)"
+        },
+        {
+          "line": 827,
+          "text": "    _FL_DEFPIN( 8,  3, 0); // D8  is P0.xx (SCL)"
+        },
+        {
+          "line": 828,
+          "text": "    _FL_DEFPIN( 9,  4, 0); // D9  is P0.xx (BUTTON1 / NFC1)"
+        },
+        {
+          "line": 829,
+          "text": "    _FL_DEFPIN(10,  5, 0); // D10 is P0.xx"
+        },
+        {
+          "line": 830,
+          "text": "    //_FL_DEFPIN(11,  0, 0); // D11 is P0.xx (Not connected)"
+        },
+        {
+          "line": 831,
+          "text": "    //_FL_DEFPIN(12,  1, 0); // D12 is P0.xx (Not connected)"
+        },
+        {
+          "line": 832,
+          "text": "    _FL_DEFPIN(13,  6, 0); // D13 is P0.xx"
+        },
+        {
+          "line": 833,
+          "text": "    _FL_DEFPIN(14,  7, 0); // D14 is P0.xx"
+        },
+        {
+          "line": 834,
+          "text": "    _FL_DEFPIN(15,  8, 0); // D15 is P0.xx"
+        },
+        {
+          "line": 835,
+          "text": "    //_FL_DEFPIN(16,  9, 0); // D16 is P0.xx (Not connected)"
+        },
+        {
+          "line": 836,
+          "text": "    //_FL_DEFPIN(17, 10, 0); // D17 is P0.xx (NFC2, Not connected)"
+        },
+        {
+          "line": 837,
+          "text": "    _FL_DEFPIN(18, 11, 0); // D18 is P0.xx (RXD)"
+        },
+        {
+          "line": 838,
+          "text": "    _FL_DEFPIN(19, 12, 0); // D19 is P0.xx (TXD)"
+        },
+        {
+          "line": 839,
+          "text": "    _FL_DEFPIN(20, 13, 0); // D20 is P0.xx (SPI SS  )"
+        },
+        {
+          "line": 840,
+          "text": "    _FL_DEFPIN(21, 14, 0); // D21 is P0.xx (SPI MISO)"
+        },
+        {
+          "line": 841,
+          "text": "    _FL_DEFPIN(22, 15, 0); // D22 is P0.xx (SPI MOSI)"
+        },
+        {
+          "line": 842,
+          "text": "    _FL_DEFPIN(23, 16, 0); // D23 is P0.xx (SPI SCK )"
+        },
+        {
+          "line": 843,
+          "text": "    _FL_DEFPIN(24, 17, 0); // D24 is P0.xx (A0)"
+        },
+        {
+          "line": 844,
+          "text": "    _FL_DEFPIN(25, 18, 0); // D25 is P0.xx (A1)"
+        },
+        {
+          "line": 845,
+          "text": "    _FL_DEFPIN(26, 19, 0); // D26 is P0.xx (A2)"
+        },
+        {
+          "line": 846,
+          "text": "    _FL_DEFPIN(27, 20, 0); // D27 is P0.xx (A3)"
+        },
+        {
+          "line": 847,
+          "text": "    //_FL_DEFPIN(28, 22, 0); // D28 is P0.xx (A4, near radio!)"
+        },
+        {
+          "line": 848,
+          "text": "    //_FL_DEFPIN(29, 23, 0); // D29 is P0.xx (A5, near radio!)"
+        },
+        {
+          "line": 849,
+          "text": "    _FL_DEFPIN(30, 24, 0); // D30 is P0.xx"
+        },
+        {
+          "line": 850,
+          "text": "    // _FL_DEFPIN(31, 21, 0); // D31 is P0.21 (RESET)"
+        },
+        {
+          "line": 869,
+          "text": "    _FL_DEFPIN( 0, 2, 0); // D0  is P0.02"
+        },
+        {
+          "line": 870,
+          "text": "    _FL_DEFPIN( 1, 3, 0); // D1  is P0.03"
+        },
+        {
+          "line": 871,
+          "text": "    _FL_DEFPIN( 2, 28, 0); // D2  is P0.28"
+        },
+        {
+          "line": 872,
+          "text": "    _FL_DEFPIN( 3, 29, 0); // D3  is P0.29 "
+        },
+        {
+          "line": 873,
+          "text": "    _FL_DEFPIN( 4, 4, 0); // D4  is P0.4"
+        },
+        {
+          "line": 874,
+          "text": "    _FL_DEFPIN( 5, 5, 0); // D5  is P0.5"
+        },
+        {
+          "line": 875,
+          "text": "    _FL_DEFPIN( 6, 43, 1); // D6  is P1.43"
+        },
+        {
+          "line": 876,
+          "text": "    _FL_DEFPIN( 7, 44, 1); // D7  is P1.44"
+        },
+        {
+          "line": 879,
+          "text": "    _FL_DEFPIN( 8, 45, 1); // D8  is P1.45"
+        },
+        {
+          "line": 880,
+          "text": "    _FL_DEFPIN( 9, 46, 1); // D9  is P1.46"
+        },
+        {
+          "line": 881,
+          "text": "    _FL_DEFPIN(10, 47, 1); // D10 is P1.47"
+        },
+        {
+          "line": 883,
+          "text": "    _FL_DEFPIN_USR_LED(11, 26, 0); // D11 is P0.26 (LED RED)"
+        },
+        {
+          "line": 884,
+          "text": "    _FL_DEFPIN_USR_LED(12, 6, 0); // D12 is P0.06 (LED BLUE)"
+        },
+        {
+          "line": 885,
+          "text": "    _FL_DEFPIN_USR_LED(13, 30, 0); // D13 is P0.30 (LED GREEN)"
+        },
+        {
+          "line": 900,
+          "text": "    _FL_DEFPIN_NFC(30, 9, 0);  // D30 is P0.09 (NFC1)"
+        },
+        {
+          "line": 901,
+          "text": "    _FL_DEFPIN_NFC(31, 10, 0);  // D31 is P0.10 (NFC2)"
+        },
+        {
+          "line": 921,
+          "text": "    _FL_DEFPIN( 0,  2, 0); // D0  is P0.02"
+        },
+        {
+          "line": 922,
+          "text": "    _FL_DEFPIN( 1,  3, 0); // D1  is P0.03"
+        },
+        {
+          "line": 923,
+          "text": "    _FL_DEFPIN( 2, 28, 0); // D2  is P0.28"
+        },
+        {
+          "line": 924,
+          "text": "    _FL_DEFPIN( 3, 29, 0); // D3  is P0.29"
+        },
+        {
+          "line": 925,
+          "text": "    _FL_DEFPIN( 4,  4, 0); // D4  is P0.04"
+        },
+        {
+          "line": 926,
+          "text": "    _FL_DEFPIN( 5,  5, 0); // D5  is P0.05"
+        },
+        {
+          "line": 927,
+          "text": "    _FL_DEFPIN( 6, 43, 1); // D6  is P1.11"
+        },
+        {
+          "line": 928,
+          "text": "    _FL_DEFPIN( 7, 44, 1); // D7  is P1.12"
+        },
+        {
+          "line": 929,
+          "text": "    _FL_DEFPIN( 8, 45, 1); // D8  is P1.13"
+        },
+        {
+          "line": 930,
+          "text": "    _FL_DEFPIN( 9, 46, 1); // D9  is P1.14"
+        },
+        {
+          "line": 931,
+          "text": "    _FL_DEFPIN(10, 47, 1); // D10 is P1.15"
+        },
+        {
+          "line": 934,
+          "text": "    _FL_DEFPIN(30, 15, 0); // D11 is P0.15 (I2S SD)"
+        },
+        {
+          "line": 935,
+          "text": "    _FL_DEFPIN(31, 19, 0); // D12 is P0.19 (I2S SCK)"
+        },
+        {
+          "line": 936,
+          "text": "    _FL_DEFPIN(32, 33, 1); // D13 is P1.01 (I2S WS)"
+        },
+        {
+          "line": 940,
+          "text": "    _FL_DEFPIN(36, 39, 1); // D17 is P1.07 (MOSI1)"
+        },
+        {
+          "line": 941,
+          "text": "    _FL_DEFPIN(37, 37, 1); // D18 is P1.05 (MISO1)"
+        },
+        {
+          "line": 942,
+          "text": "    _FL_DEFPIN(38, 35, 1); // D19 is P1.03 (SCK1)"
+        },
+        {
+          "line": 955,
+          "text": "    _FL_DEFPIN( 0, 2, 0); // D0  is P0.02"
+        },
+        {
+          "line": 956,
+          "text": "    _FL_DEFPIN( 1, 3, 0); // D1  is P0.03"
+        },
+        {
+          "line": 957,
+          "text": "    _FL_DEFPIN( 2, 28, 0); // D2  is P0.28"
+        },
+        {
+          "line": 958,
+          "text": "    _FL_DEFPIN( 3, 29, 0); // D3  is P0.29 "
+        },
+        {
+          "line": 959,
+          "text": "    _FL_DEFPIN( 4, 4, 0); // D4  is P0.4"
+        },
+        {
+          "line": 960,
+          "text": "    _FL_DEFPIN( 5, 5, 0); // D5  is P0.5"
+        },
+        {
+          "line": 961,
+          "text": "    _FL_DEFPIN( 6, 43, 1); // D6  is P1.43"
+        },
+        {
+          "line": 962,
+          "text": "    _FL_DEFPIN( 7, 44, 1); // D7  is P1.44"
+        },
+        {
+          "line": 965,
+          "text": "    _FL_DEFPIN( 8, 45, 1); // D8  is P1.45"
+        },
+        {
+          "line": 966,
+          "text": "    _FL_DEFPIN( 9, 46, 1); // D9  is P1.46"
+        },
+        {
+          "line": 967,
+          "text": "    _FL_DEFPIN(10, 47, 1); // D10 is P1.47"
+        },
+        {
+          "line": 969,
+          "text": "    _FL_DEFPIN_USR_LED(11, 26, 0); // D11 is P0.26 (LED RED)"
+        },
+        {
+          "line": 970,
+          "text": "    _FL_DEFPIN_USR_LED(12, 6, 0); // D12 is P0.06 (LED BLUE)"
+        },
+        {
+          "line": 971,
+          "text": "    _FL_DEFPIN_USR_LED(13, 30, 0); // D13 is P0.30 (LED GREEN)"
+        },
+        {
+          "line": 986,
+          "text": "    _FL_DEFPIN_NFC(30, 9, 0);  // D30 is P0.09 (NFC1)"
+        },
+        {
+          "line": 987,
+          "text": "    _FL_DEFPIN_NFC(31, 10, 0);  // D31 is P0.10 (NFC2)"
+        },
+        {
+          "line": 993,
+          "text": "    // _FL_DEFPIN(11,  6, 0); // D11 is P0.06"
+        },
+        {
+          "line": 994,
+          "text": "    // _FL_DEFPIN(12,  8, 0); // D12 is P0.08"
+        },
+        {
+          "line": 995,
+          "text": "    // _FL_DEFPIN(13, 41, 1); // D13 is P1.09 -- PIN_LED1 (red)"
+        },
+        {
+          "line": 996,
+          "text": "    // _FL_DEFPIN(14,  4, 0); // D14 is P0.04 -- A0"
+        },
+        {
+          "line": 997,
+          "text": "    // _FL_DEFPIN(15,  5, 0); // D15 is P0.05 -- A1"
+        },
+        {
+          "line": 1000,
+          "text": "    // _FL_DEFPIN(16, 30, 0); // D16 is P0.30 -- A2"
+        },
+        {
+          "line": 1001,
+          "text": "    // _FL_DEFPIN(17, 28, 0); // D17 is P0.28 -- A3"
+        },
+        {
+          "line": 1002,
+          "text": "    // _FL_DEFPIN(18,  2, 0); // D18 is P0.02 -- A4"
+        },
+        {
+          "line": 1003,
+          "text": "    // _FL_DEFPIN(19,  3, 0); // D19 is P0.03 -- A5"
+        },
+        {
+          "line": 1006,
+          "text": "    // _FL_DEFPIN(22, 12, 0); // D22 is P0.12 -- SDA"
+        },
+        {
+          "line": 1007,
+          "text": "    // _FL_DEFPIN(23, 11, 0); // D23 is P0.11 -- SCL"
+        },
+        {
+          "line": 1010,
+          "text": "    // _FL_DEFPIN(24, 15, 0); // D24 is P0.15 -- PIN_SPI_MISO"
+        },
+        {
+          "line": 1011,
+          "text": "    // _FL_DEFPIN(25, 13, 0); // D25 is P0.13 -- PIN_SPI_MOSI"
+        },
+        {
+          "line": 1012,
+          "text": "    // _FL_DEFPIN(26, 14, 0); // D26 is P0.14 -- PIN_SPI_SCK"
+        },
+        {
+          "line": 1039,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0( 0); // P0.00 (    UART RX"
+        },
+        {
+          "line": 1040,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0( 1); // P0.01 (A0, UART TX)"
+        },
+        {
+          "line": 1041,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0( 2); // P0.02 (A1)"
+        },
+        {
+          "line": 1042,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0( 3); // P0.03 (A2)"
+        },
+        {
+          "line": 1043,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0( 4); // P0.04 (A3)"
+        },
+        {
+          "line": 1044,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0( 5); // P0.05 (A4)"
+        },
+        {
+          "line": 1045,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0( 6); // P0.06 (A5)"
+        },
+        {
+          "line": 1046,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0( 7); // P0.07"
+        },
+        {
+          "line": 1047,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0( 8); // P0.08"
+        },
+        {
+          "line": 1048,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0( 9); // P0.09"
+        },
+        {
+          "line": 1049,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0(10); // P0.10"
+        },
+        {
+          "line": 1050,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0(11); // P0.11"
+        },
+        {
+          "line": 1051,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0(12); // P0.12"
+        },
+        {
+          "line": 1052,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0(13); // P0.13 (LED)"
+        },
+        {
+          "line": 1053,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0(14); // P0.14"
+        },
+        {
+          "line": 1054,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0(15); // P0.15"
+        },
+        {
+          "line": 1055,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0(16); // P0.16"
+        },
+        {
+          "line": 1056,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0(17); // P0.17"
+        },
+        {
+          "line": 1057,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0(18); // P0.18"
+        },
+        {
+          "line": 1058,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0(19); // P0.19"
+        },
+        {
+          "line": 1059,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0(20); // P0.20 (I2C SDA)"
+        },
+        {
+          "line": 1060,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0(21); // P0.21 (I2C SCL)"
+        },
+        {
+          "line": 1061,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0(22); // P0.22 (SPI MISO)"
+        },
+        {
+          "line": 1062,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0(23); // P0.23 (SPI MOSI)"
+        },
+        {
+          "line": 1063,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0(24); // P0.24 (SPI SCK )"
+        },
+        {
+          "line": 1064,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0(25); // P0.25 (SPI SS  )"
+        },
+        {
+          "line": 1065,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0(26); // P0.26"
+        },
+        {
+          "line": 1066,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0(27); // P0.27"
+        },
+        {
+          "line": 1067,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0(28); // P0.28"
+        },
+        {
+          "line": 1068,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0(29); // P0.29"
+        },
+        {
+          "line": 1069,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0(30); // P0.30"
+        },
+        {
+          "line": 1070,
+          "text": "    _DEFPIN_ARM_IDENTITY_P0(31); // P0.31"
+        },
+        {
+          "line": 1087,
+          "text": "    _FL_DEFPIN( 0,  6, 0); // D0  is P0.06 (TX)"
+        },
+        {
+          "line": 1088,
+          "text": "    _FL_DEFPIN( 1,  8, 0); // D1  is P0.08 (RX)"
+        },
+        {
+          "line": 1089,
+          "text": "    _FL_DEFPIN( 2, 17, 0); // D2  is P0.17 (SCK)"
+        },
+        {
+          "line": 1090,
+          "text": "    _FL_DEFPIN( 3, 20, 0); // D3  is P0.20 (MISO)"
+        },
+        {
+          "line": 1091,
+          "text": "    _FL_DEFPIN( 4, 22, 0); // D4  is P0.22 (MOSI)"
+        },
+        {
+          "line": 1092,
+          "text": "    _FL_DEFPIN( 5, 24, 0); // D5  is P0.24 (CS)"
+        },
+        {
+          "line": 1093,
+          "text": "    _FL_DEFPIN( 6, 32, 1); // D6  is P1.00 (SDA)"
+        },
+        {
+          "line": 1094,
+          "text": "    _FL_DEFPIN( 7, 11, 0); // D7  is P0.11 (SCL)"
+        },
+        {
+          "line": 1095,
+          "text": "    _FL_DEFPIN( 8, 36, 1); // D8  is P1.04"
+        },
+        {
+          "line": 1096,
+          "text": "    _FL_DEFPIN( 9, 38, 1); // D9  is P1.06"
+        },
+        {
+          "line": 1099,
+          "text": "    _FL_DEFPIN_NFC(10,  9, 0); // D10 is P0.09 (NFC1)"
+        },
+        {
+          "line": 1100,
+          "text": "    _FL_DEFPIN_NFC(11, 10, 0); // D11 is P0.10 (NFC2)"
+        },
+        {
+          "line": 1101,
+          "text": "    _FL_DEFPIN(12, 43, 1); // D12 is P1.11"
+        },
+        {
+          "line": 1102,
+          "text": "    _FL_DEFPIN(13, 45, 1); // D13 is P1.13 (SDA1)"
+        },
+        {
+          "line": 1103,
+          "text": "    _FL_DEFPIN(14, 47, 1); // D14 is P1.15 (SCL1)"
+        },
+        {
+          "line": 1104,
+          "text": "    _FL_DEFPIN(15,  2, 0); // D15 is P0.02 (A0)"
+        },
+        {
+          "line": 1105,
+          "text": "    _FL_DEFPIN(16, 29, 0); // D16 is P0.29 (A1)"
+        },
+        {
+          "line": 1106,
+          "text": "    _FL_DEFPIN(17, 31, 0); // D17 is P0.31 (A2)"
+        },
+        {
+          "line": 1109,
+          "text": "    _FL_DEFPIN(18, 33, 1); // D18 is P1.01 (SCK1)"
+        },
+        {
+          "line": 1110,
+          "text": "    _FL_DEFPIN(19, 34, 1); // D19 is P1.02 (MISO1)"
+        },
+        {
+          "line": 1111,
+          "text": "    _FL_DEFPIN(20, 39, 1); // D20 is P1.07 (MOSI1)"
+        },
+        {
+          "line": 1115,
+          "text": "    _FL_DEFPIN_USR_LED(22, 15, 0); // D22 is P0.15 (USR LED)"
+        },
+        {
+          "line": 1132,
+          "text": "    _FL_DEFPIN( 0,  6, 0); // D0  is P0.06 (TX)"
+        },
+        {
+          "line": 1133,
+          "text": "    _FL_DEFPIN( 1,  8, 0); // D1  is P0.08 (RX)"
+        },
+        {
+          "line": 1134,
+          "text": "    _FL_DEFPIN( 2, 17, 0); // D2  is P0.17 (SCK)"
+        },
+        {
+          "line": 1135,
+          "text": "    _FL_DEFPIN( 3, 20, 0); // D3  is P0.20 (MISO)"
+        },
+        {
+          "line": 1136,
+          "text": "    _FL_DEFPIN( 4, 22, 0); // D4  is P0.22 (MOSI)"
+        },
+        {
+          "line": 1137,
+          "text": "    _FL_DEFPIN( 5, 24, 0); // D5  is P0.24 (CS)"
+        },
+        {
+          "line": 1138,
+          "text": "    _FL_DEFPIN( 6, 32, 1); // D6  is P1.00 (SDA)"
+        },
+        {
+          "line": 1139,
+          "text": "    _FL_DEFPIN( 7, 11, 0); // D7  is P0.11 (SCL)"
+        },
+        {
+          "line": 1140,
+          "text": "    _FL_DEFPIN( 8, 36, 1); // D8  is P1.04"
+        },
+        {
+          "line": 1141,
+          "text": "    _FL_DEFPIN( 9, 38, 1); // D9  is P1.06"
+        },
+        {
+          "line": 1144,
+          "text": "    _FL_DEFPIN_NFC(10,  9, 0); // D10 is P0.09 (NFC1)"
+        },
+        {
+          "line": 1145,
+          "text": "    _FL_DEFPIN_NFC(11, 10, 0); // D11 is P0.10 (NFC2)"
+        },
+        {
+          "line": 1146,
+          "text": "    _FL_DEFPIN(12, 43, 1); // D12 is P1.11"
+        },
+        {
+          "line": 1147,
+          "text": "    _FL_DEFPIN(13, 45, 1); // D13 is P1.13 (SDA1)"
+        },
+        {
+          "line": 1148,
+          "text": "    _FL_DEFPIN(14, 47, 1); // D14 is P1.15 (SCL1)"
+        },
+        {
+          "line": 1149,
+          "text": "    _FL_DEFPIN(15,  2, 0); // D15 is P0.02 (A0)"
+        },
+        {
+          "line": 1150,
+          "text": "    _FL_DEFPIN(16, 29, 0); // D16 is P0.29 (A1)"
+        },
+        {
+          "line": 1151,
+          "text": "    _FL_DEFPIN(17, 31, 0); // D17 is P0.31 (A2)"
+        },
+        {
+          "line": 1154,
+          "text": "    _FL_DEFPIN(18, 33, 1); // D18 is P1.01 (SCK1)"
+        },
+        {
+          "line": 1155,
+          "text": "    _FL_DEFPIN(19, 34, 1); // D19 is P1.02 (MISO1)"
+        },
+        {
+          "line": 1156,
+          "text": "    _FL_DEFPIN(20, 39, 1); // D20 is P1.07 (MOSI1)"
+        },
+        {
+          "line": 1160,
+          "text": "    _FL_DEFPIN_USR_LED(22, 15, 0); // D22 is P0.15 (USR LED)"
+        },
+        {
+          "line": 1177,
+          "text": "    _FL_DEFPIN( 0,  6, 0); // D0  is P0.06 (TX)"
+        },
+        {
+          "line": 1178,
+          "text": "    _FL_DEFPIN( 1,  8, 0); // D1  is P0.08 (RX)"
+        },
+        {
+          "line": 1179,
+          "text": "    _FL_DEFPIN( 2, 15, 0); // D2  is P0.15 (SCK)"
+        },
+        {
+          "line": 1180,
+          "text": "    _FL_DEFPIN( 3, 17, 0); // D3  is P0.17 (MISO)"
+        },
+        {
+          "line": 1181,
+          "text": "    _FL_DEFPIN( 4, 20, 0); // D4  is P0.20 (MOSI)"
+        },
+        {
+          "line": 1182,
+          "text": "    _FL_DEFPIN( 5, 13, 0); // D5  is P0.13 (SDA)"
+        },
+        {
+          "line": 1183,
+          "text": "    _FL_DEFPIN( 6, 24, 0); // D6  is P0.24 (SCL)"
+        },
+        {
+          "line": 1184,
+          "text": "    _FL_DEFPIN_NFC( 7,  9, 0); // D7  is P0.09 (NFC1)"
+        },
+        {
+          "line": 1185,
+          "text": "    _FL_DEFPIN_NFC( 8, 10, 0); // D8  is P0.10 (NFC2)"
+        },
+        {
+          "line": 1186,
+          "text": "    _FL_DEFPIN( 9, 38, 1); // D9  is P1.06 (CS)"
+        },
+        {
+          "line": 1189,
+          "text": "    _FL_DEFPIN(10, 43, 1); // D10 is P1.11"
+        },
+        {
+          "line": 1190,
+          "text": "    _FL_DEFPIN(11, 28, 0); // D11 is P0.28 (A0)"
+        },
+        {
+          "line": 1191,
+          "text": "    _FL_DEFPIN(12,  3, 0); // D12 is P0.03 (A1)"
+        },
+        {
+          "line": 1192,
+          "text": "    _FL_DEFPIN(13, 45, 1); // D13 is P1.13"
+        },
+        {
+          "line": 1193,
+          "text": "    _FL_DEFPIN(14,  2, 0); // D14 is P0.02 (A2)"
+        },
+        {
+          "line": 1194,
+          "text": "    _FL_DEFPIN(15, 29, 0); // D15 is P0.29 (A3)"
+        },
+        {
+          "line": 1195,
+          "text": "    _FL_DEFPIN(16, 31, 0); // D16 is P0.31 (A4)"
+        },
+        {
+          "line": 1196,
+          "text": "    _FL_DEFPIN(17, 30, 0); // D17 is P0.30 (A5)"
+        },
+        {
+          "line": 1199,
+          "text": "    _FL_DEFPIN(18, 36, 1); // D18 is P1.04 (SCK1)"
+        },
+        {
+          "line": 1200,
+          "text": "    _FL_DEFPIN(19, 34, 1); // D19 is P1.02 (MISO1)"
+        },
+        {
+          "line": 1201,
+          "text": "    _FL_DEFPIN(20, 32, 1); // D20 is P1.00 (MOSI1)"
+        },
+        {
+          "line": 1202,
+          "text": "    _FL_DEFPIN(21, 22, 0); // D21 is P0.22"
+        },
+        {
+          "line": 1203,
+          "text": "    _FL_DEFPIN(22,  7, 0); // D22 is P0.07 (SDA1)"
+        },
+        {
+          "line": 1204,
+          "text": "    _FL_DEFPIN(23, 12, 0); // D23 is P0.12 (SCL1)"
+        },
+        {
+          "line": 1205,
+          "text": "    _FL_DEFPIN(24, 26, 0); // D24 is P0.26"
+        },
+        {
+          "line": 1210,
+          "text": "    _FL_DEFPIN_USR_LED(27, 42, 1); // D27 is P1.10 (USR LED)"
+        },
+        {
+          "line": 1222,
+          "text": "    _FL_DEFPIN( 0, 25, 0); // D0  is P0.25 -- UART TX"
+        },
+        {
+          "line": 1223,
+          "text": "    //_FL_DEFPIN( 1, 24, 0); // D1  is P0.24 -- UART RX"
+        },
+        {
+          "line": 1224,
+          "text": "    _FL_DEFPIN( 2, 10, 0); // D2  is P0.10 -- NFC2"
+        },
+        {
+          "line": 1225,
+          "text": "    _FL_DEFPIN( 3, 47, 1); // D3  is P1.15 -- PIN_LED1 (red)"
+        },
+        {
+          "line": 1226,
+          "text": "    _FL_DEFPIN( 4, 42, 1); // D4  is P1.10 -- PIN_LED2 (blue)"
+        },
+        {
+          "line": 1227,
+          "text": "    _FL_DEFPIN( 5, 40, 1); // D5  is P1.08 -- SPI/SS"
+        },
+        {
+          "line": 1228,
+          "text": "    _FL_DEFPIN( 6,  7, 0); // D6  is P0.07"
+        },
+        {
+          "line": 1229,
+          "text": "    _FL_DEFPIN( 7, 34, 1); // D7  is P1.02 -- PIN_DFU (UIButton)"
+        },
+        {
+          "line": 1232,
+          "text": "    _FL_DEFPIN( 8, 16, 0); // D8  is P0.16 -- PIN_NEOPIXEL"
+        },
+        {
+          "line": 1233,
+          "text": "    _FL_DEFPIN( 9, 26, 0); // D9  is P0.26"
+        },
+        {
+          "line": 1234,
+          "text": "    _FL_DEFPIN(10, 27, 0); // D10 is P0.27"
+        },
+        {
+          "line": 1235,
+          "text": "    _FL_DEFPIN(11,  6, 0); // D11 is P0.06"
+        },
+        {
+          "line": 1236,
+          "text": "    _FL_DEFPIN(12,  8, 0); // D12 is P0.08"
+        },
+        {
+          "line": 1237,
+          "text": "    _FL_DEFPIN(13, 41, 1); // D13 is P1.09"
+        },
+        {
+          "line": 1238,
+          "text": "    _FL_DEFPIN(14,  4, 0); // D14 is P0.04 -- A0"
+        },
+        {
+          "line": 1239,
+          "text": "    _FL_DEFPIN(15,  5, 0); // D15 is P0.05 -- A1"
+        },
+        {
+          "line": 1242,
+          "text": "    _FL_DEFPIN(16, 30, 0); // D16 is P0.30 -- A2"
+        },
+        {
+          "line": 1243,
+          "text": "    _FL_DEFPIN(17, 28, 0); // D17 is P0.28 -- A3"
+        },
+        {
+          "line": 1244,
+          "text": "    _FL_DEFPIN(18,  2, 0); // D18 is P0.02 -- A4"
+        },
+        {
+          "line": 1245,
+          "text": "    _FL_DEFPIN(19,  3, 0); // D19 is P0.03 -- A5"
+        },
+        {
+          "line": 1246,
+          "text": "    //_FL_DEFPIN(20, 29, 0); // D20 is P0.29 -- A6 -- Connected to battery!"
+        },
+        {
+          "line": 1247,
+          "text": "    //_FL_DEFPIN(21, 31, 0); // D21 is P0.31 -- A7 -- AREF"
+        },
+        {
+          "line": 1248,
+          "text": "    _FL_DEFPIN(22, 12, 0); // D22 is P0.12 -- SDA"
+        },
+        {
+          "line": 1249,
+          "text": "    _FL_DEFPIN(23, 11, 0); // D23 is P0.11 -- SCL"
+        },
+        {
+          "line": 1252,
+          "text": "    _FL_DEFPIN(24, 15, 0); // D24 is P0.15 -- PIN_SPI_MISO"
+        },
+        {
+          "line": 1253,
+          "text": "    _FL_DEFPIN(25, 13, 0); // D25 is P0.13 -- PIN_SPI_MOSI"
+        },
+        {
+          "line": 1254,
+          "text": "    _FL_DEFPIN(26, 14, 0); // D26 is P0.14 -- PIN_SPI_SCK"
+        },
+        {
+          "line": 1255,
+          "text": "    //_FL_DEFPIN(27, 19, 0); // D27 is P0.19 -- PIN_QSPI_SCK"
+        },
+        {
+          "line": 1256,
+          "text": "    //_FL_DEFPIN(28, 20, 0); // D28 is P0.20 -- PIN_QSPI_CS"
+        },
+        {
+          "line": 1257,
+          "text": "    //_FL_DEFPIN(29, 17, 0); // D29 is P0.17 -- PIN_QSPI_DATA0"
+        },
+        {
+          "line": 1258,
+          "text": "    //_FL_DEFPIN(30, 22, 0); // D30 is P0.22 -- PIN_QSPI_DATA1"
+        },
+        {
+          "line": 1259,
+          "text": "    //_FL_DEFPIN(31, 23, 0); // D31 is P0.23 -- PIN_QSPI_DATA2"
+        },
+        {
+          "line": 1262,
+          "text": "    //_FL_DEFPIN(32, 21, 0); // D32 is P0.21 -- PIN_QSPI_DATA3"
+        },
+        {
+          "line": 1263,
+          "text": "    //_FL_DEFPIN(33,  9, 0); // D33 is NFC1, only accessible via test point"
         }
       ]
     },
@@ -206733,12 +210288,13 @@
     "src/platforms/esp/8266/fastpin_esp8266.h": {
       "baseline_blob_oid": "9a4c1bd3e731ae3ab0032521ca6d807032e0fe60",
       "baseline_sha256": "73e41baa4cc4cd3ab24337ce0d2ee25768bd10ae22a53a40384e1da43fc5e248",
-      "disposition": "dependency",
+      "disposition": "positive",
       "role": "implementation",
       "findings": [
-        "default-delay"
+        "default-delay",
+        "esp8266-forced-fastpin-selection"
       ],
-      "reason": "Existing researched finding/source association retained; per-method source evidence and guard configuration distinguish caller, pin, timing and emitter responsibilities.",
+      "reason": "Existing researched finding/source association retained; per-method source evidence and guard configuration distinguish caller, pin, timing and emitter responsibilities. Targeted additional source-confirmed forced-selection concern #5068: explicit native FastPin specializations override the forced primary on the selected platform/variant. Actual forced fallback and timing qualification remain unresolved.",
       "source_evidence": [
         {
           "line": 11,
@@ -207071,6 +210627,118 @@
         {
           "line": 13,
           "text": "#include <esp8266_peri.h> // IWYU pragma: keep"
+        },
+        {
+          "line": 73,
+          "text": "_FL_DEFPIN(0,0); _FL_DEFPIN(1,1); _FL_DEFPIN(2,2); _FL_DEFPIN(3,3);"
+        },
+        {
+          "line": 74,
+          "text": "_FL_DEFPIN(4,4); _FL_DEFPIN(5,5);"
+        },
+        {
+          "line": 77,
+          "text": "// _FL_DEFPIN(6,6); _FL_DEFPIN(7,7);"
+        },
+        {
+          "line": 78,
+          "text": "// _FL_DEFPIN(8,8); _FL_DEFPIN(9,9); _FL_DEFPIN(10,10); _FL_DEFPIN(11,11);"
+        },
+        {
+          "line": 80,
+          "text": "_FL_DEFPIN(12,12); _FL_DEFPIN(13,13); _FL_DEFPIN(14,14); _FL_DEFPIN(15,15);"
+        },
+        {
+          "line": 81,
+          "text": "_FL_DEFPIN(16,16);"
+        },
+        {
+          "line": 97,
+          "text": "_FL_DEFPIN(0,3);"
+        },
+        {
+          "line": 98,
+          "text": "_FL_DEFPIN(1,1);"
+        },
+        {
+          "line": 99,
+          "text": "_FL_DEFPIN(2,16);"
+        },
+        {
+          "line": 100,
+          "text": "_FL_DEFPIN(3,5);"
+        },
+        {
+          "line": 101,
+          "text": "_FL_DEFPIN(4,4);"
+        },
+        {
+          "line": 102,
+          "text": "_FL_DEFPIN(5,14);"
+        },
+        {
+          "line": 103,
+          "text": "_FL_DEFPIN(6,12);"
+        },
+        {
+          "line": 104,
+          "text": "_FL_DEFPIN(7,13);"
+        },
+        {
+          "line": 105,
+          "text": "_FL_DEFPIN(8,0);"
+        },
+        {
+          "line": 106,
+          "text": "_FL_DEFPIN(9,2);"
+        },
+        {
+          "line": 107,
+          "text": "_FL_DEFPIN(10,15);"
+        },
+        {
+          "line": 108,
+          "text": "_FL_DEFPIN(11,13);"
+        },
+        {
+          "line": 109,
+          "text": "_FL_DEFPIN(12,12);"
+        },
+        {
+          "line": 110,
+          "text": "_FL_DEFPIN(13,14);"
+        },
+        {
+          "line": 111,
+          "text": "_FL_DEFPIN(14,4);"
+        },
+        {
+          "line": 112,
+          "text": "_FL_DEFPIN(15,5);"
+        },
+        {
+          "line": 131,
+          "text": "_FL_DEFPIN(0,16); _FL_DEFPIN(1,5); _FL_DEFPIN(2,4); _FL_DEFPIN(3,0);"
+        },
+        {
+          "line": 132,
+          "text": "_FL_DEFPIN(4,2); _FL_DEFPIN(5,14); _FL_DEFPIN(6,12); _FL_DEFPIN(7,13);"
+        },
+        {
+          "line": 133,
+          "text": "_FL_DEFPIN(8,15); _FL_DEFPIN(9,3); _FL_DEFPIN(10,1);"
+        },
+        {
+          "line": 149,
+          "text": "// _FL_DEFPIN(11,6);"
+        },
+        {
+          "line": 150,
+          "text": "// _FL_DEFPIN(12,7); _FL_DEFPIN(13,8); _FL_DEFPIN(14,9); _FL_DEFPIN(15,10);"
+        },
+        {
+          "line": 151,
+          "text": "// _FL_DEFPIN(16,11);"
         }
       ]
     },

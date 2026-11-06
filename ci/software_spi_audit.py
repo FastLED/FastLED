@@ -772,6 +772,320 @@ REQUIRED_FINDINGS = (
             "old-unguarded-restoration-must-fail-selection-oracle-not-compilation-incidental-error",
         ],
     ),
+    _required(
+        "esp8266-forced-fastpin-selection",
+        5068,
+        ["src/platforms/esp/8266/fastpin_esp8266.h"],
+        [
+            "FastPin-explicit-native-specialization-selection",
+            "ForcedSoftwarePin-hi-lo-toggle-NoPinMap-fallback",
+            "GenericSoftwareSPIOutput-and-independent-MY9221-selection",
+        ],
+        [
+            "force-off/native control",
+            "force-on/mapped fallback",
+            "force-on/NO_PINMAP Arduino fallback",
+            "all recognized board/pin-order variant branches independently",
+            "valid logical pins and invalid/excluded pins",
+            "actual SDK selected-type and executed GPIO route",
+            "restored unguarded specialization must fail the selected-type/route oracle",
+        ],
+        dependencies=[
+            "src/FastLED.h",
+            "src/fastspi.h",
+            "src/fl/system/fastpin.h",
+            "src/fl/system/fastpin_base.h",
+            "src/platforms/fastpin.h",
+            "src/platforms.h",
+            "src/fl/chipsets/my9221.h",
+            "src/platforms/shared/spi_bitbang/generic_software_spi.h",
+            "src/fl/system/forced_software_pin.h",
+            "src/platforms/my9221_emitter.h",
+            "src/platforms/shared/my9221_typed_emitter.h",
+            "src/platforms/generic_pin.h",
+            "src/platforms/esp/8266/fastled_esp8266.h",
+        ],
+        concerns=[
+            "ESP8266 defined; selected pin-order branch",
+            "platforms/fastpin.h ESP8266 branch→this header; platforms.h→fastled_esp8266.h "
+            "alsoincludesit. ALL RAW/D1/NodeMCU _FL_DEFPIN invocations lack FORCE exclusion.",
+            "native-explicit-specializations-override-forced-primary",
+            "selected-type-and-executed-route-required-not-macro-or-IRAM-receipt",
+            "forced-provider-cache-and-timing-independent",
+            "preserve-existing-optimization-acceptance-None",
+        ],
+    ),
+    _required(
+        "nrf51-forced-fastpin-selection",
+        5069,
+        ["src/platforms/arm/nrf51/fastpin_arm_nrf51.h"],
+        [
+            "FastPin-explicit-native-specialization-selection",
+            "ForcedSoftwarePin-hi-lo-toggle-NoPinMap-fallback",
+            "GenericSoftwareSPIOutput-and-independent-MY9221-selection",
+        ],
+        [
+            "force-off/native control",
+            "force-on/mapped fallback",
+            "force-on/NO_PINMAP Arduino fallback",
+            "all recognized board/pin-order variant branches independently",
+            "valid logical pins and invalid/excluded pins",
+            "actual SDK selected-type and executed GPIO route",
+            "restored unguarded specialization must fail the selected-type/route oracle",
+        ],
+        dependencies=[
+            "src/platforms/arm/nrf51/fastled_arm_nrf51.h",
+            "src/FastLED.h",
+            "src/fastspi.h",
+            "src/fl/system/fastpin.h",
+            "src/fl/system/fastpin_base.h",
+            "src/platforms/fastpin.h",
+            "src/platforms.h",
+            "src/fl/chipsets/my9221.h",
+            "src/platforms/shared/spi_bitbang/generic_software_spi.h",
+            "src/fl/system/forced_software_pin.h",
+            "src/platforms/my9221_emitter.h",
+            "src/platforms/shared/my9221_typed_emitter.h",
+            "src/platforms/generic_pin.h",
+            "src/platforms/arm/fastpin_arm.h",
+        ],
+        concerns=[
+            "NRF51 defined",
+            "platforms.h NRF51→nrf51/fastled_arm_nrf51.h→thisheader; platforms/arm/fastpin_arm.h "
+            "NRF51 alsoselects. Active #else of#if0 definesnative_ARMPIN, "
+            "definitions0..31unexcluded.",
+            "native-explicit-specializations-override-forced-primary",
+            "selected-type-and-executed-route-required-not-macro-or-IRAM-receipt",
+            "forced-provider-cache-and-timing-independent",
+            "preserve-existing-optimization-acceptance-5047",
+        ],
+    ),
+    _required(
+        "nrf52-variants-forced-fastpin-selection",
+        5070,
+        ["src/platforms/arm/nrf52/fastpin_arm_nrf52_variants.h"],
+        [
+            "FastPin-explicit-native-specialization-selection",
+            "ForcedSoftwarePin-hi-lo-toggle-NoPinMap-fallback",
+            "GenericSoftwareSPIOutput-and-independent-MY9221-selection",
+        ],
+        [
+            "force-off/native control",
+            "force-on/mapped fallback",
+            "force-on/NO_PINMAP Arduino fallback",
+            "all recognized board/pin-order variant branches independently",
+            "valid logical pins and invalid/excluded pins",
+            "actual SDK selected-type and executed GPIO route",
+            "restored unguarded specialization must fail the selected-type/route oracle",
+        ],
+        dependencies=[
+            "src/platforms/arm/nrf52/fastled_arm_nrf52.h",
+            "src/platforms/arm/nrf52/fastpin_arm_nrf52.h",
+            "src/FastLED.h",
+            "src/fastspi.h",
+            "src/fl/system/fastpin.h",
+            "src/fl/system/fastpin_base.h",
+            "src/platforms/fastpin.h",
+            "src/platforms.h",
+            "src/fl/chipsets/my9221.h",
+            "src/platforms/shared/spi_bitbang/generic_software_spi.h",
+            "src/fl/system/forced_software_pin.h",
+            "src/platforms/my9221_emitter.h",
+            "src/platforms/shared/my9221_typed_emitter.h",
+            "src/platforms/generic_pin.h",
+            "src/platforms/arm/fastpin_arm.h",
+        ],
+        concerns=[
+            "NRF52_SERIES plus recognized board/TARGET variant",
+            "platforms.h "
+            "NRF52_SERIES→fastled_arm_nrf52.h→fastpin_arm_nrf52.h→thisvariantsheader171; "
+            "nativeexplicitmacrosfl::FastPin unexcluded.",
+            "native-explicit-specializations-override-forced-primary",
+            "selected-type-and-executed-route-required-not-macro-or-IRAM-receipt",
+            "forced-provider-cache-and-timing-independent",
+            "preserve-existing-optimization-acceptance-5048",
+        ],
+    ),
+    _required(
+        "giga-forced-fastpin-selection",
+        5071,
+        [
+            "src/platforms/arm/giga/armpin.h",
+            "src/platforms/arm/giga/fastpin_arm_giga.h",
+        ],
+        [
+            "FastPin-explicit-native-specialization-selection",
+            "ForcedSoftwarePin-hi-lo-toggle-NoPinMap-fallback",
+            "GenericSoftwareSPIOutput-and-independent-MY9221-selection",
+        ],
+        [
+            "force-off/native control",
+            "force-on/mapped fallback",
+            "force-on/NO_PINMAP Arduino fallback",
+            "all recognized board/pin-order variant branches independently",
+            "valid logical pins and invalid/excluded pins",
+            "actual SDK selected-type and executed GPIO route",
+            "restored unguarded specialization must fail the selected-type/route oracle",
+        ],
+        dependencies=[
+            "src/platforms/arm/giga/fastled_arm_giga.h",
+            "src/FastLED.h",
+            "src/fastspi.h",
+            "src/fl/system/fastpin.h",
+            "src/fl/system/fastpin_base.h",
+            "src/platforms/fastpin.h",
+            "src/platforms.h",
+            "src/fl/chipsets/my9221.h",
+            "src/platforms/shared/spi_bitbang/generic_software_spi.h",
+            "src/fl/system/forced_software_pin.h",
+            "src/platforms/my9221_emitter.h",
+            "src/platforms/shared/my9221_typed_emitter.h",
+            "src/platforms/generic_pin.h",
+            "src/platforms/arm/fastpin_arm.h",
+        ],
+        concerns=[
+            "ARDUINO_GIGA or ARDUINO_GIGA_M7; ARMfastpindispatchalsoSTM32H7",
+            "platforms.h GIGA→giga/fastled_arm_giga.h→fastpin_arm_giga.h→armpin.h; "
+            "macrodefined13, invokedbyguardedGIGApinmap30..203withoutFORCEexclusion.",
+            "native-explicit-specializations-override-forced-primary",
+            "selected-type-and-executed-route-required-not-macro-or-IRAM-receipt",
+            "forced-provider-cache-and-timing-independent",
+            "preserve-existing-optimization-acceptance-5045",
+        ],
+    ),
+    _required(
+        "mgm240-forced-fastpin-selection",
+        5072,
+        ["src/platforms/arm/mgm240/fastpin_arm_mgm240.h"],
+        [
+            "FastPin-explicit-native-specialization-selection",
+            "ForcedSoftwarePin-hi-lo-toggle-NoPinMap-fallback",
+            "GenericSoftwareSPIOutput-and-independent-MY9221-selection",
+        ],
+        [
+            "force-off/native control",
+            "force-on/mapped fallback",
+            "force-on/NO_PINMAP Arduino fallback",
+            "all recognized board/pin-order variant branches independently",
+            "valid logical pins and invalid/excluded pins",
+            "actual SDK selected-type and executed GPIO route",
+            "restored unguarded specialization must fail the selected-type/route oracle",
+        ],
+        dependencies=[
+            "src/platforms/arm/mgm240/fastled_arm_mgm240.h",
+            "src/FastLED.h",
+            "src/fastspi.h",
+            "src/fl/system/fastpin.h",
+            "src/fl/system/fastpin_base.h",
+            "src/platforms/fastpin.h",
+            "src/platforms.h",
+            "src/fl/chipsets/my9221.h",
+            "src/platforms/shared/spi_bitbang/generic_software_spi.h",
+            "src/fl/system/forced_software_pin.h",
+            "src/platforms/my9221_emitter.h",
+            "src/platforms/shared/my9221_typed_emitter.h",
+            "src/platforms/generic_pin.h",
+            "src/platforms/arm/fastpin_arm.h",
+        ],
+        concerns=[
+            "ARDUINO_ARCH_SILABS and availableem_gpio/em_cmuSDKheaders",
+            "platforms.h ARDUINO_ARCH_SILABS→fastled_arm_mgm240.h→thisheader; "
+            "nativeDEFPIN150invocationsNanoMattermapunexcluded.",
+            "native-explicit-specializations-override-forced-primary",
+            "selected-type-and-executed-route-required-not-macro-or-IRAM-receipt",
+            "forced-provider-cache-and-timing-independent",
+            "preserve-existing-optimization-acceptance-5041",
+        ],
+    ),
+    _required(
+        "lpc-modern-forced-fastpin-selection",
+        5073,
+        ["src/platforms/arm/lpc/fastpin_arm_lpc.h"],
+        [
+            "FastPin-explicit-native-specialization-selection",
+            "ForcedSoftwarePin-hi-lo-toggle-NoPinMap-fallback",
+            "GenericSoftwareSPIOutput-and-independent-MY9221-selection",
+        ],
+        [
+            "force-off/native control",
+            "force-on/mapped fallback",
+            "force-on/NO_PINMAP Arduino fallback",
+            "all recognized board/pin-order variant branches independently",
+            "valid logical pins and invalid/excluded pins",
+            "actual SDK selected-type and executed GPIO route",
+            "restored unguarded specialization must fail the selected-type/route oracle",
+        ],
+        dependencies=[
+            "src/platforms/arm/lpc/fastled_arm_lpc.h",
+            "src/FastLED.h",
+            "src/fastspi.h",
+            "src/fl/system/fastpin.h",
+            "src/fl/system/fastpin_base.h",
+            "src/platforms/fastpin.h",
+            "src/platforms.h",
+            "src/fl/chipsets/my9221.h",
+            "src/platforms/shared/spi_bitbang/generic_software_spi.h",
+            "src/fl/system/forced_software_pin.h",
+            "src/platforms/my9221_emitter.h",
+            "src/platforms/shared/my9221_typed_emitter.h",
+            "src/platforms/generic_pin.h",
+            "src/platforms/arm/fastpin_arm.h",
+        ],
+        concerns=[
+            "FL_IS_ARM_LPC_845 or804 or11_USB or15",
+            "platforms.h FL_IS_ARM_LPC→lpc/fastled_arm_lpc.h→thisheader; "
+            "nativeDEFPIN142underfamilycondition34, no FORCEexclusion.",
+            "native-explicit-specializations-override-forced-primary",
+            "selected-type-and-executed-route-required-not-macro-or-IRAM-receipt",
+            "forced-provider-cache-and-timing-independent",
+            "preserve-existing-optimization-acceptance-5042",
+        ],
+    ),
+    _required(
+        "lpc-legacy-forced-fastpin-selection",
+        5074,
+        ["src/platforms/arm/lpc/fastpin_arm_lpc11_legacy.h"],
+        [
+            "FastPin-explicit-native-specialization-selection",
+            "ForcedSoftwarePin-hi-lo-toggle-NoPinMap-fallback",
+            "GenericSoftwareSPIOutput-and-independent-MY9221-selection",
+        ],
+        [
+            "force-off/native control",
+            "force-on/mapped fallback",
+            "force-on/NO_PINMAP Arduino fallback",
+            "all recognized board/pin-order variant branches independently",
+            "valid logical pins and invalid/excluded pins",
+            "actual SDK selected-type and executed GPIO route",
+            "restored unguarded specialization must fail the selected-type/route oracle",
+        ],
+        dependencies=[
+            "src/platforms/arm/lpc/fastled_arm_lpc.h",
+            "src/platforms/arm/lpc/fastpin_arm_lpc.h",
+            "src/FastLED.h",
+            "src/fastspi.h",
+            "src/fl/system/fastpin.h",
+            "src/fl/system/fastpin_base.h",
+            "src/platforms/fastpin.h",
+            "src/platforms.h",
+            "src/fl/chipsets/my9221.h",
+            "src/platforms/shared/spi_bitbang/generic_software_spi.h",
+            "src/fl/system/forced_software_pin.h",
+            "src/platforms/my9221_emitter.h",
+            "src/platforms/shared/my9221_typed_emitter.h",
+            "src/platforms/generic_pin.h",
+            "src/platforms/arm/fastpin_arm.h",
+        ],
+        concerns=[
+            "FL_IS_ARM_LPC_11_LEGACY and not845/804/11_USB/15",
+            "platforms.h FL_IS_ARM_LPC→fastled_arm_lpc.h→fastpin_arm_lpc.h28..31→legacyheader; "
+            "nativeDEFPIN158..159unexcluded.",
+            "native-explicit-specializations-override-forced-primary",
+            "selected-type-and-executed-route-required-not-macro-or-IRAM-receipt",
+            "forced-provider-cache-and-timing-independent",
+            "preserve-existing-optimization-acceptance-5043",
+        ],
+    ),
 )
 
 # Semantic candidates missed by the original five query families. Keep them
@@ -1652,6 +1966,33 @@ def _run_init_clock_low_proof(root: Path) -> "InitProof":
     return run_init_clock_low_proof(root)
 
 
+def _my9221_schedule_mutants(original: dict[str, bytes]) -> dict[str, dict[str, bytes]]:
+    from ci.software_spi_my9221_proof import prepare_mutants
+
+    return prepare_mutants(original)
+
+
+def _validate_my9221_stage_sequence(names: tuple[str, ...]) -> None:
+    from ci.software_spi_my9221_proof import validate_stage_sequence
+
+    validate_stage_sequence(names)
+
+
+def _validate_my9221_schedule_output(
+    stage: str, case: str, returncode: int, output: str
+) -> None:
+    from ci.software_spi_my9221_proof import validate_output
+
+    validate_output(stage, case, returncode, output)
+
+
+def _run_my9221_host_schedule_proof(root: Path) -> "InitProof":
+    """Actual fixed host schedule subproof; never clear full MY configuration slots."""
+    from ci.software_spi_init_proof import run_my9221_host_schedule_proof
+
+    return run_my9221_host_schedule_proof(root)
+
+
 def _native_support_input_paths(root: Path) -> list[str]:
     """All tracked/nonignored CI and test inputs plus root launch/build files."""
     result = RunningProcess.run(
@@ -1793,7 +2134,7 @@ def main() -> int:
     parser.add_argument(
         "--run-native",
         action="store_true",
-        help="run fixed fresh host traces and isolated four-stage host32 init proof; broader audit stays unresolved",
+        help="run fixed fresh host traces, isolated host32 init proof and seven-stage MY9221 host schedule proof; broader audit stays unresolved",
     )
     parser.add_argument(
         "--report", type=Path, default=ROOT / ".build/software-spi-audit-report.json"
@@ -1805,6 +2146,7 @@ def main() -> int:
     ignored: list[str] = []
     executions: list[dict[str, object]] = []
     init_clock_low_proof: dict[str, object] | None = None
+    my9221_host_schedule_proof: dict[str, object] | None = None
     errors: list[str] = []
     ignore_policy_sha256: str | None = None
     try:
@@ -1862,6 +2204,9 @@ def main() -> int:
             init_clock_low_proof = _serialize_init_clock_low_proof(
                 _run_init_clock_low_proof(ROOT)
             )
+            my9221_host_schedule_proof = _serialize_init_clock_low_proof(
+                _run_my9221_host_schedule_proof(ROOT)
+            )
         if (ROOT / ".gitignore").is_file():
             ignore_policy_sha256 = source_digest((ROOT / ".gitignore").read_bytes())
     except (OSError, ValueError, CalledProcessError, TimeoutExpired) as error:
@@ -1886,6 +2231,8 @@ def main() -> int:
         },
         "executions": executions,
         "init_clock_low_proof": init_clock_low_proof,
+        "my9221_host_schedule_proof": my9221_host_schedule_proof,
+        "my9221_host_schedule_proof_limitation": "Internally executed host92/93 requested schedule only; all seven full MY9221 target/configuration groups remain unresolved. No vendor guard/cache placement, physical phase bounds or external receipt acceptance.",
         "init_clock_low_proof_limitation": "Internally executed host32 fixture4 subproof only; no vendor/other-width certification, external receipt acceptance or required-slot clearing.",
         "errors": errors,
         "complete": not errors,

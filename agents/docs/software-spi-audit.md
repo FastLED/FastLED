@@ -82,7 +82,7 @@ refreshed to authorize changed code. Legacy path-keyed diagnostic rows retain
 their existing checks; malformed versioned documents cannot fall back to them.
 The reviewed baseline input is supplied at
 `ci/fixtures/software_spi_audit/reviewed_baseline.json`, with all 2,986 pinned
-source paths and all 41 mandatory finding associations. Use it explicitly:
+source paths and all 48 mandatory finding associations. Use it explicitly:
 
 ```sh
 bash spi-audit --classifications ci/fixtures/software_spi_audit/reviewed_baseline.json --report .build/software-spi-audit-report.json
@@ -96,7 +96,7 @@ deleted source obligations and all required target/configuration/mutation
 checks remain RED until actual fixed runners establish their evidence. CLI
 default behavior is unchanged.
 
-The registry currently contains 41 distinct required findings. Native AVR
+The registry currently contains 48 distinct required findings. Native AVR
 selected-bit predicates (#5052) and peripheral/GPIO handoff (#5055) are separate
 requirements even though both bind to `fastspi_avr.h`. The latter covers all
 five UBRR1/UBRR0/SPI0_CTRLA/SPSR/SPSR0 method variants, prior-byte shifter drain,
@@ -371,3 +371,33 @@ and RISC-V, forced on/off and pin-map configurations, generic SPI and MY9221
 producers, and restoration of the unguarded specializations must fail the
 selection oracle. Macro presence and a native IRAM ELF cannot satisfy this
 requirement; fallback cache placement and phase timing remain separate.
+
+
+The managed MY9221 host adapter uses the actual `fl_channels_spi_legacy_golden`
+translation unit and its four public-controller pin/time observation cases.
+It runs an isolated baseline, five independent production wait removals, and an
+exact restored build. The five-chip stop case must fail its literal strict
+250ns bound when the cascade wait is removed. Only the internally fixed target,
+cases and mutations can be executed; `--run-native` serializes the resulting
+full typed provenance. No imported JSON creates or authenticates this proof.
+
+A successful actual adapter run establishes only the observed host92/93 requested schedule and
+public-controller behavior, with modeled pin cost and timing-policy hooks. It
+cannot certify the real wait backend, vendor interrupt state, IRAM/SRAM placement,
+physical phase bounds or other pin/CPU/configuration matrices. All seven full
+MY9221 requirement groups stay RED. The existing init adapter remains a separate
+host32 subproof. Both retain immutable input/tool/environment/build-recipe
+identities, actual executed commands, binaries/PCH/dependencies/logs and exact
+source restoration; failed attempts keep their owned isolated locations.
+
+The opt-in actual MY adapter acceptance is:
+
+```sh
+FASTLED_RUN_MY9221_PROOF=1 UV_NO_SYNC=1 uv run --no-sync pytest ci/tests/test_software_spi_audit.py -q -k my9221_managed_host_schedule_real_acceptance
+```
+
+A parser/schema unit test or old manual mutation record is not an actual fresh
+adapter acceptance run. Actual selected-case diagnostic captures remain required
+when the framework output contract changes.
+
+Seven additional forced-selection findings (#5068–#5074) remain unresolved across ESP8266, nRF51, nRF52 variants, GIGA, MGM240, modern LPC and legacy LPC. Native explicit specializations can override the forced primary; selected-type and actual fallback-route controls are required for every supported variant. Existing optimization matrices, including nRF51 #5047, remain mandatory. Source bindings do not certify execution, cache safety or timing.

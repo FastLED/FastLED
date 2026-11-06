@@ -11,7 +11,8 @@ import re
 import shlex
 import shutil
 import sys
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass, field
+from enum import Enum
 from pathlib import Path
 from tempfile import mkdtemp
 
@@ -48,6 +49,46 @@ raise SystemExit(0 if result.success else 2)
 """
 
 
+class _ProofKind(Enum):
+    INIT = "init"
+    MY9221 = "my9221"
+
+
+@dataclass(frozen=True)
+class _NativeSpec:
+    target: str
+    test: str
+    sources: tuple[str, ...]
+    prefix: str
+    artifact_group: str
+
+
+def _spec(kind: _ProofKind) -> _NativeSpec:
+    # Closed code-owned targets only: no CLI/manifest supplies commands or paths.
+    if kind is _ProofKind.INIT:
+        return _NativeSpec(
+            "generic_software_spi", TEST, (SOURCE,), "spi-init-proof", "spi-init-proof"
+        )
+    if kind is _ProofKind.MY9221:
+        return _NativeSpec(
+            "fl_channels_spi_legacy_golden",
+            "tests/fl/channels/spi_legacy_golden.cpp",
+            ("src/fl/chipsets/my9221.h", "src/platforms/shared/my9221_typed_emitter.h"),
+            "spi-my9221-proof",
+            "spi-my9221-proof",
+        )
+    raise ValueError("unknown fixed native proof target")
+
+
+@dataclass(frozen=True)
+class NativeExecution:
+    case: str
+    command: list[str]
+    returncode: int
+    log: Path
+    log_sha256: str
+
+
 @dataclass(frozen=True)
 class ToolIdentity:
     path: Path
@@ -76,6 +117,8 @@ class InitStage:
     runtime_dependencies: dict[str, str]
     build_context: "BuildContext"
     executed_commands: tuple[tuple[str, ...], ...]
+    source_sha256s: dict[str, str] = field(default_factory=dict)
+    executions: tuple[NativeExecution, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -167,7 +210,7 @@ def _retain_generated_configuration(workspace: Path, destination: Path) -> None:
 
 
 def _capture_build_context(
-    workspace: Path, environment: dict[str, str]
+    workspace: Path, environment: dict[str, str], kind: _ProofKind = _ProofKind.INIT
 ) -> BuildContext:
     build = workspace / ".build/meson-debug"
     configuration: dict[str, str] = {}
@@ -199,7 +242,7 @@ def _capture_build_context(
         row
         for row in rows
         if (Path(row["directory"]) / row["file"]).resolve()
-        == (workspace / TEST).resolve()
+        == (workspace / _spec(kind).test).resolve()
     ]
     if len(selected) != 1:
         raise ValueError("missing or ambiguous selected compilation command")
@@ -252,9 +295,12 @@ def _capture_build_context(
 
 
 def _verify_build_context(
-    workspace: Path, environment: dict[str, str], initial: BuildContext
+    workspace: Path,
+    environment: dict[str, str],
+    initial: BuildContext,
+    kind: _ProofKind = _ProofKind.INIT,
 ) -> None:
-    if _capture_build_context(workspace, environment) != initial:
+    if _capture_build_context(workspace, environment, kind) != initial:
         raise ValueError("init proof build context/environment/recipe changed")
 
 
@@ -270,7 +316,9 @@ def _observed_commands(output: str) -> tuple[tuple[str, ...], ...]:
     return tuple(commands)
 
 
-def _validate_executed_compile_command(output: str, context: BuildContext) -> None:
+def _validate_executed_compile_command(
+    output: str, context: BuildContext, kind: _ProofKind = _ProofKind.INIT
+) -> None:
     # Meson compile DB omits the injected zccache prefix used by the real Ninja
     # rule. This single known launcher is separately content/tool bound.
     commands = []
@@ -279,14 +327,17 @@ def _validate_executed_compile_command(output: str, context: BuildContext) -> No
             command = command[1:]
         if command == context.compile_argv:
             commands.append(command)
-        elif any(TEST in arg or Path(TEST).name == Path(arg).name for arg in command):
+        elif any(
+            _spec(kind).test in arg or Path(_spec(kind).test).name == Path(arg).name
+            for arg in command
+        ):
             raise ValueError("executed compilation argv mismatch")
     if len(commands) != 1:
         raise ValueError("missing or ambiguous executed compilation command")
 
 
 def _planned_commands(
-    workspace: Path, environment: dict[str, str]
+    workspace: Path, environment: dict[str, str], kind: _ProofKind = _ProofKind.INIT
 ) -> tuple[tuple[str, ...], ...]:
     ninja = shutil.which("ninja", path=environment.get("PATH"))
     if not ninja:
@@ -298,7 +349,7 @@ def _planned_commands(
             str(workspace / ".build/meson-debug"),
             "-t",
             "commands",
-            "tests/generic_software_spi.so",
+            f"tests/{_spec(kind).target}.so",
         ],
         cwd=workspace,
         env=environment,
@@ -315,9 +366,12 @@ def _planned_commands(
 
 
 def _validate_stage_commands(
-    output: str, context: BuildContext, planned: tuple[tuple[str, ...], ...]
+    output: str,
+    context: BuildContext,
+    planned: tuple[tuple[str, ...], ...],
+    kind: _ProofKind = _ProofKind.INIT,
 ) -> tuple[tuple[str, ...], ...]:
-    _validate_executed_compile_command(output, context)
+    _validate_executed_compile_command(output, context, kind)
     observed = _observed_commands(output)
     if any(command not in planned for command in observed):
         raise ValueError("executed PCH/compile/link command differs from initial plan")
@@ -325,7 +379,7 @@ def _validate_stage_commands(
         command
         for command in observed
         if "-c" not in command
-        and any(arg.endswith("/generic_software_spi.so") for arg in command)
+        and any(arg.endswith(f"/{_spec(kind).target}.so") for arg in command)
     ]
     if len(links) != 1:
         raise ValueError("missing or ambiguous executed target link command")
@@ -375,9 +429,16 @@ def _snapshot_inputs(root: Path) -> SnapshotInputs:
     return SnapshotInputs(sorted(set(names) - {"", *gitlinks}), gitlinks)
 
 
-def _snapshot(root: Path) -> tuple[Path, SnapshotInputs]:
+def _snapshot(
+    root: Path, kind: _ProofKind = _ProofKind.INIT
+) -> tuple[Path, SnapshotInputs]:
     # Validate required real inputs before invoking even Git (unit-tested).
-    for name in (SOURCE, TEST, "src/platforms/posix/run_unit_test.hpp", "meson.build"):
+    for name in (
+        *_spec(kind).sources,
+        _spec(kind).test,
+        "src/platforms/posix/run_unit_test.hpp",
+        "meson.build",
+    ):
         if not (root / name).is_file() or (root / name).is_symlink():
             raise ValueError(f"missing or unsafe init proof input: {name}")
     manifest = _snapshot_inputs(root)
@@ -387,7 +448,7 @@ def _snapshot(root: Path) -> tuple[Path, SnapshotInputs]:
     parent = Path.home() / ".clud" / "worktrees"
     parent.mkdir(parents=True, exist_ok=True)
     workspace = Path(
-        mkdtemp(prefix="fastled3-wt-spi-init-proof-", dir=parent)
+        mkdtemp(prefix=f"fastled3-wt-{_spec(kind).prefix}-", dir=parent)
     ).resolve()
     RunningProcess.run(
         ["git", "worktree", "add", "--detach", str(workspace), "HEAD"],
@@ -541,6 +602,55 @@ def _tools(workspace: Path) -> dict[str, ToolIdentity]:
     }
 
 
+def _verify_tool_identities(
+    saved: Path,
+    phase: str,
+    expected: dict[str, ToolIdentity],
+    before: dict[str, ToolIdentity],
+    after: dict[str, ToolIdentity],
+) -> None:
+    """Retain observations before rejecting drift; never deserialize proof."""
+    names = sorted(set(expected) | set(before) | set(after))
+    changed = [
+        name
+        for name in names
+        if expected.get(name) != before.get(name)
+        or expected.get(name) != after.get(name)
+    ]
+    fields = {}
+    for name in changed:
+        fields[name] = [
+            field
+            for field in ("path", "sha256", "version")
+            if any(
+                getattr(observed.get(name), field, None)
+                != getattr(expected.get(name), field, None)
+                for observed in (before, after)
+            )
+        ]
+    saved.mkdir(parents=True, exist_ok=True)
+    (saved / f"tool-identities-{phase}.json").write_text(
+        json.dumps(
+            {
+                "phase": phase,
+                "changed_names": changed,
+                "changed_fields": fields,
+                "expected": {name: asdict(value) for name, value in expected.items()},
+                "before": {name: asdict(value) for name, value in before.items()},
+                "after": {name: asdict(value) for name, value in after.items()},
+            },
+            default=str,
+            indent=2,
+            sort_keys=True,
+        ),
+        encoding="utf-8",
+    )
+    if changed:
+        raise ValueError(
+            f"native proof tool identity changed at {phase}: {changed}; retained {saved}"
+        )
+
+
 def _verify_inputs(workspace: Path, expected: dict[str, str]) -> dict[str, str]:
     actual = _inputs(workspace)
     if actual != expected:
@@ -548,39 +658,108 @@ def _verify_inputs(workspace: Path, expected: dict[str, str]) -> dict[str, str]:
     return actual
 
 
+def _source_payload(
+    source: bytes | dict[str, bytes], kind: _ProofKind
+) -> dict[str, bytes]:
+    names = _spec(kind).sources
+    if kind is _ProofKind.INIT and isinstance(source, bytes):
+        return {SOURCE: source}
+    if (
+        not isinstance(source, dict)
+        or set(source) != set(names)
+        or any(not isinstance(data, bytes) for data in source.values())
+    ):
+        raise ValueError("invalid fixed proof production source payload")
+    return dict(source)
+
+
+def _cases(kind: _ProofKind, stage: str) -> tuple[str, ...]:
+    if kind is _ProofKind.INIT:
+        return (CASE,)
+    from ci.software_spi_my9221_proof import cases_for_stage
+
+    return cases_for_stage(stage)
+
+
+def _runtime_execution(
+    workspace: Path,
+    saved: Path,
+    binary: Path,
+    tools: dict[str, ToolIdentity],
+    stage: str,
+    case: str,
+    ordinal: int,
+    kind: _ProofKind,
+    environment: dict[str, str],
+) -> NativeExecution:
+    command = [
+        str(tools["loader"].path),
+        str(binary),
+        f"--test-case={case}",
+        "--success",
+        "--no-colors",
+    ]
+    log = saved / (
+        "runtime.log" if kind is _ProofKind.INIT else f"runtime-{ordinal}.log"
+    )
+    runtime = _run(command, workspace, log, build=False, environment=environment)
+    if kind is _ProofKind.INIT:
+        audit._validate_init_clock_low_output(stage, runtime.returncode, runtime.stdout)
+    else:
+        from ci.software_spi_my9221_proof import validate_output
+
+        validate_output(
+            stage,
+            case,
+            runtime.returncode,
+            runtime.stdout,
+            oracle=(workspace / _spec(kind).test).read_bytes(),
+        )
+    return NativeExecution(
+        case, command, runtime.returncode, log, audit.source_digest(log.read_bytes())
+    )
+
+
 def _stage(
     workspace: Path,
     artifacts: Path,
     name: str,
-    source: bytes,
+    source: bytes | dict[str, bytes],
     initial: dict[str, str],
     initial_tools: dict[str, ToolIdentity],
     context: BuildContext,
     environment: dict[str, str],
     planned: tuple[tuple[str, ...], ...],
+    kind: _ProofKind = _ProofKind.INIT,
 ) -> InitStage:
-    _verify_build_context(workspace, _managed_environment(workspace), context)
-    if _planned_commands(workspace, environment) != planned:
-        raise ValueError("init proof command plan changed")
-    target = workspace / SOURCE
-    target.write_bytes(source)
-    # Force the actual production-template translation unit through compilation;
-    # log and rebuilt artifact checks below reject stale/no-op build execution.
-    os.utime(workspace / TEST, None)
+    spec = _spec(kind)
+    _verify_build_context(workspace, _managed_environment(workspace), context, kind)
+    if _planned_commands(workspace, environment, kind) != planned:
+        raise ValueError("native proof command plan changed")
+    payload = _source_payload(source, kind)
     before = dict(initial)
-    before[SOURCE] = audit.source_digest(source)
+    for path, data in payload.items():
+        (workspace / path).write_bytes(data)
+        before[path] = audit.source_digest(data)
+    # Force the selected actual TU through compilation, never accept a cached
+    # target summary or merely previously built shared library as fresh execution.
+    os.utime(workspace / spec.test, None)
     _verify_inputs(workspace, before)
     tools_before = _tools(workspace)
-    if tools_before != initial_tools:
-        raise ValueError(f"init proof tool identity changed; retained {workspace}")
     saved = artifacts / name
+    _verify_tool_identities(
+        saved, "stage-before", initial_tools, tools_before, tools_before
+    )
     build_log = saved / "build.log"
     build = workspace / ".build/meson-debug"
     candidates = [
-        build / "tests" / f"generic_software_spi{ext}"
-        for ext in (".so", ".dylib", ".dll")
+        build / "tests" / f"{spec.target}{ext}" for ext in (".so", ".dylib", ".dll")
     ]
     saved.mkdir(parents=True, exist_ok=True)
+    for path, data in payload.items():
+        retained = saved / "production-sources" / path
+        retained.parent.mkdir(parents=True, exist_ok=True)
+        retained.write_bytes(data)
     (saved / "build-context.json").write_text(
         json.dumps(
             {
@@ -601,7 +780,7 @@ def _stage(
             previous.rename(saved / ("previous-" + previous.name))
     try:
         result = _run(
-            [sys.executable, "-c", BUILD_SCRIPT, "generic_software_spi"],
+            [sys.executable, "-c", BUILD_SCRIPT, spec.target],
             workspace,
             build_log,
             build=True,
@@ -610,135 +789,216 @@ def _stage(
     finally:
         _retain_generated_configuration(workspace, saved / "generated-after")
     if result.returncode != 0:
-        raise ValueError(f"init proof compile failed; retained {build_log}")
-    binary = next((p for p in candidates if p.is_file()), None)
+        raise ValueError(f"native proof compile failed; retained {build_log}")
+    binary = next((path for path in candidates if path.is_file()), None)
     if binary is None:
-        raise ValueError(f"init proof missing or stale binary; retained {build_log}")
-    if (
-        "generic_software_spi.cpp" not in result.stdout
-        or "Compiling" not in result.stdout
-    ):
+        raise ValueError(f"native proof missing or stale binary; retained {build_log}")
+    if Path(spec.test).name not in result.stdout or "Compiling" not in result.stdout:
         raise ValueError(
-            f"init proof missing actual template compilation; retained {build_log}"
+            f"native proof missing actual template compilation; retained {build_log}"
         )
-    _verify_build_context(workspace, _managed_environment(workspace), context)
-    executed = _validate_stage_commands(result.stdout, context, planned)
-    if _planned_commands(workspace, environment) != planned:
-        raise ValueError("init proof command plan changed during build")
+    _verify_build_context(workspace, _managed_environment(workspace), context, kind)
+    executed = _validate_stage_commands(result.stdout, context, planned, kind)
+    if _planned_commands(workspace, environment, kind) != planned:
+        raise ValueError("native proof command plan changed during build")
     saved_binary = saved / binary.name
     shutil.copy2(binary, saved_binary)
-    command = [
-        str(tools_before["loader"].path),
-        str(saved_binary),
-        f"--test-case={CASE}",
-        "--success",
-        "--no-colors",
-    ]
     binary_hash = audit.source_digest(saved_binary.read_bytes())
-    dependency_paths = sorted(
+    paths = sorted(
         path
         for path in (build / "ci/meson/native").iterdir()
         if path.is_file() and path.suffix in {".so", ".dylib", ".dll"}
     )
     pch = build / "tests/test_pch.h.pch"
     if not pch.is_file():
-        raise ValueError("init proof missing actual PCH artifact")
-    dependency_paths.append(pch)
-    dependencies = {
-        str(path): audit.source_digest(path.read_bytes()) for path in dependency_paths
-    }
-    for path in dependency_paths:
+        raise ValueError("native proof missing actual PCH artifact")
+    paths.append(pch)
+    dependencies = {str(path): audit.source_digest(path.read_bytes()) for path in paths}
+    for path in paths:
         shutil.copy2(path, saved / path.name)
-    runtime_log = saved / "runtime.log"
-    runtime = _run(
-        command, workspace, runtime_log, build=False, environment=environment
-    )
-    _verify_build_context(workspace, _managed_environment(workspace), context)
-    if dependencies != {
-        str(path): audit.source_digest(path.read_bytes()) for path in dependency_paths
-    }:
-        raise ValueError(f"init proof runtime dependencies changed; retained {saved}")
+    executions = []
+    for ordinal, case in enumerate(_cases(kind, name)):
+        _verify_inputs(workspace, before)
+        executions.append(
+            _runtime_execution(
+                workspace,
+                saved,
+                saved_binary,
+                tools_before,
+                name,
+                case,
+                ordinal,
+                kind,
+                environment,
+            )
+        )
+        _verify_build_context(workspace, _managed_environment(workspace), context, kind)
+        if dependencies != {
+            str(path): audit.source_digest(path.read_bytes()) for path in paths
+        }:
+            raise ValueError(
+                f"native proof runtime dependencies changed; retained {saved}"
+            )
+        _verify_inputs(workspace, before)
+        observed_tools = _tools(workspace)
+        _verify_tool_identities(
+            saved,
+            f"runtime-{ordinal}-after",
+            initial_tools,
+            tools_before,
+            observed_tools,
+        )
+        if binary_hash != audit.source_digest(
+            saved_binary.read_bytes()
+        ) or binary_hash != audit.source_digest(binary.read_bytes()):
+            raise ValueError(
+                f"native proof binary changed during execution; retained {saved}"
+            )
     after = _verify_inputs(workspace, before)
     tools_after = _tools(workspace)
-    if tools_before != tools_after:
-        raise ValueError(f"init proof native tools changed; retained {saved}")
-    if binary_hash != audit.source_digest(
-        saved_binary.read_bytes()
-    ) or binary_hash != audit.source_digest(binary.read_bytes()):
-        raise ValueError(
-            f"init proof binary changed during execution; retained {saved}"
-        )
-    audit._validate_init_clock_low_output(name, runtime.returncode, runtime.stdout)
+    _verify_tool_identities(
+        saved, "stage-after", initial_tools, tools_before, tools_after
+    )
+    first = executions[0]
     return InitStage(
         name,
-        audit.source_digest(source),
+        audit.source_digest(payload[spec.sources[0]]),
         before,
         after,
         tools_before,
         tools_after,
         result.returncode,
-        SOURCE,
+        SOURCE if kind is _ProofKind.INIT else spec.test,
         saved_binary,
         binary_hash,
         build_log,
         audit.source_digest(build_log.read_bytes()),
-        runtime_log,
-        audit.source_digest(runtime_log.read_bytes()),
-        command,
-        runtime.returncode,
+        first.log,
+        first.log_sha256,
+        first.command,
+        first.returncode,
         dependencies,
         context,
         executed,
+        {path: audit.source_digest(data) for path, data in payload.items()},
+        tuple(executions),
     )
 
 
-def run_init_clock_low_proof(root: Path) -> InitProof:
+def _validate_my9221_dependencies(
+    workspace: Path, previous: InitStage, current: InitStage
+) -> None:
+    """Validate stage-local captures; this helper cannot authenticate a proof."""
+    before, after = previous.runtime_dependencies, current.runtime_dependencies
+    if set(before) != set(after):
+        raise ValueError("MY9221 runtime dependency paths changed")
+    if (
+        previous.tools_before != current.tools_before
+        or previous.build_context != current.build_context
+    ):
+        raise ValueError("MY9221 dependency build identity changed")
+    changed = {path for path in before if before[path] != after[path]}
+    if not changed:
+        return
+    pch = str(workspace / ".build/meson-debug/tests/test_pch.h.pch")
+    if changed != {pch} or previous.source_sha256s == current.source_sha256s:
+        raise ValueError(
+            "MY9221 runtime dependencies changed without prescribed source rebuild"
+        )
+    # _stage already validates every observed command against the immutable
+    # initial expanded Ninja plan. Require actual PCH execution as well.
+    if not any(
+        "c++-header" in command
+        and any(
+            command[i] == "-o" and command[i + 1].endswith("test_pch.h.pch")
+            for i in range(len(command) - 1)
+        )
+        for command in current.executed_commands
+    ):
+        raise ValueError("MY9221 rebuilt PCH lacks executed planned PCH command")
+
+
+def _restore_sources(workspace: Path, original: dict[str, bytes]) -> list[str]:
+    errors = []
+    for path, data in original.items():
+        try:
+            target = workspace / path
+            target.write_bytes(data)
+            if target.read_bytes() != data:
+                raise ValueError("restoration byte mismatch")
+        except (OSError, ValueError) as error:
+            errors.append(f"{path}: {error}")
+    return errors
+
+
+def _run_proof(root: Path, kind: _ProofKind) -> InitProof:
     root = root.resolve()
-    # Missing-input validation in _snapshot deliberately precedes any process.
-    workspace, manifest = _snapshot(root)
-    original = (workspace / SOURCE).read_bytes()
+    spec = _spec(kind)
+    # Preserve the existing init private call contract for its negative controls.
+    workspace, manifest = (
+        _snapshot(root) if kind is _ProofKind.INIT else _snapshot(root, kind)
+    )
+    original = {path: (workspace / path).read_bytes() for path in spec.sources}
     root_before = _inputs(root)
     if _inputs(workspace) != root_before:
         raise ValueError(
             f"source snapshot differs from original inputs; retained {workspace}"
         )
+    artifacts = root / ".build" / spec.artifact_group / workspace.name
     context: BuildContext | None = None
+    initial_tools: dict[str, ToolIdentity] | None = None
+    proof: InitProof | None = None
+    environment = _managed_environment(workspace)
     try:
         initial = _inputs(workspace)
-        artifacts = root / ".build" / "spi-init-proof" / workspace.name
-        bootstrap = artifacts / "bootstrap.log"
-        environment = _managed_environment(workspace)
         result = _run(
             [sys.executable, "-c", BUILD_SCRIPT, "runner"],
             workspace,
-            bootstrap,
+            artifacts / "bootstrap.log",
             build=True,
             environment=environment,
         )
         if result.returncode != 0:
-            raise ValueError(f"init proof loader build failed; retained {bootstrap}")
+            raise ValueError(f"native proof loader build failed; retained {artifacts}")
         _verify_inputs(workspace, initial)
         initial_tools = _tools(workspace)
-        context = _capture_build_context(workspace, environment)
-        planned = _planned_commands(workspace, environment)
-        stages = {
-            "baseline": original,
-            **audit._init_clock_low_mutants(original),
-            "restored": original,
-        }
+        _verify_tool_identities(
+            artifacts, "bootstrap", initial_tools, initial_tools, initial_tools
+        )
+        context = _capture_build_context(workspace, environment, kind)
+        planned = _planned_commands(workspace, environment, kind)
+        if kind is _ProofKind.INIT:
+            stages = {
+                "baseline": original[SOURCE],
+                **audit._init_clock_low_mutants(original[SOURCE]),
+                "restored": original[SOURCE],
+            }
+        else:
+            stages = {
+                "baseline": original,
+                **audit._my9221_schedule_mutants(original),
+                "restored": original,
+            }
+            audit._validate_my9221_stage_sequence(tuple(stages))
         records: list[InitStage] = []
         expected = dict(initial)
         for name, source in stages.items():
-            # One trust baseline for the whole attempt: never adopt changed
-            # oracle/tool state merely because it is stable inside a stage.
+            # One trust baseline for the ENTIRE attempt, never adopt new oracle,
+            # tools, environment or ignored generated state between stages.
             _verify_inputs(workspace, expected)
-            _verify_build_context(workspace, _managed_environment(workspace), context)
-            if _planned_commands(workspace, environment) != planned:
-                raise ValueError("init proof command plan changed between stages")
-            if _tools(workspace) != initial_tools:
-                raise ValueError(
-                    f"init proof tool identity changed; retained {workspace}"
-                )
+            _verify_build_context(
+                workspace, _managed_environment(workspace), context, kind
+            )
+            if _planned_commands(workspace, environment, kind) != planned:
+                raise ValueError("native proof command plan changed between stages")
+            observed_tools = _tools(workspace)
+            _verify_tool_identities(
+                artifacts / name,
+                "between-before",
+                initial_tools,
+                initial_tools,
+                observed_tools,
+            )
             records.append(
                 _stage(
                     workspace,
@@ -750,44 +1010,123 @@ def run_init_clock_low_proof(root: Path) -> InitProof:
                     context,
                     environment,
                     planned,
+                    kind,
                 )
             )
-            expected[SOURCE] = audit.source_digest(source)
+            expected.update(
+                {
+                    path: audit.source_digest(data)
+                    for path, data in _source_payload(source, kind).items()
+                }
+            )
             _verify_inputs(workspace, expected)
-            _verify_build_context(workspace, _managed_environment(workspace), context)
-            if _planned_commands(workspace, environment) != planned:
-                raise ValueError("init proof command plan changed between stages")
-            if _tools(workspace) != initial_tools:
-                raise ValueError(
-                    f"init proof tool identity changed; retained {workspace}"
-                )
-        _verify_inputs(workspace, initial)
-        _verify_build_context(workspace, _managed_environment(workspace), context)
-        if len({stage.binary_sha256 for stage in records[:3]}) != 3:
-            raise ValueError(
-                f"init proof mutant binaries are not distinct; retained {workspace}"
+            _verify_build_context(
+                workspace, _managed_environment(workspace), context, kind
             )
-        return InitProof(
-            "generic-init-clock-low",
-            "host32-fixture4-only",
+            if _planned_commands(workspace, environment, kind) != planned:
+                raise ValueError("native proof command plan changed between stages")
+            observed_tools = _tools(workspace)
+            _verify_tool_identities(
+                artifacts / name,
+                "between-after",
+                initial_tools,
+                initial_tools,
+                observed_tools,
+            )
+            if kind is _ProofKind.MY9221 and len(records) > 1:
+                _validate_my9221_dependencies(workspace, records[-2], records[-1])
+        _verify_inputs(workspace, initial)
+        _verify_build_context(workspace, _managed_environment(workspace), context, kind)
+        unique = records[:3] if kind is _ProofKind.INIT else records[:-1]
+        if len({stage.binary_sha256 for stage in unique}) != len(unique):
+            raise ValueError(
+                f"native proof mutant binaries are not distinct; retained {workspace}"
+            )
+        if kind is _ProofKind.MY9221:
+            audit._validate_my9221_stage_sequence(
+                tuple(stage.name for stage in records)
+            )
+        proof = InitProof(
+            "generic-init-clock-low"
+            if kind is _ProofKind.INIT
+            else "my9221-ddr-timing",
+            "host32-fixture4-only"
+            if kind is _ProofKind.INIT
+            else "host92-93-requested-schedule-and-public-controller-only",
             workspace,
             records,
             manifest.gitlinks,
         )
     except (OSError, ValueError, CalledProcessError, TimeoutExpired) as error:
-        raise ValueError(f"init proof failed; retained {workspace}: {error}") from error
+        artifacts.mkdir(parents=True, exist_ok=True)
+        (artifacts / "failure.json").write_text(
+            json.dumps(
+                {
+                    "complete": False,
+                    "workspace": str(workspace),
+                    "error": str(error),
+                },
+                indent=2,
+            ),
+            encoding="utf-8",
+        )
+        raise ValueError(
+            f"native proof failed; retained {workspace}: {error}"
+        ) from error
     finally:
+        pending_error = sys.exc_info()[1]
         try:
-            (workspace / SOURCE).write_bytes(original)
-            if (workspace / SOURCE).read_bytes() != original:
-                raise ValueError("init source restoration byte mismatch")
+            restoration_errors = _restore_sources(workspace, original)
+            if restoration_errors:
+                raise ValueError("; ".join(restoration_errors))
             _verify_inputs(workspace, root_before)
             _verify_inputs(root, root_before)
+            if initial_tools is not None:
+                observed_tools = _tools(workspace)
+                _verify_tool_identities(
+                    artifacts,
+                    "final-restored",
+                    initial_tools,
+                    initial_tools,
+                    observed_tools,
+                )
             if context is not None:
                 _verify_build_context(
-                    workspace, _managed_environment(workspace), context
+                    workspace, _managed_environment(workspace), context, kind
                 )
         except (OSError, ValueError) as error:
+            artifacts.mkdir(parents=True, exist_ok=True)
+            (artifacts / "failure.json").write_text(
+                json.dumps(
+                    {
+                        "complete": False,
+                        "workspace": str(workspace),
+                        "restoration_error": str(error),
+                        "original_error": str(pending_error)
+                        if pending_error is not None
+                        else None,
+                    },
+                    indent=2,
+                ),
+                encoding="utf-8",
+            )
             raise ValueError(
-                f"init proof restoration/input verification failed; retained {workspace}: {error}"
+                f"native proof restoration/input verification failed; retained {workspace}: {error}"
             ) from error
+
+    if proof is None:
+        raise ValueError(f"native proof missing completed stages; retained {workspace}")
+    # Publish only after the finally block verified exact sources, immutable
+    # inputs/tools/configuration and the untouched caller checkout.
+    (artifacts / "proof.json").write_text(
+        json.dumps(asdict(proof), default=str, indent=2), encoding="utf-8"
+    )
+    return proof
+
+
+def run_init_clock_low_proof(root: Path) -> InitProof:
+    return _run_proof(root, _ProofKind.INIT)
+
+
+def run_my9221_host_schedule_proof(root: Path) -> InitProof:
+    return _run_proof(root, _ProofKind.MY9221)
