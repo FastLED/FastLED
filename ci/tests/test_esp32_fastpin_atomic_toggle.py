@@ -397,3 +397,67 @@ def test_esp32_native_pin_modes_preserve_output_readback_and_input_controls(
     assert "io_conf.pin_bit_mask = (1ULL << pin);" in source
     assert "gpio_config(&io_conf);" in source
     assert "gpio_get_level(static_cast<gpio_num_t>(pin))" in source
+
+
+def _native_output_guarded(
+    source: str, body: str, active: frozenset[str] = frozenset()
+) -> bool:
+    """Source-only ordering projection over actual class methods, not SDK proof."""
+    body = re.sub(r"/\*.*?\*/|//[^\n]*", "", body, flags=re.DOTALL).strip()
+    statement, separator, _ = body.partition(";")
+    if not separator:
+        return False
+    if re.match(r"FL_STATIC_ASSERT\(\s*(?:validpin\(\)|VALIDPIN)\s*,", statement):
+        return True
+    call = re.fullmatch(r"([A-Za-z_]\w*)\(\)", statement.strip())
+    if call is None or call[1] in active:
+        return False
+    bodies = _forced_pin_method_bodies(source, call[1])
+    primitives = {"setOutput", "hi", "lo", "set", "fastset", "toggle"}
+    if not bodies or (call[1] not in primitives and len(bodies) != 1):
+        return False
+    # A helper supplies compile-time validation only if it contains a single
+    # assertion, with no runtime branch or GPIO operation. Checked output
+    # primitives may also be delegated to by port overloads and strobe.
+    callee = re.sub(r"/\*.*?\*/|//[^\n]*", "", bodies[0], flags=re.DOTALL).strip()
+    if call[1] not in primitives:
+        if not re.fullmatch(
+            r"FL_STATIC_ASSERT\(\s*(?:validpin\(\)|VALIDPIN)\s*,.*\);",
+            callee,
+            flags=re.DOTALL,
+        ):
+            return False
+    return _native_output_guarded(source, bodies[0], active | {call[1]})
+
+
+@pytest.mark.parametrize(
+    "method", ["setOutput", "hi", "lo", "set", "fastset", "toggle"]
+)
+def test_esp32_native_output_legality_guards_direct_operations_before_gpio(
+    method: str,
+) -> None:
+    """Supplemental source contract; actual SDK compilation is separate evidence."""
+    source = SOURCE.read_text()
+    direct = _forced_pin_method_bodies(source, method)[0]
+    assert _native_output_guarded(source, direct), (
+        "invalid/excluded native output must be checked before GPIO, including without setOutput"
+    )
+
+
+def test_esp32_native_output_legality_delegated_overloads_and_input_independence() -> (
+    None
+):
+    """Delegation supplement; no fabricated SDK registers or method mirrors."""
+    source = SOURCE.read_text()
+    for method in ("hi", "lo"):
+        bodies = _forced_pin_method_bodies(source, method)
+        assert len(bodies) == 2
+        assert _native_output_guarded(source, bodies[1])
+    strobes = _forced_pin_method_bodies(source, "strobe")
+    assert len(strobes) == 1 and strobes[0].count("toggle();") == 2
+    assert _native_output_guarded(source, strobes[0])
+    inputs = _forced_pin_method_bodies(source, "setInput")
+    assert len(inputs) == 1 and not _native_output_guarded(source, inputs[0])
+    assert "PinMode::Input" in inputs[0]
+    fastsets = _forced_pin_method_bodies(source, "fastset")
+    assert len(fastsets) == 1 and "*port = val;" in fastsets[0]

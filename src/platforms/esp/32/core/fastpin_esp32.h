@@ -25,6 +25,10 @@ namespace fl {
 #pragma GCC diagnostic ignored "-Wvolatile"
 
 template<u8 PIN, u32 MASK, bool VALIDPIN> class _ESPPIN {
+  inline static void validateOutputPin() FL_NO_EXCEPT __attribute__ ((always_inline)) {
+      FL_STATIC_ASSERT(VALIDPIN, "This pin has been marked as an invalid pin, common reasons includes it being a ground pin, read only, or too noisy (e.g. hooked up to the uart).");
+  }
+
 public:
   typedef volatile u32 * port_ptr_t;
   typedef u32 port_t;
@@ -42,26 +46,30 @@ public:
   #endif
 
   inline static void setOutput() FL_NO_EXCEPT {
-      FL_STATIC_ASSERT(validpin(), "This pin has been marked as an invalid pin, common reasons includes it being a ground pin, read only, or too noisy (e.g. hooked up to the uart).");
+      validateOutputPin();
       (fl::pinMode)(PIN, PinMode::Output);
   }
   inline static void setInput() FL_NO_EXCEPT { (fl::pinMode)(PIN, PinMode::Input); }
 
   inline static void hi() FL_NO_EXCEPT __attribute__ ((always_inline)) {
+      validateOutputPin();
       *sport() = MASK;
   }
 
   inline static void lo() FL_NO_EXCEPT __attribute__ ((always_inline)) {
+      validateOutputPin();
       *cport() = MASK;
   }
 
   inline static void set(FASTLED_REGISTER port_t val) FL_NO_EXCEPT __attribute__ ((always_inline)) {
+      validateOutputPin();
       *port() = val;
   }
 
   inline static void strobe() FL_NO_EXCEPT __attribute__ ((always_inline)) { toggle(); toggle(); }
 
   inline static void toggle() FL_NO_EXCEPT __attribute__ ((always_inline)) {
+      validateOutputPin();
       // Never read-modify-write GPIO_OUT: a concurrent GPIO update could be
       // overwritten. Use the per-bit atomic set/clear registers instead.
       if (isset()) {
@@ -73,7 +81,7 @@ public:
 
   inline static void hi(FASTLED_REGISTER port_ptr_t port) FL_NO_EXCEPT __attribute__ ((always_inline)) { hi(); }
   inline static void lo(FASTLED_REGISTER port_ptr_t port) FL_NO_EXCEPT __attribute__ ((always_inline)) { lo(); }
-  inline static void fastset(FASTLED_REGISTER port_ptr_t port, FASTLED_REGISTER port_t val) FL_NO_EXCEPT __attribute__ ((always_inline)) { *port = val; }
+  inline static void fastset(FASTLED_REGISTER port_ptr_t port, FASTLED_REGISTER port_t val) FL_NO_EXCEPT __attribute__ ((always_inline)) { validateOutputPin(); *port = val; }
 
   inline static port_t hival() FL_NO_EXCEPT __attribute__ ((always_inline)) {
       return (*port()) | MASK;
