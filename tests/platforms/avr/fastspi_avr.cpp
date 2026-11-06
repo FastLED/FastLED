@@ -92,6 +92,7 @@ Shifter usart0, usart1, modern, classic;
 volatile u16 ubrr0 = 0, ubrr1 = 0;
 ControlReg ucsr0b(&ubrr0), ucsr1b(&ubrr1);
 ControlReg spi0Ctrla, spcr;
+volatile u8 sreg = 0x80;
 volatile u8 ucsr0c = 0, ucsr1c = 0, spi0Ctrlb = 0;
 StatusReg ucsr0a, ucsr1a, spi0Intflags, spsr;
 DataReg udr0, udr1, spi0Data, spdr;
@@ -175,6 +176,8 @@ template <u8 PIN> struct AvrRecordingPin {
 } // namespace fl
 
 #define AVR_HARDWARE_SPI
+#define SREG avr_regs::sreg
+#define cli() (avr_regs::sreg = 0)
 #define FastPin AvrRecordingPin
 
 // USART bit positions (values only need to be valid shift counts here).
@@ -328,6 +331,7 @@ template <typename Output> void checkHandoff(avr_regs::Shifter& shifter, avr_reg
         FL_REQUIRE_EQ(shifter.bytes, bytesBefore + 3);
     }
     FL_REQUIRE_EQ(avr_regs::ControlReg::badEnables, 0);
+    FL_REQUIRE_EQ(avr_regs::sreg, 0x80); // Interrupt state restored.
 
     // A post-wait byte is still shifting; waiting on it must not lose the drain.
     AvrPinTrace::reset();

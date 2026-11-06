@@ -87,10 +87,15 @@ public:
 		return previous;
 	}
 	// TXC is write-one-to-clear and set only after the shifter empties, unlike
-	// UDRE, so arm it per byte. Error flags must be written as zero.
+	// UDRE, so arm it per byte. Clear it after loading UDR, or the previous byte
+	// finishing in between sets it again; interrupts stay off so a long ISR can't
+	// outlast the new byte and lose its flag. Error flags must be written as zero.
 	static void startTx(u8 b) FL_NO_EXCEPT __attribute__((always_inline)) {
-		UCSR1A = (UCSR1A & ((1<<U2X1)|(1<<MPCM1))) | (1<<TXC1);
+		const u8 status = SREG;
+		cli();
 		UDR1 = b;
+		UCSR1A = (UCSR1A & ((1<<U2X1)|(1<<MPCM1))) | (1<<TXC1);
+		SREG = status;
 		txPending(true);
 	}
 	static void drainTx() FL_NO_EXCEPT __attribute__((always_inline)) {
@@ -271,10 +276,15 @@ public:
 		return previous;
 	}
 	// TXC is write-one-to-clear and set only after the shifter empties, unlike
-	// UDRE, so arm it per byte. Error flags must be written as zero.
+	// UDRE, so arm it per byte. Clear it after loading UDR, or the previous byte
+	// finishing in between sets it again; interrupts stay off so a long ISR can't
+	// outlast the new byte and lose its flag. Error flags must be written as zero.
 	static void startTx(u8 b) FL_NO_EXCEPT __attribute__((always_inline)) {
-		UCSR0A = (UCSR0A & ((1<<U2X0)|(1<<MPCM0))) | (1<<TXC0);
+		const u8 status = SREG;
+		cli();
 		UDR0 = b;
+		UCSR0A = (UCSR0A & ((1<<U2X0)|(1<<MPCM0))) | (1<<TXC0);
+		SREG = status;
 		txPending(true);
 	}
 	static void drainTx() FL_NO_EXCEPT __attribute__((always_inline)) {
