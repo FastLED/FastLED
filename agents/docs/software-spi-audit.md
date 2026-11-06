@@ -374,7 +374,7 @@ requirement; fallback cache placement and phase timing remain separate.
 
 
 The managed MY9221 host adapter uses the actual `fl_channels_spi_legacy_golden`
-translation unit and its four public-controller pin/time observation cases.
+translation unit and its six public-controller pin/time observation cases.
 It runs an isolated baseline, five independent production wait removals, and an
 exact restored build. The five-chip stop case must fail its literal strict
 250ns bound when the cascade wait is removed. Only the internally fixed target,
@@ -418,3 +418,15 @@ hardware IRQ behavior, loop termination, electrical timing or complete executed
 compiler arguments. It does not run through `--run-native` and does not resolve
 any of the seven full MY9221 configuration groups. Actual managed qualification
 requires a fresh successful three-stage run and independent artifact review.
+
+
+The fixed MY9221 host baseline/restoration selection also includes ordinary and
+legacy global GRB dispatch against literal partial-chain payloads, plus public
+`showLeds` scaling/correction and deterministic binary-dither literal frames.
+The latter exercises direct controller dispatch; global `FastLED.show` may
+suppress dithering at low measured refresh rates. The real allocation-failure
+case checks nonzero retry payloads, an updated frame and empty-frame silence.
+All five prescribed wait mutants retain their original designated assertion
+cases. These additional cases extend functional/requested-schedule scope only;
+physical phase limits and the seven full target configuration groups remain
+unresolved until independently qualified.

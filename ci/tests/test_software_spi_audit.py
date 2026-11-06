@@ -3198,6 +3198,8 @@ MY_SCHEDULE_CASES = (
     MY_SCHEDULE_CHAIN_CASE,
     "MY9221 real dynamic reserve failure emits no partial frame and retries",
     "MY9221 public emission guards edges and restores prior interrupt state",
+    "MY9221 ordinary and legacy global GRB routes match literal partial payload",
+    "MY9221 public scale correction and binary dither have literal frame payloads",
 )
 MY_SCHEDULE_MUTATIONS = {
     "missing-latch-high-wait": (
@@ -3451,7 +3453,10 @@ def test_my9221_managed_schedule_stop_requires_only_intended_five_chip_failure(
         ValueError, match="assertion|diagnostic|failure|bound|five|oracle"
     ):
         audit._validate_my9221_schedule_output(
-            "missing-cascade-stop-wait", MY_SCHEDULE_CHAIN_CASE, 1, transcript
+            "missing-cascade-stop-wait",
+            MY_SCHEDULE_CHAIN_CASE,
+            1,
+            my9221_current_oracle_diagnostics(transcript),
         )
 
 
@@ -3653,6 +3658,37 @@ def test_additional_forced_selection_findings_remain_required(
     assert check_evidence([row], [], audit._current_sources(audit.ROOT))
 
 
+def my9221_current_oracle_diagnostics(output: str) -> str:
+    """Rebind synthetic schema fixtures, never rewrite retained execution evidence."""
+    lines = (
+        (audit.ROOT / "tests/fl/channels/spi_legacy_golden.cpp")
+        .read_text()
+        .splitlines()
+    )
+    identities = {
+        870: f'FL_TEST_CASE("{MY_SCHEDULE_CASE}") {{',
+        909: f'FL_TEST_CASE("{MY_SCHEDULE_CHAIN_CASE}") {{',
+        165: "FL_CHECK_GT(state.ns - pulses.back().ns, stop_bound_ns);",
+        169: "FL_CHECK_GE(phase, static_cast<fl::u64>(50));",
+        179: "FL_CHECK_GE(edges[i].ns - previous_data_change, static_cast<fl::u64>(10));",
+        180: "FL_CHECK_GE(next_data_change - edges[i].ns, static_cast<fl::u64>(10));",
+    }
+    locations = {}
+    for old, expression in identities.items():
+        found = [i + 1 for i, line in enumerate(lines) if line.strip() == expression]
+        assert len(found) == 1, (
+            f"missing/ambiguous literal oracle identity {expression}"
+        )
+        locations[old] = found[0]
+    import re
+
+    return re.sub(
+        r"(spi_legacy_golden\.cpp:)(\d+)(:|\n|$)",
+        lambda m: m[1] + str(locations.get(int(m[2]), int(m[2]))) + m[3],
+        output,
+    )
+
+
 def my9221_actual_setup_transcript() -> str:
     fixture = audit.ROOT / "ci/fixtures/software_spi_audit/my9221_setup_runtime.json"
     data = json.loads(fixture.read_text())
@@ -3665,7 +3701,10 @@ def test_my9221_managed_actual_setup_preamble_and_changes_are_intended() -> None
     assert output.count(":179: 4 >= 10") == 1
     assert output.count(":179: 1 >= 10") == 18
     audit._validate_my9221_schedule_output(
-        "missing-data-setup-wait", MY_SCHEDULE_CASE, 1, output
+        "missing-data-setup-wait",
+        MY_SCHEDULE_CASE,
+        1,
+        my9221_current_oracle_diagnostics(output),
     )
 
 
@@ -3688,7 +3727,9 @@ def test_my9221_managed_setup_capture_rejects_other_values_bounds_and_lines(
             "missing-data-setup-wait",
             MY_SCHEDULE_CASE,
             1,
-            my9221_actual_setup_transcript().replace(old, new, 1),
+            my9221_current_oracle_diagnostics(
+                my9221_actual_setup_transcript().replace(old, new, 1)
+            ),
         )
 
 
@@ -3704,7 +3745,10 @@ def test_my9221_managed_setup_preamble_cannot_replace_required_one_ns_failure(
     )
     with pytest.raises(ValueError):
         audit._validate_my9221_schedule_output(
-            "missing-data-setup-wait", MY_SCHEDULE_CASE, 1, output + tail
+            "missing-data-setup-wait",
+            MY_SCHEDULE_CASE,
+            1,
+            my9221_current_oracle_diagnostics(output + tail),
         )
 
 
@@ -3718,7 +3762,10 @@ def test_my9221_managed_hold_derived_phase_and_datahold_families_only() -> None:
         "[doctest] test cases: 1 | 0 passed | 1 failed\n"
     )
     audit._validate_my9221_schedule_output(
-        "missing-data-hold-phase-wait", MY_SCHEDULE_CASE, 1, output
+        "missing-data-hold-phase-wait",
+        MY_SCHEDULE_CASE,
+        1,
+        my9221_current_oracle_diagnostics(output),
     )
     for old, new in [
         (":169:", ":146:"),
@@ -3731,7 +3778,7 @@ def test_my9221_managed_hold_derived_phase_and_datahold_families_only() -> None:
                 "missing-data-hold-phase-wait",
                 MY_SCHEDULE_CASE,
                 1,
-                output.replace(old, new, 1),
+                my9221_current_oracle_diagnostics(output.replace(old, new, 1)),
             )
 
 
@@ -5278,3 +5325,49 @@ def test_my9221_rp2040_bootstrap_cannot_adopt_wrong_postensure_environment(
             {},
             {"startup_environment": {"PATH": "desired"}},
         )
+
+
+@pytest.mark.parametrize("stage", ["baseline", "restored"])
+def test_my9221_managed_functional_case_binding_requires_all_six_fixed_cases(
+    stage: str,
+) -> None:
+    from ci import software_spi_init_proof as native
+
+    assert native._cases(native._ProofKind.MY9221, stage) == MY_SCHEDULE_CASES
+    assert len(MY_SCHEDULE_CASES) == 6
+
+
+@pytest.mark.parametrize("stage", ["baseline", "restored"])
+@pytest.mark.parametrize("case", MY_SCHEDULE_CASES[-2:])
+def test_my9221_managed_functional_case_binding_validates_exact_runtime_marker(
+    stage: str,
+    case: str,
+) -> None:
+    """Diagnostic-schema check only; not an actual runtime/proof receipt."""
+    valid = f"PASS: {case}\n[doctest] test cases: 1 | 1 passed | 0 failed\n"
+    audit._validate_my9221_schedule_output(stage, case, 0, valid)
+    for invalid in (
+        valid.replace(f"PASS: {case}", f"PASS: {MY_SCHEDULE_CASE}"),
+        valid + f"PASS: {case}\n",
+        valid.replace("1 | 1 passed", "2 | 2 passed"),
+        valid + "runtime error: incidental failure\n",
+    ):
+        with pytest.raises(ValueError):
+            audit._validate_my9221_schedule_output(stage, case, 0, invalid)
+
+
+@pytest.mark.parametrize("stage", tuple(MY_SCHEDULE_MUTATIONS))
+def test_my9221_managed_functional_case_binding_preserves_designated_mutant(
+    stage: str,
+) -> None:
+    from ci import software_spi_init_proof as native
+
+    intended = (
+        MY_SCHEDULE_CHAIN_CASE
+        if stage == "missing-cascade-stop-wait"
+        else MY_SCHEDULE_CASE
+    )
+    assert native._cases(native._ProofKind.MY9221, stage) == (intended,)
+    for unrelated in MY_SCHEDULE_CASES[-2:]:
+        with pytest.raises(ValueError, match="designated case"):
+            audit._validate_my9221_schedule_output(stage, unrelated, 1, "")

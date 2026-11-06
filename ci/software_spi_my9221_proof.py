@@ -18,6 +18,8 @@ CASES = (
     CHAIN_CASE,
     "MY9221 real dynamic reserve failure emits no partial frame and retries",
     "MY9221 public emission guards edges and restores prior interrupt state",
+    "MY9221 ordinary and legacy global GRB routes match literal partial payload",
+    "MY9221 public scale correction and binary dither have literal frame payloads",
 )
 _MUTATIONS = {
     "missing-latch-high-wait": (CONTROLLER, b"Timing::template waitNanoseconds<80>();"),

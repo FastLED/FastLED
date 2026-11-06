@@ -40,6 +40,7 @@
 
 #include "FastLED.h"
 #include "fl/channels/channel.h"
+#include "fl/channels/dither_frame.h"
 #include "fl/channels/config.h"
 #include "fl/channels/driver.h"
 #include "fl/channels/data.h"
@@ -867,6 +868,53 @@ FL_TEST_CASE("MY9221 legacy SPI-channel addLeds uses bit-bang MY9221Controller, 
 }
 
 
+
+// Synchronous draw-list isolation: older cases retain static controllers on the
+// same modeled pins. Restore their enabled state without removing ownership.
+struct My9221DrawIsolation {
+    fl::vector<CLEDController*> previously_enabled;
+    My9221DrawIsolation() {
+        for (CLEDController* c = CLEDController::head(); c; c = c->next()) {
+            if (c->getEnabled()) previously_enabled.push_back(c);
+            c->setEnabled(false);
+        }
+    }
+    ~My9221DrawIsolation() {
+        for (CLEDController* c = CLEDController::head(); c; c = c->next()) c->setEnabled(false);
+        for (CLEDController* c : previously_enabled) c->setEnabled(true);
+    }
+};
+
+static void resetMy9221Capture() {
+    My9221TimeState& state = my9221TimeState();
+    state.ns = 0; state.data = false; state.clock = false; state.events.clear();
+    state.interrupts_enabled = true; state.guard_entries = 0;
+}
+
+template <fl::size N>
+static void checkMy9221LiteralWords(const fl::u16 (&expected)[N], fl::u64 stop_ns) {
+    const My9221TimeState& state = my9221TimeState();
+    fl::vector<My9221TimeEvent> edges;
+    fl::size last_clock_index = 0;
+    for (fl::size i = 0; i < state.events.size(); ++i) {
+        if (state.events[i].kind == My9221TimeEvent::Clock) {
+            edges.push_back(state.events[i]); last_clock_index = i;
+        }
+    }
+    FL_REQUIRE_EQ(edges.size(), N * 16);
+    for (fl::size word = 0; word < N; ++word) {
+        fl::u16 sampled = 0;
+        for (int bit = 0; bit < 16; ++bit) {
+            sampled = static_cast<fl::u16>((sampled << 1) |
+                (edges[word * 16 + bit].data ? 1 : 0));
+        }
+        FL_CHECK_EQ(sampled, expected[word]);
+    }
+    checkMy9221Timing(state, edges, last_clock_index, stop_ns);
+    FL_CHECK_TRUE(state.interrupts_enabled);
+    FL_CHECK_EQ(state.guard_entries, 1);
+}
+
 FL_TEST_CASE("MY9221 public controller observes DDR and four timed DI latch pulses") {
     SpiLegacyGoldenFixture fixture;
     static CRGB leds[4] = {CRGB(0x10, 0x20, 0x30), CRGB(0xFF, 0x00, 0x80),
@@ -958,9 +1006,69 @@ FL_TEST_CASE("MY9221 partial BGR chains repeat with final HIGH and cascade stop"
     FL_CHECK_EQ(state.ns, static_cast<fl::u64>(0));
 }
 
+
+FL_TEST_CASE("MY9221 ordinary and legacy global GRB routes match literal partial payload") {
+    SpiLegacyGoldenFixture fixture;
+    My9221DrawIsolation isolated;
+    static CRGB leds[5] = {CRGB(1, 2, 3), CRGB(4, 5, 6), CRGB(7, 8, 9),
+                           CRGB(10, 11, 12), CRGB(13, 14, 15)};
+    CLEDController& ordinary = FastLED.addLeds<MY9221, 92, 93, GRB>(leds, 5);
+    CLEDController& legacy = FastLED.addLedsSpiChannel<MY9221, 92, 93, GRB>(leds, 5);
+    const fl::u16 expected[26] = {
+        0x10, 11, 10, 12, 8, 7, 9, 5, 4, 6, 2, 1, 3,
+        0x10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 14, 13, 15};
+    // Each route must independently satisfy the external literal, not merely
+    // equal another implementation's output. Other draw-list entries are off.
+    CLEDController* routes[] = {&ordinary, &legacy};
+    for (CLEDController* selected : routes) {
+        ordinary.setEnabled(false); legacy.setEnabled(false);
+        selected->setEnabled(true);
+        selected->setDither(DISABLE_DITHER);
+        selected->setCorrection(CRGB(255, 255, 255));
+        selected->setTemperature(CRGB(255, 255, 255));
+        resetMy9221Capture();
+        FastLED.show(255);
+        checkMy9221LiteralWords(expected, 220);
+    }
+}
+
+FL_TEST_CASE("MY9221 public scale correction and binary dither have literal frame payloads") {
+    SpiLegacyGoldenFixture fixture;
+    CRGB leds[4] = {CRGB(9, 17, 33), CRGB(13, 23, 45),
+                    CRGB(0, 0, 0), CRGB(255, 1, 2)};
+    MY9221Controller<92, 93, RGB> controller;
+    controller.init(); controller.setLeds(leds, 4);
+    controller.setCorrection(CRGB(255, 127, 63));
+    controller.setTemperature(CRGB(255, 255, 255));
+    // brightness128 => adjustment(128,64,32). Fixed scale is floor(x*(s+1)/256).
+    // Phase0 Q16 => offsets(0,0,0), alternating with(2,4,8).
+    // Phase1 Q144 => offsets(1,2,4), same after the alternating complement.
+    // Black stays black; 255 saturates before scaling. No production scaling,
+    // dither or serializer helper computes these independent literal words.
+    const fl::u16 disabled[13] = {0x10, 128, 0, 0, 0, 0, 0, 6, 5, 5, 4, 4, 4};
+    const fl::u16 phase0[13] = {0x10, 128, 1, 1, 0, 0, 0, 7, 6, 6, 4, 4, 4};
+    const fl::u16 phase1[13] = {0x10, 128, 0, 0, 0, 0, 0, 7, 6, 6, 5, 4, 4};
+    controller.setDither(DISABLE_DITHER);
+    resetMy9221Capture(); controller.showLeds(128);
+    checkMy9221LiteralWords(disabled, 210);
+    const fl::u8 saved_phase = fl::detail::gDitherFrame;
+    auto restore_phase = fl::make_scope_exit([saved_phase] { fl::detail::gDitherFrame = saved_phase; });
+    controller.setDither(BINARY_DITHER);
+    for (int repeat = 0; repeat < 2; ++repeat) {
+        // Public showLeds begins a frame and advances the shared phase once.
+        fl::detail::gDitherFrame = 255;
+        resetMy9221Capture(); controller.showLeds(128);
+        checkMy9221LiteralWords(phase0, 210);
+        fl::detail::gDitherFrame = 0;
+        resetMy9221Capture(); controller.showLeds(128);
+        checkMy9221LiteralWords(phase1, 210);
+    }
+}
+
 FL_TEST_CASE("MY9221 real dynamic reserve failure emits no partial frame and retries") {
     SpiLegacyGoldenFixture fixture;
-    CRGB leds[17] = {};
+    CRGB leds[17];
+    for (CRGB& led : leds) led = CRGB(1, 2, 3);
     MY9221Controller<92, 93, RGB> controller; // Fresh real dynamic scratch vector.
     controller.init();
     controller.setLeds(leds, 17);
@@ -986,12 +1094,26 @@ FL_TEST_CASE("MY9221 real dynamic reserve failure emits no partial frame and ret
     FL_CHECK_TRUE(state.events.empty());
     FL_CHECK_EQ(state.ns, static_cast<fl::u64>(0));
     allocation.reject = false;
-    controller.showLeds(255);
-    fl::size edges = 0;
-    for (const My9221TimeEvent& event : state.events) {
-        if (event.kind == My9221TimeEvent::Clock) ++edges;
-    }
-    FL_CHECK_EQ(edges, static_cast<fl::size>(1040));
+    resetMy9221Capture(); controller.showLeds(255);
+    const fl::u16 expected[65] = {
+        0x10,1,2,3,1,2,3,1,2,3,1,2,3,
+        0x10,1,2,3,1,2,3,1,2,3,1,2,3,
+        0x10,1,2,3,1,2,3,1,2,3,1,2,3,
+        0x10,1,2,3,1,2,3,1,2,3,1,2,3,
+        0x10,0,0,0,0,0,0,0,0,0,1,2,3};
+    checkMy9221LiteralWords(expected, 250);
+    leds[0] = CRGB(4, 5, 6);
+    fl::u16 updated[65];
+    for (int i = 0; i < 65; ++i) updated[i] = expected[i];
+    updated[10] = 4; updated[11] = 5; updated[12] = 6;
+    resetMy9221Capture(); controller.showLeds(255);
+    checkMy9221LiteralWords(updated, 250);
+    controller.setLeds(leds, 0);
+    resetMy9221Capture(); controller.showLeds(255);
+    FL_CHECK_TRUE(state.events.empty());
+    FL_CHECK_EQ(state.ns, static_cast<fl::u64>(0));
+    FL_CHECK_EQ(state.guard_entries, 0);
+    FL_CHECK_TRUE(state.interrupts_enabled);
 }
 
 FL_TEST_CASE("MY9221 public emission guards edges and restores prior interrupt state") {
