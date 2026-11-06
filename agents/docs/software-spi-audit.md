@@ -558,3 +558,24 @@ Surveyed SPI manager/channel and non-ESP generic writers use explicit hi/lo;
 these dependency bindings establish no new current SPI readback positive.
 This metadata snapshot does not refresh the accepted C6 receipt's historical
 43b1 input qualification or close any runtime, target or physical requirement.
+
+The classic Xtensa helper currently classifies conditional Output-only ELF
+slices. It has no managed factory or evidence-admission path. Authentic
+current, old-assignment and restored captures from snapshot
+`84405dc080e7c8e0b6e60c3ca8d55f157e9fa456` contain configured modes 3, 2 and 3;
+the old capture yields four mode-mismatch counterexamples. These captures
+remain parser data, not an accepted property receipt. The conclusion assumes
+arrival at the two bound CALL8 sites, valid nonaliasing producer-prefix and
+volatile-sink storage, normal windowed-ABI returns, and no uncontracted writes
+to the caller's config frame. The bound memset zeros exactly 16 bytes at
+SP+16 through SP+31; it does not initialize the whole 24-byte config. Other
+modes, BIN/runtime mapping, GPIO behavior, timing, cache safety and full
+finding groups remain unqualified.
+
+An adversarial opcode-bit-7 mutation exposed a real false acceptance in the
+MOVI.N family check. Root observed the regression fail, then verified the
+repair with 38 focused cases and a 65,536-word mode-cell probe admitting only
+the encoded values 2 and 3. This validates that cell, not arbitrary Xtensa
+instructions or production execution. The next steps are an independently
+bound raw ELF/SDK factory and a closed managed current/control/restored build
+proof. Historical C6 receipts remain unchanged.

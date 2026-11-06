@@ -94,3 +94,22 @@ GCC's 142-byte path reuses the actual `a5` constant at the Output store. Tests
 also change only that encoded constant from 2 to 3 as reciprocal parser input;
 this synthetic control is not a source mutation or another SDK build. The
 failed attempt remains unaccepted and the original captures are unchanged.
+
+The `esp32_xtensa_mode_{baseline,old,restored}.json` files are exact root-owned
+byte extractions from actual builds at snapshot
+`84405dc080e7c8e0b6e60c3ca8d55f157e9fa456`. Their provenance sidecar records the
+capture, ELF and build-log identities. The configured modes are 3, 2 and 3,
+with four mismatch counterexamples for the old assignment. The reciprocal
+opcode edit in unit tests is synthetic parser input, not another source build.
+Unmapped linear-disassembly diagnostics grant no reachability exemption.
+
+The helper's Output-only conclusion is conditional on arrival at the bound
+CALL8 sites, valid nonaliasing prefix/sink storage, normal windowed-ABI returns
+and caller-frame memory contracts. Its bound memset zeros only 16 bytes at
+SP+16 through SP+31, not the entire config. An opcode-bit-7 false acceptance
+was reproduced and repaired; 38 focused cases and an exhaustive 16-bit
+mode-cell probe then admitted only the encoded values 2 and 3. That probe is
+not exhaustive instruction, image, runtime or hardware validation. There is
+no managed factory or admission path yet, and no full finding group is cleared.
+Next come a bound ELF/SDK factory and a fresh managed three-stage build proof;
+the historical C6 receipts are not refreshed.

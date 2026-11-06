@@ -1,0 +1,31 @@
+{
+  "scope": "Authentic root-owned actual Xtensa build/byte-extraction fixtures only; no property or managed-proof admission",
+  "capture_only_manifest_sha256": "619eeab5f17010b7416d6c61a3295752cad8aa5dcf03fd6c7c257ad41bbad3d0",
+  "capture_harness_sha256": "36878cb1d726fa91a3396db98f6e29e985c64a774a8be16d255231b4ea2a8bee",
+  "configured_profile": "esp32dev FORCE1 without NO_PINMAP; platform55.03.311/core3.3.11; actual Xtensa windowed-ABI guard compiled",
+  "baseline": {
+    "raw_fixture_sha256": "b83f538959610171df4899c0ec2f5849e2626be7f5566eaf9c83912c142fac24",
+    "elf_sha256": "21c870762b62a9a46e12893d1611e12f73b16c4bc6f8acd41e7c20495e6913be",
+    "actual_build_log_sha256": "77a6b7b72e8ac0534b1e71df45ab39205c2dd7eb2b6d25b90412daa728c407ab",
+    "build_returncode": 0
+  },
+  "old_output_mode": {
+    "raw_fixture_sha256": "1a3f7cb7b796219fa7a61a84036d3ef3ef224649a6411dd8efa089e723fe2616",
+    "elf_sha256": "fb3ee3d5bb88361a7bdb452e8588236147deaa08b62941e89e893fac5b3a9930",
+    "actual_build_log_sha256": "1f1d8e65a23e183456e16709ec942d3114c0340249bd881f9e26c9369cf98cb9",
+    "build_returncode": 0,
+    "source_control": "Exactly one production io_conf.mode = GPIO_MODE_INPUT_OUTPUT; changed to io_conf.mode = GPIO_MODE_OUTPUT;"
+  },
+  "restored": {
+    "raw_fixture_sha256": "b83f538959610171df4899c0ec2f5849e2626be7f5566eaf9c83912c142fac24",
+    "elf_sha256": "21c870762b62a9a46e12893d1611e12f73b16c4bc6f8acd41e7c20495e6913be",
+    "actual_build_log_sha256": "1a4c93768cfa4eda78d27674c43fd880c128eed884378aa644b6a19e5e7bb87d",
+    "build_returncode": 0
+  },
+  "limitations": [
+    "The two unmapped linear disassembly diagnostic records per stage carry no dead-code or reachability authority.",
+    "The future classifier must authenticate reachable raw literals/calls/branches independently; extraction continue behavior is not an exception.",
+    "Reciprocal mode-cell changes in unit tests are synthetic opcode data, not additional source builds.",
+    "Conditional Output-only ELF property tests do not qualify other public modes, image/BIN mapping, runtime GPIO, timing/cache or full finding groups."
+  ]
+}

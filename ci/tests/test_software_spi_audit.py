@@ -5704,6 +5704,340 @@ ESP32_C6_MODE_SOURCE = "src/platforms/esp/32/pin_esp32_native_impl.hpp"
 ESP32_C6_MODE_STAGES = ("baseline", "old-output-mode-mutant", "restored")
 
 
+def _xtensa_mode_capture(stage: str = "baseline") -> dict:
+    # Exact root-extracted actual bytes. Pure parser data, never an admission
+    # receipt; unmapped linear diagnostics do not authorize unreachable code.
+    return json.loads(
+        (
+            audit.ROOT
+            / "ci/fixtures/software_spi_audit"
+            / f"esp32_xtensa_mode_{stage}.json"
+        ).read_text()
+    )
+
+
+def _classify_xtensa_mode(capture: dict):
+    from ci.software_spi_esp32_xtensa_mode_proof import classify_capture
+
+    return classify_capture(capture)
+
+
+def _patch_xtensa_bytes(
+    capture: dict, symbol: str, offset: int, before: str, after: str
+) -> None:
+    entry = capture["symbols"][symbol]
+    data, expected, replacement = (
+        bytes.fromhex(entry["bytes_hex"]),
+        bytes.fromhex(before),
+        bytes.fromhex(after),
+    )
+    assert len(expected) == len(replacement)
+    assert data[offset : offset + len(expected)] == expected
+    entry["bytes_hex"] = (
+        data[:offset] + replacement + data[offset + len(expected) :]
+    ).hex()
+
+
+@pytest.mark.parametrize(
+    ("stage", "mode"), [("baseline", 3), ("old", 2), ("restored", 3)]
+)
+def test_xtensa_mode_actual_compiled_captures_have_output_only_semantic_results(
+    stage: str, mode: int
+) -> None:
+    capture = _xtensa_mode_capture(stage)
+    result = _classify_xtensa_mode(capture)
+    assert result.authentication_errors == [] and result.decode_errors == []
+    assert result.producer_calls_bound and result.gpio_config_stores_bound
+    assert result.image_mapping_qualified is False
+    assert result.sdk.public_modes == {
+        "Input": 0,
+        "Output": 1,
+        "InputPullup": 2,
+        "InputPulldown": 3,
+    }
+    assert result.sdk.offsets == {
+        "mask": 0,
+        "mode": 8,
+        "pull_up": 12,
+        "pull_down": 16,
+        "intr": 20,
+    }
+    assert result.sdk.config_size == 24
+    assert len(result.observations) == 4
+    assert {(item.pin, item.pwm_lookup_nonnull) for item in result.observations} == {
+        (2, False),
+        (2, True),
+        (3, False),
+        (3, True),
+    }
+    pin = capture["symbols"]["fl::pinMode(int, fl::PinMode)"]["address"]
+    assert all(
+        item.public_mode == 1 and item.configured_mode == mode
+        for item in result.observations
+    )
+    assert all(item.store_address == pin + 0x4A for item in result.observations)
+    assert all(
+        item.gpio_config_address == capture["symbols"]["gpio_config"]["address"]
+        for item in result.observations
+    )
+    assert result.errors == (["output-mode-mismatch"] if mode == 2 else [])
+    assert result.counterexamples == (result.observations if mode == 2 else [])
+    assert result.assumptions == [
+        "xtensa-windowed-CALL8-normal-callee-ABI-and-bound-memset-buffer-contract"
+    ]
+    assert {pin + 0x34, pin + 0x36, pin + 0x4A, pin + 0x4C, pin + 0x4E} <= set(
+        result.reachable_pinmode_addresses
+    )
+    assert not {pin + 0x3B, pin + 0x3C, pin + 0x3E, pin + 0x42} & set(
+        result.reachable_pinmode_addresses
+    )
+    assert 0x400D0210 in result.bound_literal_addresses
+
+
+def test_xtensa_mode_synthetic_reciprocal_cell_is_numeric_not_stage_label() -> None:
+    capture = _xtensa_mode_capture("old")
+    _patch_xtensa_bytes(capture, "fl::pinMode(int, fl::PinMode)", 0x34, "0c28", "0c38")
+    result = _classify_xtensa_mode(capture)
+    assert result.authentication_errors == [] and result.decode_errors == []
+    assert result.errors == [] and result.counterexamples == []
+    assert len(result.observations) == 4 and all(
+        item.configured_mode == 3 for item in result.observations
+    )
+
+
+@pytest.mark.parametrize(
+    ("symbol", "offset", "before", "after"),
+    [
+        (
+            "esp32_global_generic_producer",
+            0x8F,
+            "25fb00",
+            "65fb00",
+        ),  # actual CALL8 enters pinMode interior
+        (
+            "esp32_global_generic_producer",
+            0x88,
+            "0c2a",
+            "0c4a",
+        ),  # actual outgoing pin2 becomes4
+        (
+            "esp32_global_generic_producer",
+            0x81,
+            "0c1b",
+            "0c2b",
+        ),  # actual outgoing public Output argument changes
+        (
+            "fl::pinMode(int, fl::PinMode)",
+            0x36,
+            "261310",
+            "261311",
+        ),  # branch target inside store
+        (
+            "fl::pinMode(int, fl::PinMode)",
+            0x36,
+            "261310",
+            "661310",
+        ),  # BEQI becomes BNEI
+        (
+            "fl::pinMode(int, fl::PinMode)",
+            0x36,
+            "261310",
+            "261301",
+        ),  # reachable edge into linear junk
+        (
+            "fl::pinMode(int, fl::PinMode)",
+            0x34,
+            "0c38",
+            "0c39",
+        ),  # mode constant written to a9 not a8
+        (
+            "fl::pinMode(int, fl::PinMode)",
+            0x34,
+            "0c38",
+            "8c38",
+        ),  # BEQZ.N-family bit7 is not MOVI.N
+        ("fl::pinMode(int, fl::PinMode)", 0x34, "0c38", "0c48"),  # unreviewed mode4
+        (
+            "fl::pinMode(int, fl::PinMode)",
+            0x4A,
+            "8941",
+            "8951",
+        ),  # store SP20 instead of actualmode SP16
+        (
+            "fl::pinMode(int, fl::PinMode)",
+            0x4C,
+            "8ba1",
+            "9ba1",
+        ),  # outgoing config pointer changes
+        (
+            "fl::pinMode(int, fl::PinMode)",
+            0x4E,
+            "a58c00",
+            "e58c00",
+        ),  # actual GPIO CALL8 interior
+        (
+            "fl::pinMode(int, fl::PinMode)",
+            0x22,
+            "8130f4",
+            "8131f4",
+        ),  # actual L32R targets another word
+        (
+            "fl::pinMode(int, fl::PinMode)",
+            0x25,
+            "e00800",
+            "e00900",
+        ),  # CALLX8 uses a9 not bound a8
+        (
+            "fl::pinMode(int, fl::PinMode)",
+            0x05,
+            "a5f4ff",
+            "e5f4ff",
+        ),  # actual PWM lookup CALL8 interior
+        (
+            "fl::pinMode(int, fl::PinMode)",
+            0x0A,
+            "a5fcff",
+            "e5fcff",
+        ),  # conditional release CALL8 interior
+        (
+            "fl::pinMode(int, fl::PinMode)",
+            0x19,
+            "25d1b1",
+            "65d1b1",
+        ),  # memset CALL8 interior
+        (
+            "fl::pinMode(int, fl::PinMode)",
+            0x16,
+            "a2c110",
+            "a2c114",
+        ),  # memset pointer SP16 becomes SP20
+        (
+            "fl::pinMode(int, fl::PinMode)",
+            0x12,
+            "1c0c",
+            "0c8c",
+        ),  # memset16 becomes8 bytes
+        (
+            "fl::pinMode(int, fl::PinMode)",
+            0x14,
+            "0c0b",
+            "0c1b",
+        ),  # memset zero argument becomes1
+    ],
+)
+def test_xtensa_mode_rejects_consistent_raw_call_branch_register_and_literal_corruption(
+    symbol: str, offset: int, before: str, after: str
+) -> None:
+    capture = _xtensa_mode_capture()
+    _patch_xtensa_bytes(capture, symbol, offset, before, after)
+    result = _classify_xtensa_mode(capture)
+    assert result.authentication_errors or result.decode_errors
+    assert result.counterexamples == []
+
+
+@pytest.mark.parametrize(
+    "corruption",
+    [
+        "partial-load",
+        "duplicate-load",
+        "wrong-owner",
+        "file-offset",
+        "raw-symbol",
+        "alias",
+        "ROM-word",
+        "ROM-raw-symbol",
+        "literal-file-offset",
+        "literal-alias",
+        "missing-reachable-literal",
+        "SDK-layout",
+        "SDK-mode-relabel",
+    ],
+)
+def test_xtensa_mode_rejects_unbound_storage_exports_aliases_and_ROM(
+    corruption: str,
+) -> None:
+    import copy
+
+    capture = _xtensa_mode_capture()
+    pin = capture["symbols"]["fl::pinMode(int, fl::PinMode)"]
+    if corruption in ("partial-load", "duplicate-load"):
+        load = copy.deepcopy(capture["program_headers"][pin["load_owner"]])
+        if corruption == "partial-load":
+            load.update(
+                vaddr=pin["address"] + 1,
+                paddr=pin["address"] + 1,
+                file_offset=pin["file_offset"] + 1,
+                file_size=2,
+                mem_size=2,
+            )
+        capture["program_headers"].append(load)
+    elif corruption == "wrong-owner":
+        pin["load_owner"] = 0
+    elif corruption == "file-offset":
+        pin["file_offset"] += 1
+    elif corruption == "raw-symbol":
+        raw = bytearray.fromhex(pin["raw_symbol_hex"])
+        raw[4] ^= 2
+        pin["raw_symbol_hex"] = raw.hex()
+    elif corruption == "alias":
+        capture["symbols"]["duplicate fl::pinMode"] = copy.deepcopy(pin)
+    elif corruption == "ROM-word":
+        literal = capture["literal_words"][str(0x400D0210)]
+        literal["uint32_le"] += 4
+        literal["bytes_hex"] = literal["uint32_le"].to_bytes(4, "little").hex()
+    elif corruption == "ROM-raw-symbol":
+        entry = capture["symbols"]["__ashldi3"]
+        raw = bytearray.fromhex(entry["raw_symbol_hex"])
+        raw[4] ^= 4
+        entry["raw_symbol_hex"] = raw.hex()
+    elif corruption == "literal-file-offset":
+        capture["literal_words"][str(0x400D0210)]["file_offset"] += 1
+    elif corruption == "literal-alias":
+        capture["literal_words"]["duplicate-ROM-literal"] = copy.deepcopy(
+            capture["literal_words"][str(0x400D0210)]
+        )
+    elif corruption == "missing-reachable-literal":
+        del capture["literal_words"][str(0x400D0210)]
+        capture["unmapped_linear_disassembly_diagnostics"].append(
+            {
+                "instruction": pin["address"] + 0x22,
+                "target": 0x400D0210,
+                "error": "must not grant a skip",
+            }
+        )
+    else:
+        name, value = (
+            ("selection_gpio_mode_offset", 24)
+            if corruption == "SDK-layout"
+            else ("selection_gpio_mode_input_output", 2)
+        )
+        item = capture["symbols"][name]
+        item["uint32_le"], item["bytes_hex"] = value, value.to_bytes(4, "little").hex()
+    result = _classify_xtensa_mode(capture)
+    assert result.authentication_errors or result.decode_errors
+    assert result.counterexamples == []
+
+
+def test_xtensa_mode_external_parser_record_cannot_satisfy_full_selection_groups() -> (
+    None
+):
+    finding = next(row for row in REQUIRED_FINDINGS if row["issue"] == 5067)
+    claims = [
+        {
+            "finding": finding["id"],
+            "configuration": configuration,
+            "status": "PASS",
+            "scope": "esp32dev-forced-gpio2-3-conditional-ELF-output-mode-only",
+            "mode": 3,
+        }
+        for configuration in finding["required_configurations"]
+    ]
+    errors = check_evidence([finding], claims, audit._current_sources(audit.ROOT))
+    assert any("external" in error for error in errors)
+    for configuration in finding["required_configurations"]:
+        assert any(f"/{configuration}: unresolved" in error for error in errors)
+
+
 def _c6_mode_retention_layout(
     tmp_path: Path, map_count: int
 ) -> tuple[dict, Path, Path]:
