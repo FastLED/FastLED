@@ -80,16 +80,39 @@ public:
 			while(!(UCSR1A & (1<<UDRE1)));
 		}
 	}
+	static bool txPending(bool pending) FL_NO_EXCEPT __attribute__((always_inline)) {
+		static bool sPending=false;
+		const bool previous = sPending;
+		sPending = pending;
+		return previous;
+	}
+	// TXC is write-one-to-clear and set only after the shifter empties, unlike
+	// UDRE, so arm it per byte. Error flags must be written as zero.
+	static void startTx(u8 b) FL_NO_EXCEPT __attribute__((always_inline)) {
+		UCSR1A = (UCSR1A & ((1<<U2X1)|(1<<MPCM1))) | (1<<TXC1);
+		UDR1 = b;
+		txPending(true);
+	}
+	static void drainTx() FL_NO_EXCEPT __attribute__((always_inline)) {
+		if(txPending(false)) {
+			while(!(UCSR1A & (1<<TXC1)));
+		}
+	}
 	static void waitFully() __attribute__((always_inline)) { wait(); }
 
 	static void writeWord(u16 w) __attribute__((always_inline)) { writeByte(w>>8); writeByte(w&0xFF); }
 
-	static void writeByte(u8 b) __attribute__((always_inline)) { wait(); UDR1=b;  shouldWait(true); }
-	static void writeBytePostWait(u8 b) __attribute__((always_inline)) { UDR1=b; shouldWait(true); wait(); }
-	static void writeByteNoWait(u8 b) __attribute__((always_inline)) { UDR1=b; shouldWait(true); }
+	static void writeByte(u8 b) __attribute__((always_inline)) { wait(); startTx(b);  shouldWait(true); }
+	static void writeBytePostWait(u8 b) __attribute__((always_inline)) { startTx(b); shouldWait(true); wait(); }
+	static void writeByteNoWait(u8 b) __attribute__((always_inline)) { startTx(b); shouldWait(true); }
 
 
 	template <u8 BIT> inline static void writeBit(u8 b) FL_NO_EXCEPT {
+		// RXEN/TXEN own the pins, so finish the byte and hand them to GPIO.
+		drainTx();
+		const u8 control = UCSR1B;
+		const u16 rate = UBRR1;
+		UCSR1B = control & ~((1<<RXEN1)|(1<<TXEN1));
 		if(b & (1 << BIT)) {
 			FastPin<_DATA_PIN>::hi();
 		} else {
@@ -98,6 +121,11 @@ public:
 
 		FastPin<_CLOCK_PIN>::hi();
 		FastPin<_CLOCK_PIN>::lo();
+		// MSPIM requires UBRR to be zero while the transmitter is enabled.
+		UBRR1 = 0;
+		UCSR1B = control;
+		UBRR1 = rate;
+		shouldWait(false);
 	}
 
 	void enable_pins() { }
@@ -236,16 +264,39 @@ public:
 			while(!(UCSR0A & (1<<UDRE0)));
 		}
 	}
+	static bool txPending(bool pending) FL_NO_EXCEPT __attribute__((always_inline)) {
+		static bool sPending=false;
+		const bool previous = sPending;
+		sPending = pending;
+		return previous;
+	}
+	// TXC is write-one-to-clear and set only after the shifter empties, unlike
+	// UDRE, so arm it per byte. Error flags must be written as zero.
+	static void startTx(u8 b) FL_NO_EXCEPT __attribute__((always_inline)) {
+		UCSR0A = (UCSR0A & ((1<<U2X0)|(1<<MPCM0))) | (1<<TXC0);
+		UDR0 = b;
+		txPending(true);
+	}
+	static void drainTx() FL_NO_EXCEPT __attribute__((always_inline)) {
+		if(txPending(false)) {
+			while(!(UCSR0A & (1<<TXC0)));
+		}
+	}
 	static void waitFully() __attribute__((always_inline)) { wait(); }
 
 	static void writeWord(u16 w) __attribute__((always_inline)) { writeByte(w>>8); writeByte(w&0xFF); }
 
-	static void writeByte(u8 b) __attribute__((always_inline)) { wait(); UDR0=b;  shouldWait(true); }
-	static void writeBytePostWait(u8 b) __attribute__((always_inline)) { UDR0=b; shouldWait(true); wait(); }
-	static void writeByteNoWait(u8 b) __attribute__((always_inline)) { UDR0=b; shouldWait(true); }
+	static void writeByte(u8 b) __attribute__((always_inline)) { wait(); startTx(b);  shouldWait(true); }
+	static void writeBytePostWait(u8 b) __attribute__((always_inline)) { startTx(b); shouldWait(true); wait(); }
+	static void writeByteNoWait(u8 b) __attribute__((always_inline)) { startTx(b); shouldWait(true); }
 
 
 	template <u8 BIT> inline static void writeBit(u8 b) FL_NO_EXCEPT {
+		// RXEN/TXEN own the pins, so finish the byte and hand them to GPIO.
+		drainTx();
+		const u8 control = UCSR0B;
+		const u16 rate = UBRR0;
+		UCSR0B = control & ~((1<<RXEN0)|(1<<TXEN0));
 		if(b & (1 << BIT)) {
 			FastPin<_DATA_PIN>::hi();
 		} else {
@@ -254,6 +305,11 @@ public:
 
 		FastPin<_CLOCK_PIN>::hi();
 		FastPin<_CLOCK_PIN>::lo();
+		// MSPIM requires UBRR to be zero while the transmitter is enabled.
+		UBRR0 = 0;
+		UCSR0B = control;
+		UBRR0 = rate;
+		shouldWait(false);
 	}
 
 	void enable_pins() { }
@@ -425,6 +481,10 @@ public:
 
 
 	template <u8 BIT> inline static void writeBit(u8 b) FL_NO_EXCEPT {
+		// The enabled peripheral owns the pins: finish the byte, then hand them over.
+		wait();
+		const u8 control = SPI0_CTRLA;
+		SPI0_CTRLA = control & ~SPI_ENABLE_bm;
 		if(b & (1 << BIT)) {
 			FastPin<_DATA_PIN>::hi();
 		} else {
@@ -433,6 +493,8 @@ public:
 
 		FastPin<_CLOCK_PIN>::hi();
 		FastPin<_CLOCK_PIN>::lo();
+		SPI0_CTRLA = control;
+		shouldWait(false);
 	}
 
 	void enable_pins() { }
@@ -613,7 +675,10 @@ public:
 	static void writeByteNoWait(u8 b) __attribute__((always_inline)) { SPDR=b; shouldWait(true); }
 
 	template <u8 BIT> inline static void writeBit(u8 b) FL_NO_EXCEPT {
-		SPCR &= ~(1 << SPE);
+		// The enabled peripheral owns the pins: finish the byte, then hand them over.
+		wait();
+		const u8 control = SPCR;
+		SPCR = control & ~(1 << SPE);
 		if(b & (1 << BIT)) {
 			FastPin<_DATA_PIN>::hi();
 		} else {
@@ -622,7 +687,7 @@ public:
 
 		FastPin<_CLOCK_PIN>::hi();
 		FastPin<_CLOCK_PIN>::lo();
-		SPCR |= 1 << SPE;
+		SPCR = control;
 		shouldWait(false);
 	}
 
@@ -801,7 +866,10 @@ public:
 	static void writeByteNoWait(u8 b) __attribute__((always_inline)) { SPDR0=b; shouldWait(true); }
 
 	template <u8 BIT> inline static void writeBit(u8 b) FL_NO_EXCEPT {
-		SPCR0 &= ~(1 << SPE);
+		// The enabled peripheral owns the pins: finish the byte, then hand them over.
+		wait();
+		const u8 control = SPCR0;
+		SPCR0 = control & ~(1 << SPE);
 		if(b & (1 << BIT)) {
 			FastPin<_DATA_PIN>::hi();
 		} else {
@@ -810,7 +878,7 @@ public:
 
 		FastPin<_CLOCK_PIN>::hi();
 		FastPin<_CLOCK_PIN>::lo();
-		SPCR0 |= 1 << SPE;
+		SPCR0 = control;
 		shouldWait(false);
 	}
 
