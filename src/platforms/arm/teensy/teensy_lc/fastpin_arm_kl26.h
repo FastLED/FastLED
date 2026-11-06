@@ -6,6 +6,9 @@
 #include "fl/stl/compiler_control.h"
 #include "fl/system/fastpin_base.h"
 #include "fl/system/pin.h"  // For PinMode, PinValue enums
+#include "fl/stl/noexcept.h"
+#include "fl/stl/type_traits.h"
+#include "platforms/shared/spi_bitbang/bitbang_pin.h"
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_DEPRECATED_REGISTER
@@ -22,7 +25,7 @@ namespace fl {
 /// uses the full port GPIO registers.  In theory, in some way, bit-band register access -should- be faster, however I have found
 /// that something about the way gcc does register allocation results in the bit-band code being slower.  It will need more fine tuning.
 /// The registers are data output, set output, clear output, toggle output, input, and direction
-template<u8 PIN, u32 _MASK, typename _PDOR, typename _PSOR, typename _PCOR, typename _PTOR, typename _PDIR, typename _PDDR> class _ARMPIN {
+template<u8 PIN, u32 _MASK, typename _PDOR, typename _PSOR, typename _PCOR, typename _PTOR, typename _PDIR, typename _PDDR> class _ARMPIN : public ValidPinBase {
 public:
   typedef volatile u32 * port_ptr_t;
   typedef u32 port_t;
@@ -50,8 +53,36 @@ public:
   inline static port_t mask() __attribute__ ((always_inline)) { return _MASK; }
 };
 
+/// True only for FastPin specializations backed by a real KL26 _ARMPIN.
+template <u8 PIN, u32 MASK, typename PDOR, typename PSOR, typename PCOR, typename PTOR, typename PDIR, typename PDDR>
+constexpr bool isKl26HardwarePin(const _ARMPIN<PIN, MASK, PDOR, PSOR, PCOR, PTOR, PDIR, PDDR>*) { return true; }
+constexpr bool isKl26HardwarePin(const void*) { return false; }
+
+/// Exclusive same-port bulk writes stream through PDOR; all other data updates
+/// use PSOR/PCOR without a data branch. kMinWriteCycles stays at its default: no
+/// GPIO write latency has been measured here, so existing padding is kept.
+template <u8 PIN> struct BitbangPin<FastPin<PIN>> : BitbangPinDefaults<FastPin<PIN>> {
+  static constexpr bool kAtomicWrite = isKl26HardwarePin(static_cast<const FastPin<PIN>*>(nullptr));
+  static constexpr bool kTwoWriteStream = kAtomicWrite;
+  template <u8 BIT>
+  FASTLED_FORCE_INLINE static void write(u8 value) FL_NO_EXCEPT {
+    writeImpl<BIT>(value, fl::integral_constant<bool, kAtomicWrite>());
+  }
+
+ private:
+  template <u8 BIT>
+  FASTLED_FORCE_INLINE static void writeImpl(u8 value, fl::integral_constant<bool, true>) FL_NO_EXCEPT {
+    writeBitSetClearNoBranch<BIT>(value, FastPin<PIN>::mask(), FastPin<PIN>::sport(), FastPin<PIN>::cport());
+  }
+  // A user-defined FastPin need not have sport()/cport(), so it keeps hi()/lo().
+  template <u8 BIT>
+  FASTLED_FORCE_INLINE static void writeImpl(u8 value, fl::integral_constant<bool, false>) FL_NO_EXCEPT {
+    BitbangPinDefaults<FastPin<PIN>>::template write<BIT>(value);
+  }
+};
+
 // Macros for kl26 pin access/definition
-#define GPIO_BITBAND_ADDR(reg, bit) (((u32)&(reg) - 0x40000000) * 32 + (bit) * 4 + 0x42000000)
+#define GPIO_BITBAND_ADDR(reg, bit) (((uptr)&(reg) - 0x40000000) * 32 + (bit) * 4 + 0x42000000)
 #define GPIO_BITBAND_PTR(reg, bit) ((u32 *)GPIO_BITBAND_ADDR((reg), (bit)))
 
 #define _R(T) struct __gen_struct_ ## T
