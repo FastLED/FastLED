@@ -1,0 +1,14 @@
+{
+  "scope": "Historical actual compiler parser data only; no managed admission or current-source qualification.",
+  "source": ".build/spi-esp32-forced-selection-global-matrix-v5/esp32c6/unguarded-control-force1",
+  "producer_sha256": "e2069d475e51d1f87cc181637cf04115e8838bcabd47489f9334585b208902da",
+  "build_log_sha256": "6cd0439efcdeba1ea4f85717f551018ce08487a44ffbb5c2494945d83c34fb1f",
+  "excerpt_source_lines": [
+    125,
+    128,
+    131
+  ],
+  "excerpt_sha256": "0498fd994b0d792f803538265aa21ae02ebd345ec5ecd6c4b7c14dde18ec7b41",
+  "paired_startup_scope": "Intact original FastLED-first startup prefix lines 1-40, followed by one owned compile-only ancestry/HAS/native-inverse/NoMap assertion block; inherited regression-only assertions removed. Not yet compiled.",
+  "paired_startup_sha256": "752971fb61effb79e133d4cf80452c6a4fbbbd2670f1a18018a131446182b0c7"
+}

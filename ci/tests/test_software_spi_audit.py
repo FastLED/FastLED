@@ -5716,9 +5716,23 @@ def _xtensa_mode_capture(stage: str = "baseline") -> dict:
     )
 
 
+@dataclass(slots=True)
+class _SyntheticELFCarrier:
+    image: bytes
+    nm: str
+    linker: Path
+
+
+@dataclass(slots=True)
+class _RetentionLayout:
+    info: dict[str, str]
+    project: Path
+    saved: Path
+
+
 def _xtensa_mode_factory_carrier(
     tmp_path: Path, stage: str = "baseline", corruption: str = "none"
-) -> tuple[bytes, str, Path]:
+) -> _SyntheticELFCarrier:
     # Explicitly SYNTHETIC ELF-format carrier: actual selected bytes and
     # allocated table geometry, new compact symbol/string tables, zero-filled
     # uninspected payload. It is not an SDK build, image or managed receipt.
@@ -6004,7 +6018,7 @@ def _xtensa_mode_factory_carrier(
         raw = raw[:51]
     elif corruption == "ELF-truncated-section-table":
         raw = raw[:-1]
-    return raw, "\n".join(nm), sdk
+    return _SyntheticELFCarrier(raw, "\n".join(nm), sdk)
 
 
 @pytest.mark.parametrize(
@@ -6015,7 +6029,10 @@ def test_xtensa_mode_factory_authenticates_synthetic_carrier_and_actual_selected
 ) -> None:
     from ci import software_spi_esp32_xtensa_mode_proof as checker
 
-    elf, nm, sdk = _xtensa_mode_factory_carrier(tmp_path, stage)
+    carrier = _xtensa_mode_factory_carrier(tmp_path, stage)
+    elf = carrier.image
+    nm = carrier.nm
+    sdk = carrier.linker
     capture = checker.extract_capture(elf, nm, sdk)
     assert (
         capture["sdk_source_contract"]["core_isa_sha256"]
@@ -6069,7 +6086,10 @@ def test_xtensa_mode_factory_rejects_incoherent_tables_storage_and_reachable_bin
 ) -> None:
     from ci import software_spi_esp32_xtensa_mode_proof as checker
 
-    elf, nm, sdk = _xtensa_mode_factory_carrier(tmp_path, corruption=corruption)
+    carrier = _xtensa_mode_factory_carrier(tmp_path, corruption=corruption)
+    elf = carrier.image
+    nm = carrier.nm
+    sdk = carrier.linker
     with pytest.raises(ValueError):
         checker.extract_capture(elf, nm, sdk)
 
@@ -6082,7 +6102,10 @@ def test_xtensa_mode_factory_binds_sdk_hashes_and_parses_contract_independently(
 ) -> None:
     from ci import software_spi_esp32_xtensa_mode_proof as checker
 
-    elf, nm, sdk = _xtensa_mode_factory_carrier(tmp_path)
+    carrier = _xtensa_mode_factory_carrier(tmp_path)
+    elf = carrier.image
+    nm = carrier.nm
+    sdk = carrier.linker
     directory = sdk / "tools/esp32-arduino-libs/esp32"
     if corruption.startswith("core"):
         path = directory / "include/xtensa/esp32/include/xtensa/config/core-isa.h"
@@ -6127,7 +6150,10 @@ def test_xtensa_mode_factory_does_not_turn_unknown_opcode_into_valid_property(
 ) -> None:
     from ci import software_spi_esp32_xtensa_mode_proof as checker
 
-    elf, nm, sdk = _xtensa_mode_factory_carrier(tmp_path, corruption="opcode-family")
+    carrier = _xtensa_mode_factory_carrier(tmp_path, corruption="opcode-family")
+    elf = carrier.image
+    nm = carrier.nm
+    sdk = carrier.linker
     try:
         capture = checker.extract_capture(elf, nm, sdk)
     except ValueError:
@@ -6157,7 +6183,10 @@ def test_xtensa_mode_factory_extra_rejects_identity_header_sizes_and_truncation(
 ) -> None:
     from ci import software_spi_esp32_xtensa_mode_proof as checker
 
-    elf, nm, sdk = _xtensa_mode_factory_carrier(tmp_path, corruption=corruption)
+    carrier = _xtensa_mode_factory_carrier(tmp_path, corruption=corruption)
+    elf = carrier.image
+    nm = carrier.nm
+    sdk = carrier.linker
     with pytest.raises(ValueError):
         checker.extract_capture(elf, nm, sdk)
 
@@ -6177,7 +6206,10 @@ def test_xtensa_mode_factory_extra_requires_exact_unique_nm_raw_symbol_binding(
 ) -> None:
     from ci import software_spi_esp32_xtensa_mode_proof as checker
 
-    elf, nm, sdk = _xtensa_mode_factory_carrier(tmp_path, corruption=corruption)
+    carrier = _xtensa_mode_factory_carrier(tmp_path, corruption=corruption)
+    elf = carrier.image
+    nm = carrier.nm
+    sdk = carrier.linker
     lines = nm.splitlines()
     selected = next(
         line for line in lines if line.endswith(" fl::pinMode(int, fl::PinMode)")
@@ -6515,9 +6547,7 @@ def test_xtensa_mode_external_parser_record_cannot_satisfy_full_selection_groups
         assert any(f"/{configuration}: unresolved" in error for error in errors)
 
 
-def _c6_mode_retention_layout(
-    tmp_path: Path, map_count: int
-) -> tuple[dict, Path, Path]:
+def _c6_mode_retention_layout(tmp_path: Path, map_count: int) -> _RetentionLayout:
     # Retention/schema behavior only. These placeholder artifact bytes are
     # deliberately not an ELF and can never authenticate a property proof.
     project, saved = tmp_path / "project", tmp_path / "retained"
@@ -6530,7 +6560,9 @@ def _c6_mode_retention_layout(
         (release / "firmware.map").write_bytes(b"release-diagnostic-map")
     if map_count == 2:
         (project / "firmware.map").write_bytes(b"project-diagnostic-map")
-    return {"prog_path": str(release / "firmware.elf")}, project, saved
+    return _RetentionLayout(
+        {"prog_path": str(release / "firmware.elf")}, project, saved
+    )
 
 
 @pytest.mark.parametrize("map_count", [0, 1, 2])
@@ -6539,7 +6571,10 @@ def test_esp32_c6_mode_maps_are_explicit_unused_diagnostics(
 ) -> None:
     from ci import software_spi_my9221_rp2040_runner as vendor
 
-    info, project, saved = _c6_mode_retention_layout(tmp_path, map_count)
+    layout = _c6_mode_retention_layout(tmp_path, map_count)
+    info = layout.info
+    project = layout.project
+    saved = layout.saved
     hashes = vendor._retain_artifacts(
         info, saved, project, vendor._PropertyKind.ESP32_C6_MODE
     )
@@ -6579,7 +6614,10 @@ def test_esp32_c6_mode_artifact_change_preserves_required_rp_map_contract(
 ) -> None:
     from ci import software_spi_my9221_rp2040_runner as vendor
 
-    info, project, saved = _c6_mode_retention_layout(tmp_path, map_count)
+    layout = _c6_mode_retention_layout(tmp_path, map_count)
+    info = layout.info
+    project = layout.project
+    saved = layout.saved
     with pytest.raises(ValueError, match="map"):
         if kind == "PLACEMENT":
             vendor._retain_artifacts(info, saved, project)
@@ -6595,7 +6633,10 @@ def test_esp32_c6_mode_missing_map_never_waives_required_artifacts(
 ) -> None:
     from ci import software_spi_my9221_rp2040_runner as vendor
 
-    info, project, saved = _c6_mode_retention_layout(tmp_path, 0)
+    layout = _c6_mode_retention_layout(tmp_path, 0)
+    info = layout.info
+    project = layout.project
+    saved = layout.saved
     path = Path(info["prog_path"]).parent / missing
     path.rename(path.with_suffix(path.suffix + ".retained-original"))
     with pytest.raises(ValueError, match="artifact"):
@@ -6609,7 +6650,10 @@ def test_esp32_c6_mode_missing_map_cannot_bypass_semantic_old_mode_rejection(
 ) -> None:
     from ci import software_spi_my9221_rp2040_runner as vendor
 
-    info, project, saved = _c6_mode_retention_layout(tmp_path, 0)
+    layout = _c6_mode_retention_layout(tmp_path, 0)
+    info = layout.info
+    project = layout.project
+    saved = layout.saved
     vendor._retain_artifacts(info, saved, project, vendor._PropertyKind.ESP32_C6_MODE)
     capture = _esp32_c6_mode_capture()
     _patch_c6_mode_bytes(capture, "fl::pinMode(int, fl::PinMode)", 0x6E, "8d47", "8947")
@@ -6701,7 +6745,7 @@ def test_esp32_c6_mode_classifier_rejects_corrupt_actual_reuse_path(
 
 def _c6_mode_parser_elf(
     tmp_path: Path, corruption: str = "none"
-) -> tuple[bytes, str, Path]:
+) -> _SyntheticELFCarrier:
     # An ELF-format fixture carrying the ACTUAL captured selected bytes. File
     # offsets/tables are compacted here; it is not an SDK build or proof receipt.
     import struct
@@ -6849,7 +6893,7 @@ def _c6_mode_parser_elf(
             audit.ROOT / "ci/fixtures/software_spi_audit/esp32c6.rom.libgcc.ld.txt"
         ).read_bytes()
     )
-    return bytes(image), "\n".join(nm), linker
+    return _SyntheticELFCarrier(bytes(image), "\n".join(nm), linker)
 
 
 def test_esp32_c6_mode_extractor_format_fixture_keeps_captured_selected_bytes(
@@ -6857,7 +6901,10 @@ def test_esp32_c6_mode_extractor_format_fixture_keeps_captured_selected_bytes(
 ) -> None:
     from ci.software_spi_esp32_c6_mode_proof import extract_capture
 
-    elf, nm, linker = _c6_mode_parser_elf(tmp_path)
+    carrier = _c6_mode_parser_elf(tmp_path)
+    elf = carrier.image
+    nm = carrier.nm
+    linker = carrier.linker
     capture = extract_capture(elf, nm, linker)
     assert {name: entry["bytes_hex"] for name, entry in capture["symbols"].items()} == {
         name: entry["bytes_hex"]
@@ -6867,13 +6914,16 @@ def test_esp32_c6_mode_extractor_format_fixture_keeps_captured_selected_bytes(
 
 def _c6_sdk_reservation_format_elf(
     tmp_path: Path, corruption: str = "none"
-) -> tuple[bytes, str, Path]:
+) -> _SyntheticELFCarrier:
     # Actual allocated section/PHDR metadata and selected instruction/data
     # bytes, with synthetic symbol/string tables and zero-filled uninspected
     # content. A format/conditional-ELF fixture, NEVER an actual firmware image.
     import struct
 
-    basic, nm, linker = _c6_mode_parser_elf(tmp_path)
+    carrier = _c6_mode_parser_elf(tmp_path)
+    basic = carrier.image
+    nm = carrier.nm
+    linker = carrier.linker
     old_shoff = struct.unpack_from("<I", basic, 32)[0]
     old_sections = [
         struct.unpack_from("<IIIIIIIIII", basic, old_shoff + index * 40)
@@ -7010,7 +7060,7 @@ def _c6_sdk_reservation_format_elf(
     if corruption == "script":
         script = linker.parent / "sections.ld"
         script.write_bytes(script.read_bytes() + b"\n/* changed */\n")
-    return bytes(image), nm, linker
+    return _SyntheticELFCarrier(bytes(image), nm, linker)
 
 
 def test_esp32_c6_mode_extractor_accepts_only_bound_sdk_reservation_geometry(
@@ -7018,7 +7068,10 @@ def test_esp32_c6_mode_extractor_accepts_only_bound_sdk_reservation_geometry(
 ) -> None:
     from ci.software_spi_esp32_c6_mode_proof import extract_capture
 
-    elf, nm, linker = _c6_sdk_reservation_format_elf(tmp_path)
+    carrier = _c6_sdk_reservation_format_elf(tmp_path)
+    elf = carrier.image
+    nm = carrier.nm
+    linker = carrier.linker
     capture = extract_capture(elf, nm, linker)
     assert (
         capture["symbols"]["fl::pinMode(int, fl::PinMode)"]["bytes_hex"]
@@ -7050,7 +7103,10 @@ def test_esp32_c6_mode_extractor_rejects_unqualified_sdk_reservation_aliases(
 ) -> None:
     from ci.software_spi_esp32_c6_mode_proof import extract_capture
 
-    elf, nm, linker = _c6_sdk_reservation_format_elf(tmp_path, corruption)
+    carrier = _c6_sdk_reservation_format_elf(tmp_path, corruption)
+    elf = carrier.image
+    nm = carrier.nm
+    linker = carrier.linker
     with pytest.raises(ValueError):
         extract_capture(elf, nm, linker)
 
@@ -7070,7 +7126,10 @@ def test_esp32_c6_mode_extractor_rejects_ambiguous_or_short_memory_extents(
 ) -> None:
     from ci.software_spi_esp32_c6_mode_proof import extract_capture
 
-    elf, nm, linker = _c6_mode_parser_elf(tmp_path, corruption)
+    carrier = _c6_mode_parser_elf(tmp_path, corruption)
+    elf = carrier.image
+    nm = carrier.nm
+    linker = carrier.linker
     with pytest.raises(ValueError):
         extract_capture(elf, nm, linker)
 
@@ -7555,7 +7614,10 @@ def test_xtensa_mode_factory_rejects_reserved_direct_section_count(tmp_path):
 
     from ci import software_spi_esp32_xtensa_mode_proof as checker
 
-    elf, nm, sdk = _xtensa_mode_factory_carrier(tmp_path)
+    carrier = _xtensa_mode_factory_carrier(tmp_path)
+    elf = carrier.image
+    nm = carrier.nm
+    sdk = carrier.linker
     malformed = bytearray(elf)
     section_offset = struct.unpack_from("<I", malformed, 32)[0]
     reserved_count = 0xFF00
@@ -7907,3 +7969,406 @@ def test_xtensa_mode_managed_rejects_changed_assumptions_or_broader_claims(corru
         result.image_mapping_qualified = True
     with pytest.raises(ValueError):
         checker.validate_stage_analysis("baseline", result)
+
+
+# Historical compiler diagnostics are parser input, never a selected-type receipt.
+def _esp32_selection_diagnostics() -> str:
+    return (
+        audit.ROOT
+        / "ci/fixtures/software_spi_audit/esp32_c6_selection_unguarded_diagnostics.txt"
+    ).read_text()
+
+
+def _esp32_selection_paired_diagnostics() -> str:
+    # Explicitly SYNTHETIC paired-output parser input: the .ino diagnostics are
+    # actual historical data; corresponding .cpp lines are not a compiler run.
+    base = audit.ROOT / "ci/fixtures/software_spi_audit"
+    startup = (base / "esp32_c6_selection_startup.cpp.txt").read_text().splitlines()
+    messages = (
+        '#error "forced selection must not advertise hardware pin support"',
+        "static assertion failed: forced GPIO2 must use ForcedSoftwarePin",
+        "static assertion failed: forced GPIO3 must use ForcedSoftwarePin",
+    )
+    lines = []
+    for message in messages:
+        token = (
+            "must not advertise"
+            if "#error" in message
+            else message.split("failed: ")[1]
+        )
+        matching = [index for index, line in enumerate(startup, 1) if token in line]
+        assert len(matching) == 1
+        lines.append(
+            f"src/sketch/AutoResearchStartupHook.cpp:{matching[0]}:1: error: {message}\n"
+        )
+    return _esp32_selection_diagnostics() + "".join(lines)
+
+
+def test_esp32_selection_managed_closed_c6_profile_and_exact_guard_mutation():
+    from ci import software_spi_esp32_selection_proof as selection
+
+    assert selection.SOURCE == "src/platforms/esp/32/core/fastpin_esp32.h"
+    assert selection.STAGES == ("baseline", "unguarded-native-mutant", "restored")
+    original = (audit.ROOT / selection.SOURCE).read_bytes()
+    opening = b"#if !defined(FASTLED_FORCE_SOFTWARE_PINS)\n"
+    closing = b"#endif // !defined(FASTLED_FORCE_SOFTWARE_PINS)\n"
+    assert original.count(opening) == original.count(closing) == 1
+    assert selection.unguarded_native_mutant(original) == original.replace(
+        opening, b"", 1
+    ).replace(closing, b"", 1)
+    for malformed in (
+        original.replace(opening, b""),
+        original + opening,
+        original + closing,
+    ):
+        with pytest.raises(ValueError):
+            selection.unguarded_native_mutant(malformed)
+    selection.validate_stage_sequence(selection.STAGES)
+
+
+@pytest.mark.parametrize("stage", ["baseline", "restored"])
+def test_esp32_selection_managed_positive_requires_success_without_diagnostics(stage):
+    from ci import software_spi_esp32_selection_proof as selection
+
+    selection.validate_stage_output(stage, 0, "firmware built successfully\n")
+    with pytest.raises(ValueError):
+        selection.validate_stage_output(stage, 1, _esp32_selection_diagnostics())
+    with pytest.raises(ValueError):
+        selection.validate_stage_output(stage, 0, _esp32_selection_diagnostics())
+
+
+def test_esp32_selection_managed_real_historical_negative_families_are_specific():
+    from ci import software_spi_esp32_selection_proof as selection
+
+    # Forbidden native advertisement is PRESENT, not a missing native flag.
+    output = _esp32_selection_paired_diagnostics()
+    assert "forced selection must not advertise hardware pin support" in output
+    assert "forced GPIO2 must use ForcedSoftwarePin" in output
+    assert "forced GPIO3 must use ForcedSoftwarePin" in output
+    selection.validate_stage_output("unguarded-native-mutant", 1, output)
+    # Repeated identical diagnostic families in wrapper retries add no coverage.
+    selection.validate_stage_output("unguarded-native-mutant", 1, output + output)
+
+
+@pytest.mark.parametrize(
+    "corruption",
+    [
+        "no-failure",
+        "no-diagnostics",
+        "missing-has",
+        "missing-pin2",
+        "missing-pin3",
+        "wrong-source",
+        "wrong-family",
+        "incidental-header",
+        "linker-error",
+        "sanitizer",
+        "unknown-stage",
+    ],
+)
+def test_esp32_selection_managed_rejects_nonselection_or_incomplete_negative(
+    corruption,
+):
+    from ci import software_spi_esp32_selection_proof as selection
+
+    output = _esp32_selection_paired_diagnostics()
+    stage, returncode = "unguarded-native-mutant", 1
+    if corruption == "no-failure":
+        returncode = 0
+    elif corruption == "no-diagnostics":
+        output = "build failed\n"
+    elif corruption.startswith("missing-"):
+        token = {
+            "missing-has": "must not advertise",
+            "missing-pin2": "forced GPIO2",
+            "missing-pin3": "forced GPIO3",
+        }[corruption]
+        output = "\n".join(line for line in output.splitlines() if token not in line)
+    elif corruption == "wrong-source":
+        output = output.replace("src/sketch/AutoResearch.ino", "src/unrelated.cpp")
+    elif corruption == "wrong-family":
+        output = output.replace(
+            "forced GPIO2 must use ForcedSoftwarePin", "native GPIO2 control"
+        )
+    elif corruption == "incidental-header":
+        output += "src/platforms/my9221_emitter.h:23:1: error: validpin is not a member of FastPin<0>\n"
+    elif corruption == "linker-error":
+        output += "collect2: error: ld returned 1 exit status\n"
+    elif corruption == "sanitizer":
+        output += "ERROR: AddressSanitizer: heap-use-after-free\n"
+    else:
+        stage = "caller-supplied-stage"
+    with pytest.raises(ValueError):
+        selection.validate_stage_output(stage, returncode, output)
+
+
+@pytest.mark.parametrize(
+    "stages",
+    [
+        (),
+        ("baseline", "restored"),
+        ("baseline", "unguarded-native-mutant", "unguarded-native-mutant", "restored"),
+        ("unguarded-native-mutant", "baseline", "restored"),
+    ],
+)
+def test_esp32_selection_managed_requires_exact_complete_stage_order(stages):
+    from ci import software_spi_esp32_selection_proof as selection
+
+    with pytest.raises(ValueError):
+        selection.validate_stage_sequence(stages)
+
+
+@pytest.mark.parametrize("force", [None, 0, 1])
+def test_esp32_selection_managed_global_force_presence_includes_defined_zero(force):
+    from ci import software_spi_esp32_selection_proof as selection
+
+    flags = [f"-DEXPECT_FORCED={int(force is not None)}", "-DEXPECT_NO_PINMAP=0"]
+    if force is not None:
+        flags.append(f"-DFASTLED_FORCE_SOFTWARE_PINS={force}")
+    selection.validate_global_defines(flags, force)
+    wrong = [flag for flag in flags if not flag.startswith("-DEXPECT_FORCED=")]
+    wrong.append(f"-DEXPECT_FORCED={int(force is None)}")
+    with pytest.raises(ValueError):
+        selection.validate_global_defines(wrong, force)
+    if force is not None:
+        with pytest.raises(ValueError):
+            selection.validate_global_defines(
+                [
+                    flag
+                    for flag in flags
+                    if not flag.startswith("-DFASTLED_FORCE_SOFTWARE_PINS=")
+                ],
+                force,
+            )
+
+
+@pytest.mark.parametrize("corruption", ["env", "board", "arch", "cpu", "compiler"])
+def test_esp32_selection_managed_rejects_architecture_or_profile_mismatch(corruption):
+    from ci import software_spi_esp32_selection_proof as selection
+
+    # Configuration-only synthetic input; never an actual SDK receipt.
+    info = {
+        "env": "esp32c6",
+        "board": "ESP32_C6_DEVKITC_1",
+        "platform": "espressif32",
+        "cxx_flags": ["-DF_CPU=160000000L", "-march=rv32imac_zicsr_zifencei"],
+        "cc_path": "/sdk/riscv32-esp-elf-14.2.0_20260121/bin/riscv32-esp-elf-gcc",
+    }
+    selection.validate_c6_profile(info)
+    if corruption == "env":
+        info["env"] = "esp32dev"
+    elif corruption == "board":
+        info["board"] = "ESP32DEV"
+    elif corruption == "arch":
+        info["cxx_flags"][1] = "-mlongcalls"
+    elif corruption == "cpu":
+        info["cxx_flags"][0] = "-DF_CPU=240000000L"
+    else:
+        info["cc_path"] = "/sdk/xtensa-esp-elf-14.2.0_20260121/bin/xtensa-esp32-elf-gcc"
+    with pytest.raises(ValueError):
+        selection.validate_c6_profile(info)
+
+
+def test_esp32_selection_managed_diagnostic_fixture_has_source_bound_provenance():
+    base = audit.ROOT / "ci/fixtures/software_spi_audit"
+    provenance = json.loads(
+        (base / "esp32_c6_selection_parser_provenance.json").read_text()
+    )
+    assert (
+        digest((base / "esp32_c6_selection_producer.cpp.txt").read_bytes())
+        == provenance["producer_sha256"]
+    )
+    assert (
+        digest((base / "esp32_c6_selection_unguarded_diagnostics.txt").read_bytes())
+        == provenance["excerpt_sha256"]
+    )
+    assert provenance["excerpt_source_lines"] == [125, 128, 131]
+    assert (
+        digest((base / "esp32_c6_selection_startup.cpp.txt").read_bytes())
+        == provenance["paired_startup_sha256"]
+    )
+
+
+@pytest.mark.parametrize(
+    "missing_tu", ["AutoResearch.ino", "AutoResearchStartupHook.cpp"]
+)
+def test_esp32_selection_managed_negative_requires_both_bound_include_order_tus(
+    missing_tu,
+):
+    from ci import software_spi_esp32_selection_proof as selection
+
+    output = "\n".join(
+        line
+        for line in _esp32_selection_paired_diagnostics().splitlines()
+        if missing_tu not in line
+    )
+    with pytest.raises(ValueError):
+        selection.validate_stage_output("unguarded-native-mutant", 1, output)
+
+
+@pytest.mark.parametrize("no_pinmap", [None, 0, 1])
+def test_esp32_selection_managed_nomap_presence_is_independent_of_force_value(
+    no_pinmap,
+):
+    from ci import software_spi_esp32_selection_proof as selection
+
+    flags = [
+        "-DEXPECT_FORCED=1",
+        f"-DEXPECT_NO_PINMAP={int(no_pinmap is not None)}",
+        "-DFASTLED_FORCE_SOFTWARE_PINS=0",
+    ]
+    if no_pinmap is not None:
+        flags.append(f"-DFASTLED_NO_PINMAP={no_pinmap}")
+    selection.validate_global_defines(flags, 0, no_pinmap)
+    wrong = [flag for flag in flags if not flag.startswith("-DEXPECT_NO_PINMAP=")]
+    wrong.append(f"-DEXPECT_NO_PINMAP={int(no_pinmap is None)}")
+    with pytest.raises(ValueError):
+        selection.validate_global_defines(wrong, 0, no_pinmap)
+
+
+def test_esp32_selection_managed_owns_separate_paired_tus_and_native_inverse_controls():
+    from ci import software_spi_esp32_selection_proof as selection
+
+    sources = selection.producer_sources(audit.ROOT)
+    base = audit.ROOT / "ci/fixtures/software_spi_audit"
+    for relative, filename in (
+        (
+            "examples/AutoResearch/AutoResearch.ino",
+            "esp32_c6_selection_producer.cpp.txt",
+        ),
+        (
+            "examples/AutoResearch/AutoResearchStartupHook.cpp",
+            "esp32_c6_selection_startup.cpp.txt",
+        ),
+    ):
+        content = (base / filename).read_bytes()
+        assert sources[relative] == content
+        assert b"forced GPIO2 must use ForcedSoftwarePin" in content
+        assert b"forced GPIO3 must use ForcedSoftwarePin" in content
+        assert b"native GPIO2 control" in content and b"native GPIO3 control" in content
+        assert b"native selection must advertise hardware pin support" in content
+        assert b"forced selection must not advertise hardware pin support" in content
+    assert sources["examples/AutoResearch/AutoResearch.ino"].index(
+        b"#include <Arduino.h>"
+    ) < sources["examples/AutoResearch/AutoResearch.ino"].index(b"#include <FastLED.h>")
+    startup = sources["examples/AutoResearch/AutoResearchStartupHook.cpp"]
+    includes = [
+        line.strip()
+        for line in startup.splitlines()
+        if line.lstrip().startswith(b"#include")
+    ]
+    assert includes[0] == b'#include "FastLED.h"'
+    assert b"#include <Arduino.h>" not in startup
+    assert b"#define FL_SOFTWARE_SPI_COMPILE_PROBE" not in startup
+
+
+@pytest.mark.parametrize(
+    "corruption",
+    [
+        "wrong-ino-line",
+        "wrong-startup-line",
+        "spoof-source-prefix",
+        "quoted-source-excerpt",
+        "additional-error",
+        "additional-fatal-error",
+    ],
+)
+def test_esp32_selection_managed_diagnostics_require_bound_origin_and_only_expected_errors(
+    corruption,
+):
+    import re
+
+    from ci import software_spi_esp32_selection_proof as selection
+
+    output = _esp32_selection_paired_diagnostics()
+    if corruption in ("wrong-ino-line", "wrong-startup-line"):
+        target = (
+            "AutoResearch.ino"
+            if corruption == "wrong-ino-line"
+            else "AutoResearchStartupHook.cpp"
+        )
+        output = "\n".join(
+            re.sub(r"(:\d+):", ":9999:", line, count=1) if target in line else line
+            for line in output.splitlines()
+        )
+    elif corruption == "spoof-source-prefix":
+        output = output.replace("src/sketch/", "unrelated/path/src/sketch/")
+    elif corruption == "quoted-source-excerpt":
+        output = "\n".join(
+            '    // quoted source: "' + line + '"' for line in output.splitlines()
+        )
+    elif corruption == "additional-error":
+        output += "src/sketch/AutoResearch.ino:1:1: error: arbitrary unrelated compiler failure\n"
+    else:
+        output += "src/sketch/AutoResearchStartupHook.cpp:1:1: fatal error: arbitrary missing header\n"
+    with pytest.raises(ValueError):
+        selection.validate_stage_output("unguarded-native-mutant", 1, output)
+
+
+@pytest.mark.parametrize(
+    "override",
+    [
+        "-DFASTLED_FORCE_SOFTWARE_PINS=1",
+        "-DFASTLED_FORCE_SOFTWARE_PINS=0",
+        "-DEXPECT_FORCED=1",
+        "-UFASTLED_FORCE_SOFTWARE_PINS",
+        "-DFASTLED_NO_PINMAP=0",
+        "-DFASTLED_NO_PINMAP=1",
+    ],
+)
+def test_esp32_selection_managed_global_flags_reject_duplicates_conflicts_and_undefinition(
+    override,
+):
+    from ci import software_spi_esp32_selection_proof as selection
+
+    flags = [
+        "-DEXPECT_FORCED=1",
+        "-DEXPECT_NO_PINMAP=1",
+        "-DFASTLED_FORCE_SOFTWARE_PINS=1",
+        "-DFASTLED_NO_PINMAP=0",
+        override,
+    ]
+    with pytest.raises(ValueError):
+        selection.validate_global_defines(flags, 1, 0)
+
+
+@pytest.mark.parametrize(
+    "name,value",
+    [
+        ("EXPECT_FORCED", "1"),
+        ("EXPECT_NO_PINMAP", "1"),
+        ("FASTLED_FORCE_SOFTWARE_PINS", "1"),
+        ("FASTLED_NO_PINMAP", "0"),
+    ],
+)
+@pytest.mark.parametrize("suffix", ["(x)", "[0]"])
+def test_esp32_selection_managed_global_flags_require_exact_scalar_macro_names(
+    name, value, suffix
+):
+    from ci import software_spi_esp32_selection_proof as selection
+
+    flags = [
+        "-DEXPECT_FORCED=1",
+        "-DEXPECT_NO_PINMAP=1",
+        "-DFASTLED_FORCE_SOFTWARE_PINS=1",
+        "-DFASTLED_NO_PINMAP=0",
+    ]
+    flags[flags.index(f"-D{name}={value}")] = f"-D{name}{suffix}={value}"
+    with pytest.raises(ValueError):
+        selection.validate_global_defines(flags, 1, 0)
+
+
+@pytest.mark.parametrize("invalid_token", [None, 1, {}])
+def test_esp32_selection_managed_global_flags_reject_nonstring_tokens_explicitly(
+    invalid_token,
+):
+    from ci import software_spi_esp32_selection_proof as selection
+
+    flags = [
+        "-DEXPECT_FORCED=1",
+        "-DEXPECT_NO_PINMAP=0",
+        "-DFASTLED_FORCE_SOFTWARE_PINS=1",
+        invalid_token,
+    ]
+    with pytest.raises(ValueError):
+        selection.validate_global_defines(flags, 1)
