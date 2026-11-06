@@ -27,6 +27,10 @@ mod tests {
         assert_eq!(test_main_lines("static int\nmain() {}\n"), vec![2]);
         assert_eq!(test_main_lines("int __attribute__((used))\nmain() {}\n"), vec![2]);
         assert_eq!(test_main_lines("unsigned main() {}\n"), vec![1]);
+        assert_eq!(test_main_lines("extern int main() {}\n"), vec![1]);
+        assert_eq!(test_main_lines("signed int main() {}\n"), vec![1]);
+        assert_eq!(test_main_lines("int main\n() { return 0; }\n"), vec![1]);
+        assert_eq!(test_main_lines("const char* s = \"a\\\nb\";\nint main() {}\n"), vec![3]);
         assert_eq!(test_main_lines("int main() { return run();\n}\n"), vec![1]);
     }
 
@@ -38,6 +42,8 @@ mod tests {
         assert_eq!(test_main_lines("// allow-test-main\nint main() {}\n"), vec![1]);
         assert_eq!(test_main_lines("// allow-test-main: x\n\nint main() {}\n"), vec![1, 3]);
         assert_eq!(test_main_lines("// allow-test-main: x\nint y;\n"), vec![1]);
+        assert_eq!(test_main_lines("/* // allow-test-main: x */\nint main() {}\n"), vec![2]);
+        assert_eq!(test_main_lines("const char* s = \"// allow-test-main: x\";\nint main() {}\n"), vec![2]);
     }
 
     #[test]
