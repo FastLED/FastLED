@@ -5,6 +5,7 @@
 #include "fl/system/fastpin_base.h"
 #include "fl/system/pin.h"  // For PinMode, PinValue enums
 #include "fl/stl/compiler_control.h"
+#include "platforms/arm/stm32/stm32_bitbang_pin.h"
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_DEPRECATED_REGISTER
@@ -17,7 +18,7 @@ namespace fl {
 /// that something about the way gcc does register allocation results in the bit-band code being slower.  It will need more fine tuning.
 /// The registers are data output, set output, clear output, toggle output, input, and direction
 
-template<u8 PIN, u8 _BIT, u32 _MASK, typename _GPIO> class _ARMPIN : public ValidPinBase {
+template<u8 PIN, u8 _BIT, u32 _MASK, typename _GPIO> class _ARMPIN : public ValidPinBase, public Stm32BsrrPin {
 
 public:
     typedef volatile u32 * port_ptr_t;
@@ -28,6 +29,8 @@ public:
     
     inline static void hi() __attribute__ ((always_inline)) { _GPIO::r()->BSRR = _MASK; }
     inline static void lo() __attribute__ ((always_inline)) { _GPIO::r()->BSRR = (_MASK<<16); }
+
+    inline static void writeBsrr(port_t val) __attribute__ ((always_inline)) { _GPIO::r()->BSRR = val; }
 
     inline static void set(FASTLED_REGISTER port_t val) __attribute__ ((always_inline)) { _GPIO::r()->ODR = val; }
 
