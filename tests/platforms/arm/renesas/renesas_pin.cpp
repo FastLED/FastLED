@@ -16,7 +16,6 @@ typedef int bsp_io_port_pin_t;
 struct R_PORT0_Type { volatile fl::u16 PODR, POSR, PORR; };
 
 #include "platforms/arm/renesas/renesas_pin.h"
-#undef PORT
 
 #include "fastspi_types.h"
 #include "fl/stl/static_assert.h"

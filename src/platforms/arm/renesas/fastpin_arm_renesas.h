@@ -13,11 +13,6 @@
 #include "fl/system/pin.h"  // For PinMode, PinValue enums
 #include "fl/stl/noexcept.h"
 
-#if !defined(FASTLED_FORCE_SOFTWARE_PINS)
-FL_DISABLE_WARNING_PUSH
-FL_DISABLE_WARNING_DEPRECATED_REGISTER
-#endif
-
 namespace fl {
 #if defined(FASTLED_FORCE_SOFTWARE_PINS)
 #warning "Software pin support forced, pin access will be slightly slower."
@@ -98,6 +93,5 @@ _FL_DEFPIN(21, BSP_IO_PORT_00_PIN_14, R_PORT0_BASE );_FL_DEFPIN(22, BSP_IO_PORT_
 #endif // FASTLED_FORCE_SOFTWARE_PINS
 }  // namespace fl
 
-FL_DISABLE_WARNING_POP
 
 #endif // __INC_FASTPIN_ARM_RENESAS_H

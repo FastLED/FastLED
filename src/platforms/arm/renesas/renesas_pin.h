@@ -18,7 +18,7 @@ FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_DEPRECATED_REGISTER
 namespace fl {
 
-/// Template definition for STM32 style ARM pins, providing direct access to the various GPIO registers.  Note that this
+/// Template definition for Renesas RA pins, providing direct access to the various GPIO registers.  Note that this
 /// uses the full port GPIO registers.  In theory, in some way, bit-band register access -should- be faster, however I have found
 /// that something about the way gcc does register allocation results in the bit-band code being slower.  It will need more fine tuning.
 /// The registers are data output, set output, clear output, toggle output, input, and direction
@@ -37,17 +37,6 @@ public:
     #define PORT ((R_PORT0_Type*)(_PORT))
     #define digitalBspPinToPort(P)		   (P >> 8)
     #define digitalBspPinToBitMask(P)      (1 << (P & 0xFF))
-
-    #if 0
-    inline static void setOutput() FL_NO_EXCEPT {
-        if(_BIT<8) {
-            _CRL::r() = (_CRL::r() & (0xF << (_BIT*4)) | (0x1 << (_BIT*4));
-        } else {
-            _CRH::r() = (_CRH::r() & (0xF << ((_BIT-8)*4))) | (0x1 << ((_BIT-8)*4));
-        }
-    }
-    inline static void setInput() { /* TODO */ } // TODO: preform MUX config { _PDDR::r() &= ~_MASK; }
-    #endif
 
     inline static void setOutput() { pinMode(PIN, PinMode::Output); } // TODO: perform MUX config { _PDDR::r() |= _MASK; }
     inline static void setInput() { pinMode(PIN, PinMode::Input); } // TODO: preform MUX config { _PDDR::r() &= ~_MASK; }
@@ -72,6 +61,10 @@ public:
     inline static port_t mask() __attribute__ ((always_inline)) { return digitalBspPinToBitMask(bspPin); }
 
 };
+
+#undef digitalBspPinToBitMask
+#undef digitalBspPinToPort
+#undef PORT
 
 /// True only for FastPin specializations backed by a real Renesas _ARMPIN.
 template <u8 PIN, bsp_io_port_pin_t BSP, u32 PORT_ADDR>
