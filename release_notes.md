@@ -1,3 +1,13 @@
+FastLED 3.10.10 (Next Release)
+=============================
+  * **Channels: engine worker defaults at compile time**
+    * `FL_ENGINE_WORKER_CORE` and `FL_ENGINE_WORKER_PRIORITY` set defaults for engines that honor them, currently the ESP32 LCD/I2S clockless driver. Define them the same way in every translation unit. Unset, `Priority::Auto` stays `High` on that worker.
+  * **AVR: native SPI `writeBit` fixes (SM16716)**
+    * `writeBit<BIT>` tests the selected bit on USART and SPI0 parts instead of treating any nonzero byte as high.
+    * All five native implementations now finish the pending byte and hand the pins to GPIO, so the bit reaches the wire on USART and SPI0 parts (Nano Every) and a pending byte is no longer cut off on classic parts (Uno). These changes were checked against datasheets and in host tests but **not on hardware**; please report SM16716 results.
+  * **ESP8266: faster generic bit-bang SPI on ordinary GPIO**
+    * The 512-byte bulk path improves from about 3.10 to 5.36 Mbit/s at 80 MHz and 4.42 to 6.66 Mbit/s at 160 MHz. Pairs using GPIO16 remain limited by its slower RTC register.
+
 FastLED 3.10.9
 =============================
   * **Memory: smaller flash and RAM than 3.10.8 on every measured ESP32 sketch**
