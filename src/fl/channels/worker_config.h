@@ -7,7 +7,7 @@ namespace fl {
 
 /// Worker task affinity. This does not change peripheral interrupt affinity.
 enum class Core : fl::i8 {
-    Auto = -1,    ///< Preserve the backend's legacy scheduling policy.
+    Auto = -1,    ///< Inherit the engine default, otherwise its legacy policy.
     Any = -2,        ///< Allow the worker to run on any configured RTOS core.
     CallingCore = -3, ///< Capture the core that creates the worker.
     Core0 = 0,
@@ -15,13 +15,14 @@ enum class Core : fl::i8 {
 };
 
 /// Portable worker scheduling policy, resolved by the selected backend.
-/// Auto inherits an existing shared worker setting; a new LCD/I2S worker
-/// defaults to High. These values are policies, not RTOS priority numbers.
+/// Auto inherits an existing shared worker setting or an honored compile-time
+/// engine default. Otherwise a new LCD/I2S worker defaults to High.
+/// These values are policies, not RTOS priority numbers.
 enum class Priority : fl::u8 {
     Auto,
-    High,
-    Medium,
-    Low
+    High,   ///< At networking priority or above, biased above when supported.
+    Medium, ///< Below networking priority, resolved by the backend scheduler.
+    Low     ///< Generally not recommended for timing-sensitive engine workers.
 };
 
 /// Shared engine settings, configured before the first transmission.
