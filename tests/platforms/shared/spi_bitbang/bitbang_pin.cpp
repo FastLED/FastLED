@@ -35,6 +35,15 @@ FL_TEST_CASE("Bit-bang set-clear writer touches exactly the requested register")
     }
 }
 
+FL_TEST_CASE("Hz phase delay keeps sub-MHz and fractional rates") {
+    FL_CHECK_EQ(bitbangPhaseNsFromHz(100000), 2500U);
+    FL_CHECK_EQ(bitbangPhaseNsFromHz(500000), 500U);
+    FL_CHECK_EQ(bitbangPhaseNsFromHz(1000000), 250U);
+    FL_CHECK_EQ(bitbangPhaseNsFromHz(1500000), 166U);
+    FL_CHECK_EQ(bitbangPhaseNsFromHz(4000000), 62U);
+    FL_CHECK_EQ(bitbangPhaseNsFromHz(0), 0U);
+}
+
 FL_TEST_CASE("Bit-bang phase padding meets the requested period and minimum pulse") {
     for (cycle_t requested = 0; requested <= 100; ++requested) {
         for (cycle_t work = 0; work <= 24; ++work) {
