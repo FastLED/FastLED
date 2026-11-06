@@ -89,12 +89,13 @@ public:
 	// TXC is write-one-to-clear and set only after the shifter empties, unlike
 	// UDRE, so arm it per byte. Clear it after loading UDR, or the previous byte
 	// finishing in between sets it again; interrupts stay off so a long ISR can't
-	// outlast the new byte and lose its flag. Error flags must be written as zero.
+	// outlast the new byte and lose its flag. MSPIM's other UCSRnA bits must be
+	// written as zero. A TXC interrupt would consume the flag and hang the drain.
 	static void startTx(u8 b) FL_NO_EXCEPT __attribute__((always_inline)) {
 		const u8 status = SREG;
 		cli();
 		UDR1 = b;
-		UCSR1A = (UCSR1A & ((1<<U2X1)|(1<<MPCM1))) | (1<<TXC1);
+		UCSR1A = 1<<TXC1;
 		SREG = status;
 		txPending(true);
 	}
@@ -103,7 +104,7 @@ public:
 			while(!(UCSR1A & (1<<TXC1)));
 		}
 	}
-	static void waitFully() __attribute__((always_inline)) { wait(); }
+	static void waitFully() __attribute__((always_inline)) { wait(); drainTx(); }
 
 	static void writeWord(u16 w) __attribute__((always_inline)) { writeByte(w>>8); writeByte(w&0xFF); }
 
@@ -283,12 +284,13 @@ public:
 	// TXC is write-one-to-clear and set only after the shifter empties, unlike
 	// UDRE, so arm it per byte. Clear it after loading UDR, or the previous byte
 	// finishing in between sets it again; interrupts stay off so a long ISR can't
-	// outlast the new byte and lose its flag. Error flags must be written as zero.
+	// outlast the new byte and lose its flag. MSPIM's other UCSRnA bits must be
+	// written as zero. A TXC interrupt would consume the flag and hang the drain.
 	static void startTx(u8 b) FL_NO_EXCEPT __attribute__((always_inline)) {
 		const u8 status = SREG;
 		cli();
 		UDR0 = b;
-		UCSR0A = (UCSR0A & ((1<<U2X0)|(1<<MPCM0))) | (1<<TXC0);
+		UCSR0A = 1<<TXC0;
 		SREG = status;
 		txPending(true);
 	}
@@ -297,7 +299,7 @@ public:
 			while(!(UCSR0A & (1<<TXC0)));
 		}
 	}
-	static void waitFully() __attribute__((always_inline)) { wait(); }
+	static void waitFully() __attribute__((always_inline)) { wait(); drainTx(); }
 
 	static void writeWord(u16 w) __attribute__((always_inline)) { writeByte(w>>8); writeByte(w&0xFF); }
 
@@ -728,6 +730,7 @@ public:
 	}
 
 	void release() FL_NO_EXCEPT {
+		waitFully(); // disable_pins() clears SPE, which would cut off a pending byte.
 		if(mPSelect != nullptr) { mPSelect->release(); }
 		disable_pins();
 	}
@@ -920,6 +923,7 @@ public:
 	}
 
 	void release() FL_NO_EXCEPT {
+		waitFully(); // disable_pins() clears SPE, which would cut off a pending byte.
 		if(mPSelect != nullptr) { mPSelect->release(); }
 		disable_pins();
 	}

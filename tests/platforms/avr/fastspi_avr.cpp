@@ -16,18 +16,31 @@ constexpr u8 kAvrTestClockPin = 2;
 
 namespace avr_regs {
 
+// One peripheral's in-flight byte; it completes only after being polled.
+struct Shifter {
+    bool busy = false;
+    int polls = 0;
+    int bytes = 0;
+};
+
 // A control register whose mask bits give the pins to the peripheral.
 struct ControlReg {
     u8 value = 0;
     u8 enableMask = 0;
     const volatile u16* rate = nullptr;
+    Shifter* shifter = nullptr; // Disabling this peripheral aborts its byte.
     static int badEnables;
+    static int abortedBytes;
 
     ControlReg() = default;
     explicit ControlReg(const volatile u16* rateRegister) : rate(rateRegister) {}
 
     operator u8() const { return value; }
     ControlReg& operator=(u8 next) {
+        if (shifter != nullptr && shifter->busy && (value & enableMask) && !(next & enableMask)) {
+            ++abortedBytes;
+            shifter->busy = false; // The byte is lost, and no completion flag follows.
+        }
         const bool enabling = !(value & enableMask) && (next & enableMask);
         if (enabling && rate != nullptr && *rate != 0) {
             ++badEnables; // MSPIM must see UBRR == 0 when enabled.
@@ -39,13 +52,7 @@ struct ControlReg {
     ControlReg& operator&=(u8 bits) { return *this = value & bits; }
 };
 int ControlReg::badEnables = 0;
-
-// One peripheral's in-flight byte; it completes only after being polled.
-struct Shifter {
-    bool busy = false;
-    int polls = 0;
-    int bytes = 0;
-};
+int ControlReg::abortedBytes = 0;
 
 // A status register: `always` bits read set, `done` is set when the byte ends.
 struct StatusReg {
@@ -53,10 +60,17 @@ struct StatusReg {
     u8 doneMask = 0;
     u8 always = 0;
     bool done = false;
+    int idlePolls = 0;
+    static int hangs;
 
     operator u8() {
         if (shifter != nullptr && shifter->busy && ++shifter->polls >= 2) {
             shifter->busy = false;
+            done = true;
+        }
+        // Spinning on a flag that will never set is a hang; break it and report.
+        if (!done && (shifter == nullptr || !shifter->busy) && ++idlePolls > 64) {
+            ++hangs;
             done = true;
         }
         return static_cast<u8>(always | (done ? doneMask : 0));
@@ -64,12 +78,15 @@ struct StatusReg {
     StatusReg& operator=(u8 bits) {
         if (bits & doneMask) {
             done = false; // Write-one-to-clear.
+            idlePolls = 0;
         }
         return *this;
     }
     StatusReg& operator|=(u8 bits) { return *this = bits; }
     StatusReg& operator&=(u8) { return *this; }
 };
+
+int StatusReg::hangs = 0;
 
 struct DataReg {
     Shifter* shifter = nullptr;
@@ -81,6 +98,7 @@ struct DataReg {
         shifter->busy = true;
         shifter->polls = 0;
         ++shifter->bytes;
+        status->idlePolls = 0;
         if (clearsDone) {
             status->done = false;
         }
@@ -326,6 +344,9 @@ template <typename Output> void checkHandoff(avr_regs::Shifter& shifter, avr_reg
                                              u8 initialControl) {
     control.value = initialControl;
     avr_regs::ControlReg::badEnables = 0;
+    avr_regs::ControlReg::abortedBytes = 0;
+    avr_regs::StatusReg::hangs = 0;
+    control.shifter = &shifter;
     shifter = avr_regs::Shifter();
     AvrPinTrace::owner = &control;
     AvrPinTrace::shifter = &shifter;
@@ -367,6 +388,24 @@ template <typename Output> void checkHandoff(avr_regs::Shifter& shifter, avr_reg
     FL_REQUIRE_EQ(AvrPinTrace::writesWhileBusy, 0);
     FL_REQUIRE_FALSE(AvrPinTrace::sampled);
 
+    // writeBit restored the rate; select() below legitimately reprograms it.
+    if (control.rate != nullptr) {
+        FL_REQUIRE_EQ(*control.rate, 7);
+    }
+
+    // Pixel then header: release() between them must not cut off the last byte.
+    Output output;
+    AvrPinTrace::reset();
+    output.select();
+    Output::writeByte(0x22);
+    output.release();
+    FL_REQUIRE_EQ(avr_regs::ControlReg::abortedBytes, 0);
+    output.select();
+    Output::template writeBit<0>(0);
+    FL_REQUIRE_EQ(AvrPinTrace::risingEdges, 1);
+    FL_REQUIRE_EQ(avr_regs::StatusReg::hangs, 0);
+    control.value = initialControl;
+
     // A high clock latch must not rise at release and sample the old data.
     AvrPinTrace::reset();
     AvrPinTrace::clockLatch = true;
@@ -400,7 +439,6 @@ FL_TEST_CASE("AVR USART1 writeBit") {
     checkAllBits<Output>();
     checkHandoff<Output>(usart1, ucsr1b, ucsr1b.enableMask);
     checkHandoff<Output>(usart1, ucsr1b, 0);
-    FL_CHECK_EQ(ubrr1, 7);
     FL_CHECK_EQ(ucsr1c, mspim);
     AvrPinTrace::modeReg = nullptr;
 }
@@ -424,7 +462,6 @@ FL_TEST_CASE("AVR USART0 writeBit") {
     checkAllBits<Output>();
     checkHandoff<Output>(usart0, ucsr0b, ucsr0b.enableMask);
     checkHandoff<Output>(usart0, ucsr0b, 0);
-    FL_CHECK_EQ(ubrr0, 7);
     FL_CHECK_EQ(ucsr0c, mspim);
     AvrPinTrace::modeReg = nullptr;
 }
