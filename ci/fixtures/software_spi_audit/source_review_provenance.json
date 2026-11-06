@@ -3,8 +3,8 @@
   "baseline": "94dab9c6b720ea277ec9177c93129c7dc646c5c3",
   "manifest": {
     "path": "reviewed_baseline.json",
-    "sha256": "842d083a8cb4ac8ea420229130d7bd16a56f180ef601a0b686424495030a1ff1",
-    "bytes": 14373773,
+    "sha256": "c14045c5b90afbe17fb2ac71d1820a41f8977b024b24df663c3b236fbaad0a16",
+    "bytes": 14375566,
     "schema_version": 1,
     "source_paths": 2986
   },
@@ -200,6 +200,14 @@
     {
       "id": "lpc-legacy-forced-fastpin-selection",
       "issue": 5074
+    },
+    {
+      "id": "forced-mapped-toggle-register-contract",
+      "issue": 5086
+    },
+    {
+      "id": "samd-forced-output-readback",
+      "issue": 5087
     }
   ],
   "review_method": {
@@ -559,5 +567,67 @@
     "plan_sha256": "96a5a0fdbd090c3e033526e06e9eb3c88fbe9d4e42c134dc4c072395d583916d",
     "scope": "Eight pinned definition/invocation rows retain baseline OID/SHA; seven new associations. Targeted guard/definition review, not complete second source reread. Current query hashes are not baseline hashes. No runtime receipts or execution certification.",
     "unselected_canonical_limit": "An unselected canonical F4 implementation is not intrinsically protected if referenced; selectors/configurations require actual route proof."
+  },
+  "additional_forced_gpio_correctness_review": {
+    "previous_manifest_sha256": "842d083a8cb4ac8ea420229130d7bd16a56f180ef601a0b686424495030a1ff1",
+    "source_only": true,
+    "required_finding_count": 50,
+    "reviewed_records": [
+      {
+        "issue": 5086,
+        "finding": "forced-mapped-toggle-register-contract",
+        "path": "src/fl/system/fastpin_base.h",
+        "baseline_blob_oid": "349bed5f1bdc23c8b5b1b793b2effeae993c2560",
+        "baseline_sha256": "296b86f3c932ae5a7705a270c727c2e949242afb29ff281cd9b3561080bc48cc",
+        "literal_added_or_reconfirmed_anchors": [
+          {
+            "line": 73,
+            "text": "\tstatic volatile RoReg *sInPort;   ///< Input register for the pin"
+          },
+          {
+            "line": 78,
+            "text": "\t\tsInPort = portInputRegister(digitalPinToPort(PIN));"
+          },
+          {
+            "line": 100,
+            "text": "\tinline static void toggle() __attribute__ ((always_inline)) { *sInPort = sPinMask; }"
+          }
+        ],
+        "previous_row_sha256": "d98ba51bc8b9cf1513bc17e260dc235d1b8756ef3824dd04372ad034f54d648b",
+        "previous_role": "implementation",
+        "previous_disposition": "positive",
+        "scope": "Targeted pinned-method binding plus root/judge reviewed SDK contracts; not a new full-file independent reread or execution proof."
+      },
+      {
+        "issue": 5087,
+        "finding": "samd-forced-output-readback",
+        "path": "src/platforms/arm/samd/pin_samd_native.hpp",
+        "baseline_blob_oid": "dbdcf02488591f06c0a035ce11d51067d6872ffd",
+        "baseline_sha256": "bd312cb881cb071ade49b2e84998e17ab95265fc9bbc949527d51f6575ade1c9",
+        "literal_added_or_reconfirmed_anchors": [
+          {
+            "line": 92,
+            "text": "        case PinMode::Output:"
+          },
+          {
+            "line": 96,
+            "text": "            port->PINCFG[pm.bit].reg = 0;"
+          },
+          {
+            "line": 154,
+            "text": "inline PinValue digitalRead(int pin) FL_NO_EXCEPT {"
+          },
+          {
+            "line": 164,
+            "text": "    return (port->IN.reg & mask) ? PinValue::High : PinValue::Low;"
+          }
+        ],
+        "previous_row_sha256": "46d12e9eaa818f01aad4e5483afbe937e8e6c34e8f0e5cc28ac0bcc746d4cce8",
+        "previous_role": "dependency",
+        "previous_disposition": "dependency",
+        "scope": "Targeted pinned-method binding plus root/judge reviewed SDK contracts; not a new full-file independent reread or execution proof."
+      }
+    ],
+    "limitations": "All prior checkpoint/reviewer-depth caveats retained. Root/judge issue evidence establishes register/sampler contracts; metadata agent independently verified raw pinned blob identities and literal method anchors. No new SDK build, runtime receipt, electrical result, closure or source-hash refresh."
   }
 }

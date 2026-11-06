@@ -82,7 +82,7 @@ refreshed to authorize changed code. Legacy path-keyed diagnostic rows retain
 their existing checks; malformed versioned documents cannot fall back to them.
 The reviewed baseline input is supplied at
 `ci/fixtures/software_spi_audit/reviewed_baseline.json`, with all 2,986 pinned
-source paths and all 48 mandatory finding associations. Use it explicitly:
+source paths and all 50 mandatory finding associations. Use it explicitly:
 
 ```sh
 bash spi-audit --classifications ci/fixtures/software_spi_audit/reviewed_baseline.json --report .build/software-spi-audit-report.json
@@ -96,7 +96,7 @@ deleted source obligations and all required target/configuration/mutation
 checks remain RED until actual fixed runners establish their evidence. CLI
 default behavior is unchanged.
 
-The registry currently contains 48 distinct required findings. Native AVR
+The registry currently contains 50 distinct required findings. Native AVR
 selected-bit predicates (#5052) and peripheral/GPIO handoff (#5055) are separate
 requirements even though both bind to `fastspi_avr.h`. The latter covers all
 five UBRR1/UBRR0/SPI0_CTRLA/SPSR/SPSR0 method variants, prior-byte shifter drain,
@@ -474,3 +474,16 @@ enabled; forced toggle uses the existing read/invert/write route. This fixes the
 configuration prerequisite without introducing shadow output state. Source and
 SDK mode checks are distinct from a physical pad-level toggle measurement or
 MY9221 timing/cache qualification.
+
+#5086 protects the selected Teensy4 forced mapped toggle path: writing a sampled
+input register is not a portable output-toggle contract. Actual separate
+input/output behavior, Teensy40/41 SDK codegen across banks, AVR PINx and NoPinMap
+controls, and restored-defect rejection remain required. ESP8266 reachability
+still depends on #5068; no universal atomicity or electrical timing is claimed.
+
+#5087 protects SAMD21/D51 FORCE plus NO_PINMAP readback: Output clears PINCFG
+while digitalRead samples IN, which requires INEN. Effective physical port/bit
+qualification is separate from Arduino numbering and native FastPin work.
+Input/pull-up preservation, realistic sampler behavior and old-path restoration
+remain required; no exact disabled-input return value or physical measurement
+is inferred. These two rows and baseline associations are bookkeeping only.

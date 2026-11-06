@@ -598,8 +598,10 @@ def test_pinned_registry_keeps_every_discovered_child_and_query_miss() -> None:
         5072,
         5073,
         5074,
+        5086,
+        5087,
     }
-    assert len(REQUIRED_FINDINGS) == 48
+    assert len(REQUIRED_FINDINGS) == 50
     assert "src/platforms/shared/spi_bitbang/spi_block_32.h" in SEMANTIC_REQUIRED_PATHS
     assert (
         "src/platforms/shared/spi_bitbang/spi_isr_engine.cpp.hpp"
@@ -5401,3 +5403,117 @@ def test_esp32_forced_selection_binds_output_policy_and_native_gpio_fallback_sou
     errors = check_evidence([finding], [], audit._current_sources(audit.ROOT))
     for configuration in finding["required_configurations"]:
         assert any(f"/{configuration}: unresolved" in error for error in errors)
+
+
+NEW_FORCED_GPIO_CONTRACTS = {
+    5086: {
+        "id": "forced-mapped-toggle-register-contract",
+        "source": "src/fl/system/fastpin_base.h",
+        "entrypoints": {
+            "ForcedSoftwarePinMap::output-input [mapped]",
+            "ForcedSoftwarePin::_init",
+            "ForcedSoftwarePin::toggle [mapped]",
+            "ForcedSoftwarePin::strobe",
+        },
+        "dependencies": {
+            "src/fl/system/forced_software_pin.h",
+            "src/platforms/arm/fastpin_arm.h",
+            "src/platforms/arm/teensy/teensy4_common/fastpin_arm_mxrt1062.h",
+            "src/fl/system/pin.h",
+            "src/fl/system/pin.cpp.hpp",
+            "src/platforms/pin.h",
+        },
+        "required_configurations": {
+            "Teensy40-Teensy41-FORCE-mapped-pin2-and-distinct-GPIO-bank",
+            "real-separate-input-output-model-HIGH-LOW-two-toggles-strobe-unrelated-bits",
+            "actual-Teensy-SDK-selected-forced-type-and-output-operation-codegen",
+            "AVR-PINx-mapped-control-and-Arduino-NoPinMap-fallback",
+            "restore-old-input-register-write-fails-output-oracle-and-exact-restore-GREEN",
+            "mapped-provider-inventory-without-universal-atomicity-or-timing-claims",
+        },
+    },
+    5087: {
+        "id": "samd-forced-output-readback",
+        "source": "src/platforms/arm/samd/pin_samd_native.hpp",
+        "entrypoints": {
+            "fl::platforms::pinMode [SAMD Output]",
+            "fl::platforms::digitalRead [SAMD IN]",
+            "ForcedSoftwarePin::toggle [FORCE plus NO_PINMAP]",
+            "ForcedSoftwarePin::strobe",
+        },
+        "dependencies": {
+            "src/fl/system/fastpin_base.h",
+            "src/fl/system/forced_software_pin.h",
+            "src/platforms/arm/d21/fastpin_arm_d21.h",
+            "src/platforms/arm/d51/fastpin_arm_d51.h",
+            "src/fl/system/pin.h",
+            "src/fl/system/pin.cpp.hpp",
+            "src/platforms/pin.h",
+        },
+        "required_configurations": {
+            "SAMD21-SAMD51-FORCE-plus-NO_PINMAP-actual-selected-provider",
+            "effective-physical-port-and-pin-bound-not-assumed-Arduino-numbering",
+            "output-sampler-INEN-or-correct-latch-readback-real-SDK-contract",
+            "initial-HIGH-LOW-two-toggles-strobe-and-unrelated-bits",
+            "restore-old-input-disable-defective-readback-path-fails-oracle-and-exact-restore-GREEN",
+            "Input-InputPullup-preserved-without-physical-speed-or-interrupt-claims",
+        },
+    },
+}
+
+
+@pytest.mark.parametrize("issue", [5086, 5087])
+def test_new_forced_gpio_sampler_findings_remain_mandatory(issue: int) -> None:
+    contract = NEW_FORCED_GPIO_CONTRACTS[issue]
+    finding = next((row for row in REQUIRED_FINDINGS if row["issue"] == issue), None)
+    assert finding is not None, (
+        f"verified forced GPIO correctness issue #{issue} remains required"
+    )
+    assert finding["id"] == contract["id"]
+    assert finding["sources"] == [contract["source"]]
+    assert contract["entrypoints"] <= set(finding["entrypoints"])
+    assert contract["dependencies"] <= set(finding["dependencies"])
+    assert (
+        set(finding["required_configurations"]) == contract["required_configurations"]
+    )
+    errors = check_evidence([finding], [], audit._current_sources(audit.ROOT))
+    for configuration in finding["required_configurations"]:
+        assert any(f"/{configuration}: unresolved" in error for error in errors)
+
+
+@pytest.mark.parametrize("issue", [5086, 5087])
+@pytest.mark.parametrize("bypass", ["drop-one-row", "omit-only-new-classification"])
+def test_new_forced_gpio_sampler_binding_cannot_be_omitted(
+    issue: int, bypass: str
+) -> None:
+    finding = next((row for row in REQUIRED_FINDINGS if row["issue"] == issue), None)
+    assert finding is not None, f"missing new mandatory issue #{issue}"
+    rows = {}
+    for entry in REQUIRED_FINDINGS:
+        for path in entry["sources"]:
+            rows.setdefault(path, {"disposition": "positive", "findings": []})[
+                "findings"
+            ].append(entry["id"])
+    assert check_required_findings(REQUIRED_FINDINGS, REQUIRED_FINDINGS, rows) == []
+    if bypass == "drop-one-row":
+        proposed = [row for row in REQUIRED_FINDINGS if row["issue"] != issue]
+        expected = f"required production entrypoint missing: {finding['id']}"
+    else:
+        proposed = REQUIRED_FINDINGS
+        path = finding["sources"][0]
+        rows[path]["findings"].remove(finding["id"])
+        expected = f"required GPIO entrypoint declassified: {finding['id']} in {path}"
+    assert check_required_findings(REQUIRED_FINDINGS, proposed, rows) == [expected]
+
+
+@pytest.mark.parametrize("issue", [5086, 5087])
+def test_reviewed_baseline_keeps_new_forced_gpio_sampler_bindings(issue: int) -> None:
+    # Source-accounting identity only; a complete binding is not execution proof.
+    document = json.loads(
+        (
+            audit.ROOT / "ci/fixtures/software_spi_audit/reviewed_baseline.json"
+        ).read_text()
+    )
+    contract = NEW_FORCED_GPIO_CONTRACTS[issue]
+    assert document["files"][contract["source"]]["disposition"] == "positive"
+    assert contract["id"] in document["files"][contract["source"]]["findings"]

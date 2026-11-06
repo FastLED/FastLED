@@ -94756,9 +94756,10 @@
       "findings": [
         "forced-software-no-pinmap",
         "production-gate",
-        "esp32-forced-fastpin-selection"
+        "esp32-forced-fastpin-selection",
+        "forced-mapped-toggle-register-contract"
       ],
-      "reason": "Actual common FastPin implementation: forced register init/operations, normal validity rejection/default operations and bit-band interface are distinct branches. Baseline forced NoPinMap leaves null pointers while hi/lo/hival/loval still dereference them. Not a facade or forwarding alias. Required current registry source association: #5056 (forced-software-no-pinmap); unresolved production/configuration and restored-defect evidence remains required. Additional targeted #5067 review: Baseline FASTLED_FORCE_SOFTWARE_PINS chooses a primary FastPin template with optional PINMAP initialization, but explicit platform specializations can still override it. Current #5056 changed this primary into ForcedSoftwarePin delegation; that safety change must remain source-change RED and cannot certify ESP32 selection. #5067 requires actual selected-type/provider evidence, including NoPinMap.",
+      "reason": "Actual common FastPin implementation: forced register init/operations, normal validity rejection/default operations and bit-band interface are distinct branches. Baseline forced NoPinMap leaves null pointers while hi/lo/hival/loval still dereference them. Not a facade or forwarding alias. Required current registry source association: #5056 (forced-software-no-pinmap); unresolved production/configuration and restored-defect evidence remains required. Additional targeted #5067 review: Baseline FASTLED_FORCE_SOFTWARE_PINS chooses a primary FastPin template with optional PINMAP initialization, but explicit platform specializations can still override it. Current #5056 changed this primary into ForcedSoftwarePin delegation; that safety change must remain source-change RED and cannot certify ESP32 selection. #5067 requires actual selected-type/provider evidence, including NoPinMap. Targeted #5086 source/register-contract review: the pinned forced primary initializes a mapped input pointer and toggle writes that pointer. Teensy4 SDK maps it to sampled PSR rather than DR_TOGGLE; AVR PINx semantics cannot be assumed for other mapped providers. Current implementation delegates this same mapped operation to ForcedSoftwarePin. Actual selected-provider/register-model output behavior and Teensy40/41 codegen, AVR and NoPinMap controls, old-statement restoration and exact restored GREEN remain unresolved. No electrical or universal atomicity claim.",
       "source_evidence": [
         {
           "line": 9,
@@ -94947,6 +94948,10 @@
         {
           "line": 124,
           "text": "template<fl::u8 PIN> volatile RoReg *FastPin<PIN>::sInPort;"
+        },
+        {
+          "line": 73,
+          "text": "\tstatic volatile RoReg *sInPort;   ///< Input register for the pin"
         }
       ]
     },
@@ -131065,17 +131070,18 @@
     "src/platforms/arm/samd/pin_samd_native.hpp": {
       "baseline_blob_oid": "dbdcf02488591f06c0a035ce11d51067d6872ffd",
       "baseline_sha256": "bd312cb881cb071ade49b2e84998e17ab95265fc9bbc949527d51f6575ade1c9",
-      "disposition": "dependency",
-      "role": "dependency",
+      "disposition": "positive",
+      "role": "implementation",
       "findings": [
         "forced-software-no-pinmap",
         "runtime-channel",
         "runtime-manager",
         "samd-sercom-gpio",
         "samd21",
-        "samd51"
+        "samd51",
+        "samd-forced-output-readback"
       ],
-      "reason": "Independently implements native runtime GPIO adapter methods; supplies pin operations to runtime software SPI and/or forced fallback. It is not a negative nor a forwarding alias.",
+      "reason": "Independently implements native runtime GPIO adapter methods; supplies pin operations to runtime software SPI and/or forced fallback. It is not a negative nor a forwarding alias. Additional targeted #5087 positive: SAMD Output explicitly clears PINCFG while digitalRead samples IN; the actual FORCE plus NO_PINMAP provider performs read/invert/write. INEN is required by the verified SAMD input-sampling contract. This binding concerns that specific selected readback path, not the default mapped provider or native FastPin optimization. Effective physical port/bit must be independently bound because current linear mapping is not proof of Arduino numbering. D21/D51 SDK/provider controls, realistic input-enable behavior, defective-path restoration and restored GREEN remain unresolved; no exact disabled-sampler return value or physical speed claim.",
       "source_evidence": [
         {
           "line": 30,
@@ -131112,6 +131118,18 @@
         {
           "line": 154,
           "text": "inline PinValue digitalRead(int pin) FL_NO_EXCEPT {"
+        },
+        {
+          "line": 92,
+          "text": "        case PinMode::Output:"
+        },
+        {
+          "line": 96,
+          "text": "            port->PINCFG[pm.bit].reg = 0;"
+        },
+        {
+          "line": 164,
+          "text": "    return (port->IN.reg & mask) ? PinValue::High : PinValue::Low;"
         }
       ]
     },

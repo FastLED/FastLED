@@ -2,8 +2,8 @@
 
 `reviewed_baseline.json` is the exact reviewed version 1 source-classification
 input for baseline `94dab9c6b720ea277ec9177c93129c7dc646c5c3`: all 2,986 pinned
-`src` paths, with associations for all 48 mandatory findings. Its SHA-256 is
-`842d083a8cb4ac8ea420229130d7bd16a56f180ef601a0b686424495030a1ff1`.
+`src` paths, with associations for all 50 mandatory findings. Its SHA-256 is
+`c14045c5b90afbe17fb2ac71d1820a41f8977b024b24df663c3b236fbaad0a16`.
 
 From the repository root:
 
@@ -32,3 +32,10 @@ an implementation. No runtime receipt is loaded from this directory, and the
 overall audit remains incomplete.
 
 Seven additional forced-selection findings (#5068–#5074) remain unresolved across ESP8266, nRF51, nRF52 variants, GIGA, MGM240, modern LPC and legacy LPC. Native explicit specializations can override the forced primary; selected-type and actual fallback-route controls are required for every supported variant. Existing optimization matrices, including nRF51 #5047, remain mandatory. Source bindings do not certify execution, cache safety or timing.
+
+Two additional forced-provider correctness requirements remain unresolved:
+#5086 binds the mapped input-register toggle assumption to the original pinned
+FastPin body (the current component is a dependency), and #5087 binds SAMD
+Output input-disable/read-IN to explicit FORCE plus NO_PINMAP. Their source
+associations preserve all old bindings, hashes and blob IDs. Neither mapped
+plain-memory input writes nor another platform's readback fix certifies them.
