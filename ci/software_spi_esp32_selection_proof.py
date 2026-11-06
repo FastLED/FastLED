@@ -189,3 +189,31 @@ def validate_c6_profile(info: dict) -> None:
         )
     ):
         raise ValueError("unsupported closed C6 selection profile")
+
+
+def validate_xtensa_profile(info: dict) -> None:
+    """Exact retained classic profile; this is not an SDK execution receipt."""
+    flags = info.get("cxx_flags", [])
+    compiler = info.get("cc_path", "")
+    parts = PurePosixPath(compiler).parts if isinstance(compiler, str) else ()
+    if (
+        not isinstance(flags, list)
+        or any(not isinstance(flag, str) for flag in flags)
+        or info.get("env") != "esp32dev"
+        or info.get("board") != "ESP32DEV"
+        or info.get("platform") != "espressif32"
+        or [flag for flag in flags if flag.startswith("-DF_CPU=")]
+        != ["-DF_CPU=240000000L"]
+        or flags.count("-mlongcalls") != 1
+        or "-mno-longcalls" in flags
+        or any(flag.startswith(("-mabi=", "-march=")) for flag in flags)
+        or parts[-4:]
+        != (
+            "xtensa-esp-elf-14.2.0_20260121-x86_64-linux-gnu",
+            "xtensa-esp-elf",
+            "bin",
+            "xtensa-esp32-elf-gcc",
+        )
+        or info.get("cxx_path") != compiler
+    ):
+        raise ValueError("unsupported fixed classic Xtensa CPU/SDK compiler profile")

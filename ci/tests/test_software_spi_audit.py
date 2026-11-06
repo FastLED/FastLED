@@ -10451,3 +10451,279 @@ def test_esp32_selection_actual_namespace_rejects_wrong_or_missing_compiler_comp
     info["cc_path"] = str(PurePosixPath(*parts))
     with pytest.raises(ValueError):
         selection.validate_c6_profile(info)
+
+
+def _xtensa_selection_actual_profile() -> dict:
+    return json.loads(
+        (
+            audit.ROOT
+            / "ci/fixtures/software_spi_audit/esp32_xtensa_selection_actual_namespace.json"
+        ).read_text()
+    )
+
+
+def test_esp32_xtensa_selection_authentic_profile_uses_actual_shared_gcc_cpp_path():
+    from pathlib import PurePosixPath
+
+    from ci import software_spi_esp32_selection_proof as selection
+
+    captured = _xtensa_selection_actual_profile()
+    info = captured["profile"]
+    assert info["cc_path"] == info["cxx_path"]
+    assert (
+        list(PurePosixPath(info["cc_path"]).parts[-4:])
+        == captured["required_compiler_suffix"]
+    )
+    assert set(info["cxx_flags"]) == {"-DF_CPU=240000000L", "-mlongcalls"}
+    selection.validate_xtensa_profile(info)
+
+
+@pytest.mark.parametrize(
+    "corruption",
+    [
+        "env",
+        "board",
+        "cpu",
+        "call-model",
+        "wrong-date",
+        "wrong-host",
+        "wrong-target",
+        "missing-bin",
+        "wrong-basename",
+        "cpp-path",
+    ],
+)
+def test_esp32_xtensa_selection_rejects_unreviewed_architecture_cpu_and_compiler_namespace(
+    corruption,
+):
+    from pathlib import PurePosixPath
+
+    from ci import software_spi_esp32_selection_proof as selection
+
+    info = dict(_xtensa_selection_actual_profile()["profile"])
+    info["cxx_flags"] = list(info["cxx_flags"])
+    parts = list(PurePosixPath(info["cc_path"]).parts)
+    if corruption == "env":
+        info["env"] = "esp32c6"
+    elif corruption == "board":
+        info["board"] = "ESP32_C6_DEVKITC_1"
+    elif corruption == "cpu":
+        info["cxx_flags"] = [
+            flag.replace("240000000L", "160000000L") for flag in info["cxx_flags"]
+        ]
+    elif corruption == "call-model":
+        info["cxx_flags"].remove("-mlongcalls")
+    elif corruption == "wrong-date":
+        parts[-4] = parts[-4].replace("20260121", "20260122")
+    elif corruption == "wrong-host":
+        parts[-4] = parts[-4].replace("x86_64-linux-gnu", "aarch64-linux-gnu")
+    elif corruption == "wrong-target":
+        parts[-3] = "riscv32-esp-elf"
+    elif corruption == "missing-bin":
+        parts.pop(-2)
+    elif corruption == "wrong-basename":
+        parts[-1] = "riscv32-esp-elf-gcc"
+    else:
+        info["cxx_path"] = info["cxx_path"].replace("-gcc", "-g++")
+    if corruption in {
+        "wrong-date",
+        "wrong-host",
+        "wrong-target",
+        "missing-bin",
+        "wrong-basename",
+    }:
+        info["cc_path"] = str(PurePosixPath(*parts))
+        info["cxx_path"] = info["cc_path"]
+    with pytest.raises(ValueError):
+        selection.validate_xtensa_profile(info)
+
+
+def test_esp32_xtensa_selection_closed_profile_dispatch_preserves_c6_and_rejects_caller_targets():
+    import inspect
+
+    from ci import software_spi_esp32_selection_runner as runner
+    from ci import software_spi_init_proof as native
+
+    classic = runner._profile_spec(runner._SelectionProfile.XTENSA)
+    c6 = runner._profile_spec(runner._SelectionProfile.C6)
+    assert (classic.env, classic.board, classic.framework_version) == (
+        "esp32dev",
+        "ESP32DEV",
+        "3.3.11",
+    )
+    assert classic.platform_pin == _xtensa_selection_actual_profile()["platform_pin"]
+    assert classic.artifact_group == "spi-esp32-xtensa-selection-proof"
+    assert classic.snapshot_kind is native._ProofKind.ESP32_XTENSA_SELECTION
+    assert (c6.env, c6.board, c6.artifact_group) == (
+        "esp32c6",
+        "ESP32_C6_DEVKITC_1",
+        "spi-esp32-c6-selection-proof",
+    )
+    assert c6.snapshot_kind is native._ProofKind.ESP32_C6_SELECTION
+    assert list(inspect.signature(runner.run_c6_selection_proof).parameters) == ["root"]
+    assert list(inspect.signature(runner.run_xtensa_selection_proof).parameters) == [
+        "root"
+    ]
+    for untrusted in ("esp32dev", {"board": "esp32dev"}, object()):
+        with pytest.raises(ValueError):
+            runner._profile_spec(untrusted)
+
+
+def _xtensa_selection_cell_configuration(
+    tmp_path, platform_pin=None, framework_version="3.3.11"
+):
+    # Synthetic planned recipe only; never an SDK build or admitted proof.
+    from ci import software_spi_esp32_selection_runner as runner
+
+    captured = _xtensa_selection_actual_profile()
+    project = tmp_path / "project"
+    release = project / ".fbuild/build/release"
+    release.mkdir(parents=True)
+    flags = runner.stage_defines("baseline")
+    framework = tmp_path / framework_version / ("esp32-core-" + framework_version)
+    framework.mkdir(parents=True)
+    info = {**captured["profile"], "prog_path": str(release / "firmware.elf")}
+    (project / "platformio.ini").write_text(
+        "[env:esp32dev]\nboard = esp32dev\nplatform = "
+        + (platform_pin or captured["platform_pin"])
+        + "\nbuild_flags = "
+        + " ".join(flags)
+        + "\n"
+    )
+    (release / "compile_commands.raw.json").write_text(
+        json.dumps(
+            [
+                {
+                    "directory": str(project),
+                    "file": "src/main.cpp",
+                    "arguments": [
+                        info["cc_path"],
+                        "-I" + framework.as_posix() + "/cores/esp32",
+                        *flags,
+                        "-c",
+                        "src/main.cpp",
+                        "-o",
+                        "main.o",
+                    ],
+                }
+            ]
+        )
+    )
+    return info
+
+
+def test_esp32_xtensa_selection_binds_exact_platform_pin_and_framework_namespace(
+    tmp_path,
+):
+    from ci import software_spi_esp32_selection_runner as runner
+
+    info = _xtensa_selection_cell_configuration(tmp_path)
+    kind = runner._SelectionProfile.XTENSA
+    cell = runner._capture_cell_configuration(info, "baseline", kind)
+    assert cell.hashes
+    roots = runner._selection_sdk_roots(info, kind)
+    assert roots[0].name == "esp32-core-3.3.11"
+    assert roots[0].parent.name == "3.3.11"
+
+
+@pytest.mark.parametrize(
+    "corruption", ["platform-pin", "framework-version", "profile-env"]
+)
+def test_esp32_xtensa_selection_rejects_other_platform_framework_or_environment(
+    tmp_path, corruption
+):
+    from ci import software_spi_esp32_selection_runner as runner
+
+    info = _xtensa_selection_cell_configuration(
+        tmp_path,
+        platform_pin="https://example.invalid/platform.zip"
+        if corruption == "platform-pin"
+        else None,
+        framework_version="3.3.12" if corruption == "framework-version" else "3.3.11",
+    )
+    kind = runner._SelectionProfile.XTENSA
+    if corruption == "profile-env":
+        info["env"] = "esp32c6"
+    with pytest.raises(ValueError):
+        runner._capture_cell_configuration(info, "baseline", kind)
+    if corruption != "platform-pin":
+        with pytest.raises(ValueError):
+            runner._selection_sdk_roots(info, kind)
+
+
+def test_esp32_xtensa_selection_snapshot_kind_is_excluded_from_native_host_execution(
+    tmp_path,
+):
+    from ci import software_spi_init_proof as native
+
+    with pytest.raises(ValueError, match="native|fixed|target"):
+        native._run_proof(tmp_path, native._ProofKind.ESP32_XTENSA_SELECTION)
+
+
+def test_esp32_xtensa_selection_missing_checkout_cannot_create_worktree_or_build(
+    tmp_path, monkeypatch
+):
+    from ci import software_spi_esp32_selection_runner as runner
+
+    monkeypatch.setattr(
+        runner.native,
+        "_snapshot",
+        lambda *args: pytest.fail("missing classic checkout reached snapshot"),
+    )
+    monkeypatch.setattr(
+        audit.RunningProcess,
+        "run",
+        lambda *args, **kwargs: pytest.fail(
+            "missing classic checkout executed a process"
+        ),
+    )
+    with pytest.raises(ValueError, match="source|input|checkout|missing"):
+        runner.run_xtensa_selection_proof(tmp_path)
+
+
+@pytest.mark.skipif(
+    os.environ.get("FASTLED_RUN_ESP32_XTENSA_SELECTION_PROOF") != "1",
+    reason="requires four discovery and five actual fixed classic Xtensa compiler submissions",
+)
+def test_esp32_xtensa_selection_real_five_stage_acceptance():
+    from ci import software_spi_esp32_selection_proof as selection
+    from ci import software_spi_esp32_selection_runner as runner
+    from ci import software_spi_init_proof as native
+
+    before = native._inputs(audit.ROOT)
+    original = (audit.ROOT / selection.SOURCE).read_bytes()
+    proof = runner.run_xtensa_selection_proof(audit.ROOT)
+    runner.validate_stage_sequence(tuple(stage.name for stage in proof.stages))
+    assert proof.scope.startswith("esp32-xtensa-")
+    assert (
+        not proof.runtime_gpio_proven
+        and not proof.complete_executed_argv
+        and not proof.full_finding_qualified
+    )
+    assert proof.idle_policy_seconds == 900 and proof.idle_policy_is_default is False
+    for stage in proof.stages:
+        runner.validate_stage_record(stage)
+        assert stage.project.name == "esp32dev"
+        assert stage.inputs_before[selection.SOURCE] == digest(
+            runner.source_for_stage(original, stage.name)
+        )
+        assert stage.outcome.returncode == (
+            1 if stage.name.startswith("unguarded-mutant-") else 0
+        )
+    assert proof.restoration_verified
+    assert native._inputs(audit.ROOT) == before
+
+
+@pytest.mark.parametrize(
+    "extra",
+    ["-DF_CPU=240000000L", "-DF_CPU=160000000L", "-mno-longcalls", "-mabi=call0"],
+)
+def test_esp32_xtensa_selection_rejects_duplicate_cpu_or_opposing_call_configuration(
+    extra,
+):
+    from ci import software_spi_esp32_selection_proof as selection
+
+    info = dict(_xtensa_selection_actual_profile()["profile"])
+    info["cxx_flags"] = [*info["cxx_flags"], extra]
+    with pytest.raises(ValueError):
+        selection.validate_xtensa_profile(info)

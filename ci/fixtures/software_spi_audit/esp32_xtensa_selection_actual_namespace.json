@@ -1,0 +1,27 @@
+{
+  "scope": "Authentic historical classic SDK namespace/profile diagnostics from b3 conditional Output-field proof; not selected-type or current-source acceptance.",
+  "source": ".build/spi-esp32-xtensa-mode-proof/fastled3-wt-spi-esp32-xtensa-mode-proof-bxps0xo4/baseline/build-info.json",
+  "source_sha256": "811621dc5ccab8553126c97a6c25191218613f40d860bb1ff0ff28dbc4d7060c",
+  "profile": {
+    "env": "esp32dev",
+    "board": "ESP32DEV",
+    "platform": "espressif32",
+    "cc_path": "/home/niteris/.fbuild/dev/cache/toolchains/toolchain-xtensa-esp-elf/164cda8d219cc6bd/xtensa-esp-elf-14.2.0_20260121-x86_64-linux-gnu/xtensa-esp-elf/bin/xtensa-esp32-elf-gcc",
+    "cxx_path": "/home/niteris/.fbuild/dev/cache/toolchains/toolchain-xtensa-esp-elf/164cda8d219cc6bd/xtensa-esp-elf-14.2.0_20260121-x86_64-linux-gnu/xtensa-esp-elf/bin/xtensa-esp32-elf-gcc",
+    "cxx_flags": [
+      "-mlongcalls",
+      "-DF_CPU=240000000L"
+    ]
+  },
+  "cxx_flags_scope": "CPU and Xtensa call-model options only; not the complete compiler configuration. Full source capture identity is retained above.",
+  "framework_root": "/home/niteris/.fbuild/dev/cache/platforms/framework-arduinoespressif32/9ef436ac06b7bf7f/3.3.11/esp32-core-3.3.11",
+  "platform_pin": "https://github.com/pioarduino/platform-espressif32/releases/download/55.03.311/platform-espressif32.zip",
+  "source_ini_sha256": "fc8952647e0343f167427b9455290e3cf175b64fa1de8e1e1d14c3fd0b8a26ec",
+  "source_planned_database_sha256": "a348067d3dd3464dafc480515d2d213d544f305adb119c4cdb922c8bf61a43e5",
+  "required_compiler_suffix": [
+    "xtensa-esp-elf-14.2.0_20260121-x86_64-linux-gnu",
+    "xtensa-esp-elf",
+    "bin",
+    "xtensa-esp32-elf-gcc"
+  ]
+}

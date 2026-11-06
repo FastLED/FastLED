@@ -11,6 +11,7 @@ import re
 import shlex
 import sys
 from dataclasses import asdict, dataclass
+from enum import Enum
 from pathlib import Path
 
 from ci import software_spi_esp32_selection_proof as selection
@@ -28,6 +29,63 @@ STAGES = (
 EXAMPLE = "examples/AutoResearch/AutoResearch.ino"
 HOOK = "examples/AutoResearch/AutoResearchStartupHook.cpp"
 _REQUIRED_SOURCES = {selection.SOURCE, EXAMPLE, HOOK}
+
+
+class _SelectionProfile(Enum):
+    C6 = "esp32c6"
+    XTENSA = "esp32dev"
+
+
+@dataclass(frozen=True, slots=True)
+class _ProfileSpec:
+    env: str
+    board: str
+    framework_version: str
+    platform_pin: str | None
+    snapshot_kind: native._ProofKind
+    artifact_group: str
+    scope: str
+
+
+def _profile_spec(kind: _SelectionProfile) -> _ProfileSpec:
+    if kind is _SelectionProfile.C6:
+        return _ProfileSpec(
+            "esp32c6",
+            "ESP32_C6_DEVKITC_1",
+            "3.3.5",
+            None,
+            native._ProofKind.ESP32_C6_SELECTION,
+            "spi-esp32-c6-selection-proof",
+            "esp32c6-forced1-NoMap-absent-native-inverse-idle900-compiler-selection-property",
+        )
+    if kind is _SelectionProfile.XTENSA:
+        return _ProfileSpec(
+            "esp32dev",
+            "ESP32DEV",
+            "3.3.11",
+            "https://github.com/pioarduino/platform-espressif32/releases/download/55.03.311/platform-espressif32.zip",
+            native._ProofKind.ESP32_XTENSA_SELECTION,
+            "spi-esp32-xtensa-selection-proof",
+            "esp32-xtensa-forced1-NoMap-absent-native-inverse-idle900-compiler-selection-property",
+        )
+    raise ValueError("unknown closed selection profile")
+
+
+def _validate_info_profile(info: dict, kind: _SelectionProfile) -> None:
+    spec = _profile_spec(kind)
+    if info.get("env") != spec.env:
+        raise ValueError("selected environment differs from closed profile")
+    if kind is _SelectionProfile.C6:
+        selection.validate_c6_profile(info)
+    else:
+        selection.validate_xtensa_profile(info)
+
+
+def _selection_sdk_roots(info: dict, kind: _SelectionProfile) -> tuple[Path, Path]:
+    _validate_info_profile(info, kind)
+    # Existing audited root discovery uses actual planned framework paths and
+    # exact core/toolchain namespaces for each environment, never a caller root.
+    return vendor._profile_roots(info)
 
 
 @dataclass(frozen=True, slots=True)
@@ -407,12 +465,15 @@ def _selection_environment(workspace: Path) -> dict[str, str]:
     return environment
 
 
-def _run_c6_compile(workspace: Path, saved: Path, environment: dict, name: str):
+def _run_fixed_compile(
+    workspace: Path, saved: Path, environment: dict, name: str, kind: _SelectionProfile
+):
+    spec = _profile_spec(kind)
     saved.mkdir(parents=True, exist_ok=True)
     command = [
         "bash",
         "compile",
-        "esp32c6",
+        spec.env,
         "--examples",
         "AutoResearch",
         "--defines",
@@ -431,6 +492,16 @@ def _run_c6_compile(workspace: Path, saved: Path, environment: dict, name: str):
     )
 
 
+def _run_c6_compile(workspace: Path, saved: Path, environment: dict, name: str):
+    return _run_fixed_compile(workspace, saved, environment, name, _SelectionProfile.C6)
+
+
+def _run_xtensa_compile(workspace: Path, saved: Path, environment: dict, name: str):
+    return _run_fixed_compile(
+        workspace, saved, environment, name, _SelectionProfile.XTENSA
+    )
+
+
 @dataclass(frozen=True, slots=True)
 class _CompileWindow:
     compile_result: object
@@ -438,15 +509,21 @@ class _CompileWindow:
     after: dict
 
 
-def _verify_submission_route(workspace: Path, environment: dict, output: str) -> None:
+def _verify_submission_route(
+    workspace: Path,
+    environment: dict,
+    output: str,
+    kind: _SelectionProfile = _SelectionProfile.C6,
+) -> None:
+    spec = _profile_spec(kind)
     if not isinstance(environment.get("FBUILD_EXECUTABLE"), str):
         raise ValueError("missing bound submission client")
     command = [
         str(Path(environment["FBUILD_EXECUTABLE"]).resolve()),
-        str(workspace / ".build/fbuild/esp32c6"),
+        str(workspace / ".build/fbuild" / spec.env),
         "build",
         "-e",
-        "esp32c6",
+        spec.env,
         "-v",
     ]
     expected = "Running: " + " ".join(command)
@@ -462,6 +539,7 @@ def _compile_engine_window(
     tools: dict,
     engine_profile: dict,
     name: str,
+    kind: _SelectionProfile = _SelectionProfile.C6,
 ) -> _CompileWindow:
     vendor._ensure_stage_engine(workspace, saved, environment, tools, engine_profile)
     before = vendor._daemon_identity(
@@ -470,7 +548,11 @@ def _compile_engine_window(
     vendor._verify_engine_profile(saved, "build-before", engine_profile, before)
     after = None
     try:
-        completed = _run_c6_compile(workspace, saved, environment, name)
+        completed = (
+            _run_c6_compile(workspace, saved, environment, name)
+            if kind is _SelectionProfile.C6
+            else _run_xtensa_compile(workspace, saved, environment, name)
+        )
     finally:
         pending = sys.exc_info()[1]
         try:
@@ -500,7 +582,7 @@ def _compile_engine_window(
             if pending is not None:
                 raise pending from error
             raise
-    _verify_submission_route(workspace, environment, completed.stdout)
+    _verify_submission_route(workspace, environment, completed.stdout, kind)
     return _CompileWindow(completed, before, after)
 
 
@@ -515,14 +597,19 @@ def _selection_build_session(
     info: dict,
     expected_inputs: dict,
     name: str,
+    kind: _SelectionProfile = _SelectionProfile.C6,
 ) -> SelectionBuildSession:
-    project = workspace / ".build/fbuild/esp32c6"
-    before_static = _selection_state(info, environment, tools, roots, project, name)
+    project = workspace / ".build/fbuild" / _profile_spec(kind).env
+    before_static = _selection_state(
+        info, environment, tools, roots, project, name, kind
+    )
     vendor.property_check._verify_profile_state(saved, "before", profile, before_static)
     window = _compile_engine_window(
-        workspace, saved, environment, tools, engine_profile, name
+        workspace, saved, environment, tools, engine_profile, name, kind
     )
-    after_static = _selection_state(info, environment, tools, roots, project, name)
+    after_static = _selection_state(
+        info, environment, tools, roots, project, name, kind
+    )
     vendor.property_check._verify_profile_state(
         saved, "after-build", profile, after_static
     )
@@ -613,8 +700,11 @@ def _normalize_cell_tokens(
     return result
 
 
-def _capture_cell_configuration(info: dict, name: str) -> CellConfiguration:
-    if name not in STAGES or info.get("env") != "esp32c6":
+def _capture_cell_configuration(
+    info: dict, name: str, kind: _SelectionProfile = _SelectionProfile.C6
+) -> CellConfiguration:
+    spec = _profile_spec(kind)
+    if name not in STAGES or info.get("env") != spec.env:
         raise ValueError("not a fixed C6 selection cell")
     project = Path(info["prog_path"]).parents[3]
     ini = project / "platformio.ini"
@@ -622,15 +712,18 @@ def _capture_cell_configuration(info: dict, name: str) -> CellConfiguration:
         interpolation=None, inline_comment_prefixes=("#", ";"), strict=True
     )
     parser.read_string(ini.read_text())
-    if parser.defaults() or not parser.has_section("env:esp32c6"):
+    section = "env:" + spec.env
+    if parser.defaults() or not parser.has_section(section):
         raise ValueError("unreviewed inherited selection configuration")
+    if kind is _SelectionProfile.XTENSA:
+        if parser.get(section, "platform", raw=True) != spec.platform_pin:
+            raise ValueError("unsupported classic selected platform pin")
+        _selection_sdk_roots(info, kind)
     normalized_ini = {
         section: dict(parser.items(section, raw=True)) for section in parser.sections()
     }
-    flags = shlex.split(
-        parser.get("env:esp32c6", "build_flags", raw=True), comments=True
-    )
-    normalized_ini["env:esp32c6"]["build_flags"] = _normalize_cell_tokens(flags, name)
+    flags = shlex.split(parser.get(section, "build_flags", raw=True), comments=True)
+    normalized_ini[section]["build_flags"] = _normalize_cell_tokens(flags, name)
     database = Path(info["prog_path"]).parent / "compile_commands.raw.json"
     files = {
         ini,
@@ -746,10 +839,18 @@ def _compare_cell_configurations(
 
 
 def _selection_state(
-    info: dict, environment: dict, tools: dict, roots: tuple, project: Path, name: str
+    info: dict,
+    environment: dict,
+    tools: dict,
+    roots: tuple,
+    project: Path,
+    name: str,
+    kind: _SelectionProfile = _SelectionProfile.C6,
 ) -> dict:
     result = vendor._base_state(info, environment, tools, roots, project)
-    result["planned_configuration"] = _capture_cell_configuration(info, name).hashes
+    result["planned_configuration"] = _capture_cell_configuration(
+        info, name, kind
+    ).hashes
     return result
 
 
@@ -805,13 +906,18 @@ def validate_attempt(stages: list[SelectionStage], original_source: bytes) -> No
             raise ValueError("forced-cell profile drift")
 
 
-def _positive_info(workspace: Path, saved: Path, completed) -> dict:
+def _positive_info(
+    workspace: Path,
+    saved: Path,
+    completed,
+    kind: _SelectionProfile = _SelectionProfile.C6,
+) -> dict:
     if completed.returncode != 0:
         raise ValueError("failed compile cannot supply fresh build-info")
-    info = json.loads((saved / "build-info.json").read_text())["esp32c6"]
-    selection.validate_c6_profile(info)
+    info = json.loads((saved / "build-info.json").read_text())[_profile_spec(kind).env]
+    _validate_info_profile(info, kind)
     _verify_submission_route(
-        workspace, _selection_environment(workspace), completed.stdout
+        workspace, _selection_environment(workspace), completed.stdout, kind
     )
     return info
 
@@ -863,9 +969,10 @@ def _execute_fixed_stages(
     initial: dict,
     original_inputs: dict,
     original_source: bytes,
+    kind: _SelectionProfile = _SelectionProfile.C6,
 ) -> list[SelectionStage]:
     environment = _selection_environment(workspace)
-    project = workspace / ".build/fbuild/esp32c6"
+    project = workspace / ".build/fbuild" / _profile_spec(kind).env
     clients = vendor._client_tools(environment)
     desired = vendor._observe_launcher(
         workspace, artifacts / "launcher", environment, clients
@@ -900,16 +1007,17 @@ def _execute_fixed_stages(
             clients if tools is None else tools,
             engine_profile,
             name,
+            kind,
         )
         completed, after = window.compile_result, window.after
         assess_compile_result(
             STAGES[1], completed.returncode, completed.stdout, project
         )
-        info = _positive_info(workspace, saved, completed)
+        info = _positive_info(workspace, saved, completed, kind)
         vendor._check_staged_sources(
             workspace, initial, project, producer_sources(workspace)[EXAMPLE]
         )
-        selected_roots = vendor._profile_roots(info)
+        selected_roots = _selection_sdk_roots(info, kind)
         observed_tools = vendor._tool_identities(info, workspace, environment, saved)
         for key, identity in clients.items():
             if (
@@ -920,12 +1028,17 @@ def _execute_fixed_stages(
         if tools is not None and (tools != observed_tools or roots != selected_roots):
             raise ValueError("native/forced tool or SDK root changed")
         tools, roots = observed_tools, selected_roots
-        cell = _capture_cell_configuration(info, name)
-        profile = _selection_state(info, environment, tools, roots, project, name)
+        cell = _capture_cell_configuration(info, name, kind)
+        profile = _selection_state(info, environment, tools, roots, project, name, kind)
         cells[name], profiles[name], infos[name] = cell, profile, info
         _retain_cell(saved, cell, "bootstrap-planned-configuration")
         vendor._retain_artifacts(
-            info, saved, project, vendor._PropertyKind.ESP32_C6_MODE
+            info,
+            saved,
+            project,
+            vendor._PropertyKind.ESP32_C6_MODE
+            if kind is _SelectionProfile.C6
+            else vendor._PropertyKind.ESP32_XTENSA_MODE,
         )
         vendor._json(
             saved / "bootstrap-scope.json",
@@ -970,6 +1083,7 @@ def _execute_fixed_stages(
             info,
             expected,
             name,
+            kind,
         )
         outcome = assess_compile_result(
             name,
@@ -987,17 +1101,22 @@ def _execute_fixed_stages(
         )
         hashes = {}
         if not outcome.expected_compile_failure:
-            updated = _positive_info(workspace, saved, session.compile_result)
+            updated = _positive_info(workspace, saved, session.compile_result, kind)
             observed = _selection_state(
-                updated, environment, tools, roots, project, name
+                updated, environment, tools, roots, project, name, kind
             )
             vendor.property_check._verify_profile_state(
                 saved, "actual-build-info", profile, observed
             )
             hashes = vendor._retain_artifacts(
-                updated, saved, project, vendor._PropertyKind.ESP32_C6_MODE
+                updated,
+                saved,
+                project,
+                vendor._PropertyKind.ESP32_C6_MODE
+                if kind is _SelectionProfile.C6
+                else vendor._PropertyKind.ESP32_XTENSA_MODE,
             )
-        config = _capture_cell_configuration(info, name)
+        config = _capture_cell_configuration(info, name, kind)
         configuration = _retain_cell(
             saved,
             config,
@@ -1023,7 +1142,9 @@ def _execute_fixed_stages(
             hashes[str(path)] = vendor._digest(path)
         native._verify_inputs(workspace, expected)
         native._verify_inputs(root, original_inputs)
-        after_static = _selection_state(info, environment, tools, roots, project, name)
+        after_static = _selection_state(
+            info, environment, tools, roots, project, name, kind
+        )
         vendor.property_check._verify_profile_state(
             saved, "after-retention", profile, after_static
         )
@@ -1054,7 +1175,8 @@ def _execute_fixed_stages(
     return records
 
 
-def run_c6_selection_proof(root: Path) -> SelectionProof:
+def _run_selection_proof(root: Path, kind: _SelectionProfile) -> SelectionProof:
+    spec = _profile_spec(kind)
     root = root.resolve()
     for relative in (selection.SOURCE, EXAMPLE, HOOK, "ci/boards.py", "compile"):
         path = root / relative
@@ -1062,12 +1184,12 @@ def run_c6_selection_proof(root: Path) -> SelectionProof:
             raise ValueError(f"missing or unsafe selection source/input {relative}")
     provider = _verify_provider_cohort()
     original_inputs = native._inputs(root)
-    workspace, _ = native._snapshot(root, native._ProofKind.ESP32_C6_SELECTION)
-    artifacts = root / ".build/spi-esp32-c6-selection-proof" / workspace.name
+    workspace, _ = native._snapshot(root, spec.snapshot_kind)
+    artifacts = root / ".build" / spec.artifact_group / workspace.name
     originals = {
         relative: (workspace / relative).read_bytes() for relative in _REQUIRED_SOURCES
     }
-    ini = workspace / ".build/fbuild/esp32c6/platformio.ini"
+    ini = workspace / ".build/fbuild" / spec.env / "platformio.ini"
     ini_existed = ini.exists()
     if ini.is_symlink() or ini_existed and not ini.is_file():
         raise ValueError("unsafe original project flag input")
@@ -1091,6 +1213,7 @@ def run_c6_selection_proof(root: Path) -> SelectionProof:
             initial,
             original_inputs,
             originals[selection.SOURCE],
+            kind,
         )
         validate_attempt(stages, originals[selection.SOURCE])
     except (
@@ -1132,7 +1255,7 @@ def run_c6_selection_proof(root: Path) -> SelectionProof:
             native._verify_inputs(workspace, original_inputs)
             native._verify_inputs(root, original_inputs)
             if pending is None:
-                _verify_final_dependencies(workspace, artifacts, stages)
+                _verify_final_dependencies(workspace, artifacts, stages, kind)
         except (OSError, ValueError, KeyError, TypeError) as error:
             errors.append(str(error))
         if errors:
@@ -1151,7 +1274,7 @@ def run_c6_selection_proof(root: Path) -> SelectionProof:
             raise ValueError(
                 f"selection restoration failed; retained {workspace}: {errors}"
             ) from pending
-    proof = SelectionProof(workspace, stages, True)
+    proof = SelectionProof(workspace, stages, True, scope=spec.scope)
     vendor._json(artifacts / "proof.json", asdict(proof))
     return proof
 
@@ -1199,7 +1322,10 @@ def _observe_staged_inputs(
 
 
 def _verify_final_dependencies(
-    workspace: Path, artifacts: Path, stages: list[SelectionStage]
+    workspace: Path,
+    artifacts: Path,
+    stages: list[SelectionStage],
+    kind: _SelectionProfile = _SelectionProfile.C6,
 ) -> None:
     if not stages or stages[-1].name != STAGES[-1]:
         raise ValueError("missing final dependency context")
@@ -1215,22 +1341,22 @@ def _verify_final_dependencies(
         raise ValueError("final build-info is not an owned retained artifact")
     _verify_files(last.artifact_sha256s)
     _verify_files(last.configuration_sha256s)
-    info = json.loads(info_file.read_text())["esp32c6"]
-    selection.validate_c6_profile(info)
+    info = json.loads(info_file.read_text())[_profile_spec(kind).env]
+    _validate_info_profile(info, kind)
     tools = {}
     try:
         for name, identity in profile["tools"].items():
             tools[name] = native.ToolIdentity(
                 Path(identity["path"]), identity["sha256"], identity["version"]
             )
-        project = workspace / ".build/fbuild/esp32c6"
+        project = workspace / ".build/fbuild" / _profile_spec(kind).env
         if Path(info["prog_path"]).parents[3] != project:
             raise ValueError("final build context belongs to another project")
         observed = vendor._base_state(
             info,
             _selection_environment(workspace),
             tools,
-            vendor._profile_roots(info),
+            _selection_sdk_roots(info, kind),
             project,
         )
     except (OSError, KeyError, TypeError, IndexError) as error:
@@ -1256,3 +1382,11 @@ def _verify_final_dependencies(
             "complete_executed_argv": False,
         },
     )
+
+
+def run_c6_selection_proof(root: Path) -> SelectionProof:
+    return _run_selection_proof(root, _SelectionProfile.C6)
+
+
+def run_xtensa_selection_proof(root: Path) -> SelectionProof:
+    return _run_selection_proof(root, _SelectionProfile.XTENSA)
