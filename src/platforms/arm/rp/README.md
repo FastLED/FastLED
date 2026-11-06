@@ -33,6 +33,7 @@ rp/
 │   ├── README.md              # RP2040 platform documentation
 │   ├── fastled_arm_rp2040.h   # Main platform header
 │   ├── fastpin_arm_rp2040.h   # Pin definitions (30 pins: 0-29)
+│   ├── rp2040_pin.h           # SIO pin template and software SPI policy (host-testable)
 │   ├── led_sysdefs_arm_rp2040.h # System defines (125 MHz default)
 │   └── clockless_arm_rp2040.h # Clockless wrapper (includes rpcommon)
 │

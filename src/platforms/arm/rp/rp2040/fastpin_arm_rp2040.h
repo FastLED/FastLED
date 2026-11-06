@@ -14,6 +14,7 @@
 // IWYU pragma: end_keep
 #include "fl/system/fastpin_base.h"
 #include "fl/stl/compiler_control.h"
+#include "platforms/arm/rp/rp2040/rp2040_pin.h"
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_DEPRECATED_REGISTER
@@ -27,37 +28,6 @@ template<u8 PIN> class FastPin;
 #undef HAS_HARDWARE_PIN_SUPPORT
 
 #else
-
-// warning: set and fastset are not thread-safe! use with caution!
-template<uint PIN, u32 _MASK> class _RP2040PIN {
-public:
-  typedef volatile u32 * port_ptr_t;
-  typedef u32 port_t;
-
-  inline static constexpr bool validpin() { return true; }
-
-  inline static void setOutput() { gpio_set_function(PIN, GPIO_FUNC_SIO); sio_hw->gpio_oe_set = _MASK; }
-  inline static void setInput() { gpio_set_function(PIN, GPIO_FUNC_SIO); sio_hw->gpio_oe_clr = _MASK; }
-
-  inline static void hi() __attribute__ ((always_inline)) { sio_hw->gpio_set = _MASK; }
-  inline static void lo() __attribute__ ((always_inline)) { sio_hw->gpio_clr = _MASK; }
-  inline static void set(FASTLED_REGISTER port_t val) __attribute__ ((always_inline)) { sio_hw->gpio_out = val; }
-
-  inline static void strobe() __attribute__ ((always_inline)) { toggle(); toggle(); }
-
-  inline static void toggle() __attribute__ ((always_inline)) { sio_hw->gpio_togl = _MASK; }
-
-  inline static void hi(FASTLED_REGISTER port_ptr_t port) __attribute__ ((always_inline)) { hi(); }
-  inline static void lo(FASTLED_REGISTER port_ptr_t port) __attribute__ ((always_inline)) { lo(); }
-  inline static void fastset(FASTLED_REGISTER port_ptr_t port, FASTLED_REGISTER port_t val) __attribute__ ((always_inline)) { *port = val; }
-
-  inline static port_t hival() __attribute__ ((always_inline)) { return sio_hw->gpio_out | _MASK; }
-  inline static port_t loval() __attribute__ ((always_inline)) { return sio_hw->gpio_out & ~_MASK; }
-  inline static port_ptr_t port() __attribute__ ((always_inline)) { return &sio_hw->gpio_out; }
-  inline static port_ptr_t sport() __attribute__ ((always_inline)) { return &sio_hw->gpio_set; }
-  inline static port_ptr_t cport() __attribute__ ((always_inline)) { return &sio_hw->gpio_clr; }
-  inline static port_t mask() __attribute__ ((always_inline)) { return _MASK; }
-};
 
 // Use 64-bit literal for pin mask calculation to support RP2350B pins 32-47
 // The template parameter is still uint32_t to maintain register compatibility
