@@ -8541,8 +8541,33 @@ def _selection_runner_schema_stage(tmp_path, name="baseline"):
             artifact.write_bytes(("synthetic schema placeholder " + filename).encode())
             artifacts[str(artifact)] = digest(artifact.read_bytes())
     ini = directory / "platformio.ini"
-    ini.write_text("synthetic schema configuration only")
+    # Real recipe grammar with synthetic bytes, never a build/SDK receipt.
+    flags = runner.stage_defines(name)
+    ini.write_text(
+        "[env:esp32c6]\nplatform = espressif32\nboard = esp32-c6-devkitc-1\nbuild_flags = "
+        + " ".join(flags)
+        + "\n"
+    )
+    database = directory / (
+        "prior-input-compile_commands.raw.json"
+        if mutant
+        else "compile_commands.raw.json"
+    )
+    database.write_text(
+        json.dumps(
+            [
+                {
+                    "directory": str(tmp_path / "project"),
+                    "file": "src/main.cpp",
+                    "arguments": ["compiler", *flags, "-c", "src/main.cpp"],
+                }
+            ]
+        )
+    )
+    if not mutant:
+        artifacts[str(database)] = digest(database.read_bytes())
     configuration[str(ini)] = digest(ini.read_bytes())
+    configuration[str(database)] = digest(database.read_bytes())
     return runner.SelectionStage(
         name=name,
         project=tmp_path / "project",
@@ -10727,3 +10752,380 @@ def test_esp32_xtensa_selection_rejects_duplicate_cpu_or_opposing_call_configura
     info["cxx_flags"] = [*info["cxx_flags"], extra]
     with pytest.raises(ValueError):
         selection.validate_xtensa_profile(info)
+
+
+@pytest.mark.parametrize("name", ESP32_SELECTION_RUNNER_STAGES)
+def test_esp32_selection_defined_zero_exact_stage_flags_preserve_presence_semantics(
+    name,
+):
+    from ci import software_spi_esp32_selection_proof as selection
+    from ci import software_spi_esp32_selection_runner as runner
+
+    cell = runner._SelectionCell.FORCE0_NOMAP0
+    flags = runner.stage_defines(name, cell)
+    expected_force = None if name == "native-inverse-control" else 0
+    selection.validate_global_defines(flags, expected_force, 0)
+    assert "-DEXPECT_NO_PINMAP=1" in flags and "-DFASTLED_NO_PINMAP=0" in flags
+    assert ("-DEXPECT_FORCED=1" in flags) is (name != "native-inverse-control")
+    assert ("-DFASTLED_FORCE_SOFTWARE_PINS=0" in flags) is (
+        name != "native-inverse-control"
+    )
+    runner.validate_stage_defines(name, flags, cell)
+
+
+@pytest.mark.parametrize(
+    "corruption",
+    [
+        "force-one",
+        "nomap-absent",
+        "nomap-one",
+        "wrong-nomap-expectation",
+        "wrong-forced-expectation",
+        "duplicate",
+        "forwarded",
+        "undefinition",
+    ],
+)
+def test_esp32_selection_defined_zero_rejects_other_cell_or_macro_overrides(corruption):
+    from ci import software_spi_esp32_selection_runner as runner
+
+    flags = [
+        "-DEXPECT_FORCED=1",
+        "-DEXPECT_NO_PINMAP=1",
+        "-DFASTLED_FORCE_SOFTWARE_PINS=0",
+        "-DFASTLED_NO_PINMAP=0",
+        "-DFASTLED_SELECTION_ASSERT_SCOPE=1",
+    ]
+    if corruption == "force-one":
+        flags[2] = "-DFASTLED_FORCE_SOFTWARE_PINS=1"
+    elif corruption == "nomap-absent":
+        flags.pop(3)
+    elif corruption == "nomap-one":
+        flags[3] = "-DFASTLED_NO_PINMAP=1"
+    elif corruption == "wrong-nomap-expectation":
+        flags[1] = "-DEXPECT_NO_PINMAP=0"
+    elif corruption == "wrong-forced-expectation":
+        flags[0] = "-DEXPECT_FORCED=0"
+    elif corruption == "duplicate":
+        flags.append("-DFASTLED_NO_PINMAP=0")
+    elif corruption == "forwarded":
+        flags.append("-Wp,-UFASTLED_NO_PINMAP")
+    else:
+        flags.append("-UFASTLED_FORCE_SOFTWARE_PINS")
+    with pytest.raises(ValueError):
+        runner.validate_stage_defines(
+            "unguarded-mutant-arduino-first", flags, runner._SelectionCell.FORCE0_NOMAP0
+        )
+
+
+def test_esp32_selection_defined_zero_closed_cell_dispatch_and_legacy_root_only_entries(
+    tmp_path, monkeypatch
+):
+    import inspect
+
+    from ci import software_spi_esp32_selection_runner as runner
+
+    zero = runner._cell_spec(runner._SelectionCell.FORCE0_NOMAP0)
+    old = runner._cell_spec(runner._SelectionCell.FORCE1_NOMAP_ABSENT)
+    assert (zero.force_value, zero.no_pinmap_value) == (0, 0)
+    assert (old.force_value, old.no_pinmap_value) == (1, None)
+    for kind, cell in (
+        (runner._SelectionProfile.C6, runner._SelectionCell.FORCE1_NOMAP_ABSENT),
+        (runner._SelectionProfile.XTENSA, runner._SelectionCell.FORCE1_NOMAP_ABSENT),
+        (runner._SelectionProfile.C6, runner._SelectionCell.FORCE0_NOMAP0),
+    ):
+        runner._validate_profile_cell(kind, cell)
+    with pytest.raises(ValueError):
+        runner._validate_profile_cell(
+            runner._SelectionProfile.XTENSA, runner._SelectionCell.FORCE0_NOMAP0
+        )
+    for untrusted in ((0, 0), {"force": 0, "no_pinmap": 0}, "force0-nomap0"):
+        with pytest.raises(ValueError):
+            runner._cell_spec(untrusted)
+    calls = []
+    sentinel = object()
+
+    def capture(root, kind, cell=runner._SelectionCell.FORCE1_NOMAP_ABSENT):
+        calls.append((root, kind, cell))
+        return sentinel
+
+    monkeypatch.setattr(runner, "_run_selection_proof", capture)
+    for entry in (
+        runner.run_c6_selection_proof,
+        runner.run_xtensa_selection_proof,
+        runner.run_c6_defined_zero_selection_proof,
+    ):
+        assert list(inspect.signature(entry).parameters) == ["root"]
+        assert entry(tmp_path) is sentinel
+    assert calls == [
+        (
+            tmp_path,
+            runner._SelectionProfile.C6,
+            runner._SelectionCell.FORCE1_NOMAP_ABSENT,
+        ),
+        (
+            tmp_path,
+            runner._SelectionProfile.XTENSA,
+            runner._SelectionCell.FORCE1_NOMAP_ABSENT,
+        ),
+        (tmp_path, runner._SelectionProfile.C6, runner._SelectionCell.FORCE0_NOMAP0),
+    ]
+
+
+def _defined_zero_cell_configuration(tmp_path, name, cell):
+    # Synthetic configuration schema only, no SDK/compiler or proof receipt.
+    from ci import software_spi_esp32_selection_runner as runner
+
+    project = tmp_path / "project"
+    release = project / ".fbuild/build/release"
+    release.mkdir(parents=True, exist_ok=True)
+    flags = runner.stage_defines(name, cell)
+    (project / "platformio.ini").write_text(
+        "[env:esp32c6]\nplatform = espressif32\nboard = esp32-c6-devkitc-1\nbuild_flags = "
+        + " ".join(flags)
+        + "\n"
+    )
+    rows = [
+        {
+            "directory": str(project),
+            "file": "src/main.cpp",
+            "arguments": ["compiler", *flags, "-c", "src/main.cpp", "-o", "main.o"],
+        }
+    ]
+    (release / "compile_commands.raw.json").write_text(json.dumps(rows))
+    info = {"env": "esp32c6", "prog_path": str(release / "firmware.elf")}
+    return runner._capture_cell_configuration(
+        info, name, runner._SelectionProfile.C6, cell
+    )
+
+
+def test_esp32_selection_defined_zero_native_forced_recipes_preserve_same_nomap_zero(
+    tmp_path,
+):
+    from ci import software_spi_esp32_selection_runner as runner
+
+    zero = runner._SelectionCell.FORCE0_NOMAP0
+    native = _defined_zero_cell_configuration(tmp_path, "native-inverse-control", zero)
+    forced = _defined_zero_cell_configuration(tmp_path, "baseline", zero)
+    assert native.cell is forced.cell is zero
+    runner._compare_cell_configurations(native, forced)
+    assert (
+        "-DFASTLED_NO_PINMAP=0"
+        in native.normalized_recipe["ini"]["env:esp32c6"]["build_flags"]
+    )
+    assert (
+        "-DFASTLED_NO_PINMAP=0"
+        in forced.normalized_recipe["ini"]["env:esp32c6"]["build_flags"]
+    )
+    assert (
+        "-DEXPECT_NO_PINMAP=1"
+        in forced.normalized_recipe["ini"]["env:esp32c6"]["build_flags"]
+    )
+
+
+def test_esp32_selection_defined_zero_cannot_compare_or_relabel_legacy_cell_configuration(
+    tmp_path,
+):
+    from dataclasses import replace
+
+    from ci import software_spi_esp32_selection_runner as runner
+
+    native = _defined_zero_cell_configuration(
+        tmp_path, "native-inverse-control", runner._SelectionCell.FORCE0_NOMAP0
+    )
+    legacy = _defined_zero_cell_configuration(
+        tmp_path, "baseline", runner._SelectionCell.FORCE1_NOMAP_ABSENT
+    )
+    with pytest.raises(ValueError):
+        runner._compare_cell_configurations(native, legacy)
+    # A nominal type tag must not erase the constant NoMap difference either.
+    with pytest.raises(ValueError):
+        runner._compare_cell_configurations(
+            native, replace(legacy, cell=runner._SelectionCell.FORCE0_NOMAP0)
+        )
+
+
+@pytest.mark.parametrize(
+    "stage_name",
+    ["baseline", "unguarded-mutant-arduino-first", "unguarded-mutant-fastled-first"],
+)
+def test_esp32_selection_defined_zero_rejects_legacy_typed_stage_and_outcome_evidence(
+    tmp_path, stage_name
+):
+    from dataclasses import replace
+
+    from ci import software_spi_esp32_selection_runner as runner
+
+    zero = runner._SelectionCell.FORCE0_NOMAP0
+    legacy = _selection_runner_schema_stage(tmp_path, stage_name)
+    assert legacy.cell is runner._SelectionCell.FORCE1_NOMAP_ABSENT
+    assert legacy.outcome.cell is runner._SelectionCell.FORCE1_NOMAP_ABSENT
+    with pytest.raises(ValueError):
+        runner.validate_stage_record(legacy, zero)
+    with pytest.raises(ValueError):
+        runner.validate_stage_record(replace(legacy, cell=zero), zero)
+
+
+def test_esp32_selection_defined_zero_same_provider_and_identical_guard_mutant_both_scopes():
+    from ci import software_spi_esp32_selection_proof as selection
+    from ci import software_spi_esp32_selection_runner as runner
+
+    original = (audit.ROOT / selection.SOURCE).read_bytes()
+    expected = selection.unguarded_native_mutant(original)
+    assert (
+        runner.source_for_stage(original, "unguarded-mutant-arduino-first") == expected
+    )
+    assert (
+        runner.source_for_stage(original, "unguarded-mutant-fastled-first") == expected
+    )
+    sources = runner.producer_sources(audit.ROOT)
+    assert b"#if EXPECT_FORCED" in sources[runner.EXAMPLE]
+    assert b"#if EXPECT_NO_PINMAP" in sources[runner.EXAMPLE]
+    assert b"#if EXPECT_FORCED" in sources[runner.HOOK]
+    assert b"#if EXPECT_NO_PINMAP" in sources[runner.HOOK]
+    assert (
+        runner._PROVIDER_COHORT_PINS.source_commit
+        == "fb63b020fa751017cef2e7dee93be0e600877967"
+    )
+
+
+def test_esp32_selection_defined_zero_missing_checkout_and_native_whitelist(
+    tmp_path, monkeypatch
+):
+    from ci import software_spi_esp32_selection_runner as runner
+    from ci import software_spi_init_proof as native
+
+    monkeypatch.setattr(
+        runner.native,
+        "_snapshot",
+        lambda *args: pytest.fail("missing zero-cell checkout reached snapshot"),
+    )
+    with pytest.raises(ValueError, match="source|input|checkout|missing"):
+        runner.run_c6_defined_zero_selection_proof(tmp_path)
+    with pytest.raises(ValueError, match="native|fixed|target"):
+        native._run_proof(tmp_path, native._ProofKind.ESP32_C6_SELECTION)
+
+
+@pytest.mark.skipif(
+    os.environ.get("FASTLED_RUN_ESP32_C6_DEFINED_ZERO_SELECTION_PROOF") != "1",
+    reason="requires fixed C6 FORCE0/NoMap0 five-stage actual SDK qualification",
+)
+def test_esp32_selection_defined_zero_real_five_stage_acceptance():
+    from ci import software_spi_esp32_selection_proof as selection
+    from ci import software_spi_esp32_selection_runner as runner
+    from ci import software_spi_init_proof as native
+
+    before = native._inputs(audit.ROOT)
+    original = (audit.ROOT / selection.SOURCE).read_bytes()
+    zero = runner._SelectionCell.FORCE0_NOMAP0
+    proof = runner.run_c6_defined_zero_selection_proof(audit.ROOT)
+    assert proof.cell is zero
+    assert (
+        proof.scope
+        == "esp32c6-force0-NoMap0-native-inverse-idle900-compiler-selection-property"
+    )
+    runner.validate_stage_sequence(tuple(stage.name for stage in proof.stages))
+    for stage in proof.stages:
+        assert stage.cell is stage.outcome.cell is zero
+        runner.validate_stage_record(stage, zero)
+        assert stage.inputs_before[selection.SOURCE] == digest(
+            runner.source_for_stage(original, stage.name)
+        )
+        assert stage.outcome.returncode == (
+            1 if stage.name.startswith("unguarded-mutant-") else 0
+        )
+    assert proof.restoration_verified and proof.idle_policy_seconds == 900
+    assert (
+        not proof.runtime_gpio_proven
+        and not proof.full_finding_qualified
+        and not proof.complete_executed_argv
+    )
+    assert native._inputs(audit.ROOT) == before
+
+
+def test_esp32_selection_defined_zero_both_type_tags_cannot_relabel_legacy_effective_configuration(
+    tmp_path,
+):
+    from dataclasses import replace
+
+    from ci import software_spi_esp32_selection_runner as runner
+
+    legacy = _selection_runner_schema_stage(tmp_path, "baseline")
+    runner.validate_stage_record(legacy)  # Original retained recipe is accepted.
+    zero = runner._SelectionCell.FORCE0_NOMAP0
+    relabeled = replace(legacy, cell=zero, outcome=replace(legacy.outcome, cell=zero))
+    with pytest.raises(ValueError):
+        runner.validate_stage_record(relabeled, zero)
+
+
+def test_esp32_selection_defined_zero_declares_distinct_receipt_scope_without_legacy_refresh():
+    from ci import software_spi_esp32_selection_runner as runner
+
+    assert (
+        runner._scope_for_profile_cell(
+            runner._SelectionProfile.C6, runner._SelectionCell.FORCE0_NOMAP0
+        )
+        == "esp32c6-force0-NoMap0-native-inverse-idle900-compiler-selection-property"
+    )
+    for kind in (runner._SelectionProfile.C6, runner._SelectionProfile.XTENSA):
+        assert (
+            runner._scope_for_profile_cell(
+                kind, runner._SelectionCell.FORCE1_NOMAP_ABSENT
+            )
+            == runner._profile_spec(kind).scope
+        )
+
+
+def test_esp32_selection_defined_zero_classic_rejection_precedes_all_provider_snapshot_process_actions(
+    tmp_path, monkeypatch
+):
+    from ci import software_spi_esp32_selection_runner as runner
+
+    monkeypatch.setattr(
+        runner,
+        "_verify_provider_cohort",
+        lambda: pytest.fail("unsupported classic zero reached provider preflight"),
+    )
+    monkeypatch.setattr(
+        runner.native,
+        "_snapshot",
+        lambda *args: pytest.fail("unsupported classic zero created a snapshot"),
+    )
+    monkeypatch.setattr(
+        audit.RunningProcess,
+        "run",
+        lambda *args, **kwargs: pytest.fail(
+            "unsupported classic zero executed a process"
+        ),
+    )
+    with pytest.raises(ValueError, match="unsupported|cell|profile"):
+        runner._run_selection_proof(
+            tmp_path,
+            runner._SelectionProfile.XTENSA,
+            runner._SelectionCell.FORCE0_NOMAP0,
+        )
+
+
+def test_esp32_selection_defined_zero_c6_compile_wrapper_forwards_exact_cell(
+    tmp_path, monkeypatch
+):
+    from ci import software_spi_esp32_selection_runner as runner
+
+    calls = []
+    sentinel = object()
+
+    def capture(workspace, saved, environment, name, kind, cell=None):
+        calls.append((workspace, saved, environment, name, kind, cell))
+        return sentinel
+
+    monkeypatch.setattr(runner, "_run_fixed_compile", capture)
+    saved = tmp_path / "retained"
+    environment = {"test": "no process execution"}
+    zero = runner._SelectionCell.FORCE0_NOMAP0
+    assert (
+        runner._run_c6_compile(tmp_path, saved, environment, "baseline", zero)
+        is sentinel
+    )
+    assert calls == [
+        (tmp_path, saved, environment, "baseline", runner._SelectionProfile.C6, zero)
+    ]

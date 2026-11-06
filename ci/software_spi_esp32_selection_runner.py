@@ -36,6 +36,48 @@ class _SelectionProfile(Enum):
     XTENSA = "esp32dev"
 
 
+class _SelectionCell(Enum):
+    FORCE1_NOMAP_ABSENT = "force1-nomap-absent"
+    FORCE0_NOMAP0 = "force0-nomap0"
+
+
+@dataclass(frozen=True, slots=True)
+class _CellSpec:
+    force_value: int
+    no_pinmap_value: int | None
+
+
+def _cell_spec(cell: _SelectionCell) -> _CellSpec:
+    if cell is _SelectionCell.FORCE1_NOMAP_ABSENT:
+        return _CellSpec(1, None)
+    if cell is _SelectionCell.FORCE0_NOMAP0:
+        return _CellSpec(0, 0)
+    raise ValueError("unknown closed selection cell")
+
+
+def _validate_profile_cell(kind: _SelectionProfile, cell: _SelectionCell) -> None:
+    _profile_spec(kind)
+    _cell_spec(cell)
+    if kind is _SelectionProfile.XTENSA and cell is _SelectionCell.FORCE0_NOMAP0:
+        raise ValueError("unsupported classic selection cell")
+
+
+def _scope_for_profile_cell(kind: _SelectionProfile, cell: _SelectionCell) -> str:
+    _validate_profile_cell(kind, cell)
+    if cell is _SelectionCell.FORCE0_NOMAP0:
+        return (
+            "esp32c6-force0-NoMap0-native-inverse-idle900-compiler-selection-property"
+        )
+    return _profile_spec(kind).scope
+
+
+def _artifact_group_for_cell(kind: _SelectionProfile, cell: _SelectionCell) -> str:
+    _validate_profile_cell(kind, cell)
+    if cell is _SelectionCell.FORCE0_NOMAP0:
+        return "spi-esp32-c6-defined-zero-selection-proof"
+    return _profile_spec(kind).artifact_group
+
+
 @dataclass(frozen=True, slots=True)
 class _ProfileSpec:
     env: str
@@ -209,6 +251,7 @@ class SelectionOutcome:
     fresh_planned_database_eligible: bool
     runtime_gpio_proven: bool = False
     complete_executed_argv: bool = False
+    cell: _SelectionCell = _SelectionCell.FORCE1_NOMAP_ABSENT
 
 
 @dataclass(frozen=True)
@@ -230,6 +273,7 @@ class SelectionStage:
     serving_engine_after: dict
     artifact_sha256s: dict[str, str]
     configuration_sha256s: dict[str, str]
+    cell: _SelectionCell = _SelectionCell.FORCE1_NOMAP_ABSENT
 
 
 @dataclass(frozen=True)
@@ -240,26 +284,35 @@ class SelectionBuildSession:
     static_after: dict
 
 
-def stage_defines(name: str) -> list[str]:
+def stage_defines(
+    name: str, cell: _SelectionCell = _SelectionCell.FORCE1_NOMAP_ABSENT
+) -> list[str]:
+    spec = _cell_spec(cell)
     if name not in STAGES:
         raise ValueError("unknown fixed selection stage")
     scope = 1 if name == STAGES[2] else 2 if name == STAGES[3] else 0
-    flags = (
-        ["-DEXPECT_FORCED=0", "-DEXPECT_NO_PINMAP=0"]
-        if name == STAGES[0]
-        else [
-            "-DEXPECT_FORCED=1",
-            "-DEXPECT_NO_PINMAP=0",
-            "-DFASTLED_FORCE_SOFTWARE_PINS=1",
-        ]
-    )
+    flags = [
+        f"-DEXPECT_FORCED={int(name != STAGES[0])}",
+        f"-DEXPECT_NO_PINMAP={int(spec.no_pinmap_value is not None)}",
+    ]
+    if name != STAGES[0]:
+        flags.append(f"-DFASTLED_FORCE_SOFTWARE_PINS={spec.force_value}")
+    if spec.no_pinmap_value is not None:
+        flags.append(f"-DFASTLED_NO_PINMAP={spec.no_pinmap_value}")
     return [*flags, f"-DFASTLED_SELECTION_ASSERT_SCOPE={scope}"]
 
 
-def validate_stage_defines(name: str, tokens: list[str]) -> None:
+def validate_stage_defines(
+    name: str,
+    tokens: list[str],
+    cell: _SelectionCell = _SelectionCell.FORCE1_NOMAP_ABSENT,
+) -> None:
+    spec = _cell_spec(cell)
     if name not in STAGES:
         raise ValueError("unknown fixed selection stage")
-    selection.validate_global_defines(tokens, None if name == STAGES[0] else 1)
+    selection.validate_global_defines(
+        tokens, None if name == STAGES[0] else spec.force_value, spec.no_pinmap_value
+    )
     key = "FASTLED_SELECTION_ASSERT_SCOPE"
     expected = "1" if name == STAGES[2] else "2" if name == STAGES[3] else "0"
     definitions = []
@@ -357,8 +410,13 @@ def _scoped_diagnostics(name: str) -> set[tuple[str, int, str]]:
 
 
 def assess_compile_result(
-    name: str, returncode: int, output: str, project: Path
+    name: str,
+    returncode: int,
+    output: str,
+    project: Path,
+    cell: _SelectionCell = _SelectionCell.FORCE1_NOMAP_ABSENT,
 ) -> SelectionOutcome:
+    _cell_spec(cell)
     if name not in STAGES or type(returncode) is not int or not isinstance(output, str):
         raise ValueError("unknown fixed selection result")
     negative = name in STAGES[2:4]
@@ -397,7 +455,7 @@ def assess_compile_result(
             observed.add(diagnostic)
         if not summaries or observed != expected:
             raise ValueError("missing bound wrapper or designated scoped triple")
-    return SelectionOutcome(returncode, negative, not negative, not negative)
+    return SelectionOutcome(returncode, negative, not negative, not negative, cell=cell)
 
 
 def _verify_files(hashes: dict[str, str]) -> None:
@@ -407,9 +465,15 @@ def _verify_files(hashes: dict[str, str]) -> None:
             raise ValueError("retained selection artifact/configuration changed")
 
 
-def validate_stage_record(stage: SelectionStage) -> None:
+def validate_stage_record(
+    stage: SelectionStage,
+    expected_cell: _SelectionCell = _SelectionCell.FORCE1_NOMAP_ABSENT,
+) -> None:
+    _cell_spec(expected_cell)
     if not isinstance(stage, SelectionStage) or stage.name not in STAGES:
         raise ValueError("unbound typed selection stage")
+    if stage.cell is not expected_cell or stage.outcome.cell is not expected_cell:
+        raise ValueError("selection stage/outcome belongs to another cell")
     for before, after in (
         (stage.inputs_before, stage.inputs_after),
         (stage.staged_sources_expected, stage.staged_sources_observed),
@@ -435,7 +499,11 @@ def validate_stage_record(stage: SelectionStage) -> None:
     ):
         raise ValueError("selection compiler log changed")
     expected = assess_compile_result(
-        stage.name, stage.outcome.returncode, stage.log_path.read_text(), stage.project
+        stage.name,
+        stage.outcome.returncode,
+        stage.log_path.read_text(),
+        stage.project,
+        expected_cell,
     )
     if stage.outcome != expected:
         raise ValueError("inconsistent selection outcome or freshness claim")
@@ -454,6 +522,7 @@ def validate_stage_record(stage: SelectionStage) -> None:
         raise ValueError("eligible positive lacks actual retained artifacts")
     _verify_files(stage.artifact_sha256s)
     _verify_files(stage.configuration_sha256s)
+    _validate_retained_cell_bindings(stage, expected_cell)
 
 
 def _selection_environment(workspace: Path) -> dict[str, str]:
@@ -466,8 +535,14 @@ def _selection_environment(workspace: Path) -> dict[str, str]:
 
 
 def _run_fixed_compile(
-    workspace: Path, saved: Path, environment: dict, name: str, kind: _SelectionProfile
+    workspace: Path,
+    saved: Path,
+    environment: dict,
+    name: str,
+    kind: _SelectionProfile,
+    cell: _SelectionCell = _SelectionCell.FORCE1_NOMAP_ABSENT,
 ):
+    _validate_profile_cell(kind, cell)
     spec = _profile_spec(kind)
     saved.mkdir(parents=True, exist_ok=True)
     command = [
@@ -477,7 +552,7 @@ def _run_fixed_compile(
         "--examples",
         "AutoResearch",
         "--defines",
-        ",".join(flag.removeprefix("-D") for flag in stage_defines(name)),
+        ",".join(flag.removeprefix("-D") for flag in stage_defines(name, cell)),
         "-v",
         "--build-info",
         str(saved / "build-info.json"),
@@ -492,13 +567,27 @@ def _run_fixed_compile(
     )
 
 
-def _run_c6_compile(workspace: Path, saved: Path, environment: dict, name: str):
-    return _run_fixed_compile(workspace, saved, environment, name, _SelectionProfile.C6)
-
-
-def _run_xtensa_compile(workspace: Path, saved: Path, environment: dict, name: str):
+def _run_c6_compile(
+    workspace: Path,
+    saved: Path,
+    environment: dict,
+    name: str,
+    cell: _SelectionCell = _SelectionCell.FORCE1_NOMAP_ABSENT,
+):
     return _run_fixed_compile(
-        workspace, saved, environment, name, _SelectionProfile.XTENSA
+        workspace, saved, environment, name, _SelectionProfile.C6, cell
+    )
+
+
+def _run_xtensa_compile(
+    workspace: Path,
+    saved: Path,
+    environment: dict,
+    name: str,
+    cell: _SelectionCell = _SelectionCell.FORCE1_NOMAP_ABSENT,
+):
+    return _run_fixed_compile(
+        workspace, saved, environment, name, _SelectionProfile.XTENSA, cell
     )
 
 
@@ -540,7 +629,9 @@ def _compile_engine_window(
     engine_profile: dict,
     name: str,
     kind: _SelectionProfile = _SelectionProfile.C6,
+    cell: _SelectionCell = _SelectionCell.FORCE1_NOMAP_ABSENT,
 ) -> _CompileWindow:
+    _validate_profile_cell(kind, cell)
     vendor._ensure_stage_engine(workspace, saved, environment, tools, engine_profile)
     before = vendor._daemon_identity(
         workspace, saved, "build-before", environment, tools
@@ -549,9 +640,9 @@ def _compile_engine_window(
     after = None
     try:
         completed = (
-            _run_c6_compile(workspace, saved, environment, name)
+            _run_c6_compile(workspace, saved, environment, name, cell)
             if kind is _SelectionProfile.C6
-            else _run_xtensa_compile(workspace, saved, environment, name)
+            else _run_xtensa_compile(workspace, saved, environment, name, cell)
         )
     finally:
         pending = sys.exc_info()[1]
@@ -598,17 +689,19 @@ def _selection_build_session(
     expected_inputs: dict,
     name: str,
     kind: _SelectionProfile = _SelectionProfile.C6,
+    cell: _SelectionCell = _SelectionCell.FORCE1_NOMAP_ABSENT,
 ) -> SelectionBuildSession:
+    _validate_profile_cell(kind, cell)
     project = workspace / ".build/fbuild" / _profile_spec(kind).env
     before_static = _selection_state(
-        info, environment, tools, roots, project, name, kind
+        info, environment, tools, roots, project, name, kind, cell
     )
     vendor.property_check._verify_profile_state(saved, "before", profile, before_static)
     window = _compile_engine_window(
-        workspace, saved, environment, tools, engine_profile, name, kind
+        workspace, saved, environment, tools, engine_profile, name, kind, cell
     )
     after_static = _selection_state(
-        info, environment, tools, roots, project, name, kind
+        info, environment, tools, roots, project, name, kind, cell
     )
     vendor.property_check._verify_profile_state(
         saved, "after-build", profile, after_static
@@ -631,14 +724,18 @@ class CellConfiguration:
     hashes: dict[str, str]
     contents: dict[str, bytes]
     normalized_recipe: dict
+    cell: _SelectionCell = _SelectionCell.FORCE1_NOMAP_ABSENT
 
 
 def _normalize_cell_tokens(
-    tokens: list[str], name: str, require_defines: bool = True
+    tokens: list[str],
+    name: str,
+    require_defines: bool = True,
+    cell: _SelectionCell = _SelectionCell.FORCE1_NOMAP_ABSENT,
 ) -> list[str]:
-    force = None if name == STAGES[0] else 1
+    force = None if name == STAGES[0] else _cell_spec(cell).force_value
     if require_defines:
-        validate_stage_defines(name, tokens)
+        validate_stage_defines(name, tokens, cell)
     else:
         # A partial argv/rsp still obeys the exact scalar/override grammar.
         # Supply only absent fixed definitions for validation; the expanded
@@ -656,10 +753,10 @@ def _normalize_cell_tokens(
                     present.add(match[0])
         missing = [
             flag
-            for flag in stage_defines(name)
+            for flag in stage_defines(name, cell)
             if flag[2:].partition("=")[0] not in present
         ]
-        validate_stage_defines(name, [*tokens, *missing])
+        validate_stage_defines(name, [*tokens, *missing], cell)
     result = []
     index = 0
     while index < len(tokens):
@@ -691,7 +788,7 @@ def _normalize_cell_tokens(
                     if key == "FASTLED_SELECTION_ASSERT_SCOPE"
                     else None
                     if force is None
-                    else "1"
+                    else str(_cell_spec(cell).force_value)
                 )
                 if expected is None or (value if separator else "1") != expected:
                     raise ValueError("unexpected cell macro operand")
@@ -701,8 +798,12 @@ def _normalize_cell_tokens(
 
 
 def _capture_cell_configuration(
-    info: dict, name: str, kind: _SelectionProfile = _SelectionProfile.C6
+    info: dict,
+    name: str,
+    kind: _SelectionProfile = _SelectionProfile.C6,
+    cell: _SelectionCell = _SelectionCell.FORCE1_NOMAP_ABSENT,
 ) -> CellConfiguration:
+    _validate_profile_cell(kind, cell)
     spec = _profile_spec(kind)
     if name not in STAGES or info.get("env") != spec.env:
         raise ValueError("not a fixed C6 selection cell")
@@ -723,7 +824,9 @@ def _capture_cell_configuration(
         section: dict(parser.items(section, raw=True)) for section in parser.sections()
     }
     flags = shlex.split(parser.get(section, "build_flags", raw=True), comments=True)
-    normalized_ini[section]["build_flags"] = _normalize_cell_tokens(flags, name)
+    normalized_ini[section]["build_flags"] = _normalize_cell_tokens(
+        flags, name, cell=cell
+    )
     database = Path(info["prog_path"]).parent / "compile_commands.raw.json"
     files = {
         ini,
@@ -799,8 +902,12 @@ def _capture_cell_configuration(
                             for key, value in row.items()
                             if key not in {"command", "arguments"}
                         },
-                        "arguments": _normalize_cell_tokens(arguments, name, False),
-                        "effective_arguments": _normalize_cell_tokens(effective, name),
+                        "arguments": _normalize_cell_tokens(
+                            arguments, name, False, cell
+                        ),
+                        "effective_arguments": _normalize_cell_tokens(
+                            effective, name, cell=cell
+                        ),
                     }
                 )
             database_rows[path] = bound_rows
@@ -815,7 +922,7 @@ def _capture_cell_configuration(
             normalized[relative] = database_rows[path]
         elif path.suffix == ".rsp":
             normalized[relative] = _normalize_cell_tokens(
-                shlex.split(path.read_text()), name, False
+                shlex.split(path.read_text()), name, False, cell
             )
     contents = {str(path): path.read_bytes() for path in sorted(files)}
     return CellConfiguration(
@@ -823,12 +930,15 @@ def _capture_cell_configuration(
         {str(path): vendor._digest(path) for path in sorted(files)},
         contents,
         {"ini": normalized_ini, "recipes": normalized, "prog_path": info["prog_path"]},
+        cell,
     )
 
 
 def _compare_cell_configurations(
     native_cell: CellConfiguration, forced_cell: CellConfiguration
 ) -> None:
+    if native_cell.cell is not forced_cell.cell:
+        raise ValueError("cannot combine different selection cells")
     if native_cell.name != STAGES[0] or forced_cell.name not in STAGES[1:]:
         raise ValueError("not the two closed selection cells")
     if (
@@ -846,10 +956,12 @@ def _selection_state(
     project: Path,
     name: str,
     kind: _SelectionProfile = _SelectionProfile.C6,
+    cell: _SelectionCell = _SelectionCell.FORCE1_NOMAP_ABSENT,
 ) -> dict:
+    _validate_profile_cell(kind, cell)
     result = vendor._base_state(info, environment, tools, roots, project)
     result["planned_configuration"] = _capture_cell_configuration(
-        info, name, kind
+        info, name, kind, cell
     ).hashes
     return result
 
@@ -868,9 +980,14 @@ class SelectionProof:
     complete_executed_argv: bool = False
     full_finding_qualified: bool = False
     limitation: str = "Compiler ancestry/HAS checks only. Explicit 900-second daemon idle condition, not a health lease, unchanged default or V1 cause finding. No GPIO execution, MY support, masks, firmware arrival, cache/timing, classic ESP32, full matrix or full finding qualification."
+    cell: _SelectionCell = _SelectionCell.FORCE1_NOMAP_ABSENT
 
 
-def validate_attempt(stages: list[SelectionStage], original_source: bytes) -> None:
+def validate_attempt(
+    stages: list[SelectionStage],
+    original_source: bytes,
+    cell: _SelectionCell = _SelectionCell.FORCE1_NOMAP_ABSENT,
+) -> None:
     validate_stage_sequence(tuple(stage.name for stage in stages))
     first = stages[0]
     unchanged = {
@@ -880,7 +997,7 @@ def validate_attempt(stages: list[SelectionStage], original_source: bytes) -> No
     }
     forced_profile = stages[1].profile_before
     for stage in stages:
-        validate_stage_record(stage)
+        validate_stage_record(stage, cell)
         expected_source = (
             selection.unguarded_native_mutant(original_source)
             if stage.name in STAGES[2:4]
@@ -922,22 +1039,96 @@ def _positive_info(
     return info
 
 
+def _validate_retained_cell_bindings(
+    stage: SelectionStage, cell: _SelectionCell
+) -> None:
+    """Replay effective macros from hash-bound retained configuration bytes."""
+    paths = {Path(name): Path(name) for name in stage.configuration_sha256s}
+    for path in tuple(paths):
+        if path.name.endswith("-scope.json"):
+            descriptor = json.loads(path.read_text())
+            for source, retained in descriptor["retained_files"].items():
+                target = Path(retained)
+                if str(target) not in stage.configuration_sha256s:
+                    raise ValueError("unbound retained configuration")
+                paths[Path(source)] = target
+    ini_paths = {
+        target
+        for source, target in paths.items()
+        if source.name.endswith("platformio.ini")
+    }
+    databases = {
+        target
+        for source, target in paths.items()
+        if source.name.endswith("compile_commands.raw.json")
+    }
+    if len(ini_paths) != 1 or not databases:
+        raise ValueError("missing retained cell configuration")
+    parser = configparser.ConfigParser(
+        interpolation=None, inline_comment_prefixes=("#", ";"), strict=True
+    )
+    parser.read_string(next(iter(ini_paths)).read_text())
+    sections = [section for section in parser.sections() if section.startswith("env:")]
+    if parser.defaults() or len(sections) != 1:
+        raise ValueError("ambiguous retained cell configuration")
+    validate_stage_defines(
+        stage.name,
+        shlex.split(parser.get(sections[0], "build_flags", raw=True), comments=True),
+        cell,
+    )
+
+    def expand(
+        tokens: list[str], directory: Path, active: frozenset[Path] = frozenset()
+    ) -> list[str]:
+        result = []
+        for token in tokens:
+            if not token.startswith("@"):
+                result.append(token)
+                continue
+            source = (directory / token[1:]).resolve()
+            if source in active or source not in paths:
+                raise ValueError("unbound retained response file")
+            result.extend(
+                expand(
+                    shlex.split(paths[source].read_text()), directory, active | {source}
+                )
+            )
+        return result
+
+    for database in databases:
+        rows = json.loads(database.read_text())
+        if not isinstance(rows, list) or not rows:
+            raise ValueError("missing retained planned rows")
+        for row in rows:
+            tokens = row.get("arguments")
+            if tokens is None:
+                tokens = shlex.split(row["command"])
+            validate_stage_defines(
+                stage.name, expand(tokens, Path(row["directory"])), cell
+            )
+
+
 def _retain_cell(saved: Path, cell: CellConfiguration, label: str) -> dict[str, str]:
     result = {}
+    retained_files = {}
     for index, (source, content) in enumerate(sorted(cell.contents.items())):
         path = saved / label / f"{index:04d}-{Path(source).name}"
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes(content)
         result[str(path)] = vendor._digest(path)
+        retained_files[source] = str(path)
+    descriptor = saved / (label + "-scope.json")
     vendor._json(
-        saved / (label + "-scope.json"),
+        descriptor,
         {
             "planned_only": True,
             "freshness": "unproven",
             "source_sha256s": cell.hashes,
+            "retained_files": retained_files,
             "complete_executed_argv": False,
         },
     )
+    result[str(descriptor)] = vendor._digest(descriptor)
     return result
 
 
@@ -970,7 +1161,9 @@ def _execute_fixed_stages(
     original_inputs: dict,
     original_source: bytes,
     kind: _SelectionProfile = _SelectionProfile.C6,
+    cell: _SelectionCell = _SelectionCell.FORCE1_NOMAP_ABSENT,
 ) -> list[SelectionStage]:
+    _validate_profile_cell(kind, cell)
     environment = _selection_environment(workspace)
     project = workspace / ".build/fbuild" / _profile_spec(kind).env
     clients = vendor._client_tools(environment)
@@ -1008,10 +1201,11 @@ def _execute_fixed_stages(
             engine_profile,
             name,
             kind,
+            cell,
         )
         completed, after = window.compile_result, window.after
         assess_compile_result(
-            STAGES[1], completed.returncode, completed.stdout, project
+            STAGES[1], completed.returncode, completed.stdout, project, cell
         )
         info = _positive_info(workspace, saved, completed, kind)
         vendor._check_staged_sources(
@@ -1028,10 +1222,12 @@ def _execute_fixed_stages(
         if tools is not None and (tools != observed_tools or roots != selected_roots):
             raise ValueError("native/forced tool or SDK root changed")
         tools, roots = observed_tools, selected_roots
-        cell = _capture_cell_configuration(info, name, kind)
-        profile = _selection_state(info, environment, tools, roots, project, name, kind)
-        cells[name], profiles[name], infos[name] = cell, profile, info
-        _retain_cell(saved, cell, "bootstrap-planned-configuration")
+        cfg_cell = _capture_cell_configuration(info, name, kind, cell)
+        profile = _selection_state(
+            info, environment, tools, roots, project, name, kind, cell
+        )
+        cells[name], profiles[name], infos[name] = cfg_cell, profile, info
+        _retain_cell(saved, cfg_cell, "bootstrap-planned-configuration")
         vendor._retain_artifacts(
             info,
             saved,
@@ -1056,10 +1252,14 @@ def _execute_fixed_stages(
     records = []
     for name in STAGES:
         cell_name = STAGES[1] if name == STAGES[4] else name
-        cell, profile, info = cells[cell_name], profiles[cell_name], infos[cell_name]
+        cfg_cell, profile, info = (
+            cells[cell_name],
+            profiles[cell_name],
+            infos[cell_name],
+        )
         saved = artifacts / name
         saved.mkdir(parents=True, exist_ok=True)
-        _activate_cell(cell)
+        _activate_cell(cfg_cell)
         content = source_for_stage(original_source, name)
         (workspace / selection.SOURCE).write_bytes(content)
         expected = {**initial, selection.SOURCE: hashlib.sha256(content).hexdigest()}
@@ -1084,12 +1284,14 @@ def _execute_fixed_stages(
             expected,
             name,
             kind,
+            cell,
         )
         outcome = assess_compile_result(
             name,
             session.compile_result.returncode,
             session.compile_result.stdout,
             project,
+            cell,
         )
         vendor._json(
             saved / "actual-build-result.json",
@@ -1103,7 +1305,7 @@ def _execute_fixed_stages(
         if not outcome.expected_compile_failure:
             updated = _positive_info(workspace, saved, session.compile_result, kind)
             observed = _selection_state(
-                updated, environment, tools, roots, project, name, kind
+                updated, environment, tools, roots, project, name, kind, cell
             )
             vendor.property_check._verify_profile_state(
                 saved, "actual-build-info", profile, observed
@@ -1116,7 +1318,7 @@ def _execute_fixed_stages(
                 if kind is _SelectionProfile.C6
                 else vendor._PropertyKind.ESP32_XTENSA_MODE,
             )
-        config = _capture_cell_configuration(info, name, kind)
+        config = _capture_cell_configuration(info, name, kind, cell)
         configuration = _retain_cell(
             saved,
             config,
@@ -1143,7 +1345,7 @@ def _execute_fixed_stages(
         native._verify_inputs(workspace, expected)
         native._verify_inputs(root, original_inputs)
         after_static = _selection_state(
-            info, environment, tools, roots, project, name, kind
+            info, environment, tools, roots, project, name, kind, cell
         )
         vendor.property_check._verify_profile_state(
             saved, "after-retention", profile, after_static
@@ -1168,14 +1370,20 @@ def _execute_fixed_stages(
             session.after,
             hashes,
             configuration,
+            cell,
         )
-        validate_stage_record(stage)
+        validate_stage_record(stage, cell)
         vendor._json(saved / "stage.json", asdict(stage))
         records.append(stage)
     return records
 
 
-def _run_selection_proof(root: Path, kind: _SelectionProfile) -> SelectionProof:
+def _run_selection_proof(
+    root: Path,
+    kind: _SelectionProfile,
+    cell: _SelectionCell = _SelectionCell.FORCE1_NOMAP_ABSENT,
+) -> SelectionProof:
+    _validate_profile_cell(kind, cell)
     spec = _profile_spec(kind)
     root = root.resolve()
     for relative in (selection.SOURCE, EXAMPLE, HOOK, "ci/boards.py", "compile"):
@@ -1185,7 +1393,7 @@ def _run_selection_proof(root: Path, kind: _SelectionProfile) -> SelectionProof:
     provider = _verify_provider_cohort()
     original_inputs = native._inputs(root)
     workspace, _ = native._snapshot(root, spec.snapshot_kind)
-    artifacts = root / ".build" / spec.artifact_group / workspace.name
+    artifacts = root / ".build" / _artifact_group_for_cell(kind, cell) / workspace.name
     originals = {
         relative: (workspace / relative).read_bytes() for relative in _REQUIRED_SOURCES
     }
@@ -1214,8 +1422,9 @@ def _run_selection_proof(root: Path, kind: _SelectionProfile) -> SelectionProof:
             original_inputs,
             originals[selection.SOURCE],
             kind,
+            cell,
         )
-        validate_attempt(stages, originals[selection.SOURCE])
+        validate_attempt(stages, originals[selection.SOURCE], cell)
     except (
         OSError,
         ValueError,
@@ -1274,7 +1483,9 @@ def _run_selection_proof(root: Path, kind: _SelectionProfile) -> SelectionProof:
             raise ValueError(
                 f"selection restoration failed; retained {workspace}: {errors}"
             ) from pending
-    proof = SelectionProof(workspace, stages, True, scope=spec.scope)
+    proof = SelectionProof(
+        workspace, stages, True, scope=_scope_for_profile_cell(kind, cell), cell=cell
+    )
     vendor._json(artifacts / "proof.json", asdict(proof))
     return proof
 
@@ -1390,3 +1601,9 @@ def run_c6_selection_proof(root: Path) -> SelectionProof:
 
 def run_xtensa_selection_proof(root: Path) -> SelectionProof:
     return _run_selection_proof(root, _SelectionProfile.XTENSA)
+
+
+def run_c6_defined_zero_selection_proof(root: Path) -> SelectionProof:
+    return _run_selection_proof(
+        root, _SelectionProfile.C6, _SelectionCell.FORCE0_NOMAP0
+    )
