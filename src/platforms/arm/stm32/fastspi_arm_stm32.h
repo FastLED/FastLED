@@ -25,6 +25,7 @@
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/static_assert.h"
 #include "fl/stl/noexcept.h"
+#include "platforms/shared/spi_bitbang/bitbang_pin.h"
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_DEPRECATED_REGISTER
@@ -202,11 +203,7 @@ public:
 #else
         // Software SPI fallback - bitbang implementation
         for (u8 bit = 0; bit < 8; bit++) {
-            if (b & 0x80) {
-                FastPin<DATA_PIN>::hi();
-            } else {
-                FastPin<DATA_PIN>::lo();
-            }
+            BitbangPin<FastPin<DATA_PIN>>::template write<7>(b);
             FastPin<CLOCK_PIN>::hi();
             b <<= 1;
             FastPin<CLOCK_PIN>::lo();
@@ -308,22 +305,10 @@ public:
         // For single bit writes, we need to use GPIO directly
         // This is typically only used for specific LED chipsets
         waitFully();
-        if (b & (1 << BIT)) {
-            FastPin<DATA_PIN>::hi();
-        } else {
-            FastPin<DATA_PIN>::lo();
-        }
-        FastPin<CLOCK_PIN>::hi();
-        FastPin<CLOCK_PIN>::lo();
-#else
-        if (b & (1 << BIT)) {
-            FastPin<DATA_PIN>::hi();
-        } else {
-            FastPin<DATA_PIN>::lo();
-        }
-        FastPin<CLOCK_PIN>::hi();
-        FastPin<CLOCK_PIN>::lo();
 #endif
+        BitbangPin<FastPin<DATA_PIN>>::template write<BIT>(b);
+        FastPin<CLOCK_PIN>::hi();
+        FastPin<CLOCK_PIN>::lo();
     }
 
     // Write pixels with color order and optional flags

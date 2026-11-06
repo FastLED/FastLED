@@ -22,6 +22,7 @@
 #include "fl/system/pin.h"  // For PinMode, PinValue enums
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/noexcept.h"
+#include "platforms/arm/stm32/stm32_bitbang_pin.h"
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_DEPRECATED_REGISTER
@@ -35,7 +36,7 @@ namespace fl {
 /// @tparam _GPIO GPIO port struct (GPIOA, GPIOB, etc.)
 /// @tparam HAS_BRR true if family has BRR register, false if must use BSRR upper bits
 template<u8 PIN, u8 _BIT, u32 _MASK, typename _GPIO, bool HAS_BRR>
-class _ARMPIN_STM32 {
+class _ARMPIN_STM32 : public Stm32BsrrPin {
 public:
   typedef volatile u32 * port_ptr_t;
   typedef u32 port_t;
@@ -71,6 +72,8 @@ public:
       _GPIO::r()->BSRR = (_MASK << 16); // F2, F4, F7, H7 families
     }
   }
+
+  inline static void writeBsrr(port_t val) FL_NO_EXCEPT __attribute__ ((always_inline)) { _GPIO::r()->BSRR = val; }
 
   inline static void set(FASTLED_REGISTER port_t val) FL_NO_EXCEPT __attribute__ ((always_inline)) {
     _GPIO::r()->ODR = val;
