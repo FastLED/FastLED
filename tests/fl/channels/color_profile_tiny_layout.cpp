@@ -31,4 +31,5 @@ FL_STATIC_ASSERT(sizeof(fl::ChannelOptions) <= sizeof(LegacyChannelOptionsLayout
 FL_STATIC_ASSERT(sizeof(fl::StaticProfileChannel<kTinyStaticProfile>) == sizeof(fl::Channel),
               "TINY static profile identity must add no Channel instance state");
 
+// allow-test-main: compile-only sizeof probe, deliberately no library or harness
 int main() { return 0; }

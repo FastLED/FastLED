@@ -7,6 +7,7 @@ on:
   pull_request:
     branches: [master]
     types: [opened, synchronize, reopened, labeled, unlabeled]
+  merge_group:
 
 permissions:
   contents: read
@@ -73,6 +74,7 @@ jobs:
       # Keep that report informational; budget applies the checker's native
       # PR ownership rules and reports inherited overflow as a warning.
       - name: Classify live cache entries (read only)
+        if: github.event_name != 'merge_group'
         continue-on-error: true
         env:
           GITHUB_TOKEN: ${{ github.token }}
@@ -81,9 +83,50 @@ jobs:
           --from git+https://github.com/zackees/ci.yml@5ac6eed923bbc6c78c088b96e5ffcc977ad20701
           ci-lint cache audit --repo "$GITHUB_WORKSPACE" --default-branch master
       - name: Check live cache retention target (read only)
+        if: github.event_name != 'merge_group'
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: >-
           uv tool run --python 3.12
           --from git+https://github.com/zackees/ci.yml@5ac6eed923bbc6c78c088b96e5ffcc977ad20701
           ci-lint cache budget --repo "$GITHUB_WORKSPACE" --default-branch master
+
+  # Merge queue gate. The queue tests the exact merge result with the same
+  # smoke inventory the standalone wrappers run on PRs; GitHub cannot require
+  # a check spanning workflows, so these jobs live beside the required summary.
+  queue-unit-linux:
+    if: github.event_name == 'merge_group'
+    uses: ./.github/workflows/template_unit_test.yml
+    with:
+      os: ubuntu-latest
+      build-mode: debug-thin
+      full-suite: false
+
+  queue-unit-windows:
+    if: github.event_name == 'merge_group'
+    uses: ./.github/workflows/template_unit_test.yml
+    with:
+      os: windows-latest
+      full-suite: false
+
+  queue-examples-linux:
+    if: github.event_name == 'merge_group'
+    uses: ./.github/workflows/template_example_test.yml
+    with:
+      os: ubuntu-latest
+      build-mode: debug-thin
+      example-group: CompileTests
+
+  # Required by the master ruleset on PRs and in the queue. Fork PRs skip
+  # `validate` and get no hosted CI until a maintainer enqueues them, so
+  # reviewing a fork PR's workflow changes remains a precondition of enqueueing.
+  ci-summary:
+    name: CI summary
+    if: always()
+    needs: [validate, queue-unit-linux, queue-unit-windows, queue-examples-linux]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check job results
+        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+        run: exit 1

@@ -260,6 +260,10 @@ FL_REQUIRE_LT((map_range<int, int, long>(x, 0, 100, 0, 1000)), max_value)
 
 ---
 
+## No main() in Test Files
+
+The shared runner calls registered `FL_TEST_CASE`s, so a `main()` under `tests/` never runs and its checks silently do nothing. `TestMainChecker` fails lint on one. For build-flag variants, keep the flags on a dedicated library in `tests/meson.build` and link a normal `FL_TEST_FILE` test DLL to it. A real entry point needs `// allow-test-main: <why>` on the same or preceding line; the reason is required. `tests/profile/` is exempt because those are standalone benchmarks.
+
 ## Test File Creation Guidelines
 
 **🚨 CRITICAL: Minimize test file proliferation - Consolidate tests whenever possible**

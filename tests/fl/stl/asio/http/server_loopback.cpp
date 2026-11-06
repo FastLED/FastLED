@@ -9,8 +9,11 @@
 #include "fl/net/http/fetch.h"
 #include "fl/log/log.h"
 #include "fl/task/executor.h"
+#include "test.h"
 
-int main() {
+FL_TEST_FILE(FL_FILEPATH) {
+
+FL_TEST_CASE("HTTP server answers loopback requests") {
     FL_WARN("Phase 3: Internal Loopback Test");
     FL_WARN("=================================");
 
@@ -34,11 +37,7 @@ int main() {
     });
 
     // Start server
-    if (!server.start(47801)) {
-        FL_WARN("✗ FAILED: Could not start server");
-        FL_WARN("Error: " << server.last_error());
-        return 1;
-    }
+    FL_REQUIRE_MESSAGE(server.start(47801), server.last_error());
 
     FL_WARN("✓ Server started on port 47801");
 
@@ -148,11 +147,8 @@ int main() {
     FL_WARN("Results: " << passed << "/" << (passed + failed) << " passed");
     FL_WARN("=================================");
 
-    if (failed > 0) {
-        FL_WARN("✗ Phase 3 FAILED");
-        return 1;
-    }
-
-    FL_WARN("✓ Phase 3 PASSED - All loopback tests successful");
-    return 0;
+    FL_CHECK_EQ(failed, 0);
+    FL_CHECK_EQ(passed, 3);
 }
+
+} // FL_TEST_FILE

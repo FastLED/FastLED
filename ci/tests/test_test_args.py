@@ -4,9 +4,12 @@ from ci.util import test_args
 from ci.util.test_args import parse_args
 
 
-def test_tiny_layout_query_bypasses_host_dll_smart_selection() -> None:
-    parsed = parse_args(["--unit", "color_profile_tiny_layout"])
-    assert parsed.test == "color_profile_tiny_layout"
+@pytest.mark.parametrize(
+    "target", ["color_profile_tiny_layout", "engine_worker_defaults_runtime"]
+)
+def test_isolated_query_bypasses_host_dll_smart_selection(target: str) -> None:
+    parsed = parse_args(["--unit", target])
+    assert parsed.test == target
     assert parsed.cpp
     assert parsed.unit
 
