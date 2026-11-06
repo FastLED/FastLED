@@ -1,5 +1,8 @@
 // IWYU pragma: private
 
+// Legacy copy: fastpin_arm.h dispatches to teensy4_common/fastpin_arm_mxrt1062.h
+// and nothing includes this file, so it has no software SPI BitbangPin policy.
+
 #ifndef __FASTPIN_ARM_MXRT1062_H
 #define __FASTPIN_ARM_MXRT1062_H
 
