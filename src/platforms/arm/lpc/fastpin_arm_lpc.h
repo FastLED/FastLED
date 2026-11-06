@@ -7,9 +7,12 @@
 #include "fl/stl/bit_cast.h"
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/static_assert.h"
+#include "fl/stl/noexcept.h"
+#include "fl/stl/type_traits.h"
 #include "fl/system/fastpin_base.h"
 #include "platforms/arm/is_arm.h"
 #include "platforms/arm/lpc/is_lpc.h"
+#include "platforms/shared/spi_bitbang/bitbang_pin.h"
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_DEPRECATED_REGISTER
@@ -124,8 +127,9 @@ public:
         *port = val;
     }
 
-    inline static port_t hival() __attribute__((always_inline)) { return *lpc_detail::lpc_gpio_pin() |  _MASK; }
-    inline static port_t loval() __attribute__((always_inline)) { return *lpc_detail::lpc_gpio_pin() & ~_MASK; }
+    // Reading SET returns the output latch; reading PIN returns pin state.
+    inline static port_t hival() __attribute__((always_inline)) { return *lpc_detail::lpc_gpio_set() |  _MASK; }
+    inline static port_t loval() __attribute__((always_inline)) { return *lpc_detail::lpc_gpio_set() & ~_MASK; }
     // Expose PIN[0] as the "port" so the clockless C++ driver can derive the
     // SET / CLR offsets at compile time (it uses HI_OFFSET / LO_OFFSET as
     // byte offsets from this pointer).
@@ -136,6 +140,35 @@ public:
 
     inline static bool isset() __attribute__((always_inline)) {
         return (*lpc_detail::lpc_gpio_pin() & _MASK) != 0;
+    }
+};
+
+/// True only for FastPin specializations backed by the real modern LPC _ARMPIN.
+template <u8 PIN, u32 MASK>
+constexpr bool isLpcHardwarePin(const _ARMPIN<PIN, MASK>*) { return true; }
+constexpr bool isLpcHardwarePin(const void*) { return false; }
+
+/// Exclusive bulk writes stream through PIN[0], from a snapshot read through SET
+/// because reading SET returns the output latch and reading PIN returns pin state.
+/// Every other data update uses SET/CLR. kMinWriteCycles stays at its
+/// default: no GPIO write latency has been measured, so existing padding is kept.
+template <u8 PIN> struct BitbangPin<FastPin<PIN>> : BitbangPinDefaults<FastPin<PIN>> {
+    static constexpr bool kAtomicWrite = isLpcHardwarePin(static_cast<const FastPin<PIN>*>(nullptr));
+    static constexpr bool kTwoWriteStream = kAtomicWrite;
+    template <u8 BIT>
+    FASTLED_FORCE_INLINE static void write(u8 value) FL_NO_EXCEPT {
+        writeImpl<BIT>(value, fl::integral_constant<bool, kAtomicWrite>());
+    }
+
+  private:
+    template <u8 BIT>
+    FASTLED_FORCE_INLINE static void writeImpl(u8 value, fl::integral_constant<bool, true>) FL_NO_EXCEPT {
+        writeBitSetClearNoBranch<BIT>(value, FastPin<PIN>::mask(), FastPin<PIN>::sport(), FastPin<PIN>::cport());
+    }
+    // A user-defined FastPin need not have sport()/cport(), so it keeps hi()/lo().
+    template <u8 BIT>
+    FASTLED_FORCE_INLINE static void writeImpl(u8 value, fl::integral_constant<bool, false>) FL_NO_EXCEPT {
+        BitbangPinDefaults<FastPin<PIN>>::template write<BIT>(value);
     }
 };
 
