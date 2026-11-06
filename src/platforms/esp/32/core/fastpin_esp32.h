@@ -15,6 +15,9 @@
 #include "fl/system/fastpin.h"
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/noexcept.h"
+#include "platforms/delaycycles.h"
+#include "platforms/esp/32/core/clock_cycles.h"
+#include "platforms/shared/spi_bitbang/bitbang_pin.h"
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_DEPRECATED_REGISTER
@@ -288,6 +291,42 @@ _FL_DEFPIN(56); _FL_DEFPIN(57); _FL_DEFPIN(58); _FL_DEFPIN(59);
 _FL_DEFPIN(60); _FL_DEFPIN(61); _FL_DEFPIN(62); _FL_DEFPIN(63);
 
 #define HAS_HARDWARE_PIN_SUPPORT
+
+/// Separates the data store from the clock edge, which can target the same
+/// set/clear register. Espressif erratum CPU-3.3 (ESP32 v0.0, fixed in v1.0) can
+/// lose consecutive writes to one address. The RISC-V fence includes device I/O,
+/// which `fence rw, rw` in FL_MEMORY_BARRIER does not.
+FASTLED_FORCE_INLINE void gpioStoreBarrier() FL_NO_EXCEPT {
+#if defined(__XTENSA__)
+    __asm__ __volatile__("memw" : : : "memory");
+#else
+    __asm__ __volatile__("fence" : : : "memory");
+#endif
+}
+
+/// Software SPI data updates are atomic per pin. Whole-port streaming stays off
+/// because a port snapshot could overwrite concurrent GPIO updates.
+template <u8 PIN> struct BitbangPin<FastPin<PIN>> : BitbangPinDefaults<FastPin<PIN>> {
+    static constexpr bool kAtomicWrite = true;
+    // The inline platform template avoids a call per clock phase; the visible
+    // fl::delaycycles is only a declaration with an out-of-line definition.
+    // Long waits use the cycle counter so they cannot expand to a NOP run.
+    template <fl::cycle_t CYCLES>
+    FASTLED_FORCE_INLINE static void delay() FL_NO_EXCEPT {
+        if (CYCLES > 32) {
+            const u32 start = __clock_cycles();
+            while (static_cast<u32>(__clock_cycles() - start) < static_cast<u32>(CYCLES)) {}
+        } else {
+            ::delaycycles<(CYCLES > 32 ? 0 : CYCLES)>();
+        }
+    }
+    template <u8 BIT>
+    FASTLED_FORCE_INLINE static void write(u8 value) FL_NO_EXCEPT {
+        gpioStoreBarrier();
+        writeBitSetClearNoBranch<BIT>(value, FastPin<PIN>::mask(), FastPin<PIN>::sport(), FastPin<PIN>::cport());
+        gpioStoreBarrier();
+    }
+};
 
 #pragma GCC diagnostic pop
 }  // namespace fl

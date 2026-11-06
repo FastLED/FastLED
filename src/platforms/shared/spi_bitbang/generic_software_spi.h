@@ -62,10 +62,11 @@ class GenericSoftwareSPIOutput {
 #ifdef FAST_SPI_INTERRUPTS_WRITE_PINS
 		return true;
 #else
-		// Keep the existing combined-port optimization. Separate
-		// ports can use atomic set/clear writes without whole-port snapshots.
+		// Keep the combined-port optimization where a pin policy opts into
+		// streaming. Otherwise atomic pins never take whole-port snapshots.
 		return BitbangPin<fl::FastPin<DATA_PIN>>::kAtomicWrite &&
-			fl::FastPin<DATA_PIN>::port() != fl::FastPin<CLOCK_PIN>::port();
+			(!kCanStreamSamePort ||
+			 fl::FastPin<DATA_PIN>::port() != fl::FastPin<CLOCK_PIN>::port());
 #endif
 	}
 
@@ -203,37 +204,11 @@ public:
 	/// @tparam BIT the bit index in the byte
 	/// @param b the byte to read the bit from
 	template <u8 BIT> __attribute__((always_inline, hot)) inline static void writeBit(u8 b) FL_NO_EXCEPT {
-#ifndef FL_IS_ESP32
 		BitbangPin<fl::FastPin<DATA_PIN>>::template write<BIT>(b);
 		fl::FastPin<CLOCK_PIN>::hi();
 		if (kNeedsGpioPadding) { CLOCK_HI_DELAY; }
 		fl::FastPin<CLOCK_PIN>::lo();
 		if (kNeedsGpioPadding) { CLOCK_LO_DELAY; }
-#else
-		//cli();
-		if(b & (1 << BIT)) {
-			fl::FastPin<DATA_PIN>::hi();
-#ifdef FL_IS_ESP32
-			// try to ensure we never have adjacent write opcodes to the same register
-			fl::FastPin<CLOCK_PIN>::lo();
-			fl::FastPin<CLOCK_PIN>::hi(); CLOCK_HI_DELAY;
-			fl::FastPin<CLOCK_PIN>::toggle(); CLOCK_LO_DELAY;
-#else
-			fl::FastPin<CLOCK_PIN>::hi(); CLOCK_HI_DELAY;
-			fl::FastPin<CLOCK_PIN>::lo(); CLOCK_LO_DELAY;
-#endif
-		} else {
-			fl::FastPin<DATA_PIN>::lo();
-			fl::FastPin<CLOCK_PIN>::hi(); CLOCK_HI_DELAY;
-#ifdef FL_IS_ESP32
-			// try to ensure we never have adjacent write opcodes to the same register
-			fl::FastPin<CLOCK_PIN>::toggle(); CLOCK_HI_DELAY;
-#else
-			fl::FastPin<CLOCK_PIN>::lo(); CLOCK_LO_DELAY;
-#endif
-		}
-		//sei();
-#endif
 	}
 
 private:

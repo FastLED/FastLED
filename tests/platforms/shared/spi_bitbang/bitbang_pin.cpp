@@ -10,6 +10,12 @@ template <u8 Bit> void checkSetClear(u32 mask) {
         volatile u32 set = 0x12345678;
         volatile u32 clear = 0x87654321;
         writeBitSetClear<Bit>(static_cast<u8>(value), mask, &set, &clear);
+        if (value & (1 << Bit)) { FL_CHECK_EQ(set, mask); } else { FL_CHECK_EQ(clear, mask); }
+        volatile u32 set2 = 0;
+        volatile u32 clear2 = 0;
+        writeBitSetClearNoBranch<Bit>(static_cast<u8>(value), mask, &set2, &clear2);
+        FL_CHECK_EQ(set2, (value & (1 << Bit)) ? mask : 0U);
+        FL_CHECK_EQ(clear2, (value & (1 << Bit)) ? 0U : mask);
         if (value & (1 << Bit)) {
             FL_CHECK_EQ(set, mask);
             FL_CHECK_EQ(clear, 0x87654321);

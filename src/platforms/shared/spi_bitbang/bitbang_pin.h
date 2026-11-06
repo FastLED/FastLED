@@ -35,6 +35,22 @@ FASTLED_FORCE_INLINE void writeBitSetClear(u8 value, u32 mask,
     *target = mask;
 }
 
+/// writeBitSetClear without a data-dependent branch, for targets where the
+/// ternary compiles to one. The asm keeps GCC from restoring the branch, so this
+/// costs extra instructions even when the bit is known at compile time.
+template <u8 BIT>
+FASTLED_FORCE_INLINE void writeBitSetClearNoBranch(u8 value, u32 mask,
+                                                   volatile u32* set,
+                                                   volatile u32* clear) FL_NO_EXCEPT {
+    uptr selected = static_cast<uptr>(0) - ((value >> BIT) & 1U);
+    __asm__ __volatile__("" : "+r"(selected));
+    // Plain casts: at -Os, fl::bit_cast is an out-of-line call per address.
+    const uptr setAddr = reinterpret_cast<uptr>(set); // ok reinterpret cast
+    const uptr clearAddr = reinterpret_cast<uptr>(clear); // ok reinterpret cast
+    volatile u32* target = reinterpret_cast<volatile u32*>(clearAddr ^ ((setAddr ^ clearAddr) & selected)); // ok reinterpret cast
+    *target = mask;
+}
+
 /// Default pin access; a platform may specialize the data-write operation
 /// while the generic SPI writer continues to own bit order and clock timing.
 template <class Pin> struct BitbangPinDefaults {
