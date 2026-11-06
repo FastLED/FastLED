@@ -1,3 +1,6 @@
+// The compile-only SPI audit uses its own retained probes, not the RPC harness.
+#if !defined(FL_SOFTWARE_SPI_COMPILE_PROBE)
+
 // Performance benchmark RPC bindings — the autoresearch perf framework
 // itself: perfProbeMemcpy (SRAM bandwidth), perfProbeNop (probe overhead
 // floor), perfProbeRepeat (probe variance), and wave2dPerf (Wave2D solver
@@ -836,3 +839,5 @@ void AutoResearchRemoteControl::bindBenchmarkMethods(fl::Remote& remote) {
 }
 
 #endif  // FL_PLATFORM_HAS_LARGE_MEMORY
+
+#endif // !FL_SOFTWARE_SPI_COMPILE_PROBE

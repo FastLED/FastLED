@@ -1,3 +1,6 @@
+// The compile-only SPI audit uses its own retained probes, not the RPC harness.
+#if !defined(FL_SOFTWARE_SPI_COMPILE_PROBE)
+
 // examples/AutoResearch/AutoResearchNet.cpp
 //
 // Network autoresearch implementation for ESP32.
@@ -1628,3 +1631,5 @@ void pollNetServer() {}
 #endif  // FL_IS_ESP32 || FL_IS_RP2350
 
 #endif  // FL_PLATFORM_HAS_LARGE_MEMORY
+
+#endif // !FL_SOFTWARE_SPI_COMPILE_PROBE

@@ -1,0 +1,22 @@
+{
+  "scope": "Actual namespace/profile diagnostic data from unaccepted V2; not a managed proof or admission receipt.",
+  "source": ".build/spi-esp32-c6-selection-proof/fastled3-wt-spi-esp32-c6-selection-proof-zi40zytb/bootstrap-native-inverse-control/build-info.json",
+  "source_sha256": "98d9eedc9bfc6afa88c21a27250e6bdbc52d6067282863c3954544e99fa749c6",
+  "profile": {
+    "env": "esp32c6",
+    "board": "ESP32_C6_DEVKITC_1",
+    "platform": "espressif32",
+    "cxx_flags": [
+      "-DF_CPU=160000000L",
+      "-march=rv32imac_zicsr_zifencei"
+    ],
+    "cc_path": "/home/niteris/.fbuild/dev/cache/toolchains/toolchain-riscv32-esp/d62421ecad92b427/riscv32-esp-elf-14.2.0_20260121-x86_64-linux-gnu/riscv32-esp-elf/bin/riscv32-esp-elf-gcc"
+  },
+  "required_compiler_suffix": [
+    "riscv32-esp-elf-14.2.0_20260121-x86_64-linux-gnu",
+    "riscv32-esp-elf",
+    "bin",
+    "riscv32-esp-elf-gcc"
+  ],
+  "cxx_flags_scope": "CPU and ISA only; this diagnostic fixture does not represent the complete compiler configuration. The source capture and source_sha256 retain the original full build-info identity."
+}

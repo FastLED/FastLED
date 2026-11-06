@@ -1,3 +1,6 @@
+// The compile-only SPI audit uses its own retained probes, not the RPC harness.
+#if !defined(FL_SOFTWARE_SPI_COMPILE_PROBE)
+
 // Math / compute kernel RPC bindings: SIMD correctness + speed, Animartrix
 // Perlin generator bench, wave8 expansion bench, PARLIO encoder/streaming
 // validation. These exercise math/compute paths (not the perf probes which
@@ -588,3 +591,5 @@ void AutoResearchRemoteControl::bindMathMethods(fl::Remote& remote) {
 }
 
 #endif  // FL_PLATFORM_HAS_LARGE_MEMORY
+
+#endif // !FL_SOFTWARE_SPI_COMPILE_PROBE

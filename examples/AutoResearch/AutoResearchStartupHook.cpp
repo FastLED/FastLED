@@ -1,3 +1,6 @@
+// The compile-only SPI audit uses its own retained probes, not the RPC harness.
+#if !defined(FL_SOFTWARE_SPI_COMPILE_PROBE)
+
 // Early-boot loop guard: the bench recovers by itself when a firmware hangs
 // or crash-loops, including before USB comes up. Each boot that never reaches
 // loop() counts toward the escape; the third drops into the bootloader so the
@@ -33,3 +36,5 @@ FL_WATCHDOG_BOOT_GUARD(AUTORESEARCH_BOOT_GUARD_ESCAPE_BOOTS,
                        AUTORESEARCH_BOOT_GUARD_TIMEOUT_MS);
 
 #endif  // FL_PLATFORM_HAS_LARGE_MEMORY
+
+#endif // !FL_SOFTWARE_SPI_COMPILE_PROBE

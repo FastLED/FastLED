@@ -1,3 +1,6 @@
+// The compile-only SPI audit uses its own retained probes, not the RPC harness.
+#if !defined(FL_SOFTWARE_SPI_COMPILE_PROBE)
+
 // Request-scoped public-API memory benches (#3179 and #4733).
 #include "fl/system/sketch_macros.h"
 
@@ -370,3 +373,5 @@ void bindMemoryBench(fl::Remote& remote) {
 }
 
 #endif
+
+#endif // !FL_SOFTWARE_SPI_COMPILE_PROBE

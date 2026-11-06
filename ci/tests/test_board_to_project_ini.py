@@ -238,5 +238,58 @@ class TestEspReleaseExceptionPolicy(unittest.TestCase):
         self.assertEqual(project.get_build_flags(board.board_name), ["-fexceptions"])
 
 
+class TestCi1306NativeProfiles(unittest.TestCase):
+    def test_ci1306_default_profile_uses_native_vendor_configuration(self) -> None:
+        board = create_board("ci1306")
+        self.assertEqual(board.board_name, "ci1306")
+        self.assertEqual(board.platform, "ci13xx")
+        self.assertEqual(board.framework, "arduino")
+        self.assertEqual(board.get_real_board_name(), "ci1306")
+        self.assertIsNone(board.build_flags)
+        self.assertIsNone(board.build_unflags)
+        self.assertIsNone(board.platform_packages)
+        self.assertIsNone(board.board_build_mcu)
+        self.assertIsNone(board.board_build_core)
+        self.assertIsNone(board.board_build_options)
+        lines = {line.strip() for line in board.to_project_ini().splitlines()}
+        self.assertTrue(
+            {
+                "[env:ci1306]",
+                "board = ci1306",
+                "platform = ci13xx",
+                "framework = arduino",
+            }.issubset(lines)
+        )
+        self.assertNotIn("-fno-lto", lines)
+        self.assertFalse(any(line.startswith("board_build.") for line in lines))
+
+    def test_ci1306_no_lto_alias_keeps_board_identity_and_removes_lto(self) -> None:
+        board = create_board("ci1306_nolto")
+        self.assertEqual(board.board_name, "ci1306_nolto")
+        self.assertEqual(board.real_board_name, "ci1306")
+        self.assertEqual(board.platform, "ci13xx")
+        self.assertEqual(board.framework, "arduino")
+        self.assertEqual(board.build_unflags, ["-flto"])
+        self.assertEqual(board.build_flags, ["-fno-lto"])
+        self.assertIsNone(board.platform_packages)
+        self.assertIsNone(board.board_build_options)
+        ini = board.to_project_ini()
+        lines = {line.strip() for line in ini.splitlines()}
+        self.assertTrue(
+            {
+                "[env:ci1306_nolto]",
+                "board = ci1306",
+                "platform = ci13xx",
+                "framework = arduino",
+                "build_unflags = -flto",
+                "-fno-lto",
+            }.issubset(lines)
+        )
+        project = ProjectIni.parseString(ini)
+        self.assertIn("-fno-lto", project.get_build_flags("ci1306_nolto"))
+        self.assertNotIn("-flto", project.get_build_flags("ci1306_nolto"))
+        self.assertFalse(any(line.startswith("board_build.") for line in lines))
+
+
 if __name__ == "__main__":
     unittest.main()

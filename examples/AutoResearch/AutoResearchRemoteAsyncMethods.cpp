@@ -1,3 +1,6 @@
+// The compile-only SPI audit uses its own retained probes, not the RPC harness.
+#if !defined(FL_SOFTWARE_SPI_COMPILE_PROBE)
+
 // Async primitive RPC bindings — exercise fl::task::coroutine() / await()
 // and fl::Promise semantics: basic create/complete, stop, concurrent,
 // await, await-error, promise callbacks, promise-catch callbacks, chained
@@ -563,3 +566,5 @@ void AutoResearchRemoteControl::bindAsyncMethods(fl::Remote& remote) {
 }
 
 #endif  // FL_PLATFORM_HAS_LARGE_MEMORY
+
+#endif // !FL_SOFTWARE_SPI_COMPILE_PROBE

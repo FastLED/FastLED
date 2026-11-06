@@ -14,7 +14,9 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[2]
-FASTPIN = ROOT / "src" / "platforms" / "esp" / "32" / "core" / "fastpin_esp32.h"
+OUTPUT_POLICY = (
+    ROOT / "src" / "platforms" / "esp" / "32" / "core" / "output_pin_policy.h"
+)
 PROBE = ROOT / "src" / "platforms" / "esp" / "32" / "pin_probe_esp32.hpp"
 REMOTE = ROOT / "examples" / "AutoResearch" / "AutoResearchRemote.cpp"
 
@@ -64,7 +66,7 @@ _CHIP = re.compile(r"defined\(FL_IS_(ESP_32\w+)\)")
 
 
 def _library_masks() -> dict[str, set[int]]:
-    source = FASTPIN.read_text(encoding="utf-8")
+    source = OUTPUT_POLICY.read_text(encoding="utf-8")
     masks: dict[str, set[int]] = {}
     for cond, body in re.findall(
         r"#(?:el)?if ([^\n]*)\n(?:(?://[^\n]*|\s*)\n)*"

@@ -1,0 +1,219 @@
+{
+  "machine": 243,
+  "elf_sha256": "28de04c09ad55553ab6b5696b20fe069b15c367eac235d59153c130e0d8ffb6a",
+  "symbols": {
+    "fl::pinMode(int, fl::PinMode)": {
+      "address": 1107306550,
+      "size": 142,
+      "section": ".flash.text",
+      "file_offset": 71734,
+      "bytes_hex": "797122d426d24ad006d600182a89ae84f53d11c15d37f94763ec27034a8605458145232204fe232404fe232604fe97e0fffde7808003232ca4fc232eb4fc89476381f40463cc9700054795c06388e402b250225492540259456182808d47e399f4fe85472320f4fe2324f4fe19a02320e4fe130584fdef007045d9bf2320f4fecdbf85472320f4fe2322f4feddb7",
+      "kind": "F"
+    },
+    "fl::pwm_state::releaseChannel(fl::pwm_state::PwmPinState*)": {
+      "address": 1107306480,
+      "size": 70,
+      "section": ".flash.text",
+      "file_offset": 71664,
+      "bytes_hex": "31c1011122cc26ca06ce0010aa840841634505028145d5351305c4fe453dfd579cc023a20400239404001305c4fe553d6244f240d244056149bff2406244d244056182808280",
+      "kind": "F"
+    },
+    "fl::pwm_state::findByPin(int)": {
+      "address": 1107306306,
+      "size": 60,
+      "section": ".flash.text",
+      "file_offset": 71490,
+      "bytes_hex": "411122c406c60008b7f78040aa8603a5879919cd0147d1452146b307b702aa9703a80700630ad8000507e318c7fe0145b2402244410182803e85ddbf",
+      "kind": "F"
+    },
+    "esp32_global_generic_producer": {
+      "address": 1107298918,
+      "size": 534,
+      "section": ".flash.text",
+      "file_offset": 64102,
+      "bytes_hex": "411106c622c44ac0000826c237070342b707034283a707130325c712370703428325471337070342032687123707034283264712aa973707034203270712ae97b297b697ba97854537f780400945232ef796ef10f05785450d45ef10705737f980400327899661cfb7f7804083a7c796144393c7f7fff58f1cc3b7b4804003c50466eff0afd503c70466b7f7804083a74797058bb7f4804071c3ddc737f78040032787979443558f98c30327899655c3b7f7804083a7c796144393c7f7fff58f1cc383278996cdcb37f780400327c7969443558f98c3a1670147938727a105070507050705070507050705070507050705070507050705070507050705070507050705070507050705070507050705070507050705070507050705070507fd17ddff83a74496b1ef0d45ef1010399305f5ffb335b0000d45ef10303781a881450d45ef10903615bf85450945ef10f035a9bf81450d45ef105035a5b799cb37f780400327879794431347f7ff758f98c389bf81450945c5b785450d45ef10f03299bf37f780400327c79698c3a1670147938727a105070507050705070507050705070507050705070507050705070507050705070507050705070507050705070507050705070507050705070507050705070507fd17ddffb7f7804083a7079781cf37f7804003278797b240224498c392440249410182800945ef10102c2244b240924402499305f5ffb335b000094541016f109029",
+      "kind": "F"
+    },
+    "gpio_config": {
+      "address": 1107309826,
+      "size": 330,
+      "section": ".flash.text",
+      "file_offset": 75010,
+      "bytes_hex": "79714ece5ec683290500832b450006d622d426d24ad052cc56ca5ac862c466c26ac0b3e77901cdcf014463cb090a370a0960e57a37f90060717baa84854c110afd1a056d61097d1b7d4c22864e85de8597d0fffde780e03f058935cd2285812b19c122851d259c442285858bd5cfeff01fbe9c442285918bddcbb5359c442285898bc5cb093bdc442285ddc7eff06ff29c482285cdc7eff03f86cc482285eff07f98dc482285d9cfeff0ffa8930744ff93f7f70f63e8fc0083270900b3f767012320f9001317240052971c43b3f75701b3e7a7011cc30504e31984f701453da0976080fee78040c3b715034237160342aa861387459f0545130646ad9385459f976080fee780c0b013052010b250225492540259f249624ad24a424bb24b224c924c024d45618280eff00fe199b7253bb1b7eff0dfb981bfeff00ff191bfeff01f85a1bfeff03fa995b7",
+      "kind": "F"
+    },
+    "selection_gpio_config_size": {
+      "address": 1107493168,
+      "size": 4,
+      "section": ".flash.rodata",
+      "file_offset": 401712,
+      "bytes_hex": "18000000",
+      "kind": "O",
+      "uint32_le": 24
+    },
+    "selection_gpio_mode_input": {
+      "address": 1107493152,
+      "size": 4,
+      "section": ".flash.rodata",
+      "file_offset": 401696,
+      "bytes_hex": "01000000",
+      "kind": "O",
+      "uint32_le": 1
+    },
+    "selection_gpio_mode_input_output": {
+      "address": 1107493160,
+      "size": 4,
+      "section": ".flash.rodata",
+      "file_offset": 401704,
+      "bytes_hex": "03000000",
+      "kind": "O",
+      "uint32_le": 3
+    },
+    "selection_gpio_mode_offset": {
+      "address": 1107493164,
+      "size": 4,
+      "section": ".flash.rodata",
+      "file_offset": 401708,
+      "bytes_hex": "08000000",
+      "kind": "O",
+      "uint32_le": 8
+    },
+    "selection_gpio_mode_output": {
+      "address": 1107493156,
+      "size": 4,
+      "section": ".flash.rodata",
+      "file_offset": 401700,
+      "bytes_hex": "02000000",
+      "kind": "O",
+      "uint32_le": 2
+    },
+    "selection_public_pin_mode_output": {
+      "address": 1107493172,
+      "size": 4,
+      "section": ".flash.rodata",
+      "file_offset": 401716,
+      "bytes_hex": "01000000",
+      "kind": "O",
+      "uint32_le": 1
+    }
+  },
+  "absolute_symbols": {
+    "__ashldi3": {
+      "address": 1073744028,
+      "size": 40,
+      "section_index": 65521,
+      "symbol_info": 18,
+      "symbol_other": 0,
+      "symbol_table_file_offset": 5645876,
+      "symbol_bytes_hex": "d44b01009c080040280000001200f1ff",
+      "kind": "F",
+      "section": "*ABS*"
+    }
+  },
+  "rom_linker_binding": {
+    "path": "/home/niteris/.fbuild/dev/cache/platforms/framework-arduinoespressif32/9ef436ac06b7bf7f/3.3.5/esp32-3.3.5/tools/esp32-arduino-libs/esp32c6/ld/esp32c6.rom.libgcc.ld",
+    "sha256": "6f601e0d26b1c9e46160edab23fad21d73fe3a1a6e0deb616906604609a0c680",
+    "statement": "__ashldi3 = 0x4000089c;"
+  },
+  "sdk_reservation": {
+    "kind": "pinned-c6-noload-rodata-reservation",
+    "image_mapping_qualified": false,
+    "text_index": 13,
+    "dummy_index": 14,
+    "reservation_load_index": 3,
+    "origin": 1107296288,
+    "reserved_size": 196608,
+    "scripts": {
+      "memory.ld": {
+        "path": "/home/niteris/.fbuild/dev/cache/platforms/framework-arduinoespressif32/9ef436ac06b7bf7f/3.3.5/esp32-3.3.5/tools/esp32-arduino-libs/esp32c6/ld/memory.ld",
+        "sha256": "56f760762733ac2a37ff4b738f5a066d576f3f67c9add19966466c5f3a515155"
+      },
+      "sections.ld": {
+        "path": "/home/niteris/.fbuild/dev/cache/platforms/framework-arduinoespressif32/9ef436ac06b7bf7f/3.3.5/esp32-3.3.5/tools/esp32-arduino-libs/esp32c6/ld/sections.ld",
+        "sha256": "31726567564a8bea7f39930cce429eb3134f870be25c974fead75e93e43fc94f"
+      }
+    },
+    "conditional_elf_only": true,
+    "text_section_header": [
+      177,
+      1,
+      6,
+      1107296288,
+      61472,
+      140614,
+      0,
+      0,
+      2,
+      0
+    ],
+    "reservation_section_header": [
+      189,
+      8,
+      3,
+      1107296288,
+      204832,
+      196608,
+      0,
+      0,
+      1,
+      0
+    ],
+    "reservation_load_header": [
+      1,
+      204832,
+      1107296288,
+      1107296288,
+      266628,
+      266628,
+      6,
+      4096
+    ],
+    "real_data_sections": [
+      {
+        "index": 15,
+        "header": [
+          209,
+          1,
+          2,
+          1107492896,
+          401440,
+          256,
+          0,
+          0,
+          16,
+          0
+        ]
+      },
+      {
+        "index": 16,
+        "header": [
+          224,
+          1,
+          3,
+          1107493152,
+          401696,
+          52980,
+          0,
+          0,
+          16,
+          0
+        ]
+      },
+      {
+        "index": 18,
+        "header": [
+          252,
+          1,
+          2,
+          1107546132,
+          454676,
+          16784,
+          0,
+          0,
+          4,
+          0
+        ]
+      }
+    ]
+  }
+}

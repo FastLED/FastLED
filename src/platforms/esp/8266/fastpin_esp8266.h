@@ -155,6 +155,7 @@ _FL_DEFPIN(8,15); _FL_DEFPIN(9,3); _FL_DEFPIN(10,1);
 #define HAS_HARDWARE_PIN_SUPPORT
 
 template <u8 PIN> struct BitbangPin<FastPin<PIN>> {
+    static constexpr bool kCalibratedTiming = true;
     static constexpr bool kAtomicWrite = true;
     static constexpr bool kTwoWriteStream = FastPin<PIN>::kRealPin < 16;
     // Normal GPIO writes serialize through the 80 MHz peripheral bus. The

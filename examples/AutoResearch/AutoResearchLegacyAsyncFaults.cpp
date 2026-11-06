@@ -1,3 +1,6 @@
+// The compile-only SPI audit uses its own retained probes, not the RPC harness.
+#if !defined(FL_SOFTWARE_SPI_COMPILE_PROBE)
+
 // Dedicated failure-test firmware only. Build with FL_RMT4_FAULT_TEST=1 and:
 // -Wl,--wrap=xTaskCreatePinnedToCore -Wl,--wrap=xQueueCreateMutex
 // -Wl,--wrap=rmt_driver_install
@@ -88,3 +91,5 @@ esp_err_t __wrap_rmt_driver_install(rmt_channel_t channel, size_t receiveBytes, 
 }
 }
 #endif
+
+#endif // !FL_SOFTWARE_SPI_COMPILE_PROBE

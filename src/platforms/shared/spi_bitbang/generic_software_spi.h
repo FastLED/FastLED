@@ -55,10 +55,16 @@ class GenericSoftwareSPIOutput {
 		BitbangPin<fl::FastPin<DATA_PIN>>::kTwoWriteStream &&
 		BitbangPin<fl::FastPin<CLOCK_PIN>>::kTwoWriteStream;
 	static constexpr bool kNeedsGpioPadding = bitbangPhaseDelay(
-		static_cast<cycle_t>(SPI_SPEED / 2 + (SPI_SPEED & 1)),
+		static_cast<i64>(SPI_SPEED / 2 + (SPI_SPEED & 1)),
 		cycles_from_ns(35, FL_CPU_FREQUENCY()),
 		BitbangPin<fl::FastPin<CLOCK_PIN>>::kMinWriteCycles) > 0;
 	FASTLED_FORCE_INLINE static bool useAtomicWrites() FL_NO_EXCEPT {
+		// No register map means logical per-pin access, even when both null
+		// pointers compare equal. A null identity never denotes a shared port.
+		if (fl::FastPin<DATA_PIN>::port() == nullptr ||
+			fl::FastPin<CLOCK_PIN>::port() == nullptr) {
+			return true;
+		}
 #ifdef FAST_SPI_INTERRUPTS_WRITE_PINS
 		return true;
 #else
@@ -86,6 +92,7 @@ public:
 		// confusing to me)
 		fl::FastPin<DATA_PIN>::setOutput();
 		fl::FastPin<CLOCK_PIN>::setOutput();
+		fl::FastPin<CLOCK_PIN>::lo();
 		release();
 	}
 
@@ -121,6 +128,13 @@ public:
 	}
 
 private:
+	// Preserve the data word's unrelated bits while applying the clock pin's
+	// logical level. hival/loval may clear/set the bit on active-low outputs.
+	FASTLED_FORCE_INLINE static data_t withClockLevel(data_t data, clock_t clock) FL_NO_EXCEPT {
+		const data_t mask = static_cast<data_t>(fl::FastPin<CLOCK_PIN>::mask());
+		return static_cast<data_t>((data & ~mask) | (clock & mask));
+	}
+
 	/// writeByte() implementation with data/clock registers passed in.
 	static void writeByte(u8 b, clock_ptr_t clockpin, data_ptr_t datapin) FL_NO_EXCEPT {
 		writeBit<7>(b, clockpin, datapin);
@@ -173,31 +187,21 @@ public:
 	#define CLOCK_HI_DELAY do { delayNanoseconds(bitbangPhaseNsFromHz(SPI_SPEED)); } while(0);
 	#define CLOCK_LO_DELAY do { delayNanoseconds(bitbangPhaseNsFromHz(SPI_SPEED)); } while(0);
 #else
-	/// We want to make sure that the clock pulse is held high for a minimum of 35 ns.
-	#define MIN_DELAY ((NS(35)>3) ? (NS(35) - 3) : 1)
-
-	/// Half the requested bit period, in cycles, for SPI_SPEED > 10.
+	// Only a calibrated platform may retain the legacy call/GPIO credits.
+	// Other platforms receive the full rounded-up half-period or 35ns floor,
+	// whichever is larger. No call, branch or MMIO latency is assumed.
+	static constexpr bool kCalibratedTiming = BitbangPin<fl::FastPin<CLOCK_PIN>>::kCalibratedTiming;
+	static constexpr i64 kRequestedPhase = static_cast<i64>(SPI_SPEED / 2 + (SPI_SPEED & 1));
+	static constexpr i64 kConservativePhase = bitbangPhaseDelay(
+		kRequestedPhase, cycles_from_ns(35, FL_CPU_FREQUENCY()), 0);
+	#define MIN_DELAY (kCalibratedTiming ? ((NS(35)>3) ? (NS(35)-3) : 1) : kConservativePhase)
 	#define FL_SPI_HALF_PERIOD ((SPI_SPEED - 6) / 2)
-
-	/// Extra cycles to add on top of MIN_DELAY to reach the requested half period.
-	///
-	/// SPI_SPEED is unsigned, so `FL_SPI_HALF_PERIOD - MIN_DELAY` wraps to ~4e9
-	/// whenever the requested half period is shorter than the 35ns minimum
-	/// pulse -- which then becomes the CYCLES template argument of
-	/// delaycycles<>. That is the #974 failure: on a Teensy 3.6 (180 MHz,
-	/// MIN_DELAY = 4) a plain DATA_RATE_MHZ(4) yields SPI_SPEED = 12, so
-	/// (12-6)/2 - 4 = -1 wraps to 4294967295 cycles of NOP. Clamp to zero
-	/// instead: MIN_DELAY has already been emitted and it is longer than the
-	/// half period being asked for, so no additional delay is owed.
 	#define FL_SPI_HI_EXTRA_DELAY \
-		((SPI_SPEED > 10) \
+		(kCalibratedTiming ? ((SPI_SPEED > 10) \
 			? ((FL_SPI_HALF_PERIOD > MIN_DELAY) ? (FL_SPI_HALF_PERIOD - MIN_DELAY) : 0) \
-			: (SPI_SPEED))
-
-	/// Delay for the clock signal 'high' period
+			: SPI_SPEED) : 0)
 	#define CLOCK_HI_DELAY do { BitbangPin<fl::FastPin<CLOCK_PIN>>::template delay<MIN_DELAY>(); BitbangPin<fl::FastPin<CLOCK_PIN>>::template delay<FL_SPI_HI_EXTRA_DELAY>(); } while(0);
-	/// Delay for the clock signal 'low' period
-	#define CLOCK_LO_DELAY do { BitbangPin<fl::FastPin<CLOCK_PIN>>::template delay<((SPI_SPEED > 10) ? FL_SPI_HALF_PERIOD : (SPI_SPEED))>(); } while(0);
+	#define CLOCK_LO_DELAY do { BitbangPin<fl::FastPin<CLOCK_PIN>>::template delay<(kCalibratedTiming ? ((SPI_SPEED > 10) ? FL_SPI_HALF_PERIOD : SPI_SPEED) : kConservativePhase)>(); } while(0);
 #endif
 
 	/// Write the BIT'th bit out via SPI, setting the data pin then strobing the clock
@@ -219,7 +223,9 @@ private:
 		const data_t low = (b & (1U << BIT)) ? datahi_clocklo : datalo_clocklo;
 		fl::FastPin<DATA_PIN>::fastset(port, low);
 		if (kNeedsGpioPadding) { CLOCK_LO_DELAY; }
-		fl::FastPin<DATA_PIN>::fastset(port, low | fl::FastPin<CLOCK_PIN>::mask());
+		// The low word already encodes logical LOW. Toggling just the clock
+		// bit reaches logical HIGH for either normal or inverted GPIO.
+		fl::FastPin<DATA_PIN>::fastset(port, low ^ fl::FastPin<CLOCK_PIN>::mask());
 		if (kNeedsGpioPadding) { CLOCK_HI_DELAY; }
 	}
 
@@ -352,10 +358,14 @@ public:
 
 		} else {
 			// If data and clock are on the same port then we can combine setting the data and clock pins
-			FASTLED_REGISTER data_t datahi_clockhi = fl::FastPin<DATA_PIN>::hival() | fl::FastPin<CLOCK_PIN>::mask();
-			FASTLED_REGISTER data_t datalo_clockhi = fl::FastPin<DATA_PIN>::loval() | fl::FastPin<CLOCK_PIN>::mask();
-			FASTLED_REGISTER data_t datahi_clocklo = fl::FastPin<DATA_PIN>::hival() & ~fl::FastPin<CLOCK_PIN>::mask();
-			FASTLED_REGISTER data_t datalo_clocklo = fl::FastPin<DATA_PIN>::loval() & ~fl::FastPin<CLOCK_PIN>::mask();
+			const clock_t clockhi = fl::FastPin<CLOCK_PIN>::hival();
+			const clock_t clocklo = fl::FastPin<CLOCK_PIN>::loval();
+			const data_t datahi = fl::FastPin<DATA_PIN>::hival();
+			const data_t datalo = fl::FastPin<DATA_PIN>::loval();
+			FASTLED_REGISTER data_t datahi_clockhi = withClockLevel(datahi, clockhi);
+			FASTLED_REGISTER data_t datalo_clockhi = withClockLevel(datalo, clockhi);
+			FASTLED_REGISTER data_t datahi_clocklo = withClockLevel(datahi, clocklo);
+			FASTLED_REGISTER data_t datalo_clocklo = withClockLevel(datalo, clocklo);
 
 			const bool nonempty = len > 0;
 			while(len--) {
@@ -398,10 +408,14 @@ public:
 		} else {
 			// fl::FastPin<CLOCK_PIN>::hi();
 			// If data and clock are on the same port then we can combine setting the data and clock pins
-			FASTLED_REGISTER data_t datahi_clockhi = fl::FastPin<DATA_PIN>::hival() | fl::FastPin<CLOCK_PIN>::mask();
-			FASTLED_REGISTER data_t datalo_clockhi = fl::FastPin<DATA_PIN>::loval() | fl::FastPin<CLOCK_PIN>::mask();
-			FASTLED_REGISTER data_t datahi_clocklo = fl::FastPin<DATA_PIN>::hival() & ~fl::FastPin<CLOCK_PIN>::mask();
-			FASTLED_REGISTER data_t datalo_clocklo = fl::FastPin<DATA_PIN>::loval() & ~fl::FastPin<CLOCK_PIN>::mask();
+			const clock_t clockhi = fl::FastPin<CLOCK_PIN>::hival();
+			const clock_t clocklo = fl::FastPin<CLOCK_PIN>::loval();
+			const data_t datahi = fl::FastPin<DATA_PIN>::hival();
+			const data_t datalo = fl::FastPin<DATA_PIN>::loval();
+			FASTLED_REGISTER data_t datahi_clockhi = withClockLevel(datahi, clockhi);
+			FASTLED_REGISTER data_t datalo_clockhi = withClockLevel(datalo, clockhi);
+			FASTLED_REGISTER data_t datahi_clocklo = withClockLevel(datahi, clocklo);
+			FASTLED_REGISTER data_t datalo_clocklo = withClockLevel(datalo, clocklo);
 
 			fl::u8 *end = data + len;
 
@@ -477,10 +491,14 @@ public:
 
 		} else {
 			// If data and clock are on the same port then we can combine setting the data and clock pins
-			FASTLED_REGISTER data_t datahi_clockhi = fl::FastPin<DATA_PIN>::hival() | fl::FastPin<CLOCK_PIN>::mask();
-			FASTLED_REGISTER data_t datalo_clockhi = fl::FastPin<DATA_PIN>::loval() | fl::FastPin<CLOCK_PIN>::mask();
-			FASTLED_REGISTER data_t datahi_clocklo = fl::FastPin<DATA_PIN>::hival() & ~fl::FastPin<CLOCK_PIN>::mask();
-			FASTLED_REGISTER data_t datalo_clocklo = fl::FastPin<DATA_PIN>::loval() & ~fl::FastPin<CLOCK_PIN>::mask();
+			const clock_t clockhi = fl::FastPin<CLOCK_PIN>::hival();
+			const clock_t clocklo = fl::FastPin<CLOCK_PIN>::loval();
+			const data_t datahi = fl::FastPin<DATA_PIN>::hival();
+			const data_t datalo = fl::FastPin<DATA_PIN>::loval();
+			FASTLED_REGISTER data_t datahi_clockhi = withClockLevel(datahi, clockhi);
+			FASTLED_REGISTER data_t datalo_clockhi = withClockLevel(datalo, clockhi);
+			FASTLED_REGISTER data_t datahi_clocklo = withClockLevel(datahi, clocklo);
+			FASTLED_REGISTER data_t datalo_clocklo = withClockLevel(datalo, clocklo);
 
 			while(pixels.has(1)) {
 				if(FLAGS & FLAG_START_BIT) {

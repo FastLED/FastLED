@@ -1,3 +1,28 @@
+// Keep a separate translation unit with FastLED first: Arduino sketch main.cpp
+// is generated with Arduino.h first, so it cannot test the opposite order.
+#if defined(FL_SOFTWARE_SPI_COMPILE_PROBE)
+#if defined(Arduino_h) || defined(ARDUINO_H) || defined(__INC_FASTSPI_LED2_H)
+#error "SPI include-order probe requires a fresh translation unit without preincluded Arduino/FastLED"
+#endif
+#include <FastLED.h>
+#include <Arduino.h>
+#include "AutoResearchSoftwareSpiPins.h"
+
+using IncludeOrderOutput =
+    ::SoftwareSPIOutput<software_spi_probe::kDataPin,
+                        software_spi_probe::kClockPin, DATA_RATE_MHZ(1)>;
+
+extern "C" FL_KEEP_ALIVE FL_NO_INLINE void software_spi_probe_fastled_first_init() {
+    IncludeOrderOutput output;
+    output.init();
+}
+
+extern "C" FL_KEEP_ALIVE FL_NO_INLINE void software_spi_probe_fastled_first_scalar(fl::u8 value) {
+    IncludeOrderOutput::writeByte(value);
+}
+
+#else
+
 // AutoResearchHelpers.cpp - Helper function implementations
 
 // Gate out under low-memory mode -- the LowMemory bring-up surface
@@ -127,3 +152,5 @@ void printSummaryTable(const fl::vector<fl::DriverTestResult>& driver_results) {
 // Build test matrix configuration from preprocessor defines and available drivers
 
 #endif  // FL_PLATFORM_HAS_LARGE_MEMORY
+
+#endif // FL_SOFTWARE_SPI_COMPILE_PROBE

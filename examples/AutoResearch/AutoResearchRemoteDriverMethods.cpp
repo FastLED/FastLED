@@ -1,3 +1,6 @@
+// The compile-only SPI audit uses its own retained probes, not the RPC harness.
+#if !defined(FL_SOFTWARE_SPI_COMPILE_PROBE)
+
 // LED driver test/benchmark RPC bindings. Today: Teensy 4.x FlexIO RX
 // validation (flexioRxBenchmark, flexioObjectFledTest, flexioRxLoopbackPing).
 // Platform-specific driver tests for other MCUs land here in the future —
@@ -1298,3 +1301,5 @@ void AutoResearchRemoteControl::bindDriverMethods(fl::Remote& remote) {
 }
 
 #endif  // FL_PLATFORM_HAS_LARGE_MEMORY
+
+#endif // !FL_SOFTWARE_SPI_COMPILE_PROBE

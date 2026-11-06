@@ -6,6 +6,7 @@
 #include "fl/stl/noexcept.h"
 #include "fl/system/fastpin_base.h"
 #include "fl/system/pin.h"
+#include "platforms/shared/spi_bitbang/bitbang_pin.h"
 // IWYU pragma: begin_keep
 #include <sam.h>
 // IWYU pragma: end_keep
@@ -95,6 +96,22 @@ template <> class FastPin<0> : public ClearCoreFastPin<0, 0> {};
 template <> class FastPin<1> : public ClearCoreFastPin<1, 1> {};
 template <> class FastPin<2> : public ClearCoreFastPin<2, 6> {};
 template <> class FastPin<3> : public ClearCoreFastPin<3, 7> {};
+
+template <u8 PIN> struct BitbangPin<FastPin<PIN>> : BitbangTiming {
+    static constexpr bool kAtomicWrite = true;
+    // IO0-IO3 share full-width Group0 OUT. Streaming retains conservative
+    // padding and requires exclusive port ownership; interrupt-safe output
+    // continues to use the reversed atomic destinations below.
+    static constexpr bool kTwoWriteStream = PIN < 4;
+    static constexpr cycle_t kMinWriteCycles = 0;
+    template <u8 BIT>
+    FASTLED_FORCE_INLINE static void write(u8 value) FL_NO_EXCEPT {
+        // sport/cport express connector levels: OUTCLR raises an active-low
+        // connector and OUTSET lowers it. Keep the existing native setup.
+        writeBitSetClear<BIT>(value, FastPin<PIN>::mask(),
+                             FastPin<PIN>::sport(), FastPin<PIN>::cport());
+    }
+};
 
 #define MAX_PIN 3
 #define HAS_HARDWARE_PIN_SUPPORT 1

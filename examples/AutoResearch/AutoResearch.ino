@@ -12,7 +12,11 @@
 #include "fl/system/sketch_macros.h"
 #include "fl/system/heap.h"
 
-#if !FL_PLATFORM_HAS_LARGE_MEMORY
+#if defined(FL_SOFTWARE_SPI_COMPILE_PROBE)
+#include "AutoResearchSoftwareSpi.h"
+void setup() { softwareSpiProbeKeepLinked(); }
+void loop() {}
+#elif !FL_PLATFORM_HAS_LARGE_MEMORY
 #include "AutoResearchLowMemory.h"
 void setup() { autoResearchLowMemorySetup(); }
 void loop()  { autoResearchLowMemoryLoop(); }

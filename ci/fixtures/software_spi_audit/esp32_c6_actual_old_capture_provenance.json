@@ -1,0 +1,14 @@
+{
+  "scope": "Actual compiled source-control parser fixture from failed, unaccepted attempt 071zeek4; not a managed proof receipt",
+  "capture_sha256": "9006361d99251059829a001374939b775e49c42fbd28846f64c015a071df9770",
+  "elf_sha256": "28de04c09ad55553ab6b5696b20fe069b15c367eac235d59153c130e0d8ffb6a",
+  "source_control": "Exactly one io_conf.mode = GPIO_MODE_INPUT_OUTPUT; assignment replaced by io_conf.mode = GPIO_MODE_OUTPUT;",
+  "original_source_sha256": "dbf954b984b9fe5f34b66ee8073e3271548f74979d770a4308fd7ffc7c12091e",
+  "actual_staged_source": "/home/niteris/.clud/worktrees/fastled3-wt-spi-esp32-c6-mode-proof-071zeek4/.build/fbuild/esp32c6/lib/FastLED/platforms/esp/32/pin_esp32_native_impl.hpp",
+  "actual_staged_source_sha256": "54fb9cd4063530e28d50b0d49772426a1b8e6d1a809c5db3b9ef62c33a4e6a25",
+  "build_log": ".build/spi-esp32-c6-mode-proof/fastled3-wt-spi-esp32-c6-mode-proof-071zeek4/old-output-mode-mutant/build.log",
+  "build_log_sha256": "9091f14860899dde2d966011483e189f92608009608e9282c346b50dff83bad3",
+  "build_returncode": 0,
+  "failed_attempt_accepted": false,
+  "synthetic_reciprocal_control": "Changing only encoded c.li a5,2 to c.li a5,3 is parser data; it is not another SOURCE mutation or SDK build."
+}

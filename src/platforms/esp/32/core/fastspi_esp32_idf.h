@@ -8,6 +8,7 @@
 // ESP32 Hardware SPI implementation using native ESP-IDF driver
 // This file uses driver/spi_master.h for pure ESP-IDF builds without Arduino framework
 
+#include "platforms/esp/32/core/output_pin_policy.h"
 #include "crgb.h"
 #include "fastspi_types.h"
 #include "fl/stl/bit_cast.h"
@@ -212,8 +213,8 @@ class ESP32SPIOutput {
 
 public:
     // Verify that the pins are valid
-    FL_STATIC_ASSERT(FastPin<DATA_PIN>::validpin(), "Invalid data pin specified");
-    FL_STATIC_ASSERT(FastPin<CLOCK_PIN>::validpin(), "Invalid clock pin specified");
+    FL_STATIC_ASSERT(Esp32OutputPinValidity<DATA_PIN>::value, "Invalid data pin specified");
+    FL_STATIC_ASSERT(Esp32OutputPinValidity<CLOCK_PIN>::value, "Invalid clock pin specified");
 
     ESP32SPIOutput() FL_NO_EXCEPT
         : mSPIHandle(nullptr)

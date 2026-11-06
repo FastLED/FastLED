@@ -23,8 +23,14 @@ fi
 
 cd "$(dirname "$0")"
 
-# if .venv not found, create virtual environment.
-if [ ! -d .venv ]; then
+# Honor uv's explicitly selected, already provisioned environment. The local
+# installer provisions .venv, so it must not run for a missing external target.
+if [ -n "${UV_PROJECT_ENVIRONMENT:-}" ]; then
+    if [ ! -d "$UV_PROJECT_ENVIRONMENT" ]; then
+        echo "UV_PROJECT_ENVIRONMENT does not name an existing environment directory: $UV_PROJECT_ENVIRONMENT" >&2
+        exit 1
+    fi
+elif [ ! -d .venv ]; then
     ./install
 fi
 

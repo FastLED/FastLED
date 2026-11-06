@@ -26,6 +26,10 @@ FL_DISABLE_WARNING(pragmas)
 FL_DISABLE_WARNING_VOLATILE
 #endif
 
+#ifdef FASTLED_FORCE_SOFTWARE_PINS
+#include "fl/system/forced_software_pin.h"
+#endif
+
 namespace fl {
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -70,61 +74,7 @@ public:
 /// Note that these classes are all static functions.  So the proper usage is Pin<13>::hi(); or such.  Instantiating objects is not recommended,
 /// as passing Pin objects around will likely -not- have the effect you're expecting.
 #ifdef FASTLED_FORCE_SOFTWARE_PINS
-template<fl::u8 PIN> class FastPin {
-	static RwReg sPinMask;            ///< Bitmask for the pin within its register
-	static volatile RwReg *sPort;     ///< Output register for the pin
-	static volatile RoReg *sInPort;   ///< Input register for the pin
-	static void _init() {
-#if !defined(FASTLED_NO_PINMAP)
-		sPinMask = digitalPinToBitMask(PIN);
-		sPort = portOutputRegister(digitalPinToPort(PIN));
-		sInPort = portInputRegister(digitalPinToPort(PIN));
-#endif
-	}
-
-public:
-	typedef volatile RwReg * port_ptr_t;  ///< @copydoc Pin::port_ptr_t
-	typedef RwReg port_t;  ///< @copydoc Pin::port_t
-
-	/// @copydoc Pin::setOutput()
-	inline static void setOutput() { _init(); (fl::pinMode)(PIN, PinMode::Output); }
-	/// @copydoc Pin::setInput()
-	inline static void setInput() { _init(); (fl::pinMode)(PIN, PinMode::Input); }
-
-	/// @copydoc Pin::hi()
-	inline static void hi() __attribute__ ((always_inline)) { *sPort |= sPinMask; }
-	/// @copydoc Pin::lo()
-	inline static void lo() __attribute__ ((always_inline)) { *sPort &= ~sPinMask; }
-
-	/// @copydoc Pin::strobe()
-	inline static void strobe() __attribute__ ((always_inline)) { toggle(); toggle(); }
-
-	/// @copydoc Pin::toggle()
-	inline static void toggle() __attribute__ ((always_inline)) { *sInPort = sPinMask; }
-
-	/// @copydoc Pin::hi(FASTLED_REGISTER port_ptr_t)
-	inline static void hi(FASTLED_REGISTER port_ptr_t port) __attribute__ ((always_inline)) { *port |= sPinMask; }
-	/// @copydoc Pin::lo(FASTLED_REGISTER port_ptr_t)
-	inline static void lo(FASTLED_REGISTER port_ptr_t port) __attribute__ ((always_inline)) { *port &= ~sPinMask; }
-	/// @copydoc Pin::set(FASTLED_REGISTER port_t)
-	inline static void set(FASTLED_REGISTER port_t val) __attribute__ ((always_inline)) { *sPort = val; }
-
-	/// @copydoc Pin::fastset()
-	inline static void fastset(FASTLED_REGISTER port_ptr_t port, FASTLED_REGISTER port_t val) __attribute__ ((always_inline)) { *port  = val; }
-
-	/// @copydoc Pin::hival()
-	static port_t hival() __attribute__ ((always_inline)) { return *sPort | sPinMask;  }
-	/// @copydoc Pin::loval()
-	static port_t loval() __attribute__ ((always_inline)) { return *sPort & ~sPinMask; }
-	/// @copydoc Pin::port()
-	static port_ptr_t  port() __attribute__ ((always_inline)) { return sPort; }
-	/// @copydoc Pin::mask()
-	static port_t mask() __attribute__ ((always_inline)) { return sPinMask; }
-};
-
-template<fl::u8 PIN> RwReg FastPin<PIN>::sPinMask;
-template<fl::u8 PIN> volatile RwReg *FastPin<PIN>::sPort;
-template<fl::u8 PIN> volatile RoReg *FastPin<PIN>::sInPort;
+template<fl::u8 PIN> class FastPin : public detail::ForcedSoftwarePin<PIN> {};
 
 #else
 

@@ -6,13 +6,14 @@
 #include "fl/stl/int.h"
 #include "fl/stl/noexcept.h"
 #include "fl/system/delay.h"
+#include "platforms/shared/spi_bitbang/bitbang_delay.h"
 
 namespace fl {
 
 /// Additional phase time after known GPIO work, without unsigned underflow.
 /// Both the requested half-period and the minimum pulse must be satisfied.
-constexpr cycle_t bitbangPhaseDelay(cycle_t requested, cycle_t minimum,
-                                    cycle_t work) FL_NO_EXCEPT {
+constexpr i64 bitbangPhaseDelay(i64 requested, i64 minimum,
+                                i64 work) FL_NO_EXCEPT {
     return requested > minimum
         ? (requested > work ? requested - work : 0)
         : (minimum > work ? minimum - work : 0);
@@ -53,14 +54,10 @@ FASTLED_FORCE_INLINE void writeBitSetClearNoBranch(u8 value, u32 mask,
 
 /// Default pin access; a platform may specialize the data-write operation
 /// while the generic SPI writer continues to own bit order and clock timing.
-template <class Pin> struct BitbangPinDefaults {
+template <class Pin> struct BitbangPinDefaults : BitbangTiming {
     static constexpr bool kAtomicWrite = false;
     static constexpr bool kTwoWriteStream = false;
     static constexpr cycle_t kMinWriteCycles = 0;
-    template <fl::cycle_t CYCLES>
-    FASTLED_FORCE_INLINE static void delay() FL_NO_EXCEPT {
-        fl::delaycycles<CYCLES>();
-    }
     template <u8 BIT>
     FASTLED_FORCE_INLINE static void write(u8 value) FL_NO_EXCEPT {
         if (value & (1U << BIT)) Pin::hi();

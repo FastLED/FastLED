@@ -1,5 +1,10 @@
 # Lessons Learned
 
+- In native pin tests, explicitly qualify uses as `fl::FastPin`, even with
+  `using namespace fl`. The test environment also exposes a global FastPin
+  template, so unqualified uses become ambiguous. This applies to both the AVR
+  bit-helper and forced-software pin regression tests.
+
 - Before asking for hardware rewiring, scan the attached safe GPIO pairs in both
   directions. Use the user-authorized current wiring for generic bit-bang tests;
   keep original GPIO4/16 RTC measurements separate from GPIO4/14 results.

@@ -1,3 +1,6 @@
+// The compile-only SPI audit uses its own retained probes, not the RPC harness.
+#if !defined(FL_SOFTWARE_SPI_COMPILE_PROBE)
+
 // AutoResearch edge probe implementation (FastLED#3586 tooling).
 // See AutoResearchEdgeProbe.h.
 
@@ -204,3 +207,5 @@ const fl::u32 *edgeProbeRmtLive() {
 #endif // FL_IS_ESP32
 
 #endif // SKETCH_HAS_LOTS_OF_MEMORY
+
+#endif // !FL_SOFTWARE_SPI_COMPILE_PROBE

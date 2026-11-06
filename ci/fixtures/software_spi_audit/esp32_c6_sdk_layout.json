@@ -1,0 +1,338 @@
+{
+  "scope": "actual failed-attempt ELF layout metadata and pinned SDK script identities; not accepted proof",
+  "elf_sha256": "64fabd190204d8fc746a0304856ec001f8be439ce761fb4d9517b68b94ef490d",
+  "sections": [
+    {
+      "index": 5,
+      "name": ".rtc_reserved",
+      "type": 8,
+      "flags": 3,
+      "address": 1342193624,
+      "offset": 475096,
+      "size": 40,
+      "alignment": 8,
+      "raw_header": [
+        81,
+        8,
+        3,
+        1342193624,
+        475096,
+        40,
+        0,
+        0,
+        8,
+        0
+      ]
+    },
+    {
+      "index": 6,
+      "name": ".iram0.text",
+      "type": 1,
+      "flags": 6,
+      "address": 1082130432,
+      "offset": 4096,
+      "size": 46664,
+      "alignment": 256,
+      "raw_header": [
+        95,
+        1,
+        6,
+        1082130432,
+        4096,
+        46664,
+        0,
+        0,
+        256,
+        0
+      ]
+    },
+    {
+      "index": 8,
+      "name": ".iram0.data",
+      "type": 8,
+      "flags": 3,
+      "address": 1082177096,
+      "offset": 50760,
+      "size": 8,
+      "alignment": 1,
+      "raw_header": [
+        123,
+        8,
+        3,
+        1082177096,
+        50760,
+        8,
+        0,
+        0,
+        1,
+        0
+      ]
+    },
+    {
+      "index": 10,
+      "name": ".dram0.data",
+      "type": 1,
+      "flags": 3,
+      "address": 1082177104,
+      "offset": 50768,
+      "size": 6824,
+      "alignment": 16,
+      "raw_header": [
+        146,
+        1,
+        3,
+        1082177104,
+        50768,
+        6824,
+        0,
+        0,
+        16,
+        0
+      ]
+    },
+    {
+      "index": 11,
+      "name": ".noinit",
+      "type": 8,
+      "flags": 3,
+      "address": 1082183928,
+      "offset": 0,
+      "size": 0,
+      "alignment": 1,
+      "raw_header": [
+        158,
+        8,
+        3,
+        1082183928,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0
+      ]
+    },
+    {
+      "index": 12,
+      "name": ".dram0.bss",
+      "type": 8,
+      "flags": 3,
+      "address": 1082183936,
+      "offset": 57592,
+      "size": 6832,
+      "alignment": 16,
+      "raw_header": [
+        166,
+        8,
+        3,
+        1082183936,
+        57592,
+        6832,
+        0,
+        0,
+        16,
+        0
+      ]
+    },
+    {
+      "index": 13,
+      "name": ".flash.text",
+      "type": 1,
+      "flags": 6,
+      "address": 1107296288,
+      "offset": 61472,
+      "size": 140610,
+      "alignment": 2,
+      "raw_header": [
+        177,
+        1,
+        6,
+        1107296288,
+        61472,
+        140610,
+        0,
+        0,
+        2,
+        0
+      ]
+    },
+    {
+      "index": 14,
+      "name": ".flash_rodata_dummy",
+      "type": 8,
+      "flags": 3,
+      "address": 1107296288,
+      "offset": 204832,
+      "size": 196608,
+      "alignment": 1,
+      "raw_header": [
+        189,
+        8,
+        3,
+        1107296288,
+        204832,
+        196608,
+        0,
+        0,
+        1,
+        0
+      ]
+    },
+    {
+      "index": 15,
+      "name": ".flash.appdesc",
+      "type": 1,
+      "flags": 2,
+      "address": 1107492896,
+      "offset": 401440,
+      "size": 256,
+      "alignment": 16,
+      "raw_header": [
+        209,
+        1,
+        2,
+        1107492896,
+        401440,
+        256,
+        0,
+        0,
+        16,
+        0
+      ]
+    },
+    {
+      "index": 16,
+      "name": ".flash.rodata",
+      "type": 1,
+      "flags": 3,
+      "address": 1107493152,
+      "offset": 401696,
+      "size": 52980,
+      "alignment": 16,
+      "raw_header": [
+        224,
+        1,
+        3,
+        1107493152,
+        401696,
+        52980,
+        0,
+        0,
+        16,
+        0
+      ]
+    },
+    {
+      "index": 18,
+      "name": ".eh_frame",
+      "type": 1,
+      "flags": 2,
+      "address": 1107546132,
+      "offset": 454676,
+      "size": 16784,
+      "alignment": 4,
+      "raw_header": [
+        252,
+        1,
+        2,
+        1107546132,
+        454676,
+        16784,
+        0,
+        0,
+        4,
+        0
+      ]
+    }
+  ],
+  "programs": [
+    {
+      "index": 0,
+      "raw_header": [
+        1879048195,
+        5550090,
+        0,
+        0,
+        106,
+        0,
+        4,
+        1
+      ]
+    },
+    {
+      "index": 1,
+      "raw_header": [
+        1,
+        4096,
+        1082130432,
+        1082130432,
+        53496,
+        60336,
+        7,
+        4096
+      ]
+    },
+    {
+      "index": 2,
+      "raw_header": [
+        1,
+        61472,
+        1107296288,
+        1107296288,
+        140610,
+        140610,
+        5,
+        4096
+      ]
+    },
+    {
+      "index": 3,
+      "raw_header": [
+        1,
+        204832,
+        1107296288,
+        1107296288,
+        266628,
+        266628,
+        6,
+        4096
+      ]
+    },
+    {
+      "index": 4,
+      "raw_header": [
+        1,
+        4056,
+        1342193624,
+        1342193624,
+        0,
+        40,
+        6,
+        4096
+      ]
+    },
+    {
+      "index": 5,
+      "raw_header": [
+        1685382481,
+        0,
+        0,
+        0,
+        0,
+        0,
+        6,
+        16
+      ]
+    }
+  ],
+  "scripts": {
+    "memory.ld": {
+      "path": "/home/niteris/.fbuild/dev/cache/platforms/framework-arduinoespressif32/9ef436ac06b7bf7f/3.3.5/esp32-3.3.5/tools/esp32-arduino-libs/esp32c6/ld/memory.ld",
+      "sha256": "56f760762733ac2a37ff4b738f5a066d576f3f67c9add19966466c5f3a515155"
+    },
+    "sections.ld": {
+      "path": "/home/niteris/.fbuild/dev/cache/platforms/framework-arduinoespressif32/9ef436ac06b7bf7f/3.3.5/esp32-3.3.5/tools/esp32-arduino-libs/esp32c6/ld/sections.ld",
+      "sha256": "31726567564a8bea7f39930cce429eb3134f870be25c974fead75e93e43fc94f"
+    }
+  }
+}

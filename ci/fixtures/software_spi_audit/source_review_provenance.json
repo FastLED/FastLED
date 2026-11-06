@@ -1,0 +1,871 @@
+{
+  "purpose": "Source-only provenance for the reviewed baseline classification input; not execution evidence.",
+  "baseline": "94dab9c6b720ea277ec9177c93129c7dc646c5c3",
+  "manifest": {
+    "path": "reviewed_baseline.json",
+    "sha256": "0dfa396606be6feb790ea9b62affab2b835a6c22274e6a9ab4ec1680b0a618cf",
+    "bytes": 14377815,
+    "schema_version": 1,
+    "source_paths": 2986
+  },
+  "required_findings": [
+    {
+      "id": "avr-pins",
+      "issue": 5025
+    },
+    {
+      "id": "teensy4-pins",
+      "issue": 5026
+    },
+    {
+      "id": "teensy4-rate",
+      "issue": 5027
+    },
+    {
+      "id": "esp32-software",
+      "issue": 5028
+    },
+    {
+      "id": "ci13xx-pins",
+      "issue": 5029
+    },
+    {
+      "id": "apollo3-loop",
+      "issue": 5030
+    },
+    {
+      "id": "production-gate",
+      "issue": 5031
+    },
+    {
+      "id": "default-delay",
+      "issue": 5032
+    },
+    {
+      "id": "samd21",
+      "issue": 5033
+    },
+    {
+      "id": "samd51",
+      "issue": 5034
+    },
+    {
+      "id": "k20",
+      "issue": 5035
+    },
+    {
+      "id": "rp2040",
+      "issue": 5036
+    },
+    {
+      "id": "k64-k66",
+      "issue": 5037
+    },
+    {
+      "id": "rp2350",
+      "issue": 5038
+    },
+    {
+      "id": "kl26",
+      "issue": 5039
+    },
+    {
+      "id": "renesas",
+      "issue": 5040
+    },
+    {
+      "id": "mgm240",
+      "issue": 5041
+    },
+    {
+      "id": "lpc-modern",
+      "issue": 5042
+    },
+    {
+      "id": "lpc-legacy",
+      "issue": 5043
+    },
+    {
+      "id": "same53",
+      "issue": 5044
+    },
+    {
+      "id": "stm32",
+      "issue": 5045
+    },
+    {
+      "id": "sam3x",
+      "issue": 5046
+    },
+    {
+      "id": "nrf51",
+      "issue": 5047
+    },
+    {
+      "id": "nrf52",
+      "issue": 5048
+    },
+    {
+      "id": "runtime-manager",
+      "issue": 5049
+    },
+    {
+      "id": "runtime-channel",
+      "issue": 5050
+    },
+    {
+      "id": "esp32-rate",
+      "issue": 5051
+    },
+    {
+      "id": "avr-native-gpio",
+      "issue": 5052
+    },
+    {
+      "id": "samd-sercom-gpio",
+      "issue": 5053
+    },
+    {
+      "id": "avr-native-handoff",
+      "issue": 5055
+    },
+    {
+      "id": "forced-software-no-pinmap",
+      "issue": 5056
+    },
+    {
+      "id": "generic-init-clock-low",
+      "issue": 5057
+    },
+    {
+      "id": "kl26-native-bit",
+      "issue": 5059
+    },
+    {
+      "id": "esp32-native-single-bit",
+      "issue": 5060
+    },
+    {
+      "id": "arduino-core-native-single-bit",
+      "issue": 5061
+    },
+    {
+      "id": "parallel-spi-target-backend",
+      "issue": 5062
+    },
+    {
+      "id": "parallel-spi-pin-mapping",
+      "issue": 5063
+    },
+    {
+      "id": "teensy4-native-pending-bits",
+      "issue": 5064
+    },
+    {
+      "id": "objectfled-spi-pin-restore",
+      "issue": 5065
+    },
+    {
+      "id": "my9221-ddr-timing",
+      "issue": 5066
+    },
+    {
+      "id": "esp32-forced-fastpin-selection",
+      "issue": 5067
+    },
+    {
+      "id": "esp8266-forced-fastpin-selection",
+      "issue": 5068
+    },
+    {
+      "id": "nrf51-forced-fastpin-selection",
+      "issue": 5069
+    },
+    {
+      "id": "nrf52-variants-forced-fastpin-selection",
+      "issue": 5070
+    },
+    {
+      "id": "giga-forced-fastpin-selection",
+      "issue": 5071
+    },
+    {
+      "id": "mgm240-forced-fastpin-selection",
+      "issue": 5072
+    },
+    {
+      "id": "lpc-modern-forced-fastpin-selection",
+      "issue": 5073
+    },
+    {
+      "id": "lpc-legacy-forced-fastpin-selection",
+      "issue": 5074
+    },
+    {
+      "id": "forced-mapped-toggle-register-contract",
+      "issue": 5086
+    },
+    {
+      "id": "samd-forced-output-readback",
+      "issue": 5087
+    },
+    {
+      "id": "apollo3-forced-no-pinmap-output-readback",
+      "issue": 5089
+    }
+  ],
+  "review_method": {
+    "initial_inventory": "Four independent normalized research inventories supplied disjoint pinned-source classifications and literal anchors. Their labels/queries do not establish that every line of all 2,986 files received an independent full-body reread.",
+    "later_semantic_review": "Flagged semantic source groups received source-specific reviews at the depth recorded in checkpoints and merge attributions. Queue zero means all queued rows have reviewed dispositions; it is not a behavioral coverage certificate.",
+    "primary_and_selection_limits": "The #5067 supplement reviews specified primary/core selection ranges plus complete dispatcher bodies; it is explicitly not a new full primary/core reread. Earlier primary source-role/anchor attribution is preserved, not upgraded by normalization.",
+    "binary_and_font_limits": "Binary format/import/export/consumer context binds executable WASM as dependencies, not noncode exclusions. Independent font review covered complete TrueType and active glyph initializer boundaries, not every glyph comment or font algorithm.",
+    "provider_limits": "Callbacks, virtual I/O, mapped GPIO, native peripherals, clockless outputs and actual FastLED.show producers keep separate implementation/configuration obligations."
+  },
+  "initial_inventory_digests": [
+    {
+      "historical_artifact": "spi-audit-arm-normalized.json",
+      "sha256": "d43905fad6cf04a4fe7fa580b0f6aeea10b6e4bd85591a587bacba180ceaf222"
+    },
+    {
+      "historical_artifact": "spi-audit-avr-teensy-normalized.json",
+      "sha256": "7d93da0e13385b9b47ca18d4fd3b1d40567dde85662b87a927517f2f7394a058"
+    },
+    {
+      "historical_artifact": "spi-audit-fl-normalized.json",
+      "sha256": "115c9b37ab80403ec7bf4019f26e505248fbb288c3e6e8b69cde6f1f9c2d96ca"
+    },
+    {
+      "historical_artifact": "spi-audit-other-normalized.json",
+      "sha256": "ac93bc53a68ec4f1a3ed4ad5d17295f5e2a13a8fb8b2510c34e0c757687936c5"
+    }
+  ],
+  "source_review_checkpoints": [
+    {
+      "historical_artifact": ".build/audio-supplement/checkpoint.json",
+      "sha256": "a218dc6d9be86d6e9bd3e409eb75f62d02fc75c890240d30acb3d3158fb5a9f6",
+      "source_paths": [
+        "src/fl/audio/audio_batch.h",
+        "src/fl/audio/audio_input.cpp.hpp",
+        "src/fl/audio/detector/chord.cpp.hpp",
+        "src/fl/audio/detector/key.cpp.hpp",
+        "src/fl/audio/detector/mood_analyzer.cpp.hpp",
+        "src/fl/audio/fft/fft.cpp.hpp",
+        "src/fl/audio/input.h",
+        "src/fl/audio/spectral_equalizer.cpp.hpp",
+        "src/fl/audio/synth.cpp.hpp"
+      ],
+      "review_depth": "Per-source review_state/ranges and attribution retained in working checkpoint; no independent full-body depth inferred from a digest.",
+      "reviewed_count": 9,
+      "remaining_count": 0,
+      "limitation": "Source-specific review metadata only; candidate/provenance not merged; vendor input providers/physical consumers independently scoped; no execution proof."
+    },
+    {
+      "historical_artifact": ".build/avr-clockless-supplement/checkpoint.json",
+      "sha256": "0e1cdc32e970ff8403d98d332d166cdc2e2e44fed60e314d68d68932c39ee751",
+      "source_paths": [
+        "src/platforms/avr/attiny/clockless_blocking.h",
+        "src/platforms/avr/attiny/clockless_blocking_controller.h",
+        "src/platforms/avr/clockless_avr.h",
+        "src/third_party/ezws2812/ezWS2812.h"
+      ],
+      "review_depth": "Per-source review_state/ranges and attribution retained in working checkpoint; no independent full-body depth inferred from a digest.",
+      "reviewed_count": 4,
+      "remaining_count": 0,
+      "limitation": "Supplement only. All four complete raw pinned bodies read; no independent second review, target execution, physical waveform certification, canonical merge or GPIO provider waiver."
+    },
+    {
+      "historical_artifact": ".build/channel-supplement/checkpoint.json",
+      "sha256": "73b3f55b6a1bae501b49132df52ed2ab2bef8b9f0f1c397a08e901f836422ba0",
+      "source_paths": [
+        "src/fl/channels/README.md",
+        "src/fl/channels/color_managed_source.cpp.hpp",
+        "src/fl/channels/detail/validation/rx_test.h",
+        "src/fl/channels/detail/wave8.cpp.hpp",
+        "src/fl/channels/id_tracker.cpp.hpp",
+        "src/fl/channels/pipeline_binding.cpp.hpp",
+        "src/fl/channels/uart_wave_encoder.h",
+        "src/fl/channels/validation.h",
+        "src/fl/channels/wave8.cpp.hpp"
+      ],
+      "review_depth": "Per-source review_state/ranges and attribution retained in working checkpoint; no independent full-body depth inferred from a digest.",
+      "reviewed_count": 9,
+      "remaining_count": 0,
+      "limitation": "Full-body source roles only for explicitly reviewed files; raw identity capture does not imply review of remaining files. Candidate/provenance untouched; virtual/callback/peripheral physical consumers remain independent."
+    },
+    {
+      "historical_artifact": ".build/codec-supplement/checkpoint.json",
+      "sha256": "ebfb61ecbbd6fa8a2bb3d867c50f497a4c9cbcb33c2a80ec3b38331c6405f0f9",
+      "source_paths": [
+        "src/fl/codec/file_system_codecs.cpp.hpp",
+        "src/fl/codec/gif.cpp.hpp",
+        "src/fl/codec/gif.h",
+        "src/fl/codec/h264.cpp.hpp",
+        "src/fl/codec/h264.h",
+        "src/fl/codec/idecoder.h",
+        "src/fl/codec/jpeg.cpp.hpp",
+        "src/fl/codec/jpeg.h",
+        "src/fl/codec/mp3.cpp.hpp",
+        "src/fl/codec/mp3.h",
+        "src/fl/codec/mp3_vbr_tag.h",
+        "src/fl/codec/mp4_parser.cpp.hpp",
+        "src/fl/codec/mp4_parser.h",
+        "src/fl/codec/mpeg1.cpp.hpp",
+        "src/fl/codec/mpeg1.h",
+        "src/fl/codec/vorbis.cpp.hpp",
+        "src/fl/codec/vorbis.h"
+      ],
+      "review_depth": "Per-source review_state/ranges and attribution retained in working checkpoint; no independent full-body depth inferred from a digest.",
+      "reviewed_count": 17,
+      "remaining_count": 0,
+      "limitation": "Source-role review only for explicit completed records; unread raw captures do not count. Candidate/provenance frozen, actual codec/callback/input/output providers independently scoped."
+    },
+    {
+      "historical_artifact": ".build/control-supplement/checkpoint.json",
+      "sha256": "15aae124456fcb33d9a2b07380d31987b94aeb797cd5c6966f53f4a7d16f54f7",
+      "source_paths": [
+        "src/fl/control/wled.cpp.hpp",
+        "src/fl/control/wled/adapter.cpp.hpp"
+      ],
+      "review_depth": "Per-source review_state/ranges and attribution retained in working checkpoint; no independent full-body depth inferred from a digest.",
+      "reviewed_count": 2,
+      "remaining_count": 0,
+      "limitation": "Supplement only. Both complete pinned bodies read; no second-review claim, canonical merge, runtime proof or downstream hardware/callback waiver."
+    },
+    {
+      "historical_artifact": ".build/esp32-forced-selection-supplement/checkpoint.json",
+      "sha256": "aa3fcdbc42daf465273fc0f62a07dc27ccb7130832da970cc2769985a11ae66b",
+      "source_paths": [
+        "src/fl/system/fastpin_base.h",
+        "src/platforms/esp/32/core/fastpin_esp32.h",
+        "src/platforms/esp/fastpin_esp.h",
+        "src/platforms/fastpin.h"
+      ],
+      "review_depth": "Per-source review_state/ranges and attribution retained in working checkpoint; no independent full-body depth inferred from a digest.",
+      "limitation": "Supplement only, no canonical merge. Targeted ranges are recorded honestly, not a new full-body reread claim for base/core. All prior findings/reasons/anchors and exact baseline identity retained; current changed/new sources remain RED. Actual SDK finding evidence is separate from classification and no imported JSON clears execution obligations."
+    },
+    {
+      "historical_artifact": ".build/fl-readme-supplement/checkpoint.json",
+      "sha256": "7e1da108b9438bf5b1bbdbbfd15b361e1b923ef553457d546d1ca050542425de",
+      "source_paths": [
+        "src/fl/README.md"
+      ],
+      "review_depth": "Per-source review_state/ranges and attribution retained in working checkpoint; no independent full-body depth inferred from a digest.",
+      "reviewed_count": 1,
+      "remaining_count": 0,
+      "limitation": "Supplement only; no canonical merge or proof from documentation. Full baseline source denominator and all mandatory findings retained; managed execution adapters, actual target evidence and new/changed/deleted source obligations remain RED."
+    },
+    {
+      "historical_artifact": ".build/fled-supplement/checkpoint.json",
+      "sha256": "a2e03659fb203492edd2c23c38f8747241a2d565bbc6d630002df2a3f3123eb2",
+      "source_paths": [
+        "src/fl/fled/builder.cpp.hpp",
+        "src/fl/fled/color.cpp.hpp",
+        "src/fl/fled/detail/parser.cpp.hpp",
+        "src/fl/fled/fled.cpp.hpp"
+      ],
+      "review_depth": "Per-source review_state/ranges and attribution retained in working checkpoint; no independent full-body depth inferred from a digest.",
+      "reviewed_count": 4,
+      "remaining_count": 0,
+      "limitation": "Supplement only; complete pinned bodies read without second-review or runtime correctness claims. No canonical merge; all previous findings retained in proposed rows and real providers/downstream output remain independent."
+    },
+    {
+      "historical_artifact": ".build/fltest-supplement/checkpoint.json",
+      "sha256": "5e06fac62aa000cb42f6c3b4cc48f1e91d8895576e02471e7424680be9db0155",
+      "source_paths": [
+        "src/fl/test/fltest.cpp.hpp",
+        "src/fl/test/fltest.h"
+      ],
+      "review_depth": "Per-source review_state/ranges and attribution retained in working checkpoint; no independent full-body depth inferred from a digest.",
+      "reviewed_count": 2,
+      "remaining_count": 0,
+      "limitation": "Supplement only; execution, time, output and reporter callbacks remain independent physical/provider obligations; no canonical merge or runtime proof."
+    },
+    {
+      "historical_artifact": ".build/font-supplement/checkpoint.json",
+      "sha256": "37053e4a9d5a438e202bb04737b9c30f35f4735d4c974d23998786a20caf8661",
+      "source_paths": [
+        "src/fl/font/console_font_4x6.h",
+        "src/fl/font/console_font_5x12.h",
+        "src/fl/font/console_font_5x8.h",
+        "src/fl/font/console_font_6x8.h",
+        "src/fl/font/console_font_7x9.h",
+        "src/fl/font/truetype.cpp.hpp"
+      ],
+      "review_depth": "Per-source review_state/ranges and attribution retained in working checkpoint; no independent full-body depth inferred from a digest.",
+      "reviewed_count": 6,
+      "remaining_count": 0,
+      "limitation": "Supplement only, unmerged; actual full-body read completed only for records marked reviewed. All40 registered positive bindings/canonical candidate unchanged. No target or rendering proof."
+    },
+    {
+      "historical_artifact": ".build/fs-supplement/checkpoint.json",
+      "sha256": "580204be53bc42960d47d13801aa647b69fbc30f12fae92055f68f3efa92fa7a",
+      "source_paths": [
+        "src/fl/fs/fs.cpp.hpp",
+        "src/fl/fs/fs.h",
+        "src/fl/fs/fstream.cpp.hpp",
+        "src/fl/fs/read.h"
+      ],
+      "review_depth": "Per-source review_state/ranges and attribution retained in working checkpoint; no independent full-body depth inferred from a digest.",
+      "reviewed_count": 4,
+      "remaining_count": 0,
+      "limitation": "Supplement only; all four pinned complete bodies read, no second-review claim, no canonical merge/runtime evidence/provider or physical-effects waiver."
+    },
+    {
+      "historical_artifact": ".build/log-supplement/checkpoint.json",
+      "sha256": "7b8cee54a223113c961b64888ea1b821d354aa9e3a97a2075da4d768556d6a1e",
+      "source_paths": [
+        "src/fl/log/async_log_queue.cpp.hpp",
+        "src/fl/log/async_logger.cpp.hpp",
+        "src/fl/log/log.cpp.hpp"
+      ],
+      "review_depth": "Per-source review_state/ranges and attribution retained in working checkpoint; no independent full-body depth inferred from a digest.",
+      "reviewed_count": 3,
+      "limitation": "Source roles only. No canonical merge, execution/timing/ISR/transport certification; independent review pending."
+    },
+    {
+      "historical_artifact": ".build/net-supplement/checkpoint.json",
+      "sha256": "eba8954c3626f4b34b88a81f89698ee30eff7c667b3380d964ffe3d7b7248e1c",
+      "source_paths": [
+        "src/fl/net/http/chunked_encoding.cpp.hpp",
+        "src/fl/net/http/fetch.cpp.hpp",
+        "src/fl/net/http/fetch_request.cpp.hpp",
+        "src/fl/net/http/stream_server.cpp.hpp",
+        "src/fl/net/http/stream_transport.cpp.hpp",
+        "src/fl/net/ota/ota.h"
+      ],
+      "review_depth": "Per-source review_state/ranges and attribution retained in working checkpoint; no independent full-body depth inferred from a digest.",
+      "reviewed_count": 6,
+      "remaining_count": 0,
+      "limitation": "Supplement only; no canonical merge, execution evidence, provider waiver or physical timing proof."
+    },
+    {
+      "historical_artifact": ".build/remote-supplement/checkpoint.json",
+      "sha256": "c1c1658c47c7cf9c914dbc34755af779ba69e736176a6571bd59286e2d994123",
+      "source_paths": [
+        "src/fl/remote/rpc/json_dispatch.cpp.hpp",
+        "src/fl/remote/rpc/json_to_type.h",
+        "src/fl/remote/rpc/rpc.cpp.hpp",
+        "src/fl/remote/rpc/rpc.h",
+        "src/fl/remote/rpc/rpc_registry.h",
+        "src/fl/remote/rpc/runtime_rpc_binding.cpp.hpp",
+        "src/fl/remote/rpc/runtime_rpc_binding.h",
+        "src/fl/remote/transport/serial.cpp.hpp",
+        "src/fl/remote/transport/serial.h"
+      ],
+      "review_depth": "Per-source review_state/ranges and attribution retained in working checkpoint; no independent full-body depth inferred from a digest.",
+      "reviewed_count": 9,
+      "remaining_count": 0,
+      "limitation": "Source-role review only for explicit completed records; unread raw captures do not count. Candidate/provenance frozen, actual codec/callback/input/output providers independently scoped."
+    },
+    {
+      "historical_artifact": ".build/root-system-supplement/checkpoint.json",
+      "sha256": "29e0f769559502c7e4e231df661458e43e64a078efee9caa019424952163229c",
+      "source_paths": [
+        "src/fl/sensors/pir.h",
+        "src/fl/system/engine_events.cpp.hpp",
+        "src/fl/system/heap.cpp.hpp"
+      ],
+      "review_depth": "Per-source review_state/ranges and attribution retained in working checkpoint; no independent full-body depth inferred from a digest.",
+      "reviewed_count": 3,
+      "remaining_count": 0,
+      "limitation": "No transitive provider or GPIO correctness certification"
+    },
+    {
+      "historical_artifact": ".build/software-spi-semantic-review-arm-summary.json",
+      "sha256": "cc432529658d51a655ec85ecc73a4a04fc357f31fb041d3b0e8301236fbb0792",
+      "reviewed_count": 83
+    },
+    {
+      "historical_artifact": ".build/software-spi-semantic-review-fx-summary.json",
+      "sha256": "0a1a5075bc90123ef0b84c6cc6b3a0986a108670ef1ecaac6e247d02bba5aaaa",
+      "reviewed_count": 65
+    },
+    {
+      "historical_artifact": ".build/software-spi-semantic-review-gfx-summary.json",
+      "sha256": "d426bdd27d0fac0bb15b3a5919216f7c751a98e37ff4297081b180cd889310fa",
+      "reviewed_count": 21
+    },
+    {
+      "historical_artifact": ".build/software-spi-semantic-review-stl-summary.json",
+      "sha256": "e892e9deb5b88d7d31ca0d9cae41f112a1f4042d4a55e1561ff84ecee1c57a8c",
+      "reviewed_count": 31
+    },
+    {
+      "historical_artifact": ".build/video-supplement/checkpoint.json",
+      "sha256": "eb717b5dca18c37c42bc72e06495e5e8e077d7e15a84e7c18a9888b93218b255",
+      "source_paths": [
+        "src/fl/video/frame_interpolator.cpp.hpp",
+        "src/fl/video/frame_interpolator.h",
+        "src/fl/video/frame_tracker.cpp.hpp",
+        "src/fl/video/frame_tracker.h",
+        "src/fl/video/pixel_stream.cpp.hpp"
+      ],
+      "review_depth": "Per-source review_state/ranges and attribution retained in working checkpoint; no independent full-body depth inferred from a digest.",
+      "reviewed_count": 5,
+      "remaining_count": 0,
+      "limitation": "Supplement only. Every complete pinned body read, no second-review claim/runtime proof/canonical merge or physical-provider waiver. Prior rows and findings preserved."
+    },
+    {
+      "historical_artifact": ".build/wdt-supplement/checkpoint.json",
+      "sha256": "06cc07a87f8592401acf99298dc35ea04d827d72efbce3e6aa25a8223476475e",
+      "source_paths": [
+        "src/fl/wdt/watchdog.cpp.hpp",
+        "src/fl/wdt/watchdog.h"
+      ],
+      "review_depth": "Per-source review_state/ranges and attribution retained in working checkpoint; no independent full-body depth inferred from a digest.",
+      "reviewed_count": 2,
+      "limitation": "Source-role review only. No execution, vendor watchdog, callback, timing, or physical-output certification. Canonical candidate unchanged."
+    }
+  ],
+  "independent_review_scope": [
+    {
+      "review_group": "net_and_wdt_semantic_merge",
+      "independent_review": "judge: net six raw identities and active source (deprecated fetch comments skipped); watchdog both complete bodies; literal anchors and prior bindings verified",
+      "limitation": "Source role only. All positive associations preserved; no execution/timing/physical-output or overall gate acceptance."
+    },
+    {
+      "review_group": "avr_fs_log_semantic_merge",
+      "independent_review": "judge: all raw identities/anchors/prior bindings verified; full seven FS/log bodies and full ezWS2812, AVR entrypoints/waveform macros/serializer boundaries rather than every AVR line",
+      "limitation": "Source role only. All positive associations preserved; no execution/timing/physical-output or overall gate acceptance."
+    },
+    {
+      "review_group": "control_semantic_merge",
+      "independent_review": "judge: both complete control bodies, original/current prior rows, raw identities and nonblank anchors; actual FastLED.show routes retain controller obligations",
+      "limitation": "Source role only. All positive associations preserved; no execution/timing/physical-output or overall gate acceptance."
+    },
+    {
+      "review_group": "fltest_semantic_merge",
+      "independent_review": "judge: raw identities/anchors/prior rows verified; independently inspected test execution/timeouts/fixtures/comparisons/registration/reporters/Arduino providers, not all2927lines",
+      "limitation": "Source role only. All positive associations preserved; no execution/timing/physical-output or overall gate acceptance."
+    },
+    {
+      "review_group": "esp32_forced_selection_positive_merge",
+      "independent_review": "judge verified all raw identities, prior rows/anchors and stated selection ranges; no new full-body review",
+      "limitation": "New positive binding only; no execution receipt or source-change hash refresh, all required configurations remain RED"
+    },
+    {
+      "review_group": "fled_semantic_merge",
+      "independent_review": "judge: all four complete Fled bodies, raw identities/prior rows/nonblank anchors; actual FS and downstream controller effects remain independent",
+      "limitation": "Source role only. All positive associations preserved; no execution/timing/physical-output or overall gate acceptance."
+    },
+    {
+      "review_group": "video_semantic_merge",
+      "independent_review": "judge: all five complete video bodies, raw identities/prior rows/nonblank anchors; actual PixelStream virtualI/O and downstream providers remain independent",
+      "limitation": "Source role only. All positive associations preserved; no execution/timing/physical-output or overall gate acceptance."
+    },
+    {
+      "review_group": "fl_readme_semantic_merge",
+      "independent_review": "judge: complete1040line README including prose/fenced examples; literal baseline identities/anchors/prior row verified, hardware/provider claims grant no execution acceptance",
+      "limitation": "Source role only. All positive associations preserved; no execution/timing/physical-output or overall gate acceptance."
+    }
+  ],
+  "working_source_provenance_sha256": "4b2cdb677653776f7401d816dbc745aeeed911508c7901964aa56bd6f3dc7ef6",
+  "limitations": [
+    "No manual runtime receipts, binaries or logs are accepted through this sidecar; the existing loader consumes only reviewed_baseline.json.",
+    "Full pinned path/blob/SHA/anchor and strict alias checks remain enforced independently by the existing version1 loader.",
+    "Current changed/new/deleted sources remain RED; baseline hashes must never be refreshed to authorize a fix.",
+    "All48 findings retain required target/configuration/mutation obligations; source classification does not clear them or certify physical timing.",
+    "Historical ignored checkpoint digests identify review records only; those local paths are not portable executable proof."
+  ],
+  "additional_forced_selection_review": {
+    "plan_sha256": "96a5a0fdbd090c3e033526e06e9eb3c88fbe9d4e42c134dc4c072395d583916d",
+    "scope": "Eight pinned definition/invocation rows retain baseline OID/SHA; seven new associations. Targeted guard/definition review, not complete second source reread. Current query hashes are not baseline hashes. No runtime receipts or execution certification.",
+    "unselected_canonical_limit": "An unselected canonical F4 implementation is not intrinsically protected if referenced; selectors/configurations require actual route proof."
+  },
+  "additional_forced_gpio_correctness_review": {
+    "previous_manifest_sha256": "842d083a8cb4ac8ea420229130d7bd16a56f180ef601a0b686424495030a1ff1",
+    "source_only": true,
+    "required_finding_count": 50,
+    "reviewed_records": [
+      {
+        "issue": 5086,
+        "finding": "forced-mapped-toggle-register-contract",
+        "path": "src/fl/system/fastpin_base.h",
+        "baseline_blob_oid": "349bed5f1bdc23c8b5b1b793b2effeae993c2560",
+        "baseline_sha256": "296b86f3c932ae5a7705a270c727c2e949242afb29ff281cd9b3561080bc48cc",
+        "literal_added_or_reconfirmed_anchors": [
+          {
+            "line": 73,
+            "text": "\tstatic volatile RoReg *sInPort;   ///< Input register for the pin"
+          },
+          {
+            "line": 78,
+            "text": "\t\tsInPort = portInputRegister(digitalPinToPort(PIN));"
+          },
+          {
+            "line": 100,
+            "text": "\tinline static void toggle() __attribute__ ((always_inline)) { *sInPort = sPinMask; }"
+          }
+        ],
+        "previous_row_sha256": "d98ba51bc8b9cf1513bc17e260dc235d1b8756ef3824dd04372ad034f54d648b",
+        "previous_role": "implementation",
+        "previous_disposition": "positive",
+        "scope": "Targeted pinned-method binding plus root/judge reviewed SDK contracts; not a new full-file independent reread or execution proof."
+      },
+      {
+        "issue": 5087,
+        "finding": "samd-forced-output-readback",
+        "path": "src/platforms/arm/samd/pin_samd_native.hpp",
+        "baseline_blob_oid": "dbdcf02488591f06c0a035ce11d51067d6872ffd",
+        "baseline_sha256": "bd312cb881cb071ade49b2e84998e17ab95265fc9bbc949527d51f6575ade1c9",
+        "literal_added_or_reconfirmed_anchors": [
+          {
+            "line": 92,
+            "text": "        case PinMode::Output:"
+          },
+          {
+            "line": 96,
+            "text": "            port->PINCFG[pm.bit].reg = 0;"
+          },
+          {
+            "line": 154,
+            "text": "inline PinValue digitalRead(int pin) FL_NO_EXCEPT {"
+          },
+          {
+            "line": 164,
+            "text": "    return (port->IN.reg & mask) ? PinValue::High : PinValue::Low;"
+          }
+        ],
+        "previous_row_sha256": "46d12e9eaa818f01aad4e5483afbe937e8e6c34e8f0e5cc28ac0bcc746d4cce8",
+        "previous_role": "dependency",
+        "previous_disposition": "dependency",
+        "scope": "Targeted pinned-method binding plus root/judge reviewed SDK contracts; not a new full-file independent reread or execution proof."
+      }
+    ],
+    "limitations": "All prior checkpoint/reviewer-depth caveats retained. Root/judge issue evidence establishes register/sampler contracts; metadata agent independently verified raw pinned blob identities and literal method anchors. No new SDK build, runtime receipt, electrical result, closure or source-hash refresh."
+  },
+  "additional_forced_readback_tracking_review": {
+    "previous_manifest_sha256": "c14045c5b90afbe17fb2ac71d1820a41f8977b024b24df663c3b236fbaad0a16",
+    "previous_manifest_commit": "43b1abc0e638ce553359e0d197206217508ad590",
+    "source_only": true,
+    "required_finding_count": 51,
+    "research_preparation_sha256": "452f3e6239d5d8b48ec34e45ec0d8e00849878dcc893a17d9e6e7216750f7c25",
+    "reviewed_records": [
+      {
+        "path": "src/platforms/apollo3/pin_apollo3_native.hpp",
+        "baseline_blob_oid": "d3cc25e38614444c671a244cb195dbd66ef76084",
+        "baseline_sha256": "55dfb1b74c519f5508af14f948a950ae6c86d8d65a0c3382cecdcadbc346b7e9",
+        "previous_row_sha256": "40d9ef329a9316b9221f7a2ba9eb9c257bf88ec9561e1c0e1f7f9d038ef4d5b3",
+        "previous_findings": [
+          "runtime-channel",
+          "runtime-manager"
+        ],
+        "previous_role": "dependency",
+        "previous_disposition": "dependency",
+        "added_or_reconfirmed_anchors": [
+          {
+            "line": 88,
+            "text": "        case PinMode::Output:"
+          },
+          {
+            "line": 90,
+            "text": "            pin_config.eGPInput = AM_HAL_GPIO_PIN_INPUT_NONE;"
+          },
+          {
+            "line": 134,
+            "text": "    u32 result = am_hal_gpio_state_read(pin, AM_HAL_GPIO_INPUT_READ, &read_state);"
+          }
+        ],
+        "updated_row_sha256": "8192745822908d0c6652e54e13b6b95fd21696c2121472385b16ccfdb48c88a4"
+      },
+      {
+        "path": "src/fl/system/fastpin_base.h",
+        "baseline_blob_oid": "349bed5f1bdc23c8b5b1b793b2effeae993c2560",
+        "baseline_sha256": "296b86f3c932ae5a7705a270c727c2e949242afb29ff281cd9b3561080bc48cc",
+        "previous_row_sha256": "6beac36c1c874b2a680deede64afbb46fa9b172d06484bd75984d8e8c787cffe",
+        "previous_findings": [
+          "forced-software-no-pinmap",
+          "production-gate",
+          "esp32-forced-fastpin-selection",
+          "forced-mapped-toggle-register-contract"
+        ],
+        "previous_role": "implementation",
+        "previous_disposition": "positive",
+        "added_or_reconfirmed_anchors": [],
+        "updated_row_sha256": "2def9c90892fe6f027ce4c9d6b1a1b430366b176b17e8d5e4721b20931a06534"
+      },
+      {
+        "path": "src/fl/system/pin.h",
+        "baseline_blob_oid": "5e31e4b83c44398d0b0f3050af2d640386bcbfff",
+        "baseline_sha256": "30a8701959bf96c65e74ec989971c5304a50b457cc7eea3897d90a48d971a62f",
+        "previous_row_sha256": "d5a1029a503bb0d546cafd8f45f6e584c9aefc0f2c84de8c550577e0fc32b96d",
+        "previous_findings": [
+          "forced-software-no-pinmap",
+          "runtime-channel",
+          "runtime-manager"
+        ],
+        "previous_role": "dependency",
+        "previous_disposition": "dependency",
+        "added_or_reconfirmed_anchors": [],
+        "updated_row_sha256": "37dedade7dff76d454f29b54dc4f956fbf1773c51b6ce7ceae8c64bd502ff2a9"
+      },
+      {
+        "path": "src/fl/system/pin.cpp.hpp",
+        "baseline_blob_oid": "f9240c6333727d14e3460143afc33518a58b361c",
+        "baseline_sha256": "1fc34978c6ef4be05dadd86f6c62843c4ac3cf8997c6b54109854c0be602427b",
+        "previous_row_sha256": "2e6b9204777ab750fe922342561bc23e63d4ca4abda30737db0708594059f9d0",
+        "previous_findings": [
+          "forced-software-no-pinmap",
+          "runtime-channel",
+          "runtime-manager"
+        ],
+        "previous_role": "implementation",
+        "previous_disposition": "dependency",
+        "added_or_reconfirmed_anchors": [],
+        "updated_row_sha256": "9e6c9be2ce2260ff4c0d37c5f9023c9811a2512b114fe9be3e511957e09458b0"
+      },
+      {
+        "path": "src/platforms/pin.h",
+        "baseline_blob_oid": "4d01f54d26d8d1f47af7f6b33cac66860d98bfeb",
+        "baseline_sha256": "c04bf6e52543b8a23e9e6bcc108e58c28461c775d1062277704f4d2d62e20b4e",
+        "previous_row_sha256": "7af5f43abbdba90e61bc862f01044679b986cb3d626444106deb86c07e407068",
+        "previous_findings": [],
+        "previous_role": "dependency",
+        "previous_disposition": "dependency",
+        "added_or_reconfirmed_anchors": [],
+        "updated_row_sha256": "45b637dda05091aa2a2f448b9d89e50a4b70c55bb3fed049bd4d1fd76ec1d84b"
+      },
+      {
+        "path": "src/platforms.h",
+        "baseline_blob_oid": "9951bceb814980052791e704b99d902694f155ff",
+        "baseline_sha256": "14a9aa17348fa26d9d9ba40462d53e0b0f583a27926e27cc64891ea27859b0de",
+        "previous_row_sha256": "8fa3b1f1488777ad236add3922f7cec2cdc8f15b46111de2e5aec8fc9bf6b772",
+        "previous_findings": [],
+        "previous_role": "dispatch",
+        "previous_disposition": "dependency",
+        "added_or_reconfirmed_anchors": [],
+        "updated_row_sha256": "913937db61fb18a6b1651dec7ad7eec586ad5350c31530785647fd984c6c6510"
+      },
+      {
+        "path": "src/led_sysdefs.h",
+        "baseline_blob_oid": "8abbe6f080e07c4f9c9e1b03a35d9682081c720c",
+        "baseline_sha256": "5bc46552d983a02225aff4b27ca10b45ecfc22a1d404edd820448442009e6031",
+        "previous_row_sha256": "a8d7b353880efdb693115fb00138962a4f26c041835ab58eec0a7ae2b2caf25f",
+        "previous_findings": [],
+        "previous_role": "dependency",
+        "previous_disposition": "dependency",
+        "added_or_reconfirmed_anchors": [],
+        "updated_row_sha256": "1418de1fee937017aa6c84caf857b6451f43f1b95bce58f6c4c76525d46e76f8"
+      },
+      {
+        "path": "src/platforms/apollo3/pin_apollo3.hpp",
+        "baseline_blob_oid": "096b8606dd3b4ca23807c5f4ea78db2c2de97c27",
+        "baseline_sha256": "b3454b2d2b34f688808065810f0ee5e0eff4ca21b52c6d5ffc2daaedb4671cd3",
+        "previous_row_sha256": "1ccad7c168bd4459daf19eaba03e6633b1d00a41f97c6a710ac3f7dab3a13786",
+        "previous_findings": [],
+        "previous_role": "forwarding-alias",
+        "previous_disposition": "alias",
+        "added_or_reconfirmed_anchors": [],
+        "updated_row_sha256": "9e0472f3cd145ce5264458a7fd0ced94be7c8e49ae459ffc819acc623f2fc75c"
+      },
+      {
+        "path": "src/platforms/apollo3/fastled_apollo3.h",
+        "baseline_blob_oid": "e93e9587d3828a0783ee229da43a4e37c32eed7b",
+        "baseline_sha256": "6b8f608ee605cddbd28341219ed886c09454c6a283f72ec4d9e012d0285f14bb",
+        "previous_row_sha256": "5a19eedc9e400e495ff9d760e215d2a2b600953af43b16de91cf7a4c3d53f127",
+        "previous_findings": [
+          "apollo3-loop"
+        ],
+        "previous_role": "implementation",
+        "previous_disposition": "dependency",
+        "added_or_reconfirmed_anchors": [],
+        "updated_row_sha256": "8c096fa509f5d80b0fc99a11e6f0a47cd7b272aa49c3d53b642141986725c8cc"
+      },
+      {
+        "path": "src/platforms/apollo3/fastpin_apollo3.h",
+        "baseline_blob_oid": "36a997e87fac49d06cdc5470ba55f8e0949717a7",
+        "baseline_sha256": "b6ccb6d2c9a0f555be4b4caa46eb9dba5aae1154c3c1d7f78d3bfc2a1f4be0f2",
+        "previous_row_sha256": "978370b325ac9e4ed5ec172729415cfab2b35c83beb21fd51cdc9ec1391dcaf0",
+        "previous_findings": [],
+        "previous_role": "dependency",
+        "previous_disposition": "dependency",
+        "added_or_reconfirmed_anchors": [],
+        "updated_row_sha256": "099b159783dae89767cce5e1f100ab09046f7b39649466c2be6568c7a50f9d91"
+      },
+      {
+        "path": "src/platforms/apollo3/led_sysdefs_apollo3.h",
+        "baseline_blob_oid": "83ee3e9278a29d515b24661fbb619b2961c8169d",
+        "baseline_sha256": "3d7deb3e329c5160bb076464fb09da1933809bdbc6d9a5599e28881948837c0e",
+        "previous_row_sha256": "f0f3d2bbca47ad862a462d4f6e41480120d3baae353ced41e952a6d403f51dd7",
+        "previous_findings": [],
+        "previous_role": "dependency",
+        "previous_disposition": "dependency",
+        "added_or_reconfirmed_anchors": [],
+        "updated_row_sha256": "9df7724ed4b1acfdafa7545168515081881cc7999524833b6f0943249d18b8b3"
+      },
+      {
+        "path": "src/platforms/arm/nrf52/fastpin_arm_nrf52_variants.h",
+        "baseline_blob_oid": "00932decc095c6c54693d95d14234e526e460dfc",
+        "baseline_sha256": "d1874d37698c26ce1bd1f1954097dd093e18efba15391a4235b4d4cbe3d3605e",
+        "previous_row_sha256": "cdcb09a5847c7d20a071b874eeead357ad2b7aed940009156dafd43a58276cd9",
+        "previous_findings": [
+          "nrf52",
+          "nrf52-variants-forced-fastpin-selection"
+        ],
+        "previous_role": "pin-map",
+        "previous_disposition": "positive",
+        "added_or_reconfirmed_anchors": [],
+        "updated_row_sha256": "cdcb09a5847c7d20a071b874eeead357ad2b7aed940009156dafd43a58276cd9"
+      },
+      {
+        "path": "src/platforms/arm/nrf52/pin_nrf52.hpp",
+        "baseline_blob_oid": "3940c45bdcec42112dcd66889de2df6b163b4881",
+        "baseline_sha256": "3d82303256caa2c45a42d0c5248d2f2b7b01fb8bd7b896c4292e9db9fe9c5472",
+        "previous_row_sha256": "7cb53c46fe83a65ee1fe4c2b46d65ff673502cc6ad5c5bb0b0c4143dbfca3ea3",
+        "previous_findings": [
+          "forced-software-no-pinmap",
+          "nrf52",
+          "runtime-channel",
+          "runtime-manager"
+        ],
+        "previous_role": "dependency",
+        "previous_disposition": "dependency",
+        "added_or_reconfirmed_anchors": [
+          {
+            "line": 42,
+            "text": "            nrf_gpio_cfg_output(pin);"
+          },
+          {
+            "line": 62,
+            "text": "    return nrf_gpio_pin_read(pin) ? PinValue::High : PinValue::Low;"
+          }
+        ],
+        "updated_row_sha256": "8c5dfadcf0b3e59df2e9d75e7cb55dff6f644051ed9b3d1d37473dcf8571588f"
+      },
+      {
+        "path": "src/platforms/arm/nrf52/is_nrf52.h",
+        "baseline_blob_oid": "7756448602e63cd9d07975147181c5f72043ed64",
+        "baseline_sha256": "9cd1dba7da0c2982f417349000e645262a3070a80b74184a31d2090caf182cf5",
+        "previous_row_sha256": "c86a356080fac9dc76ceb5f637808c9e50be4416a7a72f592deb2520042eb3b2",
+        "previous_findings": [
+          "nrf52"
+        ],
+        "previous_role": "dispatch",
+        "previous_disposition": "dependency",
+        "added_or_reconfirmed_anchors": [],
+        "updated_row_sha256": "dd415b7c0a2a4ce3c4f5f8b49b59fa39b448e653ce6f6131b6e3ba9949b79c71"
+      },
+      {
+        "path": "src/platforms/arm/nrf52/led_sysdefs_arm_nrf52.h",
+        "baseline_blob_oid": "cbd060ff98c3374636d99ec1fa0e89a44b661da8",
+        "baseline_sha256": "e2c95771d028c6d693f41189d8f290766b046d8fefa7749982a1dbddeb143618",
+        "previous_row_sha256": "4cf42933a3851ef2c44a1b137c3fa4fc54340819273e139fe732d41f731ce7ab",
+        "previous_findings": [
+          "nrf52"
+        ],
+        "previous_role": "dependency",
+        "previous_disposition": "dependency",
+        "added_or_reconfirmed_anchors": [],
+        "updated_row_sha256": "5b86304128a8e34e5a4d825d26ac3f6da6983cab879cddf82dc355f3e2082542"
+      }
+    ],
+    "current_dependency_paths_absent_from_pinned_universe": [
+      {
+        "path": "src/fl/system/forced_software_pin.h",
+        "finding": "apollo3-forced-no-pinmap-output-readback"
+      }
+    ],
+    "review_scope": "Root/judge reviewed upstream API/selector/provider contracts and exact version limitations; metadata agent verified raw pinned Git blobs and targeted actual method anchors. Not a new full-body independent reread, resolved release-package build, hardware result or execution receipt.",
+    "limitations": "All previous independent review-depth caveats retained. Apollo5089 promotes only its actual runtime API source; nRF52 runtime binding remains dependency behind5070 selector plus explicitNoMap, not current SPI-readback positive. Preserve every2986 baseline identity/oldanchor/oldassociation. C6 proof remains historical43b1 scope, not requalified by this metadata snapshot."
+  }
+}

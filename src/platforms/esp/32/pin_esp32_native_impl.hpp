@@ -10,7 +10,7 @@
 ///
 /// Mode mapping:
 /// - PinMode::Input (0) = INPUT (GPIO_MODE_INPUT)
-/// - PinMode::Output (1) = OUTPUT (GPIO_MODE_OUTPUT)
+/// - PinMode::Output (1) = push-pull output with readback (GPIO_MODE_INPUT_OUTPUT)
 /// - PinMode::InputPullup (2) = INPUT_PULLUP (GPIO_MODE_INPUT with pull-up)
 /// - PinMode::InputPulldown (3) = INPUT_PULLDOWN (GPIO_MODE_INPUT with pull-down)
 
@@ -66,7 +66,10 @@ inline void (pinMode)(int pin, PinMode mode) FL_NO_EXCEPT {
             io_conf.pull_down_en = GPIO_PULLDOWN_DISABLE;
             break;
         case PinMode::Output:
-            io_conf.mode = GPIO_MODE_OUTPUT;
+            // Preserve push-pull drive and enable pad-level readback: the SDK
+            // gpio_get_level returns0 when input is disabled. Forced toggle
+            // uses read/invert/write, so output-only mode cannot toggle LOW.
+            io_conf.mode = GPIO_MODE_INPUT_OUTPUT;
             io_conf.pull_up_en = GPIO_PULLUP_DISABLE;
             io_conf.pull_down_en = GPIO_PULLDOWN_DISABLE;
             break;

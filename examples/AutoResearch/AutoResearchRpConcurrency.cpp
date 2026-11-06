@@ -1,3 +1,6 @@
+// The compile-only SPI audit uses its own retained probes, not the RPC harness.
+#if !defined(FL_SOFTWARE_SPI_COMPILE_PROBE)
+
 #include "AutoResearchRpConcurrency.h"
 
 #include "platforms/is_platform.h"
@@ -187,3 +190,5 @@ fl::json runRpConcurrencyTest() {
 } // namespace autoresearch
 
 #endif
+
+#endif // !FL_SOFTWARE_SPI_COMPILE_PROBE
