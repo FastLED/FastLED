@@ -18,6 +18,13 @@ constexpr cycle_t bitbangPhaseDelay(cycle_t requested, cycle_t minimum,
         : (minimum > work ? minimum - work : 0);
 }
 
+/// Per-phase delay for a rate in Hz: a quarter of the bit period, in ns. Divides
+/// the rate directly so sub-MHz and fractional-MHz rates stay exact. Zero has no
+/// period; the Teensy 4 writer rejects it at compile time.
+constexpr u32 bitbangPhaseNsFromHz(u32 hz) FL_NO_EXCEPT {
+    return hz == 0 ? 0 : 1000000000UL / hz / 4;
+}
+
 /// One atomic GPIO update, without a data-dependent branch. Platforms with
 /// write-one-to-set/clear registers can use this instead of a port snapshot.
 template <u8 BIT>

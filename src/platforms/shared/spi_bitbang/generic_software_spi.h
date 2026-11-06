@@ -23,6 +23,7 @@
 #include "pixel_controller.h"
 #include "fastspi_types.h"
 #include "fl/stl/noexcept.h"
+#include "fl/stl/static_assert.h"
 #include "platforms/shared/spi_bitbang/bitbang_pin.h"
 
 FL_DISABLE_WARNING_PUSH
@@ -167,9 +168,9 @@ private:
 public:
 
 #if defined(FL_IS_TEENSY_4X)
-	#define DELAY_NS (1000 / (SPI_SPEED/1000000))
-	#define CLOCK_HI_DELAY do { delayNanoseconds((DELAY_NS/4)); } while(0);
-	#define CLOCK_LO_DELAY do { delayNanoseconds((DELAY_NS/4)); } while(0);
+	FL_STATIC_ASSERT(SPI_SPEED > 0, "Teensy 4 software SPI rate is in Hz and must be nonzero");
+	#define CLOCK_HI_DELAY do { delayNanoseconds(bitbangPhaseNsFromHz(SPI_SPEED)); } while(0);
+	#define CLOCK_LO_DELAY do { delayNanoseconds(bitbangPhaseNsFromHz(SPI_SPEED)); } while(0);
 #else
 	/// We want to make sure that the clock pulse is held high for a minimum of 35 ns.
 	#define MIN_DELAY ((NS(35)>3) ? (NS(35) - 3) : 1)
