@@ -475,6 +475,56 @@ configuration prerequisite without introducing shadow output state. Source and
 SDK mode checks are distinct from a physical pad-level toggle measurement or
 MY9221 timing/cache qualification.
 
+The separate C6 output-mode adapter is explicitly opt-in:
+`FASTLED_RUN_ESP32_C6_MODE_PROOF=1 UV_NO_SYNC=1 uv run --no-sync pytest ci/tests/test_software_spi_audit.py -q -k esp32_c6_mode_real_three_stage_acceptance`.
+It uses the fixed forced GPIO2/3 Generic producer and a FastLED-first companion
+translation unit, global FORCE=1 without NO_PINMAP, Arduino3.3.5/IDF5.5.1,
+GCC14.2.0_20260121, and the fixed 160MHz rv32imac C6 profile. Three isolated
+builds retain the current mapping, the exact
+old `GPIO_MODE_OUTPUT` assignment, and exact restoration. A bounded encoded
+RISC-V contract binds the actual producer calls and `gpio_config_t::mode` store
+to compiled SDK/public-enum exports. Both PWM lookup outcomes are considered
+under an explicit normal-callee saved-register ABI assumption. The old mapping
+must compile and produce the intended mode mismatch. Unknown instruction or
+binding forms reject; raw caller-provided records cannot certify this property.
+The retained compile database describes planned arguments, not complete executed
+argv. This static configuration property clears no full #5067 or #5066 group
+and makes no runtime GPIO, physical-toggle, IRQ, cache or timing claim.
+Remaining work includes qualified runtime readback/toggle behavior, the other
+selection/configuration and invalid-pin controls, target-specific code/cache
+closure and the independent MY9221 min/max timing and memory requirements.
+The adapter does not auto-run from `--run-native`; failed attempts retain their
+isolated workspace, logs and restoration diagnostics without publishing proof.
+
+The first managed C6 attempt (`rfo516cb`) remains unaccepted: its baseline
+restored a byte-identical ELF through fbuild's native warm link cache, which
+does not restore an ordinary map. The inherited RP map precondition stopped
+that attempt before classification or the old-mode control. C6's authority is
+the retained ELF sections/PT_LOAD/symbol bytes, compiled exports and frozen
+SDK ROM linker definition; it does not consume an ordinary map. C6 now records
+missing/present/ambiguous ordinary maps as diagnostics, retaining each present
+candidate under a distinct name with its hash and freshness explicitly
+unproven. It never substitutes a bootstrap map or skips semantic assessment.
+RP placement and saved-PRIMASK profiles continue to require their unique map.
+
+The subsequent `95z1rpgj` attempt also remains unaccepted. Its ELF exposed the
+pinned C6 SDK's intentional `.flash_rodata_dummy (NOLOAD)` reservation, which
+shares code's virtual range and is padded before real rodata. The extractor
+qualifies only this exact script-bound geometry and its zero padding/coherent
+data LOAD; other overlapping sections or LOADs still reject. Both SDK linker
+scripts and layout diagnostics are retained. This is conditional ELF analysis:
+it does not establish firmware BIN segment authority, runtime address mapping
+or physical execution, and no generic NOBITS/LOAD exemption is provided.
+
+Attempt `071zeek4` remains unaccepted too: its real old-assignment control
+compiled successfully, but GCC emitted a distinct 142-byte register-reuse
+layout instead of the 138-byte layout modeled by the initial synthetic cell
+test. Both reviewed layouts now retain exact branch/register/SP contracts and
+decoded call targets. The stored value comes from the decoded `a5` immediate
+on the selected public-Output path, never from a stage or grammar label. The
+actual old capture and reciprocal synthetic opcode test qualify parser
+behavior only; a fresh managed current/control/restored attempt is required.
+
 #5086 protects the selected Teensy4 forced mapped toggle path: writing a sampled
 input register is not a portable output-toggle contract. Actual separate
 input/output behavior, Teensy40/41 SDK codegen across banks, AVR PINx and NoPinMap

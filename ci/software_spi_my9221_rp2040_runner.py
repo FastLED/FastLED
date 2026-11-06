@@ -15,6 +15,7 @@ from dataclasses import asdict, dataclass
 from enum import Enum
 from pathlib import Path
 
+from ci import software_spi_esp32_c6_mode_proof as mode_check
 from ci import software_spi_init_proof as native
 from ci import software_spi_my9221_rp2040_irq_proof as irq_check
 from ci import software_spi_my9221_rp2040_proof as property_check
@@ -27,6 +28,7 @@ PRODUCER = b'#include <FastLED.h>\n\n// Fixed direct public-controller producer;
 class _PropertyKind(Enum):
     PLACEMENT = "placement"
     IRQ = "irq"
+    ESP32_C6_MODE = "esp32-c6-mode"
 
 
 @dataclass(frozen=True)
@@ -39,6 +41,14 @@ class _VendorSpec:
 
 
 def _vendor_spec(kind: _PropertyKind) -> _VendorSpec:
+    if kind is _PropertyKind.ESP32_C6_MODE:
+        return _VendorSpec(
+            mode_check.SOURCE,
+            mode_check.STAGES[1],
+            "esp32c6-forced-gpio2-3-output-readback-mode-property-only",
+            native._ProofKind.ESP32_C6_MODE,
+            "spi-esp32-c6-mode-proof",
+        )
     if kind is _PropertyKind.PLACEMENT:
         return _VendorSpec(
             property_check.SOURCE,
@@ -62,6 +72,7 @@ def _vendor_spec(kind: _PropertyKind) -> _VendorSpec:
 class _Assessment:
     errors: list[str]
     irq_analysis: irq_check.IRQResult | None = None
+    mode_analysis: mode_check.ModeResult | None = None
 
 
 def _assess_property(capture: dict, kind: _PropertyKind, stage: str) -> _Assessment:
@@ -72,6 +83,10 @@ def _assess_property(capture: dict, kind: _PropertyKind, stage: str) -> _Assessm
         result = irq_check.classify_irq_capture(capture)
         irq_check.validate_stage_analysis(stage, result)
         return _Assessment(result.errors, result)
+    if kind is _PropertyKind.ESP32_C6_MODE:
+        result = mode_check.classify_capture(capture)
+        mode_check.validate_stage_analysis(stage, result)
+        return _Assessment(result.errors, mode_analysis=result)
     errors = property_check.classify_capture(capture)
     intended = ["kernel-not-in-sdk-sram"] if stage == spec.mutant else []
     if errors != intended:
@@ -97,6 +112,7 @@ class VendorStage:
     serving_engine_before: dict
     serving_engine_after: dict
     irq_analysis: irq_check.IRQResult | None = None
+    mode_analysis: mode_check.ModeResult | None = None
 
 
 @dataclass(frozen=True)
@@ -281,7 +297,21 @@ def _compile(workspace: Path, saved: Path, environment: dict[str, str]) -> dict:
     return info
 
 
+def _board(kind: _PropertyKind) -> str:
+    return "esp32c6" if kind is _PropertyKind.ESP32_C6_MODE else "rp2040"
+
+
+def _compile_selected(
+    workspace: Path, saved: Path, environment: dict, kind: _PropertyKind
+) -> dict:
+    if kind is _PropertyKind.ESP32_C6_MODE:
+        return mode_check.compile_fixed(workspace, saved, environment)
+    return _compile(workspace, saved, environment)
+
+
 def _profile_roots(info: dict) -> tuple[Path, Path]:
+    if info.get("env") == "esp32c6":
+        return mode_check.sdk_roots(info)
     roots = {
         Path(path).parent.parent
         for path in info["includes"]
@@ -425,7 +455,7 @@ def _state(
     scripts = {
         str(path): _digest(path) for path in project.rglob("*.ld") if path.is_file()
     }
-    return {
+    result = {
         "tools": observed_tools,
         "sdk": {**_tree_hashes(roots), **scripts},
         "configuration": configuration,
@@ -434,6 +464,9 @@ def _state(
             for key, value in environment.items()
         },
     }
+    if info.get("env") == "esp32c6":
+        result["planned_configuration"] = mode_check.planned_configuration(info)
+    return result
 
 
 def _file_universe(root: Path) -> dict[str, str]:
@@ -453,7 +486,7 @@ def _file_universe(root: Path) -> dict[str, str]:
 
 
 def _check_staged_sources(
-    workspace: Path, expected: dict[str, str], project: Path
+    workspace: Path, expected: dict[str, str], project: Path, producer: bytes = PRODUCER
 ) -> None:
     from ci.compiler.source_manager import (
         _GENERATED_EXAMPLE_DIRS,
@@ -496,7 +529,7 @@ def _check_staged_sources(
     ).hexdigest()
     if _file_universe(project / "src") != wanted_project:
         raise ValueError("staged project source universe differs")
-    if (project / "src/sketch/AutoResearch.ino").read_bytes() != PRODUCER:
+    if (project / "src/sketch/AutoResearch.ino").read_bytes() != producer:
         raise ValueError("staged fixed public producer changed")
 
 
@@ -576,7 +609,12 @@ def _capture(
     return outputs
 
 
-def _retain_artifacts(info: dict, saved: Path, project: Path) -> dict[str, str]:
+def _retain_artifacts(
+    info: dict,
+    saved: Path,
+    project: Path,
+    kind: _PropertyKind = _PropertyKind.PLACEMENT,
+) -> dict[str, str]:
     release = Path(info["prog_path"]).parent
     sources = [
         release / name
@@ -587,12 +625,50 @@ def _retain_artifacts(info: dict, saved: Path, project: Path) -> dict[str, str]:
         for path in (release / "firmware.map", project / "firmware.map")
         if path.is_file()
     ]
-    if len(maps) != 1:
-        raise ValueError("missing or ambiguous actual RP2040 link map")
-    sources += maps
+    if kind is _PropertyKind.ESP32_C6_MODE:
+        # Unlike RP placement, C6 consumes no ordinary map. A warm native
+        # link-cache hit can restore only ELF; never borrow a bootstrap map.
+        candidates = []
+        for label, source in (
+            ("release", release / "firmware.map"),
+            ("project", project / "firmware.map"),
+        ):
+            if not source.exists() and not source.is_symlink():
+                continue
+            if source.is_symlink() or not source.is_file():
+                raise ValueError("unsafe C6 diagnostic map candidate")
+            destination = saved / "diagnostic-maps" / (label + "-firmware.map")
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(source, destination)
+            sha256 = _digest(destination)
+            if _digest(source) != sha256:
+                raise ValueError("C6 diagnostic map changed during retention")
+            candidates.append(
+                {"source": str(source), "retained": str(destination), "sha256": sha256}
+            )
+        _json(
+            saved / "map-diagnostics.json",
+            {
+                "status": "missing"
+                if not candidates
+                else "present"
+                if len(candidates) == 1
+                else "ambiguous",
+                "consumed_by_property": False,
+                "freshness": "unproven",
+                "candidates": candidates,
+            },
+        )
+    else:
+        # Preserve the existing default/RP IRQ contract: the RP classifiers
+        # consume the unique ordinary map and cannot proceed without it.
+        if len(maps) != 1:
+            raise ValueError("missing or ambiguous actual RP2040 link map")
+        sources += maps
     for source in sources:
         if not source.is_file():
-            raise ValueError(f"missing actual RP2040 artifact {source}")
+            profile = "C6" if kind is _PropertyKind.ESP32_C6_MODE else "RP2040"
+            raise ValueError(f"missing actual {profile} artifact {source}")
         shutil.copy2(source, saved / source.name)
     for source in release.rglob("*.a"):
         destination = saved / "archives" / source.relative_to(release)
@@ -637,22 +713,31 @@ def _build_session(
     engine_profile: dict,
     info: dict,
     expected_inputs: dict,
+    kind: _PropertyKind = _PropertyKind.PLACEMENT,
 ) -> BuildSession:
-    project = workspace / ".build/fbuild/rp2040"
+    project = workspace / ".build/fbuild" / _board(kind)
     # Complete all expensive static hashing before an instance-scoped window.
     before_static = _state(info, _environment(workspace), tools, roots, project)
     property_check._verify_profile_state(saved, "before", profile, before_static)
     _ensure_stage_engine(workspace, saved, environment, tools, engine_profile)
     before = _daemon_identity(workspace, saved, "build-before", environment, tools)
     _verify_engine_profile(saved, "build-before", engine_profile, before)
-    updated = _compile(workspace, saved, environment)
+    updated = _compile_selected(workspace, saved, environment, kind)
     # No source/SDK/ELF hashing between submission completion and this capture.
     after = _daemon_identity(workspace, saved, "build-after", environment, tools)
     _verify_serving_engine(saved, "build-after", before, after)
     after_static = _state(updated, _environment(workspace), tools, roots, project)
     property_check._verify_profile_state(saved, "after-build", profile, after_static)
     native._verify_inputs(workspace, expected_inputs)
-    _check_staged_sources(workspace, expected_inputs, project)
+    if kind is _PropertyKind.ESP32_C6_MODE:
+        _check_staged_sources(
+            workspace,
+            expected_inputs,
+            project,
+            mode_check.producer_sources(workspace)[EXAMPLE],
+        )
+    else:
+        _check_staged_sources(workspace, expected_inputs, project)
     return BuildSession(updated, before, after, after_static)
 
 
@@ -685,7 +770,7 @@ def _one_stage(
     spec = _vendor_spec(kind)
     saved = artifacts / name
     saved.mkdir(parents=True, exist_ok=True)
-    project = workspace / ".build/fbuild/rp2040"
+    project = workspace / ".build/fbuild" / _board(kind)
     (workspace / spec.source).write_bytes(source)
     expected = dict(initial)
     expected[spec.source] = hashlib.sha256(source).hexdigest()
@@ -705,10 +790,19 @@ def _one_stage(
         engine_profile,
         info,
         expected,
+        kind,
     )
     updated = session.info
-    hashes = _retain_artifacts(updated, saved, project)
-    capture = _capture(workspace, saved, updated, environment)
+    hashes = (
+        _retain_artifacts(updated, saved, project, kind)
+        if kind is _PropertyKind.ESP32_C6_MODE
+        else _retain_artifacts(updated, saved, project)
+    )
+    capture = (
+        mode_check.capture_retained(workspace, saved, updated, environment)
+        if kind is _PropertyKind.ESP32_C6_MODE
+        else _capture(workspace, saved, updated, environment)
+    )
     assessment = _assess_property(capture, kind, name)
     errors = assessment.errors
     for relative in (spec.source, EXAMPLE):
@@ -737,12 +831,15 @@ def _one_stage(
         "planned-argv-not-complete-executed-receipt",
         hashes,
         errors,
-        True,  # Both accepted outcomes passed actual route/callback checks.
-        True,
-        assessment.irq_analysis is not None or not errors,
+        # C6 binds calls within the fixed producer, not a firmware-root graph.
+        kind is not _PropertyKind.ESP32_C6_MODE,
+        kind is not _PropertyKind.ESP32_C6_MODE,
+        kind is not _PropertyKind.ESP32_C6_MODE
+        and (assessment.irq_analysis is not None or not errors),
         session.before,
         session.after,
         assessment.irq_analysis,
+        assessment.mode_analysis,
     )
     _json(saved / "stage.json", asdict(result))
     return result, updated
@@ -764,15 +861,23 @@ def _run_vendor_proof(root: Path, kind: _PropertyKind) -> VendorProof:
         spec.source: (workspace / spec.source).read_bytes(),
         EXAMPLE: (workspace / EXAMPLE).read_bytes(),
     }
+    producers = (
+        mode_check.producer_sources(workspace)
+        if kind is _PropertyKind.ESP32_C6_MODE
+        else {EXAMPLE: PRODUCER}
+    )
+    for relative in producers:
+        originals.setdefault(relative, (workspace / relative).read_bytes())
     profile = None
     tools = None
     info = None
     environment = _environment(workspace)
     records = []
     try:
-        (workspace / EXAMPLE).write_bytes(PRODUCER)
         initial = dict(original_inputs)
-        initial[EXAMPLE] = hashlib.sha256(PRODUCER).hexdigest()
+        for relative, content in producers.items():
+            (workspace / relative).write_bytes(content)
+            initial[relative] = hashlib.sha256(content).hexdigest()
         native._verify_inputs(workspace, initial)
         bootstrap = artifacts / "bootstrap"
         client_tools = _client_tools(environment)
@@ -782,15 +887,18 @@ def _run_vendor_proof(root: Path, kind: _PropertyKind) -> VendorProof:
         bootstrap_engine = _prepare_bootstrap_engine(
             workspace, bootstrap, environment, client_tools, desired_launcher
         )
-        info = _compile(workspace, bootstrap, environment)
+        info = _compile_selected(workspace, bootstrap, environment, kind)
         bootstrap_after = _daemon_identity(
             workspace, bootstrap, "bootstrap-build-after", environment, client_tools
         )
         _verify_serving_engine(
             bootstrap, "bootstrap-build", bootstrap_engine, bootstrap_after
         )
-        project = workspace / ".build/fbuild/rp2040"
-        _check_staged_sources(workspace, initial, project)
+        project = workspace / ".build/fbuild" / _board(kind)
+        if kind is _PropertyKind.ESP32_C6_MODE:
+            _check_staged_sources(workspace, initial, project, producers[EXAMPLE])
+        else:
+            _check_staged_sources(workspace, initial, project)
         roots = _profile_roots(info)
         tools = _tool_identities(info, workspace, environment, bootstrap)
         for key, identity in client_tools.items():
@@ -808,12 +916,17 @@ def _run_vendor_proof(root: Path, kind: _PropertyKind) -> VendorProof:
                 "complete_executed_argv": False,
             },
         )
-        _retain_artifacts(info, bootstrap, project)
+        if kind is _PropertyKind.ESP32_C6_MODE:
+            _retain_artifacts(info, bootstrap, project, kind)
+        else:
+            _retain_artifacts(info, bootstrap, project)
         native._verify_inputs(workspace, initial)
         stages = {
             "baseline": originals[spec.source],
             spec.mutant: (
-                property_check.kernel_mutant(originals[spec.source])
+                mode_check.old_output_mode_mutant(originals[spec.source])
+                if kind is _PropertyKind.ESP32_C6_MODE
+                else property_check.kernel_mutant(originals[spec.source])
                 if kind is _PropertyKind.PLACEMENT
                 else irq_check.irq_mutant(originals[spec.source])
             ),
@@ -849,14 +962,18 @@ def _run_vendor_proof(root: Path, kind: _PropertyKind) -> VendorProof:
             raise ValueError("RP2040 XIP mutant ELF is not distinct")
         proof = VendorProof(
             spec.scope,
-            "direct-controller-init-setLeds-showLeds",
+            "forced-GenericSoftwareSPIOutput-init-gpio2-3-public-PinMode-Output"
+            if kind is _PropertyKind.ESP32_C6_MODE
+            else "direct-controller-init-setLeds-showLeds",
             False,
             False,
             workspace,
             records,
             bootstrap,
             _engine_semantics(engine_profile),
-            "Bounded static potential public route/placement or saved-PRIMASK property only; no hardware execution, physical IRQ guarantee, termination, min/max timing, stack/frame runtime location or complete executed argv. All seven MY groups unresolved.",
+            "Bounded conditional-ELF output-mode field property under normal-callee RISC-V ABI assumptions; no BIN/runtime mapping, runtime GPIO/toggle, hardware execution, IRQ/cache/timing or complete executed argv. All full5067 and5066 groups unresolved."
+            if kind is _PropertyKind.ESP32_C6_MODE
+            else "Bounded static potential public route/placement or saved-PRIMASK property only; no hardware execution, physical IRQ guarantee, termination, min/max timing, stack/frame runtime location or complete executed argv. All seven MY groups unresolved.",
         )
     except (
         OSError,
@@ -870,8 +987,11 @@ def _run_vendor_proof(root: Path, kind: _PropertyKind) -> VendorProof:
             artifacts / "failure.json",
             {"complete": False, "workspace": workspace, "error": str(error)},
         )
+        label = (
+            "C6 output-mode" if kind is _PropertyKind.ESP32_C6_MODE else "RP2040 ELF"
+        )
         raise ValueError(
-            f"RP2040 ELF proof failed; retained {workspace}: {error}"
+            f"{label} proof failed; retained {workspace}: {error}"
         ) from error
     finally:
         pending = sys.exc_info()[1]
@@ -889,7 +1009,7 @@ def _run_vendor_proof(root: Path, kind: _PropertyKind) -> VendorProof:
                         _environment(workspace),
                         tools,
                         roots,
-                        workspace / ".build/fbuild/rp2040",
+                        workspace / ".build/fbuild" / _board(kind),
                     ),
                 )
         except (
@@ -1322,3 +1442,7 @@ def run_rp2040_elf_proof(root: Path) -> VendorProof:
 
 def run_rp2040_irq_proof(root: Path) -> VendorProof:
     return _run_vendor_proof(root, _PropertyKind.IRQ)
+
+
+def run_esp32_c6_mode_proof(root: Path) -> VendorProof:
+    return _run_vendor_proof(root, _PropertyKind.ESP32_C6_MODE)

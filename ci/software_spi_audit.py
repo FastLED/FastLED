@@ -2390,6 +2390,36 @@ def _validate_rp2040_irq_stage_analysis(stage: str, result) -> None:
     validate_stage_analysis(stage, result)
 
 
+def _esp32_c6_old_output_mode_mutant(source: bytes) -> bytes:
+    from ci.software_spi_esp32_c6_mode_proof import old_output_mode_mutant
+
+    return old_output_mode_mutant(source)
+
+
+def _validate_esp32_c6_mode_stage_sequence(stages: tuple[str, ...]) -> None:
+    from ci.software_spi_esp32_c6_mode_proof import validate_stage_sequence
+
+    validate_stage_sequence(stages)
+
+
+def _classify_esp32_c6_output_mode_capture(capture: dict):
+    from ci.software_spi_esp32_c6_mode_proof import classify_capture
+
+    return classify_capture(capture)
+
+
+def _validate_esp32_c6_mode_stage_analysis(stage: str, result) -> None:
+    from ci.software_spi_esp32_c6_mode_proof import validate_stage_analysis
+
+    validate_stage_analysis(stage, result)
+
+
+def _run_esp32_c6_output_mode_proof(root: Path):
+    from ci.software_spi_my9221_rp2040_runner import run_esp32_c6_mode_proof
+
+    return run_esp32_c6_mode_proof(root)
+
+
 def _run_my9221_rp2040_irq_proof(root: Path):
     from ci.software_spi_my9221_rp2040_runner import run_rp2040_irq_proof
 

@@ -5517,3 +5517,1041 @@ def test_reviewed_baseline_keeps_new_forced_gpio_sampler_bindings(issue: int) ->
     contract = NEW_FORCED_GPIO_CONTRACTS[issue]
     assert document["files"][contract["source"]]["disposition"] == "positive"
     assert contract["id"] in document["files"][contract["source"]]["findings"]
+
+
+ESP32_C6_MODE_SOURCE = "src/platforms/esp/32/pin_esp32_native_impl.hpp"
+ESP32_C6_MODE_STAGES = ("baseline", "old-output-mode-mutant", "restored")
+
+
+def _c6_mode_retention_layout(
+    tmp_path: Path, map_count: int
+) -> tuple[dict, Path, Path]:
+    # Retention/schema behavior only. These placeholder artifact bytes are
+    # deliberately not an ELF and can never authenticate a property proof.
+    project, saved = tmp_path / "project", tmp_path / "retained"
+    release = project / ".fbuild/build/release"
+    release.mkdir(parents=True)
+    saved.mkdir()
+    for name in ("firmware.elf", "firmware.bin", "compile_commands.raw.json"):
+        (release / name).write_bytes(("not-proof-" + name).encode())
+    if map_count:
+        (release / "firmware.map").write_bytes(b"release-diagnostic-map")
+    if map_count == 2:
+        (project / "firmware.map").write_bytes(b"project-diagnostic-map")
+    return {"prog_path": str(release / "firmware.elf")}, project, saved
+
+
+@pytest.mark.parametrize("map_count", [0, 1, 2])
+def test_esp32_c6_mode_maps_are_explicit_unused_diagnostics(
+    tmp_path: Path, map_count: int
+) -> None:
+    from ci import software_spi_my9221_rp2040_runner as vendor
+
+    info, project, saved = _c6_mode_retention_layout(tmp_path, map_count)
+    hashes = vendor._retain_artifacts(
+        info, saved, project, vendor._PropertyKind.ESP32_C6_MODE
+    )
+    diagnostic = json.loads((saved / "map-diagnostics.json").read_text())
+    assert diagnostic["status"] == (
+        "missing" if map_count == 0 else "present" if map_count == 1 else "ambiguous"
+    )
+    assert diagnostic["consumed_by_property"] is False
+    assert diagnostic["freshness"] == "unproven"
+    assert len(diagnostic["candidates"]) == map_count
+    retained = set()
+    for item in diagnostic["candidates"]:
+        source, target = Path(item["source"]), Path(item["retained"])
+        assert target.parent == saved / "diagnostic-maps"
+        assert target.read_bytes() == source.read_bytes()
+        assert item["sha256"] == digest(source.read_bytes()) == hashes[str(target)]
+        retained.add(target)
+    assert len(retained) == map_count
+    assert not (saved / "firmware.map").exists(), (
+        "no ordinary map is property authority on C6"
+    )
+    assert all(
+        str(saved / name) in hashes
+        for name in (
+            "firmware.elf",
+            "firmware.bin",
+            "compile_commands.raw.json",
+            "map-diagnostics.json",
+        )
+    )
+
+
+@pytest.mark.parametrize("map_count", [0, 2])
+@pytest.mark.parametrize("kind", ["PLACEMENT", "IRQ"])
+def test_esp32_c6_mode_artifact_change_preserves_required_rp_map_contract(
+    tmp_path: Path, map_count: int, kind: str
+) -> None:
+    from ci import software_spi_my9221_rp2040_runner as vendor
+
+    info, project, saved = _c6_mode_retention_layout(tmp_path, map_count)
+    with pytest.raises(ValueError, match="map"):
+        if kind == "PLACEMENT":
+            vendor._retain_artifacts(info, saved, project)
+        else:
+            vendor._retain_artifacts(info, saved, project, vendor._PropertyKind.IRQ)
+
+
+@pytest.mark.parametrize(
+    "missing", ["firmware.elf", "firmware.bin", "compile_commands.raw.json"]
+)
+def test_esp32_c6_mode_missing_map_never_waives_required_artifacts(
+    tmp_path: Path, missing: str
+) -> None:
+    from ci import software_spi_my9221_rp2040_runner as vendor
+
+    info, project, saved = _c6_mode_retention_layout(tmp_path, 0)
+    path = Path(info["prog_path"]).parent / missing
+    path.rename(path.with_suffix(path.suffix + ".retained-original"))
+    with pytest.raises(ValueError, match="artifact"):
+        vendor._retain_artifacts(
+            info, saved, project, vendor._PropertyKind.ESP32_C6_MODE
+        )
+
+
+def test_esp32_c6_mode_missing_map_cannot_bypass_semantic_old_mode_rejection(
+    tmp_path: Path,
+) -> None:
+    from ci import software_spi_my9221_rp2040_runner as vendor
+
+    info, project, saved = _c6_mode_retention_layout(tmp_path, 0)
+    vendor._retain_artifacts(info, saved, project, vendor._PropertyKind.ESP32_C6_MODE)
+    capture = _esp32_c6_mode_capture()
+    _patch_c6_mode_bytes(capture, "fl::pinMode(int, fl::PinMode)", 0x6E, "8d47", "8947")
+    with pytest.raises(ValueError):
+        vendor._assess_property(capture, vendor._PropertyKind.ESP32_C6_MODE, "baseline")
+    assert not (saved / "stage.json").exists()
+
+
+def _esp32_c6_mode_capture() -> dict:
+    # Actual root-owned ELF32 extraction, not reconstructed objdump bytes. This
+    # pure classifier fixture cannot authenticate an executed managed proof.
+    return json.loads(
+        (
+            audit.ROOT
+            / "ci/fixtures/software_spi_audit/esp32_c6_output_mode_capture.json"
+        ).read_text()
+    )
+
+
+def _esp32_c6_actual_old_mode_capture() -> dict:
+    return json.loads(
+        (
+            audit.ROOT
+            / "ci/fixtures/software_spi_audit/esp32_c6_output_mode_actual_old_capture.json"
+        ).read_text()
+    )
+
+
+@pytest.mark.parametrize("reused_mode", [2, 3])
+def test_esp32_c6_mode_classifier_actual_reused_register_value_is_computed(
+    reused_mode: int,
+) -> None:
+    capture = _esp32_c6_actual_old_mode_capture()
+    pin = capture["symbols"]["fl::pinMode(int, fl::PinMode)"]
+    assert pin["size"] == 142
+    if reused_mode == 3:
+        # Reciprocal synthetic opcode control only, not a source/build receipt.
+        _patch_c6_mode_bytes(
+            capture, "fl::pinMode(int, fl::PinMode)", 0x3E, "8947", "8d47"
+        )
+    result = audit._classify_esp32_c6_output_mode_capture(capture)
+    assert result.authentication_errors == [] and result.decode_errors == []
+    assert result.producer_calls_bound and result.gpio_config_stores_bound
+    assert len(result.observations) == 4
+    assert {(item.pin, item.pwm_lookup_nonnull) for item in result.observations} == {
+        (2, False),
+        (2, True),
+        (3, False),
+        (3, True),
+    }
+    assert all(
+        item.configured_mode == reused_mode and item.public_mode == 1
+        for item in result.observations
+    )
+    assert all(
+        item.store_address == pin["address"] + 0x7C for item in result.observations
+    )
+    assert all(
+        item.gpio_config_address == capture["symbols"]["gpio_config"]["address"]
+        for item in result.observations
+    )
+    assert result.errors == (["output-mode-mismatch"] if reused_mode == 2 else [])
+    assert result.counterexamples == (result.observations if reused_mode == 2 else [])
+
+
+@pytest.mark.parametrize(
+    ("offset", "before", "after"),
+    [
+        (0x4C, "6388e402", "6389e402"),  # selected branch enters wrong/interior target
+        (0x48, "0547", "8547"),  # a4/a5 selector reuse corrupted
+        (0x3E, "8947", "0947"),  # reused value is written to a4 instead of a5
+        (0x3E, "8947", "9147"),  # unreviewed reused constant4
+        (0x7C, "2320f4fe", "2320e4fe"),  # output store reads a4 instead of a5
+        (0x72, "130584fd", "130504fe"),  # gpio_config pointer shifted
+        (0x76, "ef007045", "ef009045"),  # actual config call enters callee interior
+    ],
+)
+def test_esp32_c6_mode_classifier_rejects_corrupt_actual_reuse_path(
+    offset: int, before: str, after: str
+) -> None:
+    capture = _esp32_c6_actual_old_mode_capture()
+    _patch_c6_mode_bytes(
+        capture, "fl::pinMode(int, fl::PinMode)", offset, before, after
+    )
+    result = audit._classify_esp32_c6_output_mode_capture(capture)
+    assert result.authentication_errors or result.decode_errors
+    assert result.counterexamples == []
+
+
+def _c6_mode_parser_elf(
+    tmp_path: Path, corruption: str = "none"
+) -> tuple[bytes, str, Path]:
+    # An ELF-format fixture carrying the ACTUAL captured selected bytes. File
+    # offsets/tables are compacted here; it is not an SDK build or proof receipt.
+    import struct
+
+    capture = _esp32_c6_mode_capture()
+    entries = capture["symbols"]
+    functions = [entry for entry in entries.values() if entry["kind"] == "F"]
+    objects = [entry for entry in entries.values() if entry["kind"] == "O"]
+    code_base = min(entry["address"] for entry in functions)
+    code_end = max(entry["address"] + entry["size"] for entry in functions)
+    data_base = min(entry["address"] for entry in objects)
+    data_end = max(entry["address"] + entry["size"] for entry in objects)
+    code_offset = 256
+    data_offset = (code_offset + code_end - code_base + 3) & ~3
+    symbol_offset = data_offset + data_end - data_base
+    strings = bytearray(b"\0")
+    symbols = bytearray(16)
+    nm = []
+    for name, entry in {**entries, **capture["absolute_symbols"]}.items():
+        name_offset = len(strings)
+        strings.extend(name.encode() + b"\0")
+        absolute = name == "__ashldi3"
+        function = entry["kind"] == "F"
+        symbols.extend(
+            struct.pack(
+                "<IIIBBH",
+                name_offset,
+                entry["address"],
+                entry["size"],
+                18 if function else 17,
+                0,
+                65521 if absolute else 1 if function else 2,
+            )
+        )
+        nm.append(
+            f"{entry['address']:08x} {entry['size']:08x} {'A' if absolute else 'T' if function else 'D'} {name}"
+        )
+    string_offset = symbol_offset + len(symbols)
+    section_names = b"\0.flash.text\0.flash.rodata\0.symtab\0.strtab\0.shstrtab\0"
+    names_offset = string_offset + len(strings)
+    shoff = (names_offset + len(section_names) + 3) & ~3
+    image = bytearray(shoff + 7 * 40)
+    image[:16] = b"\x7fELF\x01\x01\x01" + bytes(9)
+    struct.pack_into(
+        "<HHIIIIIHHHHHH",
+        image,
+        16,
+        2,
+        243,
+        1,
+        code_base,
+        52,
+        shoff,
+        0,
+        52,
+        32,
+        3,
+        40,
+        7,
+        5,
+    )
+    code_size = code_end - code_base
+    struct.pack_into(
+        "<IIIIIIII",
+        image,
+        52,
+        1,
+        code_offset,
+        code_base,
+        code_base,
+        code_size,
+        code_size - (1 if corruption == "short-memory" else 0),
+        5,
+        4,
+    )
+    struct.pack_into(
+        "<IIIIIIII",
+        image,
+        84,
+        1,
+        data_offset,
+        data_base,
+        data_base,
+        data_end - data_base,
+        data_end - data_base,
+        4,
+        4,
+    )
+    pin = entries["fl::pinMode(int, fl::PinMode)"]["address"]
+    if corruption in ("partial-load", "memory-only-load"):
+        struct.pack_into(
+            "<IIIIIIII",
+            image,
+            116,
+            1,
+            code_offset + pin + 2 - code_base,
+            pin + 2,
+            pin + 2,
+            0 if corruption == "memory-only-load" else 4,
+            4,
+            5,
+            2,
+        )
+    for entry in entries.values():
+        base, offset = (
+            (code_base, code_offset)
+            if entry["kind"] == "F"
+            else (data_base, data_offset)
+        )
+        start = offset + entry["address"] - base
+        raw = bytes.fromhex(entry["bytes_hex"])
+        image[start : start + len(raw)] = raw
+    image[symbol_offset : symbol_offset + len(symbols)] = symbols
+    image[string_offset : string_offset + len(strings)] = strings
+    image[names_offset : names_offset + len(section_names)] = section_names
+    sections = [
+        (1, 1, 6, code_base, code_offset, code_size, 0, 0, 2, 0),
+        (13, 1, 2, data_base, data_offset, data_end - data_base, 0, 0, 4, 0),
+        (27, 2, 0, 0, symbol_offset, len(symbols), 4, 1, 4, 16),
+        (35, 3, 0, 0, string_offset, len(strings), 0, 0, 1, 0),
+        (43, 3, 0, 0, names_offset, len(section_names), 0, 0, 1, 0),
+    ]
+    for index, section in enumerate(sections, 1):
+        struct.pack_into("<IIIIIIIIII", image, shoff + index * 40, *section)
+    if corruption in ("partial-section", "partial-nobits-section"):
+        struct.pack_into(
+            "<IIIIIIIIII",
+            image,
+            shoff + 6 * 40,
+            1,
+            8 if corruption == "partial-nobits-section" else 1,
+            6,
+            pin + 2,
+            code_offset + pin + 2 - code_base,
+            4,
+            0,
+            0,
+            2,
+            0,
+        )
+    linker = tmp_path / "esp32c6/ld/esp32c6.rom.libgcc.ld"
+    linker.parent.mkdir(parents=True)
+    linker.write_bytes(
+        (
+            audit.ROOT / "ci/fixtures/software_spi_audit/esp32c6.rom.libgcc.ld.txt"
+        ).read_bytes()
+    )
+    return bytes(image), "\n".join(nm), linker
+
+
+def test_esp32_c6_mode_extractor_format_fixture_keeps_captured_selected_bytes(
+    tmp_path: Path,
+) -> None:
+    from ci.software_spi_esp32_c6_mode_proof import extract_capture
+
+    elf, nm, linker = _c6_mode_parser_elf(tmp_path)
+    capture = extract_capture(elf, nm, linker)
+    assert {name: entry["bytes_hex"] for name, entry in capture["symbols"].items()} == {
+        name: entry["bytes_hex"]
+        for name, entry in _esp32_c6_mode_capture()["symbols"].items()
+    }
+
+
+def _c6_sdk_reservation_format_elf(
+    tmp_path: Path, corruption: str = "none"
+) -> tuple[bytes, str, Path]:
+    # Actual allocated section/PHDR metadata and selected instruction/data
+    # bytes, with synthetic symbol/string tables and zero-filled uninspected
+    # content. A format/conditional-ELF fixture, NEVER an actual firmware image.
+    import struct
+
+    basic, nm, linker = _c6_mode_parser_elf(tmp_path)
+    old_shoff = struct.unpack_from("<I", basic, 32)[0]
+    old_sections = [
+        struct.unpack_from("<IIIIIIIIII", basic, old_shoff + index * 40)
+        for index in range(7)
+    ]
+    symbol_data = bytearray(
+        basic[old_sections[3][4] : old_sections[3][4] + old_sections[3][5]]
+    )
+    strings = basic[old_sections[4][4] : old_sections[4][4] + old_sections[4][5]]
+    metadata = json.loads(
+        (
+            audit.ROOT / "ci/fixtures/software_spi_audit/esp32_c6_sdk_layout.json"
+        ).read_text()
+    )
+    sections = {entry["name"]: entry for entry in metadata["sections"]}
+    dummy, text, rodata = (
+        sections[name]
+        for name in (".flash_rodata_dummy", ".flash.text", ".flash.rodata")
+    )
+    programs = [list(entry["raw_header"]) for entry in metadata["programs"]]
+    rw = next(
+        program
+        for program in programs
+        if program[0] == 1 and program[2] == text["address"] and program[6] == 6
+    )
+    if corruption == "dummy-name":
+        dummy["name"] = ".unreviewed_dummy"
+    elif corruption == "dummy-type":
+        dummy["raw_header"][1] = 1
+    elif corruption == "dummy-size":
+        dummy["raw_header"][5] -= 1
+    elif corruption == "load-executable":
+        rw[6] |= 1
+    elif corruption == "load-offset":
+        rw[1] += 4
+    elif corruption == "appdesc-address":
+        sections[".flash.appdesc"]["raw_header"][3] += 4
+    elif corruption == "real-data-offset":
+        sections[".eh_frame"]["raw_header"][4] += 4
+    highest = max(entry["index"] for entry in sections.values())
+    alias_index, symbol_index, string_index, names_index = range(
+        highest + 1, highest + 5
+    )
+    section_count = names_index + 1
+    data_end = max(program[1] + program[4] for program in programs if program[0] == 1)
+    symbol_offset = (data_end + 3) & ~3
+    string_offset = symbol_offset + len(symbol_data)
+    names = bytearray(b"\0")
+    raw_sections = [(0,) * 10 for _ in range(section_count)]
+    for entry in sections.values():
+        header = list(entry["raw_header"])
+        header[0] = len(names)
+        names.extend(entry["name"].encode() + b"\0")
+        raw_sections[entry["index"]] = tuple(header)
+    for index, name in (
+        (symbol_index, ".symtab"),
+        (string_index, ".strtab"),
+        (names_index, ".shstrtab"),
+    ):
+        offset = len(names)
+        names.extend(name.encode() + b"\0")
+        raw_sections[index] = (offset,) + (0,) * 9
+    names_offset = string_offset + len(strings)
+    shoff = (names_offset + len(names) + 3) & ~3
+    image = bytearray(shoff + 40 * section_count)
+    image[:52] = basic[:52]
+    struct.pack_into("<I", image, 32, shoff)
+    struct.pack_into("<HH", image, 44, len(programs) + 1, 40)
+    struct.pack_into("<HH", image, 48, section_count, names_index)
+    for index, program in enumerate(programs):
+        struct.pack_into("<IIIIIIII", image, 52 + index * 32, *program)
+    if corruption == "extra-alias":
+        pin = _esp32_c6_mode_capture()["symbols"]["fl::pinMode(int, fl::PinMode)"][
+            "address"
+        ]
+        raw_sections[alias_index] = (
+            raw_sections[text["index"]][0],
+            1,
+            6,
+            pin + 2,
+            text["offset"] + pin + 2 - text["address"],
+            4,
+            0,
+            0,
+            2,
+            0,
+        )
+    for entry in _esp32_c6_mode_capture()["symbols"].values():
+        target = text if entry["kind"] == "F" else rodata
+        start = target["offset"] + entry["address"] - target["address"]
+        raw = bytes.fromhex(entry["bytes_hex"])
+        image[start : start + len(raw)] = raw
+    for offset in range(16, len(symbol_data), 16):
+        old_index = struct.unpack_from("<H", symbol_data, offset + 14)[0]
+        if old_index in (1, 2):
+            struct.pack_into(
+                "<H",
+                symbol_data,
+                offset + 14,
+                text["index"] if old_index == 1 else rodata["index"],
+            )
+    image[symbol_offset : symbol_offset + len(symbol_data)] = symbol_data
+    image[string_offset : string_offset + len(strings)] = strings
+    image[names_offset : names_offset + len(names)] = names
+    for index, kind, offset, size, linked, width in (
+        (symbol_index, 2, symbol_offset, len(symbol_data), string_index, 16),
+        (string_index, 3, string_offset, len(strings), 0, 0),
+        (names_index, 3, names_offset, len(names), 0, 0),
+    ):
+        raw_sections[index] = (
+            raw_sections[index][0],
+            kind,
+            0,
+            0,
+            offset,
+            size,
+            linked,
+            0,
+            1,
+            width,
+        )
+    for index, header in enumerate(raw_sections):
+        struct.pack_into("<IIIIIIIIII", image, shoff + index * 40, *header)
+    if corruption == "padding-byte":
+        image[dummy["offset"] + 17] = 1
+    for filename in ("memory.ld", "sections.ld"):
+        (linker.parent / filename).write_bytes(
+            (
+                audit.ROOT
+                / "ci/fixtures/software_spi_audit"
+                / ("esp32c6." + filename + ".txt")
+            ).read_bytes()
+        )
+    if corruption == "script":
+        script = linker.parent / "sections.ld"
+        script.write_bytes(script.read_bytes() + b"\n/* changed */\n")
+    return bytes(image), nm, linker
+
+
+def test_esp32_c6_mode_extractor_accepts_only_bound_sdk_reservation_geometry(
+    tmp_path: Path,
+) -> None:
+    from ci.software_spi_esp32_c6_mode_proof import extract_capture
+
+    elf, nm, linker = _c6_sdk_reservation_format_elf(tmp_path)
+    capture = extract_capture(elf, nm, linker)
+    assert (
+        capture["symbols"]["fl::pinMode(int, fl::PinMode)"]["bytes_hex"]
+        == _esp32_c6_mode_capture()["symbols"]["fl::pinMode(int, fl::PinMode)"][
+            "bytes_hex"
+        ]
+    )
+    assert capture["sdk_reservation"]["image_mapping_qualified"] is False
+    assert capture["sdk_reservation"]["kind"] == "pinned-c6-noload-rodata-reservation"
+
+
+@pytest.mark.parametrize(
+    "corruption",
+    [
+        "dummy-name",
+        "dummy-type",
+        "dummy-size",
+        "load-executable",
+        "load-offset",
+        "appdesc-address",
+        "real-data-offset",
+        "padding-byte",
+        "script",
+        "extra-alias",
+    ],
+)
+def test_esp32_c6_mode_extractor_rejects_unqualified_sdk_reservation_aliases(
+    tmp_path: Path, corruption: str
+) -> None:
+    from ci.software_spi_esp32_c6_mode_proof import extract_capture
+
+    elf, nm, linker = _c6_sdk_reservation_format_elf(tmp_path, corruption)
+    with pytest.raises(ValueError):
+        extract_capture(elf, nm, linker)
+
+
+@pytest.mark.parametrize(
+    "corruption",
+    [
+        "partial-section",
+        "partial-nobits-section",
+        "partial-load",
+        "memory-only-load",
+        "short-memory",
+    ],
+)
+def test_esp32_c6_mode_extractor_rejects_ambiguous_or_short_memory_extents(
+    tmp_path: Path, corruption: str
+) -> None:
+    from ci.software_spi_esp32_c6_mode_proof import extract_capture
+
+    elf, nm, linker = _c6_mode_parser_elf(tmp_path, corruption)
+    with pytest.raises(ValueError):
+        extract_capture(elf, nm, linker)
+
+
+def _patch_c6_mode_bytes(
+    capture: dict, symbol: str, offset: int, before: str, after: str
+) -> None:
+    entry = capture["symbols"][symbol]
+    data = bytes.fromhex(entry["bytes_hex"])
+    expected = bytes.fromhex(before)
+    replacement = bytes.fromhex(after)
+    assert len(expected) == len(replacement)
+    assert data[offset : offset + len(expected)] == expected
+    entry["bytes_hex"] = (
+        data[:offset] + replacement + data[offset + len(expected) :]
+    ).hex()
+
+
+def test_esp32_c6_mode_classifier_actual_bytes_bind_both_pwm_return_paths() -> None:
+    result = audit._classify_esp32_c6_output_mode_capture(_esp32_c6_mode_capture())
+    assert result.authentication_errors == [] and result.decode_errors == []
+    assert result.errors == [] and result.counterexamples == []
+    assert result.producer_calls_bound and result.gpio_config_stores_bound
+    assert result.sdk.public_output_mode == 1
+    assert result.sdk.input_output_mode == 3 and result.sdk.output_mode == 2
+    assert (result.sdk.mode_offset, result.sdk.config_size) == (8, 24)
+    assert {(item.pin, item.pwm_lookup_nonnull) for item in result.observations} == {
+        (2, False),
+        (2, True),
+        (3, False),
+        (3, True),
+    }
+    assert all(
+        item.public_mode == 1 and item.configured_mode == 3
+        for item in result.observations
+    )
+    assert result.assumptions == [
+        "bound-normal-callees-preserve-riscv-abi-saved-registers"
+    ]
+
+
+def test_esp32_c6_mode_classifier_old_mode_is_semantic_counterexample_not_decode_failure() -> (
+    None
+):
+    capture = _esp32_c6_mode_capture()
+    _patch_c6_mode_bytes(capture, "fl::pinMode(int, fl::PinMode)", 0x6E, "8d47", "8947")
+    result = audit._classify_esp32_c6_output_mode_capture(capture)
+    assert result.authentication_errors == [] and result.decode_errors == []
+    assert result.producer_calls_bound and result.gpio_config_stores_bound
+    assert result.errors == ["output-mode-mismatch"]
+    assert {(item.pin, item.pwm_lookup_nonnull) for item in result.observations} == {
+        (2, False),
+        (2, True),
+        (3, False),
+        (3, True),
+    }
+    assert all(item.configured_mode == 2 for item in result.observations)
+    assert set(result.counterexamples) == set(result.observations)
+
+
+def test_esp32_c6_mode_classifier_rejects_retargeted_actual_rom_shift_call() -> None:
+    capture = _esp32_c6_mode_capture()
+    _patch_c6_mode_bytes(
+        capture, "fl::pinMode(int, fl::PinMode)", 0x32, "e7808003", "e780a003"
+    )
+    result = audit._classify_esp32_c6_output_mode_capture(capture)
+    assert result.authentication_errors or result.decode_errors
+    assert result.counterexamples == []
+
+
+@pytest.mark.parametrize("corruption", ["missing", "wrong-address", "duplicate"])
+def test_esp32_c6_mode_classifier_requires_actual_unique_rom_abs_binding(
+    corruption: str,
+) -> None:
+    capture = _esp32_c6_mode_capture()
+    if corruption == "missing":
+        del capture["absolute_symbols"]["__ashldi3"]
+    elif corruption == "wrong-address":
+        capture["absolute_symbols"]["__ashldi3"]["address"] += 2
+    else:
+        capture["absolute_symbols"]["duplicate __ashldi3"] = dict(
+            capture["absolute_symbols"]["__ashldi3"]
+        )
+    result = audit._classify_esp32_c6_output_mode_capture(capture)
+    assert result.authentication_errors or result.decode_errors
+    assert result.counterexamples == []
+
+
+def test_esp32_c6_mode_classifier_cannot_relabel_old_mode_as_expected_sdk_mode() -> (
+    None
+):
+    capture = _esp32_c6_mode_capture()
+    _patch_c6_mode_bytes(capture, "fl::pinMode(int, fl::PinMode)", 0x6E, "8d47", "8947")
+    item = capture["symbols"]["selection_gpio_mode_input_output"]
+    item["bytes_hex"], item["uint32_le"] = "02000000", 2
+    result = audit._classify_esp32_c6_output_mode_capture(capture)
+    assert result.authentication_errors or result.decode_errors
+    assert result.counterexamples == []
+
+
+@pytest.mark.parametrize("corruption", ["missing", "duplicate", "contradictory"])
+def test_esp32_c6_mode_managed_validator_requires_exact_actual_pwm_outcomes(
+    corruption: str,
+) -> None:
+    from dataclasses import replace
+
+    result = audit._classify_esp32_c6_output_mode_capture(_esp32_c6_mode_capture())
+    if corruption == "missing":
+        result.observations = result.observations[:-1]
+    elif corruption == "duplicate":
+        result.observations[-1] = result.observations[0]
+    else:
+        result.observations[-1] = replace(result.observations[-1], configured_mode=2)
+    with pytest.raises(ValueError):
+        audit._validate_esp32_c6_mode_stage_analysis("baseline", result)
+
+
+@pytest.mark.parametrize(
+    ("offset", "before", "after"),
+    [
+        (0x18, "63ec2703", "63ec2701"),  # actual range branch redirected
+        (0x40, "638ff402", "638ef402"),  # changed mode dispatch destination
+        (0x70, "2320f4fe", "2322f4fe"),  # mode store moves to wrong struct field
+        (0x74, "130584fd", "130504fe"),  # gpio_config pointer moves four bytes
+        (0x6E, "8d47", "0000"),  # unsupported opcode, never mode mismatch
+        (0x10, "f53d", "f13d"),  # bound PWM lookup call goes to different entry
+        (0x78, "ef001045", "ef003045"),  # gpio_config call enters wrong address
+    ],
+)
+def test_esp32_c6_mode_classifier_rejects_encoded_flow_and_store_corruption(
+    offset: int, before: str, after: str
+) -> None:
+    capture = _esp32_c6_mode_capture()
+    _patch_c6_mode_bytes(
+        capture, "fl::pinMode(int, fl::PinMode)", offset, before, after
+    )
+    result = audit._classify_esp32_c6_output_mode_capture(capture)
+    assert result.authentication_errors or result.decode_errors
+    assert not result.counterexamples, (
+        "malformed flow is not an old-mode semantic witness"
+    )
+
+
+@pytest.mark.parametrize(
+    ("offset", "before", "after"),
+    [
+        (0x52, "ef10f057", "ef101058"),  # real JAL redirected into pinMode interior
+        (0x4C, "0945", "1145"),  # first actual pin changes 2 to 4
+        (0x46, "8545", "8945"),  # first public mode argument changes 1 to 2
+    ],
+)
+def test_esp32_c6_mode_classifier_requires_actual_producer_calls(
+    offset: int, before: str, after: str
+) -> None:
+    capture = _esp32_c6_mode_capture()
+    _patch_c6_mode_bytes(
+        capture, "esp32_global_generic_producer", offset, before, after
+    )
+    result = audit._classify_esp32_c6_output_mode_capture(capture)
+    assert result.authentication_errors or result.decode_errors
+    assert not result.counterexamples
+
+
+@pytest.mark.parametrize(
+    "corruption",
+    [
+        "missing-producer",
+        "wrong-public-mode",
+        "bad-layout",
+        "truncated-function",
+        "wrong-architecture",
+    ],
+)
+def test_esp32_c6_mode_classifier_rejects_unbound_exports_and_extents(
+    corruption: str,
+) -> None:
+    capture = _esp32_c6_mode_capture()
+    symbols = capture["symbols"]
+    if corruption == "missing-producer":
+        del symbols["esp32_global_generic_producer"]
+    elif corruption == "wrong-public-mode":
+        symbols["selection_public_pin_mode_output"]["bytes_hex"] = "02000000"
+        symbols["selection_public_pin_mode_output"]["uint32_le"] = 2
+    elif corruption == "bad-layout":
+        symbols["selection_gpio_mode_offset"]["bytes_hex"] = "18000000"
+        symbols["selection_gpio_mode_offset"]["uint32_le"] = 24
+    elif corruption == "truncated-function":
+        symbols["fl::pinMode(int, fl::PinMode)"]["bytes_hex"] = symbols[
+            "fl::pinMode(int, fl::PinMode)"
+        ]["bytes_hex"][:-2]
+    else:
+        capture["machine"] = 40
+    result = audit._classify_esp32_c6_output_mode_capture(capture)
+    assert result.authentication_errors or result.decode_errors
+    assert not result.counterexamples
+
+
+def test_esp32_c6_mode_mutant_changes_only_the_actual_output_assignment() -> None:
+    original = (audit.ROOT / ESP32_C6_MODE_SOURCE).read_bytes()
+    statement = b"io_conf.mode = GPIO_MODE_INPUT_OUTPUT;"
+    assert original.count(statement) == 1
+    mutant = audit._esp32_c6_old_output_mode_mutant(original)
+    assert mutant == original.replace(statement, b"io_conf.mode = GPIO_MODE_OUTPUT;", 1)
+    assert (audit.ROOT / ESP32_C6_MODE_SOURCE).read_bytes() == original
+
+
+@pytest.mark.parametrize("configuration", ["active", "commented-only", "conflicting"])
+def test_esp32_c6_mode_global_flags_require_active_unambiguous_selected_ini(
+    tmp_path: Path, configuration: str
+) -> None:
+    from ci import software_spi_esp32_c6_mode_proof as mode
+
+    project = tmp_path / "project"
+    release = project / ".fbuild/build/release"
+    release.mkdir(parents=True)
+    flags = [
+        "-DEXPECT_FORCED=1",
+        "-DEXPECT_NO_PINMAP=0",
+        "-DFASTLED_FORCE_SOFTWARE_PINS=1",
+    ]
+    (release / "compile_commands.raw.json").write_text(
+        json.dumps([{"arguments": ["compiler", *flags], "file": "producer.cpp"}])
+    )
+    text = "[env:esp32c6]\nbuild_flags =\n" + "".join(
+        "\t" + flag + "\n" for flag in flags
+    )
+    if configuration == "commented-only":
+        text = (
+            "[env:esp32c6]\n; build_flags = "
+            + " ".join(flags)
+            + "\nbuild_flags = -O2\n"
+        )
+    elif configuration == "conflicting":
+        text += "\t-DFASTLED_FORCE_SOFTWARE_PINS=0\n"
+    else:
+        text += "; unrelated comment does not supply a flag\n"
+    (project / "platformio.ini").write_text(text)
+    info = {"prog_path": str(release / "firmware.elf")}
+    if configuration == "active":
+        mode._verify_global_flags(info)
+    else:
+        with pytest.raises(ValueError):
+            mode._verify_global_flags(info)
+
+
+@pytest.mark.parametrize(
+    "override",
+    [
+        ["-UFASTLED_FORCE_SOFTWARE_PINS"],
+        ["-U", "FASTLED_FORCE_SOFTWARE_PINS"],
+        ["-D", "FASTLED_FORCE_SOFTWARE_PINS=0"],
+        ["-D", "FASTLED_FORCE_SOFTWARE_PINS=1"],
+        ["-Wp,-UFASTLED_FORCE_SOFTWARE_PINS"],
+        ["-Wp,-DFASTLED_FORCE_SOFTWARE_PINS=0"],
+    ],
+)
+def test_esp32_c6_mode_required_defines_reject_later_preprocessor_overrides(
+    override: list[str],
+) -> None:
+    from ci import software_spi_esp32_c6_mode_proof as mode
+
+    flags = [
+        "-DEXPECT_FORCED=1",
+        "-DEXPECT_NO_PINMAP=0",
+        "-DFASTLED_FORCE_SOFTWARE_PINS=1",
+    ]
+    with pytest.raises(ValueError):
+        mode._require_fixed_defines(flags + override)
+
+
+def test_esp32_c6_mode_producer_compiles_only_the_literal_closed_profile() -> None:
+    from ci import software_spi_esp32_c6_mode_proof as mode
+
+    producer = mode.producer_sources(audit.ROOT)[
+        "examples/AutoResearch/AutoResearch.ino"
+    ].decode()
+    before_fastled = producer.split("#include <FastLED.h>", 1)[0]
+    for condition in (
+        "#if !defined(FASTLED_FORCE_SOFTWARE_PINS) || FASTLED_FORCE_SOFTWARE_PINS != 1",
+        "#if !defined(EXPECT_FORCED) || EXPECT_FORCED != 1",
+        "#if !defined(EXPECT_NO_PINMAP) || EXPECT_NO_PINMAP != 0",
+        "#if defined(FASTLED_NO_PINMAP)",
+    ):
+        assert condition in before_fastled
+    assert before_fastled.count("#error") == 4
+
+
+def test_esp32_c6_mode_compile_rejects_wrong_reported_environment(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from types import SimpleNamespace
+
+    from ci import software_spi_esp32_c6_mode_proof as mode
+    from ci import software_spi_init_proof as native
+
+    workspace, saved = tmp_path / "checkout", tmp_path / "saved"
+    workspace.mkdir()
+    environment = {"FBUILD_EXECUTABLE": str(tmp_path / "fbuild")}
+
+    def completed(command, *args, **kwargs):
+        Path(command[-1]).write_text(
+            json.dumps(
+                {
+                    "esp32c6": {
+                        "env": "rp2040",
+                        "board": "ESP32_C6_DEVKITC_1",
+                        "platform": "espressif32",
+                        "cxx_flags": [
+                            "-DF_CPU=160000000L",
+                            "-march=rv32imac_zicsr_zifencei",
+                        ],
+                    }
+                }
+            )
+        )
+        route = [
+            str(Path(environment["FBUILD_EXECUTABLE"]).resolve()),
+            str(workspace / ".build/fbuild/esp32c6"),
+            "build",
+            "-e",
+            "esp32c6",
+            "-v",
+        ]
+        return SimpleNamespace(returncode=0, stdout="Running: " + " ".join(route))
+
+    monkeypatch.setattr(native, "_run", completed)
+    with pytest.raises(ValueError, match="environment|profile|board"):
+        mode.compile_fixed(workspace, saved, environment)
+
+
+@pytest.mark.parametrize("corruption", ["missing", "duplicate"])
+def test_esp32_c6_mode_mutant_rejects_unbound_or_ambiguous_source(
+    corruption: str,
+) -> None:
+    original = (audit.ROOT / ESP32_C6_MODE_SOURCE).read_bytes()
+    statement = b"io_conf.mode = GPIO_MODE_INPUT_OUTPUT;"
+    source = (
+        original.replace(statement, b"io_conf.mode = GPIO_MODE_OUTPUT;", 1)
+        if corruption == "missing"
+        else original + b"\n" + statement
+    )
+    with pytest.raises(ValueError):
+        audit._esp32_c6_old_output_mode_mutant(source)
+
+
+@pytest.mark.parametrize(
+    "stages",
+    [
+        (),
+        ("baseline", "restored"),
+        ("baseline", "old-output-mode-mutant", "old-output-mode-mutant", "restored"),
+        ("old-output-mode-mutant", "baseline", "restored"),
+    ],
+)
+def test_esp32_c6_mode_stage_sequence_rejects_missing_duplicate_or_reordered_control(
+    stages: tuple[str, ...],
+) -> None:
+    with pytest.raises(ValueError):
+        audit._validate_esp32_c6_mode_stage_sequence(stages)
+
+
+def test_esp32_c6_mode_stage_sequence_accepts_only_the_fixed_three_stages() -> None:
+    audit._validate_esp32_c6_mode_stage_sequence(ESP32_C6_MODE_STAGES)
+
+
+def test_esp32_c6_mode_runner_rejects_missing_checkout_before_execution(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(
+        audit.RunningProcess,
+        "run",
+        lambda *args, **kwargs: pytest.fail(
+            "missingcheckout must reject before a process"
+        ),
+    )
+    with pytest.raises(ValueError, match="source|input|checkout|missing"):
+        audit._run_esp32_c6_output_mode_proof(tmp_path)
+
+
+def test_esp32_c6_mode_vendor_kind_cannot_run_through_native_host_whitelist(
+    tmp_path: Path,
+) -> None:
+    from ci import software_spi_init_proof as native
+
+    with pytest.raises(ValueError, match="native|fixed|target"):
+        native._run_proof(tmp_path, native._ProofKind.ESP32_C6_MODE)
+
+
+def test_esp32_c6_mode_external_json_cannot_certify_selection_or_MY_groups() -> None:
+    for issue in (5067, 5066):
+        finding = next(row for row in REQUIRED_FINDINGS if row["issue"] == issue)
+        claims = [
+            {
+                "finding": finding["id"],
+                "configuration": configuration,
+                "scope": "esp32c6-forced-gpio2-3-output-readback-mode-property-only",
+                "status": "PASS",
+                "stages": list(ESP32_C6_MODE_STAGES),
+                "mode": 3,
+                "sdk_expected_mode": 3,
+                "complete": True,
+            }
+            for configuration in finding["required_configurations"]
+        ]
+        errors = check_evidence([finding], claims, audit._current_sources(audit.ROOT))
+        assert any("external" in error for error in errors)
+        for configuration in finding["required_configurations"]:
+            assert any(f"/{configuration}: unresolved" in error for error in errors)
+
+
+@pytest.mark.skipif(
+    os.environ.get("FASTLED_RUN_ESP32_C6_MODE_PROOF") != "1",
+    reason="requires three actual closed C6 SDK builds and retained ELF semantic inspection",
+)
+def test_esp32_c6_mode_real_three_stage_acceptance() -> None:
+    from ci import software_spi_init_proof as native
+
+    original = (audit.ROOT / ESP32_C6_MODE_SOURCE).read_bytes()
+    before = native._inputs(audit.ROOT)
+    proof = audit._run_esp32_c6_output_mode_proof(audit.ROOT)
+    assert proof.scope == "esp32c6-forced-gpio2-3-output-readback-mode-property-only"
+    assert proof.complete_executed_argv is False
+    assert proof.workspace.parent == Path.home() / ".clud/worktrees"
+    assert [stage.name for stage in proof.stages] == list(ESP32_C6_MODE_STAGES)
+    for stage in proof.stages:
+        assert stage.build_returncode == 0, (
+            "old mode must compile, not fail an incidental shape/source gate"
+        )
+        assert stage.inputs_before == stage.inputs_after
+        wanted_source = (
+            audit._esp32_c6_old_output_mode_mutant(original)
+            if stage.name == "old-output-mode-mutant"
+            else original
+        )
+        assert stage.inputs_before[ESP32_C6_MODE_SOURCE] == digest(wanted_source)
+        assert stage.tools_before == stage.tools_after == proof.stages[0].tools_before
+        assert stage.configuration == proof.stages[0].configuration
+        assert stage.serving_engine_before == stage.serving_engine_after
+        result = stage.mode_analysis
+        assert result.authentication_errors == []
+        assert result.decode_errors == []
+        assert result.producer_calls_bound and result.gpio_config_stores_bound
+        assert {item.pin for item in result.observations} == {2, 3}
+        assert result.sdk.mode_offset + 4 <= result.sdk.config_size
+        assert all(
+            item.public_mode == result.sdk.public_output_mode
+            for item in result.observations
+        )
+        for path, sha256 in stage.artifact_sha256s.items():
+            assert digest(Path(path).read_bytes()) == sha256
+        if stage.name == "old-output-mode-mutant":
+            assert result.errors == ["output-mode-mismatch"]
+            assert all(
+                item.configured_mode == result.sdk.output_mode
+                for item in result.observations
+            )
+            mismatches = [
+                item
+                for item in result.observations
+                if item.configured_mode != result.sdk.input_output_mode
+            ]
+            assert mismatches and set(result.counterexamples) == set(mismatches)
+        else:
+            assert result.errors == [] and result.counterexamples == []
+            assert all(
+                item.configured_mode == result.sdk.input_output_mode
+                for item in result.observations
+            )
+    assert (proof.workspace / ESP32_C6_MODE_SOURCE).read_bytes() == original
+    assert (audit.ROOT / ESP32_C6_MODE_SOURCE).read_bytes() == original
+    assert native._inputs(audit.ROOT) == before
+    for issue in (5067, 5066):
+        finding = next(row for row in REQUIRED_FINDINGS if row["issue"] == issue)
+        errors = check_evidence([finding], [], audit._current_sources(audit.ROOT))
+        for configuration in finding["required_configurations"]:
+            assert any(f"/{configuration}: unresolved" in error for error in errors)
