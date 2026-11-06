@@ -94757,7 +94757,8 @@
         "forced-software-no-pinmap",
         "production-gate",
         "esp32-forced-fastpin-selection",
-        "forced-mapped-toggle-register-contract"
+        "forced-mapped-toggle-register-contract",
+        "apollo3-forced-no-pinmap-output-readback"
       ],
       "reason": "Actual common FastPin implementation: forced register init/operations, normal validity rejection/default operations and bit-band interface are distinct branches. Baseline forced NoPinMap leaves null pointers while hi/lo/hival/loval still dereference them. Not a facade or forwarding alias. Required current registry source association: #5056 (forced-software-no-pinmap); unresolved production/configuration and restored-defect evidence remains required. Additional targeted #5067 review: Baseline FASTLED_FORCE_SOFTWARE_PINS chooses a primary FastPin template with optional PINMAP initialization, but explicit platform specializations can still override it. Current #5056 changed this primary into ForcedSoftwarePin delegation; that safety change must remain source-change RED and cannot certify ESP32 selection. #5067 requires actual selected-type/provider evidence, including NoPinMap. Targeted #5086 source/register-contract review: the pinned forced primary initializes a mapped input pointer and toggle writes that pointer. Teensy4 SDK maps it to sampled PSR rather than DR_TOGGLE; AVR PINx semantics cannot be assumed for other mapped providers. Current implementation delegates this same mapped operation to ForcedSoftwarePin. Actual selected-provider/register-model output behavior and Teensy40/41 codegen, AVR and NoPinMap controls, old-statement restoration and exact restored GREEN remain unresolved. No electrical or universal atomicity claim.",
       "source_evidence": [
@@ -95041,7 +95042,9 @@
       "findings": [
         "forced-software-no-pinmap",
         "runtime-channel",
-        "runtime-manager"
+        "runtime-manager",
+        "apollo3-forced-no-pinmap-output-readback",
+        "nrf52-variants-forced-fastpin-selection"
       ],
       "reason": "Actual GPIO boundary forwards fl::digitalWrite/digitalRead to platforms/pin.h-selected adapters. PWM/analog maintenance in the same source is a separate method family. Runtime and forced software SPI consume the logical GPIO API.",
       "source_evidence": [
@@ -95211,7 +95214,9 @@
       "findings": [
         "forced-software-no-pinmap",
         "runtime-channel",
-        "runtime-manager"
+        "runtime-manager",
+        "apollo3-forced-no-pinmap-output-readback",
+        "nrf52-variants-forced-fastpin-selection"
       ],
       "reason": "Actual GPIO boundary forwards fl::digitalWrite/digitalRead to platforms/pin.h-selected adapters. PWM/analog maintenance in the same source is a separate method family. Runtime and forced software SPI consume the logical GPIO API.",
       "source_evidence": [
@@ -101998,7 +102003,9 @@
       "baseline_sha256": "5bc46552d983a02225aff4b27ca10b45ecfc22a1d404edd820448442009e6031",
       "disposition": "dependency",
       "role": "dependency",
-      "findings": [],
+      "findings": [
+        "apollo3-forced-no-pinmap-output-readback"
+      ],
       "reason": "Baseline declares the concrete symbols/includes recorded below; classified as component/caller dependency rather than default software-SPI negative. Potential emitters without reviewed method dispositions remain unknown.",
       "source_evidence": [
         {
@@ -104546,7 +104553,9 @@
       "baseline_sha256": "14a9aa17348fa26d9d9ba40462d53e0b0f583a27926e27cc64891ea27859b0de",
       "disposition": "dependency",
       "role": "dispatch",
-      "findings": [],
+      "findings": [
+        "apollo3-forced-no-pinmap-output-readback"
+      ],
       "reason": "Baseline declares the concrete symbols/includes recorded below; classified as component/caller dependency rather than default software-SPI negative. Potential emitters without reviewed method dispositions remain unknown.",
       "source_evidence": [
         {
@@ -105920,7 +105929,8 @@
       "disposition": "dependency",
       "role": "implementation",
       "findings": [
-        "apollo3-loop"
+        "apollo3-loop",
+        "apollo3-forced-no-pinmap-output-readback"
       ],
       "reason": "Existing researched finding/source association retained; per-method source evidence and guard configuration distinguish caller, pin, timing and emitter responsibilities.",
       "source_evidence": [
@@ -105959,7 +105969,9 @@
       "baseline_sha256": "b6ccb6d2c9a0f555be4b4caa46eb9dba5aae1154c3c1d7f78d3bfc2a1f4be0f2",
       "disposition": "dependency",
       "role": "dependency",
-      "findings": [],
+      "findings": [
+        "apollo3-forced-no-pinmap-output-readback"
+      ],
       "reason": "Prior two-round source disposition retained with current baseline matches and method bodies; dependency role does not certify implementation or hardware behavior.",
       "source_evidence": [
         {
@@ -106513,7 +106525,9 @@
       "baseline_sha256": "3d7deb3e329c5160bb076464fb09da1933809bdbc6d9a5599e28881948837c0e",
       "disposition": "dependency",
       "role": "dependency",
-      "findings": [],
+      "findings": [
+        "apollo3-forced-no-pinmap-output-readback"
+      ],
       "reason": "Baseline declares the concrete symbols/includes recorded below; classified as component/caller dependency rather than default software-SPI negative. Potential emitters without reviewed method dispositions remain unknown.",
       "source_evidence": [
         {
@@ -106627,7 +106641,9 @@
       "baseline_sha256": "b3454b2d2b34f688808065810f0ee5e0eff4ca21b52c6d5ffc2daaedb4671cd3",
       "disposition": "alias",
       "role": "forwarding-alias",
-      "findings": [],
+      "findings": [
+        "apollo3-forced-no-pinmap-output-readback"
+      ],
       "reason": "Actual comment-stripped baseline consists solely of one unconditional include and optional pragma once; no independent declarations or conditionals.",
       "source_evidence": [
         {
@@ -106652,13 +106668,14 @@
     "src/platforms/apollo3/pin_apollo3_native.hpp": {
       "baseline_blob_oid": "d3cc25e38614444c671a244cb195dbd66ef76084",
       "baseline_sha256": "55dfb1b74c519f5508af14f948a950ae6c86d8d65a0c3382cecdcadbc346b7e9",
-      "disposition": "dependency",
-      "role": "dependency",
+      "disposition": "positive",
+      "role": "implementation",
       "findings": [
         "runtime-channel",
-        "runtime-manager"
+        "runtime-manager",
+        "apollo3-forced-no-pinmap-output-readback"
       ],
-      "reason": "Actual digitalWrite/pinMode runtime adapter, not a complete SPI transaction emitter. Retain runtime backend dependency for SPIBusManager/BitBangChannelDriver and forced-pin API; no assumed common MMIO atomic capability.",
+      "reason": "Actual digitalWrite/pinMode runtime adapter, not a complete SPI transaction emitter. Retain runtime backend dependency for SPIBusManager/BitBangChannelDriver and forced-pin API; no assumed common MMIO atomic capability. Additional #5089 positive: the public forced NoPinMap toggle/strobe route reaches this actual Output/input-sampler API contract. Configured core2.2.0 binds upstream HAL2.4.2 through the exact mbed gitlink; actual release headers/compiler/mapping and behavior remain unqualified. No current SPI-readback, disabled-value or electrical result is inferred.",
       "source_evidence": [
         {
           "line": 118,
@@ -106879,6 +106896,18 @@
         {
           "line": 305,
           "text": "            fl::platforms::pinMode(pin, PinMode::Output);"
+        },
+        {
+          "line": 88,
+          "text": "        case PinMode::Output:"
+        },
+        {
+          "line": 90,
+          "text": "            pin_config.eGPInput = AM_HAL_GPIO_PIN_INPUT_NONE;"
+        },
+        {
+          "line": 134,
+          "text": "    u32 result = am_hal_gpio_state_read(pin, AM_HAL_GPIO_INPUT_READ, &read_state);"
         }
       ]
     },
@@ -123667,7 +123696,8 @@
       "disposition": "dependency",
       "role": "dispatch",
       "findings": [
-        "nrf52"
+        "nrf52",
+        "nrf52-variants-forced-fastpin-selection"
       ],
       "reason": "Conditional type/header/board selection or platform detection. Dispatch can change reachability and cannot count as forwarding alias coverage.",
       "source_evidence": [
@@ -123981,7 +124011,8 @@
       "disposition": "dependency",
       "role": "dependency",
       "findings": [
-        "nrf52"
+        "nrf52",
+        "nrf52-variants-forced-fastpin-selection"
       ],
       "reason": "Defines platform frequency/register types/interrupt/NoPinMap contracts used by actual GPIO and SPI compilation; policy dependency, not alias.",
       "source_evidence": [
@@ -124280,9 +124311,10 @@
         "forced-software-no-pinmap",
         "nrf52",
         "runtime-channel",
-        "runtime-manager"
+        "runtime-manager",
+        "nrf52-variants-forced-fastpin-selection"
       ],
-      "reason": "Independently implements native runtime GPIO adapter methods; supplies pin operations to runtime software SPI and/or forced fallback. It is not a negative nor a forwarding alias.",
+      "reason": "Independently implements native runtime GPIO adapter methods; supplies pin operations to runtime software SPI and/or forced fallback. It is not a negative nor a forwarding alias. Additional #5070 dependency only: after the still-unfixed selector and explicit NoPinMap, forced public toggle/strobe needs qualified runtime output readback. Adafruit1.6.1 is an admitted range member, not the actually resolved package or legacy Mbed proof. Surveyed current SPI manager/channel/nonESP generic writers use explicit hi/lo; this is no new current SPI emitter positive.",
       "source_evidence": [
         {
           "line": 24,
@@ -124347,6 +124379,14 @@
         {
           "line": 61,
           "text": "inline PinValue digitalRead(int pin) FL_NO_EXCEPT {"
+        },
+        {
+          "line": 42,
+          "text": "            nrf_gpio_cfg_output(pin);"
+        },
+        {
+          "line": 62,
+          "text": "    return nrf_gpio_pin_read(pin) ? PinValue::High : PinValue::Low;"
         }
       ]
     },
@@ -219292,7 +219332,10 @@
       "baseline_sha256": "c04bf6e52543b8a23e9e6bcc108e58c28461c775d1062277704f4d2d62e20b4e",
       "disposition": "dependency",
       "role": "dependency",
-      "findings": [],
+      "findings": [
+        "apollo3-forced-no-pinmap-output-readback",
+        "nrf52-variants-forced-fastpin-selection"
+      ],
       "reason": "Baseline declares the concrete symbols/includes recorded below; classified as component/caller dependency rather than default software-SPI negative. Potential emitters without reviewed method dispositions remain unknown.",
       "source_evidence": [
         {

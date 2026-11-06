@@ -2,8 +2,8 @@
 
 `reviewed_baseline.json` is the exact reviewed version 1 source-classification
 input for baseline `94dab9c6b720ea277ec9177c93129c7dc646c5c3`: all 2,986 pinned
-`src` paths, with associations for all 50 mandatory findings. Its SHA-256 is
-`c14045c5b90afbe17fb2ac71d1820a41f8977b024b24df663c3b236fbaad0a16`.
+`src` paths, with associations for all 51 mandatory findings. Its SHA-256 is
+`0dfa396606be6feb790ea9b62affab2b835a6c22274e6a9ab4ec1680b0a618cf`.
 
 From the repository root:
 
@@ -30,6 +30,14 @@ checks remain RED until their actual fixed runners establish the required
 proof. Do not refresh baseline hashes, remove rows or change roles to authorize
 an implementation. No runtime receipt is loaded from this directory, and the
 overall audit remains incomplete.
+
+Apollo #5089 promotes only the pinned actual runtime readback API source;
+all old associations/anchors and raw baseline identities are retained.
+nRF52 #5070 adds runtime dependencies behind its selector plus explicit NoMap,
+not a current SPI-emitter positive. Upstream HAL binding and an admitted
+Adafruit version are not resolved-release build or hardware proof. The new
+source-only provenance records targeted review depth and prior row hashes;
+no C6 execution receipt is imported or requalified for this metadata snapshot.
 
 Seven additional forced-selection findings (#5068–#5074) remain unresolved across ESP8266, nRF51, nRF52 variants, GIGA, MGM240, modern LPC and legacy LPC. Native explicit specializations can override the forced primary; selected-type and actual fallback-route controls are required for every supported variant. Existing optimization matrices, including nRF51 #5047, remain mandatory. Source bindings do not certify execution, cache safety or timing.
 

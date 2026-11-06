@@ -82,7 +82,7 @@ refreshed to authorize changed code. Legacy path-keyed diagnostic rows retain
 their existing checks; malformed versioned documents cannot fall back to them.
 The reviewed baseline input is supplied at
 `ci/fixtures/software_spi_audit/reviewed_baseline.json`, with all 2,986 pinned
-source paths and all 50 mandatory finding associations. Use it explicitly:
+source paths and all 51 mandatory finding associations. Use it explicitly:
 
 ```sh
 bash spi-audit --classifications ci/fixtures/software_spi_audit/reviewed_baseline.json --report .build/software-spi-audit-report.json
@@ -96,7 +96,7 @@ deleted source obligations and all required target/configuration/mutation
 checks remain RED until actual fixed runners establish their evidence. CLI
 default behavior is unchanged.
 
-The registry currently contains 50 distinct required findings. Native AVR
+The registry currently contains 51 distinct required findings. Native AVR
 selected-bit predicates (#5052) and peripheral/GPIO handoff (#5055) are separate
 requirements even though both bind to `fastspi_avr.h`. The latter covers all
 five UBRR1/UBRR0/SPI0_CTRLA/SPSR/SPSR0 method variants, prior-byte shifter drain,
@@ -537,3 +537,24 @@ qualification is separate from Arduino numbering and native FastPin work.
 Input/pull-up preservation, realistic sampler behavior and old-path restoration
 remain required; no exact disabled-input return value or physical measurement
 is inferred. These two rows and baseline associations are bookkeeping only.
+
+#5089 protects Apollo3 forced default-NoPinMap output readback. Configured
+Arduino_Apollo3 core2.2.0 binds an upstream mbed gitlink containing HAL2.4.2;
+that is not an actually compiled release-archive/header qualification. Output
+disables input sampling, while INPUT_READ requests RDA/RDB rather than WTA/WTB
+output-latch state. Require actual provider/release/mapping controls, both
+initial latch states, two toggles/strobe, unrelated-bit preservation and the
+restored-defect behavioral control. Zeroed eIntDir means LO2HI, not INTDIR_NONE;
+no exact disabled-input result or electrical claim is inferred. Native SPI
+#5030 and missing-map safety #5056 remain separate obligations.
+
+#5070 additionally retains a latent forced-plus-explicit-NoPinMap readback
+requirement after its native-variant selector defect is fixed. The actual
+runtime file is `platforms/arm/nrf52/pin_nrf52.hpp`. Adafruit1.6.1 is admitted by
+the configured `^1.10601.0` package range, not proof of the resolved package or
+legacy Mbed HAL. Qualify latch/readback behavior and restoration independently
+while preserving every original variant/native optimization requirement.
+Surveyed SPI manager/channel and non-ESP generic writers use explicit hi/lo;
+these dependency bindings establish no new current SPI readback positive.
+This metadata snapshot does not refresh the accepted C6 receipt's historical
+43b1 input qualification or close any runtime, target or physical requirement.

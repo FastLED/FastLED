@@ -3,8 +3,8 @@
   "baseline": "94dab9c6b720ea277ec9177c93129c7dc646c5c3",
   "manifest": {
     "path": "reviewed_baseline.json",
-    "sha256": "c14045c5b90afbe17fb2ac71d1820a41f8977b024b24df663c3b236fbaad0a16",
-    "bytes": 14375566,
+    "sha256": "0dfa396606be6feb790ea9b62affab2b835a6c22274e6a9ab4ec1680b0a618cf",
+    "bytes": 14377815,
     "schema_version": 1,
     "source_paths": 2986
   },
@@ -208,6 +208,10 @@
     {
       "id": "samd-forced-output-readback",
       "issue": 5087
+    },
+    {
+      "id": "apollo3-forced-no-pinmap-output-readback",
+      "issue": 5089
     }
   ],
   "review_method": {
@@ -629,5 +633,239 @@
       }
     ],
     "limitations": "All prior checkpoint/reviewer-depth caveats retained. Root/judge issue evidence establishes register/sampler contracts; metadata agent independently verified raw pinned blob identities and literal method anchors. No new SDK build, runtime receipt, electrical result, closure or source-hash refresh."
+  },
+  "additional_forced_readback_tracking_review": {
+    "previous_manifest_sha256": "c14045c5b90afbe17fb2ac71d1820a41f8977b024b24df663c3b236fbaad0a16",
+    "previous_manifest_commit": "43b1abc0e638ce553359e0d197206217508ad590",
+    "source_only": true,
+    "required_finding_count": 51,
+    "research_preparation_sha256": "452f3e6239d5d8b48ec34e45ec0d8e00849878dcc893a17d9e6e7216750f7c25",
+    "reviewed_records": [
+      {
+        "path": "src/platforms/apollo3/pin_apollo3_native.hpp",
+        "baseline_blob_oid": "d3cc25e38614444c671a244cb195dbd66ef76084",
+        "baseline_sha256": "55dfb1b74c519f5508af14f948a950ae6c86d8d65a0c3382cecdcadbc346b7e9",
+        "previous_row_sha256": "40d9ef329a9316b9221f7a2ba9eb9c257bf88ec9561e1c0e1f7f9d038ef4d5b3",
+        "previous_findings": [
+          "runtime-channel",
+          "runtime-manager"
+        ],
+        "previous_role": "dependency",
+        "previous_disposition": "dependency",
+        "added_or_reconfirmed_anchors": [
+          {
+            "line": 88,
+            "text": "        case PinMode::Output:"
+          },
+          {
+            "line": 90,
+            "text": "            pin_config.eGPInput = AM_HAL_GPIO_PIN_INPUT_NONE;"
+          },
+          {
+            "line": 134,
+            "text": "    u32 result = am_hal_gpio_state_read(pin, AM_HAL_GPIO_INPUT_READ, &read_state);"
+          }
+        ],
+        "updated_row_sha256": "8192745822908d0c6652e54e13b6b95fd21696c2121472385b16ccfdb48c88a4"
+      },
+      {
+        "path": "src/fl/system/fastpin_base.h",
+        "baseline_blob_oid": "349bed5f1bdc23c8b5b1b793b2effeae993c2560",
+        "baseline_sha256": "296b86f3c932ae5a7705a270c727c2e949242afb29ff281cd9b3561080bc48cc",
+        "previous_row_sha256": "6beac36c1c874b2a680deede64afbb46fa9b172d06484bd75984d8e8c787cffe",
+        "previous_findings": [
+          "forced-software-no-pinmap",
+          "production-gate",
+          "esp32-forced-fastpin-selection",
+          "forced-mapped-toggle-register-contract"
+        ],
+        "previous_role": "implementation",
+        "previous_disposition": "positive",
+        "added_or_reconfirmed_anchors": [],
+        "updated_row_sha256": "2def9c90892fe6f027ce4c9d6b1a1b430366b176b17e8d5e4721b20931a06534"
+      },
+      {
+        "path": "src/fl/system/pin.h",
+        "baseline_blob_oid": "5e31e4b83c44398d0b0f3050af2d640386bcbfff",
+        "baseline_sha256": "30a8701959bf96c65e74ec989971c5304a50b457cc7eea3897d90a48d971a62f",
+        "previous_row_sha256": "d5a1029a503bb0d546cafd8f45f6e584c9aefc0f2c84de8c550577e0fc32b96d",
+        "previous_findings": [
+          "forced-software-no-pinmap",
+          "runtime-channel",
+          "runtime-manager"
+        ],
+        "previous_role": "dependency",
+        "previous_disposition": "dependency",
+        "added_or_reconfirmed_anchors": [],
+        "updated_row_sha256": "37dedade7dff76d454f29b54dc4f956fbf1773c51b6ce7ceae8c64bd502ff2a9"
+      },
+      {
+        "path": "src/fl/system/pin.cpp.hpp",
+        "baseline_blob_oid": "f9240c6333727d14e3460143afc33518a58b361c",
+        "baseline_sha256": "1fc34978c6ef4be05dadd86f6c62843c4ac3cf8997c6b54109854c0be602427b",
+        "previous_row_sha256": "2e6b9204777ab750fe922342561bc23e63d4ca4abda30737db0708594059f9d0",
+        "previous_findings": [
+          "forced-software-no-pinmap",
+          "runtime-channel",
+          "runtime-manager"
+        ],
+        "previous_role": "implementation",
+        "previous_disposition": "dependency",
+        "added_or_reconfirmed_anchors": [],
+        "updated_row_sha256": "9e6c9be2ce2260ff4c0d37c5f9023c9811a2512b114fe9be3e511957e09458b0"
+      },
+      {
+        "path": "src/platforms/pin.h",
+        "baseline_blob_oid": "4d01f54d26d8d1f47af7f6b33cac66860d98bfeb",
+        "baseline_sha256": "c04bf6e52543b8a23e9e6bcc108e58c28461c775d1062277704f4d2d62e20b4e",
+        "previous_row_sha256": "7af5f43abbdba90e61bc862f01044679b986cb3d626444106deb86c07e407068",
+        "previous_findings": [],
+        "previous_role": "dependency",
+        "previous_disposition": "dependency",
+        "added_or_reconfirmed_anchors": [],
+        "updated_row_sha256": "45b637dda05091aa2a2f448b9d89e50a4b70c55bb3fed049bd4d1fd76ec1d84b"
+      },
+      {
+        "path": "src/platforms.h",
+        "baseline_blob_oid": "9951bceb814980052791e704b99d902694f155ff",
+        "baseline_sha256": "14a9aa17348fa26d9d9ba40462d53e0b0f583a27926e27cc64891ea27859b0de",
+        "previous_row_sha256": "8fa3b1f1488777ad236add3922f7cec2cdc8f15b46111de2e5aec8fc9bf6b772",
+        "previous_findings": [],
+        "previous_role": "dispatch",
+        "previous_disposition": "dependency",
+        "added_or_reconfirmed_anchors": [],
+        "updated_row_sha256": "913937db61fb18a6b1651dec7ad7eec586ad5350c31530785647fd984c6c6510"
+      },
+      {
+        "path": "src/led_sysdefs.h",
+        "baseline_blob_oid": "8abbe6f080e07c4f9c9e1b03a35d9682081c720c",
+        "baseline_sha256": "5bc46552d983a02225aff4b27ca10b45ecfc22a1d404edd820448442009e6031",
+        "previous_row_sha256": "a8d7b353880efdb693115fb00138962a4f26c041835ab58eec0a7ae2b2caf25f",
+        "previous_findings": [],
+        "previous_role": "dependency",
+        "previous_disposition": "dependency",
+        "added_or_reconfirmed_anchors": [],
+        "updated_row_sha256": "1418de1fee937017aa6c84caf857b6451f43f1b95bce58f6c4c76525d46e76f8"
+      },
+      {
+        "path": "src/platforms/apollo3/pin_apollo3.hpp",
+        "baseline_blob_oid": "096b8606dd3b4ca23807c5f4ea78db2c2de97c27",
+        "baseline_sha256": "b3454b2d2b34f688808065810f0ee5e0eff4ca21b52c6d5ffc2daaedb4671cd3",
+        "previous_row_sha256": "1ccad7c168bd4459daf19eaba03e6633b1d00a41f97c6a710ac3f7dab3a13786",
+        "previous_findings": [],
+        "previous_role": "forwarding-alias",
+        "previous_disposition": "alias",
+        "added_or_reconfirmed_anchors": [],
+        "updated_row_sha256": "9e0472f3cd145ce5264458a7fd0ced94be7c8e49ae459ffc819acc623f2fc75c"
+      },
+      {
+        "path": "src/platforms/apollo3/fastled_apollo3.h",
+        "baseline_blob_oid": "e93e9587d3828a0783ee229da43a4e37c32eed7b",
+        "baseline_sha256": "6b8f608ee605cddbd28341219ed886c09454c6a283f72ec4d9e012d0285f14bb",
+        "previous_row_sha256": "5a19eedc9e400e495ff9d760e215d2a2b600953af43b16de91cf7a4c3d53f127",
+        "previous_findings": [
+          "apollo3-loop"
+        ],
+        "previous_role": "implementation",
+        "previous_disposition": "dependency",
+        "added_or_reconfirmed_anchors": [],
+        "updated_row_sha256": "8c096fa509f5d80b0fc99a11e6f0a47cd7b272aa49c3d53b642141986725c8cc"
+      },
+      {
+        "path": "src/platforms/apollo3/fastpin_apollo3.h",
+        "baseline_blob_oid": "36a997e87fac49d06cdc5470ba55f8e0949717a7",
+        "baseline_sha256": "b6ccb6d2c9a0f555be4b4caa46eb9dba5aae1154c3c1d7f78d3bfc2a1f4be0f2",
+        "previous_row_sha256": "978370b325ac9e4ed5ec172729415cfab2b35c83beb21fd51cdc9ec1391dcaf0",
+        "previous_findings": [],
+        "previous_role": "dependency",
+        "previous_disposition": "dependency",
+        "added_or_reconfirmed_anchors": [],
+        "updated_row_sha256": "099b159783dae89767cce5e1f100ab09046f7b39649466c2be6568c7a50f9d91"
+      },
+      {
+        "path": "src/platforms/apollo3/led_sysdefs_apollo3.h",
+        "baseline_blob_oid": "83ee3e9278a29d515b24661fbb619b2961c8169d",
+        "baseline_sha256": "3d7deb3e329c5160bb076464fb09da1933809bdbc6d9a5599e28881948837c0e",
+        "previous_row_sha256": "f0f3d2bbca47ad862a462d4f6e41480120d3baae353ced41e952a6d403f51dd7",
+        "previous_findings": [],
+        "previous_role": "dependency",
+        "previous_disposition": "dependency",
+        "added_or_reconfirmed_anchors": [],
+        "updated_row_sha256": "9df7724ed4b1acfdafa7545168515081881cc7999524833b6f0943249d18b8b3"
+      },
+      {
+        "path": "src/platforms/arm/nrf52/fastpin_arm_nrf52_variants.h",
+        "baseline_blob_oid": "00932decc095c6c54693d95d14234e526e460dfc",
+        "baseline_sha256": "d1874d37698c26ce1bd1f1954097dd093e18efba15391a4235b4d4cbe3d3605e",
+        "previous_row_sha256": "cdcb09a5847c7d20a071b874eeead357ad2b7aed940009156dafd43a58276cd9",
+        "previous_findings": [
+          "nrf52",
+          "nrf52-variants-forced-fastpin-selection"
+        ],
+        "previous_role": "pin-map",
+        "previous_disposition": "positive",
+        "added_or_reconfirmed_anchors": [],
+        "updated_row_sha256": "cdcb09a5847c7d20a071b874eeead357ad2b7aed940009156dafd43a58276cd9"
+      },
+      {
+        "path": "src/platforms/arm/nrf52/pin_nrf52.hpp",
+        "baseline_blob_oid": "3940c45bdcec42112dcd66889de2df6b163b4881",
+        "baseline_sha256": "3d82303256caa2c45a42d0c5248d2f2b7b01fb8bd7b896c4292e9db9fe9c5472",
+        "previous_row_sha256": "7cb53c46fe83a65ee1fe4c2b46d65ff673502cc6ad5c5bb0b0c4143dbfca3ea3",
+        "previous_findings": [
+          "forced-software-no-pinmap",
+          "nrf52",
+          "runtime-channel",
+          "runtime-manager"
+        ],
+        "previous_role": "dependency",
+        "previous_disposition": "dependency",
+        "added_or_reconfirmed_anchors": [
+          {
+            "line": 42,
+            "text": "            nrf_gpio_cfg_output(pin);"
+          },
+          {
+            "line": 62,
+            "text": "    return nrf_gpio_pin_read(pin) ? PinValue::High : PinValue::Low;"
+          }
+        ],
+        "updated_row_sha256": "8c5dfadcf0b3e59df2e9d75e7cb55dff6f644051ed9b3d1d37473dcf8571588f"
+      },
+      {
+        "path": "src/platforms/arm/nrf52/is_nrf52.h",
+        "baseline_blob_oid": "7756448602e63cd9d07975147181c5f72043ed64",
+        "baseline_sha256": "9cd1dba7da0c2982f417349000e645262a3070a80b74184a31d2090caf182cf5",
+        "previous_row_sha256": "c86a356080fac9dc76ceb5f637808c9e50be4416a7a72f592deb2520042eb3b2",
+        "previous_findings": [
+          "nrf52"
+        ],
+        "previous_role": "dispatch",
+        "previous_disposition": "dependency",
+        "added_or_reconfirmed_anchors": [],
+        "updated_row_sha256": "dd415b7c0a2a4ce3c4f5f8b49b59fa39b448e653ce6f6131b6e3ba9949b79c71"
+      },
+      {
+        "path": "src/platforms/arm/nrf52/led_sysdefs_arm_nrf52.h",
+        "baseline_blob_oid": "cbd060ff98c3374636d99ec1fa0e89a44b661da8",
+        "baseline_sha256": "e2c95771d028c6d693f41189d8f290766b046d8fefa7749982a1dbddeb143618",
+        "previous_row_sha256": "4cf42933a3851ef2c44a1b137c3fa4fc54340819273e139fe732d41f731ce7ab",
+        "previous_findings": [
+          "nrf52"
+        ],
+        "previous_role": "dependency",
+        "previous_disposition": "dependency",
+        "added_or_reconfirmed_anchors": [],
+        "updated_row_sha256": "5b86304128a8e34e5a4d825d26ac3f6da6983cab879cddf82dc355f3e2082542"
+      }
+    ],
+    "current_dependency_paths_absent_from_pinned_universe": [
+      {
+        "path": "src/fl/system/forced_software_pin.h",
+        "finding": "apollo3-forced-no-pinmap-output-readback"
+      }
+    ],
+    "review_scope": "Root/judge reviewed upstream API/selector/provider contracts and exact version limitations; metadata agent verified raw pinned Git blobs and targeted actual method anchors. Not a new full-body independent reread, resolved release-package build, hardware result or execution receipt.",
+    "limitations": "All previous independent review-depth caveats retained. Apollo5089 promotes only its actual runtime API source; nRF52 runtime binding remains dependency behind5070 selector plus explicitNoMap, not current SPI-readback positive. Preserve every2986 baseline identity/oldanchor/oldassociation. C6 proof remains historical43b1 scope, not requalified by this metadata snapshot."
   }
 }

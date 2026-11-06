@@ -600,8 +600,9 @@ def test_pinned_registry_keeps_every_discovered_child_and_query_miss() -> None:
         5074,
         5086,
         5087,
+        5089,
     }
-    assert len(REQUIRED_FINDINGS) == 50
+    assert len(REQUIRED_FINDINGS) == 51
     assert "src/platforms/shared/spi_bitbang/spi_block_32.h" in SEMANTIC_REQUIRED_PATHS
     assert (
         "src/platforms/shared/spi_bitbang/spi_isr_engine.cpp.hpp"
@@ -5517,6 +5518,186 @@ def test_reviewed_baseline_keeps_new_forced_gpio_sampler_bindings(issue: int) ->
     contract = NEW_FORCED_GPIO_CONTRACTS[issue]
     assert document["files"][contract["source"]]["disposition"] == "positive"
     assert contract["id"] in document["files"][contract["source"]]["findings"]
+
+
+APOLLO_READBACK_ID = "apollo3-forced-no-pinmap-output-readback"
+APOLLO_READBACK_SOURCE = "src/platforms/apollo3/pin_apollo3_native.hpp"
+APOLLO_READBACK_CONFIGS = {
+    "apollo3-redboard-FORCE1-default-NO_PINMAP-release2.2.0-selected-provider",
+    "thing-explorable-separate-board-and-pad-mapping-qualification",
+    "actual-release-HAL2.4.2-gitlink-headers-compiler-flags-binding-not-upstream-only",
+    "initial-HIGH-LOW-two-toggles-strobe-unrelated-output-latch-bits",
+    "restore-disabled-input-INPUT_READ-fails-real-provider-oracle-and-exact-restore-GREEN",
+    "Input-native-control-invalid-pins-preserved-no-electrical-speed-or-interrupt-claim",
+}
+NRF52_LATENT_READBACK_CONFIGS = {
+    "post-selector-fix-FORCE1-plus-explicit-NO_PINMAP-latch-HIGH-LOW-two-toggles-strobe",
+    "actual-resolved-Adafruit-package-and-legacy-Mbed-HAL-independently-qualified",
+    "restore-disabled-input-input-read-path-fails-real-provider-oracle-and-exact-restore-GREEN",
+}
+
+
+def test_apollo3_readback_finding_requires_actual_release_and_provider_controls() -> (
+    None
+):
+    row = next((entry for entry in REQUIRED_FINDINGS if entry["issue"] == 5089), None)
+    assert row is not None, (
+        "Apollo forced NoPinMap correctness finding remains mandatory"
+    )
+    assert row["id"] == APOLLO_READBACK_ID
+    assert row["sources"] == [APOLLO_READBACK_SOURCE]
+    assert set(row["required_configurations"]) == APOLLO_READBACK_CONFIGS
+    assert {
+        "fl::platforms::pinMode [Apollo3 Output]",
+        "fl::platforms::digitalRead [AM_HAL_GPIO_INPUT_READ]",
+        "ForcedSoftwarePin::setOutput [Apollo3 default NoPinMap]",
+        "ForcedSoftwarePin::toggle",
+        "ForcedSoftwarePin::strobe",
+    } <= set(row["entrypoints"])
+    assert {
+        "src/fl/system/fastpin_base.h",
+        "src/fl/system/forced_software_pin.h",
+        "src/fl/system/pin.h",
+        "src/fl/system/pin.cpp.hpp",
+        "src/platforms/pin.h",
+        "src/platforms.h",
+        "src/led_sysdefs.h",
+        "src/platforms/apollo3/pin_apollo3.hpp",
+        "src/platforms/apollo3/fastled_apollo3.h",
+        "src/platforms/apollo3/fastpin_apollo3.h",
+        "src/platforms/apollo3/led_sysdefs_apollo3.h",
+    } <= set(row["dependencies"])
+    assert {
+        "Arduino-core2.2.0-is-not-HAL2.2.0;bound-HAL2.4.2-gitlink5e7ff58f3294033b015ea12fdf1b098109b0549d-upstream-only",
+        "INPUT_NONE-disables-sampler;INPUT_READ-RDA-RDB-is-not-WTA-WTB-output-latch",
+        "zero-eIntDir-is-LO2HI-not-INTDIR_NONE;no-exact-disabled-value-or-electrical-claim",
+        "actual-release-package-and-compiler-header-selection-unqualified",
+        "native-loop5030-and-NoPinMap-safety5056-remain-independent",
+    } <= set(row["concerns"])
+    errors = check_evidence([row], [], audit._current_sources(audit.ROOT))
+    for configuration in APOLLO_READBACK_CONFIGS:
+        assert any(f"/{configuration}: unresolved" in error for error in errors)
+
+
+@pytest.mark.parametrize("omission", ["registry-row", "source-classification"])
+def test_apollo3_readback_binding_cannot_be_omitted(omission: str) -> None:
+    finding = next(
+        (entry for entry in REQUIRED_FINDINGS if entry["issue"] == 5089), None
+    )
+    assert finding is not None, "missing mandatory Apollo readback finding"
+    rows = {}
+    for entry in REQUIRED_FINDINGS:
+        for path in entry["sources"]:
+            rows.setdefault(path, {"disposition": "positive", "findings": []})[
+                "findings"
+            ].append(entry["id"])
+    assert check_required_findings(REQUIRED_FINDINGS, REQUIRED_FINDINGS, rows) == []
+    if omission == "registry-row":
+        proposed = [entry for entry in REQUIRED_FINDINGS if entry["issue"] != 5089]
+        expected = f"required production entrypoint missing: {APOLLO_READBACK_ID}"
+    else:
+        proposed = REQUIRED_FINDINGS
+        rows[APOLLO_READBACK_SOURCE]["findings"].remove(APOLLO_READBACK_ID)
+        expected = f"required GPIO entrypoint declassified: {APOLLO_READBACK_ID} in {APOLLO_READBACK_SOURCE}"
+    assert check_required_findings(REQUIRED_FINDINGS, proposed, rows) == [expected]
+
+
+def test_apollo3_readback_manifest_promotes_actual_baseline_without_identity_refresh() -> (
+    None
+):
+    document = json.loads(
+        (
+            audit.ROOT / "ci/fixtures/software_spi_audit/reviewed_baseline.json"
+        ).read_text()
+    )
+    assert len(document["files"]) == 2986
+    row = document["files"][APOLLO_READBACK_SOURCE]
+    assert row["baseline_blob_oid"] == "d3cc25e38614444c671a244cb195dbd66ef76084"
+    assert (
+        row["baseline_sha256"]
+        == "55dfb1b74c519f5508af14f948a950ae6c86d8d65a0c3382cecdcadbc346b7e9"
+    )
+    assert row["disposition"] == "positive"
+    assert {APOLLO_READBACK_ID, "runtime-channel", "runtime-manager"} <= set(
+        row["findings"]
+    )
+    anchors = {(item.get("line"), item.get("text")) for item in row["source_evidence"]}
+    assert (
+        90,
+        "            pin_config.eGPInput = AM_HAL_GPIO_PIN_INPUT_NONE;",
+    ) in anchors
+    assert (
+        134,
+        "    u32 result = am_hal_gpio_state_read(pin, AM_HAL_GPIO_INPUT_READ, &read_state);",
+    ) in anchors
+
+
+def test_nrf52_latent_readback_appends_real_runtime_dependencies_and_preserves_selection() -> (
+    None
+):
+    row = next(entry for entry in REQUIRED_FINDINGS if entry["issue"] == 5070)
+    assert row["sources"] == ["src/platforms/arm/nrf52/fastpin_arm_nrf52_variants.h"]
+    assert {
+        "src/fl/system/pin.h",
+        "src/fl/system/pin.cpp.hpp",
+        "src/platforms/pin.h",
+        "src/platforms/arm/nrf52/pin_nrf52.hpp",
+        "src/platforms/arm/nrf52/is_nrf52.h",
+        "src/platforms/arm/nrf52/led_sysdefs_arm_nrf52.h",
+    } <= set(row["dependencies"])
+    assert "src/platforms/arm/nrf52/pin_nrf52_native.hpp" not in row["dependencies"]
+    old = {
+        "force-off/native control",
+        "force-on/mapped fallback",
+        "force-on/NO_PINMAP Arduino fallback",
+        "all recognized board/pin-order variant branches independently",
+        "valid logical pins and invalid/excluded pins",
+        "actual SDK selected-type and executed GPIO route",
+        "restored unguarded specialization must fail the selected-type/route oracle",
+    }
+    assert set(row["required_configurations"]) == old | NRF52_LATENT_READBACK_CONFIGS
+    assert {
+        "latent-readback-behind5070-selector;FORCE-plus-explicit-NO_PINMAP-not-current-SPI-positive",
+        "Adafruit1.6.1-admitted-by-framework-range^1.10601.0-is-not-actual-resolved-package-or-legacy-Mbed-proof",
+        "nrf_gpio_cfg_output-disconnects-input;pin_read-requires-connected-input;Arduino-OUT-read-is-control",
+        "current-manager-channel-nonESP-genericSPI-use-explicit-hi-lo-not-readback;no-current-runtime-positive",
+        "preserve-existing-optimization-acceptance-5048",
+    } <= set(row["concerns"])
+    errors = check_evidence([row], [], audit._current_sources(audit.ROOT))
+    for configuration in NRF52_LATENT_READBACK_CONFIGS:
+        assert any(f"/{configuration}: unresolved" in error for error in errors)
+
+
+def test_nrf52_latent_readback_configuration_cannot_be_omitted() -> None:
+    import copy
+
+    row = next(entry for entry in REQUIRED_FINDINGS if entry["issue"] == 5070)
+    assert NRF52_LATENT_READBACK_CONFIGS <= set(row["required_configurations"])
+    proposed = copy.deepcopy(row)
+    proposed["required_configurations"].remove(sorted(NRF52_LATENT_READBACK_CONFIGS)[0])
+    rows = {row["sources"][0]: {"disposition": "positive", "findings": [row["id"]]}}
+    assert check_required_findings([row], [proposed], rows) == [
+        f"required required_configurations changed or removed: {row['id']}"
+    ]
+
+
+def test_nrf52_latent_readback_manifest_binding_remains_dependency_not_new_emitter() -> (
+    None
+):
+    document = json.loads(
+        (
+            audit.ROOT / "ci/fixtures/software_spi_audit/reviewed_baseline.json"
+        ).read_text()
+    )
+    row = document["files"]["src/platforms/arm/nrf52/pin_nrf52.hpp"]
+    assert row["disposition"] == "dependency"
+    assert "nrf52-variants-forced-fastpin-selection" in row["findings"]
+    anchors = {(item.get("line"), item.get("text")) for item in row["source_evidence"]}
+    assert (42, "            nrf_gpio_cfg_output(pin);") in anchors
+    assert (
+        62,
+        "    return nrf_gpio_pin_read(pin) ? PinValue::High : PinValue::Low;",
+    ) in anchors
 
 
 ESP32_C6_MODE_SOURCE = "src/platforms/esp/32/pin_esp32_native_impl.hpp"
