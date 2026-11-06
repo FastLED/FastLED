@@ -8,6 +8,7 @@
 // This reopens namespace fl but typedefs will still be in scope
 #include "fl/system/fastpin_base.h"
 #include "fl/system/pin.h"  // For PinMode enum and pinMode function
+#include "platforms/shared/spi_bitbang/bitbang_pin.h"
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_DEPRECATED_REGISTER
@@ -49,6 +50,23 @@ public:
 	inline static port_ptr_t cport() __attribute__ ((always_inline)) { return &_GPIO_DR_CLEAR::r(); }
 	inline static port_t mask() __attribute__ ((always_inline)) { return _MASK; }
 	inline static u32 pinbit() __attribute__ ((always_inline)) { return _BIT; }
+};
+
+/// True only for FastPin specializations backed by a real i.MXRT _ARMPIN.
+template <u8 PIN, u32 BIT, u32 MASK, typename DR, typename SET, typename CLEAR, typename TOGGLE>
+constexpr bool isMxrtHardwarePin(const _ARMPIN<PIN, BIT, MASK, DR, SET, CLEAR, TOGGLE>*) { return true; }
+constexpr bool isMxrtHardwarePin(const void*) { return false; }
+
+/// Exclusive same-port bulk writes stream through the full output latch; all
+/// other data updates use the write-one set/clear aliases. kMinWriteCycles stays
+/// zero because Teensy 4 SPI rates are in Hz, not the cycles it would be compared to.
+template <u8 PIN> struct BitbangPin<FastPin<PIN>> : BitbangPinDefaults<FastPin<PIN>> {
+	static constexpr bool kAtomicWrite = isMxrtHardwarePin(static_cast<const FastPin<PIN>*>(nullptr));
+	static constexpr bool kTwoWriteStream = kAtomicWrite;
+	template <u8 BIT>
+	FASTLED_FORCE_INLINE static void write(u8 value) FL_NO_EXCEPT {
+		writeBitSetClear<BIT>(value, FastPin<PIN>::mask(), FastPin<PIN>::sport(), FastPin<PIN>::cport());
+	}
 };
 
 
