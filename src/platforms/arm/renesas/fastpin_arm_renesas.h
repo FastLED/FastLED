@@ -8,12 +8,12 @@
 // This reopens namespace fl but template will still be in scope
 #include "fl/system/fastpin_base.h"
 
-#if !defined(FASTLED_FORCE_SOFTWARE_PINS)
 #include "bsp_api.h"
 #include "platforms/arm/renesas/renesas_pin.h"
 #include "fl/system/pin.h"  // For PinMode, PinValue enums
 #include "fl/stl/noexcept.h"
 
+#if !defined(FASTLED_FORCE_SOFTWARE_PINS)
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_DEPRECATED_REGISTER
 #endif
