@@ -52,6 +52,7 @@ EXCLUDED_TEST_FILES: set[Path] = {
     # Dedicated no-PCH tier-layout executable; registered directly in Meson.
     TESTS_DIR / "fl" / "channels" / "color_profile_tiny_layout.cpp",
     TESTS_DIR / "fl" / "channels" / "color_profile_tiny_runtime.cpp",
+    TESTS_DIR / "fl" / "channels" / "engine_worker_defaults.cpp",
 }
 
 # Directories to exclude from recursive test discovery.

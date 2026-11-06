@@ -1,5 +1,11 @@
 # Task Tracker
 
+## Generic engine worker macros
+
+- [x] Implement opt-in core/priority defaults with Channel precedence and
+  unchanged unsupported peripherals; see `engine-worker-macros.md`.
+- [ ] Validate, review, push and merge the implementation.
+
 ## ESP8266 block streaming throughput (#4966)
 
 - [x] Identify the attached ESP8266 through a live probe and measure unchanged firmware.

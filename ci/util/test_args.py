@@ -276,6 +276,7 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
         if test_args.test in (
             "color_profile_tiny_layout",
             "color_profile_tiny_runtime",
+            "engine_worker_defaults_runtime",
         ):
             test_args.cpp = True
             test_args.unit = True
