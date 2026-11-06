@@ -41,6 +41,7 @@ rp/
     ├── README.md              # RP2350 platform documentation
     ├── fastled_arm_rp2350.h   # Main platform header
     ├── fastpin_arm_rp2350.h   # Pin definitions (48 pins: 0-47)
+    ├── rp2350_pin.h           # SIO pin template and software SPI policy (host-testable)
     ├── led_sysdefs_arm_rp2350.h # System defines (150 MHz default)
     └── clockless_arm_rp2350.h # Clockless wrapper (includes rpcommon)
 ```
