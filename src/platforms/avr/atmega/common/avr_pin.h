@@ -7,6 +7,7 @@
 
 #include "fl/stl/stdint.h"
 #include "fl/stl/compiler_control.h"
+#include "platforms/shared/spi_bitbang/bitbang_pin.h"
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_DEPRECATED_REGISTER
@@ -42,3 +43,22 @@ public:
 };
 
 FL_DISABLE_WARNING_POP
+
+namespace fl {
+
+template <fl::u8 PIN> class FastPin;
+
+/// True only for FastPin specializations backed by a real _AVRPIN output latch.
+template <fl::u8 PIN, fl::u8 MASK, typename PortReg, typename DdrReg, typename PinReg>
+constexpr bool isAvrHardwarePin(const _AVRPIN<PIN, MASK, PortReg, DdrReg, PinReg>*) { return true; }
+constexpr bool isAvrHardwarePin(const void*) { return false; }
+
+/// An _AVRPIN writes its whole 8-bit latch with one store, so the exclusive
+/// same-port software SPI path can merge each falling edge with the next data
+/// update. Forced software pins are not _AVRPINs and keep the per-bit writer.
+template <fl::u8 PIN> struct BitbangPin<FastPin<PIN>> : BitbangPinDefaults<FastPin<PIN>> {
+    static constexpr bool kTwoWriteStream =
+        isAvrHardwarePin(static_cast<const FastPin<PIN>*>(nullptr));
+};
+
+} // namespace fl

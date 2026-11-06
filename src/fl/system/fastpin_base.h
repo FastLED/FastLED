@@ -10,6 +10,9 @@
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/noexcept.h"
 #include "fl/stl/static_assert.h"
+#ifdef FASTLED_FORCE_SOFTWARE_PINS
+#include "fl/system/pin.h"  // IWYU pragma: keep
+#endif
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_DEPRECATED_REGISTER
