@@ -10,6 +10,7 @@
 
 #if !defined(FASTLED_FORCE_SOFTWARE_PINS)
 #include "bsp_api.h"
+#include "platforms/arm/renesas/renesas_pin.h"
 #include "fl/system/pin.h"  // For PinMode, PinValue enums
 #include "fl/stl/noexcept.h"
 
@@ -24,61 +25,6 @@ namespace fl {
 #undef HAS_HARDWARE_PIN_SUPPORT
 
 #else
-
-/// Template definition for STM32 style ARM pins, providing direct access to the various GPIO registers.  Note that this
-/// uses the full port GPIO registers.  In theory, in some way, bit-band register access -should- be faster, however I have found
-/// that something about the way gcc does register allocation results in the bit-band code being slower.  It will need more fine tuning.
-/// The registers are data output, set output, clear output, toggle output, input, and direction
-
-template<u8 PIN, bsp_io_port_pin_t bspPin, u32 _PORT> class _ARMPIN {
-public:
-
-    typedef volatile u16 * port_ptr_t;
-    typedef u16 port_t;
-
-    /// Pin is valid for use
-    constexpr static bool validpin() { return true; }
-    /// Low speed only recommended
-    constexpr static bool LowSpeedOnlyRecommended() { return false; }
-
-    #define PORT ((R_PORT0_Type*)(_PORT))
-    #define digitalBspPinToPort(P)		   (P >> 8)
-    #define digitalBspPinToBitMask(P)      (1 << (P & 0xFF))
-
-    #if 0
-    inline static void setOutput() FL_NO_EXCEPT {
-        if(_BIT<8) {
-            _CRL::r() = (_CRL::r() & (0xF << (_BIT*4)) | (0x1 << (_BIT*4));
-        } else {
-            _CRH::r() = (_CRH::r() & (0xF << ((_BIT-8)*4))) | (0x1 << ((_BIT-8)*4));
-        }
-    }
-    inline static void setInput() { /* TODO */ } // TODO: preform MUX config { _PDDR::r() &= ~_MASK; }
-    #endif
-
-    inline static void setOutput() { pinMode(PIN, PinMode::Output); } // TODO: perform MUX config { _PDDR::r() |= _MASK; }
-    inline static void setInput() { pinMode(PIN, PinMode::Input); } // TODO: preform MUX config { _PDDR::r() &= ~_MASK; }
-
-    inline static void hi() __attribute__ ((always_inline)) { PORT->POSR = digitalBspPinToBitMask(bspPin); }
-    inline static void lo() __attribute__ ((always_inline)) { PORT->PORR = digitalBspPinToBitMask(bspPin); }
-    inline static void set(FASTLED_REGISTER port_t val) __attribute__ ((always_inline)) { PORT->PODR = val; }
-
-    inline static void strobe() __attribute__ ((always_inline)) { toggle(); toggle(); }
-
-    inline static void toggle() __attribute__ ((always_inline)) { PORT->PODR & digitalBspPinToBitMask(bspPin) ? lo() : hi(); }
-
-    inline static void hi(FASTLED_REGISTER port_ptr_t port) __attribute__ ((always_inline)) { hi(); }
-    inline static void lo(FASTLED_REGISTER port_ptr_t port) __attribute__ ((always_inline)) { lo(); }
-    inline static void fastset(FASTLED_REGISTER port_ptr_t port, FASTLED_REGISTER port_t val) __attribute__ ((always_inline)) { *port = val; }
-
-    inline static port_t hival() __attribute__ ((always_inline)) { return PORT->PODR | digitalBspPinToBitMask(bspPin); }
-    inline static port_t loval() __attribute__ ((always_inline)) { return PORT->PODR & ~digitalBspPinToBitMask(bspPin); }
-    inline static port_ptr_t port() __attribute__ ((always_inline)) { return &PORT->PODR; }
-    inline static port_ptr_t sport() __attribute__ ((always_inline)) { return &PORT->POSR; }
-    inline static port_ptr_t cport() __attribute__ ((always_inline)) { return &PORT->PORR; }
-    inline static port_t mask() __attribute__ ((always_inline)) { return digitalBspPinToBitMask(bspPin); }
-
-};
 
 #define _FL_DEFPIN(PIN, bspPin, PORT) template<> class FastPin<PIN> : public _ARMPIN<PIN, bspPin, PORT> {};
 

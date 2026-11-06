@@ -35,6 +35,15 @@ FASTLED_FORCE_INLINE void writeBitSetClear(u8 value, u32 mask,
     *target = mask;
 }
 
+/// writeBitSetClear for 16-bit set/clear registers, keeping the vendor access width.
+template <u8 BIT>
+FASTLED_FORCE_INLINE void writeBitSetClear(u8 value, u16 mask,
+                                         volatile u16* set,
+                                         volatile u16* clear) FL_NO_EXCEPT {
+    volatile u16* target = (value & (1U << BIT)) ? set : clear;
+    *target = mask;
+}
+
 /// writeBitSetClear without a data-dependent branch, for targets where the
 /// ternary compiles to one. The asm keeps GCC from restoring the branch, so this
 /// costs extra instructions even when the bit is known at compile time.

@@ -5,6 +5,7 @@ Renesas RA4M1 (Arduino UNO R4) support.
 ## Files (quick pass)
 - `fastled_arm_renesas.h`: Aggregator; includes pin and clockless.
 - `fastpin_arm_renesas.h`: Pin helpers.
+- `renesas_pin.h`: Pin template and software SPI policy, free of BSP includes so it compiles on a host. Same-port bulk writes own the whole 16-bit PODR; define `FAST_SPI_INTERRUPTS_WRITE_PINS` if an ISR writes other pins on that port.
 - `clockless_arm_renesas.h`: Clockless driver.
 - `led_sysdef_arm_renesas.h`: System defines for Renesas.
 
