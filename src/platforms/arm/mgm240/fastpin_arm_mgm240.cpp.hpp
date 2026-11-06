@@ -12,7 +12,7 @@
 // IWYU pragma: end_keep
 namespace fl {
 // Initialize GPIO clock (needed for Silicon Labs devices)
-void _mgm240_gpio_init() {
+void _mgm240_gpio_init() FL_NO_EXCEPT {
     static bool initialized = false;
     if (!initialized) {
         CMU_ClockEnable(cmuClock_GPIO, true);
