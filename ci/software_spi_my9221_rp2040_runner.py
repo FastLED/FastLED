@@ -12,14 +12,71 @@ import shutil
 import struct
 import sys
 from dataclasses import asdict, dataclass
+from enum import Enum
 from pathlib import Path
 
 from ci import software_spi_init_proof as native
+from ci import software_spi_my9221_rp2040_irq_proof as irq_check
 from ci import software_spi_my9221_rp2040_proof as property_check
 
 
 EXAMPLE = "examples/AutoResearch/AutoResearch.ino"
 PRODUCER = b'#include <FastLED.h>\n\n// Fixed direct public-controller producer; no FastLED global-list dispatch claim.\nstatic CRGB my9221_pixels[4];\nvolatile fl::u8 my9221_input = 0x30;\n\nextern "C" __attribute__((noinline, used)) void my9221_rp2040_public_producer() {\n    MY9221Controller<2, 3, RGB> my9221_controller;\n    my9221_pixels[0] = CRGB(my9221_input, 0x80, 0x01);\n    my9221_pixels[1] = CRGB(0x01, 0x02, 0x04);\n    my9221_pixels[2] = CRGB(0x08, 0x10, 0x20);\n    my9221_pixels[3] = CRGB(0x40, 0x80, 0x30);\n    my9221_controller.init();\n    my9221_controller.setLeds(my9221_pixels, 4);\n    my9221_controller.showLeds(255);\n}\n\nvoid setup() { my9221_rp2040_public_producer(); }\nvoid loop() {}\n'
+
+
+class _PropertyKind(Enum):
+    PLACEMENT = "placement"
+    IRQ = "irq"
+
+
+@dataclass(frozen=True)
+class _VendorSpec:
+    source: str
+    mutant: str
+    scope: str
+    snapshot_kind: native._ProofKind
+    artifact_group: str
+
+
+def _vendor_spec(kind: _PropertyKind) -> _VendorSpec:
+    if kind is _PropertyKind.PLACEMENT:
+        return _VendorSpec(
+            property_check.SOURCE,
+            "kernel-xip-mutant",
+            "rp2040-native-gpio2-3-elf-sram-property-only",
+            native._ProofKind.RP2040_ELF,
+            "spi-my9221-rp2040-elf-proof",
+        )
+    if kind is _PropertyKind.IRQ:
+        return _VendorSpec(
+            irq_check.SOURCE,
+            "unconditional-enable-mutant",
+            "rp2040-native-gpio2-3-saved-primask-property-only",
+            native._ProofKind.RP2040_IRQ,
+            "spi-my9221-rp2040-irq-proof",
+        )
+    raise ValueError("unknown closed vendor property")
+
+
+@dataclass(frozen=True)
+class _Assessment:
+    errors: list[str]
+    irq_analysis: irq_check.IRQResult | None = None
+
+
+def _assess_property(capture: dict, kind: _PropertyKind, stage: str) -> _Assessment:
+    spec = _vendor_spec(kind)
+    if stage not in ("baseline", spec.mutant, "restored"):
+        raise ValueError("unknown fixed vendor stage")
+    if kind is _PropertyKind.IRQ:
+        result = irq_check.classify_irq_capture(capture)
+        irq_check.validate_stage_analysis(stage, result)
+        return _Assessment(result.errors, result)
+    errors = property_check.classify_capture(capture)
+    intended = ["kernel-not-in-sdk-sram"] if stage == spec.mutant else []
+    if errors != intended:
+        raise ValueError(f"RP2040 stage lacks intended bounded ELF property: {errors}")
+    return _Assessment(errors)
 
 
 @dataclass(frozen=True)
@@ -39,6 +96,7 @@ class VendorStage:
     masked_callee_literal_closure: bool
     serving_engine_before: dict
     serving_engine_after: dict
+    irq_analysis: irq_check.IRQResult | None = None
 
 
 @dataclass(frozen=True)
@@ -598,6 +656,18 @@ def _build_session(
     return BuildSession(updated, before, after, after_static)
 
 
+def _retain_controlled_source(
+    project: Path, saved: Path, kind: _PropertyKind, source: bytes
+) -> None:
+    # SourceManager stages src/* directly into lib/FastLED/*, consistently
+    # with the complete source-universe check above. Paths are closed specs.
+    relative = _vendor_spec(kind).source.removeprefix("src/")
+    staged = project / "lib/FastLED" / relative
+    if not staged.is_file() or staged.is_symlink() or staged.read_bytes() != source:
+        raise ValueError("controlled staged vendor source differs")
+    (saved / "staged-controlled-source.h").write_bytes(staged.read_bytes())
+
+
 def _one_stage(
     workspace: Path,
     artifacts: Path,
@@ -610,13 +680,15 @@ def _one_stage(
     info: dict,
     environment: dict,
     engine_profile: dict,
+    kind: _PropertyKind = _PropertyKind.PLACEMENT,
 ) -> tuple[VendorStage, dict]:
+    spec = _vendor_spec(kind)
     saved = artifacts / name
     saved.mkdir(parents=True, exist_ok=True)
     project = workspace / ".build/fbuild/rp2040"
-    (workspace / property_check.SOURCE).write_bytes(source)
+    (workspace / spec.source).write_bytes(source)
     expected = dict(initial)
-    expected[property_check.SOURCE] = hashlib.sha256(source).hexdigest()
+    expected[spec.source] = hashlib.sha256(source).hexdigest()
     native._verify_inputs(workspace, expected)
     release = Path(info["prog_path"]).parent
     for filename in ("firmware.elf", "firmware.map", "firmware.bin"):
@@ -637,12 +709,13 @@ def _one_stage(
     updated = session.info
     hashes = _retain_artifacts(updated, saved, project)
     capture = _capture(workspace, saved, updated, environment)
-    errors = property_check.classify_capture(capture)
-    intended = ["kernel-not-in-sdk-sram"] if name == "kernel-xip-mutant" else []
-    if errors != intended:
-        raise ValueError(
-            f"RP2040 {name} lacks intended bounded ELF property: {errors}; retained {saved}"
-        )
+    assessment = _assess_property(capture, kind, name)
+    errors = assessment.errors
+    for relative in (spec.source, EXAMPLE):
+        retained = saved / "production-sources" / relative
+        retained.parent.mkdir(parents=True, exist_ok=True)
+        retained.write_bytes((workspace / relative).read_bytes())
+    _retain_controlled_source(project, saved, kind, source)
     after = native._verify_inputs(workspace, expected)
     # Local analysis can outlive an idle daemon. Its completed build window is
     # already bound; these are static checks, never a liveness exemption inside it.
@@ -666,27 +739,29 @@ def _one_stage(
         errors,
         True,  # Both accepted outcomes passed actual route/callback checks.
         True,
-        not errors,
+        assessment.irq_analysis is not None or not errors,
         session.before,
         session.after,
+        assessment.irq_analysis,
     )
     _json(saved / "stage.json", asdict(result))
     return result, updated
 
 
-def run_rp2040_elf_proof(root: Path) -> VendorProof:
+def _run_vendor_proof(root: Path, kind: _PropertyKind) -> VendorProof:
+    spec = _vendor_spec(kind)
     root = root.resolve()
     # Reject incomplete inputs before Git, provisioning, build or inspection.
-    for name in (property_check.SOURCE, EXAMPLE, "ci/boards.py", "compile"):
+    for name in (spec.source, EXAMPLE, "ci/boards.py", "compile"):
         if not (root / name).is_file() or (root / name).is_symlink():
             raise ValueError(f"missing or unsafe RP2040 proof input {name}")
     original_inputs = native._inputs(root)
-    workspace, _ = native._snapshot(root, native._ProofKind.RP2040_ELF)
-    artifacts = root / ".build/spi-my9221-rp2040-elf-proof" / workspace.name
+    workspace, _ = native._snapshot(root, spec.snapshot_kind)
+    artifacts = root / ".build" / spec.artifact_group / workspace.name
     # The wrapper honors explicit UV_PROJECT_ENVIRONMENT; create no local
     # alias or placeholder that would evade the complete snapshot universe.
     originals = {
-        property_check.SOURCE: (workspace / property_check.SOURCE).read_bytes(),
+        spec.source: (workspace / spec.source).read_bytes(),
         EXAMPLE: (workspace / EXAMPLE).read_bytes(),
     }
     profile = None
@@ -700,14 +775,28 @@ def run_rp2040_elf_proof(root: Path) -> VendorProof:
         initial[EXAMPLE] = hashlib.sha256(PRODUCER).hexdigest()
         native._verify_inputs(workspace, initial)
         bootstrap = artifacts / "bootstrap"
+        client_tools = _client_tools(environment)
+        desired_launcher = _observe_launcher(
+            workspace, bootstrap, environment, client_tools
+        )
+        bootstrap_engine = _prepare_bootstrap_engine(
+            workspace, bootstrap, environment, client_tools, desired_launcher
+        )
         info = _compile(workspace, bootstrap, environment)
+        bootstrap_after = _daemon_identity(
+            workspace, bootstrap, "bootstrap-build-after", environment, client_tools
+        )
+        _verify_serving_engine(
+            bootstrap, "bootstrap-build", bootstrap_engine, bootstrap_after
+        )
         project = workspace / ".build/fbuild/rp2040"
         _check_staged_sources(workspace, initial, project)
         roots = _profile_roots(info)
         tools = _tool_identities(info, workspace, environment, bootstrap)
-        engine_profile = _daemon_identity(
-            workspace, bootstrap, "bootstrap", environment, tools
-        )
+        for key, identity in client_tools.items():
+            if tools[key].path != identity.path or tools[key].sha256 != identity.sha256:
+                raise ValueError("prebootstrap launcher tool identity changed")
+        engine_profile = bootstrap_after
         _json(bootstrap / "engine-profile.json", _engine_semantics(engine_profile))
         profile = _state(info, environment, tools, roots, project)
         _json(bootstrap / "frozen-profile.json", profile)
@@ -722,13 +811,16 @@ def run_rp2040_elf_proof(root: Path) -> VendorProof:
         _retain_artifacts(info, bootstrap, project)
         native._verify_inputs(workspace, initial)
         stages = {
-            "baseline": originals[property_check.SOURCE],
-            "kernel-xip-mutant": property_check.kernel_mutant(
-                originals[property_check.SOURCE]
+            "baseline": originals[spec.source],
+            spec.mutant: (
+                property_check.kernel_mutant(originals[spec.source])
+                if kind is _PropertyKind.PLACEMENT
+                else irq_check.irq_mutant(originals[spec.source])
             ),
-            "restored": originals[property_check.SOURCE],
+            "restored": originals[spec.source],
         }
-        property_check.validate_stage_sequence(tuple(stages))
+        if tuple(stages) != ("baseline", spec.mutant, "restored"):
+            raise ValueError("invalid fixed vendor stage sequence")
         expected = dict(initial)
         for name, source in stages.items():
             native._verify_inputs(workspace, expected)
@@ -744,18 +836,19 @@ def run_rp2040_elf_proof(root: Path) -> VendorProof:
                 info,
                 environment,
                 engine_profile,
+                kind,
             )
             records.append(stage)
             expected = dict(stage.inputs_after)
         if (
             records[0].artifact_sha256s[str(artifacts / "baseline/firmware.elf")]
             == records[1].artifact_sha256s[
-                str(artifacts / "kernel-xip-mutant/firmware.elf")
+                str(artifacts / spec.mutant / "firmware.elf")
             ]
         ):
             raise ValueError("RP2040 XIP mutant ELF is not distinct")
         proof = VendorProof(
-            "rp2040-native-gpio2-3-elf-sram-property-only",
+            spec.scope,
             "direct-controller-init-setLeds-showLeds",
             False,
             False,
@@ -763,7 +856,7 @@ def run_rp2040_elf_proof(root: Path) -> VendorProof:
             records,
             bootstrap,
             _engine_semantics(engine_profile),
-            "Potential public route/whole emitter SRAM closure only; no hardware execution, IRQ correctness, min/max timing, stack/frame runtime location or complete executed argv. All seven MY groups unresolved.",
+            "Bounded static potential public route/placement or saved-PRIMASK property only; no hardware execution, physical IRQ guarantee, termination, min/max timing, stack/frame runtime location or complete executed argv. All seven MY groups unresolved.",
         )
     except (
         OSError,
@@ -1031,6 +1124,116 @@ print(json.dumps(dict(normal_ensure=True,python=str(python),native=str(image),ad
 """
 
 
+def _launcher_script(ensure: bool) -> str:
+    # Run in the same bound UV activation as compile's Python entrypoint.
+    verification = NORMAL_ENSURE_SCRIPT.split("if Daemon.ensure_running()", 1)[0]
+    preparation = r"""
+import os
+from ci.util.fbuild_runner import fbuild_child_env
+from ci.software_spi_my9221_rp2040_runner import _startup_environment_hashes, STARTUP_ENVIRONMENT_KEYS
+final_environment = fbuild_child_env()
+reviewed = b'\0'.join(os.fsencode(key)+'='.encode()+os.fsencode(value) for key,value in final_environment.items() if key in STARTUP_ENVIRONMENT_KEYS)
+observation = dict(startup_environment=_startup_environment_hashes(reviewed),
+    client_python=str(python),client_prefix=str(pathlib.Path(sys.prefix).absolute()),
+    client_extension_sha256=hashlib.sha256(image.read_bytes()).hexdigest(),
+    adjacent_daemon_sha256=hashlib.sha256(daemon.read_bytes()).hexdigest())
+"""
+    action = ""
+    if ensure:
+        action = "os.environ.clear()\nos.environ.update(final_environment)\nif Daemon.ensure_running() is not True:\n    raise ValueError('official normal daemon ensure failed')\n"
+    return verification + preparation + action + "print(json.dumps(observation))\n"
+
+
+def _client_tools(environment: dict) -> dict[str, native.ToolIdentity]:
+    import fbuild._native as extension
+
+    python = Path(sys.executable).absolute()
+    paths = {
+        "python": python,
+        "fbuild-extension": Path(extension.__file__).absolute(),
+        "fbuild-daemon": python.parent / "fbuild-daemon",
+    }
+    selected = shutil.which("uv", path=environment["PATH"])
+    if selected is None or python.parent != Path(sys.prefix).absolute() / "bin":
+        raise ValueError("missing provisioned launcher identity")
+    paths["uv"] = Path(selected)
+    return {
+        name: native.ToolIdentity(path, _digest(path), "prebootstrap client identity")
+        for name, path in paths.items()
+    }
+
+
+def _launcher_command(tools: dict, ensure: bool) -> list[str]:
+    python, extension, daemon, uv = (
+        tools[key] for key in ("python", "fbuild-extension", "fbuild-daemon", "uv")
+    )
+    if daemon.path.absolute() != python.path.absolute().parent / "fbuild-daemon":
+        raise ValueError("launcher adjacent daemon mismatch")
+    if any(
+        _digest(tool.path) != tool.sha256 for tool in (python, extension, daemon, uv)
+    ):
+        raise ValueError("launcher tool identity changed")
+    return [
+        str(uv.path),
+        "run",
+        "--no-sync",
+        str(python.path),
+        "-c",
+        _launcher_script(ensure),
+        str(python.path.absolute()),
+        extension.sha256,
+        daemon.sha256,
+        str(Path(sys.prefix).absolute()),
+        python.sha256,
+    ]
+
+
+def _observe_launcher(
+    workspace: Path, saved: Path, environment: dict, tools: dict
+) -> dict:
+    result = native._run(
+        _launcher_command(tools, False),
+        workspace,
+        saved / "launcher-observation.log",
+        build=False,
+        environment=environment,
+    )
+    if result.returncode != 0:
+        raise ValueError("controlled launcher observation failed")
+    observed = json.loads(result.stdout)
+    if (
+        observed.get("client_python") != str(tools["python"].path.absolute())
+        or observed.get("client_prefix") != str(Path(sys.prefix).absolute())
+        or observed.get("client_extension_sha256") != tools["fbuild-extension"].sha256
+        or observed.get("adjacent_daemon_sha256") != tools["fbuild-daemon"].sha256
+        or not isinstance(observed.get("startup_environment"), dict)
+    ):
+        raise ValueError("controlled launcher observation identity mismatch")
+    _json(saved / "desired-launcher.json", observed)
+    return observed
+
+
+def _prepare_bootstrap_engine(
+    workspace: Path, saved: Path, environment: dict, tools: dict, desired: dict
+) -> dict:
+    existing = _probe_existing_engine(workspace, saved, environment, tools, None)
+    if existing is not None:
+        if existing.get("startup_environment") != desired["startup_environment"]:
+            raise ValueError(
+                "foreign startup environment differs from controlled launcher"
+            )
+    else:
+        _ensure_stage_engine(workspace, saved, environment, tools, {})
+    actual = _daemon_identity(
+        workspace, saved, "controlled-bootstrap", environment, tools
+    )
+    if actual.get("startup_environment") != desired["startup_environment"]:
+        raise ValueError("actual startup environment differs from desired launcher")
+    if existing is not None:
+        _verify_serving_engine(saved, "bootstrap-reuse", existing, actual)
+    return actual
+
+
 def _probe_existing_engine(
     workspace: Path,
     saved: Path,
@@ -1051,7 +1254,10 @@ def _probe_existing_engine(
         )
     observation = json.loads(result.stdout)
     _json(saved / "engine-preflight.json", observation)
-    if observation.get("endpoint") != expected_endpoint:
+    if (
+        expected_endpoint is not None
+        and observation.get("endpoint") != expected_endpoint
+    ):
         raise ValueError(
             "existing serving engine endpoint differs from frozen client namespace"
         )
@@ -1092,7 +1298,7 @@ def _ensure_stage_engine(
         "--no-sync",
         str(python.path),
         "-c",
-        NORMAL_ENSURE_SCRIPT,
+        _launcher_script(True),
         str(python.path.absolute()),
         extension.sha256,
         daemon.sha256,
@@ -1108,3 +1314,11 @@ def _ensure_stage_engine(
     )
     if result.returncode != 0:
         raise ValueError(f"normal serving engine ensure failed; retained {saved}")
+
+
+def run_rp2040_elf_proof(root: Path) -> VendorProof:
+    return _run_vendor_proof(root, _PropertyKind.PLACEMENT)
+
+
+def run_rp2040_irq_proof(root: Path) -> VendorProof:
+    return _run_vendor_proof(root, _PropertyKind.IRQ)

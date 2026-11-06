@@ -401,3 +401,20 @@ adapter acceptance run. Actual selected-case diagnostic captures remain required
 when the framework output contract changes.
 
 Seven additional forced-selection findings (#5068–#5074) remain unresolved across ESP8266, nRF51, nRF52 variants, GIGA, MGM240, modern LPC and legacy LPC. Native explicit specializations can override the forced primary; selected-type and actual fallback-route controls are required for every supported variant. Existing optimization matrices, including nRF51 #5047, remain mandatory. Source bindings do not certify execution, cache safety or timing.
+
+
+The separate opt-in RP2040 saved-PRIMASK adapter uses the same fixed local
+`MY9221Controller<2, 3, RGB>` public producer and frozen vendor build profile as
+the placement adapter. Run it explicitly with
+`FASTLED_RUN_MY9221_RP2040_IRQ_PROOF=1 UV_NO_SYNC=1 uv run --no-sync pytest ci/tests/test_software_spi_audit.py -q -k my9221_rp2040_irq_managed_real_three_stage_acceptance`.
+It builds baseline, the single `restore_interrupts(mSaved)` to
+`restore_interrupts(0)` control, and exact restoration. Its internally generated
+record retains source/staged-header bytes, tools, SDK, per-build serving-engine
+identity, planned compile database, ELF/map and typed finite IRQ analysis.
+Both initial PRIMASK values must reach valid normal returns with restored SP/LR
+and terminal pin parking; the mutant requires matching concrete entry-1/exit-0
+outcomes and counterexamples. This is a bounded static property, not observed
+hardware IRQ behavior, loop termination, electrical timing or complete executed
+compiler arguments. It does not run through `--run-native` and does not resolve
+any of the seven full MY9221 configuration groups. Actual managed qualification
+requires a fresh successful three-stage run and independent artifact review.

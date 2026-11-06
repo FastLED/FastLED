@@ -51,6 +51,7 @@ raise SystemExit(0 if result.success else 2)
 
 class _ProofKind(Enum):
     RP2040_ELF = "rp2040-elf"
+    RP2040_IRQ = "rp2040-irq"
     INIT = "init"
     MY9221 = "my9221"
 
@@ -77,6 +78,17 @@ def _spec(kind: _ProofKind) -> _NativeSpec:
             ("src/fl/chipsets/my9221.h", "src/platforms/shared/my9221_typed_emitter.h"),
             "spi-my9221-proof",
             "spi-my9221-proof",
+        )
+    if kind is _ProofKind.RP2040_IRQ:
+        return _NativeSpec(
+            "rp2040",
+            "examples/AutoResearch/AutoResearch.ino",
+            (
+                "src/platforms/my9221.h",
+                "src/platforms/arm/rp/rpcommon/my9221_emitter.h",
+            ),
+            "spi-my9221-rp2040-irq-proof",
+            "spi-my9221-rp2040-irq-proof",
         )
     if kind is _ProofKind.RP2040_ELF:
         return _NativeSpec(

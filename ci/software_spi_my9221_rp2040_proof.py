@@ -6,6 +6,7 @@ whole-kernel/callback SRAM placement, not execution, IRQ correctness or timing.
 
 import hashlib
 import re
+from dataclasses import dataclass
 from pathlib import Path
 
 
@@ -221,30 +222,29 @@ def _extent_error(
     return "sram-load-range-missing"
 
 
+@dataclass(frozen=True)
+class AuthenticatedRoute:
+    kernel_name: str
+    kernel: tuple[int, str]
+    callbacks: dict[str, tuple[int, str]]
+    entries: dict[str, set[int]]
+    ram: tuple[int, int]
+
+
+class RouteAuthenticationError(ValueError):
+    def __init__(self, code: str):
+        self.code = code
+        super().__init__(code)
+
+
 def classify_capture(capture: dict) -> list[str]:
-    """Pure restrictive parser only. Caller-supplied data never grant proof."""
+    """The placement contract remains exact; supplied captures grant no proof."""
     try:
-        ram = _sdk_ram(capture)
-    except (KeyError, ValueError, TypeError):
-        return ["sdk-memory-range-invalid"]
-    try:
-        text = _blocks(capture["text_disassembly"])
-        data = _blocks(capture["ram_disassembly"])
-        all_blocks = {**text, **data}
-        producer = text.get("my9221_rp2040_public_producer")
-        main = text.get("main")
-        if (
-            producer is None
-            or main is None
-            or "<my9221_rp2040_public_producer>" not in main[1]
-        ):
-            return ["public-producer-unreachable"]
-        if (
-            _pattern("my9221_rp2040_public_producer", producer)
-            != PATTERNS["my9221_rp2040_public_producer"]
-        ):
-            return ["public-controller-vptr-unbound"]
-        return _classify_route(capture, text, all_blocks, producer, ram)
+        route = authenticate_route(capture)
+        _verify_block(capture, route.kernel_name, route.kernel, route.entries)
+        return []
+    except RouteAuthenticationError as error:
+        return [error.code]
     except (KeyError, ValueError, TypeError, OverflowError):
         return ["unsupported-kernel-shape"]
 
@@ -317,13 +317,13 @@ def _verify_block(
     _literal_loads(capture, block)
 
 
-def _classify_route(
+def _route_prefix(
     capture: dict,
     text: dict,
     all_blocks: dict,
     producer: tuple[int, str],
     ram: tuple[int, int],
-) -> list[str]:
+) -> AuthenticatedRoute:
     # GCC complete/base/deleting destructors can share a demangled name at
     # distinct real entries. Bind each call's decoded address to an actual
     # header boundary, rather than silently retaining only the last spelling.
@@ -337,7 +337,7 @@ def _classify_route(
     try:
         _verify_block(capture, "main", text["main"], entries)
     except (KeyError, ValueError):
-        return ["public-producer-unreachable"]
+        raise RouteAuthenticationError("public-producer-unreachable")
     try:
         _verify_block(capture, "my9221_rp2040_public_producer", producer, entries)
         vtables = re.findall(
@@ -360,7 +360,7 @@ def _classify_route(
         _verify_block(capture, show_name, show, entries)
         _verify_block(capture, pixel_name, pixel, entries)
     except (KeyError, ValueError):
-        return ["public-controller-vptr-unbound"]
+        raise RouteAuthenticationError("public-controller-vptr-unbound")
     try:
         callbacks = [
             _one(all_blocks, name)[1]
@@ -375,19 +375,21 @@ def _classify_route(
         if len(loads) != 4:
             raise ValueError("callback argument literal set changed")
         if any(not value & 1 for _, value in loads):
-            return ["callback-thumb-target-invalid"]
+            raise RouteAuthenticationError("callback-thumb-target-invalid")
         if loads != list(
             zip(("r6", "r3", "r6", "r2"), (block[0] | 1 for block in callbacks))
         ):
-            return ["callback-target-mismatch"]
+            raise RouteAuthenticationError("callback-target-mismatch")
         if (
             _pattern(writer_name, writer) != PATTERNS[writer_name]
             or _raw_pattern(writer) != RAW_PATTERNS[writer_name]
         ):
-            return ["callback-target-mismatch"]
+            raise RouteAuthenticationError("callback-target-mismatch")
         _verify_block(capture, writer_name, writer, entries)
+    except RouteAuthenticationError:
+        raise
     except (KeyError, ValueError):
-        return ["kernel-veneer-target-invalid"]
+        raise RouteAuthenticationError("kernel-veneer-target-invalid")
     kernel_name, kernel = _one(all_blocks, "my9221EmitRp(unsigned")
     # Resolve the actual writer edge to THIS kernel or its actually called,
     # byte-verified veneer. A similarly named unrelated entry is insufficient.
@@ -397,7 +399,7 @@ def _classify_route(
         if opcode == "bl" and "my9221EmitRp" in operands
     ]
     if len(calls) != 1:
-        return ["kernel-veneer-target-invalid"]
+        raise RouteAuthenticationError("kernel-veneer-target-invalid")
     if calls[0] != kernel[0]:
         veneers = [
             (name, block)
@@ -405,35 +407,81 @@ def _classify_route(
             if "my9221EmitRp" in name and "veneer" in name and block[0] == calls[0]
         ]
         if len(veneers) != 1:
-            return ["kernel-veneer-target-invalid"]
+            raise RouteAuthenticationError("kernel-veneer-target-invalid")
         name, veneer = veneers[0]
         try:
             _verify_block(capture, name, veneer, entries)
             if _literal_loads(capture, veneer) != [("r0", kernel[0] | 1)]:
-                return ["kernel-veneer-target-invalid"]
+                raise RouteAuthenticationError("kernel-veneer-target-invalid")
         except (KeyError, ValueError):
-            return ["kernel-veneer-target-invalid"]
-    # Whole selected kernel and leaf callback bytes bind every internal branch,
-    # all four indirect targets and the exact pop/BX return-token sequence.
-    # There are no literal loads/direct callees in the reviewed kernel bodies.
-    for name, block in [(kernel_name, kernel)] + [
-        _one(all_blocks, needle)
-        for needle in (
-            "my9221RpPin2_hi()",
-            "my9221RpPin2_lo()",
-            "my9221RpPin3_lo()",
-            "my9221RpPin3_toggle()",
+            raise RouteAuthenticationError("kernel-veneer-target-invalid")
+    return AuthenticatedRoute(
+        kernel_name,
+        kernel,
+        {
+            name: block
+            for name, block in [
+                _one(all_blocks, needle)
+                for needle in (
+                    "my9221RpPin2_hi()",
+                    "my9221RpPin2_lo()",
+                    "my9221RpPin3_lo()",
+                    "my9221RpPin3_toggle()",
+                )
+            ]
+        },
+        entries,
+        ram,
+    )
+
+
+def _declared_extent(capture: dict, needle: str, block: tuple[int, str]) -> None:
+    matches = []
+    for line in capture["elf_layout"].splitlines():
+        match = re.fullmatch(
+            r"\s*\d+:\s+([0-9a-f]+)\s+(\d+)\s+FUNC\s+\S+\s+DEFAULT\s+\d+\s+(\S+)", line
         )
-    ]:
-        try:
-            _verify_block(capture, name, block, entries)
-            extent = _verify_raw(capture, block)
-        except (KeyError, ValueError):
-            return ["unsupported-kernel-shape"]
-        error = _extent_error(capture, *extent, ram)
+        if match and needle in match[3] and "veneer" not in match[3]:
+            matches.append((int(match[1], 16) & ~1, int(match[2])))
+    start, end = _verify_raw(capture, block)
+    if matches != [(start, end - start)]:
+        raise RouteAuthenticationError("sram-symbol-range-missing")
+
+
+def authenticate_route(capture: dict) -> AuthenticatedRoute:
+    """Common byte-bound public route/leaf/storage extraction, no kernel shape waiver."""
+    try:
+        ram = _sdk_ram(capture)
+    except (KeyError, ValueError, TypeError) as error:
+        raise RouteAuthenticationError("sdk-memory-range-invalid") from error
+    text = _blocks(capture["text_disassembly"])
+    data = _blocks(capture["ram_disassembly"])
+    all_blocks = {**text, **data}
+    producer = text.get("my9221_rp2040_public_producer")
+    main = text.get("main")
+    if (
+        producer is None
+        or main is None
+        or "<my9221_rp2040_public_producer>" not in main[1]
+    ):
+        raise RouteAuthenticationError("public-producer-unreachable")
+    if (
+        _pattern("my9221_rp2040_public_producer", producer)
+        != PATTERNS["my9221_rp2040_public_producer"]
+    ):
+        raise RouteAuthenticationError("public-controller-vptr-unbound")
+    route = _route_prefix(capture, text, all_blocks, producer, ram)
+    for name, block in route.callbacks.items():
+        _verify_block(capture, name, block, route.entries)
+        _declared_extent(capture, name.split("::")[-1].split("(")[0], block)
+        error = _extent_error(capture, *_verify_raw(capture, block), ram)
         if error:
-            return [error]
-    return []
+            raise RouteAuthenticationError(error)
+    _declared_extent(capture, "my9221EmitRp", route.kernel)
+    error = _extent_error(capture, *_verify_raw(capture, route.kernel), ram)
+    if error:
+        raise RouteAuthenticationError(error)
+    return route
 
 
 def _verify_profile_state(

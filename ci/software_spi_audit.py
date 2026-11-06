@@ -2279,3 +2279,27 @@ def _run_my9221_rp2040_elf_proof(root: Path):
     from ci.software_spi_my9221_rp2040_runner import run_rp2040_elf_proof
 
     return run_rp2040_elf_proof(root)
+
+
+def _rp2040_irq_mutant(source: bytes) -> bytes:
+    from ci.software_spi_my9221_rp2040_irq_proof import irq_mutant
+
+    return irq_mutant(source)
+
+
+def _classify_rp2040_irq_capture(capture: dict):
+    from ci.software_spi_my9221_rp2040_irq_proof import classify_irq_capture
+
+    return classify_irq_capture(capture)
+
+
+def _validate_rp2040_irq_stage_analysis(stage: str, result) -> None:
+    from ci.software_spi_my9221_rp2040_irq_proof import validate_stage_analysis
+
+    validate_stage_analysis(stage, result)
+
+
+def _run_my9221_rp2040_irq_proof(root: Path):
+    from ci.software_spi_my9221_rp2040_runner import run_rp2040_irq_proof
+
+    return run_rp2040_irq_proof(root)

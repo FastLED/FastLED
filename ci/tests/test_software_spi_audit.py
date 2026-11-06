@@ -4743,3 +4743,538 @@ def test_my9221_rp2040_elf_normal_ensure_uses_same_bound_uv_launch_as_wrapper(
         "-c",
     ]
     assert not (tmp_path / "saved/proof.json").exists()
+
+
+def test_my9221_rp2040_irq_mutant_changes_only_saved_state_restore_operand() -> None:
+    source = (audit.ROOT / "src/platforms/my9221.h").read_bytes()
+    marker = b"restore_interrupts(mSaved);"
+    assert source.count(marker) == 1
+    assert audit._rp2040_irq_mutant(source) == source.replace(
+        marker, b"restore_interrupts(0);"
+    )
+    assert (audit.ROOT / "src/platforms/my9221.h").read_bytes() == source
+
+
+@pytest.mark.parametrize(
+    "source", [b"", b"restore_interrupts(mSaved);\nrestore_interrupts(mSaved);"]
+)
+def test_my9221_rp2040_irq_mutant_rejects_ambiguous_or_missing_restore(
+    source: bytes,
+) -> None:
+    with pytest.raises(ValueError, match="restore|boundary|source"):
+        audit._rp2040_irq_mutant(source)
+
+
+def rp2040_irq_capture(profile: str = "baseline") -> dict[str, object]:
+    path = audit.ROOT / "ci/fixtures/software_spi_audit/rp2040_irq_elf_captures.json"
+    return json.loads(path.read_text())[profile]
+
+
+def rp2040_irq_replace_span(
+    capture: dict[str, object], start: int, end: int, replacement: str
+) -> None:
+    import re
+
+    pattern = r"^([0-9a-f]+):\s+([0-9a-f ]+?)\s+\t([^\n]+)\n?"
+    selected = [
+        match
+        for match in re.finditer(pattern, capture["ram_disassembly"], re.MULTILINE)
+        if start <= int(match[1], 16) < end
+    ]
+    assert selected and int(selected[0][1], 16) == start
+    old = b"".join(
+        int(word, 16).to_bytes(2, "little")
+        for match in selected
+        for word in match[2].split()
+    )
+    revised = list(re.finditer(pattern, replacement, re.MULTILINE))
+    new = b"".join(
+        int(word, 16).to_bytes(2, "little")
+        for match in revised
+        for word in match[2].split()
+    )
+    assert len(old) == len(new) == end - start
+    capture["ram_disassembly"] = (
+        capture["ram_disassembly"][: selected[0].start()]
+        + replacement
+        + capture["ram_disassembly"][selected[-1].end() :]
+    )
+    for section in capture["section_bytes"].values():
+        raw = bytearray.fromhex(section["bytes_hex"])
+        offset = start - section["vma"]
+        if 0 <= offset <= len(raw) - len(old):
+            assert raw[offset : offset + len(old)] == old
+            raw[offset : offset + len(old)] = new
+            section["bytes_hex"] = raw.hex()
+            return
+    raise AssertionError("IRQ control must alter actual captured ELF storage")
+
+
+def test_my9221_rp2040_irq_actual_baseline_has_nonempty_saved_state_returns_for_both_entries() -> (
+    None
+):
+    result = audit._classify_rp2040_irq_capture(rp2040_irq_capture())
+    assert result.errors == []
+    for entry in (0, 1):
+        assert result.normal_returns[entry], "no vacuous success for an entry PRIMASK"
+        for outcome in result.normal_returns[entry]:
+            assert outcome.entry_primask == outcome.exit_primask == entry
+            assert outcome.sp_delta == 0
+            assert outcome.return_token == "entry-lr"
+            assert outcome.final_parked is True
+    row = next(row for row in REQUIRED_FINDINGS if row["issue"] == 5066)
+    assert check_evidence([row], [], audit._current_sources(audit.ROOT))
+
+
+def test_my9221_rp2040_irq_actual_source_mutant_reaches_intended_semantic_counterexample() -> (
+    None
+):
+    result = audit._classify_rp2040_irq_capture(
+        rp2040_irq_capture("unconditional_enable")
+    )
+    assert result.errors == ["saved-primask-restoration-lost"], (
+        "generic placement/hash rejection is not the control"
+    )
+    assert result.normal_returns[0] and result.normal_returns[1]
+    assert any(
+        outcome.entry_primask == 1
+        and outcome.exit_primask == 0
+        and outcome.sp_delta == 0
+        and outcome.return_token == "entry-lr"
+        for outcome in result.counterexamples
+    )
+
+
+def test_my9221_rp2040_irq_mrs_reads_current_primask_after_cpsid() -> None:
+    capture = rp2040_irq_capture()
+    rp2040_irq_replace_span(
+        capture,
+        0x20000102,
+        0x20000108,
+        "20000102:\tb672      \tcpsid\ti\n20000104:\tf3ef 8310 \tmrs\tr3, PRIMASK\n",
+    )
+    result = audit._classify_rp2040_irq_capture(capture)
+    assert "saved-primask-restoration-lost" in result.errors
+    assert any(
+        outcome.entry_primask == 0 and outcome.exit_primask == 1
+        for outcome in result.counterexamples
+    ), "MRS after CPSID cannot mint an entry-P0 token"
+
+
+def test_my9221_rp2040_irq_any_gpio_after_restore_rejects_even_if_entry_disabled() -> (
+    None
+):
+    capture = rp2040_irq_capture()
+    rp2040_irq_replace_span(
+        capture,
+        0x2000011E,
+        0x2000012A,
+        "2000011e:\t9b09      \tldr\tr3, [sp, #36]\n"
+        "20000120:\tf383 8810 \tmsr\tPRIMASK, r3\n"
+        "20000124:\t9b05      \tldr\tr3, [sp, #20]\n"
+        "20000126:\t4798      \tblx\tr3\n"
+        "20000128:\t47b8      \tblx\tr7\n",
+    )
+    result = audit._classify_rp2040_irq_capture(capture)
+    assert "irq-gpio-after-restore" in result.errors
+
+
+@pytest.mark.parametrize("slot,opcode", [(8, "9b02"), (12, "9b03")])
+def test_my9221_rp2040_irq_terminal_hi_or_toggle_invalidates_prior_low_evidence(
+    slot: int, opcode: str
+) -> None:
+    capture = rp2040_irq_capture()
+    rp2040_capture_instruction(
+        capture,
+        "ram_disassembly",
+        0x2000011E,
+        opcode,
+        "ldr\tr3, [sp, #20]",
+        f"ldr\tr3, [sp, #{slot}]",
+    )
+    result = audit._classify_rp2040_irq_capture(capture)
+    assert "irq-final-park-suffix-missing" in result.errors
+
+
+@pytest.mark.parametrize(
+    "address,opcode,old,new,error",
+    [
+        (
+            0x20000108,
+            "9009",
+            "str\tr3, [sp, #36]",
+            "str\tr0, [sp, #36]",
+            "irq-restoration-unresolved",
+        ),
+        (
+            0x20000108,
+            "600b",
+            "str\tr3, [sp, #36]",
+            "str\tr3, [r1, #0]",
+            "irq-stack-alias-unresolved",
+        ),
+        (0x2000010A, "4780", "blx\tr7", "blx\tr0", "irq-callback-target-unresolved"),
+        (0x20000132, "4700", "bx\tr3", "bx\tr0", "irq-return-token-unresolved"),
+        (0x20000134, "de00", "movs\tr5, #16", "udf\t#0", "irq-unsupported-instruction"),
+    ],
+)
+def test_my9221_rp2040_irq_consistent_unknown_or_clobbered_semantics_reject(
+    address: int, opcode: str, old: str, new: str, error: str
+) -> None:
+    capture = rp2040_irq_capture()
+    rp2040_capture_instruction(capture, "ram_disassembly", address, opcode, old, new)
+    assert error in audit._classify_rp2040_irq_capture(capture).errors
+
+
+def test_my9221_rp2040_irq_no_normal_return_cannot_pass_vacuously() -> None:
+    capture = rp2040_irq_capture()
+    rp2040_capture_instruction(
+        capture,
+        "ram_disassembly",
+        0x20000132,
+        "e7fe",
+        "bx\tr3",
+        "b.n\t20000132 <fl::detail::my9221EmitRp(unsigned short const*, unsigned int, fl::detail::My9221RpPins)+0x4a>",
+    )
+    result = audit._classify_rp2040_irq_capture(capture)
+    assert "irq-normal-return-unproved" in result.errors
+    assert not result.normal_returns.get(0) and not result.normal_returns.get(1)
+
+
+@pytest.mark.parametrize(
+    "operation,register,words",
+    [
+        ("mrs", "sp", "f3ef 8d10"),
+        ("mrs", "pc", "f3ef 8f10"),
+        ("msr", "sp", "f38d 8810"),
+        ("msr", "pc", "f38f 8810"),
+    ],
+)
+def test_my9221_rp2040_irq_special_register_forms_reject_during_decode(
+    operation: str, register: str, words: str
+) -> None:
+    capture = rp2040_irq_capture()
+    if operation == "mrs":
+        rp2040_capture_instruction(
+            capture,
+            "ram_disassembly",
+            0x20000102,
+            words,
+            "mrs\tr3, PRIMASK",
+            f"mrs\t{register}, PRIMASK",
+        )
+    else:
+        rp2040_capture_instruction(
+            capture,
+            "ram_disassembly",
+            0x20000126,
+            words,
+            "msr\tPRIMASK, r3",
+            f"msr\tPRIMASK, {register}",
+        )
+    result = audit._classify_rp2040_irq_capture(capture)
+    assert result.authentication_errors == []
+    assert result.decode_errors == ["irq-unsupported-register"]
+    assert not result.counterexamples, (
+        "unsupported SP/PC semantics cannot be concrete IRQ evidence"
+    )
+    assert not result.normal_returns.get(0) and not result.normal_returns.get(1)
+
+
+def test_my9221_rp2040_irq_managed_dispatch_uses_semantics_not_placement_shape(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from ci import software_spi_my9221_rp2040_runner as vendor
+
+    monkeypatch.setattr(
+        vendor.property_check,
+        "classify_capture",
+        lambda *_args: pytest.fail(
+            "IRQ mutant cannot be screened by placement RAW shape"
+        ),
+    )
+    assessed = vendor._assess_property(
+        rp2040_irq_capture("unconditional_enable"),
+        vendor._PropertyKind.IRQ,
+        "unconditional-enable-mutant",
+    )
+    assert assessed.irq_analysis is not None
+    assert assessed.irq_analysis.authentication_errors == []
+    assert assessed.irq_analysis.decode_errors == []
+    assert assessed.errors == ["saved-primask-restoration-lost"]
+    assert any(
+        outcome.entry_primask == 1 and outcome.exit_primask == 0
+        for outcome in assessed.irq_analysis.counterexamples
+    )
+
+
+def test_my9221_rp2040_irq_stage_validator_requires_actual_intended_analysis() -> None:
+    baseline = audit._classify_rp2040_irq_capture(rp2040_irq_capture())
+    mutant = audit._classify_rp2040_irq_capture(
+        rp2040_irq_capture("unconditional_enable")
+    )
+    audit._validate_rp2040_irq_stage_analysis("baseline", baseline)
+    audit._validate_rp2040_irq_stage_analysis("restored", baseline)
+    audit._validate_rp2040_irq_stage_analysis("unconditional-enable-mutant", mutant)
+    for stage, result in [
+        ("baseline", mutant),
+        ("restored", mutant),
+        ("unconditional-enable-mutant", baseline),
+        ("unknown", baseline),
+    ]:
+        with pytest.raises(ValueError):
+            audit._validate_rp2040_irq_stage_analysis(stage, result)
+    row = next(row for row in REQUIRED_FINDINGS if row["issue"] == 5066)
+    assert check_evidence([row], [], audit._current_sources(audit.ROOT))
+
+
+@pytest.mark.parametrize(
+    "corruption",
+    [
+        "authentication",
+        "decode",
+        "empty-returns",
+        "missing-counterexample",
+        "wrong-counterexample",
+        "counterexample-not-in-returns",
+        "sp",
+        "lr",
+        "park",
+        "unknown-mask",
+        "extra-error",
+    ],
+)
+def test_my9221_rp2040_irq_stage_validator_rejects_incomplete_or_mislabelled_control(
+    corruption: str,
+) -> None:
+    from dataclasses import replace
+
+    result = audit._classify_rp2040_irq_capture(
+        rp2040_irq_capture("unconditional_enable")
+    )
+    if corruption == "authentication":
+        result = replace(result, authentication_errors=["missing actual route"])
+    elif corruption == "decode":
+        result = replace(result, decode_errors=["unknown opcode"])
+    elif corruption == "empty-returns":
+        result = replace(result, normal_returns={0: [], 1: []})
+    elif corruption == "missing-counterexample":
+        result = replace(result, counterexamples=[])
+    elif corruption == "wrong-counterexample":
+        result = replace(
+            result, counterexamples=[replace(result.counterexamples[0], exit_primask=1)]
+        )
+    elif corruption == "counterexample-not-in-returns":
+        witness = result.counterexamples[0]
+        result = replace(
+            result,
+            counterexamples=[replace(witness, restore_pc=witness.restore_pc + 2)],
+        )
+    elif corruption == "extra-error":
+        result = replace(result, errors=result.errors + ["irq-restoration-unresolved"])
+    else:
+        field, value = {
+            "sp": ("sp_delta", 4),
+            "lr": ("return_token", "unknown"),
+            "park": ("final_parked", False),
+            "unknown-mask": ("exit_primask", None),
+        }[corruption]
+        returns = {
+            entry: list(outcomes) for entry, outcomes in result.normal_returns.items()
+        }
+        returns[1][0] = replace(returns[1][0], **{field: value})
+        result = replace(result, normal_returns=returns)
+    with pytest.raises(ValueError):
+        audit._validate_rp2040_irq_stage_analysis("unconditional-enable-mutant", result)
+
+
+def test_my9221_rp2040_irq_managed_runner_rejects_missing_inputs_before_process(
+    tmp_path: Path,
+) -> None:
+    with pytest.raises(ValueError, match="source|input|missing|checkout"):
+        audit._run_my9221_rp2040_irq_proof(tmp_path)
+
+
+@pytest.mark.skipif(
+    os.environ.get("FASTLED_RUN_MY9221_RP2040_IRQ_PROOF") != "1",
+    reason="requires three actual fixed RP2040 SDK builds; static IRQ property only",
+)
+def test_my9221_rp2040_irq_managed_real_three_stage_acceptance() -> None:
+    from ci import software_spi_init_proof as native
+
+    guard = "src/platforms/my9221.h"
+    original = (audit.ROOT / guard).read_bytes()
+    expected = {
+        "baseline": original,
+        "unconditional-enable-mutant": audit._rp2040_irq_mutant(original),
+        "restored": original,
+    }
+    before = native._inputs(audit.ROOT)
+    proof = audit._run_my9221_rp2040_irq_proof(audit.ROOT)
+    assert proof.scope == "rp2040-native-gpio2-3-saved-primask-property-only"
+    assert proof.public_api_scope == "direct-controller-init-setLeds-showLeds"
+    assert proof.global_fastled_dispatch_proven is False
+    assert proof.complete_executed_argv is False
+    assert [stage.name for stage in proof.stages] == list(expected)
+    assert proof.workspace.parent == Path.home() / ".clud" / "worktrees"
+    for stage in proof.stages:
+        assert stage.build_returncode == 0
+        assert stage.inputs_before == stage.inputs_after
+        assert stage.inputs_before[guard] == digest(expected[stage.name])
+        assert stage.tools_before == stage.tools_after == proof.stages[0].tools_before
+        assert stage.configuration == proof.stages[0].configuration
+        assert stage.serving_engine_before == stage.serving_engine_after
+        assert stage.raw_database_scope == "planned-argv-not-complete-executed-receipt"
+        assert stage.irq_analysis is not None
+        audit._validate_rp2040_irq_stage_analysis(stage.name, stage.irq_analysis)
+        for path, sha256 in stage.artifact_sha256s.items():
+            assert digest(Path(path).read_bytes()) == sha256
+        assert stage.public_producer_reachable and stage.callback_arguments_resolved
+        assert stage.masked_callee_literal_closure
+    assert (proof.workspace / guard).read_bytes() == original
+    assert native._inputs(audit.ROOT) == before
+    row = next(row for row in REQUIRED_FINDINGS if row["issue"] == 5066)
+    errors = check_evidence([row], [], audit._current_sources(audit.ROOT))
+    for configuration in row["required_configurations"]:
+        assert any(f"/{configuration}: unresolved" in error for error in errors)
+
+
+@pytest.mark.parametrize(
+    "kind,relative",
+    [
+        ("IRQ", "platforms/my9221.h"),
+        ("PLACEMENT", "platforms/arm/rp/rpcommon/my9221_emitter.h"),
+    ],
+)
+def test_my9221_rp2040_controlled_source_retention_uses_production_layout(
+    tmp_path: Path,
+    kind: str,
+    relative: str,
+) -> None:
+    """Real filesystem layout contract only; no build/proof authentication."""
+    from ci import software_spi_my9221_rp2040_runner as vendor
+
+    project = tmp_path / "project"
+    staged = project / "lib" / "FastLED" / relative
+    staged.parent.mkdir(parents=True)
+    source = b"// exact controlled source bytes\n"
+    staged.write_bytes(source)
+    saved = tmp_path / "retained"
+    saved.mkdir()
+    vendor._retain_controlled_source(
+        project, saved, getattr(vendor._PropertyKind, kind), source
+    )
+    assert (saved / "staged-controlled-source.h").read_bytes() == source
+    staged.write_bytes(b"// stale staged source\n")
+    with pytest.raises(ValueError, match="controlled staged vendor source differs"):
+        vendor._retain_controlled_source(
+            project, saved, getattr(vendor._PropertyKind, kind), source
+        )
+    assert (saved / "staged-controlled-source.h").read_bytes() == source
+
+
+@pytest.mark.parametrize("ensure", [False, True])
+def test_my9221_rp2040_launcher_uses_official_environment_in_bound_child(
+    ensure: bool,
+) -> None:
+    """Source-level orchestration contract, not an authenticated engine proof."""
+    from ci import software_spi_my9221_rp2040_runner as vendor
+
+    script = vendor._launcher_script(ensure)
+    assert "from ci.util.fbuild_runner import fbuild_child_env" in script
+    assert "fbuild_child_env()" in script
+    assert "_startup_environment_hashes" in script
+    assert "adjacent_daemon_sha256" in script and "client_extension_sha256" in script
+    if ensure:
+        assert script.index("os.environ.update(") < script.index(
+            "Daemon.ensure_running()"
+        )
+    else:
+        assert "Daemon.ensure_running()" not in script
+        assert "os.environ.update(" not in script
+    assert "dict(os.environ)" not in script, (
+        "do not serialize arbitrary startup secrets"
+    )
+
+
+@pytest.mark.parametrize("online", ["foreign", "matching", "absent"])
+def test_my9221_rp2040_prebootstrap_launcher_contract_controls_service_reuse(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    online: str,
+) -> None:
+    """Mock orchestration only; no synthetic record grants property acceptance."""
+    from ci import software_spi_my9221_rp2040_runner as vendor
+
+    desired = {
+        "startup_environment": {"PATH": "official-helper-path", "UV_NO_SYNC": "one"}
+    }
+    engine = {
+        "pid": 42,
+        "health_pid": 42,
+        "image_pid": 42,
+        "image_sha256": "approved",
+        **desired,
+    }
+    observed = None if online == "absent" else dict(engine)
+    if online == "foreign":
+        observed["startup_environment"] = {"PATH": "unprepared-path"}
+    events = []
+    monkeypatch.setattr(
+        vendor,
+        "_probe_existing_engine",
+        lambda *args: events.append("preflight") or observed,
+    )
+    monkeypatch.setattr(
+        vendor, "_ensure_stage_engine", lambda *args: events.append("ensure")
+    )
+    monkeypatch.setattr(
+        vendor,
+        "_daemon_identity",
+        lambda *args: events.append("verified-after") or engine,
+    )
+    monkeypatch.setattr(
+        vendor,
+        "_compile",
+        lambda *args: pytest.fail("prebootstrap qualification must not compile"),
+    )
+    if online == "foreign":
+        with pytest.raises(ValueError, match="startup|launcher|environment"):
+            vendor._prepare_bootstrap_engine(
+                tmp_path, tmp_path / "saved", {}, {}, desired
+            )
+        assert events == ["preflight"], "foreign daemon must remain untouched"
+    else:
+        result = vendor._prepare_bootstrap_engine(
+            tmp_path, tmp_path / "saved", {}, {}, desired
+        )
+        assert result == engine
+        assert events == (
+            ["preflight", "verified-after"]
+            if online == "matching"
+            else ["preflight", "ensure", "verified-after"]
+        )
+        assert result["startup_environment"] == desired["startup_environment"]
+
+
+def test_my9221_rp2040_bootstrap_cannot_adopt_wrong_postensure_environment(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from ci import software_spi_my9221_rp2040_runner as vendor
+
+    monkeypatch.setattr(vendor, "_probe_existing_engine", lambda *args: None)
+    monkeypatch.setattr(vendor, "_ensure_stage_engine", lambda *args: None)
+    monkeypatch.setattr(
+        vendor,
+        "_daemon_identity",
+        lambda *args: {"startup_environment": {"PATH": "wrong"}},
+    )
+    with pytest.raises(ValueError, match="startup|launcher|environment"):
+        vendor._prepare_bootstrap_engine(
+            tmp_path,
+            tmp_path / "saved",
+            {},
+            {},
+            {"startup_environment": {"PATH": "desired"}},
+        )
