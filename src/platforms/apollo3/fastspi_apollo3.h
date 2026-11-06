@@ -35,12 +35,11 @@ constexpr u32 apollo3SpiLoopCount(u32 cycles) FL_NO_EXCEPT {
 /// Longest phase written as NOPs. GCC already unrolled the old loop this far.
 constexpr u32 kApollo3SpiMaxInlineNops = 8;
 
+/// Exactly N NOPs. The assembler repeats them, so no call can appear even with
+/// inlining disabled.
 template <u32 N>
 FASTLED_FORCE_INLINE void apollo3SpiNops() FL_NO_EXCEPT {
-	if (N > 0) {
-		__asm__ __volatile__("nop");
-		apollo3SpiNops<(N > 0 ? N - 1 : 0)>();
-	}
+	__asm__ __volatile__(".rept %c0\n\t nop\n\t .endr" : : "n"(N));
 }
 
 /// Counted delay whose cost does not depend on compiler loop shaping.
