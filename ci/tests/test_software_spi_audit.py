@@ -2231,6 +2231,13 @@ def test_esp32_forced_fastpin_registry_requires_actual_selection_proof() -> None
         "src/platforms/my9221_emitter.h",
         "src/platforms/shared/my9221_typed_emitter.h",
         "src/platforms/esp/32/my9221_emitter.h",
+        "src/platforms/output_pin_policy.h",
+        "src/platforms/esp/32/core/output_pin_policy.h",
+        "src/fl/system/pin.h",
+        "src/fl/system/pin.cpp.hpp",
+        "src/platforms/pin.h",
+        "src/platforms/esp/32/pin_esp32_native.hpp",
+        "src/platforms/esp/32/pin_esp32_native_impl.hpp",
     }
     assert set(finding["concerns"]) == {
         "explicit-native-specializations-currently-override-forced-primary",
@@ -5371,3 +5378,26 @@ def test_my9221_managed_functional_case_binding_preserves_designated_mutant(
     for unrelated in MY_SCHEDULE_CASES[-2:]:
         with pytest.raises(ValueError, match="designated case"):
             audit._validate_my9221_schedule_output(stage, unrelated, 1, "")
+
+
+def test_esp32_forced_selection_binds_output_policy_and_native_gpio_fallback_sources() -> (
+    None
+):
+    finding = next(row for row in REQUIRED_FINDINGS if row["issue"] == 5067)
+    expected = {
+        "src/platforms/output_pin_policy.h",
+        "src/platforms/esp/32/core/output_pin_policy.h",
+        "src/fl/system/pin.h",
+        "src/fl/system/pin.cpp.hpp",
+        "src/platforms/pin.h",
+        "src/platforms/esp/32/pin_esp32_native.hpp",
+        "src/platforms/esp/32/pin_esp32_native_impl.hpp",
+    }
+    assert expected <= set(finding["dependencies"]), (
+        "forced selection must bind actual output-policy and native FastLED GPIO fallback inputs"
+    )
+    for path in expected:
+        assert (audit.ROOT / path).is_file(), path
+    errors = check_evidence([finding], [], audit._current_sources(audit.ROOT))
+    for configuration in finding["required_configurations"]:
+        assert any(f"/{configuration}: unresolved" in error for error in errors)

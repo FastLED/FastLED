@@ -35,7 +35,7 @@
 #define FL_CLOCKLESS_CONTROLLER_DEFINED 1
 
 #include "fl/channels/slim_bridge_controller.h"
-#include "platforms/esp/32/core/fastpin_esp32.h"
+#include "platforms/esp/32/core/output_pin_policy.h"
 #include "platforms/esp/32/drivers/rmt/rmt_4/bus_traits.h"
 #include "fl/stl/noexcept.h"
 #include "fl/stl/static_assert.h"
@@ -51,7 +51,7 @@ class ClocklessIdf4 : public SlimBridgeController<DATA_PIN, TIMING, RGB_ORDER, W
 {
 private:
     // -- Verify that the pin is valid
-    FL_STATIC_ASSERT(FastPin<DATA_PIN>::validpin(), "This pin has been marked as an invalid pin, common reasons includes it being a ground pin, read only, or too noisy (e.g. hooked up to the uart).");
+    FL_STATIC_ASSERT(Esp32OutputPinValidity<DATA_PIN>::value, "This pin has been marked as an invalid pin, common reasons includes it being a ground pin, read only, or too noisy (e.g. hooked up to the uart).");
 
 public:
     u16 getMaxRefreshRate() const FL_NO_EXCEPT override { return 400; }

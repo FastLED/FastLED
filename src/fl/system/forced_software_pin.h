@@ -2,9 +2,12 @@
 
 // Internal implementation shared by the real forced FastPin branch and its
 // native tests. Mapping supplies register lookup only, never GPIO operations.
+#include "platforms/is_platform.h"
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/stdint.h"
 #include "fl/system/pin.h"
+#include "fl/stl/static_assert.h"
+#include "platforms/output_pin_policy.h" // IWYU pragma: keep
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_DEPRECATED_REGISTER
@@ -15,7 +18,10 @@ namespace fl {
 namespace detail {
 
 template <u8 PIN> struct ForcedSoftwarePinMap {
-#if !defined(FASTLED_NO_PINMAP)
+// ESP32 deliberately keeps Arduino mapper macros out of library headers.
+// Choose the same portable provider in every TU, including Arduino-first
+// sketches, rather than letting include order change this template (ODR).
+#if !defined(FASTLED_NO_PINMAP) && !defined(FL_IS_ESP32)
     static constexpr bool kHasPinMap = true;
     static RwReg mask() { return digitalPinToBitMask(PIN); }
     static volatile RwReg *output() { return portOutputRegister(digitalPinToPort(PIN)); }
@@ -33,6 +39,13 @@ class ForcedSoftwarePin {
 	static RwReg sPinMask;            ///< Bitmask for the pin within its register
 	static volatile RwReg *sPort;     ///< Output register for the pin
 	static volatile RoReg *sInPort;   ///< Input register for the pin
+    static FASTLED_FORCE_INLINE void validateOutputPin() {
+#if defined(FL_IS_ESP32) && !defined(FASTLED_STUB_IMPL) && !defined(FL_IS_WASM)
+        FL_STATIC_ASSERT(Esp32OutputPinValidity<PIN>::value,
+                         "Invalid ESP32 forced output pin");
+#endif
+    }
+
 	static void _init() {
 		if (Mapping::kHasPinMap) {
 			sPinMask = Mapping::mask();
@@ -46,17 +59,20 @@ public:
 	typedef RwReg port_t;  ///< @copydoc Pin::port_t
 
 	/// @copydoc Pin::setOutput()
-	inline static void setOutput() { _init(); (fl::pinMode)(PIN, PinMode::Output); }
+	inline static void setOutput() {
+        validateOutputPin(); _init(); (fl::pinMode)(PIN, PinMode::Output); }
 	/// @copydoc Pin::setInput()
 	inline static void setInput() { _init(); (fl::pinMode)(PIN, PinMode::Input); }
 
 	/// @copydoc Pin::hi()
 	inline static void hi() __attribute__ ((always_inline)) {
+        validateOutputPin();
 		if (sPort) { *sPort |= sPinMask; }
 		else { (fl::digitalWrite)(PIN, PinValue::High); }
 	}
 	/// @copydoc Pin::lo()
 	inline static void lo() __attribute__ ((always_inline)) {
+        validateOutputPin();
 		if (sPort) { *sPort &= ~sPinMask; }
 		else { (fl::digitalWrite)(PIN, PinValue::Low); }
 	}
@@ -66,6 +82,7 @@ public:
 
 	/// @copydoc Pin::toggle()
 	inline static void toggle() __attribute__ ((always_inline)) {
+        validateOutputPin();
 		if (sInPort) { *sInPort = sPinMask; }
 		else {
 			const PinValue value = (fl::digitalRead)(PIN);
@@ -75,22 +92,26 @@ public:
 
 	/// @copydoc Pin::hi(FASTLED_REGISTER port_ptr_t)
 	inline static void hi(FASTLED_REGISTER port_ptr_t port) __attribute__ ((always_inline)) {
+        validateOutputPin();
 		if (port) { *port |= sPinMask; }
 		else { hi(); }
 	}
 	/// @copydoc Pin::lo(FASTLED_REGISTER port_ptr_t)
 	inline static void lo(FASTLED_REGISTER port_ptr_t port) __attribute__ ((always_inline)) {
+        validateOutputPin();
 		if (port) { *port &= ~sPinMask; }
 		else { lo(); }
 	}
 	/// @copydoc Pin::set(FASTLED_REGISTER port_t)
 	inline static void set(FASTLED_REGISTER port_t val) __attribute__ ((always_inline)) {
+        validateOutputPin();
 		if (sPort) { *sPort = val; }
 		else { (fl::digitalWrite)(PIN, val ? PinValue::High : PinValue::Low); }
 	}
 
 	/// @copydoc Pin::fastset()
 	inline static void fastset(FASTLED_REGISTER port_ptr_t port, FASTLED_REGISTER port_t val) __attribute__ ((always_inline)) {
+        validateOutputPin();
 		if (port) { *port = val; }
 		else { set(val); }
 	}

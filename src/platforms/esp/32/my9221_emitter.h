@@ -9,6 +9,8 @@
 namespace fl {
 namespace detail {
 
+#if !defined(FASTLED_FORCE_SOFTWARE_PINS)
+
 struct My9221Esp32PinFunctions {
     void (*hi)();
     void (*lo)();
@@ -781,6 +783,24 @@ template <int Data, fl::u8 Clock> struct My9221EmitterDispatch {
         my9221EmitEsp32(frame, words, pins);
     }
 };
+
+#else
+
+// ForcedSoftwarePin operations have no qualified internal-memory/cache-safe
+// call closure here. Ordinary FastLED/Generic SPI inclusion remains valid;
+// reject only when the real MY9221 dispatch is instantiated, never route it
+// through native pins or an unqualified shared serializer.
+template <int Data, fl::u8 Clock> struct My9221Esp32ForcedUnsupported {
+    static constexpr bool value = false;
+};
+template <int Data, fl::u8 Clock> struct My9221EmitterDispatch {
+    static FASTLED_FORCE_INLINE void run(const fl::u16*, fl::size) FL_NO_EXCEPT {
+        FL_STATIC_ASSERT((My9221Esp32ForcedUnsupported<Data, Clock>::value),
+            "MY9221 forced ESP32 pin provider/cache closure is unsupported");
+    }
+};
+
+#endif // !defined(FASTLED_FORCE_SOFTWARE_PINS)
 
 } // namespace detail
 } // namespace fl

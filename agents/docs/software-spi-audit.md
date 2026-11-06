@@ -430,3 +430,47 @@ All five prescribed wait mutants retain their original designated assertion
 cases. These additional cases extend functional/requested-schedule scope only;
 physical phase limits and the seven full target configuration groups remain
 unresolved until independently qualified.
+
+
+ESP32 forced-pin selection (#5067) is distinct from MY9221 qualification
+(#5066). A defined `FASTLED_FORCE_SOFTWARE_PINS`, including value0, selects the
+software primary instead of native explicit specializations. Ordinary FastLED
+and generic software-SPI inclusion remains supported. The ESP32 MY9221 forced
+provider currently has no qualified cache-safe operation closure, so invoking
+that controller produces a dependent unsupported-provider diagnostic; inclusion
+alone does not fail. This explicit unresolved prerequisite does not establish
+MY9221 forced timing, SRAM closure, or any full target configuration evidence.
+
+ESP32 forced pins deterministically use the existing `fl::pinMode`,
+`fl::digitalWrite` and `fl::digitalRead` provider without optional register
+mapping. FastLED intentionally excludes Arduino mapper macros from ESP32
+library headers; choosing their availability per translation unit would make
+Arduino-first sketches and FastLED-first library sources disagree. This policy
+does not define or override `FASTLED_NO_PINMAP`, and other platforms retain
+their mapped control. It establishes neither a cache-safe MY9221 provider nor
+physical timing guarantees.
+
+ESP32 hardware SPI, PARLIO and clockless RMT/SPI consumers validate output pins
+against a shared bounded SDK output-mask and user-exclusion policy. That policy
+is independent of the selected forced software GPIO provider; native FastPin
+declarations use the same policy. Negative and >=64 pin indices are invalid
+without forming an out-of-range shift. This preserves hardware pin rejection
+without inventing a `validpin` method on forced pins or enabling unsupported
+MY9221 forced emission.
+
+The ESP32 SDK output-mask defaults and bounded user-exclusion predicate live in
+`platforms/esp/32/core/output_pin_policy.h`, which does not include a FastPin or
+GPIO-provider implementation. Native declarations, hardware consumers and
+forced output operations share that policy. Forced `setOutput`, hi/lo, toggle,
+set and fastset (including non-null port overloads) reject invalid output pins
+at instantiation; `setInput` remains separate so input-only pins can be used.
+This is output legality, not a forced MY9221 cache/timing qualification. The
+new policy and top-level dispatcher remain source-accounting obligations; the pinned
+2,986-path baseline and its hashes are not refreshed.
+
+The native ESP32 `PinMode::Output` mapping enables push-pull drive and input
+readback (`GPIO_MODE_INPUT_OUTPUT`). SDK `gpio_get_level` requires input to be
+enabled; forced toggle uses the existing read/invert/write route. This fixes the
+configuration prerequisite without introducing shadow output state. Source and
+SDK mode checks are distinct from a physical pad-level toggle measurement or
+MY9221 timing/cache qualification.

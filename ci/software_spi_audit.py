@@ -762,6 +762,13 @@ REQUIRED_FINDINGS = (
             "src/platforms/my9221_emitter.h",
             "src/platforms/shared/my9221_typed_emitter.h",
             "src/platforms/esp/32/my9221_emitter.h",
+            "src/platforms/output_pin_policy.h",
+            "src/platforms/esp/32/core/output_pin_policy.h",
+            "src/fl/system/pin.h",
+            "src/fl/system/pin.cpp.hpp",
+            "src/platforms/pin.h",
+            "src/platforms/esp/32/pin_esp32_native.hpp",
+            "src/platforms/esp/32/pin_esp32_native_impl.hpp",
         ],
         concerns=[
             "explicit-native-specializations-currently-override-forced-primary",

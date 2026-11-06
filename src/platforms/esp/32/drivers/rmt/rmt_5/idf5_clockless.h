@@ -9,6 +9,7 @@
 // signal to the world that we have a ClocklessController to allow WS2812 and others.
 #define FL_CLOCKLESS_CONTROLLER_DEFINED 1
 
+#include "platforms/esp/32/core/output_pin_policy.h"
 #include "eorder.h"
 #include "fl/channels/bus.h"
 #include "fl/channels/slim_bridge_controller.h"
@@ -28,7 +29,7 @@ template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, 
 class ClocklessIdf5 : public SlimBridgeController<DATA_PIN, TIMING, RGB_ORDER, WAIT_TIME, BusTraits<Bus::RMT>>
 {
     // -- Verify that the pin is valid
-    FL_STATIC_ASSERT(FastPin<DATA_PIN>::validpin(), "This pin has been marked as an invalid pin, common reasons includes it being a ground pin, read only, or too noisy (e.g. hooked up to the uart).");
+    FL_STATIC_ASSERT(Esp32OutputPinValidity<DATA_PIN>::value, "This pin has been marked as an invalid pin, common reasons includes it being a ground pin, read only, or too noisy (e.g. hooked up to the uart).");
 
 public:
     ClocklessIdf5() FL_NO_EXCEPT = default;
