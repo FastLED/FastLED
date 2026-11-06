@@ -5,6 +5,7 @@ Raspberry Pi Pico 2 (RP2350) support.
 ## Files (quick pass)
 - `fastled_arm_rp2350.h`: Aggregator; includes pin and clockless.
 - `fastpin_arm_rp2350.h`: Pin helpers (48 GPIO pins: 0-47).
+- `rp2350_pin.h`: SIO pin template and software SPI policy, free of SDK includes so a host test can compile it.
 - `clockless_arm_rp2350.h`: Clockless driver using PIO (wrapper for common implementation).
 - `led_sysdefs_arm_rp2350.h`: System defines for RP2350 (150 MHz default clock).
 
