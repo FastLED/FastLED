@@ -20,6 +20,40 @@ namespace fl {
 
 #define FASTLED_ALL_PINS_HARDWARE_SPI
 
+/// Half the divider, rounded up so odd dividers never shorten the period.
+constexpr u32 apollo3SpiPhaseCycles(u32 divider) FL_NO_EXCEPT {
+	return divider / 2 + (divider & 1);
+}
+
+/// Iterations of apollo3SpiLoopDelay that take at least `cycles`. On Cortex-M4,
+/// N iterations of SUBS and BNE take at least 3N-1 cycles: 1 for each SUBS, 2 for
+/// each taken BNE and 1 for the final one, which falls through.
+constexpr u32 apollo3SpiLoopCount(u32 cycles) FL_NO_EXCEPT {
+	return cycles == 0 ? 0 : (cycles + 3) / 3;
+}
+
+/// Longest phase written as NOPs. GCC already unrolled the old loop this far.
+constexpr u32 kApollo3SpiMaxInlineNops = 8;
+
+template <u32 N>
+FASTLED_FORCE_INLINE void apollo3SpiNops() FL_NO_EXCEPT {
+	if (N > 0) {
+		__asm__ __volatile__("nop");
+		apollo3SpiNops<(N > 0 ? N - 1 : 0)>();
+	}
+}
+
+/// Counted delay whose cost does not depend on compiler loop shaping.
+FASTLED_FORCE_INLINE void apollo3SpiLoopDelay(u32 count) FL_NO_EXCEPT {
+#if defined(__thumb__)
+	__asm__ __volatile__("1: subs %0, #1\n\t bne 1b" : "+l"(count) : : "cc");
+#else
+	while (count--) { // Host test build; only target disassembly shows timing.
+		__asm__ __volatile__("nop");
+	}
+#endif
+}
+
 template <u8 _DATA_PIN, u8 _CLOCK_PIN, u32 _SPI_CLOCK_DIVIDER>
 class APOLLO3HardwareSPIOutput {
 	Selectable *mPSelect;
@@ -103,7 +137,7 @@ public:
 	void writeBytes(FASTLED_REGISTER u8 *data, int len) { writeBytes<DATA_NOP>(data, len); }
 
 	// write a single bit out, which bit from the passed in byte is determined by template parameter
-	template <u8 BIT> inline static void writeBit(u8 b) FL_NO_EXCEPT {
+	template <u8 BIT> FASTLED_FORCE_INLINE static void writeBit(u8 b) FL_NO_EXCEPT {
 		//waitFully();
 		if(b & (1 << BIT)) {
 			FastPin<_DATA_PIN>::hi();
@@ -112,11 +146,23 @@ public:
 		}
 
 		FastPin<_CLOCK_PIN>::hi();
-		for (u32 d = (_SPI_CLOCK_DIVIDER >> 1); d > 0; d--) { __NOP(); }
+		delayPhase();
 		FastPin<_CLOCK_PIN>::lo();
-		for (u32 d = (_SPI_CLOCK_DIVIDER >> 1); d > 0; d--) { __NOP(); }
+		delayPhase();
 	}
 
+private:
+	static constexpr u32 kPhaseCycles = apollo3SpiPhaseCycles(_SPI_CLOCK_DIVIDER);
+
+	FASTLED_FORCE_INLINE static void delayPhase() FL_NO_EXCEPT {
+		if (kPhaseCycles <= kApollo3SpiMaxInlineNops) {
+			apollo3SpiNops<(kPhaseCycles <= kApollo3SpiMaxInlineNops ? kPhaseCycles : 0)>();
+		} else {
+			apollo3SpiLoopDelay(apollo3SpiLoopCount(kPhaseCycles));
+		}
+	}
+
+public:
 	// write a block of uint8_ts out in groups of three.  len is the total number of uint8_ts to write out.  The template
 	// parameters indicate how many uint8_ts to skip at the beginning and/or end of each grouping
 	template <u8 FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> pixels, void* context = nullptr) FL_NO_EXCEPT {
