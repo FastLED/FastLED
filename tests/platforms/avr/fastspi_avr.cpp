@@ -103,6 +103,9 @@ DataReg udr0, udr1, spi0Data, spdr;
 struct AvrPinTrace {
     static const avr_regs::ControlReg* owner;
     static const avr_regs::Shifter* shifter;
+    static const volatile u8* modeReg;
+    static u8 modeMask;
+    static bool clockLatch;
     static bool data;
     static bool clock;
     static bool sampled;
@@ -121,20 +124,32 @@ struct AvrPinTrace {
         unrelatedWrites = 0;
         ignoredWrites = 0;
         writesWhileBusy = 0;
+        clockLatch = false;
     }
     static bool gpioOwnsPins() {
         if (shifter != nullptr && shifter->busy) {
             ++writesWhileBusy;
         }
-        if (owner != nullptr && (owner->value & owner->enableMask)) {
-            ++ignoredWrites;
+        const bool enabled = owner != nullptr && (owner->value & owner->enableMask);
+        // MSPIM keeps XCK until UMSEL clears, even with RXEN and TXEN off.
+        const bool mspim = modeReg != nullptr && (*modeReg & modeMask);
+        if (enabled || mspim) {
             return false;
+        }
+        // Released with a high clock latch: the pin rises now, sampling old data.
+        if (clockLatch && !clock) {
+            clock = true;
+            sampled = data;
+            ++risingEdges;
         }
         return true;
     }
 };
 const avr_regs::ControlReg* AvrPinTrace::owner = nullptr;
 const avr_regs::Shifter* AvrPinTrace::shifter = nullptr;
+const volatile u8* AvrPinTrace::modeReg = nullptr;
+u8 AvrPinTrace::modeMask = 0;
+bool AvrPinTrace::clockLatch = false;
 bool AvrPinTrace::data = false;
 bool AvrPinTrace::clock = false;
 bool AvrPinTrace::sampled = false;
@@ -150,11 +165,13 @@ template <u8 PIN> struct AvrRecordingPin {
         if (PIN != kAvrTestDataPin && PIN != kAvrTestClockPin) {
             ++AvrPinTrace::unrelatedWrites;
         } else if (!AvrPinTrace::gpioOwnsPins()) {
-            return;
+            ++AvrPinTrace::ignoredWrites;
+            AvrPinTrace::clockLatch = PIN == kAvrTestClockPin ? true : AvrPinTrace::clockLatch;
         } else if (PIN == kAvrTestDataPin) {
             AvrPinTrace::data = true;
         } else if (!AvrPinTrace::clock) {
             AvrPinTrace::clock = true;
+            AvrPinTrace::clockLatch = true;
             AvrPinTrace::sampled = AvrPinTrace::data;
             ++AvrPinTrace::risingEdges;
         }
@@ -162,13 +179,17 @@ template <u8 PIN> struct AvrRecordingPin {
     static void lo() {
         if (PIN != kAvrTestDataPin && PIN != kAvrTestClockPin) {
             ++AvrPinTrace::unrelatedWrites;
+        } else if (PIN == kAvrTestClockPin) {
+            // A low latch is always safe to preload, whoever owns the pin.
+            AvrPinTrace::clockLatch = false;
+            if (AvrPinTrace::gpioOwnsPins() && AvrPinTrace::clock) {
+                AvrPinTrace::clock = false;
+                ++AvrPinTrace::fallingEdges;
+            }
         } else if (!AvrPinTrace::gpioOwnsPins()) {
-            return;
+            ++AvrPinTrace::ignoredWrites;
         } else if (PIN == kAvrTestDataPin) {
             AvrPinTrace::data = false;
-        } else if (AvrPinTrace::clock) {
-            AvrPinTrace::clock = false;
-            ++AvrPinTrace::fallingEdges;
         }
     }
 };
@@ -314,6 +335,12 @@ template <typename Output> void checkHandoff(avr_regs::Shifter& shifter, avr_reg
     Output::template writeBit<0>(1);
     FL_REQUIRE_EQ(AvrPinTrace::risingEdges, 1);
     FL_REQUIRE_EQ(control.value, initialControl);
+    if (!(initialControl & control.enableMask)) {
+        // A disabled peripheral cannot transmit, so only the idle path applies.
+        AvrPinTrace::owner = nullptr;
+        AvrPinTrace::shifter = nullptr;
+        return;
+    }
 
     for (int pixel = 0; pixel < 3; ++pixel) {
         AvrPinTrace::reset();
@@ -339,6 +366,13 @@ template <typename Output> void checkHandoff(avr_regs::Shifter& shifter, avr_reg
     Output::template writeBit<0>(0);
     FL_REQUIRE_EQ(AvrPinTrace::writesWhileBusy, 0);
     FL_REQUIRE_FALSE(AvrPinTrace::sampled);
+
+    // A high clock latch must not rise at release and sample the old data.
+    AvrPinTrace::reset();
+    AvrPinTrace::clockLatch = true;
+    Output::template writeBit<0>(1);
+    FL_REQUIRE_EQ(AvrPinTrace::risingEdges, 1);
+    FL_REQUIRE(AvrPinTrace::sampled);
     AvrPinTrace::owner = nullptr;
     AvrPinTrace::shifter = nullptr;
 }
@@ -358,11 +392,17 @@ FL_TEST_CASE("AVR USART1 writeBit") {
     ucsr1b.enableMask = (1 << RXEN1) | (1 << TXEN1);
     ubrr1 = 7;
     ucsr1b.value = ucsr1b.enableMask;
+    const u8 mspim = (1 << UMSEL11) | (1 << UMSEL10);
+    ucsr1c = mspim;
+    AvrPinTrace::modeReg = &ucsr1c;
+    AvrPinTrace::modeMask = mspim;
     AvrPinTrace::owner = &ucsr1b;
     checkAllBits<Output>();
     checkHandoff<Output>(usart1, ucsr1b, ucsr1b.enableMask);
     checkHandoff<Output>(usart1, ucsr1b, 0);
     FL_CHECK_EQ(ubrr1, 7);
+    FL_CHECK_EQ(ucsr1c, mspim);
+    AvrPinTrace::modeReg = nullptr;
 }
 
 FL_TEST_CASE("AVR USART0 writeBit") {
@@ -376,11 +416,17 @@ FL_TEST_CASE("AVR USART0 writeBit") {
     ucsr0b.enableMask = (1 << RXEN0) | (1 << TXEN0);
     ubrr0 = 7;
     ucsr0b.value = ucsr0b.enableMask;
+    const u8 mspim = (1 << UMSEL01) | (1 << UMSEL00);
+    ucsr0c = mspim;
+    AvrPinTrace::modeReg = &ucsr0c;
+    AvrPinTrace::modeMask = mspim;
     AvrPinTrace::owner = &ucsr0b;
     checkAllBits<Output>();
     checkHandoff<Output>(usart0, ucsr0b, ucsr0b.enableMask);
     checkHandoff<Output>(usart0, ucsr0b, 0);
     FL_CHECK_EQ(ubrr0, 7);
+    FL_CHECK_EQ(ucsr0c, mspim);
+    AvrPinTrace::modeReg = nullptr;
 }
 
 FL_TEST_CASE("AVR SPI0_CTRLA writeBit") {

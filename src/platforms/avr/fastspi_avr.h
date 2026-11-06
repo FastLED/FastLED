@@ -116,8 +116,12 @@ public:
 		// RXEN/TXEN own the pins, so finish the byte and hand them to GPIO.
 		drainTx();
 		const u8 control = UCSR1B;
+		const u8 mode = UCSR1C;
 		const u16 rate = UBRR1;
+		// Keep the clock low at release, then leave MSPIM: it holds XCK until UMSEL clears.
+		FastPin<_CLOCK_PIN>::lo();
 		UCSR1B = control & ~((1<<RXEN1)|(1<<TXEN1));
+		UCSR1C = mode & ~((1<<UMSEL11)|(1<<UMSEL10));
 		if(b & (1 << BIT)) {
 			FastPin<_DATA_PIN>::hi();
 		} else {
@@ -128,6 +132,7 @@ public:
 		FastPin<_CLOCK_PIN>::lo();
 		// MSPIM requires UBRR to be zero while the transmitter is enabled.
 		UBRR1 = 0;
+		UCSR1C = mode;
 		UCSR1B = control;
 		UBRR1 = rate;
 		shouldWait(false);
@@ -305,8 +310,12 @@ public:
 		// RXEN/TXEN own the pins, so finish the byte and hand them to GPIO.
 		drainTx();
 		const u8 control = UCSR0B;
+		const u8 mode = UCSR0C;
 		const u16 rate = UBRR0;
+		// Keep the clock low at release, then leave MSPIM: it holds XCK until UMSEL clears.
+		FastPin<_CLOCK_PIN>::lo();
 		UCSR0B = control & ~((1<<RXEN0)|(1<<TXEN0));
+		UCSR0C = mode & ~((1<<UMSEL01)|(1<<UMSEL00));
 		if(b & (1 << BIT)) {
 			FastPin<_DATA_PIN>::hi();
 		} else {
@@ -317,6 +326,7 @@ public:
 		FastPin<_CLOCK_PIN>::lo();
 		// MSPIM requires UBRR to be zero while the transmitter is enabled.
 		UBRR0 = 0;
+		UCSR0C = mode;
 		UCSR0B = control;
 		UBRR0 = rate;
 		shouldWait(false);
@@ -494,6 +504,7 @@ public:
 		// The enabled peripheral owns the pins: finish the byte, then hand them over.
 		wait();
 		const u8 control = SPI0_CTRLA;
+		FastPin<_CLOCK_PIN>::lo(); // Keep the clock low at release: no stray edge.
 		SPI0_CTRLA = control & ~SPI_ENABLE_bm;
 		if(b & (1 << BIT)) {
 			FastPin<_DATA_PIN>::hi();
@@ -688,6 +699,7 @@ public:
 		// The enabled peripheral owns the pins: finish the byte, then hand them over.
 		wait();
 		const u8 control = SPCR;
+		FastPin<_CLOCK_PIN>::lo(); // Keep the clock low at release: no stray edge.
 		SPCR = control & ~(1 << SPE);
 		if(b & (1 << BIT)) {
 			FastPin<_DATA_PIN>::hi();
@@ -879,6 +891,7 @@ public:
 		// The enabled peripheral owns the pins: finish the byte, then hand them over.
 		wait();
 		const u8 control = SPCR0;
+		FastPin<_CLOCK_PIN>::lo(); // Keep the clock low at release: no stray edge.
 		SPCR0 = control & ~(1 << SPE);
 		if(b & (1 << BIT)) {
 			FastPin<_DATA_PIN>::hi();
