@@ -922,3 +922,246 @@ def extract_capture(elf: bytes, symbol_text: str, sdk_root: "Path") -> dict:
     if result.authentication_errors or result.decode_errors:
         raise ValueError("unbound selected encoded ELF slice")
     return capture
+
+
+SOURCE = "src/platforms/esp/32/pin_esp32_native_impl.hpp"
+STAGES = ("baseline", "old-output-mode-mutant", "restored")
+PRECONDITIONS = (
+    "arrival-at-the-two-encoded-CALL8-sites",
+    "valid-nonaliasing-producer-prefix-loads-and-volatile-sink-storage",
+    "actual-core-PC-relative-literals-and-pinned-SDK-ROM-contract",
+    "normal-windowed-ABI-returns-with-no-uncontracted-caller-frame-writes",
+)
+SCOPE = "conditional-arrival-at-bound-Xtensa-CALL8-sites-Output-field-only"
+
+
+def old_output_mode_mutant(source: bytes) -> bytes:
+    statement = b"io_conf.mode = GPIO_MODE_INPUT_OUTPUT;"
+    if source.count(statement) != 1:
+        raise ValueError("missing or ambiguous fixed Output assignment")
+    return source.replace(statement, b"io_conf.mode = GPIO_MODE_OUTPUT;", 1)
+
+
+def validate_stage_sequence(stages: tuple[str, ...]) -> None:
+    if stages != STAGES:
+        raise ValueError("invalid fixed Xtensa mode stages")
+
+
+def validate_stage_analysis(stage: str, result: ModeResult) -> None:
+    if (
+        stage not in STAGES
+        or result.authentication_errors
+        or result.decode_errors
+        or result.sdk is None
+        or not result.producer_calls_bound
+        or not result.gpio_config_stores_bound
+        or result.assumptions != [ASSUMPTION]
+        or result.preconditions != list(PRECONDITIONS)
+        or result.scope != SCOPE
+        or result.image_mapping_qualified is not False
+    ):
+        raise ValueError("unbound conditional Xtensa mode stage")
+    if len(result.observations) != 4 or {
+        (item.pin, item.pwm_lookup_nonnull) for item in result.observations
+    } != {(2, False), (2, True), (3, False), (3, True)}:
+        raise ValueError("incomplete or duplicate Xtensa PWM observations")
+    expected = (
+        result.sdk.gpio_output if stage == STAGES[1] else result.sdk.gpio_input_output
+    )
+    if any(
+        item.public_mode != result.sdk.public_modes["Output"]
+        or item.configured_mode != expected
+        for item in result.observations
+    ):
+        raise ValueError("contradictory Xtensa mode observation")
+    wrong = [
+        item
+        for item in result.observations
+        if item.configured_mode != result.sdk.gpio_input_output
+    ]
+    if (
+        result.errors != (["output-mode-mismatch"] if wrong else [])
+        or result.counterexamples != wrong
+    ):
+        raise ValueError("Xtensa counterwitness differs from actual observations")
+
+
+def producer_sources(root: "Path") -> dict[str, bytes]:
+    from pathlib import Path
+
+    fixtures = Path(root) / "ci/fixtures/software_spi_audit"
+    return {
+        "examples/AutoResearch/AutoResearch.ino": (
+            fixtures / "esp32_xtensa_mode_producer.cpp.txt"
+        ).read_bytes(),
+        "examples/AutoResearch/AutoResearchStartupHook.cpp": (
+            fixtures / "esp32_xtensa_mode_startup.cpp.txt"
+        ).read_bytes(),
+    }
+
+
+def planned_configuration(info: dict) -> dict[str, str]:
+    import configparser
+    import hashlib
+    import shlex
+    from pathlib import Path
+
+    from ci import software_spi_esp32_c6_mode_proof as common
+
+    if info.get("env") != "esp32dev":
+        raise ValueError("unsupported Xtensa environment")
+    project = Path(info["prog_path"]).parents[3]
+    parser = configparser.ConfigParser(
+        interpolation=None, inline_comment_prefixes=("#", ";"), strict=True
+    )
+    parser.read_string((project / "platformio.ini").read_text())
+    if (
+        parser.defaults()
+        or parser.get("env:esp32dev", "platform", raw=True)
+        != "https://github.com/pioarduino/platform-espressif32/releases/download/55.03.311/platform-espressif32.zip"
+    ):
+        raise ValueError("unreviewed classic platform pin; expected 55.03.311")
+    common._require_fixed_defines(
+        shlex.split(parser.get("env:esp32dev", "build_flags", raw=True), comments=True)
+    )
+    for row in common._planned_database(info):
+        common._require_fixed_defines(
+            row.get("arguments") or shlex.split(row["command"])
+        )
+    files = {
+        project / "platformio.ini",
+        Path(info["prog_path"]).parent / "compile_commands.raw.json",
+    }
+    files.update(project.rglob("*.rsp"))
+    files.update(project.rglob("compile_commands.raw.json"))
+    result = {}
+    for path in sorted(files):
+        if not path.is_file() or path.is_symlink():
+            raise ValueError("unsafe selected Xtensa configuration input")
+        result[str(path)] = hashlib.sha256(path.read_bytes()).hexdigest()
+    return result
+
+
+def sdk_roots(info: dict) -> tuple["Path", "Path"]:
+    import json
+    import re
+    from pathlib import Path
+
+    from ci import software_spi_esp32_c6_mode_proof as common
+
+    rows = json.dumps(common._planned_database(info))
+    roots = {
+        Path(match).resolve()
+        for match in re.findall(r"(/[^\s\"']*/3\.3\.11/esp32-core-3\.3\.11)(?=/)", rows)
+    }
+    if len(roots) != 1:
+        raise ValueError("missing or ambiguous selected classic SDK tree")
+    framework = roots.pop()
+    toolchain = Path(info["cc_path"]).resolve().parents[2]
+    if (
+        framework.name != "esp32-core-3.3.11"
+        or framework.parent.name != "3.3.11"
+        or "xtensa-esp-elf-14.2.0_20260121" not in str(toolchain)
+        or Path(info["cc_path"]).name != "xtensa-esp32-elf-gcc"
+    ):
+        raise ValueError("unreviewed classic SDK/compiler profile")
+    return framework, toolchain
+
+
+def compile_fixed(workspace: "Path", saved: "Path", environment: dict) -> dict:
+    import json
+    from pathlib import Path
+
+    from ci import software_spi_init_proof as native
+
+    saved.mkdir(parents=True, exist_ok=True)
+    command = [
+        "bash",
+        "compile",
+        "esp32dev",
+        "--examples",
+        "AutoResearch",
+        "--defines",
+        "EXPECT_FORCED=1,EXPECT_NO_PINMAP=0,FASTLED_FORCE_SOFTWARE_PINS=1",
+        "-v",
+        "--build-info",
+        str(saved / "build-info.json"),
+    ]
+    (saved / "invocation.json").write_text(
+        json.dumps(
+            {"argv": command, "cwd": str(workspace), "complete_executed_argv": False},
+            indent=2,
+        )
+        + "\n"
+    )
+    completed = native._run(
+        command, workspace, saved / "build.log", build=True, environment=environment
+    )
+    if completed.returncode != 0:
+        raise ValueError(f"Xtensa vendor build failed; retained {saved}")
+    route = [
+        str(Path(environment["FBUILD_EXECUTABLE"]).resolve()),
+        str(workspace / ".build/fbuild/esp32dev"),
+        "build",
+        "-e",
+        "esp32dev",
+        "-v",
+    ]
+    if "Running: " + " ".join(route) not in completed.stdout:
+        raise ValueError("unqualified actual Xtensa submission route")
+    info = json.loads((saved / "build-info.json").read_text())["esp32dev"]
+    if (
+        info.get("env") != "esp32dev"
+        or info.get("board") != "ESP32DEV"
+        or info.get("platform") != "espressif32"
+        or "-DF_CPU=240000000L" not in info["cxx_flags"]
+        or "-mlongcalls" not in info["cxx_flags"]
+    ):
+        raise ValueError("unsupported fixed Xtensa CPU/ABI/board")
+    planned_configuration(info)
+    sdk_roots(info)
+    return info
+
+
+def capture_retained(
+    workspace: "Path", saved: "Path", info: dict, environment: dict
+) -> dict:
+    import hashlib
+    import json
+
+    from ci import software_spi_init_proof as native
+
+    elf = saved / "firmware.elf"
+    before = hashlib.sha256(elf.read_bytes()).hexdigest()
+    commands = {
+        "symbols": [info["nm_path"], "-C", "-S", "--defined-only", str(elf)],
+        "disassembly": [info["objdump_path"], "-d", "-C", "-z", str(elf)],
+        "layout": [info["readelf_path"], "-W", "-S", "-l", "-s", str(elf)],
+    }
+    outputs = {}
+    for name, command in commands.items():
+        completed = native._run(
+            command,
+            workspace,
+            saved / (name + ".txt"),
+            build=False,
+            environment=environment,
+        )
+        if completed.returncode != 0:
+            raise ValueError("Xtensa SDK retained-ELF inspection failed")
+        outputs[name] = completed.stdout
+    framework, _ = sdk_roots(info)
+    capture = extract_capture(elf.read_bytes(), outputs["symbols"], framework)
+    for relative in (
+        "tools/esp32-arduino-libs/esp32/include/xtensa/esp32/include/xtensa/config/core-isa.h",
+        "tools/esp32-arduino-libs/esp32/ld/esp32.rom.libgcc.ld",
+    ):
+        path = framework / relative
+        (saved / path.name).write_bytes(path.read_bytes())
+    if hashlib.sha256(elf.read_bytes()).hexdigest() != before:
+        raise ValueError("retained Xtensa ELF changed during inspection")
+    (saved / "inspection-commands.json").write_text(
+        json.dumps(commands, indent=2) + "\n"
+    )
+    (saved / "classifier-capture.json").write_text(json.dumps(capture, indent=2) + "\n")
+    return capture

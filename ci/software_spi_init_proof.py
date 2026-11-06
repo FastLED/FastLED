@@ -50,6 +50,7 @@ raise SystemExit(0 if result.success else 2)
 
 
 class _ProofKind(Enum):
+    ESP32_XTENSA_MODE = "esp32-xtensa-mode"
     ESP32_C6_MODE = "esp32-c6-mode"
     RP2040_ELF = "rp2040-elf"
     RP2040_IRQ = "rp2040-irq"
@@ -68,6 +69,14 @@ class _NativeSpec:
 
 def _spec(kind: _ProofKind) -> _NativeSpec:
     # Closed code-owned targets only: no CLI/manifest supplies commands or paths.
+    if kind is _ProofKind.ESP32_XTENSA_MODE:
+        return _NativeSpec(
+            "esp32dev",
+            "examples/AutoResearch/AutoResearch.ino",
+            ("src/platforms/esp/32/pin_esp32_native_impl.hpp",),
+            "spi-esp32-xtensa-mode-proof",
+            "spi-esp32-xtensa-mode-proof",
+        )
     if kind is _ProofKind.ESP32_C6_MODE:
         return _NativeSpec(
             "esp32c6",

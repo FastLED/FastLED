@@ -16,6 +16,7 @@ from enum import Enum
 from pathlib import Path
 
 from ci import software_spi_esp32_c6_mode_proof as mode_check
+from ci import software_spi_esp32_xtensa_mode_proof as xtensa_check
 from ci import software_spi_init_proof as native
 from ci import software_spi_my9221_rp2040_irq_proof as irq_check
 from ci import software_spi_my9221_rp2040_proof as property_check
@@ -26,6 +27,7 @@ PRODUCER = b'#include <FastLED.h>\n\n// Fixed direct public-controller producer;
 
 
 class _PropertyKind(Enum):
+    ESP32_XTENSA_MODE = "esp32-xtensa-mode"
     PLACEMENT = "placement"
     IRQ = "irq"
     ESP32_C6_MODE = "esp32-c6-mode"
@@ -41,6 +43,14 @@ class _VendorSpec:
 
 
 def _vendor_spec(kind: _PropertyKind) -> _VendorSpec:
+    if kind is _PropertyKind.ESP32_XTENSA_MODE:
+        return _VendorSpec(
+            xtensa_check.SOURCE,
+            xtensa_check.STAGES[1],
+            "esp32-xtensa-forced-gpio2-3-conditional-output-mode-property-only",
+            native._ProofKind.ESP32_XTENSA_MODE,
+            "spi-esp32-xtensa-mode-proof",
+        )
     if kind is _PropertyKind.ESP32_C6_MODE:
         return _VendorSpec(
             mode_check.SOURCE,
@@ -73,12 +83,17 @@ class _Assessment:
     errors: list[str]
     irq_analysis: irq_check.IRQResult | None = None
     mode_analysis: mode_check.ModeResult | None = None
+    xtensa_analysis: xtensa_check.ModeResult | None = None
 
 
 def _assess_property(capture: dict, kind: _PropertyKind, stage: str) -> _Assessment:
     spec = _vendor_spec(kind)
     if stage not in ("baseline", spec.mutant, "restored"):
         raise ValueError("unknown fixed vendor stage")
+    if kind is _PropertyKind.ESP32_XTENSA_MODE:
+        result = xtensa_check.classify_capture(capture)
+        xtensa_check.validate_stage_analysis(stage, result)
+        return _Assessment(result.errors, xtensa_analysis=result)
     if kind is _PropertyKind.IRQ:
         result = irq_check.classify_irq_capture(capture)
         irq_check.validate_stage_analysis(stage, result)
@@ -92,6 +107,26 @@ def _assess_property(capture: dict, kind: _PropertyKind, stage: str) -> _Assessm
     if errors != intended:
         raise ValueError(f"RP2040 stage lacks intended bounded ELF property: {errors}")
     return _Assessment(errors)
+
+
+def _stage_property_flags(
+    kind: _PropertyKind, assessment: _Assessment
+) -> tuple[bool, bool, bool]:
+    if kind in (_PropertyKind.ESP32_C6_MODE, _PropertyKind.ESP32_XTENSA_MODE):
+        return False, False, False
+    return True, True, assessment.irq_analysis is not None or not assessment.errors
+
+
+def _mode_helper(kind: _PropertyKind):
+    if kind is _PropertyKind.ESP32_XTENSA_MODE:
+        return xtensa_check
+    if kind is _PropertyKind.ESP32_C6_MODE:
+        return mode_check
+    raise ValueError("not a closed ESP mode kind")
+
+
+def _is_mode(kind: _PropertyKind) -> bool:
+    return kind in (_PropertyKind.ESP32_C6_MODE, _PropertyKind.ESP32_XTENSA_MODE)
 
 
 @dataclass(frozen=True)
@@ -113,6 +148,7 @@ class VendorStage:
     serving_engine_after: dict
     irq_analysis: irq_check.IRQResult | None = None
     mode_analysis: mode_check.ModeResult | None = None
+    xtensa_analysis: xtensa_check.ModeResult | None = None
 
 
 @dataclass(frozen=True)
@@ -298,18 +334,22 @@ def _compile(workspace: Path, saved: Path, environment: dict[str, str]) -> dict:
 
 
 def _board(kind: _PropertyKind) -> str:
+    if kind is _PropertyKind.ESP32_XTENSA_MODE:
+        return "esp32dev"
     return "esp32c6" if kind is _PropertyKind.ESP32_C6_MODE else "rp2040"
 
 
 def _compile_selected(
     workspace: Path, saved: Path, environment: dict, kind: _PropertyKind
 ) -> dict:
-    if kind is _PropertyKind.ESP32_C6_MODE:
-        return mode_check.compile_fixed(workspace, saved, environment)
+    if _is_mode(kind):
+        return _mode_helper(kind).compile_fixed(workspace, saved, environment)
     return _compile(workspace, saved, environment)
 
 
 def _profile_roots(info: dict) -> tuple[Path, Path]:
+    if info.get("env") == "esp32dev":
+        return xtensa_check.sdk_roots(info)
     if info.get("env") == "esp32c6":
         return mode_check.sdk_roots(info)
     roots = {
@@ -464,6 +504,8 @@ def _state(
             for key, value in environment.items()
         },
     }
+    if info.get("env") == "esp32dev":
+        result["planned_configuration"] = xtensa_check.planned_configuration(info)
     if info.get("env") == "esp32c6":
         result["planned_configuration"] = mode_check.planned_configuration(info)
     return result
@@ -625,8 +667,8 @@ def _retain_artifacts(
         for path in (release / "firmware.map", project / "firmware.map")
         if path.is_file()
     ]
-    if kind is _PropertyKind.ESP32_C6_MODE:
-        # Unlike RP placement, C6 consumes no ordinary map. A warm native
+    if _is_mode(kind):
+        # Unlike RP placement, ESP mode assessors consume no ordinary map. A warm native
         # link-cache hit can restore only ELF; never borrow a bootstrap map.
         candidates = []
         for label, source in (
@@ -667,7 +709,7 @@ def _retain_artifacts(
         sources += maps
     for source in sources:
         if not source.is_file():
-            profile = "C6" if kind is _PropertyKind.ESP32_C6_MODE else "RP2040"
+            profile = "ESP mode" if _is_mode(kind) else "RP2040"
             raise ValueError(f"missing actual {profile} artifact {source}")
         shutil.copy2(source, saved / source.name)
     for source in release.rglob("*.a"):
@@ -729,12 +771,12 @@ def _build_session(
     after_static = _state(updated, _environment(workspace), tools, roots, project)
     property_check._verify_profile_state(saved, "after-build", profile, after_static)
     native._verify_inputs(workspace, expected_inputs)
-    if kind is _PropertyKind.ESP32_C6_MODE:
+    if _is_mode(kind):
         _check_staged_sources(
             workspace,
             expected_inputs,
             project,
-            mode_check.producer_sources(workspace)[EXAMPLE],
+            _mode_helper(kind).producer_sources(workspace)[EXAMPLE],
         )
     else:
         _check_staged_sources(workspace, expected_inputs, project)
@@ -795,12 +837,12 @@ def _one_stage(
     updated = session.info
     hashes = (
         _retain_artifacts(updated, saved, project, kind)
-        if kind is _PropertyKind.ESP32_C6_MODE
+        if _is_mode(kind)
         else _retain_artifacts(updated, saved, project)
     )
     capture = (
-        mode_check.capture_retained(workspace, saved, updated, environment)
-        if kind is _PropertyKind.ESP32_C6_MODE
+        _mode_helper(kind).capture_retained(workspace, saved, updated, environment)
+        if _is_mode(kind)
         else _capture(workspace, saved, updated, environment)
     )
     assessment = _assess_property(capture, kind, name)
@@ -831,15 +873,13 @@ def _one_stage(
         "planned-argv-not-complete-executed-receipt",
         hashes,
         errors,
-        # C6 binds calls within the fixed producer, not a firmware-root graph.
-        kind is not _PropertyKind.ESP32_C6_MODE,
-        kind is not _PropertyKind.ESP32_C6_MODE,
-        kind is not _PropertyKind.ESP32_C6_MODE
-        and (assessment.irq_analysis is not None or not errors),
+        # Mode assessors bind conditional call sites, never root reachability.
+        *_stage_property_flags(kind, assessment),
         session.before,
         session.after,
         assessment.irq_analysis,
         assessment.mode_analysis,
+        assessment.xtensa_analysis,
     )
     _json(saved / "stage.json", asdict(result))
     return result, updated
@@ -862,8 +902,8 @@ def _run_vendor_proof(root: Path, kind: _PropertyKind) -> VendorProof:
         EXAMPLE: (workspace / EXAMPLE).read_bytes(),
     }
     producers = (
-        mode_check.producer_sources(workspace)
-        if kind is _PropertyKind.ESP32_C6_MODE
+        _mode_helper(kind).producer_sources(workspace)
+        if _is_mode(kind)
         else {EXAMPLE: PRODUCER}
     )
     for relative in producers:
@@ -895,7 +935,7 @@ def _run_vendor_proof(root: Path, kind: _PropertyKind) -> VendorProof:
             bootstrap, "bootstrap-build", bootstrap_engine, bootstrap_after
         )
         project = workspace / ".build/fbuild" / _board(kind)
-        if kind is _PropertyKind.ESP32_C6_MODE:
+        if _is_mode(kind):
             _check_staged_sources(workspace, initial, project, producers[EXAMPLE])
         else:
             _check_staged_sources(workspace, initial, project)
@@ -916,7 +956,7 @@ def _run_vendor_proof(root: Path, kind: _PropertyKind) -> VendorProof:
                 "complete_executed_argv": False,
             },
         )
-        if kind is _PropertyKind.ESP32_C6_MODE:
+        if _is_mode(kind):
             _retain_artifacts(info, bootstrap, project, kind)
         else:
             _retain_artifacts(info, bootstrap, project)
@@ -924,8 +964,8 @@ def _run_vendor_proof(root: Path, kind: _PropertyKind) -> VendorProof:
         stages = {
             "baseline": originals[spec.source],
             spec.mutant: (
-                mode_check.old_output_mode_mutant(originals[spec.source])
-                if kind is _PropertyKind.ESP32_C6_MODE
+                _mode_helper(kind).old_output_mode_mutant(originals[spec.source])
+                if _is_mode(kind)
                 else property_check.kernel_mutant(originals[spec.source])
                 if kind is _PropertyKind.PLACEMENT
                 else irq_check.irq_mutant(originals[spec.source])
@@ -963,7 +1003,7 @@ def _run_vendor_proof(root: Path, kind: _PropertyKind) -> VendorProof:
         proof = VendorProof(
             spec.scope,
             "forced-GenericSoftwareSPIOutput-init-gpio2-3-public-PinMode-Output"
-            if kind is _PropertyKind.ESP32_C6_MODE
+            if _is_mode(kind)
             else "direct-controller-init-setLeds-showLeds",
             False,
             False,
@@ -971,8 +1011,8 @@ def _run_vendor_proof(root: Path, kind: _PropertyKind) -> VendorProof:
             records,
             bootstrap,
             _engine_semantics(engine_profile),
-            "Bounded conditional-ELF output-mode field property under normal-callee RISC-V ABI assumptions; no BIN/runtime mapping, runtime GPIO/toggle, hardware execution, IRQ/cache/timing or complete executed argv. All full5067 and5066 groups unresolved."
-            if kind is _PropertyKind.ESP32_C6_MODE
+            "Bounded conditional-ELF Output-field property under explicitly recorded arrival, nonaliasing and normal-callee ABI/frame-memory assumptions; no BIN/runtime mapping, runtime GPIO/toggle, hardware execution, IRQ/cache/timing or complete executed argv. All full5067 and5066 groups unresolved."
+            if _is_mode(kind)
             else "Bounded static potential public route/placement or saved-PRIMASK property only; no hardware execution, physical IRQ guarantee, termination, min/max timing, stack/frame runtime location or complete executed argv. All seven MY groups unresolved.",
         )
     except (
@@ -987,9 +1027,7 @@ def _run_vendor_proof(root: Path, kind: _PropertyKind) -> VendorProof:
             artifacts / "failure.json",
             {"complete": False, "workspace": workspace, "error": str(error)},
         )
-        label = (
-            "C6 output-mode" if kind is _PropertyKind.ESP32_C6_MODE else "RP2040 ELF"
-        )
+        label = "ESP output-mode" if _is_mode(kind) else "RP2040 ELF"
         raise ValueError(
             f"{label} proof failed; retained {workspace}: {error}"
         ) from error
@@ -1446,3 +1484,7 @@ def run_rp2040_irq_proof(root: Path) -> VendorProof:
 
 def run_esp32_c6_mode_proof(root: Path) -> VendorProof:
     return _run_vendor_proof(root, _PropertyKind.ESP32_C6_MODE)
+
+
+def run_esp32_xtensa_mode_proof(root: Path) -> VendorProof:
+    return _run_vendor_proof(root, _PropertyKind.ESP32_XTENSA_MODE)

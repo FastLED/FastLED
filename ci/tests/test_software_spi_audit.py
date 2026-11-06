@@ -7564,3 +7564,346 @@ def test_xtensa_mode_factory_rejects_reserved_direct_section_count(tmp_path):
     struct.pack_into("<H", malformed, 48, reserved_count)
     with pytest.raises(ValueError):
         checker.extract_capture(bytes(malformed), nm, sdk)
+
+
+@pytest.mark.parametrize("stage", ["baseline", "old-output-mode-mutant", "restored"])
+def test_xtensa_mode_managed_requires_actual_four_outcomes(stage):
+    from ci import software_spi_esp32_xtensa_mode_proof as checker
+
+    result = checker.classify_capture(
+        _xtensa_mode_capture("old" if stage == "old-output-mode-mutant" else stage)
+    )
+    checker.validate_stage_analysis(stage, result)
+    assert {(item.pin, item.pwm_lookup_nonnull) for item in result.observations} == {
+        (2, False),
+        (2, True),
+        (3, False),
+        (3, True),
+    }
+    assert result.preconditions and checker.ASSUMPTION in result.assumptions
+
+
+@pytest.mark.parametrize(
+    "corruption",
+    [
+        "missing",
+        "duplicate",
+        "wrong-mode",
+        "auth",
+        "decode",
+        "extra-error",
+        "missing-counter",
+        "duplicate-counter",
+        "contradictory-counter",
+        "missing-premise",
+        "missing-assumption",
+        "unbound-calls",
+        "unbound-store",
+    ],
+)
+def test_xtensa_mode_managed_rejects_unbound_or_contradictory_results(corruption):
+    from dataclasses import replace
+
+    from ci import software_spi_esp32_xtensa_mode_proof as checker
+
+    result = checker.classify_capture(_xtensa_mode_capture("old"))
+    if corruption == "missing":
+        result.observations.pop()
+    elif corruption == "duplicate":
+        result.observations[-1] = result.observations[0]
+    elif corruption == "wrong-mode":
+        result.observations[-1] = replace(result.observations[-1], configured_mode=3)
+    elif corruption == "auth":
+        result.authentication_errors = ["unbound"]
+    elif corruption == "decode":
+        result.decode_errors = ["unsupported"]
+    elif corruption == "extra-error":
+        result.errors.append("incidental")
+    elif corruption == "missing-counter":
+        result.counterexamples.pop()
+    elif corruption == "duplicate-counter":
+        result.counterexamples[-1] = result.counterexamples[0]
+    elif corruption == "contradictory-counter":
+        result.counterexamples[-1] = replace(
+            result.counterexamples[-1], configured_mode=3
+        )
+    elif corruption == "missing-premise":
+        result.preconditions = []
+    elif corruption == "missing-assumption":
+        result.assumptions = []
+    elif corruption == "unbound-calls":
+        result.producer_calls_bound = False
+    else:
+        result.gpio_config_stores_bound = False
+    with pytest.raises(ValueError):
+        checker.validate_stage_analysis("old-output-mode-mutant", result)
+
+
+@pytest.mark.parametrize("stage", ["baseline", "restored", "unknown"])
+def test_xtensa_mode_managed_counterexample_cannot_qualify_positive_stage(stage):
+    from ci import software_spi_esp32_xtensa_mode_proof as checker
+
+    with pytest.raises(ValueError):
+        checker.validate_stage_analysis(
+            stage, checker.classify_capture(_xtensa_mode_capture("old"))
+        )
+
+
+@pytest.mark.parametrize(
+    "stages",
+    [
+        (),
+        ("baseline", "restored"),
+        ("baseline", "old-output-mode-mutant", "old-output-mode-mutant", "restored"),
+        ("old-output-mode-mutant", "baseline", "restored"),
+    ],
+)
+def test_xtensa_mode_managed_rejects_incomplete_or_reordered_sequence(stages):
+    from ci import software_spi_esp32_xtensa_mode_proof as checker
+
+    with pytest.raises(ValueError):
+        checker.validate_stage_sequence(stages)
+
+
+def test_xtensa_mode_managed_exact_mutant_and_positive_sequence():
+    from ci import software_spi_esp32_xtensa_mode_proof as checker
+
+    source = (
+        audit.ROOT / "src/platforms/esp/32/pin_esp32_native_impl.hpp"
+    ).read_bytes()
+    statement = b"io_conf.mode = GPIO_MODE_INPUT_OUTPUT;"
+    assert source.count(statement) == 1
+    assert checker.old_output_mode_mutant(source) == source.replace(
+        statement, b"io_conf.mode = GPIO_MODE_OUTPUT;", 1
+    )
+    checker.validate_stage_sequence(("baseline", "old-output-mode-mutant", "restored"))
+    for malformed in (source.replace(statement, b""), source + statement):
+        with pytest.raises(ValueError):
+            checker.old_output_mode_mutant(malformed)
+
+
+def test_xtensa_mode_vendor_closed_kind_and_separate_analysis_field():
+    from dataclasses import fields
+
+    from ci import software_spi_init_proof as native
+    from ci import software_spi_my9221_rp2040_runner as runner
+
+    kind = runner._PropertyKind.ESP32_XTENSA_MODE
+    spec = runner._vendor_spec(kind)
+    assert spec.snapshot_kind is native._ProofKind.ESP32_XTENSA_MODE
+    assert spec.source == "src/platforms/esp/32/pin_esp32_native_impl.hpp"
+    assert spec.mutant == "old-output-mode-mutant"
+    assert spec.artifact_group == "spi-esp32-xtensa-mode-proof"
+    assert runner._board(kind) == "esp32dev"
+    names = [field.name for field in fields(runner.VendorStage)]
+    assert names[-1] == "xtensa_analysis"
+    assert "irq_analysis" in names and "mode_analysis" in names
+    for stage, captured in (
+        ("baseline", "baseline"),
+        (spec.mutant, "old"),
+        ("restored", "restored"),
+    ):
+        assessed = runner._assess_property(_xtensa_mode_capture(captured), kind, stage)
+        assert assessed.xtensa_analysis is not None
+        assert assessed.mode_analysis is None and assessed.irq_analysis is None
+
+
+@pytest.mark.parametrize(
+    ("kind_name", "errors", "has_irq", "wanted"),
+    [
+        ("PLACEMENT", [], False, (True, True, True)),
+        ("PLACEMENT", ["kernel-not-in-sdk-sram"], False, (True, True, False)),
+        ("IRQ", [], True, (True, True, True)),
+        ("IRQ", ["saved-primask-restoration-lost"], True, (True, True, True)),
+        ("ESP32_C6_MODE", [], False, (False, False, False)),
+        ("ESP32_XTENSA_MODE", [], False, (False, False, False)),
+    ],
+)
+def test_xtensa_mode_vendor_encoded_calls_never_assert_broad_route_or_closure(
+    kind_name, errors, has_irq, wanted
+):
+    from ci import software_spi_my9221_rp2040_runner as runner
+
+    assessment = runner._Assessment(errors, irq_analysis=object() if has_irq else None)
+    assert (
+        runner._stage_property_flags(runner._PropertyKind[kind_name], assessment)
+        == wanted
+    )
+
+
+def test_xtensa_mode_vendor_native_whitelist_rejects_board_kind(tmp_path):
+    from ci import software_spi_init_proof as native
+
+    with pytest.raises(ValueError, match="native|fixed|target"):
+        native._run_proof(tmp_path, native._ProofKind.ESP32_XTENSA_MODE)
+
+
+def test_xtensa_mode_vendor_missing_checkout_cannot_publish_or_execute(
+    tmp_path, monkeypatch
+):
+    from ci import software_spi_my9221_rp2040_runner as runner
+
+    monkeypatch.setattr(
+        audit.RunningProcess,
+        "run",
+        lambda *args, **kwargs: pytest.fail("invalid checkout executed"),
+    )
+    with pytest.raises(ValueError, match="source|input|checkout|missing"):
+        runner.run_esp32_xtensa_mode_proof(tmp_path)
+    assert not list(tmp_path.rglob("proof.json"))
+
+
+def test_xtensa_mode_vendor_owned_producer_matches_actual_capture():
+    from ci import software_spi_esp32_xtensa_mode_proof as checker
+
+    base = audit.ROOT / "ci/fixtures/software_spi_audit"
+    assert checker.producer_sources(audit.ROOT) == {
+        "examples/AutoResearch/AutoResearch.ino": (
+            base / "esp32_xtensa_mode_producer.cpp.txt"
+        ).read_bytes(),
+        "examples/AutoResearch/AutoResearchStartupHook.cpp": (
+            base / "esp32_xtensa_mode_startup.cpp.txt"
+        ).read_bytes(),
+    }
+
+
+@pytest.mark.skipif(
+    os.environ.get("FASTLED_RUN_ESP32_XTENSA_MODE_PROOF") != "1",
+    reason="requires fixed three-stage Xtensa SDK builds and retained ELF analysis",
+)
+def test_xtensa_mode_managed_real_three_stage_acceptance():
+    from ci import software_spi_esp32_xtensa_mode_proof as checker
+    from ci import software_spi_init_proof as native
+    from ci import software_spi_my9221_rp2040_runner as runner
+
+    before = native._inputs(audit.ROOT)
+    source = audit.ROOT / "src/platforms/esp/32/pin_esp32_native_impl.hpp"
+    original = source.read_bytes()
+    proof = runner.run_esp32_xtensa_mode_proof(audit.ROOT)
+    assert proof.complete_executed_argv is False
+    assert proof.global_fastled_dispatch_proven is False
+    checker.validate_stage_sequence(tuple(stage.name for stage in proof.stages))
+    for stage in proof.stages:
+        assert stage.build_returncode == 0
+        assert stage.inputs_before == stage.inputs_after
+        assert stage.serving_engine_before == stage.serving_engine_after
+        assert not stage.public_producer_reachable
+        assert not stage.callback_arguments_resolved
+        assert not stage.masked_callee_literal_closure
+        checker.validate_stage_analysis(stage.name, stage.xtensa_analysis)
+        for path, sha in stage.artifact_sha256s.items():
+            assert digest(Path(path).read_bytes()) == sha
+    assert source.read_bytes() == original
+    assert native._inputs(audit.ROOT) == before
+    receipt = (
+        audit.ROOT
+        / ".build/spi-esp32-xtensa-mode-proof"
+        / proof.workspace.name
+        / "proof.json"
+    )
+    assert receipt.is_file()
+
+
+@pytest.mark.parametrize("restore_failure", [False, True])
+def test_xtensa_mode_vendor_setup_failure_restores_all_sources_without_publication(
+    tmp_path, monkeypatch, restore_failure
+):
+    from ci import software_spi_init_proof as native
+    from ci import software_spi_my9221_rp2040_runner as runner
+
+    root, workspace = tmp_path / "root", tmp_path / "snapshot"
+    source = "src/platforms/esp/32/pin_esp32_native_impl.hpp"
+    example = "examples/AutoResearch/AutoResearch.ino"
+    startup = "examples/AutoResearch/AutoResearchStartupHook.cpp"
+    originals = {
+        source: b"original guard",
+        example: b"original example",
+        startup: b"original startup",
+    }
+    for directory in (root, workspace):
+        for relative, content in {
+            **originals,
+            "ci/boards.py": b"boards",
+            "compile": b"wrapper",
+        }.items():
+            path = directory / relative
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(content)
+        fixtures = directory / "ci/fixtures/software_spi_audit"
+        fixtures.mkdir(parents=True)
+        for name in (
+            "esp32_xtensa_mode_producer.cpp.txt",
+            "esp32_xtensa_mode_startup.cpp.txt",
+        ):
+            (fixtures / name).write_bytes(
+                (audit.ROOT / "ci/fixtures/software_spi_audit" / name).read_bytes()
+            )
+    monkeypatch.setattr(
+        native,
+        "_inputs",
+        lambda path: {key: digest(value) for key, value in originals.items()},
+    )
+    monkeypatch.setattr(native, "_snapshot", lambda *args: (workspace, None))
+    monkeypatch.setattr(native, "_verify_inputs", lambda *args: None)
+    monkeypatch.setattr(runner, "_environment", lambda *args: {})
+
+    def fail_client(*args):
+        assert (workspace / example).read_bytes() != originals[example]
+        raise ValueError("deliberate client discovery failure")
+
+    monkeypatch.setattr(runner, "_client_tools", fail_client)
+    restore = native._restore_sources
+
+    def restore_all(*args):
+        errors = restore(*args)
+        return errors + (
+            ["deliberate restoration verification failure"] if restore_failure else []
+        )
+
+    monkeypatch.setattr(native, "_restore_sources", restore_all)
+    with pytest.raises(ValueError):
+        runner.run_esp32_xtensa_mode_proof(root)
+    for relative, content in originals.items():
+        assert (workspace / relative).read_bytes() == content
+        assert (root / relative).read_bytes() == content
+    assert not list(root.rglob("proof.json"))
+    failures = list(root.rglob("failure.json"))
+    assert len(failures) == 1
+    failure = json.loads(failures[0].read_text())
+    assert failure["complete"] is False
+    if restore_failure:
+        assert "deliberate restoration" in str(failure["restoration_errors"])
+        assert "deliberate client" in failure["original_error"]
+
+
+@pytest.mark.parametrize("index", range(4))
+@pytest.mark.parametrize("corruption", ["missing", "wrong-nonempty"])
+def test_xtensa_mode_managed_requires_each_exact_conditional_precondition(
+    index, corruption
+):
+    from ci import software_spi_esp32_xtensa_mode_proof as checker
+
+    result = checker.classify_capture(_xtensa_mode_capture())
+    if corruption == "missing":
+        result.preconditions.pop(index)
+    else:
+        result.preconditions[index] = "unreviewed replacement premise"
+    with pytest.raises(ValueError):
+        checker.validate_stage_analysis("baseline", result)
+
+
+@pytest.mark.parametrize(
+    "corruption", ["wrong-assumption", "wrong-scope", "image-mapping-claim"]
+)
+def test_xtensa_mode_managed_rejects_changed_assumptions_or_broader_claims(corruption):
+    from ci import software_spi_esp32_xtensa_mode_proof as checker
+
+    result = checker.classify_capture(_xtensa_mode_capture())
+    if corruption == "wrong-assumption":
+        result.assumptions = ["unreviewed normal-callee contract"]
+    elif corruption == "wrong-scope":
+        result.scope = "whole-public-producer-execution-proven"
+    else:
+        result.image_mapping_qualified = True
+    with pytest.raises(ValueError):
+        checker.validate_stage_analysis("baseline", result)
