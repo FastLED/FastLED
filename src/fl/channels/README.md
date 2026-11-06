@@ -62,8 +62,9 @@ This removes unrelated driver singleton allocations, registration callback stora
 
 ### ESP32-S3 LCD/I2S clockless worker scheduling
 
-Worker core affinity and priority are configured only through the Channels
-API's `ChannelConfig::options.mWorker`. Legacy `addLeds<>` templates select
+Per-channel worker core affinity and priority use the Channels API's
+`ChannelConfig::options.mWorker`; build-wide defaults are described below.
+Legacy `addLeds<>` templates select
 the chipset, pins, bus, and bus instance; they do not configure worker
 scheduling.
 
@@ -112,29 +113,53 @@ config.options.mWorker.priority = fl::Priority::High; // Auto by default.
 auto channel = FastLED.add<fl::Bus::FLEX_IO, fl::ClocklessChipset>(config);
 ```
 
+Build-wide engine defaults can also be supplied as compiler definitions:
+
+```text
+-DFL_ENGINE_WORKER_CORE=fl::Core::Core1
+-DFL_ENGINE_WORKER_PRIORITY=fl::Priority::High
+```
+
+These portable defaults are currently honored by the LCD/I2S clockless engine.
+Other peripherals may honor or ignore them. Define them consistently for every
+translation unit, including library sources; a definition only in a sketch does
+not configure separately compiled drivers. Unset values are numeric Auto defaults
+(`-1` for core, `0` for priority), retaining existing backend behavior.
+They do not change the default `WorkerConfig` or add legacy template arguments.
+Explicit Channel settings override either default before the worker is created.
+The first explicit shared-engine configuration locks its policy; after worker
+creation, conflicting requests are rejected. Core selections must exist on the
+honoring target, and the LCD driver rejects invalid compile-time policies.
+
 **Migration:** remove all worker core and priority template arguments from
 legacy `addLeds<>` calls, including `Core::Auto` and `Priority::Auto`
 placeholders. To keep an explicit scheduling choice, use the channel
 configuration shown above. Neither core nor priority can be supplied through
 the legacy slim-controller templates.
 
-`Core::Auto` is the default and preserves legacy backend behavior (LCD:
-unpinned; RMT4: first show caller's core). `Any` explicitly
+`Core::Auto` is the default and inherits the engine policy, including an honored
+compile-time default. Without an override it preserves legacy backend behavior
+(LCD: unpinned; RMT4: first show caller's core). `Any` explicitly
 requests no affinity, and `CallingCore` captures the core creating the worker
 on the first transmission. `Core0` and `Core1` select an available RTOS core.
 Pinning does not follow subsequent `show()` calls between cores and does not
 configure interrupt affinity.
 
-`Priority::Auto` inherits an already configured worker's policy. A new LCD/I2S
-clockless worker defaults to `High`, preserving its previous scheduling:
+`Priority::Auto` inherits an already configured worker's policy or an honored
+compile-time default. Without an override, a new LCD/I2S clockless worker
+defaults to `High`, preserving its previous scheduling:
 
 | Priority | ESP32 FreeRTOS priority (`configMAX_PRIORITIES = 25`) |
 |---|---:|
-| `Auto` (new worker) / `High` | `configMAX_PRIORITIES - 2` = 23 |
+| `Auto` (no override) / `High` | `configMAX_PRIORITIES - 2` = 23 |
 | `Medium` | `configMAX_PRIORITIES / 2` = 12 |
 | `Low` | 1 |
 
-The enum values are policies, not raw scheduler numbers. Migrate the previous
+The enum values are policies, not raw scheduler numbers. `High` should run at
+networking priority or above, biased above when the scheduler supports it;
+`Medium` runs below networking. `Low` is generally not recommended for
+timing-sensitive engine workers. The current LCD mapping above preserves its
+existing High priority of 23. Migrate the previous
 numeric runtime setting `23` to `fl::Priority::High`. Lower priorities allow
 more competing work but can reduce the driver's ability to refill long strips
 in time. Task stack and DMA buffer sizing do not change with priority.

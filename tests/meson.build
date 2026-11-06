@@ -244,6 +244,42 @@ color_profile_tiny_runtime = executable('color_profile_tiny_runtime',
 )
 test('color_profile_tiny_runtime', color_profile_tiny_runtime)
 
+# Isolated whole-library worker-default variant: every translation unit uses
+# the same flags, without the ordinary library or its PCH in this process.
+engine_worker_default_args = [
+  '-DFL_ENGINE_WORKER_CORE=fl::Core::Core1',
+  '-DFL_ENGINE_WORKER_PRIORITY=fl::Priority::Medium',
+]
+engine_worker_defaults_lib = static_library('fastled_engine_worker_defaults',
+  fastled_sources + platforms_shared_files,
+  cpp_args: base_compile_args + test_abs_include_args + engine_worker_default_args + [
+    '-DFASTLED_BUILDING_DLL',
+  ],
+  pic: true,
+  implicit_include_directories: false,
+  build_by_default: false,
+  install: false
+)
+engine_worker_defaults_runtime = shared_library('engine_worker_defaults_runtime',
+  'fl/channels/engine_worker_defaults.cpp',
+  objects: shared_test_objects,
+  cpp_args: test_abs_include_args + unit_test_compile_args + engine_worker_default_args + [
+    '-DTEST_DLL_MODE',
+  ],
+  link_args: host_machine.system() == 'windows'
+    ? unit_test_link_args + ['-ldbghelp', '-lpsapi'] : unit_test_link_args,
+  link_with: [engine_worker_defaults_lib, crash_handler_lib],
+  name_prefix: '',
+  implicit_include_directories: false,
+  build_by_default: false,
+  install: false
+)
+test('engine_worker_defaults_runtime', runner_exe,
+  args: [engine_worker_defaults_runtime.full_path()],
+  workdir: meson.project_source_root(),
+  depends: [engine_worker_defaults_runtime],
+)
+
 # Build each test as a DLL with shared PCH
 foreach test_name : test_names
   # Get test file path from dynamic map (for subdirectories) or default to test_name.cpp
