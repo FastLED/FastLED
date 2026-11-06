@@ -6,7 +6,7 @@
 
 1. Make sure `release_notes.md` opens with a `FastLED X.Y.Z (Next Release)` section holding the notes.
 2. `bash release prepare --pr` (add `minor` or `major` for a bigger step; default is `patch`). It bumps every version string one step past the newest tag, makes the notes heading final, and opens a `Rev X.Y.Z` PR.
-3. Review and merge that PR. Merging does not create the release. Run `uv run python ci/release_gate.py dispatch-full --sha <sha>` for the merged commit and wait for it to finish, then manually run the `release` workflow on `master` with that `candidate_sha`: first with `dry_run` on, then off. It tags the commit and creates the GitHub release from the notes. See [CI modes](docs/CI_MODES.md). The Arduino index picks up the tag.
+3. Review and merge that PR. Merging does not create the release. Run `uv run python ci/release_gate.py dispatch-full --sha <sha>` for the merged commit (the full 40-character SHA) and wait for it to finish, then manually run the `release` workflow on `master` with that `candidate_sha`: first with `dry_run` on, then off. It tags the commit and creates the GitHub release from the notes. See [CI modes](docs/CI_MODES.md). The Arduino index picks up the tag.
 4. `bash release status` until every row shows the new version, then announce it on the subreddit.
 
 The manual steps further down are what the automation replaces; they remain as a fallback.
