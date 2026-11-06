@@ -2255,3 +2255,27 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
+
+def _rp2040_kernel_mutant(source: bytes) -> bytes:
+    from ci.software_spi_my9221_rp2040_proof import kernel_mutant
+
+    return kernel_mutant(source)
+
+
+def _validate_rp2040_elf_stage_sequence(names: tuple[str, ...]) -> None:
+    from ci.software_spi_my9221_rp2040_proof import validate_stage_sequence
+
+    validate_stage_sequence(names)
+
+
+def _classify_rp2040_elf_capture(capture: dict) -> list[str]:
+    from ci.software_spi_my9221_rp2040_proof import classify_capture
+
+    return classify_capture(capture)
+
+
+def _run_my9221_rp2040_elf_proof(root: Path):
+    from ci.software_spi_my9221_rp2040_runner import run_rp2040_elf_proof
+
+    return run_rp2040_elf_proof(root)

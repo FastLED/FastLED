@@ -3837,3 +3837,909 @@ def test_my9221_managed_bootstrap_tool_identities_retained_without_proof(
     assert record["expected"] == record["before"] == record["after"]
     assert set(record["expected"]) == set(names)
     assert not (tmp_path / "proof.json").exists()
+
+
+RP2040_MY_KERNEL = "src/platforms/arm/rp/rpcommon/my9221_emitter.h"
+
+
+def test_my9221_rp2040_elf_mutant_changes_only_kernel_sram_boundary() -> None:
+    original = (audit.ROOT / RP2040_MY_KERNEL).read_bytes()
+    marker = b"__no_inline_not_in_flash_func(my9221EmitRp)"
+    assert original.count(marker) == 2  # mutually exclusive GCC compiler branches
+    mutant = audit._rp2040_kernel_mutant(original)
+    assert mutant == original.replace(marker, b"__attribute__((noinline)) my9221EmitRp")
+    assert mutant.count(b"__no_inline_not_in_flash_func(my9221RpPin") == original.count(
+        b"__no_inline_not_in_flash_func(my9221RpPin"
+    )
+    assert (audit.ROOT / RP2040_MY_KERNEL).read_bytes() == original
+
+
+@pytest.mark.parametrize(
+    "source",
+    [
+        b"",
+        b"__no_inline_not_in_flash_func(my9221EmitRp)",
+        b"__no_inline_not_in_flash_func(my9221EmitRp)" * 3,
+    ],
+)
+def test_my9221_rp2040_elf_mutant_rejects_changed_boundary_shape(source: bytes) -> None:
+    with pytest.raises(ValueError):
+        audit._rp2040_kernel_mutant(source)
+
+
+@pytest.mark.parametrize(
+    "names",
+    [
+        (),
+        ("baseline", "restored"),
+        ("kernel-xip-mutant", "baseline", "restored"),
+        ("baseline", "kernel-xip-mutant", "restored", "extra"),
+    ],
+)
+def test_my9221_rp2040_elf_rejects_missing_reordered_or_extra_stages(
+    names: tuple[str, ...],
+) -> None:
+    with pytest.raises(ValueError):
+        audit._validate_rp2040_elf_stage_sequence(names)
+
+
+def test_my9221_rp2040_elf_closed_stage_catalog_does_not_supply_target_proof() -> None:
+    audit._validate_rp2040_elf_stage_sequence(
+        ("baseline", "kernel-xip-mutant", "restored")
+    )
+    row = next(row for row in REQUIRED_FINDINGS if row["issue"] == 5066)
+    assert check_evidence([row], [], audit._current_sources(audit.ROOT))
+
+
+def test_my9221_rp2040_elf_runner_rejects_missing_checkout_before_process(
+    tmp_path: Path,
+) -> None:
+    with pytest.raises(ValueError, match="input|source|checkout|missing"):
+        audit._run_my9221_rp2040_elf_proof(tmp_path)
+
+
+@pytest.mark.skipif(
+    os.environ.get("FASTLED_RUN_MY9221_RP2040_ELF_PROOF") != "1",
+    reason="requires three real fixed RP2040 vendor builds; ELF-property only",
+)
+def test_my9221_rp2040_elf_real_three_stage_acceptance() -> None:
+    from ci import software_spi_init_proof as native
+
+    original = (audit.ROOT / RP2040_MY_KERNEL).read_bytes()
+    before = native._inputs(audit.ROOT)
+    proof = audit._run_my9221_rp2040_elf_proof(audit.ROOT)
+    assert proof.scope == "rp2040-native-gpio2-3-elf-sram-property-only"
+    assert proof.public_api_scope == "direct-controller-init-setLeds-showLeds"
+    assert proof.global_fastled_dispatch_proven is False
+    assert proof.complete_executed_argv is False
+    assert [stage.name for stage in proof.stages] == [
+        "baseline",
+        "kernel-xip-mutant",
+        "restored",
+    ]
+    assert proof.workspace.parent == Path.home() / ".clud" / "worktrees"
+    assert proof.workspace != audit.ROOT
+    for stage in proof.stages:
+        assert stage.build_returncode == 0, "compile failure cannot satisfy XIP mutant"
+        assert stage.inputs_before == stage.inputs_after
+        assert stage.tools_before == stage.tools_after == proof.stages[0].tools_before
+        assert stage.configuration == proof.stages[0].configuration
+        assert stage.raw_database_scope == "planned-argv-not-complete-executed-receipt"
+        for path, expected in stage.artifact_sha256s.items():
+            assert digest(Path(path).read_bytes()) == expected
+        if stage.name == "kernel-xip-mutant":
+            assert stage.property_errors == ["kernel-not-in-sdk-sram"]
+        else:
+            assert stage.property_errors == []
+            assert stage.public_producer_reachable is True
+            assert stage.callback_arguments_resolved is True
+            assert stage.masked_callee_literal_closure is True
+    assert (proof.workspace / RP2040_MY_KERNEL).read_bytes() == original
+    assert native._inputs(audit.ROOT) == before
+    row = next(row for row in REQUIRED_FINDINGS if row["issue"] == 5066)
+    errors = check_evidence([row], [], audit._current_sources(audit.ROOT))
+    for configuration in row["required_configurations"]:
+        assert any(f"/{configuration}: unresolved" in error for error in errors)
+
+
+def rp2040_local_elf_capture() -> dict[str, object]:
+    # Actual fresh SDK output/raw ELF bytes; these data are parser fixtures,
+    # never proof receipts or a source of runtime/configuration acceptance.
+    path = audit.ROOT / "ci/fixtures/software_spi_audit/rp2040_local_elf_capture.json"
+    return json.loads(path.read_text())
+
+
+def rp2040_capture_word(capture: dict[str, object], address: int, value: int) -> None:
+    for section in capture["section_bytes"].values():
+        raw = bytearray.fromhex(section["bytes_hex"])
+        offset = address - section["vma"]
+        if 0 <= offset <= len(raw) - 4:
+            prior = int.from_bytes(raw[offset : offset + 4], "little")
+            raw[offset : offset + 4] = value.to_bytes(4, "little")
+            section["bytes_hex"] = raw.hex()
+            old = f"{prior:08x} \t.word\t0x{prior:08x}"
+            new = f"{value:08x} \t.word\t0x{value:08x}"
+            for key in ("text_disassembly", "ram_disassembly"):
+                capture[key] = capture[key].replace(old, new)
+            return
+    raise AssertionError("literal fixture address not backed by captured ELF section")
+
+
+def test_my9221_rp2040_elf_actual_capture_allows_pre_guard_flash_literals_and_flash_lma() -> (
+    None
+):
+    capture = rp2040_local_elf_capture()
+    assert "0x200000c0 0x10013140" in capture["elf_layout"]
+    assert "10003584" in capture["text_disassembly"]
+    assert "#208" in capture["ram_disassembly"]  # SIO/MMIO scalar, not a code pointer.
+    assert audit._classify_rp2040_elf_capture(capture) == []
+    row = next(row for row in REQUIRED_FINDINGS if row["issue"] == 5066)
+    assert check_evidence([row], [], audit._current_sources(audit.ROOT))
+
+
+@pytest.mark.parametrize(
+    "word,error",
+    [
+        (0x200000C0, "callback-thumb-target-invalid"),
+        (0x200000C3, "callback-target-mismatch"),
+        (0x100000C1, "callback-target-mismatch"),
+    ],
+)
+def test_my9221_rp2040_elf_callback_words_resolve_exact_thumb_entrypoints(
+    word: int, error: str
+) -> None:
+    capture = rp2040_local_elf_capture()
+    rp2040_capture_word(capture, 0x10003584, word)
+    assert error in audit._classify_rp2040_elf_capture(capture)
+
+
+@pytest.mark.parametrize(
+    "change,error",
+    [
+        ("missing-root", "public-producer-unreachable"),
+        ("wrong-vptr-slot", "public-controller-vptr-unbound"),
+        ("section-end", "sram-symbol-range-missing"),
+        ("load-end", "sram-load-range-missing"),
+        ("no-executable-load", "sram-load-range-missing"),
+        ("unknown-indirect", "unsupported-kernel-shape"),
+        ("unknown-opcode", "unsupported-kernel-shape"),
+        ("flash-literal-in-kernel", "unsupported-kernel-shape"),
+        ("bad-return-token", "unsupported-kernel-shape"),
+        ("malformed-memory", "sdk-memory-range-invalid"),
+    ],
+)
+def test_my9221_rp2040_elf_rejects_actual_capture_graph_range_and_instruction_corruption(
+    change: str, error: str
+) -> None:
+    capture = rp2040_local_elf_capture()
+    if change == "missing-root":
+        capture["text_disassembly"] = capture["text_disassembly"].replace(
+            "<my9221_rp2040_public_producer>", "<unused_public_producer>"
+        )
+    elif change == "wrong-vptr-slot":
+        capture["text_disassembly"] = capture["text_disassembly"].replace(
+            "str\tr3, [sp, #0]", "str\tr3, [sp, #4]", 1
+        )
+    elif change == "section-end":
+        capture["elf_layout"] = capture["elf_layout"].replace(
+            "0150c0 000e34", "0150c0 000100", 1
+        )
+    elif change == "load-end":
+        capture["elf_layout"] = capture["elf_layout"].replace(
+            "0x00e34 0x00e34 R E", "0x00100 0x00100 R E", 1
+        )
+    elif change == "no-executable-load":
+        capture["elf_layout"] = capture["elf_layout"].replace(
+            "0x00e34 0x00e34 R E", "0x00e34 0x00e34 RW ", 1
+        )
+    elif change == "unknown-indirect":
+        capture["ram_disassembly"] = capture["ram_disassembly"].replace(
+            "blx\tr7", "blx\tr0", 1
+        )
+    elif change == "unknown-opcode":
+        capture["ram_disassembly"] = capture["ram_disassembly"].replace(
+            "mrs\tr3, PRIMASK", "udf\t#0", 1
+        )
+    elif change == "flash-literal-in-kernel":
+        capture["ram_disassembly"] = capture["ram_disassembly"].replace(
+            "movs\tr3, #2", "ldr\tr3, [pc, #0] @ (10000000)", 1
+        )
+    elif change == "bad-return-token":
+        capture["ram_disassembly"] = capture["ram_disassembly"].replace(
+            "bx\tr3", "bx\tr0", 1
+        )
+    else:
+        capture["memory_map"] = capture["memory_map"].replace(
+            "0x00040000", "0x00000000", 1
+        )
+    assert error in audit._classify_rp2040_elf_capture(capture)
+
+
+def test_my9221_rp2040_elf_veneer_cannot_target_unrelated_flash_code() -> None:
+    capture = rp2040_local_elf_capture()
+    rp2040_capture_word(capture, 0x1001223C, 0x10003001)
+    assert "kernel-veneer-target-invalid" in audit._classify_rp2040_elf_capture(capture)
+
+
+@pytest.mark.parametrize(
+    "key,old,new",
+    [
+        ("ram_disassembly", "bcs.n\t2000014c", "bcs.n\t2000014e"),
+        ("ram_disassembly", "bhi.n\t20000134", "bne.n\t20000134"),
+        (
+            "text_disassembly",
+            "bl\t10003266 <fl::CLEDController::showLeds",
+            "bl\t10003268 <fl::CLEDController::showLeds",
+        ),
+        (
+            "text_disassembly",
+            "bl\t10012230 <___ZN2fl6detailL12my9221EmitRp",
+            "bl\t10012232 <___ZN2fl6detailL12my9221EmitRp",
+        ),
+        ("text_disassembly", "ldr\tr3, [pc, #104]", "ldr\tr3, [pc, #100]"),
+        ("text_disassembly", "str\tr6, [sp, #24]", "str\tr6, [sp, #28]"),
+        ("ram_disassembly", "47b8      \tblx\tr7", "4780      \tblx\tr7"),
+    ],
+)
+def test_my9221_rp2040_elf_normalization_cannot_hide_actual_target_or_operand_drift(
+    key: str, old: str, new: str
+) -> None:
+    capture = rp2040_local_elf_capture()
+    assert old in capture[key], "negative must change a real captured instruction"
+    capture[key] = capture[key].replace(old, new, 1)
+    assert audit._classify_rp2040_elf_capture(capture), (
+        "same symbol annotation cannot authorize wrong raw target/opcode/operand"
+    )
+
+
+def test_my9221_rp2040_elf_unused_producer_symbol_cannot_replace_actual_main_edge() -> (
+    None
+):
+    capture = rp2040_local_elf_capture()
+    old = "bl\t10003304 <my9221_rp2040_public_producer>"
+    assert old in capture["text_disassembly"]
+    capture["text_disassembly"] = capture["text_disassembly"].replace(
+        old, "bl\t10003306 <my9221_rp2040_public_producer>", 1
+    )
+    assert "public-producer-unreachable" in audit._classify_rp2040_elf_capture(capture)
+
+
+def rp2040_capture_instruction(
+    capture: dict[str, object],
+    key: str,
+    address: int,
+    words: str,
+    old_operand: str,
+    new_operand: str,
+) -> None:
+    import re
+
+    pattern = rf"^{address:x}:\s+([0-9a-f ]+?)\s+\t(.+)$"
+    match = re.search(pattern, capture[key], re.MULTILINE)
+    assert match and old_operand in match[2]
+    original = b"".join(
+        int(word, 16).to_bytes(2, "little") for word in match[1].split()
+    )
+    replacement = b"".join(
+        int(word, 16).to_bytes(2, "little") for word in words.split()
+    )
+    assert len(original) == len(replacement)
+    changed = f"{address:x}:\\t{words} \\t{match[2].replace(old_operand, new_operand, 1)}".replace(
+        "\\t", "\t"
+    )
+    capture[key] = capture[key][: match.start()] + changed + capture[key][match.end() :]
+    for section in capture["section_bytes"].values():
+        offset = address - section["vma"]
+        raw = bytearray.fromhex(section["bytes_hex"])
+        if 0 <= offset <= len(raw) - len(original):
+            assert raw[offset : offset + len(original)] == original
+            raw[offset : offset + len(original)] = replacement
+            section["bytes_hex"] = raw.hex()
+            return
+    raise AssertionError("instruction not in actual captured ELF storage")
+
+
+@pytest.mark.parametrize(
+    "key,address,words,old,new,error",
+    [
+        (
+            "text_disassembly",
+            0x1000338A,
+            "f7ff ffbc",
+            "bl\t10003304",
+            "bl\t10003306",
+            "public-producer-unreachable",
+        ),
+        (
+            "ram_disassembly",
+            0x2000014E,
+            "d2fe",
+            "bcs.n\t2000014c",
+            "bcs.n\t2000014e",
+            "unsupported-kernel-shape",
+        ),
+        (
+            "text_disassembly",
+            0x10003552,
+            "9607",
+            "str\tr6, [sp, #24]",
+            "str\tr6, [sp, #28]",
+            "callback-target-mismatch",
+        ),
+    ],
+)
+def test_my9221_rp2040_elf_consistent_bad_target_or_slot_cannot_hide_behind_annotation(
+    key: str, address: int, words: str, old: str, new: str, error: str
+) -> None:
+    capture = rp2040_local_elf_capture()
+    rp2040_capture_instruction(capture, key, address, words, old, new)
+    assert error in audit._classify_rp2040_elf_capture(capture)
+
+
+def test_my9221_rp2040_elf_decoy_named_writer_target_cannot_certify_unused_kernel() -> (
+    None
+):
+    capture = rp2040_local_elf_capture()
+    old = "bl\t10012230 <___ZN2fl6detailL12my9221EmitRpEPKtjNS0_12My9221RpPinsE_veneer>"
+    new = "bl\t10003266 <decoy_my9221EmitRp>"
+    rp2040_capture_instruction(
+        capture, "text_disassembly", 0x1000356A, "f7ff fe7c", old, new
+    )
+    capture["text_function_headers"] += "10003266 <decoy_my9221EmitRp>:\n"
+    assert "kernel-veneer-target-invalid" in audit._classify_rp2040_elf_capture(capture)
+
+
+@pytest.mark.parametrize("kind", ["section", "load"])
+def test_my9221_rp2040_elf_rejects_ambiguous_executable_extents(kind: str) -> None:
+    capture = rp2040_local_elf_capture()
+    lines = capture["elf_layout"].splitlines()
+    needle = (
+        ".data             PROGBITS" if kind == "section" else "0x200000c0 0x10013140"
+    )
+    matches = [line for line in lines if needle in line]
+    assert len(matches) == 1
+    capture["elf_layout"] += matches[0] + "\n"
+    assert "sram-extent-ambiguous" in audit._classify_rp2040_elf_capture(capture)
+
+
+@pytest.mark.parametrize("field", ["tools", "sdk", "configuration", "environment"])
+def test_my9221_rp2040_elf_frozen_profile_rejects_any_identity_drift(
+    tmp_path: Path, field: str
+) -> None:
+    import copy
+
+    from ci import software_spi_my9221_rp2040_proof as vendor
+
+    # Frozen-state comparison only: hand-written state never certifies a build.
+    expected = {
+        "tools": {"compiler": "initial"},
+        "sdk": {"core/header.h": "initial"},
+        "configuration": {"cxx_flags": ["-mcpu=cortex-m0plus"]},
+        "environment": {"PATH": "hash-only"},
+    }
+    observed = copy.deepcopy(expected)
+    observed[field] = {"drift": "changed"}
+    with pytest.raises(ValueError, match="identity|profile|changed"):
+        vendor._verify_profile_state(tmp_path, "mutant-before", expected, observed)
+    diagnostic = json.loads((tmp_path / "profile-mutant-before.json").read_text())
+    assert diagnostic["changed_fields"] == [field]
+    assert diagnostic["expected"] == expected
+    assert diagnostic["observed"] == observed
+    assert not (tmp_path / "proof.json").exists()
+
+
+@dataclass(slots=True)
+class Rp2040StagedProject:
+    workspace: Path
+    project: Path
+    expected: dict[str, str]
+
+
+def rp2040_staged_project_fixture(
+    tmp_path: Path, unsafe: bool = False
+) -> Rp2040StagedProject:
+    from ci import software_spi_my9221_rp2040_runner as vendor
+    from ci.compiler.source_manager import generate_main_cpp
+
+    workspace, project = tmp_path / "workspace", tmp_path / "project"
+    source = workspace / "src/fl/model.h"
+    source.parent.mkdir(parents=True)
+    source.write_bytes(b"actual fixture source identity")
+    example = workspace / "examples/AutoResearch/AutoResearch.ino"
+    example.parent.mkdir(parents=True)
+    example.write_bytes(vendor.PRODUCER)
+    metadata = (audit.ROOT / "library.json").read_bytes()
+    (workspace / "library.json").write_bytes(metadata)
+    staged = project / "lib/FastLED/fl/model.h"
+    staged.parent.mkdir(parents=True)
+    if unsafe:
+        try:
+            staged.symlink_to(source)
+        except OSError as error:
+            pytest.skip(f"real symlink capability unavailable: {error}")
+    else:
+        staged.write_bytes(source.read_bytes())
+    (project / "lib/FastLED/library.json").write_bytes(metadata)
+    sketch = project / "src/sketch/AutoResearch.ino"
+    sketch.parent.mkdir(parents=True)
+    sketch.write_bytes(vendor.PRODUCER)
+    (project / "src/main.cpp").write_bytes(
+        generate_main_cpp(["AutoResearch.ino"]).encode()
+    )
+    return Rp2040StagedProject(
+        workspace, project, {"src/fl/model.h": digest(source.read_bytes())}
+    )
+
+
+@pytest.mark.parametrize(
+    "kind",
+    [
+        "extra-library",
+        "extra-project",
+        "extra-sketch",
+        "source-symlink",
+        "directory-symlink",
+    ],
+)
+def test_my9221_rp2040_elf_rejects_extra_or_unsafe_staged_inputs(
+    tmp_path: Path, kind: str
+) -> None:
+    from ci import software_spi_my9221_rp2040_runner as vendor
+
+    fixture = rp2040_staged_project_fixture(tmp_path, kind == "source-symlink")
+    workspace, project, expected = fixture.workspace, fixture.project, fixture.expected
+    if kind == "extra-library":
+        (project / "lib/FastLED/injected.cpp").write_text("#error extra library source")
+    elif kind == "extra-project":
+        (project / "src/injected.cpp").write_text("#error extra project source")
+    elif kind == "extra-sketch":
+        (project / "src/sketch/Injected.h").write_text("#error extra sketch header")
+    elif kind == "directory-symlink":
+        try:
+            (project / "src/sketch/external").symlink_to(
+                workspace / "src", target_is_directory=True
+            )
+        except OSError as error:
+            pytest.skip(f"real directory symlink capability unavailable: {error}")
+    with pytest.raises(ValueError, match="staged|unsafe|universe|source"):
+        vendor._check_staged_sources(workspace, expected, project)
+
+
+def test_my9221_rp2040_elf_exact_staged_project_control(tmp_path: Path) -> None:
+    from ci import software_spi_my9221_rp2040_runner as vendor
+
+    fixture = rp2040_staged_project_fixture(tmp_path)
+    workspace, project, expected = fixture.workspace, fixture.project, fixture.expected
+    vendor._check_staged_sources(workspace, expected, project)
+
+
+def test_my9221_rp2040_elf_child_environment_excludes_secrets_and_binds_reviewed_inputs(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from ci import software_spi_my9221_rp2040_runner as vendor
+
+    for name in (
+        "GITHUB_TOKEN",
+        "AWS_SECRET_ACCESS_KEY",
+        "UNREVIEWED_PRIVATE_VALUE",
+        "HTTPS_PROXY",
+    ):
+        monkeypatch.setenv(name, "secret-must-not-inherit-or-fingerprint")
+    monkeypatch.setenv("CXXFLAGS", "-DREVIEWED_PROFILE_FLAG=1")
+    environment = vendor._environment(tmp_path)
+    assert all(
+        name not in environment
+        for name in (
+            "GITHUB_TOKEN",
+            "AWS_SECRET_ACCESS_KEY",
+            "UNREVIEWED_PRIVATE_VALUE",
+            "HTTPS_PROXY",
+        )
+    )
+    assert environment["CXXFLAGS"] == "-DREVIEWED_PROFILE_FLAG=1"
+    assert environment["UV_PROJECT_ENVIRONMENT"] == sys.prefix
+    assert environment["PYTHONPATH"] == str(tmp_path.resolve())
+    assert environment["UV_NO_SYNC"] == "1"
+    assert environment["FBUILD_DEV_MODE"] == "1"
+
+
+@pytest.mark.parametrize(
+    "changed", ["pid", "start", "cache", "running-image", "health-pid"]
+)
+def test_my9221_rp2040_elf_serving_daemon_drift_cannot_be_disk_binary_proof(
+    tmp_path: Path, changed: str
+) -> None:
+    import copy
+
+    from ci import software_spi_my9221_rp2040_runner as vendor
+
+    # Identity comparison fixtures only; no hand-written daemon record can
+    # authenticate a build or clear target evidence.
+    baseline = {
+        "pid": 42,
+        "start_ticks": "123",
+        "started_at": "fixture-start",
+        "cache_identity": "fixture-cache",
+        "image_sha256": "a" * 64,
+        "health_pid": 42,
+        "image_pid": 42,
+    }
+    observed = copy.deepcopy(baseline)
+    observed[
+        {
+            "pid": "pid",
+            "start": "start_ticks",
+            "cache": "cache_identity",
+            "running-image": "image_sha256",
+            "health-pid": "health_pid",
+        }[changed]
+    ] = "drift"
+    with pytest.raises(ValueError, match="daemon|engine|identity"):
+        vendor._verify_serving_engine(tmp_path, "stage-after", baseline, observed)
+    assert not (tmp_path / "proof.json").exists()
+
+
+def test_my9221_rp2040_elf_inspection_targets_retained_immutable_elf(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from ci import software_spi_my9221_rp2040_runner as vendor
+
+    saved = tmp_path / "saved"
+    saved.mkdir()
+    (saved / "firmware.elf").write_bytes(b"retained ELF identity")
+    info = {
+        "prog_path": str(tmp_path / "mutable/firmware.elf"),
+        "objdump_path": "/bound/sdk/objdump",
+        "readelf_path": "/bound/sdk/readelf",
+    }
+    commands = []
+
+    def stop_at_inspection(
+        command: list[str], *_args: object, **_kwargs: object
+    ) -> None:
+        commands.append(command)
+        raise RuntimeError("inspection stopped by orchestration-negative fixture")
+
+    monkeypatch.setattr(vendor.native, "_run", stop_at_inspection)
+    with pytest.raises(RuntimeError, match="inspection stopped"):
+        vendor._capture(tmp_path, saved, info, {})
+    assert commands[0][-1] == str(saved / "firmware.elf")
+
+
+def test_my9221_rp2040_elf_daemon_startup_env_filters_credentials_and_binds_build_flags() -> (
+    None
+):
+    from ci import software_spi_my9221_rp2040_runner as vendor
+
+    raw = (
+        b"GITHUB_TOKEN=never-hash-this-secret\0UNKNOWN_PRIVATE_VALUE=also-secret\0"
+        b"HTTPS_PROXY=https://user:password@example.invalid\0"
+        b"PATH=/bound/tool/bin\0CXXFLAGS=-DSTARTUP_PROFILE=1\0FBUILD_DEV_MODE=1\0"
+    )
+    observed = vendor._startup_environment_hashes(raw)
+    assert observed == {
+        "PATH": digest(b"/bound/tool/bin"),
+        "CXXFLAGS": digest(b"-DSTARTUP_PROFILE=1"),
+        "FBUILD_DEV_MODE": digest(b"1"),
+    }
+    assert digest(b"never-hash-this-secret") not in observed.values()
+    assert digest(b"https://user:password@example.invalid") not in observed.values()
+
+
+def test_my9221_rp2040_elf_daemon_startup_compiler_environment_drift_rejects(
+    tmp_path: Path,
+) -> None:
+    from ci import software_spi_my9221_rp2040_runner as vendor
+
+    baseline = {
+        "pid": 42,
+        "health_pid": 42,
+        "image_pid": 42,
+        "startup_environment": vendor._startup_environment_hashes(
+            b"CXXFLAGS=-DPROFILE=1\0"
+        ),
+    }
+    observed = {
+        **baseline,
+        "startup_environment": vendor._startup_environment_hashes(
+            b"CXXFLAGS=-DPROFILE=2\0"
+        ),
+    }
+    assert baseline["startup_environment"] != observed["startup_environment"]
+    with pytest.raises(ValueError, match="daemon|engine|identity"):
+        vendor._verify_serving_engine(tmp_path, "after", baseline, observed)
+    assert not (tmp_path / "proof.json").exists()
+
+
+@pytest.mark.skipif(
+    sys.platform != "linux",
+    reason="serving-image discovery is the explicitly Linux /proc profile",
+)
+def test_my9221_rp2040_elf_daemon_version_comes_from_verified_serving_identity(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from ci import software_spi_my9221_rp2040_runner as vendor
+
+    # Tool-discovery orchestration only; mock observations cannot authenticate
+    # a vendor build or publish any proof.
+    info = {"aliases": {}}
+    for key in (
+        "cc_path",
+        "cxx_path",
+        "ar_path",
+        "objdump_path",
+        "readelf_path",
+        "nm_path",
+    ):
+        path = tmp_path / key
+        path.write_bytes(key.encode())
+        info[key] = str(path)
+    linker = tmp_path / "ld"
+    linker.write_bytes(b"linker fixture identity")
+    info["aliases"]["ld"] = str(linker)
+    commands = []
+    health_calls = []
+
+    def version_command(
+        command: list[str], *_args: object, **_kwargs: object
+    ) -> NativeProcessResult:
+        assert Path(command[0]).name != "fbuild-daemon", (
+            "daemon CLI has no --version; never start/probe the service executable"
+        )
+        commands.append(command)
+        return NativeProcessResult(0, "fixture tool version")
+
+    def observed_daemon(
+        _workspace: Path, _saved: Path, phase: str, _environment: dict, tools: dict
+    ) -> dict:
+        health_calls.append(phase)
+        return {
+            "version": "2.5.52",
+            "build_id": "verified-health-build",
+            "image_sha256": tools["fbuild-daemon"].sha256,
+        }
+
+    monkeypatch.setattr(vendor.native, "_run", version_command)
+    monkeypatch.setattr(vendor, "_daemon_identity", observed_daemon)
+    tools = vendor._tool_identities(
+        info, tmp_path, {"PATH": os.environ["PATH"]}, tmp_path / "saved"
+    )
+    assert commands and health_calls
+    assert tools["fbuild-daemon"].version == "2.5.52 (verified-health-build)"
+    assert not (tmp_path / "saved/proof.json").exists()
+
+
+@pytest.mark.skipif(
+    sys.platform != "linux",
+    reason="serving-image discovery is the explicitly Linux /proc profile",
+)
+def test_my9221_rp2040_elf_health_version_never_waives_running_image_identity(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from ci import software_spi_init_proof as native
+    from ci import software_spi_my9221_rp2040_runner as vendor
+
+    # A matching reported version cannot replace the independently observed
+    # /proc loaded-image SHA check. This is a parser negative, not a real API receipt.
+    observation = {
+        "version": "2.5.52",
+        "build_id": "matching-version",
+        "image_sha256": "b" * 64,
+    }
+    monkeypatch.setattr(
+        vendor.native,
+        "_run",
+        lambda *_args, **_kwargs: NativeProcessResult(0, json.dumps(observation)),
+    )
+    tools = {
+        "fbuild-daemon": native.ToolIdentity(tmp_path / "daemon", "a" * 64, "2.5.52")
+    }
+    with pytest.raises(ValueError, match="image|binary"):
+        vendor._daemon_identity(tmp_path, tmp_path / "saved", "bootstrap", {}, tools)
+    assert not (tmp_path / "saved/proof.json").exists()
+
+
+def test_my9221_rp2040_elf_build_session_hashes_before_ensure_and_captures_immediate_after(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from ci import software_spi_my9221_rp2040_runner as vendor
+
+    # Orchestration only: no fake SDK execution/property proof is supplied.
+    events = []
+    engine = {
+        "pid": 42,
+        "health_pid": 42,
+        "image_pid": 42,
+        "start_ticks": "initial",
+        "image_sha256": "same",
+        "startup_environment": {"CXXFLAGS": "same"},
+    }
+    monkeypatch.setattr(
+        vendor,
+        "_state",
+        lambda *_args, **_kwargs: events.append("hash") or {"fixed": "profile"},
+    )
+    monkeypatch.setattr(
+        vendor,
+        "_ensure_stage_engine",
+        lambda *_args, **_kwargs: events.append("ensure"),
+        raising=False,
+    )
+    monkeypatch.setattr(
+        vendor,
+        "_daemon_identity",
+        lambda *_args, **_kwargs: events.append("capture") or engine,
+    )
+    monkeypatch.setattr(
+        vendor,
+        "_compile",
+        lambda *_args, **_kwargs: events.append("build") or {"same": "info"},
+    )
+    monkeypatch.setattr(
+        vendor.native,
+        "_verify_inputs",
+        lambda *_args, **_kwargs: events.append("inputs") or {},
+    )
+    monkeypatch.setattr(
+        vendor,
+        "_check_staged_sources",
+        lambda *_args, **_kwargs: events.append("staged"),
+    )
+    monkeypatch.setattr(
+        vendor.property_check, "_verify_profile_state", lambda *_args, **_kwargs: None
+    )
+    vendor._build_session(
+        tmp_path,
+        tmp_path / "saved",
+        {},
+        {},
+        (),
+        {"fixed": "profile"},
+        engine,
+        {"same": "info"},
+        {},
+    )
+    assert events == [
+        "hash",
+        "ensure",
+        "capture",
+        "build",
+        "capture",
+        "hash",
+        "inputs",
+        "staged",
+    ]
+
+
+def test_my9221_rp2040_elf_new_verified_instance_between_builds_preserves_profile(
+    tmp_path: Path,
+) -> None:
+    from ci import software_spi_my9221_rp2040_runner as vendor
+
+    baseline = {
+        "pid": 42,
+        "health_pid": 42,
+        "image_pid": 42,
+        "start_ticks": "old",
+        "started_at": 1,
+        "exe_device": 1,
+        "exe_inode": 10,
+        "image_sha256": "same",
+        "version": "same",
+        "cache_identity": "same",
+        "startup_environment": {"CXXFLAGS": "same"},
+    }
+    later = {
+        **baseline,
+        "pid": 43,
+        "health_pid": 43,
+        "image_pid": 43,
+        "start_ticks": "new",
+        "started_at": 2,
+        "exe_inode": 11,
+    }
+    vendor._verify_engine_profile(tmp_path, "next-build", baseline, later)
+    for key in (
+        "image_sha256",
+        "cache_identity",
+        "startup_environment",
+        "not_a_pid_field",
+    ):
+        bad = {**later, key: "changed"}
+        with pytest.raises(ValueError, match="engine|profile|identity"):
+            vendor._verify_engine_profile(tmp_path, "next-build", baseline, bad)
+    assert not (tmp_path / "proof.json").exists()
+
+
+@pytest.mark.parametrize("field", ["pid", "image_sha256", "startup_environment"])
+def test_my9221_rp2040_elf_build_window_never_accepts_instance_or_provider_drift(
+    tmp_path: Path, field: str
+) -> None:
+    from ci import software_spi_my9221_rp2040_runner as vendor
+
+    baseline = {
+        "pid": 42,
+        "health_pid": 42,
+        "image_pid": 42,
+        "start_ticks": "same",
+        "image_sha256": "same",
+        "startup_environment": {"CXXFLAGS": "same"},
+    }
+    with pytest.raises(ValueError, match="engine|identity"):
+        vendor._verify_serving_engine(
+            tmp_path, "build-after", baseline, {**baseline, field: "changed"}
+        )
+
+
+def test_my9221_rp2040_elf_unqualified_online_engine_blocks_normal_ensure(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from ci import software_spi_my9221_rp2040_runner as vendor
+
+    expected = {
+        "pid": 42,
+        "health_pid": 42,
+        "image_pid": 42,
+        "image_sha256": "approved",
+        "startup_environment": {"CXXFLAGS": "same"},
+    }
+    monkeypatch.setattr(
+        vendor,
+        "_probe_existing_engine",
+        lambda *_args, **_kwargs: {**expected, "image_sha256": "unqualified"},
+        raising=False,
+    )
+    commands = []
+    monkeypatch.setattr(
+        vendor.native, "_run", lambda *args, **_kwargs: commands.append(args)
+    )
+    with pytest.raises(ValueError, match="engine|profile|identity"):
+        vendor._ensure_stage_engine(tmp_path, tmp_path / "saved", {}, {}, expected)
+    assert commands == [], "normal ensure cannot replace an unqualified online engine"
+
+
+@pytest.mark.skipif(
+    sys.platform != "linux",
+    reason="actual serving/client-discovery profile uses provisioned Linux venv",
+)
+def test_my9221_rp2040_elf_normal_ensure_uses_same_bound_uv_launch_as_wrapper(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import shutil
+
+    from ci import software_spi_init_proof as native
+    from ci import software_spi_my9221_rp2040_runner as vendor
+
+    environment = vendor._environment(tmp_path)
+    paths = {
+        "python": Path(sys.executable).absolute(),
+        "fbuild-daemon": Path(sys.executable).absolute().parent / "fbuild-daemon",
+        "fbuild-extension": Path(
+            __import__("fbuild._native", fromlist=["__file__"]).__file__
+        ),
+        "uv": Path(shutil.which("uv", path=environment["PATH"])),
+    }
+    tools = {
+        name: native.ToolIdentity(path, digest(path.read_bytes()), "fixture identity")
+        for name, path in paths.items()
+    }
+    monkeypatch.setattr(
+        vendor, "_probe_existing_engine", lambda *_args, **_kwargs: None
+    )
+    commands = []
+    monkeypatch.setattr(
+        vendor.native,
+        "_run",
+        lambda command, *_args, **_kwargs: (
+            commands.append(command) or NativeProcessResult(0, "{}")
+        ),
+    )
+    vendor._ensure_stage_engine(tmp_path, tmp_path / "saved", environment, tools, {})
+    assert commands[0][:5] == [
+        str(tools["uv"].path),
+        "run",
+        "--no-sync",
+        str(tools["python"].path),
+        "-c",
+    ]
+    assert not (tmp_path / "saved/proof.json").exists()

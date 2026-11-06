@@ -50,6 +50,7 @@ raise SystemExit(0 if result.success else 2)
 
 
 class _ProofKind(Enum):
+    RP2040_ELF = "rp2040-elf"
     INIT = "init"
     MY9221 = "my9221"
 
@@ -76,6 +77,14 @@ def _spec(kind: _ProofKind) -> _NativeSpec:
             ("src/fl/chipsets/my9221.h", "src/platforms/shared/my9221_typed_emitter.h"),
             "spi-my9221-proof",
             "spi-my9221-proof",
+        )
+    if kind is _ProofKind.RP2040_ELF:
+        return _NativeSpec(
+            "rp2040",
+            "examples/AutoResearch/AutoResearch.ino",
+            ("src/platforms/arm/rp/rpcommon/my9221_emitter.h",),
+            "spi-my9221-rp2040-elf-proof",
+            "spi-my9221-rp2040-elf-proof",
         )
     raise ValueError("unknown fixed native proof target")
 
@@ -932,6 +941,8 @@ def _restore_sources(workspace: Path, original: dict[str, bytes]) -> list[str]:
 
 
 def _run_proof(root: Path, kind: _ProofKind) -> InitProof:
+    if kind not in (_ProofKind.INIT, _ProofKind.MY9221):
+        raise ValueError("vendor snapshot kind cannot select native execution proof")
     root = root.resolve()
     spec = _spec(kind)
     # Preserve the existing init private call contract for its negative controls.
