@@ -88,7 +88,10 @@ template <u8 PIN, int GRP> struct TracedClock : d51_test::Base<PIN, d51_test::kC
         // Apply the aliases to the latch, as the hardware does.
         volatile u32& latch = d51_test::Reg<0, d51_test::kDr>::r();
         latch = (latch | s) & ~c;
-        d51_test::gEdges.push_back({s != 0, s, c});
+        // Only a real low-to-high transition counts as an edge.
+        if ((d51_test::Reg<GRP, d51_test::kDr>::r() & d51_test::kClock) == 0) {
+            d51_test::gEdges.push_back({s != 0, s, c});
+        }
         ++d51_test::gClockAliasStores;
         d51_test::Reg<GRP, d51_test::kDr>::r() =
             d51_test::Reg<GRP, d51_test::kDr>::r() | d51_test::kClock;
