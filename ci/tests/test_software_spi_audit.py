@@ -5716,6 +5716,483 @@ def _xtensa_mode_capture(stage: str = "baseline") -> dict:
     )
 
 
+def _xtensa_mode_factory_carrier(
+    tmp_path: Path, stage: str = "baseline", corruption: str = "none"
+) -> tuple[bytes, str, Path]:
+    # Explicitly SYNTHETIC ELF-format carrier: actual selected bytes and
+    # allocated table geometry, new compact symbol/string tables, zero-filled
+    # uninspected payload. It is not an SDK build, image or managed receipt.
+    import struct
+
+    directory = audit.ROOT / "ci/fixtures/software_spi_audit"
+    geometry = json.loads(
+        (directory / "esp32_xtensa_factory_geometry.json").read_text()
+    )
+    captured = _xtensa_mode_capture(stage)
+    entries = captured["symbols"]
+    pin_name = "fl::pinMode(int, fl::PinMode)"
+    pin = entries[pin_name]
+    if corruption == "reachable-literal-unmapped":
+        _patch_xtensa_bytes(captured, pin_name, 0x22, "8130f4", "810000")
+    elif corruption == "opcode-family":
+        _patch_xtensa_bytes(captured, pin_name, 0x34, "0c38", "8c38")
+    if corruption == "ROM-symbol-target":
+        entries["__ashldi3"]["address"] += 4
+        literal = captured["literal_words"][str(0x400D0210)]
+        literal["bytes_hex"] = (
+            entries["__ashldi3"]["address"].to_bytes(4, "little").hex()
+        )
+    programs = [dict(item) for item in geometry["program_headers"]]
+    owner = programs[pin["load_owner"]]
+    if corruption == "load-no-exec":
+        owner["flags"] &= ~1
+    elif corruption == "load-no-read":
+        owner["flags"] &= ~4
+    elif corruption == "load-short-file":
+        owner["file_size"] = pin["address"] - owner["vaddr"] + pin["size"] - 1
+    elif corruption == "load-short-memory":
+        owner["mem_size"] = owner["file_size"] - 1
+    extra_program = {
+        "type": 0,
+        "file_offset": 0,
+        "vaddr": 0,
+        "paddr": 0,
+        "file_size": 0,
+        "mem_size": 0,
+        "flags": 0,
+        "align": 0,
+    }
+    if corruption in ("partial-load", "memory-only-load", "duplicate-load"):
+        extra_program = dict(owner)
+        if corruption != "duplicate-load":
+            extra_program.update(
+                vaddr=pin["address"] + 1,
+                paddr=pin["address"] + 1,
+                file_offset=pin["file_offset"] + 1,
+                file_size=0 if corruption == "memory-only-load" else 2,
+                mem_size=2,
+            )
+    programs.append(extra_program)
+    strings, symbols = bytearray(b"\0"), bytearray(16)
+    symbol_offsets, nm = {}, []
+    for name, entry in entries.items():
+        index = len(strings)
+        strings.extend(entry["raw_symbol"].encode() + b"\0")
+        symbol_offsets[name] = len(symbols)
+        symbols.extend(
+            struct.pack(
+                "<IIIBBH",
+                index,
+                entry["address"],
+                entry["size"],
+                entry["raw_symbol_info"],
+                0,
+                entry["raw_symbol_index"],
+            )
+        )
+        nm.append(
+            f"{entry['address']:08x} {entry['size']:08x} {'A' if entry['kind'] == 'ABS' else 'T' if entry['kind'] == 'F' else 'D'} {name}"
+        )
+    position = symbol_offsets[pin_name]
+    if corruption == "symbol-string-index":
+        struct.pack_into("<I", symbols, position, len(strings) + 1)
+    elif corruption == "symbol-kind":
+        symbols[position + 12] = 17
+    elif corruption == "symbol-value-vs-nm":
+        struct.pack_into("<I", symbols, position + 4, pin["address"] + 2)
+    elif corruption == "symbol-size-vs-nm":
+        struct.pack_into("<I", symbols, position + 8, pin["size"] + 1)
+    elif corruption in ("symbol-section", "symbol-xindex"):
+        struct.pack_into(
+            "<H",
+            symbols,
+            position + 14,
+            16 if corruption == "symbol-section" else 65535,
+        )
+    elif corruption == "duplicate-identity":
+        symbols.extend(symbols[position : position + 16])
+    elif corruption == "symbol-alias":
+        index = len(strings)
+        strings.extend(b"unreviewed_pin_alias\0")
+        symbols.extend(
+            struct.pack(
+                "<IIIBBH", index, pin["address"] + 1, 2, 18, 0, pin["section_index"]
+            )
+        )
+    if corruption == "unterminated-string":
+        strings[-1] = 88
+    names = bytearray(b"\0")
+    count = geometry["section_count"] + 1
+    sections = [(0,) * 10 for _ in range(count)]
+    for entry in geometry["allocated_sections"]:
+        name = len(names)
+        names.extend(entry["name"].encode() + b"\0")
+        header = [
+            name,
+            entry["type"],
+            entry["flags"],
+            entry["address"],
+            entry["file_offset"],
+            entry["size"],
+            entry["link"],
+            entry["info"],
+            entry["align"],
+            entry["entry_size"],
+        ]
+        if entry["index"] == pin["section_index"]:
+            if corruption == "section-file-offset":
+                header[4] += 1
+            elif corruption == "section-no-exec":
+                header[2] &= ~4
+        sections[entry["index"]] = tuple(header)
+    for index, label in ((38, ".symtab"), (39, ".strtab"), (40, ".shstrtab")):
+        name = len(names)
+        names.extend(label.encode() + b"\0")
+        sections[index] = (name,) + (0,) * 9
+    alias = geometry["section_count"]
+    extended = bytearray()
+    if corruption == "symbol-xindex":
+        # Coherent gABI extension data: reject the unsupported form itself,
+        # rather than relying on a missing extension table to fail first.
+        extended = bytearray((len(symbols) // 16) * 4)
+        struct.pack_into("<I", extended, (position // 16) * 4, pin["section_index"])
+        name = len(names)
+        names.extend(b".symtab_shndx\0")
+        sections[alias] = (name,) + (0,) * 9
+    if corruption in ("partial-section", "partial-nobits-section"):
+        name = len(names)
+        names.extend(b".unreviewed_alias\0")
+        sections[alias] = (
+            name,
+            8 if corruption == "partial-nobits-section" else 1,
+            3 if corruption == "partial-nobits-section" else 6,
+            pin["address"] + 1,
+            pin["file_offset"] + 1,
+            2,
+            0,
+            0,
+            1,
+            0,
+        )
+    data_end = max(
+        item["file_offset"] + item["file_size"]
+        for item in geometry["program_headers"]
+        if item["type"] == 1
+    )
+    symbol_start = (data_end + 3) & ~3
+    extended_start = symbol_start + len(symbols)
+    string_start = extended_start + len(extended)
+    # Both tables remain individually valid when their terminating/initial
+    # NUL byte aliases; only an explicit table-overlap check can reject it.
+    names_start = (
+        string_start + len(strings) - (1 if corruption == "table-alias" else 0)
+    )
+    shoff = (names_start + len(names) + 3) & ~3
+    image = bytearray(shoff + count * 40)
+    image[:52] = bytes.fromhex(geometry["elf_header_hex"])
+    struct.pack_into("<I", image, 32, shoff)
+    struct.pack_into("<HH", image, 44, len(programs), 40)
+    struct.pack_into("<HH", image, 48, count, 40)
+    for index, program in enumerate(programs):
+        struct.pack_into(
+            "<IIIIIIII",
+            image,
+            52 + index * 32,
+            *(
+                program[key]
+                for key in (
+                    "type",
+                    "file_offset",
+                    "vaddr",
+                    "paddr",
+                    "file_size",
+                    "mem_size",
+                    "flags",
+                    "align",
+                )
+            ),
+        )
+    for entry in (*entries.values(), *captured["literal_words"].values()):
+        if entry.get("kind") == "ABS":
+            continue
+        raw = bytes.fromhex(entry["bytes_hex"])
+        offset = entry["file_offset"]
+        if (
+            corruption == "section-file-offset"
+            and entry["section_index"] == pin["section_index"]
+        ):
+            # Move the real selected bytes with SHDR, retaining valid opcode
+            # data while intentionally violating the unchanged LOAD offset.
+            offset += 1
+        image[offset : offset + len(raw)] = raw
+    image[symbol_start : symbol_start + len(symbols)] = symbols
+    image[extended_start : extended_start + len(extended)] = extended
+    image[string_start : string_start + len(strings)] = strings
+    image[names_start : names_start + len(names)] = names
+    sections[38] = (
+        sections[38][0],
+        2,
+        0,
+        0,
+        symbol_start,
+        len(symbols),
+        16 if corruption == "symbol-table-link" else 39,
+        1,
+        4,
+        15 if corruption == "symbol-entry-size" else 16,
+    )
+    sections[39] = (sections[39][0], 3, 0, 0, string_start, len(strings), 0, 0, 1, 0)
+    sections[40] = (sections[40][0], 3, 0, 0, names_start, len(names), 0, 0, 1, 0)
+    if extended:
+        sections[alias] = (
+            sections[alias][0],
+            18,
+            0,
+            0,
+            extended_start,
+            len(extended),
+            38,
+            0,
+            4,
+            4,
+        )
+    for index, header in enumerate(sections):
+        struct.pack_into("<IIIIIIIIII", image, shoff + index * 40, *header)
+    if corruption == "section-table-outside":
+        struct.pack_into("<I", image, 32, len(image) - 4)
+    elif corruption == "extended-section-count":
+        struct.pack_into("<H", image, 48, 0)
+        struct.pack_into("<I", image, shoff + 20, count)
+    elif corruption == "extended-string-index":
+        struct.pack_into("<H", image, 50, 65535)
+        struct.pack_into("<I", image, shoff + 24, 40)
+    elif corruption == "extended-program-count":
+        struct.pack_into("<H", image, 44, 65535)
+        struct.pack_into("<I", image, shoff + 28, len(programs))
+    elif corruption == "wrong-machine":
+        struct.pack_into("<H", image, 18, 243)
+    elif corruption == "ELF-class":
+        image[4] = 2
+    elif corruption == "ELF-endian":
+        image[5] = 2
+    elif corruption == "ELF-ident-version":
+        image[6] = 2
+    elif corruption == "ELF-header-version":
+        struct.pack_into("<I", image, 20, 2)
+    elif corruption == "ELF-header-size":
+        struct.pack_into("<H", image, 40, 51)
+    elif corruption == "ELF-program-entry-size":
+        struct.pack_into("<H", image, 42, 31)
+    elif corruption == "ELF-section-entry-size":
+        struct.pack_into("<H", image, 46, 39)
+    elif corruption == "ELF-program-table-outside":
+        struct.pack_into("<I", image, 28, len(image) - 4)
+    sdk = tmp_path / "sdk/3.3.11/esp32-core-3.3.11"
+    relative = Path("tools/esp32-arduino-libs/esp32")
+    for source, target in (
+        (
+            "esp32_xtensa_core_isa.h.txt",
+            "include/xtensa/esp32/include/xtensa/config/core-isa.h",
+        ),
+        ("esp32_xtensa_rom_libgcc.ld.txt", "ld/esp32.rom.libgcc.ld"),
+    ):
+        path = sdk / relative / target
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes((directory / source).read_bytes())
+    raw = bytes(image)
+    if corruption == "ELF-truncated-header":
+        raw = raw[:51]
+    elif corruption == "ELF-truncated-section-table":
+        raw = raw[:-1]
+    return raw, "\n".join(nm), sdk
+
+
+@pytest.mark.parametrize(
+    ("stage", "expected"), [("baseline", 3), ("old", 2), ("restored", 3)]
+)
+def test_xtensa_mode_factory_authenticates_synthetic_carrier_and_actual_selected_values(
+    tmp_path: Path, stage: str, expected: int
+) -> None:
+    from ci import software_spi_esp32_xtensa_mode_proof as checker
+
+    elf, nm, sdk = _xtensa_mode_factory_carrier(tmp_path, stage)
+    capture = checker.extract_capture(elf, nm, sdk)
+    assert (
+        capture["sdk_source_contract"]["core_isa_sha256"]
+        == checker.SDK_SOURCE_CONTRACT["core_isa_sha256"]
+    )
+    assert capture["sdk_source_contract"]["XCHAL_HAVE_ABSOLUTE_LITERALS"] == 0
+    result = checker.classify_capture(capture)
+    assert result.authentication_errors == [] and result.decode_errors == []
+    assert len(result.observations) == 4
+    assert all(item.configured_mode == expected for item in result.observations)
+    assert result.errors == (["output-mode-mismatch"] if expected == 2 else [])
+    assert result.counterexamples == (result.observations if expected == 2 else [])
+    assert result.image_mapping_qualified is False
+
+
+@pytest.mark.parametrize(
+    "corruption",
+    [
+        "section-table-outside",
+        "extended-section-count",
+        "extended-string-index",
+        "extended-program-count",
+        "wrong-machine",
+        "symbol-string-index",
+        "unterminated-string",
+        "symbol-kind",
+        "symbol-section",
+        "symbol-xindex",
+        "duplicate-identity",
+        "symbol-alias",
+        "symbol-table-link",
+        "symbol-entry-size",
+        "table-alias",
+        "partial-section",
+        "partial-nobits-section",
+        "partial-load",
+        "memory-only-load",
+        "duplicate-load",
+        "section-file-offset",
+        "section-no-exec",
+        "load-no-exec",
+        "load-no-read",
+        "load-short-file",
+        "load-short-memory",
+        "reachable-literal-unmapped",
+        "ROM-symbol-target",
+    ],
+)
+def test_xtensa_mode_factory_rejects_incoherent_tables_storage_and_reachable_bindings(
+    tmp_path: Path, corruption: str
+) -> None:
+    from ci import software_spi_esp32_xtensa_mode_proof as checker
+
+    elf, nm, sdk = _xtensa_mode_factory_carrier(tmp_path, corruption=corruption)
+    with pytest.raises(ValueError):
+        checker.extract_capture(elf, nm, sdk)
+
+
+@pytest.mark.parametrize(
+    "corruption", ["core-hash", "core-macro", "ROM-hash", "ROM-assignment"]
+)
+def test_xtensa_mode_factory_binds_sdk_hashes_and_parses_contract_independently(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, corruption: str
+) -> None:
+    from ci import software_spi_esp32_xtensa_mode_proof as checker
+
+    elf, nm, sdk = _xtensa_mode_factory_carrier(tmp_path)
+    directory = sdk / "tools/esp32-arduino-libs/esp32"
+    if corruption.startswith("core"):
+        path = directory / "include/xtensa/esp32/include/xtensa/config/core-isa.h"
+        raw = path.read_bytes()
+        if corruption == "core-macro":
+            assert b"#define XCHAL_HAVE_ABSOLUTE_LITERALS\t0" in raw
+            raw = raw.replace(
+                b"#define XCHAL_HAVE_ABSOLUTE_LITERALS\t0",
+                b"#define XCHAL_HAVE_ABSOLUTE_LITERALS\t1",
+                1,
+            )
+        else:
+            raw += b"\n/* changed source */\n"
+        key = "core_isa_sha256"
+    else:
+        path = directory / "ld/esp32.rom.libgcc.ld"
+        raw = path.read_bytes()
+        raw = (
+            raw.replace(b"__ashldi3 = 0x4000c818;", b"__ashldi3 = 0x4000c81c;", 1)
+            if corruption == "ROM-assignment"
+            else raw + b"\n/* changed source */\n"
+        )
+        key = "esp32_rom_libgcc_sha256"
+    path.write_bytes(raw)
+    if corruption in ("core-macro", "ROM-assignment"):
+        # Deliberately match the altered hash so the semantic source parser,
+        # rather than only the hash gate, must reject the wrong contract.
+        monkeypatch.setitem(checker.SDK_SOURCE_CONTRACT, key, digest(raw))
+    expected_error = (
+        "SDK-core-literal-mode"
+        if corruption == "core-macro"
+        else "SDK-ROM-assignment"
+        if corruption == "ROM-assignment"
+        else "SDK-source-hash"
+    )
+    with pytest.raises(ValueError, match=expected_error):
+        checker.extract_capture(elf, nm, sdk)
+
+
+def test_xtensa_mode_factory_does_not_turn_unknown_opcode_into_valid_property(
+    tmp_path: Path,
+) -> None:
+    from ci import software_spi_esp32_xtensa_mode_proof as checker
+
+    elf, nm, sdk = _xtensa_mode_factory_carrier(tmp_path, corruption="opcode-family")
+    try:
+        capture = checker.extract_capture(elf, nm, sdk)
+    except ValueError:
+        return
+    result = checker.classify_capture(capture)
+    assert result.authentication_errors or result.decode_errors
+    assert result.counterexamples == []
+
+
+@pytest.mark.parametrize(
+    "corruption",
+    [
+        "ELF-class",
+        "ELF-endian",
+        "ELF-ident-version",
+        "ELF-header-version",
+        "ELF-header-size",
+        "ELF-program-entry-size",
+        "ELF-section-entry-size",
+        "ELF-program-table-outside",
+        "ELF-truncated-header",
+        "ELF-truncated-section-table",
+    ],
+)
+def test_xtensa_mode_factory_extra_rejects_identity_header_sizes_and_truncation(
+    tmp_path: Path, corruption: str
+) -> None:
+    from ci import software_spi_esp32_xtensa_mode_proof as checker
+
+    elf, nm, sdk = _xtensa_mode_factory_carrier(tmp_path, corruption=corruption)
+    with pytest.raises(ValueError):
+        checker.extract_capture(elf, nm, sdk)
+
+
+@pytest.mark.parametrize(
+    "corruption",
+    [
+        "nm-wrong-address",
+        "nm-missing",
+        "nm-duplicate",
+        "symbol-value-vs-nm",
+        "symbol-size-vs-nm",
+    ],
+)
+def test_xtensa_mode_factory_extra_requires_exact_unique_nm_raw_symbol_binding(
+    tmp_path: Path, corruption: str
+) -> None:
+    from ci import software_spi_esp32_xtensa_mode_proof as checker
+
+    elf, nm, sdk = _xtensa_mode_factory_carrier(tmp_path, corruption=corruption)
+    lines = nm.splitlines()
+    selected = next(
+        line for line in lines if line.endswith(" fl::pinMode(int, fl::PinMode)")
+    )
+    if corruption == "nm-wrong-address":
+        address, rest = selected.split(" ", 1)
+        lines[lines.index(selected)] = f"{int(address, 16) + 4:08x} {rest}"
+    elif corruption == "nm-missing":
+        lines.remove(selected)
+    elif corruption == "nm-duplicate":
+        lines.append(selected)
+    with pytest.raises(ValueError, match="nm-binding"):
+        checker.extract_capture(elf, "\n".join(lines), sdk)
+
+
 def _classify_xtensa_mode(capture: dict):
     from ci.software_spi_esp32_xtensa_mode_proof import classify_capture
 
@@ -7070,3 +7547,20 @@ def test_esp32_c6_mode_real_three_stage_acceptance() -> None:
         errors = check_evidence([finding], [], audit._current_sources(audit.ROOT))
         for configuration in finding["required_configurations"]:
             assert any(f"/{configuration}: unresolved" in error for error in errors)
+
+
+def test_xtensa_mode_factory_rejects_reserved_direct_section_count(tmp_path):
+    """A fully present reserved-count table still requires unsupported escape encoding."""
+    import struct
+
+    from ci import software_spi_esp32_xtensa_mode_proof as checker
+
+    elf, nm, sdk = _xtensa_mode_factory_carrier(tmp_path)
+    malformed = bytearray(elf)
+    section_offset = struct.unpack_from("<I", malformed, 32)[0]
+    reserved_count = 0xFF00
+    table_end = section_offset + reserved_count * 40
+    malformed.extend(b"\0" * max(0, table_end - len(malformed)))
+    struct.pack_into("<H", malformed, 48, reserved_count)
+    with pytest.raises(ValueError):
+        checker.extract_capture(bytes(malformed), nm, sdk)

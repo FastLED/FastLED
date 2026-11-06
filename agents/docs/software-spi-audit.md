@@ -559,8 +559,9 @@ these dependency bindings establish no new current SPI readback positive.
 This metadata snapshot does not refresh the accepted C6 receipt's historical
 43b1 input qualification or close any runtime, target or physical requirement.
 
-The classic Xtensa helper currently classifies conditional Output-only ELF
-slices. It has no managed factory or evidence-admission path. Authentic
+The classic Xtensa helper authenticates actual ELF/nm inputs and exact SDK
+source files before classifying conditional Output-only ELF slices. It has no
+managed evidence-admission path. Authentic
 current, old-assignment and restored captures from snapshot
 `84405dc080e7c8e0b6e60c3ca8d55f157e9fa456` contain configured modes 3, 2 and 3;
 the old capture yields four mode-mismatch counterexamples. These captures
@@ -576,6 +577,13 @@ An adversarial opcode-bit-7 mutation exposed a real false acceptance in the
 MOVI.N family check. Root observed the regression fail, then verified the
 repair with 38 focused cases and a 65,536-word mode-cell probe admitting only
 the encoded values 2 and 3. This validates that cell, not arbitrary Xtensa
-instructions or production execution. The next steps are an independently
-bound raw ELF/SDK factory and a closed managed current/control/restored build
-proof. Historical C6 receipts remain unchanged.
+instructions or production execution. The factory now checks ELF tables, raw
+symbol and string identities, nm agreement, competing section/LOAD extents,
+reachable literal storage, and the pinned core-ISA and ROM linker sources.
+Its 90 focused cases include a reproduced reserved direct-section-count
+acceptance and its boundary repair. Source-only SDK fixtures and a synthetic
+ELF-format carrier exercise parser boundaries; separate offline checks of all
+three actual retained ELFs yield modes 3, 2 and 3 and four old-mode counters.
+Those checks grant no installed SDK, session, managed receipt or runtime
+qualification. Next is a closed managed current/control/restored build proof.
+Historical C6 receipts remain unchanged.

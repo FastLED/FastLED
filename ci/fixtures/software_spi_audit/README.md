@@ -110,6 +110,15 @@ SP+16 through SP+31, not the entire config. An opcode-bit-7 false acceptance
 was reproduced and repaired; 38 focused cases and an exhaustive 16-bit
 mode-cell probe then admitted only the encoded values 2 and 3. That probe is
 not exhaustive instruction, image, runtime or hardware validation. There is
-no managed factory or admission path yet, and no full finding group is cleared.
-Next come a bound ELF/SDK factory and a fresh managed three-stage build proof;
-the historical C6 receipts are not refreshed.
+an actual ELF/nm factory with pinned SDK source binding, but no managed
+admission path, and no full finding group is cleared. The source-only
+`esp32_xtensa_core_isa.h.txt` and `esp32_xtensa_rom_libgcc.ld.txt` files retain
+the exact SDK sources; `esp32_xtensa_factory_geometry.json` supports an
+explicitly synthetic ELF-format carrier using actual selected bytes and
+allocated geometry. It is not an actual firmware or execution receipt.
+The 90 focused cases cover factory boundaries, including a reproduced reserved
+direct-section-count acceptance and its repair. Separate offline factory checks
+of the three retained actual ELFs reproduce modes 3, 2 and 3 and four old-mode
+counters; they do not qualify an installed SDK or serving session. Next is a
+fresh closed managed three-stage build proof. The historical C6 receipts are
+not refreshed.

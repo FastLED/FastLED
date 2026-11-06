@@ -587,3 +587,338 @@ def classify_capture(capture: dict) -> ModeResult:
     except (KeyError, TypeError, ValueError, OverflowError):
         result.decode_errors = ["xtensa-unsupported-reachable-encoding"]
     return result
+
+
+def extract_capture(elf: bytes, symbol_text: str, sdk_root: "Path") -> dict:
+    """Authenticate a fixed ELF slice; this does not admit managed evidence."""
+    import hashlib
+    import re
+    from pathlib import Path
+
+    root = Path(sdk_root)
+    sources = (
+        (
+            "core_isa_sha256",
+            "tools/esp32-arduino-libs/esp32/include/xtensa/esp32/include/xtensa/config/core-isa.h",
+        ),
+        (
+            "esp32_rom_libgcc_sha256",
+            "tools/esp32-arduino-libs/esp32/ld/esp32.rom.libgcc.ld",
+        ),
+    )
+    texts = []
+    for key, relative in sources:
+        path = root / relative
+        try:
+            data = path.read_bytes()
+        except OSError as error:
+            raise ValueError("SDK-source-hash") from error
+        if hashlib.sha256(data).hexdigest() != SDK_SOURCE_CONTRACT[key]:
+            raise ValueError("SDK-source-hash")
+        texts.append(data.decode("utf-8"))
+    if re.findall(
+        r"^\s*#define\s+XCHAL_HAVE_ABSOLUTE_LITERALS\s+(\d+)\b", texts[0], re.M
+    ) != ["0"]:
+        raise ValueError("SDK-core-literal-mode")
+    assignments = re.findall(r"\b__ashldi3\s*=\s*(0x[0-9a-fA-F]+)\s*;", texts[1])
+    if (
+        len(assignments) != 1
+        or int(assignments[0], 16) != SDK_SOURCE_CONTRACT["__ashldi3"]
+    ):
+        raise ValueError("SDK-ROM-assignment")
+
+    def bounded(offset: int, size: int) -> bytes:
+        if offset < 0 or size < 0 or offset + size > len(elf):
+            raise ValueError("ELF file extent")
+        return elf[offset : offset + size]
+
+    if len(elf) < 52 or elf[:7] != b"\x7fELF\x01\x01\x01":
+        raise ValueError("ELF identity")
+    header = struct.unpack("<HHIIIIIHHHHHH", bounded(16, 36))
+    (
+        kind,
+        machine,
+        version,
+        _,
+        phoff,
+        shoff,
+        _,
+        ehsize,
+        phsize,
+        phnum,
+        shsize,
+        shnum,
+        shstr,
+    ) = header
+    if (
+        (kind, machine, version, ehsize, phsize, shsize) != (2, 94, 1, 52, 32, 40)
+        or not 0 < phnum < 65535
+        or not 0 < shnum < 0xFF00
+        or not 0 < shstr < shnum
+    ):
+        raise ValueError("unsupported ELF header")
+    programs = []
+    for index in range(phnum):
+        values = struct.unpack("<8I", bounded(phoff + index * 32, 32))
+        program = dict(
+            zip(
+                (
+                    "type",
+                    "file_offset",
+                    "vaddr",
+                    "paddr",
+                    "file_size",
+                    "mem_size",
+                    "flags",
+                    "align",
+                ),
+                values,
+            )
+        )
+        if program["type"] == 1:
+            bounded(program["file_offset"], program["file_size"])
+            if (
+                program["file_size"] > program["mem_size"]
+                or program["vaddr"] + program["mem_size"] > 1 << 32
+            ):
+                raise ValueError("incoherent LOAD")
+        programs.append(program)
+    # gABI reserves direct section indexes/counts from SHN_LORESERVE onward.
+    # Program counts instead use the distinct PN_XNUM escape (0xffff).
+    sections = [
+        struct.unpack("<10I", bounded(shoff + index * 40, 40)) for index in range(shnum)
+    ]
+
+    def section_bytes(index: int) -> bytes:
+        section = sections[index]
+        if section[1] == 8:
+            raise ValueError("NOBITS file payload")
+        return bounded(section[4], section[5])
+
+    def string(table: bytes, offset: int) -> str:
+        if offset >= len(table) or b"\0" not in table[offset:]:
+            raise ValueError("ELF string extent")
+        return table[offset : table.index(0, offset)].decode("utf-8")
+
+    if sections[shstr][1] != 3:
+        raise ValueError("section string table")
+    names = [string(section_bytes(shstr), section[0]) for section in sections]
+    tables = [index for index, section in enumerate(sections) if section[1] == 2]
+    if len(tables) != 1 or any(section[1] == 18 for section in sections):
+        raise ValueError("unsupported symbol tables")
+    symindex = tables[0]
+    sym = sections[symindex]
+    if (
+        sym[9] != 16
+        or sym[5] % 16
+        or not 0 < sym[6] < shnum
+        or sections[sym[6]][1] != 3
+    ):
+        raise ValueError("symbol table contract")
+    intervals = [(0, 52), (phoff, phnum * 32), (shoff, shnum * 40)] + [
+        (sections[index][4], sections[index][5]) for index in (symindex, sym[6], shstr)
+    ]
+    for index, (start, size) in enumerate(intervals):
+        bounded(start, size)
+        if any(
+            start < other + length and other < start + size
+            for other, length in intervals[:index]
+        ):
+            raise ValueError("metadata table alias")
+    strings = section_bytes(sym[6])
+    rawsymbols = []
+    for offset in range(0, sym[5], 16):
+        raw = bounded(sym[4] + offset, 16)
+        fields = struct.unpack("<IIIBBH", raw)
+        if fields[5] == 65535:
+            raise ValueError("unsupported symbol extended index")
+        rawsymbols.append((string(strings, fields[0]), fields, raw, sym[4] + offset))
+    expected = {
+        PIN,
+        PRODUCER,
+        FIND,
+        RELEASE,
+        "memset",
+        "gpio_config",
+        "__ashldi3",
+        "selection_gpio_config_size",
+        *_PUBLIC.values(),
+        *_OFFSETS.values(),
+        *_GPIO_MODES,
+    }
+    selected = {}
+    for name in expected:
+        matches = [
+            entry for entry in rawsymbols if entry[0] == _MANGLED.get(name, name)
+        ]
+        if len(matches) != 1:
+            raise ValueError("selected raw symbol identity")
+        selected[name] = matches[0]
+    # Compare the actual SDK nm view before decoding any potentially shifted body.
+    nm = {}
+    for line in symbol_text.splitlines():
+        match = re.fullmatch(
+            r"\s*([0-9a-fA-F]+)\s+([0-9a-fA-F]+)\s+(\S)\s+(.+?)\s*", line
+        )
+        if match and match[4] in expected:
+            nm.setdefault(match[4], []).append(
+                (int(match[1], 16), int(match[2], 16), match[3])
+            )
+    for name, (_, fields, _, _) in selected.items():
+        expected_type = (
+            "A" if name == "__ashldi3" else "T" if fields[3] & 15 == 2 else "D"
+        )
+        rows = nm.get(name, [])
+        if (
+            len(rows) != 1
+            or rows[0][:2] != fields[1:3]
+            or rows[0][2].upper() != expected_type
+        ):
+            raise ValueError("nm-binding")
+
+    def storage(address: int, size: int, executable: bool) -> dict:
+        if not size or address + size > 1 << 32:
+            raise ValueError("selected address extent")
+        overlaps = [
+            (index, section)
+            for index, section in enumerate(sections)
+            if section[2] & 2
+            and section[5]
+            and section[3] < address + size
+            and address < section[3] + section[5]
+        ]
+        if len(overlaps) != 1:
+            raise ValueError("ambiguous allocated section")
+        index, section = overlaps[0]
+        if (
+            section[1] != 1
+            or not section[3] <= address < address + size <= section[3] + section[5]
+            or executable
+            and not section[2] & 4
+        ):
+            raise ValueError("selected section contract")
+        loads = [
+            (owner, program)
+            for owner, program in enumerate(programs)
+            if program["type"] == 1
+            and program["mem_size"]
+            and program["vaddr"] < address + size
+            and address < program["vaddr"] + program["mem_size"]
+        ]
+        if len(loads) != 1:
+            raise ValueError("ambiguous selected LOAD")
+        owner, program = loads[0]
+        offset = section[4] + address - section[3]
+        if (
+            not program["vaddr"]
+            <= address
+            < address + size
+            <= program["vaddr"] + program["file_size"]
+            or offset != program["file_offset"] + address - program["vaddr"]
+            or not program["flags"] & 4
+            or executable
+            and not program["flags"] & 1
+        ):
+            raise ValueError("selected LOAD mapping")
+        data = bounded(offset, size)
+        return {
+            "address": address,
+            "size": size,
+            "file_offset": offset,
+            "section": names[index],
+            "section_index": index,
+            "section_flags": section[2],
+            "load_owner": owner,
+            "bytes_hex": data.hex(),
+        }
+
+    symbols = {}
+    for name, (rawname, fields, raw, offset) in selected.items():
+        _, address, size, info, other, index = fields
+        function = name in {PIN, PRODUCER, FIND, RELEASE, "memset", "gpio_config"}
+        if other or info != (18 if function or name == "__ashldi3" else 17):
+            raise ValueError("selected symbol kind")
+        if name == "__ashldi3":
+            if index != 65521 or address != SDK_SOURCE_CONTRACT[name] or size != 24:
+                raise ValueError("SDK ROM symbol")
+            entry = {"address": address, "size": size, "section": "ABS", "kind": "ABS"}
+        else:
+            if not 0 < index < shnum:
+                raise ValueError("selected symbol section")
+            entry = storage(address, size, function)
+            if entry["section_index"] != index:
+                raise ValueError("selected symbol owner")
+            entry["kind"] = "F" if function else "O"
+            if not function:
+                entry["uint32_le"] = int.from_bytes(
+                    bytes.fromhex(entry["bytes_hex"]), "little"
+                )
+        entry.update(
+            raw_symbol=rawname,
+            raw_symbol_hex=raw.hex(),
+            raw_symbol_info=info,
+            raw_symbol_index=index,
+            raw_symbol_file_offset=offset,
+        )
+        symbols[name] = entry
+    for rawname, fields, _, _ in rawsymbols:
+        if fields[3] & 15 not in (1, 2) or not fields[2] or fields[5] >= shnum:
+            continue
+        for name, (_, chosen, _, _) in selected.items():
+            if (
+                name != "__ashldi3"
+                and rawname != _MANGLED.get(name, name)
+                and fields[1] < chosen[1] + chosen[2]
+                and chosen[1] < fields[1] + fields[2]
+            ):
+                raise ValueError("competing symbol alias")
+    literals = {}
+    for name, offsets in (
+        (PIN, (0x22,)),
+        (
+            PRODUCER,
+            (
+                3,
+                6,
+                0x13,
+                0x1D,
+                0x27,
+                0x31,
+                0x3B,
+                0x45,
+                0x4F,
+                0x59,
+                0x63,
+                0x6D,
+                0x77,
+                0x85,
+            ),
+        ),
+    ):
+        entry = symbols[name]
+        code = bytes.fromhex(entry["bytes_hex"])
+        for offset in offsets:
+            word = _word(code, offset, 3)
+            if word & 15 != 1:
+                raise ValueError("reachable L32R opcode")
+            address = (
+                ((entry["address"] + offset + 3) & ~3) + (((word >> 8) - 65536) << 2)
+            ) & 0xFFFFFFFF
+            literal = storage(address, 4, False)
+            literal["uint32_le"] = int.from_bytes(
+                bytes.fromhex(literal["bytes_hex"]), "little"
+            )
+            literals[str(address)] = literal
+    capture = {
+        "machine": 94,
+        "elf_sha256": hashlib.sha256(elf).hexdigest(),
+        "symbols": symbols,
+        "literal_words": literals,
+        "program_headers": programs,
+        "sdk_source_contract": dict(SDK_SOURCE_CONTRACT),
+        "image_mapping_qualified": False,
+    }
+    result = classify_capture(capture)
+    if result.authentication_errors or result.decode_errors:
+        raise ValueError("unbound selected encoded ELF slice")
+    return capture
