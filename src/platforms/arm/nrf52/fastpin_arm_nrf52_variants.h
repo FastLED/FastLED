@@ -38,45 +38,67 @@
 //     _FL_DEFPIN(47, 47, 1);
 //
 
+// Every macro below emits fl::Nrf52HwPin<ARDUINO_PIN>, the native register
+// pin. The SPIM and PWM drivers use it directly, for GPIO setup and for PSEL,
+// so both always name the same physical pin. For valid pins,
+// fl::FastPin<ARDUINO_PIN> derives from it only when FASTLED_FORCE_SOFTWARE_PINS
+// is not set: an explicit specialization would override the forced software
+// primary template in fastpin_base.h (#5070). Invalid pins keep their FastPin
+// specialization in both modes, so the runtime "marked as invalid" warning in
+// _INVALID_ARMPIN is never bypassed. Each macro ends in a declaration that the
+// call site's semicolon terminates.
+#if defined(FASTLED_FORCE_SOFTWARE_PINS)
+    #define _FL_NRF52_FASTPIN(ARDUINO_PIN) FL_STATIC_ASSERT(true, "forced software pin")
+#else
+    #define _FL_NRF52_FASTPIN(ARDUINO_PIN) \
+        template<> class fl::FastPin<ARDUINO_PIN> : public fl::Nrf52HwPin<ARDUINO_PIN> {}
+#endif
+
 #define _FL_DEF_INVALID_PIN(ARDUINO_PIN, BOARD_PIN, BOARD_PORT)                 \
-    template<> class fl::FastPin<ARDUINO_PIN> :              \
+    template<> class fl::Nrf52HwPin<ARDUINO_PIN> :         \
     public fl::_INVALID_ARMPIN<                               \
         0,                                                \
         __generated_struct_NRF_P0,                        \
         0,                                                \
         0                                                 \
         >                                                \
-    {}
+    {};                                                  \
+    template<> class fl::FastPin<ARDUINO_PIN> : public fl::Nrf52HwPin<ARDUINO_PIN> {}
 
+// BOARD_PORT selects the port. The port number must come from it too: the
+// short form _FL_DEFPIN(3, 15, 1) means P1.15, and BOARD_PIN / 32 would be 0.
 #define _FL_DEFPIN(ARDUINO_PIN, BOARD_PIN, BOARD_PORT)   \
-    template<> class fl::FastPin<ARDUINO_PIN> :              \
-    public fl::_ARMPIN<                                      \
+    template<> class fl::Nrf52HwPin<ARDUINO_PIN> :        \
+    public fl::_ARMPIN<                                  \
         1u << (BOARD_PIN & 31u),                         \
         __generated_struct_NRF_P ## BOARD_PORT,          \
-        (BOARD_PIN / 32),                                \
+        BOARD_PORT,                                      \
         BOARD_PIN & 31u                                  \
         >                                                \
-    {}
+    {};                                                  \
+    _FL_NRF52_FASTPIN(ARDUINO_PIN)
 
 #define _DEFPIN_ARM_IDENTITY_P0(ARDUINO_PIN)      \
-    template<> class fl::FastPin<ARDUINO_PIN> :       \
-    public fl::_ARMPIN<                               \
+    template<> class fl::Nrf52HwPin<ARDUINO_PIN> : \
+    public fl::_ARMPIN<                           \
         1u << (ARDUINO_PIN & 31u),                \
         __generated_struct_NRF_P0,                \
         0,                                        \
         (ARDUINO_PIN & 31u) + 0                   \
         >                                         \
-    {}
+    {};                                           \
+    _FL_NRF52_FASTPIN(ARDUINO_PIN)
 
 #define _DEFPIN_ARM_IDENTITY_P1(ARDUINO_PIN)      \
-    template<> class fl::FastPin<ARDUINO_PIN> :       \
-    public fl::_ARMPIN<                               \
+    template<> class fl::Nrf52HwPin<ARDUINO_PIN> : \
+    public fl::_ARMPIN<                           \
         1u << (ARDUINO_PIN & 31u),                \
         __generated_struct_NRF_P1,                \
         1,                                        \
         (ARDUINO_PIN & 31u) + 32                  \
         >                                         \
-    {}
+    {};                                           \
+    _FL_NRF52_FASTPIN(ARDUINO_PIN)
 
 
 // ---- Opt-in re-enable macros for pins normally treated as invalid ---------
@@ -356,7 +378,7 @@
     _FL_DEFPIN(33, 13, 1); // D33 is P1.13 LED1
     _FL_DEFPIN(34, 15, 1); // D34 is P1.15 LED2
     _FL_DEFPIN(35, 13, 0); // D35 is P0.13 NeoPixel
-    _FL_DEFPIN(36,  0, 1); // D36 is P1.02 Switch
+    _FL_DEFPIN(36,  2, 1); // D36 is P1.02 Switch
     _FL_DEFPIN(37,  0, 1); // D37 is P1.00 SWO/DFU
     _FL_DEFPIN(38,  9, 0); // D38 is P0.09 NFC1
     _FL_DEFPIN(39, 10, 0); // D39 is P0.10 NFC2
@@ -601,7 +623,7 @@
     _FL_DEFPIN(10, 11, 0); // D10 is P0.11 (SCL)
     _FL_DEFPIN(11, 12, 0); // D11 is P0.12 (DRDYn)
     _FL_DEFPIN(12, 13, 0); // D12 is P0.13 (SDA)
-    _FL_DEFPIN(13, 14, 0); // D13 is P0.17 (INT)
+    _FL_DEFPIN(13, 14, 0); // D13 is P0.14 (INT)
     _FL_DEFPIN(14, 15, 0); // D14 is P0.15 (INT1)
     _FL_DEFPIN(15, 20, 0); // D15 is P0.20 (INT2)
     _FL_DEFPIN(16,  2, 0); // D16 is P0.02 (A0)

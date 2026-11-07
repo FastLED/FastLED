@@ -145,8 +145,8 @@ namespace fl {
         NRF52HardwareSPIOutput() {}
 
         // Low frequency GPIO is for signals with a frequency up to 10 kHz.  Lowest speed SPIM is 125kbps.
-        FL_STATIC_ASSERT(!FastPin<_DATA_PIN>::LowSpeedOnlyRecommended(),  "Invalid (low-speed only) pin specified");
-        FL_STATIC_ASSERT(!FastPin<_CLOCK_PIN>::LowSpeedOnlyRecommended(), "Invalid (low-speed only) pin specified");
+        FL_STATIC_ASSERT(!Nrf52HwPin<_DATA_PIN>::LowSpeedOnlyRecommended(),  "Invalid (low-speed only) pin specified");
+        FL_STATIC_ASSERT(!Nrf52HwPin<_CLOCK_PIN>::LowSpeedOnlyRecommended(), "Invalid (low-speed only) pin specified");
 
         /// initialize the SPI subssytem
         void init() FL_NO_EXCEPT {
@@ -154,10 +154,10 @@ namespace fl {
             //ASSERT(m_SPIM->ENABLE != (SPIM_ENABLE_ENABLE_Enabled << SPIM_ENABLE_ENABLE_Pos));
 
             // 1. set pins to output/H0H1 drive/etc.
-            FastPin<_DATA_PIN>::setOutput();
-            FastPin<_CLOCK_PIN>::setOutput();
+            Nrf52HwPin<_DATA_PIN>::setOutput();
+            Nrf52HwPin<_CLOCK_PIN>::setOutput();
             // writeBit pulses from the latch once SPIM releases the pin, so it must idle low.
-            FastPin<_CLOCK_PIN>::lo();
+            Nrf52HwPin<_CLOCK_PIN>::lo();
 
             // 2. Configure SPIMx
             nrf_spim_configure(
@@ -171,8 +171,8 @@ namespace fl {
                 );
             nrf_spim_pins_set(
                 FASTLED_NRF52_SPIM,
-                FastPin<_CLOCK_PIN>::nrf_pin(),
-                FastPin<_DATA_PIN>::nrf_pin(),
+                Nrf52HwPin<_CLOCK_PIN>::nrf_pin(),
+                Nrf52HwPin<_DATA_PIN>::nrf_pin(),
                 NRF_SPIM_PIN_NOT_CONNECTED
                 );
 
@@ -326,15 +326,15 @@ namespace fl {
             nrf_spim_disable(FASTLED_NRF52_SPIM);
             // set the data pin to appropriate state
             if (b & (1 << BIT)) {
-                FastPin<_DATA_PIN>::hi();
+                Nrf52HwPin<_DATA_PIN>::hi();
             } else {
-                FastPin<_DATA_PIN>::lo();
+                Nrf52HwPin<_DATA_PIN>::lo();
             }
             // delay 1/2 cycle per SPI bit
             fl::delaycycles<_SPI_CLOCK_DIVIDER/2>();
-            FastPin<_CLOCK_PIN>::hi();
+            Nrf52HwPin<_CLOCK_PIN>::hi();
             fl::delaycycles<_SPI_CLOCK_DIVIDER/2>();
-            FastPin<_CLOCK_PIN>::lo();
+            Nrf52HwPin<_CLOCK_PIN>::lo();
             // re-enable the SPIM instance
             nrf_spim_enable(FASTLED_NRF52_SPIM);
         }
