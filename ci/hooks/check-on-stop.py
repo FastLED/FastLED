@@ -40,6 +40,13 @@ PROJECT_ROOT = SCRIPT_DIR.parent.parent
 SESSION_FINGERPRINT_FILE = PROJECT_ROOT / ".cache" / "session_fingerprint.json"
 BLOCK_STATE_FILE = PROJECT_ROOT / ".cache" / "stop_hook_block.json"
 MAX_IDENTICAL_BLOCKS = 2
+FIX_DIRECTIVE = """
+REMINDER - FIX ALL ERRORS FROM STOP HOOK, MAKE AT LEAST TWO ATTEMPTS!
+Your next action must be a tool call that edits the failing code, not a status reply.
+Fix these errors even if you did not cause them or the file has uncommitted edits
+that may be another session's: edit in place, which keeps those edits, and leave
+them uncommitted if they are not yours. Lint failures are never a reason to wait.
+"""
 WORKTREES_DIR = PROJECT_ROOT / ".claude" / "worktrees"
 STALE_WORKTREE_THRESHOLD = 5
 
@@ -556,10 +563,7 @@ def run_checks() -> int:
             if test_thread
             else test_skip_reason,
         )
-        print(
-            "\nREMINDER - FIX ALL ERRORS FROM STOP HOOK, MAKE AT LEAST TWO ATTEMPTS!",
-            file=sys.stderr,
-        )
+        print(FIX_DIRECTIVE, file=sys.stderr)
         warn_stale_worktrees()
         return 2
 
@@ -605,10 +609,7 @@ def run_checks() -> int:
             print("", file=sys.stderr)
             print("!" * 60, file=sys.stderr)
         _emit_timing(test_phase_secs=test_secs, test_phase_note="failed")
-        print(
-            "\nREMINDER - FIX ALL ERRORS FROM STOP HOOK, MAKE AT LEAST TWO ATTEMPTS!",
-            file=sys.stderr,
-        )
+        print(FIX_DIRECTIVE, file=sys.stderr)
         warn_stale_worktrees()
         return 2
 
