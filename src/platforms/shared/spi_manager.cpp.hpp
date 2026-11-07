@@ -14,6 +14,7 @@
 #include "fl/system/fastpin.h"
 #include "fl/math/math.h"
 #include "fl/stl/noexcept.h"
+#include "platforms/shared/spi_bitbang/runtime_software_spi.h"
 
 // Arduino defines max/min as macros, which conflicts with fl::numeric_limits<T>::max()
 // Undefine them here since we use the FastLED fl:: equivalents (min/max)
@@ -1049,6 +1050,15 @@ void SPIBusManager::softwareSPIWrite(u8 clock_pin, u8 data_pin, const u8* data, 
     // Set pins to output
     clock.setOutput();
     dataOut.setOutput();
+
+    // Atomic registers, where known, leave other pins alone and need no per-bit Pin
+    // dispatch. Resolved once per transfer, after the pins are configured.
+    RuntimeGpio gpioClock;
+    RuntimeGpio gpioData;
+    if (resolveRuntimeGpio(clock_pin, &gpioClock) && resolveRuntimeGpio(data_pin, &gpioData)) {
+        writeRuntimeSoftwareSpi(gpioClock, gpioData, data, length);
+        return;
+    }
 
     // Initial state: clock low
     clock.lo();
