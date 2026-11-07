@@ -159,7 +159,7 @@ public:
      */
     template <bool GPIO_AVAILABLE = FL_SPI_GPIO_AVAILABLE>
     void transmit() FL_NO_EXCEPT {
-        FL_STATIC_ASSERT(GPIO_AVAILABLE,
+        FL_STATIC_ASSERT(GPIO_AVAILABLE && FL_SPI_GPIO_AVAILABLE,
                       "Parallel software SPI has no GPIO registers for this target: define "
                       "FASTLED_GPIO_W1TS_ADDR and FASTLED_GPIO_W1TC_ADDR");
         if (!mBuffer || mBufferLen == 0) return;

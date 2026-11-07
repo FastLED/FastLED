@@ -66,7 +66,7 @@ class TestTargetSelection(unittest.TestCase):
                     code,
                     r"template <bool GPIO_AVAILABLE = FL_SPI_GPIO_AVAILABLE>\s+"
                     r"void transmit\(\) FL_NO_EXCEPT \{\s+"
-                    r"FL_STATIC_ASSERT\(GPIO_AVAILABLE,",
+                    r"FL_STATIC_ASSERT\(GPIO_AVAILABLE && FL_SPI_GPIO_AVAILABLE,",
                 )
 
 
