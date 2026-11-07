@@ -21,9 +21,8 @@
       `fl_parallel_spi_isr()` and returns with your platform's trap return.
     • Keep the ISR in IRAM and data in DRAM (or preloaded) for predictability.
 
-  GPIO MMIO (ESP32-C3/C2 AHB):
-    W1TS: 0x60004008  (write 1 to set pin bits)
-    W1TC: 0x6000400C  (write 1 to clear pin bits)
+  GPIO MMIO: the target's write-1-to-set and write-1-to-clear registers, chosen in
+  spi_platform.h from the SDK (or given explicitly). Not compiled where there are none.
 
   Build tips:
     riscv32-esp-elf-g++ -Os -ffreestanding -fno-asynchronous-unwind-tables \
@@ -49,6 +48,9 @@
 #include "fl/stl/singleton.h"
 #include "fl/stl/noexcept.h"
 
+// Not built where there are no GPIO registers: the writes would do nothing, so a
+// caller links against nothing instead (see spi_platform.h).
+#if FL_SPI_GPIO_AVAILABLE
 
 // All implementation uses C linkage for clean assembly generation
 FL_EXTERN_C_BEGIN
@@ -225,5 +227,7 @@ FL_IRAM void fl_parallel_spi_isr(void) FL_NO_EXCEPT {
 
 FL_EXTERN_C_END
 
+
+#endif  // FL_SPI_GPIO_AVAILABLE
 
 #endif  // SKETCH_HAS_LARGE_MEMORY && (!defined(STUB_PLATFORM) || defined(FASTLED_SPI_HOST_SIMULATION))
