@@ -7,6 +7,8 @@
 #include "platforms/shared/spi_bitbang/spi_isr_engine.h"
 #include "platforms/shared/spi_bitbang/spi_platform.h"
 #include "fl/stl/static_assert.h"
+#include "fl/stl/compiler_control.h"
+#include "platforms/shared/spi_bitbang/spi_pin_mapping.h"
 #include "fl/stl/noexcept.h"
 
 namespace fl {
@@ -74,13 +76,20 @@ public:
      *
      * Initializes the 256-entry LUT to map byte values to GPIO masks
      * for the specified data pin.
+     * @return false, changing nothing, if a pin is outside 0-31, data lanes 0-7
+     *         repeat or sit on the clock, or a lane 8+ sits on lanes 0-7.
      */
-    void setPinMapping(u8 data, u8 clk) FL_NO_EXCEPT {
+    FL_NO_DISCARD bool setPinMapping(u8 data, u8 clk) FL_NO_EXCEPT {
+        // Validate first, so a rejected mapping leaves the last good one in place.
+        const u8 dataPins[] = {data};
+        if (!spiPinMappingValid(dataPins, clk)) {
+            return false;
+        }
         // Store clock mask
-        mClockMask = 1u << clk;
+        mClockMask = u32(1) << clk;
 
         // Build data pin mask
-        u32 dataPinMask = 1u << data;
+        u32 dataPinMask = u32(1) << data;
 
         // Initialize 256-entry LUT
         // For each possible byte value (0-255):
@@ -99,6 +108,7 @@ public:
                 mLUT[byteValue].clear_mask = dataPinMask;
             }
         }
+        return true;
     }
 
     /**
@@ -132,7 +142,7 @@ public:
         FL_STATIC_ASSERT(GPIO_AVAILABLE && FL_SPI_GPIO_AVAILABLE,
                       "Parallel software SPI has no GPIO registers for this target: define "
                       "FASTLED_GPIO_W1TS_ADDR and FASTLED_GPIO_W1TC_ADDR");
-        if (!mBuffer || mBufferLen == 0) return;
+        if (!mBuffer || mBufferLen == 0 || mClockMask == 0) return;  // Unmapped: drive nothing.
 
         // Inline bit-banging loop (same logic as ISR implementation)
         for (u16 i = 0; i < mBufferLen; i++) {

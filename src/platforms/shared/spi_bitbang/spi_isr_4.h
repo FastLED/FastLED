@@ -6,6 +6,8 @@
 #include "fl/stl/stdint.h"
 #include "fl/stl/bit_cast.h"
 #include "platforms/shared/spi_bitbang/spi_isr_engine.h"
+#include "fl/stl/compiler_control.h"
+#include "platforms/shared/spi_bitbang/spi_pin_mapping.h"
 #include "fl/stl/noexcept.h"
 
 namespace fl {
@@ -59,17 +61,24 @@ public:
      *
      * Automatically initializes the 256-entry LUT to map byte values
      * to GPIO masks for the 4 specified data pins.
+     * @return false, changing nothing, if a pin is outside 0-31, data lanes 0-7
+     *         repeat or sit on the clock, or a lane 8+ sits on lanes 0-7.
      */
-    void setPinMapping(u8 d0, u8 d1, u8 d2, u8 d3, u8 clk) FL_NO_EXCEPT {
+    FL_NO_DISCARD bool setPinMapping(u8 d0, u8 d1, u8 d2, u8 d3, u8 clk) FL_NO_EXCEPT {
+        // Validate first, so a rejected mapping leaves the last good one in place.
+        const u8 dataPins[] = {d0, d1, d2, d3};
+        if (!spiPinMappingValid(dataPins, clk)) {
+            return false;
+        }
         // Store clock mask
-        fl_spi_set_clock_mask(1u << clk);
+        fl_spi_set_clock_mask(u32(1) << clk);
 
         // Build pin masks array
         u32 dataPinMasks[NUM_DATA_PINS] = {
-            1u << d0,  // Bit 0
-            1u << d1,  // Bit 1
-            1u << d2,  // Bit 2
-            1u << d3   // Bit 3
+            u32(1) << d0,  // Bit 0
+            u32(1) << d1,  // Bit 1
+            u32(1) << d2,  // Bit 2
+            u32(1) << d3   // Bit 3
         };
 
         // Initialize 256-entry LUT
@@ -95,18 +104,26 @@ public:
             lut[byteValue].set_mask = setMask;
             lut[byteValue].clear_mask = clearMask;
         }
+        return true;
     }
 
     /**
      * Alternative: Configure pin mapping using clock mask directly
      * @param d0-d3 GPIO numbers for data pins
      * @param clockMask Pre-computed GPIO mask for clock pin (e.g., 1 << 8)
+     * @return false, changing nothing, if a pin is outside 0-31, data lanes 0-7
+     *         repeat or sit on the clock, or a lane 8+ sits on lanes 0-7.
      */
-    void setPinMappingWithMask(u8 d0, u8 d1, u8 d2, u8 d3, u32 clockMask) FL_NO_EXCEPT {
+    FL_NO_DISCARD bool setPinMappingWithMask(u8 d0, u8 d1, u8 d2, u8 d3, u32 clockMask) FL_NO_EXCEPT {
+        // Validate first, so a rejected mapping leaves the last good one in place.
+        const u8 dataPins[] = {d0, d1, d2, d3};
+        if (!spiPinMappingValidWithMask(dataPins, clockMask)) {
+            return false;
+        }
         fl_spi_set_clock_mask(clockMask);
 
         u32 dataPinMasks[NUM_DATA_PINS] = {
-            1u << d0, 1u << d1, 1u << d2, 1u << d3
+            u32(1) << d0, u32(1) << d1, u32(1) << d2, u32(1) << d3
         };
 
         PinMaskEntry* lut = fl_spi_get_lut_array();
@@ -125,6 +142,7 @@ public:
             lut[v].set_mask = setMask;
             lut[v].clear_mask = clearMask;
         }
+        return true;
     }
 
     /**

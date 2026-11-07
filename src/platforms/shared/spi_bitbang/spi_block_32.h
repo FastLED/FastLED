@@ -7,6 +7,8 @@
 #include "platforms/shared/spi_bitbang/spi_isr_engine.h"
 #include "platforms/shared/spi_bitbang/spi_platform.h"
 #include "fl/stl/static_assert.h"
+#include "fl/stl/compiler_control.h"
+#include "platforms/shared/spi_bitbang/spi_pin_mapping.h"
 #include "fl/stl/noexcept.h"
 
 namespace fl {
@@ -106,8 +108,10 @@ public:
      * Initializes the 256-entry LUT to map byte values to GPIO masks
      * for the specified data pins. Only the first 8 bits of each byte
      * are used; bits 8-31 are always cleared.
+     * @return false, changing nothing, if a pin is outside 0-31, data lanes 0-7
+     *         repeat or sit on the clock, or a lane 8+ sits on lanes 0-7.
      */
-    void setPinMapping(u8 d0, u8 d1, u8 d2, u8 d3,
+    FL_NO_DISCARD bool setPinMapping(u8 d0, u8 d1, u8 d2, u8 d3,
                        u8 d4, u8 d5, u8 d6, u8 d7,
                        u8 d8, u8 d9, u8 d10, u8 d11,
                        u8 d12, u8 d13, u8 d14, u8 d15,
@@ -116,43 +120,48 @@ public:
                        u8 d24, u8 d25, u8 d26, u8 d27,
                        u8 d28, u8 d29, u8 d30, u8 d31,
                        u8 clk) FL_NO_EXCEPT {
+        // Validate first, so a rejected mapping leaves the last good one in place.
+        const u8 dataPins[] = {d0, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17, d18, d19, d20, d21, d22, d23, d24, d25, d26, d27, d28, d29, d30, d31};
+        if (!spiPinMappingValid(dataPins, clk)) {
+            return false;
+        }
         // Store clock mask
-        mClockMask = 1u << clk;
+        mClockMask = u32(1) << clk;
 
         // Build data pin masks array
         u32 dataPinMasks[NUM_DATA_PINS] = {
-            1u << d0,   // Bit 0 (LSB)
-            1u << d1,   // Bit 1
-            1u << d2,   // Bit 2
-            1u << d3,   // Bit 3
-            1u << d4,   // Bit 4
-            1u << d5,   // Bit 5
-            1u << d6,   // Bit 6
-            1u << d7,   // Bit 7
-            1u << d8,   // Bit 8
-            1u << d9,   // Bit 9
-            1u << d10,  // Bit 10
-            1u << d11,  // Bit 11
-            1u << d12,  // Bit 12
-            1u << d13,  // Bit 13
-            1u << d14,  // Bit 14
-            1u << d15,  // Bit 15
-            1u << d16,  // Bit 16
-            1u << d17,  // Bit 17
-            1u << d18,  // Bit 18
-            1u << d19,  // Bit 19
-            1u << d20,  // Bit 20
-            1u << d21,  // Bit 21
-            1u << d22,  // Bit 22
-            1u << d23,  // Bit 23
-            1u << d24,  // Bit 24
-            1u << d25,  // Bit 25
-            1u << d26,  // Bit 26
-            1u << d27,  // Bit 27
-            1u << d28,  // Bit 28
-            1u << d29,  // Bit 29
-            1u << d30,  // Bit 30
-            1u << d31   // Bit 31 (MSB)
+            u32(1) << d0,   // Bit 0 (LSB)
+            u32(1) << d1,   // Bit 1
+            u32(1) << d2,   // Bit 2
+            u32(1) << d3,   // Bit 3
+            u32(1) << d4,   // Bit 4
+            u32(1) << d5,   // Bit 5
+            u32(1) << d6,   // Bit 6
+            u32(1) << d7,   // Bit 7
+            u32(1) << d8,   // Bit 8
+            u32(1) << d9,   // Bit 9
+            u32(1) << d10,  // Bit 10
+            u32(1) << d11,  // Bit 11
+            u32(1) << d12,  // Bit 12
+            u32(1) << d13,  // Bit 13
+            u32(1) << d14,  // Bit 14
+            u32(1) << d15,  // Bit 15
+            u32(1) << d16,  // Bit 16
+            u32(1) << d17,  // Bit 17
+            u32(1) << d18,  // Bit 18
+            u32(1) << d19,  // Bit 19
+            u32(1) << d20,  // Bit 20
+            u32(1) << d21,  // Bit 21
+            u32(1) << d22,  // Bit 22
+            u32(1) << d23,  // Bit 23
+            u32(1) << d24,  // Bit 24
+            u32(1) << d25,  // Bit 25
+            u32(1) << d26,  // Bit 26
+            u32(1) << d27,  // Bit 27
+            u32(1) << d28,  // Bit 28
+            u32(1) << d29,  // Bit 29
+            u32(1) << d30,  // Bit 30
+            u32(1) << d31   // Bit 31 (MSB)
         };
 
         // Initialize 256-entry LUT
@@ -181,6 +190,7 @@ public:
             mLUT[byteValue].set_mask = setMask;
             mLUT[byteValue].clear_mask = clearMask;
         }
+        return true;
     }
 
     /**
@@ -215,7 +225,7 @@ public:
         FL_STATIC_ASSERT(GPIO_AVAILABLE && FL_SPI_GPIO_AVAILABLE,
                       "Parallel software SPI has no GPIO registers for this target: define "
                       "FASTLED_GPIO_W1TS_ADDR and FASTLED_GPIO_W1TC_ADDR");
-        if (!mBuffer || mBufferLen == 0) return;
+        if (!mBuffer || mBufferLen == 0 || mClockMask == 0) return;  // Unmapped: drive nothing.
 
         // Inline bit-banging loop (same logic as 16-way implementation)
         for (u16 i = 0; i < mBufferLen; i++) {
