@@ -65,7 +65,7 @@ private:
     /// @brief Send '1' bit - optimized for 78MHz
     /// 0.8µs high (~62 cycles), 0.45µs low (~35 cycles)
     FASTLED_FORCE_INLINE void send1() const FL_NO_EXCEPT {
-        FastPin<DATA_PIN>::hi();
+        Mgm240HwPin<DATA_PIN>::hi();
         asm volatile(
             "nop; nop; nop; nop; nop; nop; nop; nop;"  // 8
             "nop; nop; nop; nop; nop; nop; nop; nop;"  // 16
@@ -76,7 +76,7 @@ private:
             "nop; nop; nop; nop; nop; nop; nop; nop;"  // 56
             "nop; nop; nop; nop; nop; nop;"            // 62
         );
-        FastPin<DATA_PIN>::lo();
+        Mgm240HwPin<DATA_PIN>::lo();
         asm volatile(
             "nop; nop; nop; nop; nop; nop; nop; nop;"  // 8
             "nop; nop; nop; nop; nop; nop; nop; nop;"  // 16
@@ -89,14 +89,14 @@ private:
     /// @brief Send '0' bit - optimized for 78MHz
     /// 0.4µs high (~31 cycles), 0.85µs low (~66 cycles)
     FASTLED_FORCE_INLINE void send0() const FL_NO_EXCEPT {
-        FastPin<DATA_PIN>::hi();
+        Mgm240HwPin<DATA_PIN>::hi();
         asm volatile(
             "nop; nop; nop; nop; nop; nop; nop; nop;"  // 8
             "nop; nop; nop; nop; nop; nop; nop; nop;"  // 16
             "nop; nop; nop; nop; nop; nop; nop; nop;"  // 24
             "nop; nop; nop; nop; nop; nop; nop;"       // 31
         );
-        FastPin<DATA_PIN>::lo();
+        Mgm240HwPin<DATA_PIN>::lo();
         asm volatile(
             "nop; nop; nop; nop; nop; nop; nop; nop;"  // 8
             "nop; nop; nop; nop; nop; nop; nop; nop;"  // 16
@@ -140,8 +140,8 @@ public:
 
     /// @brief Initialize the controller
     virtual void init() FL_NO_EXCEPT override {
-        FastPin<DATA_PIN>::setOutput();
-        FastPin<DATA_PIN>::lo();
+        Mgm240HwPin<DATA_PIN>::setOutput();
+        Mgm240HwPin<DATA_PIN>::lo();
     }
 
     /// @brief Get maximum refresh rate

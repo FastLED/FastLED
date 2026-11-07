@@ -82,9 +82,17 @@
 typedef volatile fl::u32 RwReg;  ///< Read-write register (32-bit)
 typedef volatile fl::u32 RoReg;  ///< Read-only register (32-bit)
 
+/// The Silicon Labs Arduino core has no port register map (no
+/// portOutputRegister), and the fallbacks below are placeholders, not EFR32MG24
+/// GPIO addresses. So with FASTLED_FORCE_SOFTWARE_PINS, FastPin must be
+/// NoPinMapPin (the core's pin API), never the register-based software pin
+/// (#5072).
+#if defined(FASTLED_FORCE_SOFTWARE_PINS) && !defined(FASTLED_NO_PINMAP)
+#define FASTLED_NO_PINMAP
+#endif
+
 /// @brief Arduino compatibility macros
-/// These provide fallback pin manipulation functions when hardware FastPin is not available.
-/// The MGM240 platform uses hardware FastPin, so these are rarely used.
+/// Placeholders only; no FastLED pin path reads them on MGM240.
 #ifndef digitalPinToBitMask
 #define digitalPinToBitMask(P) (1 << (P))
 #endif
