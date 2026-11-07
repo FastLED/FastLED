@@ -28,7 +28,11 @@ DRIVER = (
     / "bitbang_channel_driver.cpp.hpp"
 )
 
-COMMENT = re.compile(r"//[^\n]*|/\*.*?\*/", re.S)
+# Comments and string or char literals, whose brackets are not code. One pattern,
+# so that a `//` inside a string is not taken for a comment.
+NOISE = re.compile(
+    r"""//[^\n]*|/\*.*?\*/|"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*'""", re.S
+)
 
 # Any spelling of the query: qualified, unqualified, or the macro.
 FETCH = re.compile(r"\b(?:cpuFrequencyHz|FL_CPU_FREQUENCY)\s*\(\s*\)")
@@ -85,7 +89,7 @@ def _bit_loop_body(text: str) -> str:
 
 class TestTheClockQueryIsHoisted(unittest.TestCase):
     def setUp(self: "TestTheClockQueryIsHoisted") -> None:
-        self.text = COMMENT.sub(" ", DRIVER.read_text(encoding="utf-8"))
+        self.text = NOISE.sub(" ", DRIVER.read_text(encoding="utf-8"))
 
     def test_the_bit_function_takes_a_frequency(
         self: "TestTheClockQueryIsHoisted",
@@ -164,6 +168,13 @@ class TestTheClockQueryIsHoisted(unittest.TestCase):
         self.assertTrue(_one_arg_delays("fl::delayNs(t1_ns);"))
         self.assertFalse(_one_arg_delays("fl::delayNanoseconds(t1_ns, hz);"))
         self.assertFalse(_one_arg_delays("fl::delayNanoseconds(f(a, b), hz);"))
+
+    def test_literals_cannot_confuse_the_call_scanner(
+        self: "TestTheClockQueryIsHoisted",
+    ) -> None:
+        call = 'fl::delayNanoseconds(sizeof("(") + t, hz); // )'
+        self.assertFalse(_one_arg_delays(NOISE.sub(" ", call)))
+        self.assertEqual(NOISE.sub(" ", '"//" x'), "  x")
 
     def test_the_fetch_detector_sees_every_spelling(
         self: "TestTheClockQueryIsHoisted",
