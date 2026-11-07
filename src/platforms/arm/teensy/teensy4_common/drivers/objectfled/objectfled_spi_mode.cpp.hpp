@@ -12,16 +12,15 @@
 ///   - DMA channel   : one allocated via DMAChannel(), trigger source
 ///                     DMAMUX_SOURCE_FLEXPWM2_WRITE0. Clockless uses XBAR1
 ///                     sources (30/31/94) -- no overlap.
-///   - DMA dest      : GPIO6_DR (whole 32-bit register write). Clockless
-///                     uses GPIO1_DR_SET/CLEAR via the IOMUXC_GPR_GPR26
-///                     remap -- different alias surface, no conflict at
-///                     init time. NOTE: we deliberately do NOT touch GPR26;
-///                     this means: (a) we always operate on the native
-///                     GPIO6, and (b) we are racy with any other code that
-///                     writes GPIO6_DR mid-transfer (e.g. other FastLED
-///                     drivers writing other GPIO6 pins). Documented and
-///                     accepted -- normal LED frame-loop usage owns the
-///                     bank end-to-end.
+///   - DMA dest      : GPIO1_DR (whole 32-bit register write). eDMA cannot
+///                     reach fast GPIO6, so init clears the two pads'
+///                     IOMUXC_GPR_GPR26 bits to move them to GPIO1, and
+///                     deinit puts those bits back with the rest of the pad
+///                     state (objectfled_pad_state.h). Each DMA word rewrites
+///                     all of GPIO1_DR from a snapshot taken at show(), so
+///                     other code writing GPIO1 mid-transfer is racy.
+///                     Documented and accepted -- normal LED frame-loop
+///                     usage owns the bank end-to-end.
 ///
 /// SPI configuration:
 ///   - Mode 0 (CPOL=0, CPHA=0), MSB-first, 8-bit beats, no inter-byte gap.
@@ -31,10 +30,10 @@
 ///
 /// Bit-banged DMA encoding: each input byte expands to 16 32-bit DMA
 /// words. For byte b, bit n (n = 7 down to 0), we emit two words:
-///       phase-A (SCLK=0): other_gpio6 | (b.bn << mosi_bit)
-///       phase-B (SCLK=1): other_gpio6 | (b.bn << mosi_bit) | sclk_mask
-/// `other_gpio6` is snapshotted at init from GPIO6_DR and preserved so
-/// we don't disturb unrelated GPIO6 outputs.
+///       phase-A (SCLK=0): other | (b.bn << mosi_bit)
+///       phase-B (SCLK=1): other | (b.bn << mosi_bit) | sclk_mask
+/// `other` is snapshotted at each show() from GPIO1_DR and preserved so
+/// we don't disturb unrelated GPIO1 outputs.
 ///
 /// References:
 ///   - NXP i.MX RT1060 Reference Manual, rev 3, chapter 30 (FlexPWM) and
@@ -55,6 +54,7 @@
 #if defined(FL_IS_TEENSY_4X)
 
 #include "platforms/arm/teensy/teensy4_common/drivers/objectfled/objectfled_spi_mode.h"
+#include "platforms/arm/teensy/teensy4_common/drivers/objectfled/objectfled_pad_state.h"
 
 #include "fl/log/log.h"
 #include "fl/stl/cstring.h"
@@ -128,9 +128,32 @@ static ObjectFLEDSPIPinInfo sSpiCurrentPins{};
 // SADDR satisfies eDMA 32-bit beat alignment.
 FL_DMAMEM static u32 sSpiBitPattern[kSpiMaxOutputWords] __attribute__((aligned(32)));
 
-// Saved IOMUXC pad-mux values so deinit() can restore pad ALT5 (GPIO).
-static u32 sSpiSavedMosiMux = 0;  // FL_LINT_ALLOW_GLOBAL(DMA-ISR-shared driver state; single T4 peripheral instance)
-static u32 sSpiSavedSclkMux = 0;  // FL_LINT_ALLOW_GLOBAL(DMA-ISR-shared driver state; single T4 peripheral instance)
+// The pads' bank, latch, direction, mux and pad state from before init, so
+// deinit and failed inits hand them back exactly as found.
+static ObjectFLEDPadState sSpiPadState;  // FL_LINT_ALLOW_GLOBAL(DMA-ISR-shared driver state; single T4 peripheral instance)
+
+static ObjectFLEDPadRegs spi_pad_regs(const ObjectFLEDSPIPinInfo& pins) FL_NO_EXCEPT {
+    return ObjectFLEDPadRegs{&IOMUXC_GPR_GPR26, &GPIO1_GDIR, &GPIO1_DR,
+                             pins.mosi_mux_reg, pins.mosi_pad_reg,
+                             pins.sclk_mux_reg, pins.sclk_pad_reg};
+}
+
+// Stop and clear QTimer3 channel 0, then hand the pads back as init found
+// them, GPR26 bank select included: Teensy's pinMode()/FastPin drive GPIO6 and
+// never set GPR26, so a remap left behind would disconnect ordinary GPIO from
+// these pins (#5065). Shared by deinit and every init failure after the pads
+// were taken. The DMA must already be stopped.
+//
+// XBAR routing is left as configured -- another driver may share CTRL1 slot 0
+// (req94) and we don't want to clobber its bits. The routing is harmless once
+// the timer is stopped.
+static void spi_release_timer_and_pads(const ObjectFLEDSPIPinInfo& pins) FL_NO_EXCEPT {
+    TMR3_ENBL    &= ~1u;
+    TMR3_CSCTRL0  = 0;
+    TMR3_CTRL0    = 0;
+    TMR3_SCTRL0   = 0;
+    sSpiPadState.restore(spi_pad_regs(pins));
+}
 
 // Diagnostics snapshot captured in wait() BEFORE recovery clears state.
 // Read by `objectfled_spi_read_diagnostics()` after wait() returns.
@@ -383,10 +406,10 @@ bool objectfled_spi_init(const ObjectFLEDSPIPinInfo& pin_info,
     // the Teensy on bring-up. Verified against imxrt.h:1573.
     CCM_CCGR4 |= CCM_CCGR4_PWM2(CCM_CCGR_ON);
 
-    // Snapshot pre-init mux ALT values so deinit() can restore them. Per
-    // coderabbitai review on #3432.
-    sSpiSavedMosiMux = *(pin_info.mosi_mux_reg);
-    sSpiSavedSclkMux = *(pin_info.sclk_mux_reg);
+    // Snapshot everything init changes on the pads so deinit (and the failure
+    // returns below) can put it back.
+    sSpiPadState.capture(spi_pad_regs(pin_info),
+                         pin_info.mosi_mask | pin_info.sclk_mask);
 
     *(pin_info.mosi_mux_reg) = 5u;
     *(pin_info.mosi_pad_reg) =
@@ -419,12 +442,14 @@ bool objectfled_spi_init(const ObjectFLEDSPIPinInfo& pin_info,
         sSpiDmaChannel = new DMAChannel();  // ok bare allocation -- one-shot, balanced in deinit
         if (sSpiDmaChannel == nullptr) {
             FL_LOG_OBJECTFLED("ObjectFLED_SPI: failed to allocate DMA channel");
+            spi_release_timer_and_pads(pin_info);
             return false;
         }
         if (sSpiDmaChannel->TCD == nullptr) {
             FL_LOG_OBJECTFLED("ObjectFLED_SPI: DMA channel has null TCD");
             delete sSpiDmaChannel;  // ok bare allocation
             sSpiDmaChannel = nullptr;
+            spi_release_timer_and_pads(pin_info);
             return false;
         }
         // XBAR1_3 -> DMA_CH_MUX_REQ95, driven by QTIMER3_TIMER0 compare event
@@ -636,15 +661,6 @@ void objectfled_spi_deinit() FL_NO_EXCEPT {
 
     objectfled_spi_wait();
 
-    // Stop + clear QTimer3 channel 0.
-    TMR3_ENBL    &= ~1u;
-    TMR3_CSCTRL0  = 0;
-    TMR3_CTRL0    = 0;
-    TMR3_SCTRL0   = 0;
-    // NOTE: XBAR routing is left as configured -- another driver may share
-    // CTRL1 slot 0 (req94) and we don't want to clobber its bits. The
-    // routing is harmless when our DMA channel is disabled.
-
     if (sSpiDmaChannel) {
         sSpiDmaChannel->disable();
         sSpiDmaChannel->detachInterrupt();
@@ -654,29 +670,12 @@ void objectfled_spi_deinit() FL_NO_EXCEPT {
         delete to_delete;  // ok bare allocation
     }
 
-    // Per coderabbitai review on #3432: restore the saved mux ALT values
-    // captured in objectfled_spi_init() rather than forcing ALT5. If the
-    // user previously had the pin on (e.g.) ALT3 for FlexCAN, forcing ALT5
-    // would leave them with a silently-changed pin mux post-deinit.
-    if (sSpiCurrentPins.mosi_mux_reg) {
-        GPIO1_DR   &= ~sSpiCurrentPins.mosi_mask;
-        GPIO1_GDIR &= ~sSpiCurrentPins.mosi_mask;
-        *(sSpiCurrentPins.mosi_mux_reg) = sSpiSavedMosiMux;
-    }
-    if (sSpiCurrentPins.sclk_mux_reg) {
-        GPIO1_DR   &= ~sSpiCurrentPins.sclk_mask;
-        GPIO1_GDIR &= ~sSpiCurrentPins.sclk_mask;
-        *(sSpiCurrentPins.sclk_mux_reg) = sSpiSavedSclkMux;
-    }
-    // NOTE: we deliberately do NOT restore IOMUXC_GPR_GPR26 -- leaving
-    // the pads aliased to GPIO1 is harmless when not driven, and avoids
-    // a race with any other driver that may have remapped the same bits.
+    // The DMA is stopped, so nothing writes GPIO1 any more.
+    spi_release_timer_and_pads(sSpiCurrentPins);
 
     sSpiInitialized   = false;
     sSpiDmaComplete   = true;
     sSpiCurrentPins   = ObjectFLEDSPIPinInfo{};
-    sSpiSavedMosiMux  = 0;
-    sSpiSavedSclkMux  = 0;
 }
 
 // ============================================================================
