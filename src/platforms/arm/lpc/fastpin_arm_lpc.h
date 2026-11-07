@@ -14,6 +14,17 @@
 #include "platforms/arm/lpc/is_lpc.h"
 #include "platforms/shared/spi_bitbang/bitbang_pin.h"
 
+// Forced software pins are FastPin = NoPinMapPin (LPC defines
+// FASTLED_NO_PINMAP), which drives pins through fl::pinMode / digitalWrite.
+// LPC has no core pin API: those resolve to platforms/shared/pin_noop.hpp, so
+// every forced pin access would silently do nothing. The native FastPin
+// specializations below used to override the option without a word (#5073);
+// until an LPC pin backend exists, reject it instead. This covers the modern
+// and the legacy LPC11xx routes.
+#if defined(FL_IS_ARM_LPC) && defined(FASTLED_FORCE_SOFTWARE_PINS)
+#error "FASTLED_FORCE_SOFTWARE_PINS is not supported on LPC: there is no LPC core pin API (fl::pinMode/digitalWrite are no-ops), so software pins could not drive anything. Remove the define to use the native GPIO pins."
+#endif
+
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_DEPRECATED_REGISTER
 
