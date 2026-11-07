@@ -131,6 +131,28 @@ class ARMHardwareSPIOutput {
     }
   }
 
+  static inline auto dataPinConfig() FL_NO_EXCEPT -> decltype(&CORE_PIN11_CONFIG) {
+    switch(_DATA_PIN) {
+      case 0: return &CORE_PIN0_CONFIG;
+      case 1: return &CORE_PIN1_CONFIG;
+      case 7: return &CORE_PIN7_CONFIG;
+      case 8: return &CORE_PIN8_CONFIG;
+      case 11: return &CORE_PIN11_CONFIG;
+      case 12: return &CORE_PIN12_CONFIG;
+      case 21: return &CORE_PIN21_CONFIG;
+    }
+    return nullptr;
+  }
+
+  static inline auto clockPinConfig() FL_NO_EXCEPT -> decltype(&CORE_PIN13_CONFIG) {
+    switch(_CLOCK_PIN) {
+      case 13: return &CORE_PIN13_CONFIG;
+      case 14: return &CORE_PIN14_CONFIG;
+      case 20: return &CORE_PIN20_CONFIG;
+    }
+    return nullptr;
+  }
+
   void setSPIRate() FL_NO_EXCEPT {
     u8 sppr, spr;
     getScalars<_SPI_CLOCK_DIVIDER>(sppr, spr);
@@ -140,7 +162,9 @@ class ARMHardwareSPIOutput {
 
     // Also, force 8 bit transfers (don't want to juggle 8/16 since that flushes the world)
     SPIX.C2 = 0;
-    SPIX.C1 |= SPI_C1_SPE;
+    // Also force mode 0, MSB first: another SPI client may have left CPOL set, and then
+    // handing the clock pad back after writeBit would be an extra rising edge.
+    SPIX.C1 = SPI_C1_MSTR | SPI_C1_SPE;
   }
 
 public:
@@ -180,23 +204,61 @@ public:
 
   // release the CS select
   void inline release() FL_NO_EXCEPT __attribute__((always_inline)) {
+    waitFully();  // Taking the pads away mid-frame would cut off the last byte.
     disable_pins();
     if(mPSelect != nullptr) { mPSelect->release(); }
   }
 
   void endTransaction() FL_NO_EXCEPT {
-    waitFully();
     release();
   }
 
   // Wait for the world to be clear
   static void wait() __attribute__((always_inline)) { while(!(SPIX.S & SPI_S_SPTEF));  }
 
-  // wait until all queued up data has been written
-  void waitFully() { wait(); }
+  // Wait until all queued data has left the shifter. SPTEF only says the buffer is
+  // empty, and there is no shifter-idle flag: SPRF cannot stand in, because nothing
+  // here reads DL. So wait out one frame, plus one bit of margin for the load from the
+  // buffer. Each peripheral read takes at least one bus clock, so this cannot be short.
+  static void waitFully() FL_NO_EXCEPT {
+    wait();
+    const u8 rate = SPIX.BR;
+    const u32 busClocksPerBit = (static_cast<u32>((rate >> 4) & 0x7) + 1) << ((rate & 0xF) + 1);
+    for (u32 reads = 9 * busClocksPerBit; reads != 0; --reads) {
+      const u8 status = SPIX.S;
+      (void)status;
+    }
+  }
 
-  // not the most efficient mechanism in the world - but should be enough for sm16716 and friends
-  template <u8 BIT> inline static void writeBit(u8 b) { /* TODO */ }
+  // The peripheral only sends 8 or 16 bit frames, so one bit is sent by hand: drain,
+  // give both pads to GPIO, pulse, and give them back as they were. The clock latch
+  // goes low first so that it cannot rise as the pad leaves the mux, matching SPI
+  // mode 0's idle level. Slow, but only sm16716-style start bits and trailers use it.
+  template <u8 BIT> inline static void writeBit(u8 b) FL_NO_EXCEPT {
+    waitFully();
+    FastPin<_CLOCK_PIN>::lo();
+    auto* const dataConfig = dataPinConfig();
+    auto* const clockConfig = clockPinConfig();
+    const u32 savedData = dataConfig ? static_cast<u32>(*dataConfig) : 0;
+    const u32 savedClock = clockConfig ? static_cast<u32>(*clockConfig) : 0;
+    // GPIO without PORT_PCR_SRE: this pulse is short, and the bytes around it are fast.
+    if (dataConfig) { *dataConfig = PORT_PCR_MUX(1); }
+    if (clockConfig) { *clockConfig = PORT_PCR_MUX(1); }
+
+    if (b & (1 << BIT)) {
+      FastPin<_DATA_PIN>::hi();
+    } else {
+      FastPin<_DATA_PIN>::lo();
+    }
+    delaycycles<NS(35)>();
+    FastPin<_CLOCK_PIN>::hi();
+    delaycycles<NS(35)>();
+    FastPin<_CLOCK_PIN>::lo();
+
+    // Without ISF, which is write-1-to-clear: restoring it would drop a pending pin interrupt.
+    if (dataConfig) { *dataConfig = savedData & ~PORT_PCR_ISF; }
+    if (clockConfig) { *clockConfig = savedClock & ~PORT_PCR_ISF; }
+  }
 
   // write a byte out via SPI (returns immediately on writing register)
   static void writeByte(u8 b) __attribute__((always_inline)) { wait(); SPIX.DL = b; }
@@ -215,7 +277,6 @@ public:
     while(len--) {
       writeByte(value);
     }
-    waitFully();
     release();
   }
 
@@ -229,7 +290,6 @@ public:
       writeByte(D::adjust(*data++));
     }
     D::postBlock(len);
-    waitFully();
     release();
   }
 
