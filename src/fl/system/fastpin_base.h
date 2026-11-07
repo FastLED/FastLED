@@ -12,6 +12,9 @@
 #include "fl/stl/static_assert.h"
 #ifdef FASTLED_FORCE_SOFTWARE_PINS
 #include "fl/system/pin.h"  // IWYU pragma: keep
+#if defined(FASTLED_NO_PINMAP)
+#include "fl/system/fastpin_no_pinmap.h"  // IWYU pragma: keep
+#endif
 #endif
 
 FL_DISABLE_WARNING_PUSH
@@ -69,17 +72,18 @@ public:
 ///
 /// Note that these classes are all static functions.  So the proper usage is Pin<13>::hi(); or such.  Instantiating objects is not recommended,
 /// as passing Pin objects around will likely -not- have the effect you're expecting.
-#ifdef FASTLED_FORCE_SOFTWARE_PINS
+#if defined(FASTLED_FORCE_SOFTWARE_PINS) && defined(FASTLED_NO_PINMAP)
+/// No register map exists to read, so every access goes through the core's pin API.
+template<fl::u8 PIN> class FastPin : public NoPinMapPin<PIN> {};
+#elif defined(FASTLED_FORCE_SOFTWARE_PINS)
 template<fl::u8 PIN> class FastPin {
 	static RwReg sPinMask;            ///< Bitmask for the pin within its register
 	static volatile RwReg *sPort;     ///< Output register for the pin
 	static volatile RoReg *sInPort;   ///< Input register for the pin
 	static void _init() {
-#if !defined(FASTLED_NO_PINMAP)
 		sPinMask = digitalPinToBitMask(PIN);
 		sPort = portOutputRegister(digitalPinToPort(PIN));
 		sInPort = portInputRegister(digitalPinToPort(PIN));
-#endif
 	}
 
 public:

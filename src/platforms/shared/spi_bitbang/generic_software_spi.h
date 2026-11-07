@@ -24,6 +24,7 @@
 #include "fastspi_types.h"
 #include "fl/stl/noexcept.h"
 #include "fl/stl/static_assert.h"
+#include "fl/system/fastpin_no_pinmap.h"
 #include "platforms/shared/spi_bitbang/bitbang_pin.h"
 
 FL_DISABLE_WARNING_PUSH
@@ -64,6 +65,11 @@ class GenericSoftwareSPIOutput {
 #else
 		// Keep the combined-port optimization where a pin policy opts into
 		// streaming. Otherwise atomic pins never take whole-port snapshots.
+		// A no-pin-map pin has no port, so per-pin writes are its only safe form.
+		if (isNoPinMapPin(static_cast<const fl::FastPin<DATA_PIN>*>(nullptr)) ||
+			isNoPinMapPin(static_cast<const fl::FastPin<CLOCK_PIN>*>(nullptr))) {
+			return true;
+		}
 		return BitbangPin<fl::FastPin<DATA_PIN>>::kAtomicWrite &&
 			(!kCanStreamSamePort ||
 			 fl::FastPin<DATA_PIN>::port() != fl::FastPin<CLOCK_PIN>::port());
