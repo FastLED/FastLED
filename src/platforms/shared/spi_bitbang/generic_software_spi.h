@@ -92,6 +92,8 @@ public:
 		// confusing to me)
 		fl::FastPin<DATA_PIN>::setOutput();
 		fl::FastPin<CLOCK_PIN>::setOutput();
+		// Writers raise the clock first, so a latch left high would lose the first edge.
+		fl::FastPin<CLOCK_PIN>::lo();
 		release();
 	}
 
