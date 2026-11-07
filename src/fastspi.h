@@ -103,7 +103,22 @@
 
 /// Software SPI output (generic cross-platform bit-banging)
 /// NOTE: This is NOT in the fl namespace per fastspi.h design requirements
+///
+/// Pass DATA_RATE_MHZ()/DATA_RATE_KHZ() as the third parameter. Its unit depends on
+/// the platform: on ESP32 and Teensy 4 it is Hz, and on other platforms it is what
+/// GenericSoftwareSPIOutput consumes, normally a clock divider. The ESP32 conversion
+/// uses the compile-time CPU frequency. For a literal divider on ESP32, use
+/// fl::GenericSoftwareSPIOutput.
+#if defined(ESP32)
+template<fl::u8 _DATA_PIN, fl::u8 _CLOCK_PIN, fl::u32 _SPI_RATE_HZ>
+class SoftwareSPIOutput : public fl::GenericSoftwareSPIOutput<
+    _DATA_PIN, _CLOCK_PIN, fl::bitbangDividerFromHz(_SPI_RATE_HZ > 0 ? _SPI_RATE_HZ : 1, FL_CPU_FREQUENCY())> {
+    FL_STATIC_ASSERT(_SPI_RATE_HZ >= 1000,
+                     "ESP32 SoftwareSPIOutput takes a rate in Hz: use DATA_RATE_MHZ/KHZ, or fl::GenericSoftwareSPIOutput for a literal divider");
+};
+#else
 template<fl::u8 _DATA_PIN, fl::u8 _CLOCK_PIN, fl::u32 _SPI_CLOCK_DIVIDER>
 class SoftwareSPIOutput : public fl::GenericSoftwareSPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER> {};
+#endif
 
 #endif  // __INC_FASTSPI_H

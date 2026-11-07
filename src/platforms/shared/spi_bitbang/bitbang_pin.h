@@ -25,6 +25,15 @@ constexpr u32 bitbangPhaseNsFromHz(u32 hz) FL_NO_EXCEPT {
     return hz == 0 ? 0 : 1000000000UL / hz / 4;
 }
 
+/// GenericSoftwareSPIOutput divider for a rate in Hz, at the given CPU clock. Rounds
+/// up, and stays above 10 because that class reads 10 or less as a half period, which
+/// would make faster requests run slower. @p hz must be nonzero.
+constexpr u32 bitbangDividerFromHz(u32 hz, u32 cpu_hz) FL_NO_EXCEPT {
+    return cpu_hz / hz + (cpu_hz % hz != 0 ? 1 : 0) < 11
+        ? 11
+        : cpu_hz / hz + (cpu_hz % hz != 0 ? 1 : 0);
+}
+
 /// One atomic GPIO update, without a data-dependent branch. Platforms with
 /// write-one-to-set/clear registers can use this instead of a port snapshot.
 template <u8 BIT>
