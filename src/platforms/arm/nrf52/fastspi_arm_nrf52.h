@@ -156,6 +156,8 @@ namespace fl {
             // 1. set pins to output/H0H1 drive/etc.
             FastPin<_DATA_PIN>::setOutput();
             FastPin<_CLOCK_PIN>::setOutput();
+            // writeBit pulses from the latch once SPIM releases the pin, so it must idle low.
+            FastPin<_CLOCK_PIN>::lo();
 
             // 2. Configure SPIMx
             nrf_spim_configure(
@@ -330,9 +332,9 @@ namespace fl {
             }
             // delay 1/2 cycle per SPI bit
             fl::delaycycles<_SPI_CLOCK_DIVIDER/2>();
-            FastPin<_CLOCK_PIN>::toggle();
+            FastPin<_CLOCK_PIN>::hi();
             fl::delaycycles<_SPI_CLOCK_DIVIDER/2>();
-            FastPin<_CLOCK_PIN>::toggle();
+            FastPin<_CLOCK_PIN>::lo();
             // re-enable the SPIM instance
             nrf_spim_enable(FASTLED_NRF52_SPIM);
         }
