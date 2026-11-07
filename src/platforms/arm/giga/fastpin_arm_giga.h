@@ -198,7 +198,17 @@ _FL_DEFPIN(41, 7, K);
 // SPI2 SCK
 #define SPI_CLOCK 91
 
+#if defined(FASTLED_FORCE_SOFTWARE_PINS)
+// The pin map then emits only GigaHwPin, so fl::FastPin uses the forced
+// software primary template in fastpin_base.h (#5071). GIGA defines
+// FASTLED_NO_PINMAP, so that is NoPinMapPin (digitalWrite); the clockless
+// driver keeps GigaHwPin.
+#warning "Software pin support forced, pin access will be slightly slower."
+#define NO_HARDWARE_PIN_SUPPORT
+#undef HAS_HARDWARE_PIN_SUPPORT
+#else
 #define HAS_HARDWARE_PIN_SUPPORT
+#endif
 
 #endif // ARDUINO_GIGA || ARDUINO_GIGA_M7
 }  // namespace fl
