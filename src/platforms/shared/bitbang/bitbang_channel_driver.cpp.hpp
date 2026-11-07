@@ -230,6 +230,9 @@ void BitBangChannelDriver::transmitSpi(
     fl::span<const ChannelDataPtr> channels) FL_NO_EXCEPT {
     if (channels.empty()) return;
 
+    // Once for the whole transmission; see transmitClockless.
+    const u32 hz = fl::cpuFrequencyHz();
+
     // Group channels by clock pin
     fl::vector<bool> processed(channels.size(), false);
 
@@ -259,46 +262,59 @@ void BitBangChannelDriver::transmitSpi(
             }
         }
 
-        // Find max data size in group
+        if (clockPin < 0) continue;  // Nothing to clock; setup skipped this pin too.
+
+        // Resolve each lane once; nothing here changes during the transfer.
+        struct SpiLane {
+            const u8* bytes;
+            size_t size;
+            u8 slotMask;
+        };
+        fl::vector<SpiLane> lanes;
+        lanes.reserve(groupIndices.size());
         size_t maxBytes = 0;
         for (fl::size gi = 0; gi < groupIndices.size(); ++gi) {
-            size_t sz = channels[groupIndices[gi]]->getSize();
+            const auto& ch = channels[groupIndices[gi]];
+            size_t sz = ch->getSize();
             if (sz > maxBytes) maxBytes = sz;
+
+            const auto* chSpi = ch->getChipset().ptr<SpiChipsetConfig>();
+            if (!chSpi) continue;
+            int pin = chSpi->dataPin;
+            if (pin < 0 || pin > 255) continue;
+            int slot = mSlotForPin[pin];
+            if (slot < 0) continue;
+            lanes.push_back({ch->getData().data(), sz, static_cast<u8>(1u << slot)});
         }
 
         // Bit-bang SPI: MSB-first, data before rising edge (mode 0)
         for (size_t byteIdx = 0; byteIdx < maxBytes; ++byteIdx) {
-            for (int bit = 7; bit >= 0; --bit) {
-                // Build data mask for all lanes
-                u8 dataMask = 0;
-                for (fl::size gi = 0; gi < groupIndices.size(); ++gi) {
-                    const auto& ch = channels[groupIndices[gi]];
-                    const auto* chSpi =
-                        ch->getChipset().ptr<SpiChipsetConfig>();
-                    if (!chSpi) continue;
-
-                    int pin = chSpi->dataPin;
-                    if (pin < 0 || pin > 255) continue;
-                    int slot = mSlotForPin[pin];
-                    if (slot < 0) continue;
-
-                    const auto& data = ch->getData();
-                    u8 byte = (byteIdx < data.size()) ? data[byteIdx] : 0;
+            // Data masks for all lanes, built once per byte and indexed by bit.
+            u8 masks[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+            for (fl::size li = 0; li < lanes.size(); ++li) {
+                const SpiLane& lane = lanes[li];
+                if (byteIdx >= lane.size) continue;  // Short lanes pad with zeros.
+                const u8 byte = lane.bytes[byteIdx];
+                for (int bit = 0; bit < 8; ++bit) {
                     if ((byte >> bit) & 1) {
-                        dataMask |= (1 << slot);
+                        masks[bit] = static_cast<u8>(masks[bit] | lane.slotMask);
                     }
                 }
+            }
+
+            for (int bit = 7; bit >= 0; --bit) {
+                const u8 dataMask = masks[bit];
 
                 // Set data pins (SPI mode 0: data before rising edge)
                 mMultiWriter.writeByte(dataMask);
 
                 // Clock rising edge
                 (fl::digitalWrite)(clockPin, PinValue::High);
-                fl::delayNanoseconds(halfPeriodNs);
+                fl::delayNanoseconds(halfPeriodNs, hz);
 
                 // Clock falling edge
                 (fl::digitalWrite)(clockPin, PinValue::Low);
-                fl::delayNanoseconds(halfPeriodNs);
+                fl::delayNanoseconds(halfPeriodNs, hz);
             }
         }
     }

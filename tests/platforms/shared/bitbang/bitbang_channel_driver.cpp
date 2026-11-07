@@ -15,6 +15,8 @@
 #include "fl/channels/data.h"
 #include "fl/channels/config.h"
 #include "fl/system/pin.h"
+#include "fl/stl/vector.h"
+#include "platforms/stub/stub_gpio.h"
 
 using namespace fl;
 
@@ -34,6 +36,43 @@ ChannelDataPtr makeSpi(int dataPin, int clockPin, const u8* bytes,
     fl::vector_psram<u8> data(bytes, bytes + len);
     ChipsetVariant chipset = spiCfg;
     return ChannelData::create(chipset, fl::move(data));
+}
+
+// Records each data pin's level at every rising edge of a clock pin, through the
+// driver's real enqueue/show path. Also counts falling edges.
+struct SpiTrace {
+    int clockPin;
+    fl::vector<int> dataPins;
+    fl::vector<fl::vector<u8>> sampled;  // Per data pin, one level per rising edge.
+    int falling = 0;
+
+    SpiTrace(int clock, fl::vector<int> pins) : clockPin(clock), dataPins(pins) {
+        sampled.resize(dataPins.size());
+        fl::stub::setPinEdgeCallback(clockPin, [this](bool high, u32) FL_NO_EXCEPT {
+            if (!high) {
+                ++falling;
+                return;
+            }
+            for (fl::size i = 0; i < dataPins.size(); ++i) {
+                const bool level = fl::digitalRead(dataPins[i]) == fl::PinValue::High;
+                sampled[i].push_back(level ? 1 : 0);
+            }
+        });
+    }
+    ~SpiTrace() { fl::stub::clearPinEdgeCallback(clockPin); }
+};
+
+// Checks MSB-first output with zero padding past the lane's end.
+void checkLane(const SpiTrace& trace, fl::size lane, const fl::vector<u8>& bytes, fl::size totalBytes) {
+    FL_REQUIRE_EQ(trace.sampled[lane].size(), totalBytes * 8);
+    for (fl::size i = 0; i < totalBytes * 8; ++i) {
+        const u8 byte = (i / 8) < bytes.size() ? bytes[i / 8] : 0;
+        FL_CHECK_EQ(trace.sampled[lane][i], static_cast<u8>((byte >> (7 - (i % 8))) & 1));
+    }
+}
+
+ChannelDataPtr makeSpiVec(int dataPin, int clockPin, const fl::vector<u8>& bytes) {
+    return makeSpi(dataPin, clockPin, bytes.data(), bytes.size());
 }
 
 } // namespace
@@ -168,6 +207,91 @@ FL_TEST_CASE("getMultiWriter exposes initialized writer") {
     FL_CHECK_EQ(fl::digitalRead(5), fl::PinValue::High);
     writer.writeByte(0x00);
     FL_CHECK_EQ(fl::digitalRead(5), fl::PinValue::Low);
+}
+
+FL_TEST_CASE("SPI trace: all byte values, MSB first, clock falls after each rise") {
+    fl::vector<u8> bytes;
+    for (int v = 0; v < 256; ++v) {
+        bytes.push_back(static_cast<u8>(v));
+    }
+    BitBangChannelDriver driver;
+    SpiTrace trace(21, {20});
+    driver.enqueue(makeSpiVec(20, 21, bytes));
+    driver.show();
+    checkLane(trace, 0, bytes, bytes.size());
+    FL_CHECK_EQ(trace.falling, 256 * 8 + 1);  // Plus parking the clock low in setup.
+}
+
+FL_TEST_CASE("SPI trace: 8 unequal lanes on one clock pad with zeros") {
+    BitBangChannelDriver driver;
+    fl::vector<int> pins = {10, 11, 12, 13, 14, 15, 16, 17};
+    SpiTrace trace(18, pins);
+    fl::vector<fl::vector<u8>> lanes;
+    for (fl::size i = 0; i < pins.size(); ++i) {
+        fl::vector<u8> bytes;
+        for (fl::size b = 0; b <= i; ++b) {
+            bytes.push_back(static_cast<u8>(0xA5 ^ (i * 17 + b * 3)));
+        }
+        lanes.push_back(bytes);
+        driver.enqueue(makeSpiVec(pins[i], 18, bytes));
+    }
+    driver.show();
+    for (fl::size i = 0; i < pins.size(); ++i) {
+        checkLane(trace, i, lanes[i], pins.size());
+    }
+}
+
+FL_TEST_CASE("SPI trace: separate clock groups transmit independently") {
+    BitBangChannelDriver driver;
+    const fl::vector<u8> first = {0xC3};
+    const fl::vector<u8> second = {0x3C, 0x81};
+    SpiTrace traceA(41, {40});
+    SpiTrace traceB(43, {42});
+    driver.enqueue(makeSpiVec(40, 41, first));
+    driver.enqueue(makeSpiVec(42, 43, second));
+    driver.show();
+    checkLane(traceA, 0, first, first.size());
+    checkLane(traceB, 0, second, second.size());
+}
+
+FL_TEST_CASE("SPI trace: duplicate data pin ORs lanes") {
+    BitBangChannelDriver driver;
+    SpiTrace trace(46, {45});
+    driver.enqueue(makeSpiVec(45, 46, {0xF0}));
+    driver.enqueue(makeSpiVec(45, 46, {0x0C}));
+    driver.show();
+    checkLane(trace, 0, {0xFC}, 1);
+}
+
+FL_TEST_CASE("SPI trace: empty transfer only parks the clock") {
+    BitBangChannelDriver driver;
+    SpiTrace trace(48, {47});
+    driver.enqueue(makeSpiVec(47, 48, {}));
+    driver.show();
+    FL_CHECK_EQ(trace.sampled[0].size(), 0U);
+    FL_CHECK_EQ(trace.falling, 1);
+}
+
+FL_TEST_CASE("SPI trace: repeated show of one channel uses its current data") {
+    BitBangChannelDriver driver;
+    SpiTrace trace(50, {49});
+    auto ch = makeSpiVec(49, 50, {0x81});
+    driver.enqueue(ch);
+    driver.show();
+    ch->getData()[0] = 0x7E;
+    driver.enqueue(ch);
+    driver.show();
+    checkLane(trace, 0, {0x81, 0x7E}, 2);
+}
+
+FL_TEST_CASE("SPI trace: a channel with no clock pin writes no data") {
+    BitBangChannelDriver driver;
+    int edges = 0;
+    fl::stub::setPinEdgeCallback(51, [&edges](bool, u32) FL_NO_EXCEPT { ++edges; });
+    driver.enqueue(makeSpiVec(51, -1, {0xFF}));
+    driver.show();
+    fl::stub::clearPinEdgeCallback(51);
+    FL_CHECK_EQ(edges, 0);
 }
 
 } // FL_TEST_SUITE
