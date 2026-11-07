@@ -7,6 +7,8 @@
 #include "test.h"
 
 #include "fastspi_types.h"
+#include "pixel_controller.h"
+#include "platforms/shared/spi_pixel_writer.h"
 #include "fl/stl/int.h"
 
 namespace fl {
@@ -404,6 +406,41 @@ template <typename Output> void checkHandoff(avr_regs::Shifter& shifter, avr_reg
     Output::template writeBit<0>(0);
     FL_REQUIRE_EQ(AvrPinTrace::risingEdges, 1);
     FL_REQUIRE_EQ(avr_regs::StatusReg::hangs, 0);
+    control.value = initialControl;
+
+    // The real SM16716 pixel path, then its header with no drain in between, as in
+    // showPixels. The header sequence is replayed: SM16716Controller needs fl::SPIOutput.
+    {
+        CRGB leds[3] = {CRGB(1, 2, 3), CRGB(4, 5, 6), CRGB(7, 8, 9)};
+        PixelController<RGB> pixels(leds, 3, ColorAdjustment::noAdjustment(), DISABLE_DITHER);
+        AvrPinTrace::reset();
+        const int bytesBefore = shifter.bytes;
+        writePixelsToSPI<FLAG_START_BIT, DATA_NOP, RGB>(pixels, output, nullptr);
+        FL_REQUIRE_EQ(AvrPinTrace::risingEdges, 3);
+        FL_REQUIRE(AvrPinTrace::sampled); // The start bit is a 1.
+
+        output.select();
+        Output::template writeBit<0>(0);
+        FL_REQUIRE_FALSE(AvrPinTrace::sampled);
+        Output::writeByte(0);
+        Output::writeByte(0);
+        Output::writeByte(0);
+        Output::template writeBit<0>(0);
+        Output::writeByte(0);
+        Output::writeByte(0);
+        Output::writeByte(0);
+        output.endTransaction();
+        Output::waitFully();
+
+        FL_REQUIRE_EQ(AvrPinTrace::risingEdges, 5);
+        FL_REQUIRE_EQ(AvrPinTrace::fallingEdges, 5);
+        FL_REQUIRE_EQ(AvrPinTrace::writesWhileBusy, 0);
+        FL_REQUIRE_EQ(AvrPinTrace::ignoredWrites, 0);
+        FL_REQUIRE_EQ(shifter.bytes, bytesBefore + 15);
+        FL_REQUIRE_EQ(avr_regs::ControlReg::abortedBytes, 0);
+        FL_REQUIRE_EQ(avr_regs::ControlReg::badEnables, 0);
+        FL_REQUIRE_EQ(avr_regs::StatusReg::hangs, 0);
+    }
     control.value = initialControl;
 
     // A high clock latch must not rise at release and sample the old data.
