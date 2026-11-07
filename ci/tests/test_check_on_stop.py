@@ -51,13 +51,12 @@ def test_directive_rules_out_ownership_excuses() -> None:
 
 
 def _run_main(monkeypatch, tmp_path, stop_active: bool, checks_code: int, digest: str):
-    state = tmp_path / "block.json"
     payload = {"session_id": "s", "stop_hook_active": stop_active}
-    monkeypatch.setattr(hook, "BLOCK_STATE_FILE", state)
+    monkeypatch.setattr(hook, "BLOCK_STATE_DIR", tmp_path / "blocks")
     monkeypatch.setattr(hook, "_read_stop_payload", lambda: payload)
     monkeypatch.setattr(hook, "_tree_digest", lambda: digest)
     monkeypatch.setattr(hook, "run_checks", lambda: checks_code)
-    return hook.main(), state
+    return hook.main(), hook._block_state_file("s")
 
 
 def test_main_blocks_twice_then_releases_then_edit_blocks_again(
@@ -73,3 +72,51 @@ def test_main_clears_state_once_checks_pass(monkeypatch, tmp_path) -> None:
     _run_main(monkeypatch, tmp_path, False, 2, "d")
     code, state = _run_main(monkeypatch, tmp_path, True, 0, "d")
     assert code == 0 and not state.exists()
+
+
+def test_sessions_keep_separate_state_files() -> None:
+    assert hook._block_state_file("a") != hook._block_state_file("b")
+
+
+def test_block_is_counted_against_tree_checked_before_lint(
+    monkeypatch, tmp_path
+) -> None:
+    digests = iter(["before", "reformatted"])
+    payload = {"session_id": "s", "stop_hook_active": False}
+    monkeypatch.setattr(hook, "BLOCK_STATE_DIR", tmp_path / "blocks")
+    monkeypatch.setattr(hook, "_read_stop_payload", lambda: payload)
+    monkeypatch.setattr(hook, "_tree_digest", lambda: next(digests))
+    monkeypatch.setattr(hook, "run_checks", lambda: 2)
+    assert hook.main() == 2
+    assert hook._load_block_state("s")["digest"] == "before"
+
+
+def test_state_write_failure_keeps_the_block(monkeypatch, tmp_path) -> None:
+    blocker = tmp_path / "file"
+    blocker.write_text("x")
+    payload = {"session_id": "s", "stop_hook_active": False}
+    monkeypatch.setattr(hook, "BLOCK_STATE_DIR", blocker / "blocks")
+    monkeypatch.setattr(hook, "_read_stop_payload", lambda: payload)
+    monkeypatch.setattr(hook, "_tree_digest", lambda: "d")
+    monkeypatch.setattr(hook, "run_checks", lambda: 2)
+    assert hook.main() == 2
+
+
+def test_untracked_file_content_changes_digest(monkeypatch, tmp_path) -> None:
+    (tmp_path / "new.txt").write_text("one")
+    monkeypatch.setattr(hook, "PROJECT_ROOT", tmp_path)
+
+    class Result:
+        returncode = 0
+
+        def __init__(self, stdout: str) -> None:
+            self.stdout = stdout
+
+    monkeypatch.setattr(
+        hook,
+        "run_cmd",
+        lambda cmd: Result("new.txt\0" if "ls-files" in cmd else ""),
+    )
+    first = hook._tree_digest()
+    (tmp_path / "new.txt").write_text("two")
+    assert hook._tree_digest() != first

@@ -38,7 +38,7 @@ from running_process import PIPE, CompletedProcess, RunningProcess
 SCRIPT_DIR = Path(__file__).parent.resolve()
 PROJECT_ROOT = SCRIPT_DIR.parent.parent
 SESSION_FINGERPRINT_FILE = PROJECT_ROOT / ".cache" / "session_fingerprint.json"
-BLOCK_STATE_FILE = PROJECT_ROOT / ".cache" / "stop_hook_block.json"
+BLOCK_STATE_DIR = PROJECT_ROOT / ".cache" / "stop_hook_blocks"
 MAX_IDENTICAL_BLOCKS = 2
 FIX_DIRECTIVE = """
 REMINDER - FIX ALL ERRORS FROM STOP HOOK, MAKE AT LEAST TWO ATTEMPTS!
@@ -347,14 +347,27 @@ def _tree_digest() -> str | None:
     """Hash tracked content and the status list, so any edit changes it."""
     status = run_cmd(["git", "status", "--porcelain"])
     diff = run_cmd(["git", "diff", "HEAD"])
-    if status.returncode != 0 or diff.returncode != 0:
+    untracked = run_cmd(["git", "ls-files", "--others", "--exclude-standard", "-z"])
+    if status.returncode != 0 or diff.returncode != 0 or untracked.returncode != 0:
         return None
-    return hashlib.sha256((status.stdout + "\0" + diff.stdout).encode()).hexdigest()
+    digest = hashlib.sha256((status.stdout + "\0" + diff.stdout).encode())
+    for name in sorted(filter(None, untracked.stdout.split("\0"))):
+        try:
+            digest.update((PROJECT_ROOT / name).read_bytes())
+        except OSError:
+            digest.update(b"unreadable")
+    return digest.hexdigest()
 
 
-def _load_block_state() -> dict[str, object]:
+def _block_state_file(session_id: object) -> Path:
+    """One file per session, so sessions sharing a checkout keep separate counts."""
+    name = hashlib.sha256(str(session_id).encode()).hexdigest()[:16]
+    return BLOCK_STATE_DIR / f"{name}.json"
+
+
+def _load_block_state(session_id: object) -> dict[str, object]:
     try:
-        state = json.loads(BLOCK_STATE_FILE.read_text(encoding="utf-8"))
+        state = json.loads(_block_state_file(session_id).read_text(encoding="utf-8"))
     except (OSError, ValueError):
         return {}
     return state if isinstance(state, dict) else {}
@@ -398,10 +411,10 @@ def next_block_state(
 def main() -> int:
     payload = _read_stop_payload()
     session_id = payload.get("session_id")
-    state = _load_block_state()
-    if should_release(
-        payload.get("stop_hook_active"), session_id, _tree_digest(), state
-    ):
+    state = _load_block_state(session_id)
+    # Count blocks against the tree that was checked, not one lint reformatted.
+    digest = _tree_digest()
+    if should_release(payload.get("stop_hook_active"), session_id, digest, state):
         print(
             json.dumps(
                 {
@@ -416,14 +429,19 @@ def main() -> int:
         )
         return 0
     code = run_checks()
-    if code == 2:
-        BLOCK_STATE_FILE.parent.mkdir(parents=True, exist_ok=True)
-        BLOCK_STATE_FILE.write_text(
-            json.dumps(next_block_state(session_id, _tree_digest(), state)),
-            encoding="utf-8",
-        )
-    else:
-        BLOCK_STATE_FILE.unlink(missing_ok=True)
+    state_file = _block_state_file(session_id)
+    try:
+        if code == 2:
+            state_file.parent.mkdir(parents=True, exist_ok=True)
+            state_file.write_text(
+                json.dumps(next_block_state(session_id, digest, state)),
+                encoding="utf-8",
+            )
+        else:
+            state_file.unlink(missing_ok=True)
+    except OSError as exc:
+        # Bookkeeping must never turn a blocking result into a hook crash.
+        print(f"[stop-hook] could not update block state: {exc}", file=sys.stderr)
     return code
 
 
