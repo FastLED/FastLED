@@ -59,8 +59,8 @@ class ClocklessController : public CPixelLEDController<RGB_ORDER> {
     static constexpr u32 T2 = (TIMING::T2 * (F_CPU / 1000000UL) + 500) / 1000;
     static constexpr u32 T3 = (TIMING::T3 * (F_CPU / 1000000UL) + 500) / 1000;
 
-    typedef typename FastPin<DATA_PIN>::port_ptr_t data_ptr_t;
-    typedef typename FastPin<DATA_PIN>::port_t data_t;
+    typedef typename Mgm240HwPin<DATA_PIN>::port_ptr_t data_ptr_t;
+    typedef typename Mgm240HwPin<DATA_PIN>::port_t data_t;
 
     data_t mPinMask;
     data_ptr_t mPort;
@@ -70,9 +70,9 @@ public:
     /// @brief Initialize the LED controller
     /// Sets up the data pin as output and caches pin mask and port address
     virtual void init() FL_NO_EXCEPT {
-        FastPin<DATA_PIN>::setOutput();
-        mPinMask = FastPin<DATA_PIN>::mask();
-        mPort = FastPin<DATA_PIN>::port();
+        Mgm240HwPin<DATA_PIN>::setOutput();
+        mPinMask = Mgm240HwPin<DATA_PIN>::mask();
+        mPort = Mgm240HwPin<DATA_PIN>::port();
     }
 
     /// @brief Get maximum refresh rate in Hz
@@ -105,27 +105,27 @@ protected:
         for(FASTLED_REGISTER u32 i = BITS-1; i > 0; --i) {
             while(ARM_DWT_CYCCNT < next_mark);
             next_mark = ARM_DWT_CYCCNT + (T1+T2+T3);
-            FastPin<DATA_PIN>::fastset(port, hi);
+            Mgm240HwPin<DATA_PIN>::fastset(port, hi);
             if(b&0x80) {
                 while((next_mark - ARM_DWT_CYCCNT) > (T3+(2*(F_CPU/24000000))));
-                FastPin<DATA_PIN>::fastset(port, lo);
+                Mgm240HwPin<DATA_PIN>::fastset(port, lo);
             } else {
                 while((next_mark - ARM_DWT_CYCCNT) > (T2+T3+(2*(F_CPU/24000000))));
-                FastPin<DATA_PIN>::fastset(port, lo);
+                Mgm240HwPin<DATA_PIN>::fastset(port, lo);
             }
             b <<= 1;
         }
 
         while(ARM_DWT_CYCCNT < next_mark);
         next_mark = ARM_DWT_CYCCNT + (T1+T2+T3);
-        FastPin<DATA_PIN>::fastset(port, hi);
+        Mgm240HwPin<DATA_PIN>::fastset(port, hi);
 
         if(b&0x80) {
             while((next_mark - ARM_DWT_CYCCNT) > (T3+(2*(F_CPU/24000000))));
-            FastPin<DATA_PIN>::fastset(port, lo);
+            Mgm240HwPin<DATA_PIN>::fastset(port, lo);
         } else {
             while((next_mark - ARM_DWT_CYCCNT) > (T2+T3+(2*(F_CPU/24000000))));
-            FastPin<DATA_PIN>::fastset(port, lo);
+            Mgm240HwPin<DATA_PIN>::fastset(port, lo);
         }
     }
 
@@ -138,9 +138,9 @@ protected:
         ARM_DWT_CTRL |= ARM_DWT_CTRL_CYCCNTENA;
         ARM_DWT_CYCCNT = 0;
 
-        FASTLED_REGISTER data_ptr_t port = FastPin<DATA_PIN>::port();
-        FASTLED_REGISTER data_t hi = *port | FastPin<DATA_PIN>::mask();
-        FASTLED_REGISTER data_t lo = *port & ~FastPin<DATA_PIN>::mask();
+        FASTLED_REGISTER data_ptr_t port = Mgm240HwPin<DATA_PIN>::port();
+        FASTLED_REGISTER data_t hi = *port | Mgm240HwPin<DATA_PIN>::mask();
+        FASTLED_REGISTER data_t lo = *port & ~Mgm240HwPin<DATA_PIN>::mask();
         *port = lo;
 
         // Setup the pixel controller and load/scale the first byte
@@ -159,8 +159,8 @@ protected:
                 if((ARM_DWT_CYCCNT-next_mark) > ((WAIT_TIME-INTERRUPT_THRESHOLD)*CLKS_PER_US)) { sei(); return 0; }
             }
 
-            hi = *port | FastPin<DATA_PIN>::mask();
-            lo = *port & ~FastPin<DATA_PIN>::mask();
+            hi = *port | Mgm240HwPin<DATA_PIN>::mask();
+            lo = *port & ~Mgm240HwPin<DATA_PIN>::mask();
             #endif
             // Write first byte (R/G/B + XTRA0 extra bits), read next byte
             writeBits<8+XTRA0>(next_mark, port, hi, lo, b);

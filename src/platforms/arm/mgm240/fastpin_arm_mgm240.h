@@ -24,18 +24,47 @@
 
 #include "led_sysdefs.h"
 #include "fl/stl/compiler_control.h"
+#include "fl/stl/static_assert.h"
 #include "fl/system/fastpin_base.h"
 #include "fl/stl/noexcept.h"
 #include "platforms/arm/mgm240/mgm240_pin.h"
 
 namespace fl {
-/// @brief Pin definition macro for MGM240 FastPin specializations
-/// Creates a template specialization of FastPin for a specific Arduino pin number
+/// Native pin for an MGM240 Arduino pin, specialized by _FL_DEFPIN for every
+/// mapped pin. The timing-critical clockless and ezWS2812 drivers use it, so
+/// they keep native GPIO when FASTLED_FORCE_SOFTWARE_PINS replaces FastPin.
+/// The primary is instantiated only for unmapped pins.
+template <u8 PIN> class Mgm240HwPin {
+public:
+    // Stubs keep the static assertion the only diagnostic.
+    typedef volatile u32* port_ptr_t;
+    typedef u32 port_t;
+    static void setOutput() {}
+    static void hi() {}
+    static void lo() {}
+    static port_t mask() { return 0; }
+    static port_ptr_t port() { return nullptr; }
+    static void fastset(port_ptr_t, port_t) {}
+    FL_STATIC_ASSERT(PIN == 255 && PIN != 255,
+                     "This pin is not in the MGM240 pin map (fastpin_arm_mgm240.h), so the clockless drivers cannot drive it.");
+};
+
+/// @brief Pin definition macro for MGM240 pin specializations
 /// @param PIN Arduino pin number (0-25)
 /// @param BIT Pin number within the port (0-7)
 /// @param PORT_LETTER Port letter (A, B, C, D)
 /// @param MASK Bit mask for the pin (1 << BIT)
-#define _FL_DEFPIN(PIN, BIT, PORT_LETTER, MASK) template<> class FastPin<PIN> : public _ARMPIN<MASK, __generated_struct_GPIO_PORT_##PORT_LETTER, PORT_NUM_##PORT_LETTER, BIT> {};
+// _FL_DEFPIN always emits Mgm240HwPin<PIN>. FastPin<PIN> derives from it only
+// when FASTLED_FORCE_SOFTWARE_PINS is not set: an explicit specialization
+// would override the forced software primary template in fastpin_base.h (#5072).
+#if defined(FASTLED_FORCE_SOFTWARE_PINS)
+#define _FL_MGM240_FASTPIN(PIN)
+#else
+#define _FL_MGM240_FASTPIN(PIN) template<> class FastPin<PIN> : public Mgm240HwPin<PIN> {};
+#endif
+#define _FL_DEFPIN(PIN, BIT, PORT_LETTER, MASK) \
+    template<> class Mgm240HwPin<PIN> : public _ARMPIN<MASK, __generated_struct_GPIO_PORT_##PORT_LETTER, PORT_NUM_##PORT_LETTER, BIT> {}; \
+    _FL_MGM240_FASTPIN(PIN)
 
 // Define port numbers for template parameters
 #define PORT_NUM_A 0
@@ -78,5 +107,13 @@ _FL_DEFPIN(23, 1, D, (1 << 1));   // D23 - PD01
 _FL_DEFPIN(24, 2, D, (1 << 2));   // D24 - PD02
 _FL_DEFPIN(25, 3, D, (1 << 3));   // D25 - PD03
 
+#if defined(FASTLED_FORCE_SOFTWARE_PINS)
+// The pin map then emits only Mgm240HwPin, so fl::FastPin uses the forced
+// software primary template in fastpin_base.h (#5072).
+#warning "Software pin support forced, pin access will be slightly slower."
+#define NO_HARDWARE_PIN_SUPPORT
+#undef HAS_HARDWARE_PIN_SUPPORT
+#else
 #define HAS_HARDWARE_PIN_SUPPORT
+#endif
 }  // namespace fl
