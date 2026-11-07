@@ -19,6 +19,18 @@ COM10     1FC9:0132    USB Serial Device (COM10)         ser=0B03400A
           └─ NXP Semiconductors / LPC-Link2 CMSIS-DAP    # LPC845-BRK
 ```
 
+### Correct agent response when asked about attached boards
+
+When a task needs hardware, or the user says a board is attached or was missed, re-verify the current state with fbuild in that same turn. Earlier scans, saved memory, and earlier statements in the conversation may be stale, so don't answer from them.
+
+1. **List ports:** run `fbuild port scan`. If the user names a board you can't see, also run `fbuild port doctor --port <PORT>`.
+2. **Treat the scan label as a hint.** The `└─ vendor / product` line is resolved from the USB identity, and USB-serial bridges and shared IDs are used by many boards. On 2026-11-06 a CH340 (`1A86:7523`) was labelled `OLIMEX ESP32-DevKit-LiPo` but was an ESP8266, and `303A:1001` matches 36 products.
+3. **Confirm the chip through fbuild:** deploy with `bash autoresearch <env> --upload-port <PORT>`. `This chip is X, not Y` from the deploy means the port holds an X, so retest with an environment for X. A passing RPC exchange or a `chip` field in the boot `RESULT:` line is the positive confirmation.
+4. **Report per port:** give the port, the scan label, the confirmed chip, and how it was confirmed. Example: "`/dev/ttyUSB0`: scan says OLIMEX ESP32; firmware confirms ESP8266. `/dev/ttyACM0`: firmware confirms ESP32-C6. I found no classic ESP32 on these two USB serial ports."
+5. **If the user disagrees with the result,** rescan and retest rather than defending the earlier answer. If the result still differs, show the evidence and ask which port the board is on or whether it needs reconnecting. Don't claim a board is present or absent beyond what the evidence shows.
+
+Also check the exit status of hardware commands (use `set -o pipefail`): piping through `tail` can report exit 0 for a run that never started. Select the port with `--upload-port`.
+
 Do NOT reason about attachment from memory or from "which board this task is about." Read the scan. Full rule + history (two incidents where boards were wrongly declared absent): `agents/docs/cpp-standards.md` → "Check if the target hardware might already be attached (REQUIRED)".
 
 ## Live Device Testing (AI Agents)
