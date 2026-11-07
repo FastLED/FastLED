@@ -353,7 +353,9 @@ GPIO writes are abstracted through macros that select ESP32 hardware or host sim
     #define FL_GPIO_WRITE_SET(mask)   fl_gpio_sim_write_set(mask)
     #define FL_GPIO_WRITE_CLEAR(mask) fl_gpio_sim_write_clear(mask)
 #else
-    // ESP32: Direct MMIO write
+    // Hardware: direct MMIO write. ESP32 takes GPIO_OUT_W1TS_REG/W1TC_REG from its
+    // SDK; any other target must define both FASTLED_GPIO_W1TS_ADDR and
+    // FASTLED_GPIO_W1TC_ADDR, or SpiBlock*::transmit() does not compile there.
     #define FL_GPIO_WRITE_SET(mask) \
         (*(volatile uint32_t*)(uintptr_t)FASTLED_GPIO_W1TS_ADDR = (mask))
     #define FL_GPIO_WRITE_CLEAR(mask) \

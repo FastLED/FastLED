@@ -6,6 +6,7 @@
 #include "fl/stl/stdint.h"
 #include "platforms/shared/spi_bitbang/spi_isr_engine.h"
 #include "platforms/shared/spi_bitbang/spi_platform.h"
+#include "fl/stl/static_assert.h"
 #include "fl/stl/noexcept.h"
 
 namespace fl {
@@ -140,7 +141,11 @@ public:
      *
      * Performance: Higher throughput than ISR due to no interrupt overhead
      */
+    template <bool GPIO_AVAILABLE = FL_SPI_GPIO_AVAILABLE>
     void transmit() FL_NO_EXCEPT {
+        FL_STATIC_ASSERT(GPIO_AVAILABLE,
+                      "Parallel software SPI has no GPIO registers for this target: define "
+                      "FASTLED_GPIO_W1TS_ADDR and FASTLED_GPIO_W1TC_ADDR");
         if (!mBuffer || mBufferLen == 0) return;
 
         // Inline bit-banging loop (same logic as ISR implementation)
