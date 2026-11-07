@@ -657,14 +657,18 @@ def _capture(
     _json(saved / "inspection-commands.json", commands)
     headers = (
         "\n".join(
-            re.findall(r"^[0-9a-f]+ <.+>:$", outputs["text_disassembly"], re.MULTILINE)
+            re.findall(
+                r"^[0-9a-f]+ <.+>:$", str(outputs["text_disassembly"]), re.MULTILINE
+            )
         )
         + "\n"
     )
     # Preserve raw full outputs, but inspect only code-owned selected functions;
     # unrelated overloaded aliases do not expand the decoder universe.
-    outputs["text_disassembly"] = _selected_disassembly(outputs["text_disassembly"])
-    outputs["ram_disassembly"] = _selected_disassembly(outputs["ram_disassembly"])
+    outputs["text_disassembly"] = _selected_disassembly(
+        str(outputs["text_disassembly"])
+    )
+    outputs["ram_disassembly"] = _selected_disassembly(str(outputs["ram_disassembly"]))
     outputs["text_function_headers"] = headers
     outputs["memory_map"] = (saved / "firmware.map").read_text()
     outputs["section_bytes"] = _section_bytes(elf.read_bytes())
@@ -1287,7 +1291,7 @@ else:
 
 NORMAL_ENSURE_SCRIPT = r"""
 import hashlib, json, pathlib, sys
-import fbuild._native as extension
+import fbuild._native as extension  # ty: ignore[unresolved-import]
 from fbuild import Daemon
 python = pathlib.Path(sys.executable).absolute()
 image = pathlib.Path(extension.__file__).absolute()
@@ -1327,7 +1331,7 @@ observation = dict(startup_environment=_startup_environment_hashes(reviewed),
 
 
 def _client_tools(environment: dict) -> dict[str, native.ToolIdentity]:
-    import fbuild._native as extension
+    import fbuild._native as extension  # ty: ignore[unresolved-import]
 
     python = Path(sys.executable).absolute()
     paths = {

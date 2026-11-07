@@ -8787,6 +8787,12 @@ def test_esp32_selection_runner_immediate_engine_window_surrounds_both_process_s
 
     from ci import software_spi_esp32_selection_runner as runner
 
+    # This test isolates engine/route ordering and already stubs the complete
+    # source/staging observer. No producer/SDK qualification is supplied here.
+    monkeypatch.setattr(
+        runner, "_bound_producer", lambda *args: b"isolated source observer"
+    )
+
     events = []
     profile = {"bound": "static profile"}
     monkeypatch.setattr(
@@ -9673,6 +9679,12 @@ def test_esp32_selection_runner_bound_submission_route_is_required_for_both_actu
     from types import SimpleNamespace
 
     from ci import software_spi_esp32_selection_runner as runner
+
+    # This test isolates engine/route ordering and already stubs the complete
+    # source/staging observer. No producer/SDK qualification is supplied here.
+    monkeypatch.setattr(
+        runner, "_bound_producer", lambda *args: b"isolated source observer"
+    )
 
     environment = {"FBUILD_EXECUTABLE": str(tmp_path / "fbuild")}
     project = tmp_path / ".build/fbuild/esp32c6"
@@ -11129,3 +11141,2053 @@ def test_esp32_selection_defined_zero_c6_compile_wrapper_forwards_exact_cell(
     assert calls == [
         (tmp_path, saved, environment, "baseline", runner._SelectionProfile.C6, zero)
     ]
+
+
+# Matrix metadata tests assert finite compiler-configuration coverage only. They
+# do not turn synthetic records or historical receipts into accepted SDK proof.
+_SELECTION_MATRIX_LITERALS = ((0, None), (0, 0), (0, 1), (1, None), (1, 0), (1, 1))
+
+
+@pytest.mark.parametrize("profile_name", ["C6", "XTENSA"])
+def test_esp32_selection_matrix_exact_six_cells_and_nine_literal_states(profile_name):
+    from ci import software_spi_esp32_selection_runner as runner
+
+    kind = getattr(runner._SelectionProfile, profile_name)
+    cells = runner._matrix_cells(kind)
+    assert len(cells) == len(set(cells)) == 6
+    literals = {
+        (runner._cell_spec(cell).force_value, runner._cell_spec(cell).no_pinmap_value)
+        for cell in cells
+    }
+    assert literals == set(_SELECTION_MATRIX_LITERALS)
+    states = literals | {(None, no_map) for _, no_map in literals}
+    assert states == {
+        (force, no_map) for force in (None, 0, 1) for no_map in (None, 0, 1)
+    }
+    runner._validate_matrix_sequence(kind, cells)
+
+
+@pytest.mark.parametrize("profile_name", ["C6", "XTENSA"])
+@pytest.mark.parametrize("force,no_map", _SELECTION_MATRIX_LITERALS)
+def test_esp32_selection_matrix_exact_presence_flags_all_five_stages(
+    profile_name, force, no_map
+):
+    from ci import software_spi_esp32_selection_runner as runner
+
+    kind = getattr(runner._SelectionProfile, profile_name)
+    cell = next(
+        cell
+        for cell in runner._matrix_cells(kind)
+        if (
+            runner._cell_spec(cell).force_value,
+            runner._cell_spec(cell).no_pinmap_value,
+        )
+        == (force, no_map)
+    )
+    for index, name in enumerate(runner.STAGES):
+        expected = {
+            f"-DEXPECT_FORCED={int(index != 0)}",
+            f"-DEXPECT_NO_PINMAP={int(no_map is not None)}",
+            f"-DFASTLED_SELECTION_ASSERT_SCOPE={1 if index == 2 else 2 if index == 3 else 0}",
+        }
+        if index:
+            expected.add(f"-DFASTLED_FORCE_SOFTWARE_PINS={force}")
+        if no_map is not None:
+            expected.add(f"-DFASTLED_NO_PINMAP={no_map}")
+        actual = runner.stage_defines(name, cell)
+        assert len(actual) == len(expected)
+        assert set(actual) == expected
+        runner.validate_stage_defines(name, actual, cell)
+        # A previous cell's FORCE/NoMap cannot survive a nominal cell change.
+        for stale in ("-DFASTLED_FORCE_SOFTWARE_PINS=1", "-DFASTLED_NO_PINMAP=1"):
+            with pytest.raises(ValueError):
+                runner.validate_stage_defines(name, [*actual, stale], cell)
+
+
+@pytest.mark.parametrize("profile_name", ["C6", "XTENSA"])
+@pytest.mark.parametrize(
+    "mutation", ["missing", "duplicate", "unexpected", "reordered"]
+)
+def test_esp32_selection_matrix_rejects_incomplete_or_relabelled_cell_sequence(
+    profile_name, mutation
+):
+    from ci import software_spi_esp32_selection_runner as runner
+
+    kind = getattr(runner._SelectionProfile, profile_name)
+    cells = list(runner._matrix_cells(kind))
+    if mutation == "missing":
+        cells.pop()
+    elif mutation == "duplicate":
+        cells[-1] = cells[0]
+    elif mutation == "unexpected":
+        cells[-1] = "force1-nomap-absent"
+    else:
+        cells[0], cells[1] = cells[1], cells[0]
+    with pytest.raises(ValueError):
+        runner._validate_matrix_sequence(kind, tuple(cells))
+
+
+@pytest.mark.parametrize("bad_profile", ["esp32c6", "esp32dev", None])
+def test_esp32_selection_matrix_unknown_profile_rejected_before_effects(
+    tmp_path, monkeypatch, bad_profile
+):
+    from ci import software_spi_esp32_selection_runner as runner
+
+    monkeypatch.setattr(
+        runner, "_verify_provider_cohort", lambda: pytest.fail("provider reached")
+    )
+    monkeypatch.setattr(
+        runner.native, "_snapshot", lambda *args: pytest.fail("snapshot reached")
+    )
+    monkeypatch.setattr(
+        audit.RunningProcess,
+        "run",
+        lambda *args, **kwargs: pytest.fail("process reached"),
+    )
+    with pytest.raises(ValueError):
+        runner._run_selection_matrix(tmp_path, bad_profile)
+
+
+@pytest.mark.parametrize(
+    "profile_name,entry_name",
+    [
+        ("C6", "run_c6_selection_matrix_proof"),
+        ("XTENSA", "run_xtensa_selection_matrix_proof"),
+    ],
+)
+def test_esp32_selection_matrix_fixed_root_only_entries(
+    profile_name, entry_name, tmp_path, monkeypatch
+):
+    import inspect
+
+    from ci import software_spi_esp32_selection_runner as runner
+
+    entry = getattr(runner, entry_name)
+    assert tuple(inspect.signature(entry).parameters) == ("root",)
+    sentinel = object()
+    seen = []
+
+    def capture(root, kind):
+        seen.append((root, kind))
+        return sentinel
+
+    monkeypatch.setattr(runner, "_run_selection_matrix", capture)
+    assert entry(tmp_path) is sentinel
+    assert seen == [(tmp_path, getattr(runner._SelectionProfile, profile_name))]
+
+
+def test_esp32_selection_matrix_preserves_legacy_root_only_entry_defaults(
+    tmp_path, monkeypatch
+):
+    from ci import software_spi_esp32_selection_runner as runner
+
+    seen = []
+
+    def capture(root, kind, cell=runner._SelectionCell.FORCE1_NOMAP_ABSENT):
+        seen.append((kind, cell))
+
+    monkeypatch.setattr(runner, "_run_selection_proof", capture)
+    runner.run_c6_selection_proof(tmp_path)
+    runner.run_xtensa_selection_proof(tmp_path)
+    assert seen == [
+        (runner._SelectionProfile.C6, runner._SelectionCell.FORCE1_NOMAP_ABSENT),
+        (runner._SelectionProfile.XTENSA, runner._SelectionCell.FORCE1_NOMAP_ABSENT),
+    ]
+
+
+@pytest.fixture(autouse=True)
+def _selection_matrix_owner_isolation(request):
+    if not request.node.name.startswith("test_esp32_selection_matrix"):
+        yield
+        return
+    from ci import software_spi_esp32_selection_runner as runner
+
+    token = runner._MATRIX_OWNER.set(None)
+    try:
+        yield
+    finally:
+        runner._MATRIX_OWNER.reset(token)
+
+
+@dataclass(slots=True)
+class _SyntheticSelectionMatrix:
+    original: bytes
+    workspace: Path
+    results: list
+
+
+def _selection_matrix_schema(tmp_path, profile_name="C6") -> _SyntheticSelectionMatrix:
+    """Hash-bound synthetic parser data; never SDK or current-build evidence."""
+    from dataclasses import replace
+
+    from ci import software_spi_esp32_selection_runner as runner
+
+    kind = getattr(runner._SelectionProfile, profile_name)
+    workspace = tmp_path / "synthetic-matrix-workspace"
+    results = []
+    common_project = workspace / ".build/fbuild" / runner._profile_spec(kind).env
+    original = b""
+    for index, cell in enumerate(runner._matrix_cells(kind)):
+        original, stages = _selection_runner_schema_attempt(workspace / str(index))
+        rewritten = []
+        for stage in stages:
+            # One actual matrix uses one project; independent per-cell schema
+            # directories are retained output locations, not compiler CWDs.
+            stage.log_path.write_text(
+                _matrix_generated_selection_diagnostics(
+                    runner, kind, cell, stage.name, common_project
+                )
+                if stage.name in runner.STAGES[2:4]
+                else "build completed\n"
+            )
+            flags = runner.stage_defines(stage.name, cell)
+            generated = runner._matrix_sources(audit.ROOT, kind, cell, stage.name)
+            expected_inputs = {
+                **stage.inputs_before,
+                **{
+                    relative: digest(payload) for relative, payload in generated.items()
+                },
+            }
+            hashes = dict(stage.configuration_sha256s)
+            artifacts = dict(stage.artifact_sha256s)
+            for filename in hashes:
+                path = Path(filename)
+                if path.name == "platformio.ini":
+                    path.write_text(
+                        ("[env:" + runner._profile_spec(kind).env + "]\nbuild_flags = ")
+                        + " ".join(flags)
+                        + "\n"
+                    )
+                elif path.name.endswith("compile_commands.raw.json"):
+                    rows = json.loads(path.read_text())
+                    rows[0]["directory"] = str(common_project)
+                    rows[0]["arguments"] = ["compiler", *flags, "-c", "src/main.cpp"]
+                    path.write_text(json.dumps(rows))
+                hashes[filename] = digest(path.read_bytes())
+                if filename in artifacts:
+                    artifacts[filename] = hashes[filename]
+            rewritten.append(
+                replace(
+                    stage,
+                    inputs_before=expected_inputs,
+                    inputs_after=dict(expected_inputs),
+                    staged_sources_expected=dict(expected_inputs),
+                    staged_sources_observed=dict(expected_inputs),
+                    project=common_project,
+                    log_sha256=digest(stage.log_path.read_bytes()),
+                    cell=cell,
+                    outcome=replace(stage.outcome, cell=cell),
+                    configuration_sha256s=hashes,
+                    artifact_sha256s=artifacts,
+                )
+            )
+        results.append(
+            runner.SelectionMatrixCell(
+                profile=kind,
+                cell=cell,
+                stages=rewritten,
+                discovery_submissions=4,
+            )
+        )
+    root = tmp_path / "synthetic-root"
+    owner = runner._MatrixOwner(root, workspace, kind)
+    runner._MATRIX_OWNER.set(owner)
+    artifacts = (
+        root
+        / ".build"
+        / (runner._profile_spec(kind).artifact_group + "-matrix")
+        / workspace.name
+    )
+    retained_results = []
+    for result in results:
+        retained_stages = []
+        for stage in result.stages:
+            directory = artifacts / result.cell.value / stage.name
+            directory.mkdir(parents=True, exist_ok=True)
+            paths = {}
+            for filename in {
+                *stage.artifact_sha256s,
+                *stage.configuration_sha256s,
+                str(stage.log_path),
+            }:
+                target = directory / Path(filename).name
+                target.write_bytes(Path(filename).read_bytes())
+                paths[filename] = target
+            retained_stages.append(
+                replace(
+                    stage,
+                    log_path=paths[str(stage.log_path)],
+                    artifact_sha256s={
+                        str(paths[name]): sha
+                        for name, sha in stage.artifact_sha256s.items()
+                    },
+                    configuration_sha256s={
+                        str(paths[name]): sha
+                        for name, sha in stage.configuration_sha256s.items()
+                    },
+                )
+            )
+        discovery = {}
+        for name in runner.STAGES[:4]:
+            directory = artifacts / result.cell.value / ("bootstrap-" + name)
+            directory.mkdir(parents=True)
+            for filename, content in (
+                ("build.log", b"synthetic topology only\n"),
+                (
+                    "bootstrap-scope.json",
+                    b'{"bootstrap_only":true,"certified_stage":false}',
+                ),
+            ):
+                path = directory / filename
+                path.write_bytes(content)
+                discovery[str(path)] = digest(content)
+        retained_results.append(
+            replace(result, stages=retained_stages, discovery_sha256s=discovery)
+        )
+    return _SyntheticSelectionMatrix(original, workspace, retained_results)
+
+
+def test_esp32_selection_matrix_validator_rechecks_all_thirty_stages(
+    tmp_path, monkeypatch
+):
+    from ci import software_spi_esp32_selection_runner as runner
+
+    data = _selection_matrix_schema(tmp_path)
+    visited = []
+    original = runner.validate_stage_record
+
+    def observe(stage, expected_cell=runner._SelectionCell.FORCE1_NOMAP_ABSENT):
+        visited.append((stage.cell, stage.name))
+        return original(stage, expected_cell)
+
+    monkeypatch.setattr(runner, "validate_stage_record", observe)
+    runner._validate_matrix_results(
+        runner._SelectionProfile.C6, data.results, data.original, data.workspace
+    )
+    assert set(visited) == {
+        (result.cell, name) for result in data.results for name in runner.STAGES
+    }
+    assert len(visited) >= 30
+
+
+@pytest.mark.parametrize("retained", ["artifact", "log", "configuration"])
+def test_esp32_selection_matrix_earliest_retained_tamper_blocks_final_validation(
+    tmp_path, retained
+):
+    from ci import software_spi_esp32_selection_runner as runner
+
+    data = _selection_matrix_schema(tmp_path)
+    runner._validate_matrix_results(
+        runner._SelectionProfile.C6, data.results, data.original, data.workspace
+    )
+    stage = data.results[0].stages[1]
+    path = (
+        stage.log_path
+        if retained == "log"
+        else Path(
+            next(
+                iter(
+                    stage.artifact_sha256s
+                    if retained == "artifact"
+                    else stage.configuration_sha256s
+                )
+            )
+        )
+    )
+    path.write_bytes(path.read_bytes() + b"changed after later cells completed")
+    with pytest.raises(ValueError):
+        runner._validate_matrix_results(
+            runner._SelectionProfile.C6, data.results, data.original, data.workspace
+        )
+
+
+@pytest.mark.parametrize(
+    "corruption",
+    [
+        "missing-cell",
+        "duplicate-cell",
+        "wrong-profile",
+        "wrong-cell-tags",
+        "missing-stage",
+        "stage-order",
+        "discovery-count",
+        "historical-workspace",
+        "mutant-success",
+        "mutant-incidental-error",
+        "mutant-timeout",
+        "wrong-guard",
+    ],
+)
+def test_esp32_selection_matrix_rejects_incomplete_or_cross_bound_results(
+    tmp_path, corruption
+):
+    from dataclasses import replace
+
+    from ci import software_spi_esp32_selection_runner as runner
+
+    data = _selection_matrix_schema(tmp_path)
+    kind = runner._SelectionProfile.C6
+    runner._validate_matrix_results(kind, data.results, data.original, data.workspace)
+    first = data.results[0]
+    if corruption == "missing-cell":
+        data.results.pop()
+    elif corruption == "duplicate-cell":
+        data.results[-1] = first
+    elif corruption == "wrong-profile":
+        data.results[0] = replace(first, profile=runner._SelectionProfile.XTENSA)
+    elif corruption == "wrong-cell-tags":
+        # Keep the exact outer sequence; only effective retained macro bindings
+        # distinguish these relabelled stages from the expected first cell.
+        data.results[0] = replace(
+            first,
+            stages=[
+                replace(
+                    stage,
+                    cell=first.cell,
+                    outcome=replace(stage.outcome, cell=first.cell),
+                )
+                for stage in data.results[1].stages
+            ],
+        )
+    elif corruption == "discovery-count":
+        data.results[0] = replace(first, discovery_submissions=3)
+    elif corruption == "historical-workspace":
+        # Existing retained files outside this attempt never supply fresh cells.
+        data.workspace = tmp_path / "different-current-attempt"
+    elif corruption in ("missing-stage", "stage-order"):
+        if corruption == "missing-stage":
+            first.stages.pop()
+        else:
+            first.stages[0], first.stages[1] = first.stages[1], first.stages[0]
+    else:
+        stage = first.stages[2]
+        if corruption == "mutant-success":
+            first.stages[2] = replace(
+                stage, outcome=replace(stage.outcome, returncode=0)
+            )
+        elif corruption in ("mutant-incidental-error", "mutant-timeout"):
+            stage.log_path.write_text(
+                "src/other.cpp:1:1: error: unrelated\n"
+                if corruption.endswith("error")
+                else "compile deadline exceeded\n"
+            )
+            first.stages[2] = replace(
+                stage,
+                log_sha256=digest(stage.log_path.read_bytes()),
+                outcome=replace(
+                    stage.outcome, returncode=1 if corruption.endswith("error") else -9
+                ),
+            )
+        else:
+            changed = {
+                **stage.inputs_before,
+                runner.selection.SOURCE: digest(data.original),
+            }
+            first.stages[2] = replace(
+                stage,
+                inputs_before=changed,
+                inputs_after=changed,
+                staged_sources_expected=changed,
+                staged_sources_observed=changed,
+            )
+    with pytest.raises(ValueError):
+        runner._validate_matrix_results(
+            kind, data.results, data.original, data.workspace
+        )
+
+
+@pytest.mark.parametrize(
+    "failure",
+    [
+        "mid-cell",
+        "interrupt",
+        "cleanup",
+        "final-sdk",
+        "final-tools",
+        "final-environment",
+    ],
+)
+def test_esp32_selection_matrix_entry_restores_everything_before_any_publication(
+    tmp_path, monkeypatch, failure
+):
+    from ci import software_spi_esp32_selection_runner as runner
+
+    layout, artifacts, ordinary = _selection_matrix_real_retention_layout(
+        tmp_path, monkeypatch
+    )
+    data = _SyntheticSelectionMatrix(
+        layout.originals[runner.selection.SOURCE], layout.workspace, ordinary
+    )
+    events = []
+
+    def execute(*args):
+        for relative in layout.originals:
+            (layout.workspace / relative).write_bytes(b"partially changed cell")
+        layout.ini.write_bytes(b"last cell flags")
+        if failure == "interrupt":
+            raise KeyboardInterrupt("mid-matrix interruption")
+        if failure == "mid-cell":
+            raise ValueError("later cell compiler failure")
+        return data.results
+
+    monkeypatch.setattr(runner, "_execute_matrix_cells", execute)
+    monkeypatch.setattr(runner, "_validate_matrix_results", lambda *args: None)
+
+    def final(*args):
+        events.append("final")
+        for relative, content in layout.originals.items():
+            assert (layout.workspace / relative).read_bytes() == content
+        assert layout.ini.read_bytes() == layout.ini_original
+        if failure.startswith("final-"):
+            raise ValueError("final dependency drift: " + failure)
+
+    monkeypatch.setattr(runner, "_verify_matrix_final_dependencies", final)
+    if failure == "cleanup":
+        restore = runner.native._restore_sources
+        monkeypatch.setattr(
+            runner.native,
+            "_restore_sources",
+            lambda *args: restore(*args) + ["cleanup verification failed"],
+        )
+    with pytest.raises(KeyboardInterrupt if failure == "interrupt" else ValueError):
+        runner.run_c6_selection_matrix_proof(layout.root)
+    for relative, content in layout.originals.items():
+        assert (layout.root / relative).read_bytes() == content
+        assert (layout.workspace / relative).read_bytes() == content
+    assert layout.ini.read_bytes() == layout.ini_original
+    assert not list(layout.root.rglob("proof.json"))
+    if failure.startswith("final-"):
+        assert events == ["final"]
+
+
+@pytest.mark.parametrize(
+    "profile_name,entry_name,flag",
+    [
+        (
+            "C6",
+            "run_c6_selection_matrix_proof",
+            "FASTLED_RUN_C6_SELECTION_MATRIX_PROOF",
+        ),
+        (
+            "XTENSA",
+            "run_xtensa_selection_matrix_proof",
+            "FASTLED_RUN_XTENSA_SELECTION_MATRIX_PROOF",
+        ),
+    ],
+)
+def test_esp32_selection_matrix_real_fifty_four_submission_acceptance(
+    profile_name, entry_name, flag
+):
+    import os
+
+    from ci import software_spi_esp32_selection_runner as runner
+
+    if os.environ.get(flag) != "1":
+        pytest.skip("explicit real 54-submission architecture opt-in required")
+    proof = getattr(runner, entry_name)(audit.ROOT)
+    assert proof.profile is getattr(runner._SelectionProfile, profile_name)
+    assert proof.restoration_verified
+    assert proof.discovery_submissions == 24 and proof.certified_submissions == 30
+    assert len(proof.cells) == 6
+    assert proof.calibration_submissions == 16 and len(proof.calibrations) == 16
+    assert proof.numeric_values_verified and proof.oracle_values_verified
+    assert (
+        not proof.runtime_gpio_proven
+        and not proof.complete_executed_argv
+        and not proof.full_finding_qualified
+    )
+    runner._validate_matrix_proof(audit.ROOT, proof)
+
+
+@pytest.mark.parametrize("profile_name", ["C6", "XTENSA"])
+def test_esp32_selection_matrix_all_fifty_four_compile_dispatches_bind_actual_command(
+    tmp_path, monkeypatch, profile_name
+):
+    from ci import software_spi_esp32_selection_runner as runner
+
+    kind = getattr(runner._SelectionProfile, profile_name)
+    submitted = []
+    wrapper_calls = []
+    for wrapper_name in ("_run_c6_compile", "_run_xtensa_compile"):
+        original = getattr(runner, wrapper_name)
+
+        def observe(*args, _original=original, _name=wrapper_name, **kwargs):
+            wrapper_calls.append(_name)
+            return _original(*args, **kwargs)
+
+        monkeypatch.setattr(runner, wrapper_name, observe)
+    sentinel = object()
+
+    def process(command, cwd, log, **kwargs):
+        submitted.append((command, cwd, log, kwargs))
+        return sentinel
+
+    monkeypatch.setattr(runner.native, "_run", process)
+    workspace = tmp_path / "owned-snapshot"
+    plan = runner._matrix_submission_plan(kind)
+    assert len(plan) == 54
+    for cell in runner._matrix_cells(kind):
+        selected = [item for item in plan if item.cell is cell]
+        assert [item.name for item in selected if not item.certified] == list(
+            runner.STAGES[:4]
+        )
+        assert [item.name for item in selected if item.certified] == list(runner.STAGES)
+        for item in selected:
+            saved = (
+                tmp_path
+                / cell.value
+                / ("certified" if item.certified else "discovery")
+                / item.name
+            )
+            assert (
+                runner._run_matrix_compile(
+                    workspace, saved, {"UV_NO_SYNC": "1"}, item.name, kind, cell
+                )
+                is sentinel
+            )
+            command, cwd, log, settings = submitted[-1]
+            assert command[:3] == ["bash", "compile", runner._profile_spec(kind).env]
+            assert command[command.index("--defines") + 1].split(",") == [
+                flag[2:] for flag in runner.stage_defines(item.name, cell)
+            ]
+            assert cwd == workspace and log == saved / "build.log"
+            assert settings["build"] is True
+            assert settings["environment"] == {"UV_NO_SYNC": "1"}
+    assert len(submitted) == len(wrapper_calls) == 54
+    assert set(wrapper_calls) == {
+        "_run_c6_compile" if profile_name == "C6" else "_run_xtensa_compile"
+    }
+
+
+@pytest.mark.parametrize("field", ["tools", "sdk", "environment"])
+def test_esp32_selection_matrix_cross_cell_immutable_dependency_drift_rejected(
+    tmp_path, field
+):
+    from dataclasses import replace
+
+    from ci import software_spi_esp32_selection_runner as runner
+
+    data = _selection_matrix_schema(tmp_path)
+    runner._validate_matrix_results(
+        runner._SelectionProfile.C6, data.results, data.original, data.workspace
+    )
+    result = data.results[1]
+    changed = []
+    for stage in result.stages:
+        if field == "tools":
+            stage = replace(
+                stage,
+                tools_before={"compiler": "different actual tool"},
+                tools_after={"compiler": "different actual tool"},
+            )
+        else:
+            stage = replace(
+                stage,
+                profile_before={**stage.profile_before, field: "drift"},
+                profile_after={**stage.profile_after, field: "drift"},
+            )
+        changed.append(stage)
+    data.results[1] = replace(result, stages=changed)
+    with pytest.raises(ValueError):
+        runner._validate_matrix_results(
+            runner._SelectionProfile.C6, data.results, data.original, data.workspace
+        )
+
+
+def test_esp32_selection_matrix_process_instances_may_differ_between_completed_cells(
+    tmp_path,
+):
+    from dataclasses import replace
+
+    from ci import software_spi_esp32_selection_runner as runner
+
+    data = _selection_matrix_schema(tmp_path)
+    for index, result in enumerate(data.results):
+        engine = {"pid": index + 1, "image_sha256": "bound image"}
+        data.results[index] = replace(
+            result,
+            stages=[
+                replace(
+                    stage, serving_engine_before=engine, serving_engine_after=engine
+                )
+                for stage in result.stages
+            ],
+        )
+    runner._validate_matrix_results(
+        runner._SelectionProfile.C6, data.results, data.original, data.workspace
+    )
+
+
+@pytest.mark.parametrize("field", ["pid", "image_sha256"])
+def test_esp32_selection_matrix_still_rejects_instance_change_during_one_build(
+    tmp_path, field
+):
+    from dataclasses import replace
+
+    from ci import software_spi_esp32_selection_runner as runner
+
+    data = _selection_matrix_schema(tmp_path)
+    stage = data.results[0].stages[1]
+    data.results[0].stages[1] = replace(
+        stage, serving_engine_after={**stage.serving_engine_after, field: "changed"}
+    )
+    with pytest.raises(ValueError):
+        runner._validate_matrix_results(
+            runner._SelectionProfile.C6, data.results, data.original, data.workspace
+        )
+
+
+@pytest.mark.parametrize("tamper_after_final_checks", [False, True])
+def test_esp32_selection_matrix_publication_rechecks_earliest_bindings_after_final_dependencies(
+    tmp_path, monkeypatch, tamper_after_final_checks
+):
+    from ci import software_spi_esp32_selection_runner as runner
+
+    layout, artifacts, results = _selection_matrix_real_retention_layout(
+        tmp_path, monkeypatch
+    )
+    events = []
+
+    def final(*args):
+        events.append("restored-final-dependencies")
+        for relative, content in layout.originals.items():
+            assert (layout.workspace / relative).read_bytes() == content
+        assert layout.ini.read_bytes() == layout.ini_original
+        if tamper_after_final_checks:
+            results[0].stages[0].log_path.write_text(
+                "earlier cell changed before aggregate publication"
+            )
+
+    monkeypatch.setattr(runner, "_verify_matrix_final_dependencies", final)
+    write = runner.vendor._json
+
+    def observe(path, value):
+        if path.name == "proof.json":
+            assert events == ["restored-final-dependencies"]
+            events.append("published")
+        return write(path, value)
+
+    monkeypatch.setattr(runner.vendor, "_json", observe)
+    if tamper_after_final_checks:
+        with pytest.raises(ValueError):
+            runner.run_c6_selection_matrix_proof(layout.root)
+        assert events == ["restored-final-dependencies"]
+        assert not list(layout.root.rglob("proof.json"))
+    else:
+        proof = runner.run_c6_selection_matrix_proof(layout.root)
+        assert events == ["restored-final-dependencies", "published"]
+        assert proof.restoration_verified
+        assert proof.discovery_submissions == 24 and proof.certified_submissions == 30
+        assert (
+            not proof.runtime_gpio_proven
+            and not proof.complete_executed_argv
+            and not proof.full_finding_qualified
+        )
+
+
+@pytest.mark.parametrize("profile_name", ["C6", "XTENSA"])
+def test_esp32_selection_matrix_real_executor_topology_reaches_fifty_four_compile_windows(
+    tmp_path, monkeypatch, profile_name
+):
+    # Exercise BOTH production executors, replacing only external observations
+    # and validation with synthetic services. This is topology, not SDK proof.
+    from types import SimpleNamespace
+
+    from ci import software_spi_esp32_selection_runner as runner
+
+    kind = getattr(runner._SelectionProfile, profile_name)
+    workspace = tmp_path / "one-owned-workspace"
+    source = workspace / runner.selection.SOURCE
+    source.parent.mkdir(parents=True)
+    original_source = (audit.ROOT / runner.selection.SOURCE).read_bytes()
+    source.write_bytes(original_source)
+    state = {
+        "tools": {"compiler": "synthetic"},
+        "sdk": {"root": "synthetic"},
+        "environment": {"UV_NO_SYNC": "1"},
+        "configuration": {"scope": "synthetic"},
+    }
+    info = {"prog_path": str(workspace / "release/firmware.elf")}
+    monkeypatch.setattr(runner, "_selection_environment", lambda *args: {})
+    monkeypatch.setattr(runner.vendor, "_client_tools", lambda *args: {})
+    monkeypatch.setattr(runner.vendor, "_observe_launcher", lambda *args: {})
+    monkeypatch.setattr(runner.vendor, "_prepare_bootstrap_engine", lambda *args: {})
+    monkeypatch.setattr(runner.vendor, "_base_state", lambda *args: dict(state))
+    monkeypatch.setattr(runner, "_selection_state", lambda *args: dict(state))
+    monkeypatch.setattr(runner, "_selection_sdk_roots", lambda *args: ())
+    monkeypatch.setattr(runner.vendor, "_tool_identities", lambda *args: {})
+    monkeypatch.setattr(runner, "_positive_info", lambda *args: info)
+    monkeypatch.setattr(runner.native, "_verify_inputs", lambda *args: None)
+    monkeypatch.setattr(runner.vendor, "_check_staged_sources", lambda *args: None)
+    monkeypatch.setattr(
+        runner.vendor.property_check, "_verify_profile_state", lambda *args: None
+    )
+    monkeypatch.setattr(runner.vendor, "_retain_artifacts", lambda *args: {})
+    monkeypatch.setattr(runner, "_retain_cell", lambda *args: {})
+    base_payloads = runner.producer_sources(audit.ROOT)
+    for relative, payload in base_payloads.items():
+        target = workspace / relative
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(payload)
+    monkeypatch.setattr(runner, "producer_sources", lambda *args: base_payloads)
+    monkeypatch.setattr(runner, "_REQUIRED_SOURCES", ())
+    monkeypatch.setattr(
+        runner, "_observe_staged_inputs", lambda *args: runner._StagedInputs({}, {})
+    )
+    monkeypatch.setattr(runner, "validate_stage_record", lambda *args: None)
+    monkeypatch.setattr(
+        runner,
+        "_capture_cell_configuration",
+        lambda info, name, selected_kind, cell: runner.CellConfiguration(
+            name, {}, {}, {}, cell
+        ),
+    )
+    windows = []
+
+    def compile_window(
+        selected_workspace,
+        saved,
+        environment,
+        tools,
+        engine,
+        name,
+        selected_kind,
+        cell,
+        *args,
+        **kwargs,
+    ):
+        expected_payloads = runner._matrix_sources(
+            audit.ROOT, selected_kind, cell, name
+        )
+        for relative, expected_payload in expected_payloads.items():
+            assert (selected_workspace / relative).read_bytes() == expected_payload
+        discovery = saved.name.startswith("bootstrap-")
+        negative = not discovery and name in runner.STAGES[2:4]
+        output = (
+            _matrix_generated_selection_diagnostics(
+                runner,
+                kind,
+                cell,
+                name,
+                workspace / ".build/fbuild" / runner._profile_spec(kind).env,
+            )
+            if negative
+            else "build completed\n"
+        )
+        saved.mkdir(parents=True, exist_ok=True)
+        (saved / "build.log").write_text(output)
+        windows.append(
+            (selected_workspace, selected_kind, cell, name, discovery, int(negative))
+        )
+        return runner._CompileWindow(
+            SimpleNamespace(returncode=int(negative), stdout=output), {}, {}
+        )
+
+    monkeypatch.setattr(runner, "_compile_engine_window", compile_window)
+    executions = []
+    execute = runner._execute_fixed_stages
+
+    def observe(*args, **kwargs):
+        executions.append((args[1], args[2], args[6], args[7]))
+        return execute(*args, **kwargs)
+
+    monkeypatch.setattr(runner, "_execute_fixed_stages", observe)
+    results = runner._execute_matrix_cells(
+        tmp_path, workspace, tmp_path / "artifacts", {}, {}, original_source, kind
+    )
+    assert len(results) == len(executions) == 6
+    assert {item[0] for item in executions} == {workspace}
+    assert {item[2] for item in executions} == {kind}
+    assert len({item[1] for item in executions}) == 6
+    assert [item[3] for item in executions] == list(runner._matrix_cells(kind))
+    assert len(windows) == 54
+    for cell in runner._matrix_cells(kind):
+        selected = [item for item in windows if item[2] is cell]
+        assert [item[3] for item in selected if item[4]] == list(runner.STAGES[:4])
+        assert [item[3] for item in selected if not item[4]] == list(runner.STAGES)
+        assert [item[5] for item in selected if not item[4]] == [0, 0, 1, 1, 0]
+        assert all(item[0] == workspace and item[1] is kind for item in selected)
+
+
+def test_esp32_selection_matrix_all_outer_architecture_tags_cannot_relabel_c6_bindings(
+    tmp_path,
+):
+    from dataclasses import replace
+
+    from ci import software_spi_esp32_selection_runner as runner
+
+    data = _selection_matrix_schema(tmp_path)
+    runner._validate_matrix_results(
+        runner._SelectionProfile.C6, data.results, data.original, data.workspace
+    )
+    changed = [
+        replace(result, profile=runner._SelectionProfile.XTENSA)
+        for result in data.results
+    ]
+    # Cell order/tags remain correct; retained C6 INI and configuration are the
+    # distinguishing evidence, rather than outer profile disagreement alone.
+    with pytest.raises(ValueError, match="profile|architecture|environment|board"):
+        runner._validate_matrix_results(
+            runner._SelectionProfile.XTENSA, changed, data.original, data.workspace
+        )
+
+
+@pytest.mark.parametrize(
+    "field", ["startup_environment", "image_sha256", "cache_identity", "version"]
+)
+def test_esp32_selection_matrix_cross_cell_serving_semantics_immutable(tmp_path, field):
+    from dataclasses import replace
+
+    from ci import software_spi_esp32_selection_runner as runner
+
+    data = _selection_matrix_schema(tmp_path)
+    runner._validate_matrix_results(
+        runner._SelectionProfile.C6, data.results, data.original, data.workspace
+    )
+    result = data.results[1]
+    stages = []
+    for stage in result.stages:
+        engine = {
+            **stage.serving_engine_before,
+            field: {"policy": "changed"}
+            if field == "startup_environment"
+            else "different",
+        }
+        stages.append(
+            replace(stage, serving_engine_before=engine, serving_engine_after=engine)
+        )
+    data.results[1] = replace(result, stages=stages)
+    with pytest.raises(ValueError):
+        runner._validate_matrix_results(
+            runner._SelectionProfile.C6, data.results, data.original, data.workspace
+        )
+
+
+def _selection_matrix_real_retention_layout(tmp_path, monkeypatch):
+    """Synthetic records in the actual separate ROOT/WT retention topology."""
+    from dataclasses import replace
+
+    from ci import software_spi_esp32_selection_runner as runner
+
+    layout = _selection_runner_entry_layout(tmp_path, monkeypatch)
+    data = _selection_matrix_schema(tmp_path / "schema")
+    kind = runner._SelectionProfile.C6
+    artifacts = (
+        layout.root
+        / ".build"
+        / (runner._profile_spec(kind).artifact_group + "-matrix")
+        / layout.workspace.name
+    )
+    project = layout.workspace / ".build/fbuild/esp32c6"
+    results = []
+    for result in data.results:
+        stages = []
+        for stage in result.stages:
+            directory = artifacts / result.cell.value / stage.name
+            directory.mkdir(parents=True, exist_ok=True)
+            paths = {}
+            for filename in {
+                *stage.artifact_sha256s,
+                *stage.configuration_sha256s,
+                str(stage.log_path),
+            }:
+                source = Path(filename)
+                target = directory / source.name
+                target.write_bytes(source.read_bytes())
+                if source == stage.log_path:
+                    target.write_text(
+                        target.read_text().replace(str(stage.project), str(project))
+                    )
+                if source.name.endswith("compile_commands.raw.json"):
+                    rows = json.loads(target.read_text())
+                    for row in rows:
+                        row["directory"] = str(project)
+                    target.write_text(json.dumps(rows))
+                paths[filename] = target
+            stages.append(
+                replace(
+                    stage,
+                    project=project,
+                    log_path=paths[str(stage.log_path)],
+                    log_sha256=digest(paths[str(stage.log_path)].read_bytes()),
+                    artifact_sha256s={
+                        str(paths[name]): digest(paths[name].read_bytes())
+                        for name in stage.artifact_sha256s
+                    },
+                    configuration_sha256s={
+                        str(paths[name]): digest(paths[name].read_bytes())
+                        for name in stage.configuration_sha256s
+                    },
+                )
+            )
+        discovery = {}
+        for name in runner.STAGES[:4]:
+            directory = artifacts / result.cell.value / ("bootstrap-" + name)
+            directory.mkdir(parents=True)
+            for filename, content in (
+                ("build.log", b"synthetic discovery only\n"),
+                (
+                    "bootstrap-scope.json",
+                    b'{"bootstrap_only":true,"certified_stage":false,"complete_executed_argv":false}',
+                ),
+            ):
+                path = directory / filename
+                path.write_bytes(content)
+                discovery[str(path)] = digest(content)
+        results.append(replace(result, stages=stages, discovery_sha256s=discovery))
+    token = runner._MATRIX_OWNER.set(
+        runner._MatrixOwner(layout.root, layout.workspace, kind)
+    )
+    try:
+        data = _SyntheticSelectionMatrix(
+            layout.originals[runner.selection.SOURCE], layout.workspace, results
+        )
+        controls = _selection_matrix_calibration_schema(data)
+    finally:
+        runner._MATRIX_OWNER.reset(token)
+    monkeypatch.setattr(runner, "_execute_matrix_calibrations", lambda *args: controls)
+    monkeypatch.setattr(runner, "_execute_matrix_cells", lambda *args: results)
+    # This parser/orchestration fixture has no actual SDK context. Real final
+    # dependencies retain their separately tested mandatory runtime observer.
+    monkeypatch.setattr(runner, "_verify_matrix_final_dependencies", lambda *args: None)
+    return layout, artifacts, results
+
+
+def test_esp32_selection_matrix_retention_uses_exact_owned_root_artifacts_outside_worktree(
+    tmp_path, monkeypatch
+):
+    from ci import software_spi_esp32_selection_runner as runner
+
+    layout, artifacts, results = _selection_matrix_real_retention_layout(
+        tmp_path, monkeypatch
+    )
+    assert not artifacts.is_relative_to(layout.workspace)
+    proof = runner.run_c6_selection_matrix_proof(layout.root)
+    assert proof.restoration_verified and proof.workspace == layout.workspace
+    assert len(proof.cells) == len(results) == 6
+    assert (artifacts / "proof.json").is_file()
+
+
+@pytest.mark.parametrize(
+    "kind", ["stage-artifact", "stage-log", "stage-configuration", "discovery"]
+)
+@pytest.mark.parametrize("foreign", ["attempt", "cell", "stage"])
+def test_esp32_selection_matrix_retention_rejects_coherent_foreign_subtrees(
+    tmp_path, monkeypatch, kind, foreign
+):
+    from dataclasses import replace
+
+    from ci import software_spi_esp32_selection_runner as runner
+
+    layout, artifacts, results = _selection_matrix_real_retention_layout(
+        tmp_path, monkeypatch
+    )
+    result = results[0]
+    stage = result.stages[1]
+    source = (
+        Path(next(iter(result.discovery_sha256s)))
+        if kind == "discovery"
+        else stage.log_path
+        if kind == "stage-log"
+        else Path(
+            next(
+                iter(
+                    stage.artifact_sha256s
+                    if kind == "stage-artifact"
+                    else stage.configuration_sha256s
+                )
+            )
+        )
+    )
+    if foreign == "attempt":
+        target = (
+            artifacts.parent / "different-owned-attempt" / source.relative_to(artifacts)
+        )
+    elif foreign == "cell":
+        target = (
+            artifacts
+            / results[1].cell.value
+            / "injected-copy"
+            / source.relative_to(artifacts / result.cell.value)
+        )
+    else:
+        target = source.parent.parent / "wrong-stage" / source.name
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_bytes(source.read_bytes())
+
+    def moved(hashes):
+        return {
+            str(target) if name == str(source) else name: sha
+            for name, sha in hashes.items()
+        }
+
+    if kind == "discovery":
+        results[0] = replace(result, discovery_sha256s=moved(result.discovery_sha256s))
+    else:
+        result.stages[1] = replace(
+            stage,
+            log_path=target if kind == "stage-log" else stage.log_path,
+            artifact_sha256s=moved(stage.artifact_sha256s),
+            configuration_sha256s=moved(stage.configuration_sha256s),
+        )
+    with pytest.raises(
+        ValueError, match="retained|ownership|artifact|attempt|cell|stage|foreign"
+    ):
+        runner.run_c6_selection_matrix_proof(layout.root)
+    assert not (artifacts / "proof.json").exists()
+
+
+@pytest.mark.parametrize("foreign", [None, "root", "attempt"])
+def test_esp32_selection_matrix_post_return_validation_scopes_factory_proof_ownership(
+    tmp_path, monkeypatch, foreign
+):
+    from dataclasses import replace
+
+    from ci import software_spi_esp32_selection_runner as runner
+
+    layout, artifacts, results = _selection_matrix_real_retention_layout(
+        tmp_path, monkeypatch
+    )
+    # Entry owns its context only during execution. Post-return validation must
+    # derive a fresh scoped owner from the fixed root and typed returned proof.
+    token = runner._MATRIX_OWNER.set(None)
+    try:
+        proof = runner.run_c6_selection_matrix_proof(layout.root)
+        assert (artifacts / "proof.json").is_file()
+        assert runner._MATRIX_OWNER.get() is None
+        root = layout.root
+        if foreign == "root":
+            root = tmp_path / "different-root"
+            source = root / runner.selection.SOURCE
+            source.parent.mkdir(parents=True)
+            source.write_bytes((layout.root / runner.selection.SOURCE).read_bytes())
+        elif foreign == "attempt":
+            proof = replace(
+                proof, workspace=layout.workspace.with_name("different-attempt")
+            )
+        if foreign is None:
+            runner._validate_matrix_proof(root, proof)
+        else:
+            with pytest.raises(
+                ValueError, match="foreign|attempt|project|retained|ownership"
+            ):
+                runner._validate_matrix_proof(root, proof)
+        assert runner._MATRIX_OWNER.get() is None
+    finally:
+        runner._MATRIX_OWNER.reset(token)
+
+
+_MATRIX_LITERAL_END = b"// End matrix literal contract\n"
+_MATRIX_ORACLE_KEYS = (
+    "EXPECT_FORCED",
+    "EXPECT_NO_PINMAP",
+    "FASTLED_SELECTION_ASSERT_SCOPE",
+)
+
+
+def _matrix_literal_parts(payload):
+    prefix, separator, semantic = payload.partition(_MATRIX_LITERAL_END)
+    assert separator, "generated literal checks require an independently bounded prefix"
+    return prefix.decode(), semantic
+
+
+def _matrix_literal_checks_are_active(prefix, values):
+    active = True
+    stack = []
+    for line in prefix.splitlines():
+        text = line.strip()
+        if text.startswith(("#ifdef ", "#ifndef ")):
+            directive, macro = text.split()
+            assert macro in values, "unreviewed literal-prefix gate"
+            condition = values[macro] is not None
+            if directive == "#ifndef":
+                condition = not condition
+            stack.append((active, condition))
+            active = active and condition
+        elif text == "#else":
+            assert stack
+            parent, condition = stack[-1]
+            active = parent and not condition
+        elif text == "#endif":
+            assert stack
+            active, _ = stack.pop()
+        elif text.startswith(("#if", "#elif", "#define", "#undef")):
+            pytest.fail("literal prefix cannot hide checks or redefine actual operands")
+        elif "static_assert" in text:
+            assert active, "literal assertion is hidden by a false source gate"
+        elif text.startswith("#error"):
+            assert not active, "nominal presence predicate rejects its own closed cell"
+    assert not stack
+
+
+def _matrix_selection_token_active(semantic, token, forced, no_map):
+    active = True
+    stack = []
+    observed = []
+    known = {"HAS_HARDWARE_PIN_SUPPORT": not forced, "FASTLED_NO_PINMAP": no_map}
+    for line in semantic.decode().splitlines():
+        text = line.strip()
+        if text.startswith(("#ifdef ", "#ifndef ")):
+            directive, macro = text.split()[:2]
+            condition = known.get(macro)
+            if directive == "#ifndef" and condition is not None:
+                condition = not condition
+            stack.append((active, condition))
+            active = active and (condition is not False)
+        elif text.startswith("#if "):
+            expression = text[4:].split("//", 1)[0].strip().strip("() ")
+            condition = expression == "1" if expression in ("0", "1") else None
+            stack.append((active, condition))
+            active = active and (condition is not False)
+        elif text.startswith("#else"):
+            parent, condition = stack[-1]
+            active = parent and (condition is not True)
+        elif text.startswith("#endif"):
+            active, _ = stack.pop()
+        elif token in text:
+            observed.append(active)
+    assert not stack and len(observed) == 1
+    return observed[0]
+
+
+def _matrix_expect_literal(prefix, macro, value):
+    import re
+
+    if value is None:
+        assert re.search(r"#\s*ifdef\s+" + macro + r"\s*\n\s*#\s*error", prefix), (
+            "absence must be checked even when the macro would evaluate as zero"
+        )
+    else:
+        matches = re.findall(
+            r"static_assert\s*\(\s*" + macro + r"\s*==\s*([01]|2)\s*,", prefix
+        )
+        assert matches == [str(value)], (
+            "actual macro must remain the LHS; no literal tautology"
+        )
+        assert re.search(r"#\s*ifndef\s+" + macro + r"\s*\n\s*#\s*error", prefix)
+
+
+def _matrix_expected_literals(runner, cell, name):
+    spec = runner._cell_spec(cell)
+    native = name == runner.STAGES[0]
+    return {
+        "FASTLED_FORCE_SOFTWARE_PINS": None if native else spec.force_value,
+        "FASTLED_NO_PINMAP": spec.no_pinmap_value,
+        "EXPECT_FORCED": int(not native),
+        "EXPECT_NO_PINMAP": int(spec.no_pinmap_value is not None),
+        "FASTLED_SELECTION_ASSERT_SCOPE": 1
+        if name == runner.STAGES[2]
+        else 2
+        if name == runner.STAGES[3]
+        else 0,
+    }
+
+
+@pytest.mark.parametrize("profile_name", ["C6", "XTENSA"])
+@pytest.mark.parametrize("name", ESP32_SELECTION_RUNNER_STAGES)
+def test_esp32_selection_matrix_literals_all_ordinary_tus_bind_actual_macro_operands(
+    profile_name, name
+):
+    import re
+
+    from ci import software_spi_esp32_selection_runner as runner
+
+    kind = getattr(runner._SelectionProfile, profile_name)
+    base = runner.producer_sources(audit.ROOT)
+    for cell in runner._matrix_cells(kind):
+        sources = runner._matrix_sources(audit.ROOT, kind, cell, name)
+        assert set(sources) == {runner.EXAMPLE, runner.HOOK}
+        for relative, payload in sources.items():
+            prefix, semantic = _matrix_literal_parts(payload)
+            expectations = _matrix_expected_literals(runner, cell, name)
+            _matrix_literal_checks_are_active(prefix, expectations)
+            for macro, value in expectations.items():
+                _matrix_expect_literal(prefix, macro, value)
+            # Source literals, not unchecked CLI oracle flags, select type/HAS,
+            # mapping-presence branches and the three-assertion TU activation.
+            directives = re.findall(
+                rb"^\s*#\s*(?:if|elif)[^\n]*", semantic, re.MULTILINE
+            )
+            assert not any(
+                key.encode() in directive
+                for key in _MATRIX_ORACLE_KEYS
+                for directive in directives
+            )
+            assert b"forced GPIO2 must use ForcedSoftwarePin" in semantic
+            assert b"native GPIO2 control" in semantic
+            assert b"global mapper switch missing" in semantic
+            expected_values = _matrix_expected_literals(runner, cell, name)
+            forced = bool(expected_values["EXPECT_FORCED"])
+            tu_scope = 1 if relative == runner.EXAMPLE else 2
+            selected = expected_values["FASTLED_SELECTION_ASSERT_SCOPE"] in (
+                0,
+                tu_scope,
+            )
+            assert _matrix_selection_token_active(
+                semantic,
+                "forced GPIO2 must use ForcedSoftwarePin",
+                forced,
+                expected_values["FASTLED_NO_PINMAP"] is not None,
+            ) is (forced and selected)
+            assert _matrix_selection_token_active(
+                semantic,
+                "native GPIO2 control",
+                forced,
+                expected_values["FASTLED_NO_PINMAP"] is not None,
+            ) is (not forced)
+            for include in re.findall(
+                rb"^#include[^\n]+", base[relative], re.MULTILINE
+            ):
+                assert include in semantic
+            if relative == runner.EXAMPLE:
+                original_writer = base[relative][
+                    base[relative].index(b"volatile fl::u8 selection_input") :
+                ]
+                assert semantic.endswith(original_writer), (
+                    "Generic/provider body cannot be gated or rewritten"
+                )
+            # Every literal check precedes every transformed selection gate,
+            # including both production-guard negative TU scopes.
+            assert payload.index(_MATRIX_LITERAL_END) < payload.index(b"forced GPIO2")
+
+
+@pytest.mark.parametrize("profile_name", ["C6", "XTENSA"])
+def test_esp32_selection_matrix_literals_seventy_plan_keeps_fifty_four_ordinary_and_sixteen_calibrations(
+    profile_name,
+):
+    from ci import software_spi_esp32_selection_runner as runner
+
+    kind = getattr(runner._SelectionProfile, profile_name)
+    controls = runner._matrix_calibrations(kind)
+    assert len(controls) == len({control.name for control in controls}) == 16
+    assert all(
+        control.profile is kind and control.tu_scope in (1, 2) for control in controls
+    )
+    product = {
+        (item.macro, item.expected_value, item.actual_value, item.tu_scope)
+        for item in controls
+        if item.category == "product"
+    }
+    oracle = {
+        (item.macro, item.expected_value, item.actual_value, item.tu_scope)
+        for item in controls
+        if item.category == "oracle"
+    }
+    assert product == {
+        (macro, old, new, tu)
+        for macro in ("FASTLED_FORCE_SOFTWARE_PINS", "FASTLED_NO_PINMAP")
+        for old, new in ((0, 1), (1, 0))
+        for tu in (1, 2)
+    }
+    assert oracle == {
+        (macro, 0, actual, tu)
+        for macro, actuals in (
+            ("FASTLED_SELECTION_ASSERT_SCOPE", (1, 2)),
+            ("EXPECT_FORCED", (1,)),
+            ("EXPECT_NO_PINMAP", (1,)),
+        )
+        for actual in actuals
+        for tu in (1, 2)
+    }
+    assert all(
+        control.stage == runner.STAGES[0]
+        and runner._cell_spec(control.cell).no_pinmap_value is None
+        for control in controls
+        if control.macro in ("EXPECT_FORCED", "EXPECT_NO_PINMAP")
+    )
+    plan = runner._matrix_execution_plan(kind)
+    assert len(plan) == 70
+    ordinary = [item for item in plan if item.calibration is None]
+    calibrated = [item.calibration for item in plan if item.calibration is not None]
+    assert [(item.cell, item.name, item.certified) for item in ordinary] == [
+        (item.cell, item.name, item.certified)
+        for item in runner._matrix_submission_plan(kind)
+    ]
+    assert calibrated == list(controls)
+    assert runner._MATRIX_OUTER_SECONDS == 8 * 60 * 60
+
+
+@pytest.mark.parametrize("profile_name", ["C6", "XTENSA"])
+def test_esp32_selection_matrix_literals_calibration_sibling_expectations_never_change_semantic_branches(
+    profile_name,
+):
+    from ci import software_spi_esp32_selection_runner as runner
+
+    kind = getattr(runner._SelectionProfile, profile_name)
+    for control in runner._matrix_calibrations(kind):
+        ordinary = runner._matrix_sources(audit.ROOT, kind, control.cell, control.stage)
+        sources = runner._matrix_calibration_sources(audit.ROOT, kind, control)
+        flags = runner._matrix_calibration_defines(kind, control)
+        original = runner.stage_defines(control.stage, control.cell)
+        expected_flags = [
+            f"-D{control.macro}={control.actual_value}"
+            if token.startswith("-D" + control.macro + "=")
+            else token
+            for token in original
+        ]
+        assert flags == expected_flags and flags != original
+        for relative, tu_scope in ((runner.EXAMPLE, 1), (runner.HOOK, 2)):
+            prefix, semantic = _matrix_literal_parts(sources[relative])
+            ordinary_prefix, ordinary_semantic = _matrix_literal_parts(
+                ordinary[relative]
+            )
+            assert semantic == ordinary_semantic, (
+                "oracle override must never change source semantic branches"
+            )
+            expectations = _matrix_expected_literals(
+                runner, control.cell, control.stage
+            )
+            assert expectations[control.macro] == control.expected_value
+            expectations[control.macro] = (
+                control.expected_value
+                if tu_scope == control.tu_scope
+                else control.actual_value
+            )
+            _matrix_literal_checks_are_active(prefix, expectations)
+            for macro, value in expectations.items():
+                _matrix_expect_literal(prefix, macro, value)
+            if tu_scope == control.tu_scope:
+                assert prefix == ordinary_prefix, (
+                    "selected TU keeps its real original predicate"
+                )
+            else:
+                assert prefix != ordinary_prefix, (
+                    "sibling checks stay enabled and match actual wrong value"
+                )
+
+
+def _matrix_calibration_output(runner, kind, control, project):
+    sources = runner._matrix_calibration_sources(audit.ROOT, kind, control)
+    relative = runner.EXAMPLE if control.tu_scope == 1 else runner.HOOK
+    source = "src/sketch/" + Path(relative).name
+    message = f"matrix literal {control.macro} expected {control.expected_value}"
+    matches = [
+        index
+        for index, line in enumerate(sources[relative].decode().splitlines(), 1)
+        if f'"{message}"' in line
+    ]
+    assert len(matches) == 1
+    target = project / (
+        "src/main.cpp"
+        if control.tu_scope == 1
+        else "src/sketch/AutoResearchStartupHook.cpp"
+    )
+    return f"build error: build failed: compilation failed for {target}:\n{source}:{matches[0]}:1: error: static assertion failed: {message}\n"
+
+
+@pytest.mark.parametrize("profile_name", ["C6", "XTENSA"])
+def test_esp32_selection_matrix_literals_specific_calibration_diagnostics_all_sixteen(
+    tmp_path, profile_name
+):
+    from ci import software_spi_esp32_selection_runner as runner
+
+    kind = getattr(runner._SelectionProfile, profile_name)
+    project = tmp_path / runner._profile_spec(kind).env
+    for control in runner._matrix_calibrations(kind):
+        output = _matrix_calibration_output(runner, kind, control, project)
+        result = runner._assess_matrix_calibration(kind, control, 1, output, project)
+        assert result.returncode == 1 and result.expected_compile_failure
+        assert (
+            not result.fresh_elf_eligible and not result.fresh_planned_database_eligible
+        )
+        assert not result.runtime_gpio_proven and not result.complete_executed_argv
+
+
+@pytest.mark.parametrize(
+    "corruption",
+    [
+        "success",
+        "timeout",
+        "wrong-tu",
+        "wrong-line",
+        "wrong-project",
+        "quoted-only",
+        "extra-error",
+        "wrong-family",
+    ],
+)
+def test_esp32_selection_matrix_literals_calibration_rejects_incidental_or_unbound_failure(
+    tmp_path, corruption
+):
+    import re
+
+    from ci import software_spi_esp32_selection_runner as runner
+
+    kind = runner._SelectionProfile.C6
+    control = runner._matrix_calibrations(kind)[0]
+    project = tmp_path / "esp32c6"
+    output = _matrix_calibration_output(runner, kind, control, project)
+    code = 1
+    if corruption == "success":
+        code = 0
+    elif corruption == "timeout":
+        code = -9
+    elif corruption == "wrong-tu":
+        output = (
+            output.replace("AutoResearch.ino", "AutoResearchStartupHook.cpp")
+            if control.tu_scope == 1
+            else output.replace("AutoResearchStartupHook.cpp", "AutoResearch.ino")
+        )
+    elif corruption == "wrong-line":
+        output = re.sub(r"(src/sketch/[^:]+):\d+:", r"\1:99999:", output)
+    elif corruption == "wrong-project":
+        output = output.replace(str(project), str(tmp_path / "other-project"))
+    elif corruption == "quoted-only":
+        output = "quoted source excerpt: " + output.replace("error:", "source text:")
+    elif corruption == "extra-error":
+        output += "src/other.cpp:1:1: fatal error: unrelated\n"
+    else:
+        output = output.replace("matrix literal", "unrelated type mismatch")
+    with pytest.raises(ValueError):
+        runner._assess_matrix_calibration(kind, control, code, output, project)
+
+
+@pytest.mark.parametrize("corruption", ["tuple", "label", "profile"])
+def test_esp32_selection_matrix_literals_control_spec_is_closed_not_caller_config(
+    corruption,
+):
+    from dataclasses import replace
+
+    from ci import software_spi_esp32_selection_runner as runner
+
+    kind = runner._SelectionProfile.C6
+    control = runner._matrix_calibrations(kind)[0]
+    if corruption == "tuple":
+        control = replace(control, actual_value=7)
+    elif corruption == "label":
+        control = replace(control, name="caller-supplied-calibration")
+    else:
+        kind = runner._SelectionProfile.XTENSA
+    with pytest.raises(ValueError):
+        runner._matrix_calibration_sources(audit.ROOT, kind, control)
+    with pytest.raises(ValueError):
+        runner._matrix_calibration_defines(kind, control)
+
+
+@pytest.mark.parametrize(
+    "relative",
+    [
+        "examples/AutoResearch/AutoResearch.ino",
+        "examples/AutoResearch/AutoResearchStartupHook.cpp",
+    ],
+)
+def test_esp32_selection_matrix_literals_stale_tu_payload_hash_rejected(relative):
+    from ci import software_spi_esp32_selection_runner as runner
+
+    kind = runner._SelectionProfile.C6
+    cells = runner._matrix_cells(kind)
+    sources = runner._matrix_sources(audit.ROOT, kind, cells[0], "baseline")
+    inputs = {name: digest(payload) for name, payload in sources.items()}
+    runner._validate_matrix_payloads(audit.ROOT, kind, cells[0], "baseline", inputs)
+    stale = runner._matrix_sources(audit.ROOT, kind, cells[3], "baseline")
+    inputs[relative] = digest(stale[relative])
+    with pytest.raises(ValueError):
+        runner._validate_matrix_payloads(audit.ROOT, kind, cells[0], "baseline", inputs)
+
+
+@pytest.mark.parametrize("interrupt", [False, True])
+def test_esp32_selection_matrix_literals_generated_sources_restore_on_failure(
+    tmp_path, monkeypatch, interrupt
+):
+    from ci import software_spi_esp32_selection_runner as runner
+
+    layout = _selection_runner_entry_layout(tmp_path, monkeypatch)
+
+    def execute(*args):
+        sources = runner._matrix_sources(
+            audit.ROOT,
+            runner._SelectionProfile.C6,
+            runner._matrix_cells(runner._SelectionProfile.C6)[0],
+            "baseline",
+        )
+        for relative, payload in sources.items():
+            (layout.workspace / relative).write_bytes(payload)
+        layout.ini.write_bytes(b"changed numeric calibration configuration")
+        if interrupt:
+            raise KeyboardInterrupt("literal-stage interruption")
+        raise ValueError("literal-stage failure")
+
+    monkeypatch.setattr(runner, "_execute_matrix_cells", execute)
+    with pytest.raises(KeyboardInterrupt if interrupt else ValueError):
+        runner.run_c6_selection_matrix_proof(layout.root)
+    for relative, content in layout.originals.items():
+        assert (layout.workspace / relative).read_bytes() == content
+    assert layout.ini.read_bytes() == layout.ini_original
+    assert not list(layout.root.rglob("proof.json"))
+
+
+def _matrix_generated_selection_diagnostics(runner, kind, cell, name, project):
+    sources = runner._matrix_sources(audit.ROOT, kind, cell, name)
+    relative = runner.EXAMPLE if name == runner.STAGES[2] else runner.HOOK
+    source = "src/sketch/" + Path(relative).name
+    target = project / (
+        "src/main.cpp"
+        if name == runner.STAGES[2]
+        else "src/sketch/AutoResearchStartupHook.cpp"
+    )
+    output = f"build error: build failed: compilation failed for {target}:\n"
+    for token, message in (
+        (
+            "forced selection must not advertise hardware pin support",
+            '#error "forced selection must not advertise hardware pin support"',
+        ),
+        (
+            "forced GPIO2 must use ForcedSoftwarePin",
+            "static assertion failed: forced GPIO2 must use ForcedSoftwarePin",
+        ),
+        (
+            "forced GPIO3 must use ForcedSoftwarePin",
+            "static assertion failed: forced GPIO3 must use ForcedSoftwarePin",
+        ),
+    ):
+        lines = [
+            index
+            for index, line in enumerate(sources[relative].decode().splitlines(), 1)
+            if token in line
+        ]
+        assert len(lines) == 1
+        output += f"{source}:{lines[0]}:1: error: {message}\n"
+    return output
+
+
+@pytest.mark.parametrize("profile_name", ["C6", "XTENSA"])
+def test_esp32_selection_matrix_literals_all_calibration_commands_use_fixed_actual_flags(
+    tmp_path, monkeypatch, profile_name
+):
+    from ci import software_spi_esp32_selection_runner as runner
+
+    kind = getattr(runner._SelectionProfile, profile_name)
+    submitted = []
+    sentinel = object()
+
+    def process(command, cwd, log, **kwargs):
+        submitted.append((command, cwd, log, kwargs))
+        return sentinel
+
+    monkeypatch.setattr(runner.native, "_run", process)
+    for control in runner._matrix_calibrations(kind):
+        workspace = tmp_path / "owned-workspace"
+        saved = tmp_path / control.name
+        assert (
+            runner._run_matrix_calibration_compile(
+                workspace, saved, {"UV_NO_SYNC": "1"}, kind, control
+            )
+            is sentinel
+        )
+        command, cwd, log, settings = submitted[-1]
+        assert command[:3] == ["bash", "compile", runner._profile_spec(kind).env]
+        assert command[command.index("--defines") + 1].split(",") == [
+            flag[2:] for flag in runner._matrix_calibration_defines(kind, control)
+        ]
+        assert cwd == workspace and log == saved / "build.log"
+        assert settings["build"] is True and settings["environment"] == {
+            "UV_NO_SYNC": "1"
+        }
+    assert len(submitted) == 16
+
+
+@pytest.mark.parametrize("profile_name", ["C6", "XTENSA"])
+def test_esp32_selection_matrix_literal_integration_entry_reaches_exact_seventy_windows(
+    tmp_path, monkeypatch, profile_name
+):
+    # Exercise BOTH production executors, replacing only external observations
+    # and validation with synthetic services. This is topology, not SDK proof.
+    from types import SimpleNamespace
+
+    from ci import software_spi_esp32_selection_runner as runner
+
+    kind = getattr(runner._SelectionProfile, profile_name)
+    layout = _selection_runner_entry_layout(tmp_path, monkeypatch)
+    workspace = layout.workspace
+    source = workspace / runner.selection.SOURCE
+    source.parent.mkdir(parents=True, exist_ok=True)
+    original_source = (audit.ROOT / runner.selection.SOURCE).read_bytes()
+    source.write_bytes(original_source)
+    state = {
+        "tools": {"compiler": "synthetic"},
+        "sdk": {"root": "synthetic"},
+        "environment": {"UV_NO_SYNC": "1"},
+        "configuration": {"scope": "synthetic"},
+    }
+    info = {"prog_path": str(workspace / "release/firmware.elf")}
+    monkeypatch.setattr(runner, "_selection_environment", lambda *args: {})
+    monkeypatch.setattr(runner.vendor, "_client_tools", lambda *args: {})
+    monkeypatch.setattr(runner.vendor, "_observe_launcher", lambda *args: {})
+    monkeypatch.setattr(runner.vendor, "_prepare_bootstrap_engine", lambda *args: {})
+    monkeypatch.setattr(runner.vendor, "_base_state", lambda *args: dict(state))
+    monkeypatch.setattr(runner, "_selection_state", lambda *args: dict(state))
+    monkeypatch.setattr(runner, "_selection_sdk_roots", lambda *args: ())
+    monkeypatch.setattr(runner.vendor, "_tool_identities", lambda *args: {})
+    monkeypatch.setattr(runner, "_positive_info", lambda *args: info)
+    monkeypatch.setattr(runner.native, "_verify_inputs", lambda *args: None)
+    monkeypatch.setattr(runner.vendor, "_check_staged_sources", lambda *args: None)
+    monkeypatch.setattr(
+        runner.vendor.property_check, "_verify_profile_state", lambda *args: None
+    )
+    monkeypatch.setattr(runner.vendor, "_retain_artifacts", lambda *args: {})
+    monkeypatch.setattr(runner, "_retain_cell", lambda *args: {})
+    base_payloads = runner.producer_sources(audit.ROOT)
+    monkeypatch.setattr(runner, "producer_sources", lambda *args: base_payloads)
+    monkeypatch.setattr(
+        runner, "_observe_staged_inputs", lambda *args: runner._StagedInputs({}, {})
+    )
+    monkeypatch.setattr(runner, "validate_stage_record", lambda *args: None)
+    monkeypatch.setattr(
+        runner,
+        "_capture_cell_configuration",
+        lambda info, name, selected_kind, cell: runner.CellConfiguration(
+            name, {}, {}, {}, cell
+        ),
+    )
+    monkeypatch.setattr(runner, "_validate_matrix_results", lambda *args: None)
+    monkeypatch.setattr(
+        runner, "_validate_matrix_calibrations", lambda *args: None, raising=False
+    )
+    monkeypatch.setattr(
+        runner, "_validate_matrix_calibration_record", lambda *args: None, raising=False
+    )
+    monkeypatch.setattr(runner, "_verify_matrix_final_dependencies", lambda *args: None)
+    monkeypatch.setattr(
+        runner, "_matrix_calibration_state", lambda *args: dict(state), raising=False
+    )
+    monkeypatch.setattr(
+        runner,
+        "_capture_calibration_configuration",
+        lambda info, selected_kind, control: runner.CellConfiguration(
+            control.name, {}, {}, {}, control.cell
+        ),
+        raising=False,
+    )
+    clock = [100.0]
+    monkeypatch.setattr(runner.time, "monotonic", lambda: clock[0])
+    windows = []
+
+    def compile_window(
+        selected_workspace,
+        saved,
+        environment,
+        tools,
+        engine,
+        name,
+        selected_kind,
+        cell,
+        *args,
+        **kwargs,
+    ):
+        control = kwargs.get("calibration")
+        if control is None:
+            control = next(
+                (item for item in args if item in runner._matrix_calibrations(kind)),
+                None,
+            )
+        expected_payloads = (
+            runner._matrix_sources(audit.ROOT, selected_kind, cell, name)
+            if control is None
+            else runner._matrix_calibration_sources(audit.ROOT, selected_kind, control)
+        )
+        for relative, expected_payload in expected_payloads.items():
+            assert (selected_workspace / relative).read_bytes() == expected_payload
+        project = workspace / ".build/fbuild" / runner._profile_spec(kind).env
+        for relative in runner._REQUIRED_SOURCES:
+            target = (
+                (project / "lib/FastLED" / relative.removeprefix("src/"))
+                if relative.startswith("src/")
+                else project / "src/sketch" / Path(relative).name
+            )
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes((workspace / relative).read_bytes())
+        discovery = control is None and saved.name.startswith("bootstrap-")
+        negative = control is not None or (not discovery and name in runner.STAGES[2:4])
+        if control is not None:
+            output = _matrix_calibration_output(runner, kind, control, project)
+        elif negative:
+            output = _matrix_generated_selection_diagnostics(
+                runner, kind, cell, name, project
+            )
+        else:
+            output = "build completed\n"
+        saved.mkdir(parents=True, exist_ok=True)
+        (saved / "build.log").write_text(output)
+        windows.append(
+            (
+                selected_workspace,
+                selected_kind,
+                cell,
+                name,
+                discovery,
+                int(negative),
+                control,
+                runner._MATRIX_DEADLINE.get(),
+            )
+        )
+        clock[0] += 1.0
+        return runner._CompileWindow(
+            SimpleNamespace(returncode=int(negative), stdout=output), {}, {}
+        )
+
+    monkeypatch.setattr(runner, "_compile_engine_window", compile_window)
+    executions = []
+    execute = runner._execute_fixed_stages
+
+    def observe(*args, **kwargs):
+        executions.append((args[1], args[2], args[6], args[7]))
+        return execute(*args, **kwargs)
+
+    monkeypatch.setattr(runner, "_execute_fixed_stages", observe)
+    proof = runner._run_selection_matrix(layout.root, kind)
+    assert len(proof.cells) == len(executions) == 6
+    assert {item[0] for item in executions} == {workspace}
+    assert {item[2] for item in executions} == {kind}
+    assert len({item[1] for item in executions}) == 6
+    assert [item[3] for item in executions] == list(runner._matrix_cells(kind))
+    assert len(windows) == 70
+    ordinary = [item for item in windows if item[6] is None]
+    controls = [item for item in windows if item[6] is not None]
+    assert len(ordinary) == 54 and len(controls) == 16
+    assert [item[6] for item in controls] == list(runner._matrix_calibrations(kind))
+    assert all(item[5] == 1 for item in controls)
+    assert {item[7] for item in windows} == {100.0 + 8 * 60 * 60}, (
+        "one budget must span ordinary and calibration phases"
+    )
+    assert runner._MATRIX_DEADLINE.get() is None
+    for cell in runner._matrix_cells(kind):
+        selected = [item for item in ordinary if item[2] is cell]
+        assert [item[3] for item in selected if item[4]] == list(runner.STAGES[:4])
+        assert [item[3] for item in selected if not item[4]] == list(runner.STAGES)
+        assert [item[5] for item in selected if not item[4]] == [0, 0, 1, 1, 0]
+    assert all(item[0] == workspace and item[1] is kind for item in windows)
+    for relative, content in layout.originals.items():
+        assert (workspace / relative).read_bytes() == content
+    assert layout.ini.read_bytes() == layout.ini_original
+
+
+def _selection_matrix_calibration_schema(data):
+    """Synthetic hash-bound calibration records, not SDK/process receipts."""
+    from dataclasses import replace
+
+    from ci import software_spi_esp32_selection_runner as runner
+
+    kind = runner._SelectionProfile.C6
+    owner = runner._MATRIX_OWNER.get()
+    artifacts = (
+        owner.root
+        / ".build"
+        / (runner._profile_spec(kind).artifact_group + "-matrix")
+        / data.workspace.name
+    )
+    records = []
+    seed = data.results[0].stages[2]
+    for control in runner._matrix_calibrations(kind):
+        directory = artifacts / control.cell.value / "calibrations" / control.name
+        directory.mkdir(parents=True, exist_ok=True)
+        sources = runner._matrix_calibration_sources(audit.ROOT, kind, control)
+        inputs = {
+            **seed.inputs_before,
+            runner.selection.SOURCE: digest(data.original),
+            **{name: digest(payload) for name, payload in sources.items()},
+        }
+        log = directory / "build.log"
+        log.write_text(_matrix_calibration_output(runner, kind, control, seed.project))
+        outcome = runner._assess_matrix_calibration(
+            kind, control, 1, log.read_text(), seed.project
+        )
+        assert outcome.cell is control.cell
+        flags = runner._matrix_calibration_defines(kind, control)
+        ini = directory / "platformio.ini"
+        ini.write_text("[env:esp32c6]\nbuild_flags = " + " ".join(flags) + "\n")
+        database = directory / "prior-input-compile_commands.raw.json"
+        database.write_text(
+            json.dumps(
+                [
+                    {
+                        "directory": str(seed.project),
+                        "file": "src/main.cpp",
+                        "arguments": ["compiler", *flags, "-c", "src/main.cpp"],
+                    }
+                ]
+            )
+        )
+        configuration = {
+            str(path): digest(path.read_bytes()) for path in (ini, database)
+        }
+        copied_sources = {}
+        for relative, payload in {
+            **sources,
+            runner.selection.SOURCE: data.original,
+        }.items():
+            path = directory / "staged-sources" / relative
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(payload)
+            copied_sources[str(path)] = digest(payload)
+        profile = {"cell": "native" if control.stage == runner.STAGES[0] else "forced"}
+        stage = replace(
+            seed,
+            name=control.name,
+            cell=control.cell,
+            outcome=outcome,
+            log_path=log,
+            log_sha256=digest(log.read_bytes()),
+            inputs_before=inputs,
+            inputs_after=dict(inputs),
+            staged_sources_expected=dict(inputs),
+            staged_sources_observed=dict(inputs),
+            profile_before=profile,
+            profile_after=dict(profile),
+            artifact_sha256s=copied_sources,
+            configuration_sha256s=configuration,
+        )
+        records.append(runner.SelectionMatrixCalibration(control=control, stage=stage))
+    return records
+
+
+def _corrupt_matrix_calibration(records, corruption):
+    from dataclasses import replace
+
+    from ci import software_spi_esp32_selection_runner as runner
+
+    record = records[0]
+    stage = record.stage
+    if corruption == "missing":
+        records.pop()
+    elif corruption == "duplicate":
+        records[-1] = record
+    elif corruption == "profile":
+        records[0] = replace(
+            record,
+            control=replace(record.control, profile=runner._SelectionProfile.XTENSA),
+        )
+    elif corruption == "tuple":
+        records[0] = replace(record, control=replace(record.control, actual_value=7))
+    elif corruption == "return0":
+        records[0] = replace(
+            record, stage=replace(stage, outcome=replace(stage.outcome, returncode=0))
+        )
+    elif corruption == "log":
+        stage.log_path.write_text(
+            stage.log_path.read_text().replace("matrix literal", "unrelated predicate")
+        )
+        records[0] = replace(
+            record, stage=replace(stage, log_sha256=digest(stage.log_path.read_bytes()))
+        )
+    elif corruption == "configuration":
+        hashes = dict(stage.configuration_sha256s)
+        actual = f"-D{record.control.macro}={record.control.actual_value}"
+        different = f"-D{record.control.macro}={record.control.expected_value}"
+        for filename in hashes:
+            path = Path(filename)
+            content = path.read_text()
+            assert actual in content
+            path.write_text(content.replace(actual, different))
+            hashes[filename] = digest(path.read_bytes())
+        records[0] = replace(record, stage=replace(stage, configuration_sha256s=hashes))
+    else:
+        assert corruption == "payload"
+        relative = runner.EXAMPLE if record.control.tu_scope == 1 else runner.HOOK
+        path = next(
+            Path(name) for name in stage.artifact_sha256s if name.endswith(relative)
+        )
+        content = path.read_bytes()
+        assert b"matrix literal" in content
+        path.write_bytes(content.replace(b"matrix literal", b"unbound literal"))
+        changed = digest(path.read_bytes())
+        artifacts = {**stage.artifact_sha256s, str(path): changed}
+        inputs = {**stage.inputs_before, relative: changed}
+        records[0] = replace(
+            record,
+            stage=replace(
+                stage,
+                artifact_sha256s=artifacts,
+                inputs_before=inputs,
+                inputs_after=dict(inputs),
+                staged_sources_expected=dict(inputs),
+                staged_sources_observed=dict(inputs),
+            ),
+        )
+
+
+@pytest.mark.parametrize(
+    "corruption",
+    [
+        "missing",
+        "duplicate",
+        "profile",
+        "tuple",
+        "return0",
+        "log",
+        "configuration",
+        "payload",
+    ],
+)
+def test_esp32_selection_matrix_literal_integration_calibration_aggregate_rechecks_real_bindings(
+    tmp_path, corruption
+):
+    from ci import software_spi_esp32_selection_runner as runner
+
+    data = _selection_matrix_schema(tmp_path)
+    controls = _selection_matrix_calibration_schema(data)
+    runner._validate_matrix_calibrations(
+        runner._SelectionProfile.C6,
+        controls,
+        data.results,
+        data.original,
+        data.workspace,
+    )
+    _corrupt_matrix_calibration(controls, corruption)
+    with pytest.raises(ValueError):
+        runner._validate_matrix_calibrations(
+            runner._SelectionProfile.C6,
+            controls,
+            data.results,
+            data.original,
+            data.workspace,
+        )
+
+
+@pytest.mark.parametrize(
+    "corruption",
+    [
+        "missing",
+        "duplicate",
+        "profile",
+        "tuple",
+        "return0",
+        "log",
+        "configuration",
+        "payload",
+    ],
+)
+def test_esp32_selection_matrix_literal_integration_calibration_tamper_after_finaldeps_blocks_publication(
+    tmp_path, monkeypatch, corruption
+):
+    from ci import software_spi_esp32_selection_runner as runner
+
+    layout, artifacts, ordinary = _selection_matrix_real_retention_layout(
+        tmp_path, monkeypatch
+    )
+    kind = runner._SelectionProfile.C6
+    runner._MATRIX_OWNER.set(runner._MatrixOwner(layout.root, layout.workspace, kind))
+    data = _SyntheticSelectionMatrix(
+        layout.originals[runner.selection.SOURCE], layout.workspace, ordinary
+    )
+    controls = _selection_matrix_calibration_schema(data)
+    runner._validate_matrix_calibrations(
+        kind, controls, ordinary, data.original, layout.workspace
+    )
+    monkeypatch.setattr(runner, "_execute_matrix_calibrations", lambda *args: controls)
+    events = []
+
+    def final(*args):
+        events.append("final-dependencies")
+        for relative, content in layout.originals.items():
+            assert (layout.workspace / relative).read_bytes() == content
+        assert layout.ini.read_bytes() == layout.ini_original
+        _corrupt_matrix_calibration(controls, corruption)
+
+    monkeypatch.setattr(runner, "_verify_matrix_final_dependencies", final)
+    with pytest.raises(ValueError):
+        runner.run_c6_selection_matrix_proof(layout.root)
+    assert events == ["final-dependencies"]
+    assert not (artifacts / "proof.json").exists()
+    for relative, content in layout.originals.items():
+        assert (layout.workspace / relative).read_bytes() == content
+    assert layout.ini.read_bytes() == layout.ini_original

@@ -17,6 +17,7 @@ InstructionsRI16.tex (CALL8 and forced-negative PC-relative L32R).
 
 import struct
 from dataclasses import dataclass, field
+from pathlib import Path
 
 
 PIN = "fl::pinMode(int, fl::PinMode)"
@@ -896,13 +897,14 @@ def extract_capture(elf: bytes, symbol_text: str, sdk_root: "Path") -> dict:
         ),
     ):
         entry = symbols[name]
-        code = bytes.fromhex(entry["bytes_hex"])
+        code = bytes.fromhex(str(entry["bytes_hex"]))
         for offset in offsets:
             word = _word(code, offset, 3)
             if word & 15 != 1:
                 raise ValueError("reachable L32R opcode")
             address = (
-                ((entry["address"] + offset + 3) & ~3) + (((word >> 8) - 65536) << 2)
+                ((int(entry["address"]) + offset + 3) & ~3)
+                + (((word >> 8) - 65536) << 2)
             ) & 0xFFFFFFFF
             literal = storage(address, 4, False)
             literal["uint32_le"] = int.from_bytes(

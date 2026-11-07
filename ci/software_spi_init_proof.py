@@ -15,6 +15,7 @@ from dataclasses import asdict, dataclass, field
 from enum import Enum
 from pathlib import Path
 from tempfile import mkdtemp
+from typing import Any
 
 from running_process import (
     CalledProcessError,
@@ -282,6 +283,8 @@ def _capture_build_context(
             json.dumps(data, sort_keys=True, separators=(",", ":")).encode()
         )
         if name == "intro-buildoptions.json":
+            if not isinstance(data, list):
+                raise ValueError("malformed build configuration options")
             options = {row["name"]: row["value"] for row in data}
             if len(options) != len(data):
                 raise ValueError("duplicate build configuration options")
@@ -295,6 +298,8 @@ def _capture_build_context(
             ):
                 raise ValueError("unexpected debug build configuration")
     rows = audit._read_audit_json(build / "compile_commands.json")
+    if not isinstance(rows, list):
+        raise ValueError("malformed compile_commands.json")
     selected = [
         row
         for row in rows
@@ -444,7 +449,7 @@ def _validate_stage_commands(
 
 
 def _snapshot_inputs(root: Path) -> SnapshotInputs:
-    options = dict(
+    options: dict[str, Any] = dict(
         cwd=root,
         check=True,
         timeout=30,

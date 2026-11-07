@@ -190,6 +190,8 @@ def _ci13_pin_configuration(defines: dict[str, int]) -> str:
         input=source,
         capture_output=True,
         text=True,
+        encoding="utf-8",
+        errors="replace",
         timeout=30,
     )
     assert result.returncode == 0, result.stderr

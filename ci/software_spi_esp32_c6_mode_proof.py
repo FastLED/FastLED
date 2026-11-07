@@ -576,10 +576,11 @@ def _sdk_reservation(
         r"\.\s*=\s*ALIGN\((0x[0-9a-fA-F]+)\)\s*\+\s*(0x[0-9a-fA-F]+);",
         text_scripts["sections.ld"],
     )
-    if any(match is None for match in origins) or page is None:
+    first_origin, second_origin = origins
+    if first_origin is None or second_origin is None or page is None:
         raise ValueError("unsupported bound SDK region expressions")
-    origin = int(origins[0][1], 16)
-    if int(origins[1][1], 16) != origin:
+    origin = int(first_origin[1], 16)
+    if int(second_origin[1], 16) != origin:
         raise ValueError("SDK code/rodata regions do not alias")
     page_size, header = int(page[1], 16), int(page[2], 16)
 
