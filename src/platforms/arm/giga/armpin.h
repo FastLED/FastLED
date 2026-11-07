@@ -5,13 +5,25 @@
 #include "fl/system/fastpin_base.h"
 #include "fl/system/pin.h"  // For PinMode, PinValue enums
 #include "fl/stl/compiler_control.h"
+#include "fl/stl/static_assert.h"
 #include "platforms/arm/stm32/stm32_bitbang_pin.h"
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_DEPRECATED_REGISTER
 namespace fl {
 #define _R(T) struct __gen_struct_ ## T
-#define _FL_DEFPIN(PIN, BIT, L) template<> class FastPin<PIN> : public _ARMPIN<PIN, BIT, 1 << BIT, _R(GPIO ## L)> {};
+// _FL_DEFPIN always emits GigaHwPin<PIN>, the native BSRR pin that the
+// clockless driver uses. FastPin<PIN> derives from it only when
+// FASTLED_FORCE_SOFTWARE_PINS is not set: an explicit specialization would
+// override the forced software primary template in fastpin_base.h (#5071).
+#if defined(FASTLED_FORCE_SOFTWARE_PINS)
+#define _FL_GIGA_FASTPIN(PIN)
+#else
+#define _FL_GIGA_FASTPIN(PIN) template<> class FastPin<PIN> : public GigaHwPin<PIN> {};
+#endif
+#define _FL_DEFPIN(PIN, BIT, L) \
+    template<> class GigaHwPin<PIN> : public _ARMPIN<PIN, BIT, 1 << BIT, _R(GPIO ## L)> {}; \
+    _FL_GIGA_FASTPIN(PIN)
 
 /// Template definition for STM32 style ARM pins, providing direct access to the various GPIO registers.  Note that this
 /// uses the full port GPIO registers.  In theory, in some way, bit-band register access -should- be faster, however I have found
@@ -50,6 +62,21 @@ public:
     inline static port_ptr_t cport() __attribute__ ((always_inline)) { return &_GPIO::r()->BSRR = _MASK; }
 
     inline static port_t mask() __attribute__ ((always_inline)) { return _MASK; }
+};
+
+/// Native pin for an Arduino GIGA pin, specialized by _FL_DEFPIN for every
+/// mapped pin. The primary is instantiated only for unmapped pins.
+template <u8 PIN> class GigaHwPin {
+public:
+    // Stubs keep the static assertion the only diagnostic.
+    typedef volatile u32* port_ptr_t;
+    typedef u32 port_t;
+    static void setOutput() {}
+    static port_t mask() { return 0; }
+    static port_ptr_t port() { return nullptr; }
+    static void fastset(port_ptr_t, port_t) {}
+    FL_STATIC_ASSERT(PIN == 255 && PIN != 255,
+                     "This pin is not in the Arduino GIGA pin map (fastpin_arm_giga.h), so the clockless driver cannot drive it.");
 };
 }  // namespace fl
 
