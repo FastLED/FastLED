@@ -147,7 +147,7 @@ PlainReg FakeRegs::C2;
 
 fl::u32 gScgc4 = 0;
 
-void resetBus(fl::u32 padConfig = kMuxSpi) {
+void resetBus(fl::u32 padConfig) {
     gWire.clear();
     gLostBits = gInvisiblePulses = gMuxExitsWithClockHigh = 0;
     gMuxChangesWhileShifting = gDataWrittenWhileBufferFull = 0;
@@ -170,6 +170,7 @@ void resetBus(fl::u32 padConfig = kMuxSpi) {
 #define SIM_SCGC4_SPI1 (1U << 23)
 #define PORT_PCR_MUX(n) (static_cast<fl::u32>(n) << 8)
 #define PORT_PCR_SRE kSre
+#define PORT_PCR_ISF 0x01000000U
 #define CORE_PIN0_CONFIG gOtherPins[0]
 #define CORE_PIN1_CONFIG gOtherPins[1]
 #define CORE_PIN7_CONFIG gOtherPins[2]
@@ -244,7 +245,7 @@ void expectByte(fl::size at, u8 value) {
 
 template <u8 BIT> void checkEveryValue() {
     for (int value = 0; value < 256; ++value) {
-        resetBus();
+        resetBus(kMuxSpi);
         Output::template writeBit<BIT>(static_cast<u8>(value));
         FL_REQUIRE_EQ(gWire.size(), 1U);
         FL_REQUIRE_EQ(gWire[0], static_cast<u8>((value >> BIT) & 1));
@@ -269,7 +270,7 @@ FL_TEST_CASE("writeBit pulses once with the selected bit: every bit, every value
 
 FL_TEST_CASE("byte, bit, byte keeps order at a range of clock rates") {
     for (u8 rate : {u8(0x00), u8(0x10), u8(0x70), u8(0x08), u8(0x78)}) {
-        resetBus();
+        resetBus(kMuxSpi);
         FakeRegs::BR = rate;
         Output::writeByte(0xA5);
         Output::writeByte(0x3C); // The first is shifting, this one is buffered.
@@ -297,12 +298,29 @@ FL_TEST_CASE("an idle call restores a pad configuration it did not set") {
 }
 
 FL_TEST_CASE("a clock latch left high is parked before the pad leaves the mux") {
-    resetBus();
+    resetBus(kMuxSpi);
     gClockLatch = true; // SPI owns the pad, so this level is not on the wire yet.
     Output::writeBit<0>(1);
     FL_REQUIRE_EQ(gWire.size(), 1U);
     FL_CHECK_EQ(gWire[0], 1);
     checkClean();
+}
+
+FL_TEST_CASE("restoring a pad does not clear its pending interrupt flag") {
+    resetBus(kMuxSpi | PORT_PCR_ISF);
+    Output::writeBit<0>(1);
+    FL_CHECK_EQ(gDataCfg.value & PORT_PCR_ISF, 0U);
+    FL_CHECK_EQ(gClockCfg.value & PORT_PCR_ISF, 0U);
+    FL_CHECK_EQ(gDataCfg.value, kMuxSpi);
+}
+
+FL_TEST_CASE("select forces mode 0 after another client left the clock polarity set") {
+    resetBus(kSre | kMuxGpio);
+    FakeRegs::C1 = static_cast<fl::u8>(SPI_C1_MSTR | SPI_C1_SPE | 0x08); // CPOL
+    Output output;
+    output.select();
+    FL_CHECK_EQ(FakeRegs::C1.value, static_cast<fl::u8>(SPI_C1_MSTR | SPI_C1_SPE));
+    output.release();
 }
 
 FL_TEST_CASE("release does not cut off the last byte") {

@@ -162,7 +162,9 @@ class ARMHardwareSPIOutput {
 
     // Also, force 8 bit transfers (don't want to juggle 8/16 since that flushes the world)
     SPIX.C2 = 0;
-    SPIX.C1 |= SPI_C1_SPE;
+    // Also force mode 0, MSB first: another SPI client may have left CPOL set, and then
+    // handing the clock pad back after writeBit would be an extra rising edge.
+    SPIX.C1 = SPI_C1_MSTR | SPI_C1_SPE;
   }
 
 public:
@@ -253,8 +255,9 @@ public:
     delaycycles<NS(35)>();
     FastPin<_CLOCK_PIN>::lo();
 
-    if (dataConfig) { *dataConfig = savedData; }
-    if (clockConfig) { *clockConfig = savedClock; }
+    // Without ISF, which is write-1-to-clear: restoring it would drop a pending pin interrupt.
+    if (dataConfig) { *dataConfig = savedData & ~PORT_PCR_ISF; }
+    if (clockConfig) { *clockConfig = savedClock & ~PORT_PCR_ISF; }
   }
 
   // write a byte out via SPI (returns immediately on writing register)
