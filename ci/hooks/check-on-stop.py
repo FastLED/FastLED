@@ -18,7 +18,8 @@ Path-filtered mode (issue #2609):
 
 Usage: Receives JSON on stdin from Claude Code Stop hook.
 Exit codes:
-  0 - Both passed or skipped (no changes during session)
+  0 - Both passed, skipped (no changes during session), or released after
+      repeated identical blocks on an unchanged tree
   2 - Lint or test failures (stderr fed back to Claude)
 """
 
@@ -37,6 +38,15 @@ from running_process import PIPE, CompletedProcess, RunningProcess
 SCRIPT_DIR = Path(__file__).parent.resolve()
 PROJECT_ROOT = SCRIPT_DIR.parent.parent
 SESSION_FINGERPRINT_FILE = PROJECT_ROOT / ".cache" / "session_fingerprint.json"
+BLOCK_STATE_DIR = PROJECT_ROOT / ".cache" / "stop_hook_blocks"
+MAX_IDENTICAL_BLOCKS = 2
+FIX_DIRECTIVE = """
+REMINDER - FIX ALL ERRORS FROM STOP HOOK, MAKE AT LEAST TWO ATTEMPTS!
+Your next action must be a tool call that edits the failing code, not a status reply.
+Fix these errors even if you did not cause them or the file has uncommitted edits
+that may be another session's: edit in place, which keeps those edits, and leave
+them uncommitted if they are not yours. Lint failures are never a reason to wait.
+"""
 WORKTREES_DIR = PROJECT_ROOT / ".claude" / "worktrees"
 STALE_WORKTREE_THRESHOLD = 5
 
@@ -322,7 +332,125 @@ def _fmt_seconds(seconds: float) -> str:
     return f"{seconds:.1f}s"
 
 
+def _read_stop_payload() -> dict[str, object]:
+    """Parse the Stop hook JSON from stdin; empty when run by hand."""
+    if sys.stdin is None or sys.stdin.isatty():
+        return {}
+    try:
+        payload = json.loads(sys.stdin.read() or "{}")
+    except (OSError, ValueError):
+        return {}
+    return payload if isinstance(payload, dict) else {}
+
+
+def _tree_digest() -> str | None:
+    """Hash tracked content and the status list, so any edit changes it."""
+    status = run_cmd(["git", "status", "--porcelain"])
+    diff = run_cmd(["git", "diff", "HEAD"])
+    untracked = run_cmd(["git", "ls-files", "--others", "--exclude-standard", "-z"])
+    if status.returncode != 0 or diff.returncode != 0 or untracked.returncode != 0:
+        return None
+    digest = hashlib.sha256((status.stdout + "\0" + diff.stdout).encode())
+    for name in sorted(filter(None, untracked.stdout.split("\0"))):
+        file_hash = hashlib.sha256()
+        try:
+            with (PROJECT_ROOT / name).open("rb") as handle:
+                while chunk := handle.read(1024 * 1024):
+                    file_hash.update(chunk)
+            record = file_hash.hexdigest()
+        except OSError:
+            record = "unreadable"
+        digest.update(f"{name}\0{record}\0".encode())
+    return digest.hexdigest()
+
+
+def _block_state_file(session_id: object) -> Path:
+    """One file per session, so sessions sharing a checkout keep separate counts."""
+    name = hashlib.sha256(str(session_id).encode()).hexdigest()[:16]
+    return BLOCK_STATE_DIR / f"{name}.json"
+
+
+def _load_block_state(session_id: object) -> dict[str, object]:
+    try:
+        state = json.loads(_block_state_file(session_id).read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+    return state if isinstance(state, dict) else {}
+
+
+def should_release(
+    active: object, session_id: object, digest: str | None, state: dict[str, object]
+) -> bool:
+    """Release only a repeat stop on a tree already blocked MAX_IDENTICAL_BLOCKS times.
+
+    Without this, a failure the agent will not or cannot change blocks forever.
+    Any edit changes the digest and earns the full checks again.
+    """
+    if active is not True or not session_id or digest is None:
+        return False
+    count = state.get("count")
+    return (
+        state.get("session_id") == session_id
+        and state.get("digest") == digest
+        and isinstance(count, int)
+        and count >= MAX_IDENTICAL_BLOCKS
+    )
+
+
+def next_block_state(
+    session_id: object, digest: str | None, state: dict[str, object]
+) -> dict[str, object]:
+    count = state.get("count")
+    repeat = (
+        state.get("session_id") == session_id
+        and state.get("digest") == digest
+        and isinstance(count, int)
+    )
+    return {
+        "session_id": session_id,
+        "digest": digest,
+        "count": count + 1 if repeat else 1,
+    }
+
+
 def main() -> int:
+    payload = _read_stop_payload()
+    session_id = payload.get("session_id")
+    state = _load_block_state(session_id)
+    # Count blocks against the tree that was checked, not one lint reformatted.
+    digest = _tree_digest()
+    if should_release(payload.get("stop_hook_active"), session_id, digest, state):
+        print(
+            json.dumps(
+                {
+                    "systemMessage": (
+                        "UNRESOLVED stop-hook failures: the working tree is "
+                        f"unchanged after {MAX_IDENTICAL_BLOCKS} identical blocks, "
+                        "so this stop was released. The failures remain; "
+                        "report them to the user."
+                    )
+                }
+            )
+        )
+        return 0
+    code = run_checks()
+    state_file = _block_state_file(session_id)
+    try:
+        if code == 2:
+            state_file.parent.mkdir(parents=True, exist_ok=True)
+            state_file.write_text(
+                json.dumps(next_block_state(session_id, digest, state)),
+                encoding="utf-8",
+            )
+        else:
+            state_file.unlink(missing_ok=True)
+    except OSError as exc:
+        # Bookkeeping must never turn a blocking result into a hook crash.
+        print(f"[stop-hook] could not update block state: {exc}", file=sys.stderr)
+    return code
+
+
+def run_checks() -> int:
     try:
         porcelain = get_porcelain()
     except GitPorcelainError as exc:
@@ -458,10 +586,7 @@ def main() -> int:
             if test_thread
             else test_skip_reason,
         )
-        print(
-            "\nREMINDER - FIX ALL ERRORS FROM STOP HOOK, MAKE AT LEAST TWO ATTEMPTS!",
-            file=sys.stderr,
-        )
+        print(FIX_DIRECTIVE, file=sys.stderr)
         warn_stale_worktrees()
         return 2
 
@@ -507,10 +632,7 @@ def main() -> int:
             print("", file=sys.stderr)
             print("!" * 60, file=sys.stderr)
         _emit_timing(test_phase_secs=test_secs, test_phase_note="failed")
-        print(
-            "\nREMINDER - FIX ALL ERRORS FROM STOP HOOK, MAKE AT LEAST TWO ATTEMPTS!",
-            file=sys.stderr,
-        )
+        print(FIX_DIRECTIVE, file=sys.stderr)
         warn_stale_worktrees()
         return 2
 
