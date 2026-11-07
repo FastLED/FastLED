@@ -1,13 +1,18 @@
+import importlib.machinery
 import importlib.util
 from pathlib import Path
+from types import ModuleType
+from typing import Iterator
+
+import pytest
 
 
-SPEC = importlib.util.spec_from_file_location(
+SPEC: importlib.machinery.ModuleSpec | None = importlib.util.spec_from_file_location(
     "check_on_stop",
     Path(__file__).resolve().parents[1] / "hooks" / "check-on-stop.py",
 )
 assert SPEC and SPEC.loader
-hook = importlib.util.module_from_spec(SPEC)
+hook: ModuleType = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(hook)
 
 
@@ -50,28 +55,36 @@ def test_directive_rules_out_ownership_excuses() -> None:
     assert "even if you did not cause them" in hook.FIX_DIRECTIVE
 
 
-def _run_main(monkeypatch, tmp_path, stop_active: bool, checks_code: int, digest: str):
-    payload = {"session_id": "s", "stop_hook_active": stop_active}
+def _run_main(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    stop_active: bool,
+    checks_code: int,
+    digest: str,
+) -> int:
+    payload: dict[str, object] = {"session_id": "s", "stop_hook_active": stop_active}
     monkeypatch.setattr(hook, "BLOCK_STATE_DIR", tmp_path / "blocks")
     monkeypatch.setattr(hook, "_read_stop_payload", lambda: payload)
     monkeypatch.setattr(hook, "_tree_digest", lambda: digest)
     monkeypatch.setattr(hook, "run_checks", lambda: checks_code)
-    return hook.main(), hook._block_state_file("s")
+    return hook.main()
 
 
 def test_main_blocks_twice_then_releases_then_edit_blocks_again(
-    monkeypatch, tmp_path
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
-    assert _run_main(monkeypatch, tmp_path, False, 2, "d")[0] == 2
-    assert _run_main(monkeypatch, tmp_path, True, 2, "d")[0] == 2
-    assert _run_main(monkeypatch, tmp_path, True, 2, "d")[0] == 0
-    assert _run_main(monkeypatch, tmp_path, True, 2, "edited")[0] == 2
+    assert _run_main(monkeypatch, tmp_path, False, 2, "d") == 2
+    assert _run_main(monkeypatch, tmp_path, True, 2, "d") == 2
+    assert _run_main(monkeypatch, tmp_path, True, 2, "d") == 0
+    assert _run_main(monkeypatch, tmp_path, True, 2, "edited") == 2
 
 
-def test_main_clears_state_once_checks_pass(monkeypatch, tmp_path) -> None:
+def test_main_clears_state_once_checks_pass(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
     _run_main(monkeypatch, tmp_path, False, 2, "d")
-    code, state = _run_main(monkeypatch, tmp_path, True, 0, "d")
-    assert code == 0 and not state.exists()
+    code: int = _run_main(monkeypatch, tmp_path, True, 0, "d")
+    assert code == 0 and not hook._block_state_file("s").exists()
 
 
 def test_sessions_keep_separate_state_files() -> None:
@@ -79,10 +92,10 @@ def test_sessions_keep_separate_state_files() -> None:
 
 
 def test_block_is_counted_against_tree_checked_before_lint(
-    monkeypatch, tmp_path
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
-    digests = iter(["before", "reformatted"])
-    payload = {"session_id": "s", "stop_hook_active": False}
+    digests: Iterator[str] = iter(["before", "reformatted"])
+    payload: dict[str, object] = {"session_id": "s", "stop_hook_active": False}
     monkeypatch.setattr(hook, "BLOCK_STATE_DIR", tmp_path / "blocks")
     monkeypatch.setattr(hook, "_read_stop_payload", lambda: payload)
     monkeypatch.setattr(hook, "_tree_digest", lambda: next(digests))
@@ -91,10 +104,12 @@ def test_block_is_counted_against_tree_checked_before_lint(
     assert hook._load_block_state("s")["digest"] == "before"
 
 
-def test_state_write_failure_keeps_the_block(monkeypatch, tmp_path) -> None:
-    blocker = tmp_path / "file"
+def test_state_write_failure_keeps_the_block(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    blocker: Path = tmp_path / "file"
     blocker.write_text("x")
-    payload = {"session_id": "s", "stop_hook_active": False}
+    payload: dict[str, object] = {"session_id": "s", "stop_hook_active": False}
     monkeypatch.setattr(hook, "BLOCK_STATE_DIR", blocker / "blocks")
     monkeypatch.setattr(hook, "_read_stop_payload", lambda: payload)
     monkeypatch.setattr(hook, "_tree_digest", lambda: "d")
@@ -102,12 +117,14 @@ def test_state_write_failure_keeps_the_block(monkeypatch, tmp_path) -> None:
     assert hook.main() == 2
 
 
-def test_untracked_file_content_changes_digest(monkeypatch, tmp_path) -> None:
+def test_untracked_file_content_changes_digest(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
     (tmp_path / "new.txt").write_text("one")
     monkeypatch.setattr(hook, "PROJECT_ROOT", tmp_path)
 
     class Result:
-        returncode = 0
+        returncode: int = 0
 
         def __init__(self, stdout: str) -> None:
             self.stdout = stdout
@@ -117,6 +134,6 @@ def test_untracked_file_content_changes_digest(monkeypatch, tmp_path) -> None:
         "run_cmd",
         lambda cmd: Result("new.txt\0" if "ls-files" in cmd else ""),
     )
-    first = hook._tree_digest()
+    first: str | None = hook._tree_digest()
     (tmp_path / "new.txt").write_text("two")
     assert hook._tree_digest() != first
