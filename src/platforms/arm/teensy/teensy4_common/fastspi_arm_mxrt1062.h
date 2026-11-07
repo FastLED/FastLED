@@ -12,6 +12,9 @@
 #include "fastspi_types.h"
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/noexcept.h"
+#include "fl/stl/static_assert.h"
+#include "fl/system/delay.h"
+#include "fl/system/fastpin_base.h"
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_DEPRECATED_REGISTER
@@ -20,9 +23,69 @@ namespace fl {
 
 template <u8 _DATA_PIN, u8 _CLOCK_PIN, u32 _SPI_CLOCK_RATE, int _SPI_INDEX>
 class Teensy4HardwareSPIOutput {
+	FL_STATIC_ASSERT(_SPI_INDEX >= 0 && _SPI_INDEX <= 2,
+		"Teensy 4 has LPSPI indices 0 (LPSPI4), 1 (LPSPI3) and 2 (LPSPI1) only");
+
 	Selectable *mPSelect = nullptr;
-	u32  mBitCount = 0;
-	u32 mBitData = 0;
+	u32  mBitCount = 0;   // Bits collected by writeBit and not yet sent (0-7).
+	u32 mBitData = 0;     // Those bits, oldest in the highest position.
+
+	// Send `bits` (8-16) low bits of `data`, MSB first, as one LPSPI frame and
+	// wait until it has been clocked out. LPSPI frames are at least 8 bits.
+	void sendFrame(u32 data, u32 bits) FL_NO_EXCEPT {
+		const u32 tcr = port().TCR;
+		port().TCR = (tcr & 0xfffff000) | LPSPI_TCR_FRAMESZ(bits - 1);
+		port().TDR = data;
+		while ((port().RSR & LPSPI_RSR_RXEMPTY)) ;	// The frame is done once its receive word lands.
+		// Force 8-bit frames back: TCR reads can lag the command FIFO, so a read
+		// value is not a safe thing to restore.
+		port().TCR = (tcr & 0xfffff000) | LPSPI_TCR_FRAMESZ(7);
+		const u32 received = port().RDR;  // Pop the word so the RX FIFO stays empty.
+		(void)received;
+	}
+
+	// Send 1-7 bits, which no LPSPI frame can carry: hand both pads to GPIO,
+	// clock the bits out in mode 0 at the SPI rate, and give the pads back. Every
+	// LPSPI write here is blocking, so the shifter is already idle.
+	void sendBitsByGpio(u32 data, u32 bits) FL_NO_EXCEPT {
+		volatile u32 *dataMux = portConfigRegister(_DATA_PIN);
+		volatile u32 *clockMux = portConfigRegister(_CLOCK_PIN);
+		volatile u32 *dataPad = portControlRegister(_DATA_PIN);
+		volatile u32 *clockPad = portControlRegister(_CLOCK_PIN);
+		const u32 savedDataMux = *dataMux;
+		const u32 savedClockMux = *clockMux;
+		const u32 savedDataPad = *dataPad;
+		const u32 savedClockPad = *clockPad;
+		const u32 halfPeriodNs = 500000000UL / _SPI_CLOCK_RATE;
+		FastPin<_CLOCK_PIN>::lo();  // Mode 0 idles low; set the latch before the mux moves.
+		FastPin<_CLOCK_PIN>::setOutput();
+		FastPin<_DATA_PIN>::setOutput();
+		for (u32 i = bits; i-- > 0;) {
+			if ((data >> i) & 1U) {
+				FastPin<_DATA_PIN>::hi();
+			} else {
+				FastPin<_DATA_PIN>::lo();
+			}
+			fl::delayNanoseconds(halfPeriodNs);
+			FastPin<_CLOCK_PIN>::hi();
+			fl::delayNanoseconds(halfPeriodNs);
+			FastPin<_CLOCK_PIN>::lo();
+		}
+		*dataMux = savedDataMux;
+		*clockMux = savedClockMux;
+		*dataPad = savedDataPad;
+		*clockPad = savedClockPad;
+	}
+
+	// Send any bits writeBit has collected, exactly that many.
+	void flushBits() FL_NO_EXCEPT {
+		if (mBitCount != 0) {
+			sendBitsByGpio(mBitData, mBitCount);
+			mBitCount = 0;
+			mBitData = 0;
+		}
+	}
+
 	inline IMXRT_LPSPI_t & port() FL_NO_EXCEPT __attribute__((always_inline)) {
 		switch(_SPI_INDEX) {
 			case 0:
@@ -52,8 +115,9 @@ public:
 		if(mPSelect != nullptr) { mPSelect->select(); }
 	}
 
-	// release the CS select
+	// release the CS select, after any pending bits have gone out
 	void inline release() FL_NO_EXCEPT __attribute__((always_inline)) {
+		flushBits();
 		if(mPSelect != nullptr) { mPSelect->release(); }
 		fl::platforms::teensy::LpspiBus::get(_SPI_INDEX).endTransaction();
 	}
@@ -63,34 +127,31 @@ public:
 		release();
 	}
 
-	// wait until all queued up data has been written
-	static void waitFully() { /* TODO */ }
+	// wait until all queued up data has been written. Every transfer here is
+	// blocking, so only bits still held by writeBit can be outstanding.
+	void waitFully() FL_NO_EXCEPT { flushBits(); }
 
-	// write a byte out via SPI (returns immediately on writing register) -
+	// write a byte out via SPI. Pending writeBit bits lead it in the same frame.
 	void inline writeByte(u8 b) FL_NO_EXCEPT __attribute__((always_inline)) {
 		if(mBitCount == 0) {
 			fl::platforms::teensy::LpspiBus::get(_SPI_INDEX).transfer(b);
 		} else {
-			// There's been a bit of data written, add that to the output as well
-			u32 outData = (mBitData << 8) | b;
-			u32 tcr = port().TCR;
-			port().TCR = (tcr & 0xfffff000) | LPSPI_TCR_FRAMESZ((8+mBitCount) - 1);  // turn on 9 bit mode
-			port().TDR = outData;		// output 9 bit data.
-			while ((port().RSR & LPSPI_RSR_RXEMPTY)) ;	// wait while the RSR fifo is empty...
-			port().TCR = (tcr & 0xfffff000) | LPSPI_TCR_FRAMESZ((8) - 1);  // turn back on 8 bit mode
-			port().RDR;
+			sendFrame((mBitData << 8) | b, 8 + mBitCount);
 			mBitCount = 0;
+			mBitData = 0;
 		}
 	}
 
-	// write a word out via SPI (returns immediately on writing register)
+	// write a word out via SPI (blocking, like writeByte)
 	void inline writeWord(u16 w) FL_NO_EXCEPT __attribute__((always_inline)) {
 		writeByte(((w>>8) & 0xFF));
 		fl::platforms::teensy::LpspiBus::get(_SPI_INDEX).transfer(w & 0xFF);
 	}
 
-	// A raw set of writing byte values, assumes setup/init/waiting done elsewhere
-	static void writeBytesValueRaw(u8 value, int len) FL_NO_EXCEPT {
+	// A raw set of writing byte values, assumes setup/init/waiting done elsewhere.
+	// Pending writeBit bits go out first so the order on the wire is kept.
+	void writeBytesValueRaw(u8 value, int len) FL_NO_EXCEPT {
+		flushBits();
 		while(len--) { fl::platforms::teensy::LpspiBus::get(_SPI_INDEX).transfer(value); }
 	}
 
@@ -118,14 +179,13 @@ public:
 	// write a single bit out, which bit from the passed in byte is determined by template parameter
 	template <u8 BIT> inline void writeBit(u8 b) FL_NO_EXCEPT {
 		mBitData = (mBitData<<1) | ((b&(1<<BIT)) != 0);
-		// If this is the 8th bit we've collected, just write it out raw
-		FASTLED_REGISTER u32 bc = mBitCount;
-		bc = (bc + 1) & 0x07;
-		if (!bc) {
+		// Eight collected bits are a whole byte: send it as one.
+		if (++mBitCount == 8) {
+			const u8 whole = static_cast<u8>(mBitData);
 			mBitCount = 0;
-			fl::platforms::teensy::LpspiBus::get(_SPI_INDEX).transfer(mBitData);
+			mBitData = 0;
+			fl::platforms::teensy::LpspiBus::get(_SPI_INDEX).transfer(whole);
 		}
-		mBitCount = bc;
 	}
 
 	// write a block of uint8_ts out in groups of three.  len is the total number of uint8_ts to write out.  The template
@@ -149,17 +209,15 @@ public:
 		release();
 	}
 
-	/// Finalize transmission (no-op for Teensy 4.x SPI)
-	/// This method exists for compatibility with other SPI implementations
-	/// that may need to flush buffers or perform post-transmission operations
-	static void finalizeTransmission() { }
+	/// Finalize transmission: send any bits writeBit still holds.
+	void finalizeTransmission() FL_NO_EXCEPT { flushBits(); }
 
 };
 
-
-#endif
 }  // namespace fl
 
 FL_DISABLE_WARNING_POP
+
+#endif  // FL_IS_TEENSY_4X
 
 #endif
