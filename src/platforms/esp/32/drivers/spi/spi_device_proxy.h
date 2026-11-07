@@ -49,6 +49,8 @@ private:
     bool mInitialized;                       // Whether init() was called
     bool mBusInitialized;                    // Whether bus manager has been initialized
     bool mInTransaction;                     // Whether select() was called
+    bool mFrameHasLoneBit;                   // writeBit() arrived with no single-SPI backend
+    bool mWarnedLoneBit;                     // Warned about that once for this device
     Esp32SpiBus mRequestedBus;
 
 public:
@@ -59,6 +61,8 @@ public:
         , mInitialized(false)
         , mBusInitialized(false)
         , mInTransaction(false)
+        , mFrameHasLoneBit(false)
+        , mWarnedLoneBit(false)
         , mRequestedBus(Esp32SpiBus::AUTO)
     {
     }
@@ -137,6 +141,7 @@ public:
 
         mInTransaction = true;
         mWriteBuffer.clear();  // Reset buffer for new frame
+        mFrameHasLoneBit = false;
 
         // Route to backend
         if (mSingleSPI) {
@@ -220,17 +225,27 @@ public:
         writeByte(b);
     }
 
-    /// Write a single bit (for hardware SPI, tests the specified bit and transmits 0xFF or 0x00)
-    /// Note: Hardware SPI transmits full bytes, not individual bits. This tests bit BIT
-    /// in the input byte and sends 0xFF if the bit is set, 0x00 if clear.
-    /// This matches the behavior of other platform implementations (AVR, ARM, etc.)
+    /// Write a single bit: one clock on the native single-SPI backend (a whole byte
+    /// under FL_ESP32_SPI_ARDUINO). Every other bus type buffers whole bytes, so a frame
+    /// containing a lone bit is refused, with one warning per device, not sent misaligned.
     /// @tparam BIT the bit index in the byte to test
     /// @param b the byte to test
     template <u8 BIT = 0>
     void writeBit(u8 b) FL_NO_EXCEPT {
-        // Test bit BIT in value b, send 0xFF if set, 0x00 if clear
-        // This matches the behavior of other platforms (AVR, ARM, etc.)
-        writeByte((b & (1 << BIT)) ? 0xFF : 0x00);
+        if (!mInitialized || !mInTransaction) {
+            return;
+        }
+        ensureBusInitialized();
+        if (mSingleSPI) {
+            mSingleSPI->template writeBit<BIT>(b);
+        } else {
+            mFrameHasLoneBit = true;
+            if (!mWarnedLoneBit) {
+                mWarnedLoneBit = true;
+                FL_WARN("SPIDeviceProxy: this chipset needs single-bit writes, which only the "
+                        "single-SPI bus supports - its frames are dropped on this bus.");
+            }
+        }
     }
 
     /// Wait for SPI to be ready (NOP for buffered writes)
@@ -248,6 +263,12 @@ public:
 
         // Ensure bus is initialized
         ensureBusInitialized();
+
+        if (mFrameHasLoneBit) {
+            mFrameHasLoneBit = false;
+            mWriteBuffer.clear();
+            return;
+        }
 
         // Only needed for Quad-SPI (single-SPI writes directly)
         if (!mSingleSPI && !mWriteBuffer.empty()) {

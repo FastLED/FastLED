@@ -224,8 +224,9 @@ public:
 
 	// write a single bit out, which bit from the passed in byte is determined by template parameter
 	template <u8 BIT> inline void writeBit(u8 b) FL_NO_EXCEPT {
-		// Test bit BIT in value b, send 0xFF if set, 0x00 if clear
-		// This matches the behavior of other platforms (AVR, ARM, etc.)
+		// Still a whole byte, so one-bit protocols such as SM16716 do not work on this
+		// opt-in backend. SPIClass::transferBits is not a fix: in arduino-esp32 3.20017
+		// its masked data is byte-swapped away from the first byte the peripheral sends.
 		mLedSPI.transfer((b & (1 << BIT)) ? 0xFF : 0x00);
 	}
 

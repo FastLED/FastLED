@@ -143,6 +143,7 @@ class ESP32SPIOutput {
     // Ping-pong DMA buffer ring - see the file-level comment above for why.
     static const int NUM_BUFFERS = FL_ESP32_SPI_NUM_BUFFERS;
     u8* mBuffer[NUM_BUFFERS] = {};
+    u8 mBitFill = 0;                    // bits used in the buffer's last byte; 0 = byte aligned (see writeBit())
     size_t mBufferLen = 0;              // fill position in the buffer CURRENTLY being written (between select() and release())
     int mCurrentBuffer = 0;             // which of mBuffer[] is being written - cycles 0..NUM_BUFFERS-1, see select()
     spi_transaction_t mTrans[NUM_BUFFERS] = {};  // one persistent transaction descriptor per buffer - must outlive the queued transaction
@@ -207,6 +208,18 @@ class ESP32SPIOutput {
                 heap_caps_free(mBuffer[i]);
                 mBuffer[i] = nullptr;
             }
+        }
+    }
+
+    // After a writeBit(): the byte straddles the partial last byte and a new one.
+    void writeByteUnaligned(u8 b) FL_NO_EXCEPT {
+        u8* buffer = mBuffer[mCurrentBuffer];
+        buffer[mBufferLen - 1] |= static_cast<u8>(b >> mBitFill);
+        if (mBufferLen < FL_ESP32_SPI_DMA_BUFFER_BYTES) {
+            buffer[mBufferLen++] = static_cast<u8>(b << (8 - mBitFill));
+        } else {
+            mBitFill = 0;  // The buffer's last bit is used, so it is aligned and full.
+            mOverflowDropped = true;
         }
     }
 
@@ -304,9 +317,9 @@ public:
             // writePixelsBulk() all correctly no-op until a later init()
             // call succeeds.
             FL_WARN("ESP32SPIOutput: failed to allocate one or more of "
-                    << NUM_BUFFERS << " DMA buffers ("
+                    << static_cast<i32>(NUM_BUFFERS) << " DMA buffers ("
                     << FL_ESP32_SPI_DMA_BUFFER_BYTES << " bytes each, "
-                    << (NUM_BUFFERS * FL_ESP32_SPI_DMA_BUFFER_BYTES)
+                    << (static_cast<i32>(NUM_BUFFERS) * FL_ESP32_SPI_DMA_BUFFER_BYTES)
                     << " bytes total) - LED output disabled for this boot.");
             freeBuffers();
             return;
@@ -407,7 +420,9 @@ public:
     // but release() warns once per occurrence rather than truncating
     // silently.
     void writeByte(u8 b) FL_NO_EXCEPT __attribute__((always_inline)) {
-        if (mInitialized && mBufferLen < FL_ESP32_SPI_DMA_BUFFER_BYTES) {
+        if (mBitFill != 0) {
+            writeByteUnaligned(b);
+        } else if (mInitialized && mBufferLen < FL_ESP32_SPI_DMA_BUFFER_BYTES) {
             mBuffer[mCurrentBuffer][mBufferLen++] = b;
         } else if (mInitialized) {
             mOverflowDropped = true;
@@ -468,6 +483,7 @@ public:
         mSelectMicros = waitT1;
 #endif
         mBufferLen = 0;
+        mBitFill = 0;
         if (mPSelect != nullptr) {
             mPSelect->select();
         }
@@ -487,7 +503,8 @@ public:
         if (mInitialized && mSPIHandle != nullptr && mBufferLen > 0) {
             spi_transaction_t& trans = mTrans[mCurrentBuffer];
             trans = {};
-            trans.length = mBufferLen * 8;
+            // In bits: a frame with writeBit() calls need not end on a byte.
+            trans.length = mBufferLen * 8 - (mBitFill != 0 ? 8 - mBitFill : 0);
             trans.tx_buffer = mBuffer[mCurrentBuffer];
             trans.rx_buffer = nullptr;
 #ifdef FL_ESP32_SPI_DMA_TIMING
@@ -544,6 +561,7 @@ public:
             }
 #endif
             mBufferLen = 0;
+            mBitFill = 0;
         }
         if (mPSelect != nullptr) {
             mPSelect->release();
@@ -586,8 +604,22 @@ public:
 
     template <u8 BIT>
     inline void writeBit(u8 b) FL_NO_EXCEPT {
-        // Test bit BIT in value b, send 0xFF if set, 0x00 if clear
-        writeByte((b & (1 << BIT)) ? 0xFF : 0x00);
+        // One clock, not a byte: the frame buffer is a bitstream, MSB first, and
+        // release() requests its exact length in bits.
+        if (!mInitialized) {
+            return;
+        }
+        if (mBitFill == 0) {
+            if (mBufferLen >= FL_ESP32_SPI_DMA_BUFFER_BYTES) {
+                mOverflowDropped = true;
+                return;
+            }
+            mBuffer[mCurrentBuffer][mBufferLen++] = 0;
+        }
+        if (b & (1 << BIT)) {
+            mBuffer[mCurrentBuffer][mBufferLen - 1] |= static_cast<u8>(0x80 >> mBitFill);
+        }
+        mBitFill = (mBitFill + 1) & 7;
     }
 
     template <u8 FLAGS, class D, EOrder RGB_ORDER>
