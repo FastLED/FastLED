@@ -5,6 +5,7 @@
 #include "fl/stl/stdint.h"
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/noexcept.h"
+#include "fl/stl/static_assert.h"
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_DEPRECATED_REGISTER
@@ -73,7 +74,7 @@ public:
 		while(data != end) {
 			writeByte(D::adjust(*data++));
 		}
-		D::postBlock(len);
+		D::postBlock(len, this);
 		waitFully();
 		release();
 	}
@@ -81,21 +82,19 @@ public:
 	// A full cycle of writing a value for len bytes, including select, release, and waiting
 	void writeBytes(FASTLED_REGISTER u8 *data, int len) { writeBytes<DATA_NOP>(data, len); }
 
-	// write a single bit out, which bit from the passed in byte is determined by template parameter
-	template <u8 BIT> inline void writeBit(u8 b) FL_NO_EXCEPT {
-		// todo
-	}
+	// Not supported, so asking for it does not compile. SPIClass only sends whole bytes,
+	// and sending a lone bit would need pad ownership handling this class does not have.
+	template <u8 BIT> void writeBit(u8 b) FL_NO_EXCEPT = delete;
 
 	// write a block of uint8_ts out in groups of three.  len is the total number of uint8_ts to write out.  The template
 	// parameters indicate how many uint8_ts to skip at the beginning and/or end of each grouping
 	template <u8 FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> pixels, void* context = nullptr) FL_NO_EXCEPT {
+		FL_STATIC_ASSERT(!(FLAGS & FLAG_START_BIT),
+			"ArdunioCoreSPIOutput cannot send start bits: SPIClass only sends whole bytes");
 		select();
     int len = pixels.mLen;
 
 		while(pixels.has(1)) {
-			if(FLAGS & FLAG_START_BIT) {
-				writeBit<0>(1);
-			}
 			writeByte(D::adjust(pixels.loadAndScale0()));
 			writeByte(D::adjust(pixels.loadAndScale1()));
 			writeByte(D::adjust(pixels.loadAndScale2()));
@@ -103,7 +102,7 @@ public:
 			pixels.advanceData();
 			pixels.stepDithering();
 		}
-		D::postBlock(len);
+		D::postBlock(len, context);
 		release();
 	}
 
