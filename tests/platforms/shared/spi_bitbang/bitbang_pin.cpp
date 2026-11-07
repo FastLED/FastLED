@@ -41,6 +41,19 @@ FL_TEST_CASE("Bit-bang set-clear writer touches exactly the requested register")
     }
 }
 
+FL_TEST_CASE("bitbangDividerFromHz converts a rate to cycles per bit") {
+    FL_CHECK_EQ(bitbangDividerFromHz(1000000, 240000000), 240U);
+    FL_CHECK_EQ(bitbangDividerFromHz(500000, 160000000), 320U);
+    FL_CHECK_EQ(bitbangDividerFromHz(1000000, 80000000), 80U);
+    FL_CHECK_EQ(bitbangDividerFromHz(7000000, 240000000), 35U);  // Rounds up from 34.3.
+    // Clamped above 10, where the writer's half-period branch would invert the rate.
+    FL_CHECK_EQ(bitbangDividerFromHz(21000000, 240000000), 12U);
+    FL_CHECK_EQ(bitbangDividerFromHz(24000000, 240000000), 11U);
+    FL_CHECK_EQ(bitbangDividerFromHz(240000000, 240000000), 11U);
+    FL_CHECK_EQ(bitbangDividerFromHz(1000000000, 240000000), 11U);
+    FL_CHECK_EQ(bitbangDividerFromHz(1, 240000000), 240000000U);
+}
+
 FL_TEST_CASE("Hz phase delay keeps sub-MHz and fractional rates") {
     FL_CHECK_EQ(bitbangPhaseNsFromHz(100000), 2500U);
     FL_CHECK_EQ(bitbangPhaseNsFromHz(500000), 500U);
