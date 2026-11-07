@@ -17,6 +17,7 @@
 constexpr fl::u32 kMuxSpi = 2U << 8;
 constexpr fl::u32 kMuxGpio = 1U << 8;
 constexpr fl::u32 kSre = 1U << 2;
+constexpr fl::u32 kIsf = 1U << 24; // Interrupt flag: write 1 to clear, write 0 to keep.
 
 fl::vector<fl::u8> gWire;     // Every bit a device on the bus would clock in.
 int gLostBits = 0;            // Shifted while SPI did not own both pads.
@@ -38,7 +39,9 @@ PinCfg gOtherPins[8]; // Must never be touched: wrong pins for this bus.
 PinCfg gDataCfg;
 PinCfg gClockCfg;
 
-bool spiOwnsPads() { return gDataCfg.value == kMuxSpi && gClockCfg.value == kMuxSpi; }
+bool spiOwnsPads() {
+    return (gDataCfg.value & ~kIsf) == kMuxSpi && (gClockCfg.value & ~kIsf) == kMuxSpi;
+}
 
 struct Shifter {
     fl::u8 buffer = 0;
@@ -85,7 +88,7 @@ PinCfg& PinCfg::operator=(fl::u32 next) {
             ++gMuxExitsWithClockHigh;
         }
     }
-    value = next;
+    value = (next & ~kIsf) | (value & kIsf & ~next);
     return *this;
 }
 
@@ -170,7 +173,7 @@ void resetBus(fl::u32 padConfig) {
 #define SIM_SCGC4_SPI1 (1U << 23)
 #define PORT_PCR_MUX(n) (static_cast<fl::u32>(n) << 8)
 #define PORT_PCR_SRE kSre
-#define PORT_PCR_ISF 0x01000000U
+#define PORT_PCR_ISF kIsf
 #define CORE_PIN0_CONFIG gOtherPins[0]
 #define CORE_PIN1_CONFIG gOtherPins[1]
 #define CORE_PIN7_CONFIG gOtherPins[2]
@@ -309,9 +312,8 @@ FL_TEST_CASE("a clock latch left high is parked before the pad leaves the mux") 
 FL_TEST_CASE("restoring a pad does not clear its pending interrupt flag") {
     resetBus(kMuxSpi | PORT_PCR_ISF);
     Output::writeBit<0>(1);
-    FL_CHECK_EQ(gDataCfg.value & PORT_PCR_ISF, 0U);
-    FL_CHECK_EQ(gClockCfg.value & PORT_PCR_ISF, 0U);
-    FL_CHECK_EQ(gDataCfg.value, kMuxSpi);
+    FL_CHECK_EQ(gDataCfg.value, kMuxSpi | kIsf);
+    FL_CHECK_EQ(gClockCfg.value, kMuxSpi | kIsf);
 }
 
 FL_TEST_CASE("select forces mode 0 after another client left the clock polarity set") {
