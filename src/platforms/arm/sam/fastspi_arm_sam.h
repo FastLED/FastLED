@@ -19,6 +19,7 @@
 #include <wiring_private.h>
 // IWYU pragma: end_keep
 #include "fl/system/pin.h"  // For PinMode, PinValue enums
+#include "fastled_delay.h"  // For NS()
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/noexcept.h"
 
@@ -276,17 +277,30 @@ public:
 	template <u8 BIT> inline void writeBit(u8 b) FL_NO_EXCEPT {
 		peripheral()->disableSPI();
 
-		pinMode(_DATA_PIN, PinMode::Output);
-		pinMode(_CLOCK_PIN, PinMode::Output);
+		// Resolved through the variant's pin table: fl::pinMode/digitalWrite assume
+		// pin/32 and pin%32, which names the wrong pad here (Zero SCK 24 is PB11, not
+		// the USB pad PA24), and native SPI pins can lack a FastPin (Grand Central
+		// 65/66). Writing PINCFG clears PMUXEN, handing each pad to GPIO; the value
+		// matches the core's pinMode(OUTPUT). Direct stores take no call's worth of
+		// time, so setup and clock pulse are padded to a computed 35 ns.
+		const PinDescription& dataDesc = g_APinDescription[_DATA_PIN];
+		const PinDescription& clockDesc = g_APinDescription[_CLOCK_PIN];
+		PortGroup& dataPort = PORT->Group[dataDesc.ulPort];
+		PortGroup& clockPort = PORT->Group[clockDesc.ulPort];
+		const u32 dataMask = 1UL << dataDesc.ulPin;
+		const u32 clockMask = 1UL << clockDesc.ulPin;
 
-		if(b & (1 << BIT)) {
-			digitalWrite(_DATA_PIN, PinValue::High);
-		} else {
-			digitalWrite(_DATA_PIN, PinValue::Low);
-		}
+		clockPort.OUTCLR.reg = clockMask;  // The pad must not go high as it leaves the mux.
+		dataPort.PINCFG[dataDesc.ulPin].reg = PORT_PINCFG_INEN | PORT_PINCFG_DRVSTR;
+		clockPort.PINCFG[clockDesc.ulPin].reg = PORT_PINCFG_INEN | PORT_PINCFG_DRVSTR;
+		dataPort.DIRSET.reg = dataMask;
+		clockPort.DIRSET.reg = clockMask;
 
-		digitalWrite(_CLOCK_PIN, PinValue::High);
-		digitalWrite(_CLOCK_PIN, PinValue::Low);
+		writeBitSetClearNoBranch<BIT>(b, dataMask, &dataPort.OUTSET.reg, &dataPort.OUTCLR.reg);
+		fl::delaycycles<NS(35)>();
+		clockPort.OUTSET.reg = clockMask;
+		fl::delaycycles<NS(35)>();
+		clockPort.OUTCLR.reg = clockMask;
 
 		pinPeripheral(PIN_SPI_SCK, g_APinDescription[PIN_SPI_SCK].ulPinType);
 		pinPeripheral(PIN_SPI_MOSI, g_APinDescription[PIN_SPI_MOSI].ulPinType);
