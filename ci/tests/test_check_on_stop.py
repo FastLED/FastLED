@@ -137,3 +137,27 @@ def test_untracked_file_content_changes_digest(
     first: str | None = hook._tree_digest()
     (tmp_path / "new.txt").write_text("two")
     assert hook._tree_digest() != first
+
+
+def test_content_moved_between_untracked_files_changes_digest(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    (tmp_path / "a.txt").write_text("xy")
+    (tmp_path / "b.txt").write_text("")
+    monkeypatch.setattr(hook, "PROJECT_ROOT", tmp_path)
+
+    class Result:
+        returncode: int = 0
+
+        def __init__(self, stdout: str) -> None:
+            self.stdout = stdout
+
+    monkeypatch.setattr(
+        hook,
+        "run_cmd",
+        lambda cmd: Result("a.txt\0b.txt\0" if "ls-files" in cmd else ""),
+    )
+    first: str | None = hook._tree_digest()
+    (tmp_path / "a.txt").write_text("x")
+    (tmp_path / "b.txt").write_text("y")
+    assert hook._tree_digest() != first

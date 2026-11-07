@@ -352,10 +352,15 @@ def _tree_digest() -> str | None:
         return None
     digest = hashlib.sha256((status.stdout + "\0" + diff.stdout).encode())
     for name in sorted(filter(None, untracked.stdout.split("\0"))):
+        file_hash = hashlib.sha256()
         try:
-            digest.update((PROJECT_ROOT / name).read_bytes())
+            with (PROJECT_ROOT / name).open("rb") as handle:
+                while chunk := handle.read(1024 * 1024):
+                    file_hash.update(chunk)
+            record = file_hash.hexdigest()
         except OSError:
-            digest.update(b"unreadable")
+            record = "unreadable"
+        digest.update(f"{name}\0{record}\0".encode())
     return digest.hexdigest()
 
 
