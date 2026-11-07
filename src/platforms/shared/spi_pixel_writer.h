@@ -25,10 +25,20 @@ namespace fl {
 /// This is used by chipset controllers to avoid mixing pixel rendering logic
 /// with low-level SPI transmission.
 ///
+/// Compile-time so that an output with no writeBit<>() can still send byte-only pixels.
+template <bool HAS_START_BIT> struct SpiStartBit {
+    template <class SPI_OUT> static void write(SPI_OUT&) FL_NO_EXCEPT {}
+};
+template <> struct SpiStartBit<true> {
+    template <class SPI_OUT> static void write(SPI_OUT& spi) FL_NO_EXCEPT {
+        spi.template writeBit<0>(1);
+    }
+};
+
 /// @tparam FLAGS flags for pixel writing (e.g., FLAG_START_BIT)
 /// @tparam D data adjustment class (e.g., DATA_NOP, LPD8806_ADJUST)
 /// @tparam RGB_ORDER RGB ordering for pixels
-/// @tparam SPI_OUT SPI output device type (must provide writeByte(), select(), release(), writeBit<>() methods)
+/// @tparam SPI_OUT SPI output device type (must provide writeByte(), select(), release(), and writeBit<>() when FLAG_START_BIT is set)
 /// @param pixels the PixelController containing pixel data
 /// @param spi the SPI output device to write bytes to
 /// @param context optional context pointer for post-block callbacks
@@ -39,9 +49,7 @@ void writePixelsToSPI(PixelController<RGB_ORDER> pixels, SPI_OUT& spi, void* con
 
     while(pixels.has(1)) {
         // Write start bit if FLAG_START_BIT is set
-        if(FLAGS & FLAG_START_BIT) {
-            spi.template writeBit<0>(1);
-        }
+        SpiStartBit<(FLAGS & FLAG_START_BIT) != 0>::write(spi);
 
         // Convert and write RGB bytes
         spi.writeByte(D::adjust(pixels.loadAndScale0()));
