@@ -25,7 +25,8 @@ constexpr u32 bitbangPhaseNsFromHz(u32 hz) FL_NO_EXCEPT {
     return hz == 0 ? 0 : 1000000000UL / hz / 4;
 }
 
-/// GenericSoftwareSPIOutput divider for a rate in Hz, at the given CPU clock. Rounds
+/// GenericSoftwareSPIOutput divider for a rate in Hz, at the given CPU clock, on
+/// divider-based platforms. Teensy 4 takes Hz directly, so do not use this there. Rounds
 /// up, and stays above 10 because that class reads 10 or less as a half period, which
 /// would make faster requests run slower. @p hz must be nonzero.
 constexpr u32 bitbangDividerFromHz(u32 hz, u32 cpu_hz) FL_NO_EXCEPT {
