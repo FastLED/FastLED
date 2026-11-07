@@ -4,6 +4,7 @@
 #define __FASTPIN_ARM_NRF52_H
 
 #include "fl/stl/compiler_control.h"
+#include "fl/stl/static_assert.h"
 // Include fastpin_base.h to get FastPin base template
 // This reopens namespace fl but typedefs will still be in scope
 #include "fl/system/fastpin_base.h"
@@ -109,10 +110,27 @@ public:
 
 };
 
+/// Native register pin for an Arduino pin, specialized for every pin in the
+/// variant table. Peripheral drivers (SPIM, PWM) use it so they keep native
+/// GPIO and PSEL routing when FASTLED_FORCE_SOFTWARE_PINS replaces FastPin.
+template <u8 PIN> class Nrf52HwPin {
+    // Instantiated only for pins missing from the variant table.
+    FL_STATIC_ASSERT(PIN == 255 && PIN != 255,
+                     "This pin is not in the nRF52 variant pin table, so the PWM and SPIM drivers cannot route it. Use a pin listed in fastpin_arm_nrf52_variants.h for your board.");
+};
+
 }  // namespace fl
 
 
+#if defined(FASTLED_FORCE_SOFTWARE_PINS)
+// The variant table then emits only fl::Nrf52HwPin, so fl::FastPin uses
+// the forced software primary template in fastpin_base.h (#5070).
+#warning "Software pin support forced, pin access will be slightly slower."
+#define NO_HARDWARE_PIN_SUPPORT
+#undef HAS_HARDWARE_PIN_SUPPORT
+#else
 #define HAS_HARDWARE_PIN_SUPPORT
+#endif
 
 // Include variant-specific pin definitions
 #include "platforms/arm/nrf52/fastpin_arm_nrf52_variants.h" // allow-include-after-namespace

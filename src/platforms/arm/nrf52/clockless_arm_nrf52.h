@@ -99,17 +99,17 @@ private:
     bool mPinReady;
 
     FASTLED_NRF52_INLINE_ATTRIBUTE static void startPwmPlayback_InitializePinState() FL_NO_EXCEPT {
-        FastPin<_DATA_PIN>::setOutput();
+        Nrf52HwPin<_DATA_PIN>::setOutput();
         if (_INITIALIZE_PIN_HIGH) {
-            FastPin<_DATA_PIN>::hi();
+            Nrf52HwPin<_DATA_PIN>::hi();
         } else {
-            FastPin<_DATA_PIN>::lo();
+            Nrf52HwPin<_DATA_PIN>::lo();
         }
     }
     FASTLED_NRF52_INLINE_ATTRIBUTE static void startPwmPlayback_InitializePwmInstance(NRF_PWM_Type * pwm) FL_NO_EXCEPT {
 
         // Pins must be set before enabling the peripheral
-        pwm->PSEL.OUT[0] = FastPin<_DATA_PIN>::nrf_pin();
+        pwm->PSEL.OUT[0] = Nrf52HwPin<_DATA_PIN>::nrf_pin();
         pwm->PSEL.OUT[1] = NRF_PWM_PIN_NOT_CONNECTED;
         pwm->PSEL.OUT[2] = NRF_PWM_PIN_NOT_CONNECTED;
         pwm->PSEL.OUT[3] = NRF_PWM_PIN_NOT_CONNECTED;
