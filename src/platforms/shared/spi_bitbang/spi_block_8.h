@@ -7,6 +7,8 @@
 #include "platforms/shared/spi_bitbang/spi_isr_engine.h"
 #include "platforms/shared/spi_bitbang/spi_platform.h"
 #include "fl/stl/static_assert.h"
+#include "fl/stl/compiler_control.h"
+#include "platforms/shared/spi_bitbang/spi_pin_mapping.h"
 #include "fl/stl/noexcept.h"
 
 namespace fl {
@@ -93,23 +95,30 @@ public:
      *
      * Initializes the 256-entry LUT to map byte values to GPIO masks
      * for the specified data pins.
+     * @return false, changing nothing, if a pin is outside 0-31, data lanes 0-7
+     *         repeat or sit on the clock, or a lane 8+ sits on lanes 0-7.
      */
-    void setPinMapping(u8 d0, u8 d1, u8 d2, u8 d3,
+    FL_NO_DISCARD bool setPinMapping(u8 d0, u8 d1, u8 d2, u8 d3,
                        u8 d4, u8 d5, u8 d6, u8 d7,
                        u8 clk) FL_NO_EXCEPT {
+        // Validate first, so a rejected mapping leaves the last good one in place.
+        const u8 dataPins[] = {d0, d1, d2, d3, d4, d5, d6, d7};
+        if (!spiPinMappingValid(dataPins, clk)) {
+            return false;
+        }
         // Store clock mask
-        mClockMask = 1u << clk;
+        mClockMask = u32(1) << clk;
 
         // Build data pin masks array
         u32 dataPinMasks[NUM_DATA_PINS] = {
-            1u << d0,  // Bit 0 (LSB)
-            1u << d1,  // Bit 1
-            1u << d2,  // Bit 2
-            1u << d3,  // Bit 3
-            1u << d4,  // Bit 4
-            1u << d5,  // Bit 5
-            1u << d6,  // Bit 6
-            1u << d7   // Bit 7 (MSB)
+            u32(1) << d0,  // Bit 0 (LSB)
+            u32(1) << d1,  // Bit 1
+            u32(1) << d2,  // Bit 2
+            u32(1) << d3,  // Bit 3
+            u32(1) << d4,  // Bit 4
+            u32(1) << d5,  // Bit 5
+            u32(1) << d6,  // Bit 6
+            u32(1) << d7   // Bit 7 (MSB)
         };
 
         // Initialize 256-entry LUT
@@ -132,6 +141,7 @@ public:
             mLUT[byteValue].set_mask = setMask;
             mLUT[byteValue].clear_mask = clearMask;
         }
+        return true;
     }
 
     /**
@@ -165,7 +175,7 @@ public:
         FL_STATIC_ASSERT(GPIO_AVAILABLE && FL_SPI_GPIO_AVAILABLE,
                       "Parallel software SPI has no GPIO registers for this target: define "
                       "FASTLED_GPIO_W1TS_ADDR and FASTLED_GPIO_W1TC_ADDR");
-        if (!mBuffer || mBufferLen == 0) return;
+        if (!mBuffer || mBufferLen == 0 || mClockMask == 0) return;  // Unmapped: drive nothing.
 
         // Inline bit-banging loop (same logic as ISR implementation)
         for (u16 i = 0; i < mBufferLen; i++) {

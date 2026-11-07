@@ -17,6 +17,7 @@
 #include "platforms/shared/spi_bitbang/spi_block_8.h" // ok platform headers
 #include "platforms/shared/spi_bitbang/spi_block_16.h" // ok platform headers
 #include "platforms/shared/spi_bitbang/spi_block_32.h" // ok platform headers
+#include "platforms/shared/spi_bitbang/spi_pin_mapping.h" // ok platform headers
 #include "fl/stl/noexcept.h"
 // IWYU pragma: end_keep
 
@@ -108,7 +109,7 @@ void buildDefaultLUT(const fl::vector<u8>& gpio_pins,
 
         // Map byte bits to GPIO pins
         for (size_t bit_pos = 0; bit_pos < num_pins && bit_pos < 8; bit_pos++) {
-            u32 pin_mask = 1u << gpio_pins[bit_pos];
+            u32 pin_mask = u32(1) << gpio_pins[bit_pos];
 
             if (byte_val & (1 << bit_pos)) {
                 set_mask |= pin_mask;    // Set this pin high
@@ -119,7 +120,7 @@ void buildDefaultLUT(const fl::vector<u8>& gpio_pins,
 
         // For pins beyond bit 7, always clear them (if num_pins > 8)
         for (size_t pin_idx = 8; pin_idx < num_pins; pin_idx++) {
-            clear_mask |= (1u << gpio_pins[pin_idx]);
+            clear_mask |= (u32(1) << gpio_pins[pin_idx]);
         }
 
         set_masks[byte_val] = set_mask;
@@ -166,6 +167,13 @@ fl::optional<fl::task::Error> ParallelDevice::begin() FL_NO_EXCEPT {
     // Validate pin count
     if (num_pins == 0 || num_pins > 32) {
         return fl::task::Error("Invalid number of GPIO pins (must be 1-32)");
+    }
+
+    // buildDefaultLUT shifts each pin into a 32-bit mask, so reject anything it
+    // cannot represent before it runs.
+    if (!spiPinMappingValid(pImpl->config.gpio_pins.data(), num_pins,
+                            pImpl->config.clock_pin)) {
+        return fl::task::Error("Invalid pin mapping (pins 0-31; data lanes 0-7 distinct and off the clock)");
     }
 
     // Determine backend width (round up to next supported width: 1,2,4,8,16,32)
