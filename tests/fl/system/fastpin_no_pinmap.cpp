@@ -65,6 +65,19 @@ FL_TEST_CASE("No-pin-map pins have no port and always take per-pin writes") {
     FL_CHECK_FALSE(isNoPinMapPin(static_cast<const void*>(nullptr)));
 }
 
+FL_TEST_CASE("toggle and strobe use the last level written") {
+    FastPin<kNoMapClock>::setOutput();
+    FastPin<kNoMapClock>::lo();
+    Trace trace;
+    FastPin<kNoMapClock>::toggle();
+    FL_CHECK(fl::digitalRead(kNoMapClock) == PinValue::High);
+    FastPin<kNoMapClock>::toggle();
+    FL_CHECK(fl::digitalRead(kNoMapClock) == PinValue::Low);
+    FastPin<kNoMapClock>::strobe();
+    FL_CHECK_EQ(trace.bits.size(), 2U);
+    FL_CHECK_EQ(trace.falling, 2);
+}
+
 FL_TEST_CASE("writeByte sends all 256 values MSB first") {
     Output spi;
     spi.init();

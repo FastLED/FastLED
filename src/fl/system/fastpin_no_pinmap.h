@@ -24,11 +24,16 @@ template <u8 PIN> class NoPinMapPin {
     static void setOutput() FL_NO_EXCEPT { (fl::pinMode)(PIN, PinMode::Output); }
     static void setInput() FL_NO_EXCEPT { (fl::pinMode)(PIN, PinMode::Input); }
 
-    static void hi() FL_NO_EXCEPT { (fl::digitalWrite)(PIN, PinValue::High); }
-    static void lo() FL_NO_EXCEPT { (fl::digitalWrite)(PIN, PinValue::Low); }
-    static void toggle() FL_NO_EXCEPT {
-        (fl::digitalWrite)(PIN, (fl::digitalRead)(PIN) == PinValue::High ? PinValue::Low : PinValue::High);
+    static void hi() FL_NO_EXCEPT {
+        sHigh = true;
+        (fl::digitalWrite)(PIN, PinValue::High);
     }
+    static void lo() FL_NO_EXCEPT {
+        sHigh = false;
+        (fl::digitalWrite)(PIN, PinValue::Low);
+    }
+    // Uses the last level written: not every core reads back an output pin.
+    static void toggle() FL_NO_EXCEPT { sHigh ? lo() : hi(); }
     static void strobe() FL_NO_EXCEPT {
         toggle();
         toggle();
@@ -43,7 +48,12 @@ template <u8 PIN> class NoPinMapPin {
     static port_t loval() FL_NO_EXCEPT { return 0; }
     static port_ptr_t port() FL_NO_EXCEPT { return nullptr; }
     static port_t mask() FL_NO_EXCEPT { return 1; }
+
+  private:
+    static bool sHigh;
 };
+
+template <u8 PIN> bool NoPinMapPin<PIN>::sHigh = false;
 
 template <u8 PIN> constexpr bool isNoPinMapPin(const NoPinMapPin<PIN>*) FL_NO_EXCEPT { return true; }
 constexpr bool isNoPinMapPin(const void*) FL_NO_EXCEPT { return false; }
