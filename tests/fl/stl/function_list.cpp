@@ -754,6 +754,153 @@ FL_TEST_CASE("function_list - failed subscription reports minus one and recovers
 }
 #endif
 
+template <typename List>
+void replacementWaitsForOuterDispatch() {
+    List callbacks;
+    List replacement;
+    fl::vector<int> order;
+    replacement.add([&]() { order.push_back(3); });
+    callbacks.add([&]() {
+        order.push_back(1);
+        callbacks = replacement;
+        callbacks();
+        order.push_back(2);
+    });
+    callbacks();
+    FL_CHECK_EQ(order.size(), 2);
+    if (order.size() < 2) return;
+    FL_CHECK_EQ(order[0], 1);
+    FL_CHECK_EQ(order[1], 2);
+    callbacks();
+    FL_CHECK_EQ(order.size(), 3);
+    if (order.size() < 3) return;
+    FL_CHECK_EQ(order[2], 3);
+}
+
+FL_TEST_CASE("function_list - replacement nested invocation waits for outer return") {
+    FL_SUBCASE("small tier") { replacementWaitsForOuterDispatch<fl::detail::FunctionListImpl<void(), false>>(); }
+    FL_SUBCASE("large tier") { replacementWaitsForOuterDispatch<function_list<void()>>(); }
+}
+
+template <typename List>
+void activeMovePreservesLaterMutation() {
+    List source;
+    List destination;
+    int observed = 0;
+    struct Counter {
+        fl::shared_ptr<int> value;
+        List* source;
+        List* destination;
+        int* observed;
+        Counter(List& from, List& to, int& output) FL_NO_EXCEPT
+            : value(fl::make_shared<int>(0)), source(&from), destination(&to), observed(&output) {}
+        Counter(const Counter& other) FL_NO_EXCEPT
+            : value(fl::make_shared<int>(*other.value)), source(other.source), destination(other.destination), observed(other.observed) {}
+        Counter(Counter&&) FL_NO_EXCEPT = default;
+        void operator()() const FL_NO_EXCEPT {
+            if (*value == 0) {
+                *destination = fl::move(*source);
+                *value = 7;
+            } else {
+                *observed = *value;
+            }
+        }
+    };
+    source.add(Counter(source, destination, observed));
+    source();
+    FL_CHECK_TRUE(source.empty());
+    destination();
+    FL_CHECK_EQ(observed, 7);
+}
+
+FL_TEST_CASE("function_list - active move retains later owned callback mutation") {
+    FL_SUBCASE("small tier") { activeMovePreservesLaterMutation<fl::detail::FunctionListImpl<void(), false>>(); }
+    FL_SUBCASE("large tier") { activeMovePreservesLaterMutation<function_list<void()>>(); }
+}
+
+template <typename List>
+void outsideCleanupAllowsRegistration(bool clearAll) {
+    List callbacks;
+    int calls = 0;
+    struct RegisterOnDestroy {
+        List* list;
+        int* calls;
+        RegisterOnDestroy(List& target, int& output) FL_NO_EXCEPT : list(&target), calls(&output) {}
+        ~RegisterOnDestroy() {
+            int* output = calls;
+            for (int i = 0; i < 64; ++i) list->add([output]() { ++*output; });
+        }
+    };
+    auto owner = fl::make_shared<RegisterOnDestroy>(callbacks, calls);
+    const int removed = callbacks.add([owner]() {});
+    owner.reset();
+    callbacks.add([]() {});
+    if (clearAll) callbacks.clear();
+    else callbacks.remove(removed);
+    callbacks();
+    FL_CHECK_EQ(calls, 64);
+}
+
+FL_TEST_CASE("function_list - outside cleanup permits destructor registration") {
+    FL_SUBCASE("small remove") { outsideCleanupAllowsRegistration<fl::detail::FunctionListImpl<void(), false>>(false); }
+    FL_SUBCASE("small clear") { outsideCleanupAllowsRegistration<fl::detail::FunctionListImpl<void(), false>>(true); }
+    FL_SUBCASE("large remove") { outsideCleanupAllowsRegistration<function_list<void()>>(false); }
+    FL_SUBCASE("large clear") { outsideCleanupAllowsRegistration<function_list<void()>>(true); }
+}
+
+template <typename List>
+void destructorMutatesDuringCompaction(int operation) {
+    List callbacks;
+    int added = 0;
+    int victimCalls = 0;
+    int survivorCalls = 0;
+    int victim = -1;
+    struct OnDestroy {
+        List* list;
+        int operation;
+        int* victim;
+        int* added;
+        OnDestroy(List& target, int action, int& removed, int& count) FL_NO_EXCEPT
+            : list(&target), operation(action), victim(&removed), added(&count) {}
+        ~OnDestroy() {
+            if (operation == 0) {
+                int* output = added;
+                for (int i = 0; i < 64; ++i) list->add([output]() { ++*output; });
+            } else if (operation == 1) {
+                list->remove(*victim);
+            } else {
+                list->clear();
+            }
+        }
+    };
+    auto owner = fl::make_shared<OnDestroy>(callbacks, operation, victim, added);
+    int removed = -1;
+    removed = callbacks.add([owner]() {});
+    callbacks.add([&]() { callbacks.remove(removed); });
+    owner.reset();
+    victim = callbacks.add([&]() { ++victimCalls; });
+    callbacks.add([&]() { ++survivorCalls; });
+    callbacks();
+    FL_CHECK_EQ(victimCalls, 1);
+    FL_CHECK_EQ(survivorCalls, 1);
+    callbacks();
+    FL_CHECK_EQ(added, operation == 0 ? 64 : 0);
+    FL_CHECK_EQ(victimCalls, operation == 0 ? 2 : 1);
+    FL_CHECK_EQ(survivorCalls, operation == 2 ? 1 : 2);
+    if (operation == 2) FL_CHECK_TRUE(callbacks.empty());
+}
+
+FL_TEST_CASE("function_list - destructors mutate safely during compaction") {
+    using Small = fl::detail::FunctionListImpl<void(), false>;
+    using Large = function_list<void()>;
+    FL_SUBCASE("small add") { destructorMutatesDuringCompaction<Small>(0); }
+    FL_SUBCASE("small remove") { destructorMutatesDuringCompaction<Small>(1); }
+    FL_SUBCASE("small clear") { destructorMutatesDuringCompaction<Small>(2); }
+    FL_SUBCASE("large add") { destructorMutatesDuringCompaction<Large>(0); }
+    FL_SUBCASE("large remove") { destructorMutatesDuringCompaction<Large>(1); }
+    FL_SUBCASE("large clear") { destructorMutatesDuringCompaction<Large>(2); }
+}
+
 // Compile-time error test - commented out because it should NOT compile
 // Uncomment this test to verify that non-void return types trigger static_assert
 /*

@@ -400,20 +400,92 @@ FL_NO_INLINE inline void sortFunctionListPriorities(fl::vector_inlined<int, 16>&
 namespace detail {
 template <typename Signature, bool Large> class FunctionListImpl;
 
-// Entries never move or destroy their callable during dispatch. Mutations mark
-// entries dead or append to pending storage; the outermost invocation commits
-// those changes after every running callback has returned.
+// A stack activation retains the actual callable across an active list move.
+// Entry relocation retargets it; entry destruction detaches it. Normal list
+// mutations still use the depth guard and deferred compaction below.
 template <typename... Args>
 struct FunctionListEntry {
     using FunctionType = function<void(Args...)>;
+    struct Activation {
+        FunctionListEntry* entry;
+        FunctionType fn;
+        bool valid = true;
+        explicit Activation(FunctionListEntry& value) FL_NO_EXCEPT
+            : entry(&value), fn(fl::move(value.fn)) { value.active = this; }
+        ~Activation() FL_NO_EXCEPT {
+            if (entry) {
+                entry->active = nullptr;
+                // A removed entry still owns its callable until outer cleanup.
+                entry->fn = fl::move(fn);
+            }
+        }
+    };
+
     int id;
     int priority;
     FunctionType fn;
+    // Borrowed only during synchronous dispatch; moves retarget the activation,
+    // destruction detaches it, and copies clone its actual callable value.
+    Activation* active = nullptr;
+
     FunctionListEntry() FL_NO_EXCEPT : id(-1), priority(0), fn() {}
     FunctionListEntry(int value, int rank, FunctionType callback) FL_NO_EXCEPT
         : id(value), priority(rank), fn(fl::move(callback)) {}
-    bool isValid() const FL_NO_EXCEPT { return id >= 0 && bool(fn); }
-    void clear() FL_NO_EXCEPT { id = -1; }
+    FunctionListEntry(const FunctionListEntry& other) FL_NO_EXCEPT
+        : id(other.id), priority(other.priority), fn(copyFunction(other)) {}
+    FunctionListEntry(FunctionListEntry&& other) FL_NO_EXCEPT
+        : id(other.id), priority(other.priority), fn(fl::move(other.fn)), active(other.active) {
+        if (active) active->entry = this;
+        other.active = nullptr;
+    }
+    FunctionListEntry& operator=(const FunctionListEntry& other) FL_NO_EXCEPT {
+        if (this != &other) {
+            detach();
+            id = other.id;
+            priority = other.priority;
+            fn = copyFunction(other);
+        }
+        return *this;
+    }
+    FunctionListEntry& operator=(FunctionListEntry&& other) FL_NO_EXCEPT {
+        if (this != &other) {
+            detach();
+            id = other.id;
+            priority = other.priority;
+            fn = fl::move(other.fn);
+            active = other.active;
+            if (active) active->entry = this;
+            other.active = nullptr;
+        }
+        return *this;
+    }
+    ~FunctionListEntry() FL_NO_EXCEPT { detach(); }
+
+    bool isValid() const FL_NO_EXCEPT { return id >= 0 && (active ? active->valid : bool(fn)); }
+    void clear() FL_NO_EXCEPT {
+        id = -1;
+        if (active) active->valid = false;
+        // Destruction is deferred by the list's dispatch/compaction guard.
+    }
+    void invoke(Args... args) FL_NO_EXCEPT {
+        if (active) active->fn(args...);
+        else {
+            Activation call(*this);
+            call.fn(args...);
+        }
+    }
+  private:
+    static FunctionType copyFunction(const FunctionListEntry& other) FL_NO_EXCEPT {
+        if (!other.isValid()) return FunctionType();
+        return other.active ? other.active->fn : other.fn;
+    }
+    void detach() FL_NO_EXCEPT {
+        if (active) {
+            active->entry = nullptr;
+            active->valid = false;
+            active = nullptr;
+        }
+    }
 };
 
 // Small tiers own their vectors directly and never allocate a State. The same
@@ -468,17 +540,14 @@ class FunctionListImpl<void(Args...), false> {
     FunctionListImpl() FL_NO_EXCEPT = default;
     FunctionListImpl(const FunctionListImpl& other) FL_NO_EXCEPT { copyFrom(other); }
     FunctionListImpl(FunctionListImpl&& other) FL_NO_EXCEPT {
-        if (other.mDepth) {
-            // Moving an inline-owned list cannot relocate an active callable.
-            copyFrom(other);
-            other.clear();
-        } else {
-            mFunctions = fl::move(other.mFunctions);
-            mPending = fl::move(other.mPending);
-            mIdCounter = other.mIdCounter;
-            mNeedsCompact = other.mNeedsCompact;
-            ++other.mRevision;
-        }
+        // Moving the vector transfers its allocation, not the running callable.
+        // Its stack activation keeps ownership if the destination later mutates
+        // or destroys that entry before the original callback returns.
+        mFunctions = fl::move(other.mFunctions);
+        mPending = fl::move(other.mPending);
+        mIdCounter = other.mIdCounter;
+        mNeedsCompact = other.mNeedsCompact;
+        ++other.mRevision;
     }
     FunctionListImpl& operator=(const FunctionListImpl& other) FL_NO_EXCEPT {
         if (this != &other) replaceWith(FunctionListImpl(other));
@@ -499,43 +568,53 @@ class FunctionListImpl<void(Args...), false> {
         for (auto& entry : mFunctions) {
             if (entry.id == id) {
                 entry.clear();
-                if (!mDepth) entry.fn.clear();
                 mNeedsCompact = true;
             }
         }
         for (auto& entry : mPending) {
             if (entry.id == id) entry.clear();
         }
+        // Even outside dispatch, capture destructors can mutate this list.
+        compact();
     }
     void clear() FL_NO_EXCEPT {
         ++mRevision;
-        if (mDepth) {
-            for (auto& entry : mFunctions) entry.clear();
-            for (auto& entry : mPending) entry.clear();
-            mNeedsCompact = true;
-        } else {
-            mPending.clear();
-            mFunctions.clear();
-            mNeedsCompact = false;
-        }
+        for (auto& entry : mFunctions) entry.clear();
+        for (auto& entry : mPending) entry.clear();
+        mNeedsCompact = true;
+        compact();
     }
     void compact() FL_NO_EXCEPT {
-        if (mDepth) return;
-        if (mNeedsCompact) {
-            size_t write = 0;
-            for (size_t read = 0; read < mFunctions.size(); ++read) {
-                if (mFunctions[read].isValid()) {
-                    if (write != read) mFunctions[write] = fl::move(mFunctions[read]);
-                    ++write;
+        if (mDepth || (!mNeedsCompact && mPending.empty())) return;
+        // Destructors may register, remove or clear callbacks. Keep them on the
+        // deferred path, and retire dead entries before moving any survivors.
+        ++mDepth;
+        do {
+            {
+                FunctionVector retired;
+                if (mNeedsCompact) {
+                    for (auto& entry : mFunctions) {
+                        if (!entry.isValid()) retired.push_back(fl::move(entry));
+                    }
+                    size_t write = 0;
+                    for (size_t read = 0; read < mFunctions.size(); ++read) {
+                        if (mFunctions[read].isValid()) {
+                            if (write != read) mFunctions[write] = fl::move(mFunctions[read]);
+                            ++write;
+                        }
+                    }
+                    mFunctions.resize(write);
+                    mNeedsCompact = false;
+                }
+                // A separate batch keeps destructor-driven additions out of the
+                // vector being iterated. Both batches die after all moves finish.
+                FunctionVector pending = fl::move(mPending);
+                for (auto& entry : pending) {
+                    if (entry.isValid()) mFunctions.push_back(fl::move(entry));
                 }
             }
-            mFunctions.resize(write);
-            mNeedsCompact = false;
-        }
-        for (auto& entry : mPending) {
-            if (entry.isValid()) mFunctions.push_back(fl::move(entry));
-        }
-        mPending.clear();
+        } while (mNeedsCompact || !mPending.empty());
+        --mDepth;
     }
     fl::size size() const FL_NO_EXCEPT {
         fl::size count = 0;
@@ -568,7 +647,7 @@ class FunctionListImpl<void(Args...), false> {
             for (size_t i = 0; i < invokeSize; ++i) {
                 if (mRevision != revision) return;
                 if (mFunctions[i].isValid() && mFunctions[i].priority == priorities[p]) {
-                    mFunctions[i].fn(args...);
+                    mFunctions[i].invoke(args...);
                 }
             }
         }
@@ -590,8 +669,15 @@ class FunctionListImpl<void(Args...), true> {
     fl::shared_ptr<State> mState;
 
     void replaceWith(fl::shared_ptr<State> replacement) FL_NO_EXCEPT {
-        if (mState && mState->isDispatching()) mState->interrupt();
-        mState = fl::move(replacement);
+        if (mState && mState->isDispatching()) {
+            // Keep replacement callbacks pending on the dispatching core, just
+            // as the inline-owned tier does. Nested invocation cannot see them.
+            Core next;
+            if (replacement) next = fl::move(static_cast<Core&>(*replacement));
+            mState->Core::replaceWith(fl::move(next));
+        } else {
+            mState = fl::move(replacement);
+        }
     }
     static void invokeSubscribed(FunctionListImpl& self, Args... args) FL_NO_EXCEPT {
         // Reassignment can release the list's owner, so dispatch retains its
