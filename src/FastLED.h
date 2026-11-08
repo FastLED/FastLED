@@ -850,18 +850,15 @@ public:
 	/// A chipset-family mismatch returns nullptr without registering anything.
 	template<fl::Bus B, typename Chipset = fl::ClocklessChipset, fl::u8 Which = 0>
 	FL_ALWAYS_INLINE fl::ChannelPtr add(const fl::ChannelConfig& config) FL_NO_EXCEPT {
-		fl::ChannelPtr channel = fl::TypedChannel<B, Chipset, Which>::createWithKnownEncoder(config);
-		if (channel != nullptr) add(channel);
-		return channel;
+		return addWithFactory(config, fl::TypedChannel<B, Chipset, Which>::factoryFor(config.chipset));
 	}
 
 	/// Add a typed configuration, deducing its chipset family.
 	/// The template bus and instance take precedence over runtime bus options.
 	template<fl::Bus B, typename Chipset, fl::u8 Which = 0>
 	FL_ALWAYS_INLINE fl::ChannelPtr add(const fl::ChannelConfigOf<Chipset>& config) FL_NO_EXCEPT {
-		fl::ChannelPtr channel = fl::TypedChannel<B, Chipset, Which>::create(config);
-		if (channel != nullptr) add(channel);
-		return channel;
+		const auto factory = fl::TypedChannel<B, Chipset, Which>::factoryFor(config.chipset);
+		return addWithFactory(config.toErased(), factory);
 	}
 
 	template<fl::ProfileId Profile>
@@ -1791,6 +1788,9 @@ public:
 	}
 
 private:
+    using ChannelFactory = fl::ChannelPtr (*)(const fl::ChannelConfig&);
+    FL_NO_INLINE static fl::ChannelPtr addWithFactory(const fl::ChannelConfig&, ChannelFactory) FL_NO_EXCEPT;
+
 	// Forward shims for the tiered-wait spin budget (#2818). Full impl
 	// lives in src/fl/channels/detail/wait_spin_budget.{h,cpp.hpp}.
 	// Declared here so we don't drag the channel-detail include graph

@@ -332,7 +332,7 @@ protected:
     using PixelEncoder = EncoderAvailability::PixelEncoder;
 
 private:
-    static ChannelPtr createWithEncoder(const ChannelConfig&, PixelEncoder) FL_NO_EXCEPT;
+    FL_NO_INLINE static ChannelPtr createWithEncoder(const ChannelConfig&, PixelEncoder) FL_NO_EXCEPT;
 
     /// @brief Cold slow-path helper for `showPixels()`. Handles dynamic
     ///        `ChannelManager::selectDriverForChannel()` lookup AND the
@@ -363,15 +363,6 @@ private:
     /// retain only their encoder. Erased construction uses the full selector.
     /// The encoder callbacks remain channel-side: drivers receive
     /// ChannelData only after it has been encoded.
-    FL_ALWAYS_INLINE PixelEncoder knownPixelEncoder(const ClocklessChipset& chipset) FL_NO_EXCEPT {
-        return EncoderAvailability::known(chipset, &Channel::encodeWS2812);
-    }
-    FL_ALWAYS_INLINE PixelEncoder knownPixelEncoder(const SpiChipsetConfig& chipset) FL_NO_EXCEPT {
-        return EncoderAvailability::known(chipset, nullptr);
-    }
-    FL_ALWAYS_INLINE PixelEncoder knownPixelEncoder(const ChipsetVariant& chipset) FL_NO_EXCEPT {
-        return EncoderAvailability::known(chipset, &Channel::encodeWS2812);
-    }
     FL_NO_INLINE static void encodeWS2812(Channel&, PixelIterator&, bool,
                                          fl::vector_psram<u8>&) FL_NO_EXCEPT;
     FL_NO_INLINE static void encodeTM1812RGBWW(Channel&, PixelIterator&, bool,

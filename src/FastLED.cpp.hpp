@@ -821,6 +821,13 @@ fl::u32 CFastLED::_getWaitSpinBudgetUs() FL_NO_EXCEPT {
 // Runtime Channel API Implementation
 // ============================================================================
 
+fl::ChannelPtr CFastLED::addWithFactory(const fl::ChannelConfig& config,
+                                          ChannelFactory factory) FL_NO_EXCEPT {
+    auto channel = factory(config);
+    if (channel != nullptr) add(channel);
+    return channel;
+}
+
 fl::ChannelPtr CFastLED::add(const fl::ChannelConfig& config) FL_NO_EXCEPT {
     // Issue #2459: the non-template `FastLED.add(cfg)` path is the runtime-
     // selection mode. To make sure `cfg.options.mBus` (or priority dispatch
