@@ -802,7 +802,7 @@ bool RmtMemoryManager::isGlobalPool() const FL_NO_EXCEPT {
 // ============================================================================
 
 bool RmtMemoryManager::isDMAAvailable() const FL_NO_EXCEPT {
-#if FASTLED_RMT5_DMA_SUPPORTED
+#if FASTLED_RMT5_DMA_SUPPORTED && FL_RMT5_USE_DMA
     if (mDMAAllocation.allocated) {
         return false;  // DMA slot already in use
     }
@@ -815,7 +815,7 @@ bool RmtMemoryManager::isDMAAvailable() const FL_NO_EXCEPT {
 #endif
     return true;
 #else
-    return false;  // No DMA support on this platform
+    return false;  // No DMA support on this platform, or FL_RMT5_USE_DMA=0
 #endif
 }
 

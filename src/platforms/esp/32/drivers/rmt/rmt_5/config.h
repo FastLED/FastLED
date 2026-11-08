@@ -28,3 +28,12 @@
 #ifndef FASTLED_RMT_STATIC_ALLOCATION
 #define FASTLED_RMT_STATIC_ALLOCATION FL_RMT_STATIC_ALLOCATION
 #endif
+
+// RMT TX/RX DMA opt-out (#5161). On chips with RMT DMA (ESP32-S3) the first
+// channel takes the single DMA slot, which allocates a 4 KB DMA-capable
+// internal-RAM block regardless of strip length. Build with
+// -DFL_RMT5_USE_DMA=0 to keep every channel on on-chip RMT memory (double
+// buffered, refilled by interrupt) and save that heap on boards without PSRAM.
+#ifndef FL_RMT5_USE_DMA
+#define FL_RMT5_USE_DMA 1
+#endif

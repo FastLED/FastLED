@@ -32,6 +32,11 @@ FL_TEST_CASE("RMT fixed allocation ledger rejects overflow and resets") {
     FL_CHECK_EQ(*ledger.begin(), 41);
 }
 
+FL_TEST_CASE("RMT DMA is enabled unless FL_RMT5_USE_DMA=0") {
+    // #5161: -DFL_RMT5_USE_DMA=0 keeps ESP32-S3 TX off the 4 KB DMA block.
+    FL_CHECK_EQ(FL_RMT5_USE_DMA, 1);
+}
+
 FL_TEST_CASE("RMT static allocation ledger is bounded to one strip") {
     FL_CHECK_EQ(FL_RMT_ALLOCATION_LEDGER_CAPACITY, 1);
 
