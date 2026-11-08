@@ -10,7 +10,10 @@
 #include "fl/stl/int.h"
 
 typedef unsigned int uint;
-struct FakeSio { volatile fl::u32 gpio_out, gpio_set, gpio_clr, gpio_togl, gpio_oe_set, gpio_oe_clr; };
+struct FakeSio {
+    volatile fl::u32 gpio_out, gpio_set, gpio_clr, gpio_togl, gpio_oe_set, gpio_oe_clr;
+    volatile fl::u32 gpio_hi_out, gpio_hi_set, gpio_hi_clr, gpio_hi_togl, gpio_hi_oe_set, gpio_hi_oe_clr;
+};
 static FakeSio gFakeSio;
 #define sio_hw (&gFakeSio)
 #define GPIO_FUNC_SIO 5
@@ -291,6 +294,35 @@ FL_TEST_CASE("RP2350 split-port bulk writes keep concurrent unrelated changes") 
     SplitPort::writeBytesValueRaw(0x5A, 1);
     FL_CHECK_EQ(dr0(), kOther | (1U << 9));
     FL_CHECK_EQ(dr1() & kClock, 0U);
+}
+
+// GPIO32-47 live in the GPIO_HI bank, bit (PIN - 32) (#5100).
+FL_TEST_CASE("RP2350 GPIO32-47 drive the GPIO_HI registers") {
+    using Low = _RP2350PIN<5, 1U << 5>;
+    using High = _RP2350PIN<33, 1U << 1>;
+    gFakeSio = FakeSio();
+
+    High::setOutput();
+    High::hi();
+    FL_CHECK_EQ(gFakeSio.gpio_hi_oe_set, 1U << 1);
+    FL_CHECK_EQ(gFakeSio.gpio_hi_set, 1U << 1);
+    High::lo();
+    FL_CHECK_EQ(gFakeSio.gpio_hi_clr, 1U << 1);
+    High::toggle();
+    FL_CHECK_EQ(gFakeSio.gpio_hi_togl, 1U << 1);
+    FL_CHECK(High::port() == &gFakeSio.gpio_hi_out);
+    FL_CHECK(High::sport() == &gFakeSio.gpio_hi_set);
+    FL_CHECK(High::cport() == &gFakeSio.gpio_hi_clr);
+    // Nothing reached the low bank, where bit 1 is GPIO1.
+    FL_CHECK_EQ(gFakeSio.gpio_set, 0U);
+    FL_CHECK_EQ(gFakeSio.gpio_clr, 0U);
+    FL_CHECK_EQ(gFakeSio.gpio_oe_set, 0U);
+
+    Low::setOutput();
+    Low::hi();
+    FL_CHECK_EQ(gFakeSio.gpio_oe_set, 1U << 5);
+    FL_CHECK_EQ(gFakeSio.gpio_set, 1U << 5);
+    FL_CHECK(Low::port() == &gFakeSio.gpio_out);
 }
 
 } // FL_TEST_FILE

@@ -29,9 +29,9 @@ template<u8 PIN> class FastPin;
 
 #else
 
-// The u32 cast makes the mask 0 for GPIO32-47, so those pins compile but write
-// nothing: _RP2350PIN does not address the GPIO_HI registers.
-#define _FL_DEFPIN(PIN) template<> class FastPin<PIN> : public _RP2350PIN<PIN, (u32)(1ULL << PIN)> {};
+// The mask is the pin's bit within its bank: GPIO32-47 are bits 0-15 of the
+// GPIO_HI registers, which _RP2350PIN selects for PIN >= 32 (#5100).
+#define _FL_DEFPIN(PIN) template<> class FastPin<PIN> : public _RP2350PIN<PIN, (1u << ((PIN) & 31u))> {};
 
 // RP2350B has up to 48 pins (0-47), RP2350A has 30 pins (0-29)
 // We support up to 47 for all RP2350 variants
