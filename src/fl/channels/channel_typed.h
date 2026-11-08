@@ -85,16 +85,17 @@ public:
     /// The factory returns a `ChannelPtr` to the existing non-template
     /// `fl::Channel` runtime object so the rest of the system (events,
     /// manager, draw list) is unchanged.
-    static ChannelPtr create(const ChannelConfigOf<Chipset>& cfg) FL_NO_EXCEPT {
+    FL_ALWAYS_INLINE ChannelPtr create(const ChannelConfigOf<Chipset>& cfg) FL_NO_EXCEPT {
         // Register only the compile-time-selected bus specialization and its
         // associated driver(s). This retains the required translation unit(s)
         // without pulling in enableAllDrivers().
+        const auto encoder = Channel::selectPixelEncoder(ChipsetVariant(cfg.chipset));
         detail::enable_clockless_for<Chipset, BusTraits<kBus, Which>>::apply();  // #4793
         BusTraits<kBus, Which>::registerWithManager();
         ChannelConfig erased = cfg.toErased();
         erased.options.mBus = kBus;
         erased.options.mBusWhich = Which;
-        return Channel::create(erased);
+        return Channel::createWithEncoder(erased, encoder);
     }
 
     /// @brief Overload accepting the (type-erased) non-template config.
@@ -103,17 +104,18 @@ public:
     /// compile-time bus/chipset validation. The runtime chipset variant must
     /// match `Chipset`. Reject a mismatch before registering the driver or
     /// creating a channel, so an erased config cannot bypass the contract.
-    static ChannelPtr create(const ChannelConfig& cfg) FL_NO_EXCEPT {
+    FL_ALWAYS_INLINE ChannelPtr create(const ChannelConfig& cfg) FL_NO_EXCEPT {
         if (!cfg.getChipset().is<Chipset>()) {
             FL_ERROR("TypedChannel: configuration does not match the selected chipset family");
             return nullptr;
         }
+        const auto encoder = Channel::selectPixelEncoder(cfg.getChipset());
         detail::enable_clockless_for<Chipset, BusTraits<kBus, Which>>::apply();  // #4793
         BusTraits<kBus, Which>::registerWithManager();
         ChannelConfig erased = cfg;
         erased.options.mBus = kBus;
         erased.options.mBusWhich = Which;
-        return Channel::create(erased);
+        return Channel::createWithEncoder(erased, encoder);
     }
 
 private:
