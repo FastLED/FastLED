@@ -57,6 +57,9 @@
 /// - FL_IS_SILABS: General Silicon Labs EFM32/EFR32 platform
 /// - FL_IS_SILABS_MGM240: MGM240 (EFR32MG24) - Arduino Nano Matter, SparkFun Thing Plus Matter
 ///
+/// Nordic nRF51 Platforms (ARM-based):
+/// - FL_IS_NRF51: nRF51 (Cortex-M0, 16 MHz) - BBC micro:bit v1, etc.
+///
 /// Nordic nRF52 Platforms (ARM-based):
 /// - FL_IS_NRF52: General nRF52 platform (any nRF52 variant)
 /// - FL_IS_NRF52832: nRF52832 (Cortex-M4F, 64 MHz, 512KB Flash)
@@ -144,6 +147,7 @@
 // Include all platform detection headers
 #include "platforms/apollo3/is_apollo3.h"
 #include "platforms/arm/is_arm.h"
+#include "platforms/arm/nrf51/is_nrf51.h"
 #include "platforms/arm/nrf52/is_nrf52.h"
 #include "platforms/arm/renesas/is_renesas.h"
 #include "platforms/arm/rp/is_rp.h"

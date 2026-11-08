@@ -101,7 +101,8 @@
     || defined(FL_IS_ESP8266) \
     || defined(ARDUINO_ARCH_RENESAS_UNO) \
     || defined(ARDUINO_BLUEPILL_F103C8) \
-    || defined(FL_IS_ARM_LPC)
+    || defined(FL_IS_ARM_LPC) \
+    || defined(FL_IS_NRF51)
     #define FL_PLATFORM_HAS_LARGE_MEMORY 0
   #else
     #define FL_PLATFORM_HAS_LARGE_MEMORY 1

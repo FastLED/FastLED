@@ -78,6 +78,8 @@ EXPECTED_MEMORY_BY_PATTERN = {
     # RP2040 (huge)
     ("rp2040", "huge"),
     ("rp2350", "huge"),
+    # NRF51 (low tier, 16KB RAM)
+    ("bbcmicrobit", "low"),
     # NRF52 (high tier)
     ("nrf52840_dk", "high"),
     ("adafruit_feather_nrf52840_sense", "high"),

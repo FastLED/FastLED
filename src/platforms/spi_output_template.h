@@ -28,7 +28,7 @@
 // (see platforms/esp/8266/spi_output_template.h).
 #include "platforms/esp/8266/spi_output_template.h"
 
-#elif defined(NRF51)
+#elif defined(FL_IS_NRF51)
 #include "platforms/arm/nrf51/spi_output_template.h"
 
 #elif defined(FL_IS_NRF52)

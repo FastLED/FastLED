@@ -25,7 +25,7 @@
 
 #if defined(FL_IS_ARM_LPC)
 #include "platforms/arm/lpc/led_sysdefs_arm_lpc.h"  // ok platform headers
-#elif defined(NRF51) || defined(__RFduino__) || defined (__Simblee__)
+#elif defined(FL_IS_NRF51)
 #include "platforms/arm/nrf51/led_sysdefs_arm_nrf51.h"  // ok platform headers
 #elif defined(NRF52_SERIES) || defined(NRF52840_XXAA)
 #include "platforms/arm/nrf52/led_sysdefs_arm_nrf52.h"  // ok platform headers
