@@ -15,17 +15,13 @@ struct EncoderAvailability {
 
     FL_NO_INLINE static PixelEncoder select(const ChipsetVariant&) FL_NO_EXCEPT;
 
-    FL_ALWAYS_INLINE PixelEncoder known(const ClocklessChipset& chipset,
-                                       PixelEncoder ws2812) FL_NO_EXCEPT {
-        return chipset.encoder == ClocklessEncoder::CLOCKLESS_ENCODER_WS2812
-            ? ws2812 : nullptr;
+    FL_ALWAYS_INLINE bool isWS2812(const ClocklessChipset& chipset) FL_NO_EXCEPT {
+        return chipset.encoder == ClocklessEncoder::CLOCKLESS_ENCODER_WS2812;
     }
-    FL_ALWAYS_INLINE PixelEncoder known(const SpiChipsetConfig&,
-                                       PixelEncoder) FL_NO_EXCEPT { return nullptr; }
-    FL_ALWAYS_INLINE PixelEncoder known(const ChipsetVariant& chipset,
-                                       PixelEncoder ws2812) FL_NO_EXCEPT {
+    FL_ALWAYS_INLINE bool isWS2812(const SpiChipsetConfig&) FL_NO_EXCEPT { return false; }
+    FL_ALWAYS_INLINE bool isWS2812(const ChipsetVariant& chipset) FL_NO_EXCEPT {
         const auto* clockless = chipset.ptr<ClocklessChipset>();
-        return clockless ? known(*clockless, ws2812) : nullptr;
+        return clockless && isWS2812(*clockless);
     }
 };
 } // namespace fl

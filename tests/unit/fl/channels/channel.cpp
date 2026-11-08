@@ -958,7 +958,15 @@ FL_TEST_CASE("[#5157] typed and erased encoders produce identical bytes") {
         auto typed = spi
             ? TypedChannel<Bus::BIT_BANG, SpiChipsetConfig>::create(config)
             : TypedChannel<Bus::BIT_BANG, ClocklessChipset>::create(config);
+        auto typedConfig = spi
+            ? TypedChannel<Bus::BIT_BANG, SpiChipsetConfig>::create(
+                ChannelConfigOf<SpiChipsetConfig>(*config.getSpiChipset(), config.mLeds,
+                                                  config.rgb_order, config.options))
+            : TypedChannel<Bus::BIT_BANG, ClocklessChipset>::create(
+                ChannelConfigOf<ClocklessChipset>(*config.getClocklessChipset(), config.mLeds,
+                                                 config.rgb_order, config.options));
         auto erased = Channel::create(config);
+        FL_REQUIRE(typedConfig != nullptr);
         FL_REQUIRE(typed != nullptr);
         FL_REQUIRE(erased != nullptr);
         // Replace the registered hardware driver after construction so both
@@ -983,6 +991,9 @@ FL_TEST_CASE("[#5157] typed and erased encoders produce identical bytes") {
         for (fl::size i = 0; i < expected.size(); ++i) {
             FL_CHECK_EQ(driver->last[i], expected[i]);
         }
+        typedConfig->showLeds(173);
+        FL_REQUIRE_EQ(driver->frames, 3);
+        FL_CHECK_EQ(driver->last, expected);
     };
     compare(ChannelConfig(makeClockless<TIMING_WS2812_800KHZ>(14), leds, GRB, options), false);
     const ClocklessEncoder clocklessEncoders[] = {
@@ -1702,6 +1713,37 @@ FL_TEST_CASE("[#5157] typed creation snapshots metadata before fallback callback
     options.requestColorManagement(SourceProfile::linearSrgb());
     ChannelConfig config(makeClockless<TIMING_WS2812_800KHZ>(3), leds, RGB, options);
     config.mName = fl::string("original");
+    bool typedConfig = false;
+    FL_SUBCASE("erased configuration") { typedConfig = false; }
+    FL_SUBCASE("typed configuration") { typedConfig = true; }
+    ChannelConfigOf<ClocklessChipset> typed(*config.getClocklessChipset(), leds, RGB, options);
+    typed.mName = config.mName;
+    auto& events = ChannelEvents::instance();
+    auto& manager = ChannelManager::instance();
+    const int listener = events.onColorProfileFallback.add(
+        [&](const ColorProfileEvent&) {
+            config.mName = fl::string("changed");
+            typed.mName = fl::string("changed");
+        });
+    auto cleanup = fl::make_scope_exit([&]() {
+        events.onColorProfileFallback.remove(listener);
+        manager.clearAllDrivers();
+    });
+    auto channel = typedConfig
+        ? TypedChannel<Bus::BIT_BANG, ClocklessChipset>::create(typed)
+        : TypedChannel<Bus::BIT_BANG, ClocklessChipset>::create(config);
+    FL_REQUIRE(channel != nullptr);
+    FL_CHECK_EQ(config.mName.value(), fl::string("changed"));
+    FL_CHECK_EQ(typed.mName.value(), fl::string("changed"));
+    FL_CHECK_EQ(channel->name(), fl::string("original"));
+}
+
+FL_TEST_CASE("[#5157] erased creation snapshots metadata before fallback callbacks") {
+    CRGB leds[1];
+    ChannelOptions options;
+    options.requestColorManagement(SourceProfile::linearSrgb());
+    ChannelConfig config(makeClockless<TIMING_WS2812_800KHZ>(3), leds, RGB, options);
+    config.mName = fl::string("original");
     auto& events = ChannelEvents::instance();
     auto& manager = ChannelManager::instance();
     const int listener = events.onColorProfileFallback.add(
@@ -1710,7 +1752,7 @@ FL_TEST_CASE("[#5157] typed creation snapshots metadata before fallback callback
         events.onColorProfileFallback.remove(listener);
         manager.clearAllDrivers();
     });
-    auto channel = TypedChannel<Bus::BIT_BANG, ClocklessChipset>::createWithKnownEncoder(config);
+    auto channel = Channel::create(config);
     FL_REQUIRE(channel != nullptr);
     FL_CHECK_EQ(config.mName.value(), fl::string("changed"));
     FL_CHECK_EQ(channel->name(), fl::string("original"));

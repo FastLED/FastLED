@@ -519,20 +519,17 @@ FL_TEST_CASE("function_list - failed copies consistently become empty") {
 }
 #endif
 
-FL_TEST_CASE("function_list - reassignment during dispatch retains the active state") {
-    function_list<void()> callbacks;
-    function_list<void()> replacement;
-    int action = 0;
-    FL_SUBCASE("self move") { action = 2; }
-    FL_SUBCASE("assign other") { action = 1; }
-    FL_SUBCASE("assign empty") { action = 0; }
+template <typename List>
+void reassignmentDuringDispatch(int action) {
+    List callbacks;
+    List replacement;
     int first = 0;
     int tail = 0;
     int next = 0;
     replacement.add([&]() { ++next; });
     callbacks.add([&]() {
         ++first;
-        if (action == 0) callbacks = function_list<void()>();
+        if (action == 0) callbacks = List();
         else if (action == 1) callbacks = replacement;
         else callbacks = fl::move(callbacks);
     }, 10);
@@ -544,6 +541,15 @@ FL_TEST_CASE("function_list - reassignment during dispatch retains the active st
     callbacks();
     FL_CHECK_EQ(next, action == 1 ? 1 : 0);
     FL_CHECK_EQ(tail, action == 2 ? 2 : 0);
+}
+
+FL_TEST_CASE("function_list - reassignment during dispatch retains the active state") {
+    FL_SUBCASE("small tier") {
+        for (int action = 0; action < 3; ++action) reassignmentDuringDispatch<fl::detail::FunctionListImpl<void(), false>>(action);
+    }
+    FL_SUBCASE("large tier") {
+        for (int action = 0; action < 3; ++action) reassignmentDuringDispatch<function_list<void()>>(action);
+    }
 }
 
 template <typename List>
@@ -650,6 +656,103 @@ FL_TEST_CASE("function_list - clear and refill defers new callbacks") {
     FL_SUBCASE("small tier") { clearAndRefillDuringDispatch<fl::detail::FunctionListImpl<void(), false>>(); }
     FL_SUBCASE("large tier") { clearAndRefillDuringDispatch<function_list<void()>>(); }
 }
+
+template <typename List>
+void recursiveRemovalKeepsOuterIndices() {
+    List callbacks;
+    bool inner = false;
+    int c = 0;
+    int d = 0;
+    const int a = callbacks.add([]() {});
+    callbacks.add([&]() {
+        if (!inner) {
+            inner = true;
+            callbacks.remove(a);
+            callbacks();
+        }
+    });
+    callbacks.add([&]() { ++c; });
+    callbacks.add([&]() { ++d; });
+    callbacks();
+    FL_CHECK_EQ(c, 2);
+    FL_CHECK_EQ(d, 2);
+}
+
+FL_TEST_CASE("function_list - recursive removal preserves outer callback indices") {
+    FL_SUBCASE("small tier") { recursiveRemovalKeepsOuterIndices<fl::detail::FunctionListImpl<void(), false>>(); }
+    FL_SUBCASE("large tier") { recursiveRemovalKeepsOuterIndices<function_list<void()>>(); }
+}
+
+template <typename List>
+void removalReleasesAfterDispatchOnly() {
+    List callbacks;
+    auto captured = fl::make_shared<int>(73);
+    int id = callbacks.add([captured]() {});
+    FL_CHECK_EQ(captured.use_count(), 2);
+    callbacks.remove(id);
+    FL_CHECK_EQ(captured.use_count(), 1);
+    int during = 0;
+    id = callbacks.add([captured, &callbacks, &id, &during]() {
+        callbacks.remove(id);
+        during = captured.use_count();
+    });
+    callbacks();
+    FL_CHECK_EQ(during, 2);
+    FL_CHECK_EQ(captured.use_count(), 1);
+}
+
+FL_TEST_CASE("function_list - removal releases captures immediately unless dispatching") {
+    FL_SUBCASE("small tier") { removalReleasesAfterDispatchOnly<fl::detail::FunctionListImpl<void(), false>>(); }
+    FL_SUBCASE("large tier") { removalReleasesAfterDispatchOnly<function_list<void()>>(); }
+}
+
+template <typename List>
+void nestedSubscriptionWaitsForOutermostReturn() {
+    List callbacks;
+    fl::vector<int> order;
+    bool nested = false;
+    int late = 0;
+    const int removed = callbacks.add([&]() { order.push_back(9); }, -1);
+    callbacks.add([&]() {
+        order.push_back(1);
+        if (!nested) {
+            nested = true;
+            callbacks.remove(removed);
+            callbacks.add([&]() { ++late; }, 100);
+            callbacks();
+        }
+    }, 10);
+    callbacks.add([&]() { order.push_back(2); }, 0);
+    callbacks();
+    FL_CHECK_EQ(late, 0);
+    FL_REQUIRE_EQ(order.size(), 4);
+    FL_CHECK_EQ(order[0], 1);
+    FL_CHECK_EQ(order[1], 1);
+    FL_CHECK_EQ(order[2], 2);
+    FL_CHECK_EQ(order[3], 2);
+    callbacks();
+    FL_CHECK_EQ(late, 1);
+}
+
+FL_TEST_CASE("function_list - nested dispatch preserves priorities and defers subscriptions") {
+    FL_SUBCASE("small tier") { nestedSubscriptionWaitsForOutermostReturn<fl::detail::FunctionListImpl<void(), false>>(); }
+    FL_SUBCASE("large tier") { nestedSubscriptionWaitsForOutermostReturn<function_list<void()>>(); }
+}
+
+#if defined(FASTLED_TEST_ALLOC_FAILURE_WRAP)
+FL_TEST_CASE("function_list - failed subscription reports minus one and recovers") {
+    function_list<void()> callbacks;
+    failFunctionListAllocation = true;
+    const int id = callbacks.add([]() {});
+    failFunctionListAllocation = false;
+    FL_CHECK_EQ(id, -1);
+    FL_CHECK_TRUE(callbacks.empty());
+    int calls = 0;
+    FL_CHECK_EQ(callbacks.add([&]() { ++calls; }), 0);
+    callbacks();
+    FL_CHECK_EQ(calls, 1);
+}
+#endif
 
 // Compile-time error test - commented out because it should NOT compile
 // Uncomment this test to verify that non-void return types trigger static_assert
