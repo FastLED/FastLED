@@ -16,8 +16,8 @@ def test_render_is_one_table_with_size_then_colored_delta() -> None:
     assert out.count("|---|---:|---:|") == 1
     assert "Absolute sizes" not in out
     assert "🟢" not in out and "🔴" not in out
-    # Increase is a red up arrow, decrease a green down arrow, unchanged plain 0.
-    assert "| uno | 3,660 (" + UP + " 60) | 134 (0) |" in out
+    # Increase is a red up arrow, decrease a green down arrow, unchanged "Same".
+    assert "| uno | 3,660 (" + UP + " 60) | 134 (Same) |" in out
     assert (
         "| esp32s3 | 320,655 (" + DOWN + " 5,368) | 38,623 (" + DOWN + " 570) |" in out
     )
@@ -30,7 +30,7 @@ def test_render_lists_missing_boards() -> None:
     }
     head = {"esp32c6": {"image_flash": 348_182, "total_ram": 19_544}}
     out = render(base, head, "Blink")
-    assert "| esp32c6 | 348,182 (" + DOWN + " 18,432) | 19,544 (0) |" in out
+    assert "| esp32c6 | 348,182 (" + DOWN + " 18,432) | 19,544 (Same) |" in out
     assert "`rp2040`" in out
 
 
