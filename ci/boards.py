@@ -494,7 +494,9 @@ class Board:
                 return "RP2350"
             return "RP2040"
 
-        # NRF51 boards
+        # NRF51 boards (micro:bit v2 is an nRF52833, not an nRF51)
+        elif "microbit_v2" in board_lower:
+            return "NRF52833"
         elif "microbit" in board_lower or "nrf51" in board_lower:
             return "NRF51822"
 
