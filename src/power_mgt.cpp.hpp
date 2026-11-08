@@ -402,11 +402,13 @@ fl::u32 power_ratio_of_255(fl::u32 num, fl::u32 den) FL_NO_EXCEPT {
 }
 
 // Largest brightness whose *total* demand -- baseline included -- stays inside
-// the budget. When the baseline alone is already over it no brightness meets
-// the budget, and blanking the strip would not either: the baseline is drawn
-// at brightness zero too. Such budgets were written against the classic model,
+// the budget, floored at the classic answer for a budget at the baseline.
+// When the baseline alone is already over the budget no brightness meets it,
+// and blanking the strip would not either: the baseline is drawn at
+// brightness zero too. Such budgets were written against the classic model,
 // which scaled the whole estimate, so they get the classic answer back rather
-// than a dark strip (#5139: 1 W on 271 LEDs lit nothing from 3.10.6).
+// than a dark strip (#5139: 1 W on 271 LEDs lit nothing from 3.10.6). The
+// floor keeps the answer monotone across the baseline; see its comment below.
 static fl::u8 brightness_within_budget(fl::u32 fixed_mW, fl::u32 controllable_mW,
                                        fl::u8 target_brightness,
                                        fl::u32 max_power_mW) FL_NO_EXCEPT {
@@ -420,13 +422,14 @@ static fl::u8 brightness_within_budget(fl::u32 fixed_mW, fl::u32 controllable_mW
         // Also keeps the division below from dividing by zero.
         return 0;
     }
+    // Whole full-brightness estimate. Saturating sum: 32-bit only, as on AVR.
+    const fl::u32 full_mW = fixed_mW + controllable_mW < fixed_mW
+                                ? 0xFFFFFFFFu
+                                : fixed_mW + controllable_mW;
     if (max_power_mW <= fixed_mW) {
         // Classic proportional answer over the whole full-brightness
         // estimate, capped at the request. Also keeps the subtraction below
-        // from underflowing. Saturating sum: 32-bit only, as on AVR.
-        const fl::u32 full_mW = fixed_mW + controllable_mW < fixed_mW
-                                    ? 0xFFFFFFFFu
-                                    : fixed_mW + controllable_mW;
+        // from underflowing.
         const fl::u32 classic = power_ratio_of_255(max_power_mW, full_mW);
         return classic < target_brightness ? static_cast<fl::u8>(classic)
                                            : target_brightness;
@@ -466,7 +469,22 @@ static fl::u8 brightness_within_budget(fl::u32 fixed_mW, fl::u32 controllable_mW
                max_power_mW) {
         --recommended;
     }
-    return recommended;
+
+    // Never dimmer than a budget at the baseline gets. Just above it the
+    // headroom buys almost nothing, so without this floor 1 mW more than the
+    // baseline blanked a strip the baseline itself lit (on 100 LEDs, 625 mW
+    // gave 11 and 626 mW gave 0). Raising a budget must never dim the strip.
+    //
+    // The cost: the floor holds until the headroom answer overtakes it, at a
+    // budget of about fixed + controllable * fixed / full. Across that range
+    // the modeled draw is the floor's, the same as a budget at the baseline
+    // gets -- over the budget by up to controllable * fixed / full mW, which
+    // shrinks to zero as the budget reaches the crossover.
+    const fl::u32 at_baseline = power_ratio_of_255(fixed_mW, full_mW);
+    const fl::u8 floor_brightness =
+        at_baseline < target_brightness ? static_cast<fl::u8>(at_baseline)
+                                        : target_brightness;
+    return recommended > floor_brightness ? recommended : floor_brightness;
 }
 
 fl::u8 calculate_max_brightness_for_power_vmA(const CRGB* ledbuffer, fl::u16 numLeds, fl::u8 target_brightness, fl::u32 max_power_V, fl::u32 max_power_mA) FL_NO_EXCEPT {

@@ -23,6 +23,10 @@ struct AutoResearchConfig {
     fl::RxDeviceType rx_type;                    ///< RX device type (RMT or ISR)
     fl::span<const LegacyClocklessChipset> legacy_chipsets;  ///< Optional per-lane legacy templates
     bool legacy_rgbw;                            ///< Enable RGBW on legacy controllers
+    /// Power budget for FastLED.setMaxPowerInMilliWatts(); 0 = unlimited.
+    /// When set, dithering is off and each frame is compared against the
+    /// raw pixels scaled by the brightness the limiter chose (#5139).
+    uint32_t max_power_mw = 0;
 
     AutoResearchConfig(const fl::ChipsetTimingConfig& t,
                      const char* tn,
@@ -114,6 +118,12 @@ struct RunResult {
     fl::vector<LEDError> errors;    ///< First few errors (up to 10)
     bool captureFailed;             ///< True when RX produced no decodable bytes
     bool passed;                    ///< True if no errors
+    // Power-limit capture (only filled when AutoResearchConfig::max_power_mw):
+    int expectedScale = 255;        ///< Brightness the limiter reported before show()
+    uint32_t fullDemandMw = 0;      ///< Modeled demand at brightness 255, MCU included
+    uint32_t baselineMw = 0;        ///< MCU + dark current (cannot be dimmed)
+    uint32_t sumRaw = 0;            ///< Sum of source pixel bytes on lane 0
+    uint32_t sumWire = 0;           ///< Sum of captured wire bytes on lane 0
 
     RunResult() : run_number(0), total_leds(0), mismatches(0),
                   totalBytes(0), capturedBytes(0), captureWaitResult(-1),

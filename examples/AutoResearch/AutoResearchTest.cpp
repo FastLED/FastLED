@@ -32,6 +32,7 @@
 #include "fl/stl/chrono.h"
 #include "fl/system/delay.h"
 #include "fl/stl/sstream.h"
+#include "fl/channels/power_prepass.h"
 
 // PR #3421 framework-hang fix:
 // FL_WARN expansion ALWAYS constructs `fl::sstream() << X` regardless
@@ -1203,6 +1204,27 @@ void runMultiTest(const char* test_name,
             result.total_leds = num_leds;
             result.totalBytes = static_cast<int>(expected_data_bytes);
 
+            // Power-limit mode: record the limiter's decision for this frame
+            // before show() so the wire bytes can be checked against it. The
+            // reported full/baseline model lane 0 alone, which is the whole
+            // draw list here (one lane is enforced) with dither off (so no
+            // dither reserve).
+            // Legacy controllers and Channel API lanes both reach the wire
+            // through the classic scalar (the Channel frame plan's Q16 flux
+            // is not what show() applies), so one oracle serves both.
+            if (config.max_power_mw != 0) {
+                const CRGB black = CRGB::Black;
+                const uint32_t dark_per_led =
+                    calculate_unscaled_power_mW(fl::span<const CRGB>(&black, 1));
+                result.baselineMw = fl::framePowerMCUBaselineMilliwatts() +
+                                    dark_per_led * static_cast<uint32_t>(num_leds);
+                result.fullDemandMw = fl::framePowerMCUBaselineMilliwatts() +
+                                      calculate_unscaled_power_mW(
+                                          fl::span<const CRGB>(leds.data(), num_leds));
+                result.expectedScale =
+                    calculate_max_brightness_for_power_mW(255, config.max_power_mw);
+            }
+
             // Capture RX data
             size_t bytes_captured =
                 capture(config.rx_channel, config.rx_buffer,
@@ -1381,12 +1403,27 @@ void runMultiTest(const char* test_name,
                     uint8_t actual_g = config.rx_buffer[byte_offset + 1];
                     uint8_t actual_b = config.rx_buffer[byte_offset + 2];
 
+                    // Power-limit mode: the wire carries the source scaled by
+                    // the limiter's brightness. Colour adjustment rounds the
+                    // scalar, so allow 2 codes either way.
+                    int tolerance = 0;
+                    if (config.max_power_mw != 0) {
+                        result.sumRaw += static_cast<uint32_t>(expected_r) + expected_g + expected_b;
+                        result.sumWire += static_cast<uint32_t>(actual_r) + actual_g + actual_b;
+                        const uint8_t s = static_cast<uint8_t>(result.expectedScale);
+                        expected_r = scale8(expected_r, s);
+                        expected_g = scale8(expected_g, s);
+                        expected_b = scale8(expected_b, s);
+                        tolerance = 2;
+                    }
+
                     // Per-byte comparison for byte-level stats
                     uint8_t exp_bytes[3] = {expected_r, expected_g, expected_b};
                     uint8_t act_bytes[3] = {actual_r, actual_g, actual_b};
                     bool led_mismatch = false;
                     for (int ch = 0; ch < 3; ch++) {
-                        if (exp_bytes[ch] != act_bytes[ch]) {
+                        const int diff = static_cast<int>(exp_bytes[ch]) - act_bytes[ch];
+                        if (diff > tolerance || diff < -tolerance) {
                             result.mismatchedBytes++;
                             if ((exp_bytes[ch] ^ act_bytes[ch]) == 0x01) {
                                 result.lsbOnlyErrors++;
@@ -1545,6 +1582,31 @@ void runMultiTest(const char* test_name,
 
 // AutoResearch a specific chipset timing configuration
 // Creates channels, runs tests, destroys channels
+// Applies an AutoResearch power budget for one chipset run and always
+// restores unlimited power and the default dither on exit. Dither is off so
+// the wire bytes are a pure function of the limiter's scalar (#5139).
+class ScopedAutoResearchPowerLimit {
+  public:
+    explicit ScopedAutoResearchPowerLimit(uint32_t max_power_mw) FL_NO_EXCEPT
+        : mActive(max_power_mw != 0) {
+        if (mActive) {
+            FastLED.setDither(DISABLE_DITHER);
+            FastLED.setMaxPowerInMilliWatts(max_power_mw);
+        }
+    }
+    // CFastLED has no dither getter, so this restores BINARY_DITHER, FastLED's
+    // default; nothing else in AutoResearch changes the global dither mode.
+    // The harness never sets a power budget either, so clearing is a restore.
+    ~ScopedAutoResearchPowerLimit() FL_NO_EXCEPT {
+        if (mActive) {
+            FastLED.clear(ClearFlags::POWER_SETTINGS);
+            FastLED.setDither(BINARY_DITHER);
+        }
+    }
+  private:
+    bool mActive;
+};
+
 void autoResearchChipsetTiming(fl::AutoResearchConfig& config,
                            int& driver_total, int& driver_passed,
                            uint32_t& out_show_duration_ms,
@@ -1602,6 +1664,7 @@ void autoResearchChipsetTiming(fl::AutoResearchConfig& config,
     }
 
     FastLED.setBrightness(255);
+    ScopedAutoResearchPowerLimit power_limit(config.max_power_mw);
 
     // Pre-initialize the TX engine to avoid first-call setup delays
     for (size_t i = 0; i < config.tx_configs.size(); i++) {
@@ -1719,6 +1782,7 @@ void autoResearchChipsetTimingLegacy(fl::AutoResearchConfig& config,
     }
 
     FastLED.setBrightness(255);
+    ScopedAutoResearchPowerLimit power_limit(config.max_power_mw);
 
     // Pre-initialize the TX engine to avoid first-call setup delays
     for (size_t i = 0; i < config.tx_configs.size(); i++) {

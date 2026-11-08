@@ -748,6 +748,23 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
         }
     }
 
+    // 4c. Extract maxPowerMw (optional, default: 0 = unlimited). Applies
+    // FastLED.setMaxPowerInMilliWatts() for the run and checks the wire
+    // against the limiter's brightness (#5139). Single clockless RGB lane
+    // only: the oracle models lane 0's pixels and the MCU baseline alone.
+    uint32_t max_power_mw = 0;
+    if (config.contains("maxPowerMw")) {
+        if (!config["maxPowerMw"].is_int() ||
+            config["maxPowerMw"].as_int().value() < 0 ||
+            config["maxPowerMw"].as_int().value() > 10000000) {
+            response.set("success", false);
+            response.set("error", "InvalidMaxPowerMw");
+            response.set("message", "maxPowerMw must be an integer in [0, 10000000]");
+            return response;
+        }
+        max_power_mw = static_cast<uint32_t>(config["maxPowerMw"].as_int().value());
+    }
+
     // 5. Extract pinTx (optional, default: use mState->pin_tx)
     int pin_tx = mState->pin_tx;
     if (config.contains("pinTx") && config["pinTx"].is_int()) {
@@ -1301,6 +1318,23 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
         fl::span<const LegacyClocklessChipset>(legacy_chipsets),
         legacy_rgbw
     );
+    autoresearch_config.max_power_mw = max_power_mw;
+    bool legacy_non_ws2812b = false;
+    for (const auto chipset : legacy_chipsets) {
+        if (chipset != LegacyClocklessChipset::WS2812B) {
+            legacy_non_ws2812b = true;  // WS2814 and friends emit RGBW
+        }
+    }
+    if (max_power_mw != 0 &&
+        (lane_sizes.size() != 1 || legacy_rgbw || legacy_non_ws2812b ||
+         is_spi_chipset_driver ||
+         fl::ClocklessEncoder::CLOCKLESS_ENCODER_WS2812 != timing_config.encoder)) {
+        response.set("success", false);
+        response.set("error", "MaxPowerUnsupportedConfig");
+        response.set("message",
+                     "maxPowerMw needs one RGB clockless lane (WS2812B for the legacy API)");
+        return response;
+    }
 
     // Run test with debug output suppressed
     int total_tests = 0;
@@ -1592,6 +1626,25 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
     // passing runs emit just runNumber/totalLeds/totalBytes/passed (#4578).
     const bool ws2814_legacy = use_legacy_api && !legacy_chipsets.empty() &&
                                legacy_chipsets[0] == LegacyClocklessChipset::WS2814;
+    if (max_power_mw != 0 && !run_results.empty()) {
+        // Every frame's limiter decision and wire totals, pass or fail, so
+        // the host can check the policy itself and not only the comparison.
+        fl::json frames = fl::json::array();
+        for (fl::size ri = 0; ri < run_results.size(); ri++) {
+            const auto& rr = run_results[ri];
+            fl::json f = fl::json::object();
+            f.set("passed", rr.passed);
+            f.set("expectedScale", static_cast<int64_t>(rr.expectedScale));
+            f.set("fullDemandMw", static_cast<int64_t>(rr.fullDemandMw));
+            f.set("baselineMw", static_cast<int64_t>(rr.baselineMw));
+            f.set("sumRaw", static_cast<int64_t>(rr.sumRaw));
+            f.set("sumWire", static_cast<int64_t>(rr.sumWire));
+            f.set("mismatchedBytes", static_cast<int64_t>(rr.mismatchedBytes));
+            frames.push_back(f);
+        }
+        response.set("maxPowerMw", static_cast<int64_t>(max_power_mw));
+        response.set("powerFrames", frames);
+    }
     if ((!passed || ws2814_legacy) && !run_results.empty()) {
         fl::json patterns = fl::json::array();
         for (fl::size ri = 0; ri < run_results.size(); ri++) {
