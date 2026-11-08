@@ -25,6 +25,7 @@
 #include "fl/stl/string.h"
 #include "fl/stl/vector.h"
 #include "test.h"
+#include "fl/stl/type_traits.h"
 #include "power_mgt.h"
 #include "platforms/stub/bus_traits.h"
 
@@ -1686,6 +1687,54 @@ FL_TEST_CASE("[#4566] a pre-bound mBus channel matches the dynamic path byte-for
     FL_CHECK_EQ(enqueueEvents, 2);
 }
 
+
+template <typename Config>
+void checkConfigSpecialMembers() {
+    FL_STATIC_ASSERT((fl::is_same<decltype(Config(fl::declval<const Config&>())), Config>::value), "copy constructor");
+    FL_STATIC_ASSERT((fl::is_same<decltype(Config(fl::declval<Config&&>())), Config>::value), "move constructor");
+    FL_STATIC_ASSERT((fl::is_same<decltype(fl::declval<Config&>() = fl::declval<const Config&>()), Config&>::value), "copy assignment");
+    FL_STATIC_ASSERT((fl::is_same<decltype(fl::declval<Config&>() = fl::declval<Config&&>()), Config&>::value), "move assignment");
+}
+
+FL_TEST_CASE("[#5157] typed creation snapshots metadata before fallback callbacks") {
+    CRGB leds[1];
+    ChannelOptions options;
+    options.requestColorManagement(SourceProfile::linearSrgb());
+    ChannelConfig config(makeClockless<TIMING_WS2812_800KHZ>(3), leds, RGB, options);
+    config.mName = fl::string("original");
+    auto& events = ChannelEvents::instance();
+    auto& manager = ChannelManager::instance();
+    const int listener = events.onColorProfileFallback.add(
+        [&](const ColorProfileEvent&) { config.mName = fl::string("changed"); });
+    auto cleanup = fl::make_scope_exit([&]() {
+        events.onColorProfileFallback.remove(listener);
+        manager.clearAllDrivers();
+    });
+    auto channel = TypedChannel<Bus::BIT_BANG, ClocklessChipset>::createWithKnownEncoder(config);
+    FL_REQUIRE(channel != nullptr);
+    FL_CHECK_EQ(config.mName.value(), fl::string("changed"));
+    FL_CHECK_EQ(channel->name(), fl::string("original"));
+}
+
+FL_TEST_CASE("[#5157] typed configs preserve copy and move assignment") {
+    checkConfigSpecialMembers<ChannelConfig>();
+    checkConfigSpecialMembers<ChannelConfigOf<ClocklessChipset>>();
+    checkConfigSpecialMembers<ChannelConfigOf<SpiChipsetConfig>>();
+    CRGB leds[2];
+    ChannelConfigOf<ClocklessChipset> source(makeClockless<TIMING_WS2812_800KHZ>(3), leds, GRB);
+    source.mName = fl::string("assigned");
+    ChannelConfigOf<ClocklessChipset> target(makeClockless<TIMING_WS2812_800KHZ>(4), leds, RGB);
+    target = source;
+    FL_CHECK_EQ(target.chipset.pin, 3);
+    FL_CHECK_EQ(target.rgb_order, GRB);
+    FL_REQUIRE(target.mName.has_value());
+    FL_CHECK_EQ(target.mName.value(), source.mName.value());
+    target = fl::move(source);
+    FL_CHECK_EQ(target.chipset.pin, 3);
+    FL_CHECK_EQ(target.rgb_order, GRB);
+    FL_REQUIRE(target.mName.has_value());
+    FL_CHECK_EQ(target.mName.value(), fl::string("assigned"));
+}
 
 FL_TEST_CASE("[#5157] typed RGB channels accept late direct RGBW and RGBWW options") {
     bool rgbww = false;

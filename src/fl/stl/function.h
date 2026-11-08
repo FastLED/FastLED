@@ -397,29 +397,259 @@ FL_NO_INLINE inline void sortFunctionListPriorities(fl::vector_inlined<int, 16>&
 }
 } // namespace detail
 
-// Partial specialization for function signature syntax: function_list<void(Args...)>
-// Supports: function_list<void()>, function_list<void(float)>, function_list<void(u8, float, float)>, etc.
+namespace detail {
+template <typename Signature, bool Large> class FunctionListImpl;
+
+// A callback activation owns the callable on the dispatch stack. Entries may
+// move or disappear, but never destroy a callable while it is executing.
 template <typename... Args>
-class function_list<void(Args...)> {
+struct FunctionListEntry {
+    using FunctionType = function<void(Args...)>;
+    struct Activation {
+        FunctionListEntry* entry;
+        FunctionType fn;
+        bool valid = true;
+        explicit Activation(FunctionListEntry& value) FL_NO_EXCEPT
+            : entry(&value), fn(fl::move(value.fn)) { value.active = this; }
+        ~Activation() FL_NO_EXCEPT {
+            if (entry) {
+                entry->active = nullptr;
+                if (valid) entry->fn = fl::move(fn);
+                else entry->fn.clear();
+            }
+        }
+    };
+
+    int id;
+    int priority;
+    FunctionType fn;
+    // Borrowed only during synchronous dispatch; moves retarget the activation,
+    // destruction detaches it, and copies clone its actual callable value.
+    Activation* active = nullptr;
+
+    FunctionListEntry() FL_NO_EXCEPT : id(0), priority(0), fn() {}
+    FunctionListEntry(int value, int rank, FunctionType callback) FL_NO_EXCEPT
+        : id(value), priority(rank), fn(fl::move(callback)) {}
+    FunctionListEntry(const FunctionListEntry& other) FL_NO_EXCEPT
+        : id(other.id), priority(other.priority), fn(copyFunction(other)) {}
+    FunctionListEntry(FunctionListEntry&& other) FL_NO_EXCEPT
+        : id(other.id), priority(other.priority), fn(fl::move(other.fn)), active(other.active) {
+        if (active) active->entry = this;
+        other.active = nullptr;
+    }
+    FunctionListEntry& operator=(const FunctionListEntry& other) FL_NO_EXCEPT {
+        if (this != &other) {
+            detach();
+            id = other.id;
+            priority = other.priority;
+            fn = copyFunction(other);
+        }
+        return *this;
+    }
+    FunctionListEntry& operator=(FunctionListEntry&& other) FL_NO_EXCEPT {
+        if (this != &other) {
+            detach();
+            id = other.id;
+            priority = other.priority;
+            fn = fl::move(other.fn);
+            active = other.active;
+            if (active) active->entry = this;
+            other.active = nullptr;
+        }
+        return *this;
+    }
+    ~FunctionListEntry() FL_NO_EXCEPT { detach(); }
+
+    bool isValid() const FL_NO_EXCEPT { return active ? active->valid : bool(fn); }
+    void clear() FL_NO_EXCEPT {
+        if (active) active->valid = false;
+        fn.clear();
+    }
+    void invoke(Args... args) FL_NO_EXCEPT {
+        if (active) active->fn(args...);
+        else {
+            Activation call(*this);
+            call.fn(args...);
+        }
+    }
+  private:
+    static FunctionType copyFunction(const FunctionListEntry& other) FL_NO_EXCEPT {
+        if (!other.isValid()) return FunctionType();
+        return other.active ? other.active->fn : other.fn;
+    }
+    void detach() FL_NO_EXCEPT {
+        if (active) {
+            active->entry = nullptr;
+            active->valid = false;
+            active = nullptr;
+        }
+    }
+};
+
+// Small tiers own their callback vector directly, with no State allocation.
+// Partial specialization for function signature syntax: FunctionListImpl<void(Args...)>
+// Supports: FunctionListImpl<void()>, FunctionListImpl<void(float)>, FunctionListImpl<void(u8, float, float)>, etc.
+template <typename... Args>
+class FunctionListImpl<void(Args...), false> {
   private:
     using FunctionType = function<void(Args...)>;
 
-    struct FunctionEntry {
-        int id;
-        int priority;
-        FunctionType fn;
-
-        FunctionEntry() FL_NO_EXCEPT : id(0), priority(0), fn() {}
-        FunctionEntry(int idParam, int priorityParam, FunctionType fnParam) FL_NO_EXCEPT
-            : id(idParam), priority(priorityParam), fn(fnParam) {}
-    };
+    using FunctionEntry = FunctionListEntry<Args...>;
 
     using FunctionVector = fl::vector<FunctionEntry>;
 
-    using Invoker = void (*)(function_list&, Args...);
+    FunctionVector mFunctions;
+    int mIdCounter = 0;
+
+    u32 mRevision = 0;
+    bool mNeedsCompact = false;  // True when functions have been cleared during invocation
+
+  public:
+    FunctionListImpl() FL_NO_EXCEPT : mFunctions(), mIdCounter(0), mNeedsCompact(false) {}
+    FunctionListImpl(const FunctionListImpl& other) FL_NO_EXCEPT
+        : mFunctions(other.mFunctions), mIdCounter(other.mIdCounter), mNeedsCompact(other.mNeedsCompact) {}
+    FunctionListImpl(FunctionListImpl&& other) FL_NO_EXCEPT
+        : mFunctions(fl::move(other.mFunctions)), mIdCounter(other.mIdCounter), mNeedsCompact(other.mNeedsCompact) { ++other.mRevision; }
+    FunctionListImpl& operator=(const FunctionListImpl& other) FL_NO_EXCEPT {
+        if (this != &other) {
+            mFunctions = other.mFunctions;
+            mIdCounter = other.mIdCounter;
+            mNeedsCompact = other.mNeedsCompact;
+            ++mRevision;
+        }
+        return *this;
+    }
+    FunctionListImpl& operator=(FunctionListImpl&& other) FL_NO_EXCEPT {
+        if (this != &other) {
+            mFunctions = fl::move(other.mFunctions);
+            mIdCounter = other.mIdCounter;
+            mNeedsCompact = other.mNeedsCompact;
+            ++mRevision;
+            ++other.mRevision;
+        }
+        return *this;
+    }
+    ~FunctionListImpl() = default;
+
+    int add(function<void(Args...)> fn, int priority = 0) FL_NO_EXCEPT {
+        int id = mIdCounter++;
+        mFunctions.push_back(FunctionEntry(id, priority, fn));
+        return id;
+    }
+
+    void remove(int id) FL_NO_EXCEPT {
+        // During invocation: clear the function for deferred removal
+        for (size_t i = 0; i < mFunctions.size(); ++i) {
+            if (mFunctions[i].id == id) {
+                mFunctions[i].clear();
+                mNeedsCompact = true;
+            }
+        }
+    }
+
+    void clear() FL_NO_EXCEPT {
+        mFunctions.clear();
+        ++mRevision;
+    }
+
+    // Compact the storage by removing invalid (cleared) callbacks
+    // Used internally after invocation if removals occurred
+    void compact() FL_NO_EXCEPT {
+        if (!mNeedsCompact) return;
+        size_t write_pos = 0;
+        for (size_t read_pos = 0; read_pos < mFunctions.size(); ++read_pos) {
+            if (mFunctions[read_pos].isValid()) {  // Check if function is still valid
+                if (write_pos != read_pos) {
+                    mFunctions[write_pos] = fl::move(mFunctions[read_pos]);
+                }
+                write_pos++;
+            }
+        }
+        mFunctions.resize(write_pos);
+        mNeedsCompact = false;
+    }
+
+    // Size information - counts only valid (non-cleared) functions
+    fl::size size() const FL_NO_EXCEPT {
+        fl::size count = 0;
+        for (const auto& entry : mFunctions) {
+            if (entry.isValid()) {
+                ++count;
+            }
+        }
+        return count;
+    }
+    bool empty() const FL_NO_EXCEPT { return size() == 0; }
+
+    // Boolean conversion for if (callback) checks
+    explicit operator bool() const FL_NO_EXCEPT { return !empty(); }
+
+    void invoke(Args... args) FL_NO_EXCEPT {
+        if (mFunctions.empty()) return;
+        // Compact the storage by removing invalid (cleared) callbacks
+        compact();
+        // Save size at start - newly added callbacks won't execute until next call
+        const size_t invoke_size = mFunctions.size();
+        const u32 revision = mRevision;
+        // Early return if no callbacks
+        if (invoke_size == 0) {
+            return;
+        }
+
+        // Collect unique priorities into a small vector (usually very few unique values)
+        fl::vector_inlined<int, 16> priorities;
+        for (size_t i = 0; i < invoke_size; ++i) {
+            if (!mFunctions[i].isValid()) continue;  // Skip already-cleared functions
+
+            int p = mFunctions[i].priority;
+            // Only add if not already present
+            if (priorities.find(p) == priorities.end()) {
+                priorities.push_back(p);
+            }
+        }
+
+        // Sort priorities (higher priority first) - cheap since there are usually very few unique priorities
+        detail::sortFunctionListPriorities(priorities);
+
+        // Iterate through priorities (highest first), then through functions matching each priority
+        for (size_t p_idx = 0; p_idx < priorities.size(); ++p_idx) {
+            int current_priority = priorities[p_idx];
+            for (size_t i = 0; i < invoke_size; ++i) {
+                if (mRevision != revision || i >= mFunctions.size()) {
+                    return;  // Clear happened.
+                }
+                if (mFunctions[i].isValid() && mFunctions[i].priority == current_priority) {
+                    mFunctions[i].invoke(args...);
+                }
+            }
+        }
+        compact();
+    }
+
+    // Call operator - syntactic sugar for invoke()
+    void operator()(Args... args) FL_NO_EXCEPT {
+        invoke(args...);
+    }
+};
+
+#if FL_PLATFORM_HAS_LARGE_MEMORY
+// Large tiers detach unused callback machinery through lazy owned State.
+// Partial specialization for function signature syntax: FunctionListImpl<void(Args...)>
+// Supports: FunctionListImpl<void()>, FunctionListImpl<void(float)>, FunctionListImpl<void(u8, float, float)>, etc.
+template <typename... Args>
+class FunctionListImpl<void(Args...), true> {
+  private:
+    using FunctionType = function<void(Args...)>;
+
+    using FunctionEntry = FunctionListEntry<Args...>;
+
+    using FunctionVector = fl::vector<FunctionEntry>;
+
+    using Invoker = void (*)(FunctionListImpl&, Args...);
     struct State {
         FunctionVector mFunctions;
         int mIdCounter = 0;
+        u32 mRevision = 0;
         bool mNeedsCompact = false;
         Invoker mInvoker = &invokeSubscribed;
     };
@@ -429,22 +659,22 @@ class function_list<void(Args...)> {
     fl::shared_ptr<State> mState;
 
   public:
-    function_list() FL_NO_EXCEPT = default;
-    function_list(const function_list& other) FL_NO_EXCEPT
+    FunctionListImpl() FL_NO_EXCEPT = default;
+    FunctionListImpl(const FunctionListImpl& other) FL_NO_EXCEPT
         : mState(other.mState ? fl::make_shared<State>(*other.mState)
                               : fl::shared_ptr<State>()) {}
-    function_list(function_list&& other) FL_NO_EXCEPT = default;
+    FunctionListImpl(FunctionListImpl&& other) FL_NO_EXCEPT = default;
     // Copies own independent state. If allocation fails, both construction
     // and assignment produce an empty list (the source is unchanged).
-    function_list& operator=(const function_list& other) FL_NO_EXCEPT {
+    FunctionListImpl& operator=(const FunctionListImpl& other) FL_NO_EXCEPT {
         if (this != &other) {
             mState = other.mState ? fl::make_shared<State>(*other.mState)
                                  : fl::shared_ptr<State>();
         }
         return *this;
     }
-    function_list& operator=(function_list&& other) FL_NO_EXCEPT = default;
-    ~function_list() = default;
+    FunctionListImpl& operator=(FunctionListImpl&& other) FL_NO_EXCEPT = default;
+    ~FunctionListImpl() = default;
 
     int add(function<void(Args...)> fn, int priority = 0) FL_NO_EXCEPT {
         if (!mState) {
@@ -461,7 +691,7 @@ class function_list<void(Args...)> {
         // During invocation: clear the function for deferred removal
         for (size_t i = 0; i < mState->mFunctions.size(); ++i) {
             if (mState->mFunctions[i].id == id) {
-                mState->mFunctions[i].fn.clear();
+                mState->mFunctions[i].clear();
                 mState->mNeedsCompact = true;
             }
         }
@@ -470,6 +700,7 @@ class function_list<void(Args...)> {
     void clear() FL_NO_EXCEPT {
         if (!mState) return;
         mState->mFunctions.clear();
+        ++mState->mRevision;
     }
 
     // Compact the storage by removing invalid (cleared) callbacks
@@ -483,7 +714,7 @@ class function_list<void(Args...)> {
         if (!mState) return 0;
         fl::size count = 0;
         for (const auto& entry : mState->mFunctions) {
-            if (entry.fn) {
+            if (entry.isValid()) {
                 ++count;
             }
         }
@@ -495,7 +726,7 @@ class function_list<void(Args...)> {
     explicit operator bool() const FL_NO_EXCEPT { return !empty(); }
 
   private:
-    static void invokeSubscribed(function_list& self, Args... args) FL_NO_EXCEPT {
+    static void invokeSubscribed(FunctionListImpl& self, Args... args) FL_NO_EXCEPT {
         self.invokeImpl(args...);
     }
 
@@ -503,9 +734,9 @@ class function_list<void(Args...)> {
         if (!state.mNeedsCompact) return;
         size_t write_pos = 0;
         for (size_t read_pos = 0; read_pos < state.mFunctions.size(); ++read_pos) {
-            if (state.mFunctions[read_pos].fn) {  // Check if function is still valid
+            if (state.mFunctions[read_pos].isValid()) {  // Check if function is still valid
                 if (write_pos != read_pos) {
-                    state.mFunctions[write_pos] = state.mFunctions[read_pos];
+                    state.mFunctions[write_pos] = fl::move(state.mFunctions[read_pos]);
                 }
                 write_pos++;
             }
@@ -524,6 +755,7 @@ class function_list<void(Args...)> {
         compactState(*state);
         // Save size at start - newly added callbacks won't execute until next call
         const size_t invoke_size = state->mFunctions.size();
+        const u32 revision = state->mRevision;
         // Early return if no callbacks
         if (invoke_size == 0) {
             return;
@@ -532,7 +764,7 @@ class function_list<void(Args...)> {
         // Collect unique priorities into a small vector (usually very few unique values)
         fl::vector_inlined<int, 16> priorities;
         for (size_t i = 0; i < invoke_size; ++i) {
-            if (!state->mFunctions[i].fn) continue;  // Skip already-cleared functions
+            if (!state->mFunctions[i].isValid()) continue;  // Skip already-cleared functions
 
             int p = state->mFunctions[i].priority;
             // Only add if not already present
@@ -548,11 +780,11 @@ class function_list<void(Args...)> {
         for (size_t p_idx = 0; p_idx < priorities.size(); ++p_idx) {
             int current_priority = priorities[p_idx];
             for (size_t i = 0; i < invoke_size; ++i) {
-                if (mState.get() != state.get() || i >= state->mFunctions.size()) {
+                if (mState.get() != state.get() || state->mRevision != revision || i >= state->mFunctions.size()) {
                     return;  // Cleared or replaced during a callback.
                 }
-                if (state->mFunctions[i].fn && state->mFunctions[i].priority == current_priority) {
-                    state->mFunctions[i].fn(args...);
+                if (state->mFunctions[i].isValid() && state->mFunctions[i].priority == current_priority) {
+                    state->mFunctions[i].invoke(args...);
                 }
             }
         }
@@ -571,6 +803,13 @@ class function_list<void(Args...)> {
         invoke(args...);
     }
 };
+
+#endif
+} // namespace detail
+
+template <typename... Args>
+class function_list<void(Args...)>
+    : public detail::FunctionListImpl<void(Args...), FL_PLATFORM_HAS_LARGE_MEMORY> {};
 
 // Partial specialization for non-void return types: function_list<R(Args...)> where R != void
 // Triggers a compile-time error when attempting to use non-void return types

@@ -165,7 +165,30 @@ using ChipsetVariant = fl::variant<ClocklessChipset, SpiChipsetConfig>;
 /// - Color correction and temperature
 /// - Dithering mode
 /// - RGBW conversion settings
-struct ChannelConfig {
+namespace detail {
+// Share non-trivial member construction; only the concrete chipset is built
+// inline after these constructors return.
+struct ChannelConfigMembers {
+    FL_NO_INLINE ChannelConfigMembers(fl::span<CRGB>, EOrder) FL_NO_EXCEPT;
+    FL_NO_INLINE ChannelConfigMembers(fl::span<CRGB>, EOrder, const ChannelOptions&) FL_NO_EXCEPT;
+    FL_NO_INLINE ChannelConfigMembers(const fl::string&, fl::span<CRGB>, EOrder) FL_NO_EXCEPT;
+    FL_NO_INLINE ChannelConfigMembers(const fl::string&, fl::span<CRGB>, EOrder,
+                         const ChannelOptions&) FL_NO_EXCEPT;
+    FL_NO_INLINE ChannelConfigMembers(const ChannelConfigMembers&) FL_NO_EXCEPT;
+    FL_NO_INLINE ChannelConfigMembers(ChannelConfigMembers&&) FL_NO_EXCEPT;
+    FL_NO_INLINE ChannelConfigMembers& operator=(const ChannelConfigMembers&) FL_NO_EXCEPT;
+    FL_NO_INLINE ChannelConfigMembers& operator=(ChannelConfigMembers&&) FL_NO_EXCEPT;
+    FL_NO_INLINE ~ChannelConfigMembers() FL_NO_EXCEPT;
+
+    fl::span<CRGB> mLeds;
+    EOrder rgb_order = RGB;
+    ChannelOptions options;
+    fl::ScreenMap mScreenMap;
+    fl::optional<fl::string> mName;
+};
+} // namespace detail
+
+struct ChannelConfig : detail::ChannelConfigMembers {
 
     // ========== New Variant-Based Constructors ==========
 
@@ -184,35 +207,25 @@ struct ChannelConfig {
     /// @param rgbOrder RGB channel ordering
     /// @param options Channel options (correction, temperature, dither, affinity)
     FASTLED_FORCE_INLINE ChannelConfig(const ChipsetVariant& chipset, fl::span<CRGB> leds,
-                  EOrder rgbOrder = RGB, const ChannelOptions& options = ChannelOptions()) FL_NO_EXCEPT
-    : mLeds(leds)
-    , rgb_order(rgbOrder)
-    , options(options)
-    , chipset(chipset) {}
+                  EOrder rgbOrder = RGB) FL_NO_EXCEPT
+        : ChannelConfigMembers(leds, rgbOrder), chipset(chipset) {}
+    FASTLED_FORCE_INLINE ChannelConfig(const ChipsetVariant& chipset, fl::span<CRGB> leds,
+                  EOrder rgbOrder, const ChannelOptions& options) FL_NO_EXCEPT
+        : ChannelConfigMembers(leds, rgbOrder, options), chipset(chipset) {}
 
-    /// @brief Constructor with clockless chipset
-    /// @param clockless Clockless chipset configuration
-    /// @param leds LED data array
-    /// @param rgbOrder RGB channel ordering
-    /// @param options Channel options
     FASTLED_FORCE_INLINE ChannelConfig(const ClocklessChipset& clockless, fl::span<CRGB> leds,
-                  EOrder rgbOrder = RGB, const ChannelOptions& options = ChannelOptions()) FL_NO_EXCEPT
-    : mLeds(leds)
-    , rgb_order(rgbOrder)
-    , options(options)
-    , chipset(clockless) {}
+                  EOrder rgbOrder = RGB) FL_NO_EXCEPT
+        : ChannelConfigMembers(leds, rgbOrder), chipset(clockless) {}
+    FASTLED_FORCE_INLINE ChannelConfig(const ClocklessChipset& clockless, fl::span<CRGB> leds,
+                  EOrder rgbOrder, const ChannelOptions& options) FL_NO_EXCEPT
+        : ChannelConfigMembers(leds, rgbOrder, options), chipset(clockless) {}
 
-    /// @brief Constructor with SPI chipset
-    /// @param spi SPI chipset configuration
-    /// @param leds LED data array
-    /// @param rgbOrder RGB channel ordering
-    /// @param options Channel options
     FASTLED_FORCE_INLINE ChannelConfig(const SpiChipsetConfig& spi, fl::span<CRGB> leds,
-                  EOrder rgbOrder = RGB, const ChannelOptions& options = ChannelOptions()) FL_NO_EXCEPT
-    : mLeds(leds)
-    , rgb_order(rgbOrder)
-    , options(options)
-    , chipset(spi) {}
+                  EOrder rgbOrder = RGB) FL_NO_EXCEPT
+        : ChannelConfigMembers(leds, rgbOrder), chipset(spi) {}
+    FASTLED_FORCE_INLINE ChannelConfig(const SpiChipsetConfig& spi, fl::span<CRGB> leds,
+                  EOrder rgbOrder, const ChannelOptions& options) FL_NO_EXCEPT
+        : ChannelConfigMembers(leds, rgbOrder, options), chipset(spi) {}
 
     // ========== Backwards-Compatible Constructors (Deprecated) ==========
 
@@ -220,29 +233,29 @@ struct ChannelConfig {
     /// @deprecated Use ClocklessChipset constructor instead
     /// @note This constructor creates a ClocklessChipset internally
     template<typename TIMING>
-    ChannelConfig(int pin, fl::span<CRGB> leds, EOrder rgbOrder = RGB,
-                  const ChannelOptions& options = ChannelOptions())
- FL_NO_EXCEPT : ChannelConfig(makeClockless<TIMING>(pin), leds, rgbOrder, options) {}
+    FASTLED_FORCE_INLINE ChannelConfig(int pin, fl::span<CRGB> leds, EOrder rgbOrder = RGB)
+        FL_NO_EXCEPT : ChannelConfig(makeClockless<TIMING>(pin), leds, rgbOrder) {}
+    template<typename TIMING>
+    FASTLED_FORCE_INLINE ChannelConfig(int pin, fl::span<CRGB> leds, EOrder rgbOrder,
+                                      const ChannelOptions& options)
+        FL_NO_EXCEPT : ChannelConfig(makeClockless<TIMING>(pin), leds, rgbOrder, options) {}
 
-    /// @brief Basic constructor with timing (backwards compatibility)
-    /// @deprecated Use ClocklessChipset constructor instead
-    /// @note This constructor creates a ClocklessChipset internally
-    FASTLED_FORCE_INLINE ChannelConfig(int pin, const ChipsetTimingConfig& timing, fl::span<CRGB> leds,
-                  EOrder rgbOrder = RGB, const ChannelOptions& options = ChannelOptions()) FL_NO_EXCEPT
-    : mLeds(leds)
-    , rgb_order(rgbOrder)
-    , options(options)
-    , chipset(ClocklessChipset(pin, timing)) {}
+    FASTLED_FORCE_INLINE ChannelConfig(int pin, const ChipsetTimingConfig& timing,
+                  fl::span<CRGB> leds, EOrder rgbOrder = RGB) FL_NO_EXCEPT
+        : ChannelConfigMembers(leds, rgbOrder), chipset(ClocklessChipset(pin, timing)) {}
+    FASTLED_FORCE_INLINE ChannelConfig(int pin, const ChipsetTimingConfig& timing,
+                  fl::span<CRGB> leds, EOrder rgbOrder, const ChannelOptions& options) FL_NO_EXCEPT
+        : ChannelConfigMembers(leds, rgbOrder, options), chipset(ClocklessChipset(pin, timing)) {}
 
     // Copy constructor (needed because of variant)
     ChannelConfig(const ChannelConfig& other) FL_NO_EXCEPT;
 
     // Move constructor (needed because of variant)
     ChannelConfig(ChannelConfig&& other) FL_NO_EXCEPT;
+    ~ChannelConfig() FL_NO_EXCEPT;
 
-    // Note: Assignment operators deleted because const members cannot be reassigned
-    ChannelConfig& operator=(const ChannelConfig&) FL_NO_EXCEPT = delete;
-    ChannelConfig& operator=(ChannelConfig&&) FL_NO_EXCEPT = delete;
+    FL_NO_INLINE ChannelConfig& operator=(const ChannelConfig&) FL_NO_EXCEPT;
+    FL_NO_INLINE ChannelConfig& operator=(ChannelConfig&&) FL_NO_EXCEPT;
 
     // ========== Accessors ==========
 
@@ -279,25 +292,7 @@ struct ChannelConfig {
     /// @return true if screen map has been set with LEDs
     bool hasScreenMap() const FL_NO_EXCEPT { return mScreenMap.getLength() > 0; }
 
-    // ========== Data Members ==========
-
-    /// LED data array
-    fl::span<CRGB> mLeds;
-
-    /// RGB channel ordering
-    EOrder rgb_order = RGB;
-
-    /// Optional channel settings (correction, temperature, dither, rgbw, affinity)
-    ChannelOptions options;
-
-    /// Screen mapping
-    fl::ScreenMap mScreenMap;
-
-    /// Optional user-specified name (if not set, Channel generates one automatically)
-    fl::optional<fl::string> mName;
-
-    // Initialize the concrete chipset after options and ScreenMap so a known
-    // encoder stays visible without a reset-and-assign construction step.
+    // Only trivial chipset construction remains at the inline seam.
     ChipsetVariant chipset;
 };
 
@@ -322,23 +317,25 @@ FASTLED_SHARED_PTR_STRUCT(ChannelConfig);
 ///
 /// @tparam Chipset One of `fl::ClocklessChipset` or `fl::SpiChipsetConfig`.
 template<typename Chipset>
-struct ChannelConfigOf {
+struct ChannelConfigOf : detail::ChannelConfigMembers {
     /// @brief Construct from a typed chipset, LEDs span, and optional metadata.
     ChannelConfigOf(const Chipset& chipset, fl::span<CRGB> leds,
-                    EOrder rgbOrder = RGB,
-                    const ChannelOptions& options = ChannelOptions()) FL_NO_EXCEPT
-        : chipset(chipset), mLeds(leds), rgb_order(rgbOrder), options(options) {}
-
-    /// @brief Named-channel constructor.
+                    EOrder rgbOrder = RGB) FL_NO_EXCEPT
+        : ChannelConfigMembers(leds, rgbOrder), chipset(chipset) {}
+    ChannelConfigOf(const Chipset& chipset, fl::span<CRGB> leds,
+                    EOrder rgbOrder, const ChannelOptions& options) FL_NO_EXCEPT
+        : ChannelConfigMembers(leds, rgbOrder, options), chipset(chipset) {}
     ChannelConfigOf(const fl::string& name, const Chipset& chipset,
-                    fl::span<CRGB> leds, EOrder rgbOrder = RGB,
-                    const ChannelOptions& options = ChannelOptions()) FL_NO_EXCEPT
-        : chipset(chipset), mLeds(leds), rgb_order(rgbOrder), options(options), mName(name) {}
+                    fl::span<CRGB> leds, EOrder rgbOrder = RGB) FL_NO_EXCEPT
+        : ChannelConfigMembers(name, leds, rgbOrder), chipset(chipset) {}
+    ChannelConfigOf(const fl::string& name, const Chipset& chipset,
+                    fl::span<CRGB> leds, EOrder rgbOrder, const ChannelOptions& options) FL_NO_EXCEPT
+        : ChannelConfigMembers(name, leds, rgbOrder, options), chipset(chipset) {}
 
     /// @brief Implicit conversion to the type-erased `ChannelConfig` so the
     ///        existing non-template `Channel::create()` factory accepts a
     ///        templated config without any per-call-site change.
-    operator ChannelConfig() const FL_NO_EXCEPT {
+    FL_NO_INLINE operator ChannelConfig() const FL_NO_EXCEPT {
         ChannelConfig cfg(chipset, mLeds, rgb_order, options);
         cfg.mScreenMap = mScreenMap;
         if (mName.has_value()) {
@@ -357,20 +354,7 @@ struct ChannelConfigOf {
     /// parameter is the source of truth.
     Chipset chipset;
 
-    /// LED data span.
-    fl::span<CRGB> mLeds;
 
-    /// RGB channel ordering.
-    EOrder rgb_order = RGB;
-
-    /// Optional channel settings (correction, temperature, dither, rgbw, affinity).
-    ChannelOptions options;
-
-    /// Screen mapping (for JS canvas visualization).
-    fl::ScreenMap mScreenMap;
-
-    /// Optional user-specified name. If unset, `Channel` auto-generates one.
-    fl::optional<fl::string> mName;
 };
 
 /// @brief Multi-channel LED configuration

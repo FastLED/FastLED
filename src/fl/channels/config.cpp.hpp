@@ -5,6 +5,25 @@
 
 namespace fl {
 
+namespace detail {
+ChannelConfigMembers::ChannelConfigMembers(fl::span<CRGB> leds, EOrder order) FL_NO_EXCEPT
+    : mLeds(leds), rgb_order(order) {}
+ChannelConfigMembers::ChannelConfigMembers(fl::span<CRGB> leds, EOrder order,
+                                         const ChannelOptions& opts) FL_NO_EXCEPT
+    : mLeds(leds), rgb_order(order), options(opts) {}
+ChannelConfigMembers::ChannelConfigMembers(const fl::string& name, fl::span<CRGB> leds,
+                                         EOrder order) FL_NO_EXCEPT
+    : mLeds(leds), rgb_order(order), mName(name) {}
+ChannelConfigMembers::ChannelConfigMembers(const fl::string& name, fl::span<CRGB> leds,
+                                         EOrder order, const ChannelOptions& opts) FL_NO_EXCEPT
+    : mLeds(leds), rgb_order(order), options(opts), mName(name) {}
+ChannelConfigMembers::ChannelConfigMembers(const ChannelConfigMembers&) FL_NO_EXCEPT = default;
+ChannelConfigMembers::ChannelConfigMembers(ChannelConfigMembers&&) FL_NO_EXCEPT = default;
+ChannelConfigMembers& ChannelConfigMembers::operator=(const ChannelConfigMembers&) FL_NO_EXCEPT = default;
+ChannelConfigMembers& ChannelConfigMembers::operator=(ChannelConfigMembers&&) FL_NO_EXCEPT = default;
+ChannelConfigMembers::~ChannelConfigMembers() FL_NO_EXCEPT = default;
+} // namespace detail
+
 // ========== New Variant-Based Constructors ==========
 
 ChannelConfig::ChannelConfig(const fl::string& name, const ChipsetVariant& chipset,
@@ -16,20 +35,14 @@ ChannelConfig::ChannelConfig(const fl::string& name, const ChipsetVariant& chips
 // ========== Backwards-Compatible Constructors ==========
 
 ChannelConfig::ChannelConfig(const ChannelConfig& other) FL_NO_EXCEPT
-    : mLeds(other.mLeds)
-    , rgb_order(other.rgb_order)
-    , options(other.options)
-    , mScreenMap(other.mScreenMap)
-    , mName(other.mName)
-    , chipset(other.chipset) {}
+    : ChannelConfigMembers(other), chipset(other.chipset) {}
 
 ChannelConfig::ChannelConfig(ChannelConfig&& other) FL_NO_EXCEPT
-    : mLeds(other.mLeds)
-    , rgb_order(other.rgb_order)
-    , options(fl::move(other.options))
-    , mScreenMap(fl::move(other.mScreenMap))
-    , mName(fl::move(other.mName))
-    , chipset(fl::move(other.chipset)) {}
+    : ChannelConfigMembers(fl::move(other)), chipset(fl::move(other.chipset)) {}
+
+ChannelConfig::~ChannelConfig() FL_NO_EXCEPT = default;
+ChannelConfig& ChannelConfig::operator=(const ChannelConfig&) FL_NO_EXCEPT = default;
+ChannelConfig& ChannelConfig::operator=(ChannelConfig&&) FL_NO_EXCEPT = default;
 
 // ========== Accessor Methods ==========
 

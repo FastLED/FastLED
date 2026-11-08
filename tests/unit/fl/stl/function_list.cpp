@@ -546,6 +546,111 @@ FL_TEST_CASE("function_list - reassignment during dispatch retains the active st
     FL_CHECK_EQ(tail, action == 2 ? 2 : 0);
 }
 
+template <typename List>
+void runningCallbackLifetime(bool grow) {
+    List callbacks;
+    int result = 0;
+    auto captured = fl::make_shared<int>(73);
+    callbacks.add([captured, &callbacks, &result, grow]() {
+        auto& list = callbacks;
+        auto& output = result;
+        if (grow) {
+            for (int i = 0; i < 64; ++i) list.add([]() {});
+        } else {
+            list.clear();
+        }
+        output = *captured;
+    });
+    captured.reset();
+    callbacks();
+    FL_CHECK_EQ(result, 73);
+}
+
+FL_TEST_CASE("function_list - running callback survives clear and vector growth") {
+    using SmallList = fl::detail::FunctionListImpl<void(), false>;
+    FL_SUBCASE("small reallocate then read capture") { runningCallbackLifetime<SmallList>(true); }
+    FL_SUBCASE("small clear then read capture") { runningCallbackLifetime<SmallList>(false); }
+    FL_SUBCASE("large clear then read capture") { runningCallbackLifetime<function_list<void()>>(false); }
+    FL_SUBCASE("large reallocate then read capture") { runningCallbackLifetime<function_list<void()>>(true); }
+}
+
+#if defined(FASTLED_TEST_ALLOC_FAILURE_WRAP)
+FL_TEST_CASE("function_list - small tier add has no State allocation failure") {
+    fl::detail::FunctionListImpl<void(), false> callbacks;
+    int calls = 0;
+    failFunctionListAllocation = true;
+    const int id = callbacks.add([&]() { ++calls; });
+    callbacks();
+    failFunctionListAllocation = false;
+    FL_CHECK_EQ(id, 0);
+    FL_CHECK_EQ(calls, 1);
+}
+#endif
+
+template <typename List>
+void mutableCallbackAndCopy() {
+    List callbacks;
+    List copied;
+    int observed = 0;
+    struct Counter {
+        fl::shared_ptr<int> value;
+        List* list;
+        List* copy;
+        int* output;
+        Counter(List& source, List& target, int& result) FL_NO_EXCEPT
+            : value(fl::make_shared<int>(0)), list(&source), copy(&target), output(&result) {}
+        Counter(const Counter& other) FL_NO_EXCEPT
+            : value(fl::make_shared<int>(*other.value)), list(other.list), copy(other.copy), output(other.output) {}
+        Counter(Counter&&) FL_NO_EXCEPT = default;
+        void operator()() const FL_NO_EXCEPT {
+            ++*value;
+            if (*value == 1) {
+                for (int i = 0; i < 64; ++i) list->add([]() {});
+                ++*value;
+                *copy = *list;
+            }
+            *output = *value;
+        }
+    };
+    callbacks.add(Counter(callbacks, copied, observed));
+    callbacks();
+    FL_CHECK_EQ(observed, 2);
+    callbacks();
+    FL_CHECK_EQ(observed, 3);
+    copied();
+    FL_CHECK_EQ(observed, 3);
+    callbacks();
+    FL_CHECK_EQ(observed, 4);
+}
+
+FL_TEST_CASE("function_list - active owned callbacks keep state and copy safely") {
+    FL_SUBCASE("small tier") { mutableCallbackAndCopy<fl::detail::FunctionListImpl<void(), false>>(); }
+    FL_SUBCASE("large tier") { mutableCallbackAndCopy<function_list<void()>>(); }
+}
+
+template <typename List>
+void clearAndRefillDuringDispatch() {
+    List callbacks;
+    int oldTail = 0;
+    int added = 0;
+    callbacks.add([&]() {
+        callbacks.clear();
+        callbacks.add([&]() { ++added; });
+        callbacks.add([&]() { ++added; });
+    });
+    callbacks.add([&]() { ++oldTail; });
+    callbacks();
+    FL_CHECK_EQ(oldTail, 0);
+    FL_CHECK_EQ(added, 0);
+    callbacks();
+    FL_CHECK_EQ(added, 2);
+}
+
+FL_TEST_CASE("function_list - clear and refill defers new callbacks") {
+    FL_SUBCASE("small tier") { clearAndRefillDuringDispatch<fl::detail::FunctionListImpl<void(), false>>(); }
+    FL_SUBCASE("large tier") { clearAndRefillDuringDispatch<function_list<void()>>(); }
+}
+
 // Compile-time error test - commented out because it should NOT compile
 // Uncomment this test to verify that non-void return types trigger static_assert
 /*
