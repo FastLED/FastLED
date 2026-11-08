@@ -238,11 +238,12 @@ fl::string Channel::makeName(i32 id, const fl::optional<fl::string>& configName)
 }
 
 ChannelPtr Channel::create(const ChannelConfig &config) FL_NO_EXCEPT {
-    return createWithEncoder(config, EncoderAvailability::select(config.chipset));
+    return createWithEncoder(config, EncoderAvailability::select(config.chipset),
+                             config.options.mBus, config.options.mBusWhich);
 }
 
 ChannelPtr Channel::createWithEncoder(const ChannelConfig &config,
-                                      PixelEncoder encoder) FL_NO_EXCEPT {
+                                      PixelEncoder encoder, Bus bus, u8 which) FL_NO_EXCEPT {
     // Late binding strategy: Always create with empty driver
     // Engine binding happens on first showPixels() call:
     // - Affinity channels: Look up by name and cache
@@ -250,6 +251,12 @@ ChannelPtr Channel::createWithEncoder(const ChannelConfig &config,
 
     auto channel = fl::make_shared<Channel>(config.chipset, config.mLeds,
                                               config.rgb_order, config.options, encoder);
+    channel->mBus = bus;
+    channel->mBusWhich = which;
+    channel->mSettings.mBus = bus;
+    channel->mSettings.mBusWhich = which;
+    // Consume every caller-owned field before any callback can mutate it.
+    auto name = makeName(channel->mId, config.mName);
     auto& events = ChannelEvents::instance();
 #if FL_COLOR_PROFILE_RUNTIME
     if (channel->reconcileColorProfile(config.options)) {
@@ -257,7 +264,7 @@ ChannelPtr Channel::createWithEncoder(const ChannelConfig &config,
             ColorProfileEvent{channel->id(), channel->colorProfileStatus(), {}});
     }
 #endif
-    channel->mName = makeName(channel->mId, config.mName);
+    channel->mName = fl::move(name);
     events.onChannelCreated(*channel);
     return channel;
 }

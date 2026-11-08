@@ -1788,8 +1788,7 @@ public:
 	}
 
 private:
-    using ChannelFactory = fl::ChannelPtr (*)(const fl::ChannelConfig&);
-    FL_NO_INLINE static fl::ChannelPtr addWithFactory(const fl::ChannelConfig&, ChannelFactory) FL_NO_EXCEPT;
+    FL_NO_INLINE static fl::ChannelPtr addWithFactory(const fl::ChannelConfig&, fl::ChannelFactory) FL_NO_EXCEPT;
 
 	// Forward shims for the tiered-wait spin budget (#2818). Full impl
 	// lives in src/fl/channels/detail/wait_spin_budget.{h,cpp.hpp}.

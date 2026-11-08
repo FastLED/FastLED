@@ -400,408 +400,244 @@ FL_NO_INLINE inline void sortFunctionListPriorities(fl::vector_inlined<int, 16>&
 namespace detail {
 template <typename Signature, bool Large> class FunctionListImpl;
 
-// A callback activation owns the callable on the dispatch stack. Entries may
-// move or disappear, but never destroy a callable while it is executing.
+// Entries never move or destroy their callable during dispatch. Mutations mark
+// entries dead or append to pending storage; the outermost invocation commits
+// those changes after every running callback has returned.
 template <typename... Args>
 struct FunctionListEntry {
     using FunctionType = function<void(Args...)>;
-    struct Activation {
-        FunctionListEntry* entry;
-        FunctionType fn;
-        bool valid = true;
-        explicit Activation(FunctionListEntry& value) FL_NO_EXCEPT
-            : entry(&value), fn(fl::move(value.fn)) { value.active = this; }
-        ~Activation() FL_NO_EXCEPT {
-            if (entry) {
-                entry->active = nullptr;
-                if (valid) entry->fn = fl::move(fn);
-                else entry->fn.clear();
-            }
-        }
-    };
-
     int id;
     int priority;
     FunctionType fn;
-    // Borrowed only during synchronous dispatch; moves retarget the activation,
-    // destruction detaches it, and copies clone its actual callable value.
-    Activation* active = nullptr;
-
-    FunctionListEntry() FL_NO_EXCEPT : id(0), priority(0), fn() {}
+    FunctionListEntry() FL_NO_EXCEPT : id(-1), priority(0), fn() {}
     FunctionListEntry(int value, int rank, FunctionType callback) FL_NO_EXCEPT
         : id(value), priority(rank), fn(fl::move(callback)) {}
-    FunctionListEntry(const FunctionListEntry& other) FL_NO_EXCEPT
-        : id(other.id), priority(other.priority), fn(copyFunction(other)) {}
-    FunctionListEntry(FunctionListEntry&& other) FL_NO_EXCEPT
-        : id(other.id), priority(other.priority), fn(fl::move(other.fn)), active(other.active) {
-        if (active) active->entry = this;
-        other.active = nullptr;
-    }
-    FunctionListEntry& operator=(const FunctionListEntry& other) FL_NO_EXCEPT {
-        if (this != &other) {
-            detach();
-            id = other.id;
-            priority = other.priority;
-            fn = copyFunction(other);
-        }
-        return *this;
-    }
-    FunctionListEntry& operator=(FunctionListEntry&& other) FL_NO_EXCEPT {
-        if (this != &other) {
-            detach();
-            id = other.id;
-            priority = other.priority;
-            fn = fl::move(other.fn);
-            active = other.active;
-            if (active) active->entry = this;
-            other.active = nullptr;
-        }
-        return *this;
-    }
-    ~FunctionListEntry() FL_NO_EXCEPT { detach(); }
-
-    bool isValid() const FL_NO_EXCEPT { return active ? active->valid : bool(fn); }
-    void clear() FL_NO_EXCEPT {
-        if (active) active->valid = false;
-        fn.clear();
-    }
-    void invoke(Args... args) FL_NO_EXCEPT {
-        if (active) active->fn(args...);
-        else {
-            Activation call(*this);
-            call.fn(args...);
-        }
-    }
-  private:
-    static FunctionType copyFunction(const FunctionListEntry& other) FL_NO_EXCEPT {
-        if (!other.isValid()) return FunctionType();
-        return other.active ? other.active->fn : other.fn;
-    }
-    void detach() FL_NO_EXCEPT {
-        if (active) {
-            active->entry = nullptr;
-            active->valid = false;
-            active = nullptr;
-        }
-    }
+    bool isValid() const FL_NO_EXCEPT { return id >= 0 && bool(fn); }
+    void clear() FL_NO_EXCEPT { id = -1; }
 };
 
-// Small tiers own their callback vector directly, with no State allocation.
-// Partial specialization for function signature syntax: FunctionListImpl<void(Args...)>
-// Supports: FunctionListImpl<void()>, FunctionListImpl<void(float)>, FunctionListImpl<void(u8, float, float)>, etc.
+// Small tiers own their vectors directly and never allocate a State. The same
+// mutation/dispatch implementation is also used inside large-tier owned State.
 template <typename... Args>
 class FunctionListImpl<void(Args...), false> {
-  private:
-    using FunctionType = function<void(Args...)>;
-
+    template <typename, bool> friend class FunctionListImpl;
     using FunctionEntry = FunctionListEntry<Args...>;
-
     using FunctionVector = fl::vector<FunctionEntry>;
-
     FunctionVector mFunctions;
+    FunctionVector mPending;
     int mIdCounter = 0;
-
     u32 mRevision = 0;
-    bool mNeedsCompact = false;  // True when functions have been cleared during invocation
+    unsigned mDepth = 0;
+    bool mNeedsCompact = false;
+
+    struct DispatchGuard {
+        FunctionListImpl& list;
+        explicit DispatchGuard(FunctionListImpl& value) FL_NO_EXCEPT : list(value) { ++list.mDepth; }
+        ~DispatchGuard() FL_NO_EXCEPT {
+            if (--list.mDepth == 0) list.compact();
+        }
+    };
+
+    void copyFrom(const FunctionListImpl& other) FL_NO_EXCEPT {
+        for (const auto& entry : other.mFunctions) {
+            if (entry.isValid()) mFunctions.push_back(entry);
+        }
+        for (const auto& entry : other.mPending) {
+            if (entry.isValid()) mFunctions.push_back(entry);
+        }
+        mIdCounter = other.mIdCounter;
+    }
+    void replaceWith(FunctionListImpl&& replacement) FL_NO_EXCEPT {
+        ++mRevision;
+        mIdCounter = replacement.mIdCounter;
+        if (mDepth) {
+            // Keep the old vector, including running callbacks, alive. The
+            // replacement becomes visible after this dispatch tree returns.
+            for (auto& entry : mFunctions) entry.clear();
+            for (auto& entry : mPending) entry.clear();
+            for (auto& entry : replacement.mFunctions) mPending.push_back(fl::move(entry));
+            mNeedsCompact = true;
+        } else {
+            mFunctions = fl::move(replacement.mFunctions);
+            mPending.clear();
+            mNeedsCompact = false;
+        }
+    }
 
   public:
-    FunctionListImpl() FL_NO_EXCEPT : mFunctions(), mIdCounter(0), mNeedsCompact(false) {}
-    FunctionListImpl(const FunctionListImpl& other) FL_NO_EXCEPT
-        : mFunctions(other.mFunctions), mIdCounter(other.mIdCounter), mNeedsCompact(other.mNeedsCompact) {}
-    FunctionListImpl(FunctionListImpl&& other) FL_NO_EXCEPT
-        : mFunctions(fl::move(other.mFunctions)), mIdCounter(other.mIdCounter), mNeedsCompact(other.mNeedsCompact) { ++other.mRevision; }
-    FunctionListImpl& operator=(const FunctionListImpl& other) FL_NO_EXCEPT {
-        if (this != &other) {
-            mFunctions = other.mFunctions;
+    FunctionListImpl() FL_NO_EXCEPT = default;
+    FunctionListImpl(const FunctionListImpl& other) FL_NO_EXCEPT { copyFrom(other); }
+    FunctionListImpl(FunctionListImpl&& other) FL_NO_EXCEPT {
+        if (other.mDepth) {
+            // Moving an inline-owned list cannot relocate an active callable.
+            copyFrom(other);
+            other.clear();
+        } else {
+            mFunctions = fl::move(other.mFunctions);
+            mPending = fl::move(other.mPending);
             mIdCounter = other.mIdCounter;
             mNeedsCompact = other.mNeedsCompact;
-            ++mRevision;
+            ++other.mRevision;
         }
+    }
+    FunctionListImpl& operator=(const FunctionListImpl& other) FL_NO_EXCEPT {
+        if (this != &other) replaceWith(FunctionListImpl(other));
+        return *this;
+    }
+    FunctionListImpl& operator=(FunctionListImpl&& other) FL_NO_EXCEPT {
+        if (this != &other) replaceWith(FunctionListImpl(fl::move(other)));
+        return *this;
+    }
+
+    int add(function<void(Args...)> fn, int priority = 0) FL_NO_EXCEPT {
+        int id = mIdCounter++;
+        auto& destination = mDepth ? mPending : mFunctions;
+        destination.push_back(FunctionEntry(id, priority, fl::move(fn)));
+        return id;
+    }
+    void remove(int id) FL_NO_EXCEPT {
+        for (auto& entry : mFunctions) {
+            if (entry.id == id) {
+                entry.clear();
+                if (!mDepth) entry.fn.clear();
+                mNeedsCompact = true;
+            }
+        }
+        for (auto& entry : mPending) {
+            if (entry.id == id) entry.clear();
+        }
+    }
+    void clear() FL_NO_EXCEPT {
+        ++mRevision;
+        if (mDepth) {
+            for (auto& entry : mFunctions) entry.clear();
+            for (auto& entry : mPending) entry.clear();
+            mNeedsCompact = true;
+        } else {
+            mPending.clear();
+            mFunctions.clear();
+            mNeedsCompact = false;
+        }
+    }
+    void compact() FL_NO_EXCEPT {
+        if (mDepth) return;
+        if (mNeedsCompact) {
+            size_t write = 0;
+            for (size_t read = 0; read < mFunctions.size(); ++read) {
+                if (mFunctions[read].isValid()) {
+                    if (write != read) mFunctions[write] = fl::move(mFunctions[read]);
+                    ++write;
+                }
+            }
+            mFunctions.resize(write);
+            mNeedsCompact = false;
+        }
+        for (auto& entry : mPending) {
+            if (entry.isValid()) mFunctions.push_back(fl::move(entry));
+        }
+        mPending.clear();
+    }
+    fl::size size() const FL_NO_EXCEPT {
+        fl::size count = 0;
+        for (const auto& entry : mFunctions) if (entry.isValid()) ++count;
+        for (const auto& entry : mPending) if (entry.isValid()) ++count;
+        return count;
+    }
+    bool empty() const FL_NO_EXCEPT { return size() == 0; }
+    explicit operator bool() const FL_NO_EXCEPT { return !empty(); }
+  private:
+    bool isDispatching() const FL_NO_EXCEPT { return mDepth != 0; }
+    void interrupt() FL_NO_EXCEPT { ++mRevision; }
+
+  public:
+    void invoke(Args... args) FL_NO_EXCEPT {
+        if (mFunctions.empty()) return;
+        compact();
+        const size_t invokeSize = mFunctions.size();
+        if (!invokeSize) return;
+        const u32 revision = mRevision;
+        DispatchGuard guard(*this);
+        fl::vector_inlined<int, 16> priorities;
+        for (size_t i = 0; i < invokeSize; ++i) {
+            if (!mFunctions[i].isValid()) continue;
+            int priority = mFunctions[i].priority;
+            if (priorities.find(priority) == priorities.end()) priorities.push_back(priority);
+        }
+        sortFunctionListPriorities(priorities);
+        for (size_t p = 0; p < priorities.size(); ++p) {
+            for (size_t i = 0; i < invokeSize; ++i) {
+                if (mRevision != revision) return;
+                if (mFunctions[i].isValid() && mFunctions[i].priority == priorities[p]) {
+                    mFunctions[i].fn(args...);
+                }
+            }
+        }
+    }
+    void operator()(Args... args) FL_NO_EXCEPT { invoke(args...); }
+};
+
+#if FL_PLATFORM_HAS_LARGE_MEMORY
+FL_NO_INLINE void warnFunctionListAllocationFailure() FL_NO_EXCEPT;
+
+// Large tiers instantiate subscribed callback machinery only on first add().
+template <typename... Args>
+class FunctionListImpl<void(Args...), true> {
+    using Core = FunctionListImpl<void(Args...), false>;
+    using Invoker = void (*)(FunctionListImpl&, Args...);
+    struct State : Core {
+        Invoker mInvoker = &invokeSubscribed;
+    };
+    fl::shared_ptr<State> mState;
+
+    void replaceWith(fl::shared_ptr<State> replacement) FL_NO_EXCEPT {
+        if (mState && mState->isDispatching()) mState->interrupt();
+        mState = fl::move(replacement);
+    }
+    static void invokeSubscribed(FunctionListImpl& self, Args... args) FL_NO_EXCEPT {
+        // Reassignment can release the list's owner, so dispatch retains its
+        // own strong reference until the depth guard commits deferred changes.
+        auto state = self.mState;
+        state->invoke(args...);
+    }
+
+  public:
+    FunctionListImpl() FL_NO_EXCEPT = default;
+    // Copies are independent. Allocation failure produces an empty copy,
+    // consistently for construction and assignment; the source is unchanged.
+    FunctionListImpl(const FunctionListImpl& other) FL_NO_EXCEPT
+        : mState(other.mState ? fl::make_shared<State>(*other.mState) : fl::shared_ptr<State>()) {}
+    FunctionListImpl(FunctionListImpl&& other) FL_NO_EXCEPT : mState(fl::move(other.mState)) {
+        if (mState && mState->isDispatching()) mState->interrupt();
+    }
+    FunctionListImpl& operator=(const FunctionListImpl& other) FL_NO_EXCEPT {
+        if (this != &other) replaceWith(other.mState ? fl::make_shared<State>(*other.mState) : fl::shared_ptr<State>());
         return *this;
     }
     FunctionListImpl& operator=(FunctionListImpl&& other) FL_NO_EXCEPT {
         if (this != &other) {
-            mFunctions = fl::move(other.mFunctions);
-            mIdCounter = other.mIdCounter;
-            mNeedsCompact = other.mNeedsCompact;
-            ++mRevision;
-            ++other.mRevision;
+            if (other.mState && other.mState->isDispatching()) other.mState->interrupt();
+            replaceWith(fl::move(other.mState));
         }
         return *this;
     }
-    ~FunctionListImpl() = default;
-
-    int add(function<void(Args...)> fn, int priority = 0) FL_NO_EXCEPT {
-        int id = mIdCounter++;
-        mFunctions.push_back(FunctionEntry(id, priority, fn));
-        return id;
-    }
-
-    void remove(int id) FL_NO_EXCEPT {
-        // During invocation: clear the function for deferred removal
-        for (size_t i = 0; i < mFunctions.size(); ++i) {
-            if (mFunctions[i].id == id) {
-                mFunctions[i].clear();
-                mNeedsCompact = true;
-            }
-        }
-    }
-
-    void clear() FL_NO_EXCEPT {
-        mFunctions.clear();
-        ++mRevision;
-    }
-
-    // Compact the storage by removing invalid (cleared) callbacks
-    // Used internally after invocation if removals occurred
-    void compact() FL_NO_EXCEPT {
-        if (!mNeedsCompact) return;
-        size_t write_pos = 0;
-        for (size_t read_pos = 0; read_pos < mFunctions.size(); ++read_pos) {
-            if (mFunctions[read_pos].isValid()) {  // Check if function is still valid
-                if (write_pos != read_pos) {
-                    mFunctions[write_pos] = fl::move(mFunctions[read_pos]);
-                }
-                write_pos++;
-            }
-        }
-        mFunctions.resize(write_pos);
-        mNeedsCompact = false;
-    }
-
-    // Size information - counts only valid (non-cleared) functions
-    fl::size size() const FL_NO_EXCEPT {
-        fl::size count = 0;
-        for (const auto& entry : mFunctions) {
-            if (entry.isValid()) {
-                ++count;
-            }
-        }
-        return count;
-    }
-    bool empty() const FL_NO_EXCEPT { return size() == 0; }
-
-    // Boolean conversion for if (callback) checks
-    explicit operator bool() const FL_NO_EXCEPT { return !empty(); }
-
-    void invoke(Args... args) FL_NO_EXCEPT {
-        if (mFunctions.empty()) return;
-        // Compact the storage by removing invalid (cleared) callbacks
-        compact();
-        // Save size at start - newly added callbacks won't execute until next call
-        const size_t invoke_size = mFunctions.size();
-        const u32 revision = mRevision;
-        // Early return if no callbacks
-        if (invoke_size == 0) {
-            return;
-        }
-
-        // Collect unique priorities into a small vector (usually very few unique values)
-        fl::vector_inlined<int, 16> priorities;
-        for (size_t i = 0; i < invoke_size; ++i) {
-            if (!mFunctions[i].isValid()) continue;  // Skip already-cleared functions
-
-            int p = mFunctions[i].priority;
-            // Only add if not already present
-            if (priorities.find(p) == priorities.end()) {
-                priorities.push_back(p);
-            }
-        }
-
-        // Sort priorities (higher priority first) - cheap since there are usually very few unique priorities
-        detail::sortFunctionListPriorities(priorities);
-
-        // Iterate through priorities (highest first), then through functions matching each priority
-        for (size_t p_idx = 0; p_idx < priorities.size(); ++p_idx) {
-            int current_priority = priorities[p_idx];
-            for (size_t i = 0; i < invoke_size; ++i) {
-                if (mRevision != revision || i >= mFunctions.size()) {
-                    return;  // Clear happened.
-                }
-                if (mFunctions[i].isValid() && mFunctions[i].priority == current_priority) {
-                    mFunctions[i].invoke(args...);
-                }
-            }
-        }
-        compact();
-    }
-
-    // Call operator - syntactic sugar for invoke()
-    void operator()(Args... args) FL_NO_EXCEPT {
-        invoke(args...);
-    }
-};
-
-#if FL_PLATFORM_HAS_LARGE_MEMORY
-// Large tiers detach unused callback machinery through lazy owned State.
-// Partial specialization for function signature syntax: FunctionListImpl<void(Args...)>
-// Supports: FunctionListImpl<void()>, FunctionListImpl<void(float)>, FunctionListImpl<void(u8, float, float)>, etc.
-template <typename... Args>
-class FunctionListImpl<void(Args...), true> {
-  private:
-    using FunctionType = function<void(Args...)>;
-
-    using FunctionEntry = FunctionListEntry<Args...>;
-
-    using FunctionVector = fl::vector<FunctionEntry>;
-
-    using Invoker = void (*)(FunctionListImpl&, Args...);
-    struct State {
-        FunctionVector mFunctions;
-        int mIdCounter = 0;
-        u32 mRevision = 0;
-        bool mNeedsCompact = false;
-        Invoker mInvoker = &invokeSubscribed;
-    };
-
-    // The concrete callback storage and its destructor are installed only on
-    // subscription. Empty producers retain just shared_ptr's erased release.
-    fl::shared_ptr<State> mState;
-
-  public:
-    FunctionListImpl() FL_NO_EXCEPT = default;
-    FunctionListImpl(const FunctionListImpl& other) FL_NO_EXCEPT
-        : mState(other.mState ? fl::make_shared<State>(*other.mState)
-                              : fl::shared_ptr<State>()) {}
-    FunctionListImpl(FunctionListImpl&& other) FL_NO_EXCEPT = default;
-    // Copies own independent state. If allocation fails, both construction
-    // and assignment produce an empty list (the source is unchanged).
-    FunctionListImpl& operator=(const FunctionListImpl& other) FL_NO_EXCEPT {
-        if (this != &other) {
-            mState = other.mState ? fl::make_shared<State>(*other.mState)
-                                 : fl::shared_ptr<State>();
-        }
-        return *this;
-    }
-    FunctionListImpl& operator=(FunctionListImpl&& other) FL_NO_EXCEPT = default;
-    ~FunctionListImpl() = default;
-
+    // Returns -1 if the initial State allocation fails; warns once globally.
     int add(function<void(Args...)> fn, int priority = 0) FL_NO_EXCEPT {
         if (!mState) {
             mState = fl::make_shared<State>();
-            if (!mState) return -1;
+            if (!mState) { warnFunctionListAllocationFailure(); return -1; }
         }
-        int id = mState->mIdCounter++;
-        mState->mFunctions.push_back(FunctionEntry(id, priority, fn));
-        return id;
+        return mState->add(fl::move(fn), priority);
     }
-
-    void remove(int id) FL_NO_EXCEPT {
-        if (!mState) return;
-        // During invocation: clear the function for deferred removal
-        for (size_t i = 0; i < mState->mFunctions.size(); ++i) {
-            if (mState->mFunctions[i].id == id) {
-                mState->mFunctions[i].clear();
-                mState->mNeedsCompact = true;
-            }
-        }
-    }
-
-    void clear() FL_NO_EXCEPT {
-        if (!mState) return;
-        mState->mFunctions.clear();
-        ++mState->mRevision;
-    }
-
-    // Compact the storage by removing invalid (cleared) callbacks
-    // Used internally after invocation if removals occurred
-    void compact() FL_NO_EXCEPT {
-        if (mState) compactState(*mState);
-    }
-
-    // Size information - counts only valid (non-cleared) functions
-    fl::size size() const FL_NO_EXCEPT {
-        if (!mState) return 0;
-        fl::size count = 0;
-        for (const auto& entry : mState->mFunctions) {
-            if (entry.isValid()) {
-                ++count;
-            }
-        }
-        return count;
-    }
+    void remove(int id) FL_NO_EXCEPT { if (mState) mState->remove(id); }
+    void clear() FL_NO_EXCEPT { if (mState) mState->clear(); }
+    void compact() FL_NO_EXCEPT { if (mState) mState->compact(); }
+    fl::size size() const FL_NO_EXCEPT { return mState ? mState->size() : 0; }
     bool empty() const FL_NO_EXCEPT { return size() == 0; }
-
-    // Boolean conversion for if (callback) checks
     explicit operator bool() const FL_NO_EXCEPT { return !empty(); }
-
-  private:
-    static void invokeSubscribed(FunctionListImpl& self, Args... args) FL_NO_EXCEPT {
-        self.invokeImpl(args...);
-    }
-
-    static void compactState(State& state) FL_NO_EXCEPT {
-        if (!state.mNeedsCompact) return;
-        size_t write_pos = 0;
-        for (size_t read_pos = 0; read_pos < state.mFunctions.size(); ++read_pos) {
-            if (state.mFunctions[read_pos].isValid()) {  // Check if function is still valid
-                if (write_pos != read_pos) {
-                    state.mFunctions[write_pos] = fl::move(state.mFunctions[read_pos]);
-                }
-                write_pos++;
-            }
-        }
-        state.mFunctions.resize(write_pos);
-        state.mNeedsCompact = false;
-    }
-
-    void invokeImpl(Args... args) FL_NO_EXCEPT {
-        // Reassignment from a callback must not destroy or replace the state
-        // being dispatched. Reassignment ends this dispatch; replacement state
-        // starts receiving events on the next call.
-        auto state = mState;
-        if (state->mFunctions.empty()) return;
-        // Compact the storage by removing invalid (cleared) callbacks
-        compactState(*state);
-        // Save size at start - newly added callbacks won't execute until next call
-        const size_t invoke_size = state->mFunctions.size();
-        const u32 revision = state->mRevision;
-        // Early return if no callbacks
-        if (invoke_size == 0) {
-            return;
-        }
-
-        // Collect unique priorities into a small vector (usually very few unique values)
-        fl::vector_inlined<int, 16> priorities;
-        for (size_t i = 0; i < invoke_size; ++i) {
-            if (!state->mFunctions[i].isValid()) continue;  // Skip already-cleared functions
-
-            int p = state->mFunctions[i].priority;
-            // Only add if not already present
-            if (priorities.find(p) == priorities.end()) {
-                priorities.push_back(p);
-            }
-        }
-
-        // Sort priorities (higher priority first) - cheap since there are usually very few unique priorities
-        detail::sortFunctionListPriorities(priorities);
-
-        // Iterate through priorities (highest first), then through functions matching each priority
-        for (size_t p_idx = 0; p_idx < priorities.size(); ++p_idx) {
-            int current_priority = priorities[p_idx];
-            for (size_t i = 0; i < invoke_size; ++i) {
-                if (mState.get() != state.get() || state->mRevision != revision || i >= state->mFunctions.size()) {
-                    return;  // Cleared or replaced during a callback.
-                }
-                if (state->mFunctions[i].isValid() && state->mFunctions[i].priority == current_priority) {
-                    state->mFunctions[i].invoke(args...);
-                }
-            }
-        }
-        compactState(*state);
-    }
-
-  public:
     void invoke(Args... args) FL_NO_EXCEPT {
-        if (mState) {
-            mState->mInvoker(*this, args...);
-        }
+        if (mState) mState->mInvoker(*this, args...);
     }
-
-    // Call operator - syntactic sugar for invoke()
-    void operator()(Args... args) FL_NO_EXCEPT {
-        invoke(args...);
-    }
+    void operator()(Args... args) FL_NO_EXCEPT { invoke(args...); }
 };
 
 #endif

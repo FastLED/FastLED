@@ -80,16 +80,14 @@ public:
         BusSupports<kBus, Chipset, Which>::value,
         "TypedChannel: Bus does not support this Chipset family");
 
-    using Factory = ChannelPtr (*)(const ChannelConfig&);
-
     // Only the encoder/factory choice is duplicated at a constant call site.
     // Registration, settings copies and attachment remain out of line.
     template<typename ConfigChipset>
-    FL_ALWAYS_INLINE Factory factoryFor(const ConfigChipset& chipset) FL_NO_EXCEPT {
-        if (EncoderAvailability::known(chipset, &Channel::encodeWS2812)) {
+    FL_ALWAYS_INLINE ChannelFactory factoryFor(const ConfigChipset& chipset) FL_NO_EXCEPT {
+        if (EncoderAvailability::isWS2812(chipset)) {
             return &createWS2812;
         }
-        return static_cast<Factory>(&create);
+        return static_cast<ChannelFactory>(&create);
     }
 
     FL_ALWAYS_INLINE ChannelPtr create(const ChannelConfigOf<Chipset>& cfg) FL_NO_EXCEPT {
@@ -100,10 +98,6 @@ public:
     /// Runtime configurations share the library's complete encoder selector.
     FL_NO_INLINE static ChannelPtr create(const ChannelConfig& cfg) FL_NO_EXCEPT {
         return create(cfg, EncoderAvailability::select(cfg.chipset));
-    }
-
-    FL_ALWAYS_INLINE ChannelPtr createWithKnownEncoder(const ChannelConfig& cfg) FL_NO_EXCEPT {
-        return factoryFor(cfg.chipset)(cfg);
     }
 
 private:
@@ -119,10 +113,7 @@ private:
         }
         detail::enable_clockless_for<Chipset, BusTraits<kBus, Which>>::apply();
         BusTraits<kBus, Which>::registerWithManager();
-        ChannelConfig erased = cfg;
-        erased.options.mBus = kBus;
-        erased.options.mBusWhich = Which;
-        return Channel::createWithEncoder(erased, encoder);
+        return Channel::createWithEncoder(cfg, encoder, kBus, Which);
     }
 
     TypedChannel() FL_NO_EXCEPT = delete;

@@ -45,6 +45,8 @@ enum class ProfileId : u8 { WS2812B };
 FASTLED_SHARED_PTR(Channel);
 FASTLED_SHARED_PTR(ChannelData);
 
+using ChannelFactory = ChannelPtr (*)(const ChannelConfig&);
+
 #if FL_COLOR_PIPELINE_SHARED
 shared_ptr<StreamingPipelineQ16> channelColorPipeline(const CLEDController& controller) FL_NO_EXCEPT;
 #endif
@@ -332,7 +334,7 @@ protected:
     using PixelEncoder = EncoderAvailability::PixelEncoder;
 
 private:
-    FL_NO_INLINE static ChannelPtr createWithEncoder(const ChannelConfig&, PixelEncoder) FL_NO_EXCEPT;
+    FL_NO_INLINE static ChannelPtr createWithEncoder(const ChannelConfig&, PixelEncoder, Bus, u8) FL_NO_EXCEPT;
 
     /// @brief Cold slow-path helper for `showPixels()`. Handles dynamic
     ///        `ChannelManager::selectDriverForChannel()` lookup AND the

@@ -822,7 +822,7 @@ fl::u32 CFastLED::_getWaitSpinBudgetUs() FL_NO_EXCEPT {
 // ============================================================================
 
 fl::ChannelPtr CFastLED::addWithFactory(const fl::ChannelConfig& config,
-                                          ChannelFactory factory) FL_NO_EXCEPT {
+                                          fl::ChannelFactory factory) FL_NO_EXCEPT {
     auto channel = factory(config);
     if (channel != nullptr) add(channel);
     return channel;
