@@ -29,7 +29,9 @@
 
 #include "platforms/arm/nrf52/is_nrf52.h"
 
-#if defined(FL_IS_NRF52)
+// FASTLED_FORCE_SOFTWARE_SPI compiles out NRF52HardwareSPIOutput, which this
+// proxy wraps; SPIOutput then uses the generic bit-bang output instead (#5120).
+#if defined(FL_IS_NRF52) && !defined(FASTLED_FORCE_SOFTWARE_SPI)
 
 #include "fl/stl/unique_ptr.h"
 #include "fl/stl/vector.h"
@@ -382,4 +384,4 @@ private:
 
 }  // namespace fl
 
-#endif  // FL_IS_NRF52
+#endif  // FL_IS_NRF52 && !FASTLED_FORCE_SOFTWARE_SPI
