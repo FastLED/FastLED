@@ -4,6 +4,7 @@
 #define __INC_CLOCKLESS_ARM_NRF51
 
 #include "platforms/arm/nrf51/is_nrf51.h"
+#include "platforms/arm/nrf51/fastpin_arm_nrf51.h"  // Nrf51HwPin
 
 #if defined(FL_IS_NRF51)
 
@@ -33,8 +34,8 @@ namespace fl {
 
 template <fl::u8 DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 75>
 class ClocklessController : public CPixelLEDController<RGB_ORDER> {
-    typedef typename FastPinBB<DATA_PIN>::port_ptr_t data_ptr_t;
-    typedef typename FastPinBB<DATA_PIN>::port_t data_t;
+    typedef typename Nrf51HwPin<DATA_PIN>::port_ptr_t data_ptr_t;
+    typedef typename Nrf51HwPin<DATA_PIN>::port_t data_t;
 
     data_t mPinMask;
     data_ptr_t mPort;
@@ -42,9 +43,9 @@ class ClocklessController : public CPixelLEDController<RGB_ORDER> {
 
 public:
     virtual void init() FL_NO_EXCEPT {
-        FastPinBB<DATA_PIN>::setOutput();
-        mPinMask = FastPinBB<DATA_PIN>::mask();
-        mPort = FastPinBB<DATA_PIN>::port();
+        Nrf51HwPin<DATA_PIN>::setOutput();
+        mPinMask = Nrf51HwPin<DATA_PIN>::mask();
+        mPort = Nrf51HwPin<DATA_PIN>::port();
     }
 
 	virtual fl::u16 getMaxRefreshRate() const { return 400; }
@@ -75,7 +76,7 @@ public:
         data.e[2] = pixels.e[2];
         data.adj = pixels.mAdvance;
 
-        typename FastPin<DATA_PIN>::port_ptr_t portBase = FastPin<DATA_PIN>::port();
+        typename Nrf51HwPin<DATA_PIN>::port_ptr_t portBase = Nrf51HwPin<DATA_PIN>::port();
 
         // timer mode w/prescaler of 0
         LED_TIMER->MODE = TIMER_MODE_MODE_Timer;
@@ -85,7 +86,7 @@ public:
         LED_TIMER->SHORTS = TIMER_SHORTS_COMPARE0_CLEAR_Msk;
         LED_TIMER->TASKS_START = 1;
 
-        int ret = showLedData<4,8,TIMING,RGB_ORDER,WAIT_TIME>(portBase, FastPin<DATA_PIN>::mask(), pixels.mData, pixels.mLen, &data);
+        int ret = showLedData<4,8,TIMING,RGB_ORDER,WAIT_TIME>(portBase, Nrf51HwPin<DATA_PIN>::mask(), pixels.mData, pixels.mLen, &data);
 
         LED_TIMER->TASKS_STOP = 1;
         return ret; // 0x00FFFFFF - _VAL;

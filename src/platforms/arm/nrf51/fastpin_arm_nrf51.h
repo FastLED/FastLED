@@ -4,6 +4,13 @@
 #define __FASTPIN_ARM_NRF51_H
 
 #include "fl/stl/compiler_control.h"
+#include "fl/stl/static_assert.h"
+
+// nRF51 has no Arduino port-register map. Define this before fastpin_base.h
+// so a forced FastPin is NoPinMapPin whichever nRF51 header comes first.
+#ifndef FASTLED_NO_PINMAP
+#define FASTLED_NO_PINMAP
+#endif
 #include "fl/system/fastpin_base.h"
 #include "platforms/arm/nrf51/is_nrf51.h"
 
@@ -53,7 +60,35 @@ public:
     inline static bool isset() __attribute__ ((always_inline)) { return (NRF_GPIO->IN & _MASK) != 0; }
 };
 
-#define _FL_DEFPIN(PIN) template<> class FastPin<PIN> : public _ARMPIN<PIN, (fl::u32)1 << PIN> {};
+/// Native register pin. The clockless and SPI0 drivers use it so they keep
+/// native GPIO when FASTLED_FORCE_SOFTWARE_PINS replaces FastPin (#5069).
+template <fl::u8 PIN> class Nrf51HwPin {
+public:
+    // Instantiated only for pins outside 0..31. Stubs keep the static
+    // assertion the only diagnostic.
+    typedef volatile fl::u32* port_ptr_t;
+    typedef fl::u32 port_t;
+    static void setOutput() {}
+    static void hi() {}
+    static void lo() {}
+    static void toggle() {}
+    static port_t mask() { return 0; }
+    static port_ptr_t port() { return nullptr; }
+    FL_STATIC_ASSERT(PIN == 255 && PIN != 255,
+                     "nRF51 has GPIO 0..31 only; this pin cannot be driven natively.");
+};
+
+#if defined(FASTLED_FORCE_SOFTWARE_PINS)
+// No FastPin specialization: fl::FastPin is the forced software primary
+// template from fastpin_base.h (NoPinMapPin, since FASTLED_NO_PINMAP is set).
+#define _FL_NRF51_FASTPIN(PIN)
+#else
+#define _FL_NRF51_FASTPIN(PIN) template<> class FastPin<PIN> : public Nrf51HwPin<PIN> {};
+#endif
+
+#define _FL_DEFPIN(PIN) \
+    template<> class Nrf51HwPin<PIN> : public _ARMPIN<PIN, (fl::u32)1 << PIN> {}; \
+    _FL_NRF51_FASTPIN(PIN)
 
 // Actual pin definitions
 #define MAX_PIN 31
@@ -66,9 +101,15 @@ _FL_DEFPIN(20); _FL_DEFPIN(21); _FL_DEFPIN(22); _FL_DEFPIN(23);
 _FL_DEFPIN(24); _FL_DEFPIN(25); _FL_DEFPIN(26); _FL_DEFPIN(27);
 _FL_DEFPIN(28); _FL_DEFPIN(29); _FL_DEFPIN(30); _FL_DEFPIN(31);
 
-#define HAS_HARDWARE_PIN_SUPPORT
-
 }  // namespace fl
+
+#if defined(FASTLED_FORCE_SOFTWARE_PINS)
+#warning "Software pin support forced, pin access will be slightly slower."
+#define NO_HARDWARE_PIN_SUPPORT
+#undef HAS_HARDWARE_PIN_SUPPORT
+#else
+#define HAS_HARDWARE_PIN_SUPPORT
+#endif
 
 #endif  // FL_IS_NRF51
 
