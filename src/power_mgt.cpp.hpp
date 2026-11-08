@@ -402,9 +402,11 @@ fl::u32 power_ratio_of_255(fl::u32 num, fl::u32 den) FL_NO_EXCEPT {
 }
 
 // Largest brightness whose *total* demand -- baseline included -- stays inside
-// the budget. Zero when the baseline alone is already over it: no brightness
-// meets the budget then, and answering with a lit strip would promise a bound
-// that cannot be held at any setting.
+// the budget. When the baseline alone is already over it no brightness meets
+// the budget, and blanking the strip would not either: the baseline is drawn
+// at brightness zero too. Such budgets were written against the classic model,
+// which scaled the whole estimate, so they get the classic answer back rather
+// than a dark strip (#5139: 1 W on 271 LEDs lit nothing from 3.10.6).
 static fl::u8 brightness_within_budget(fl::u32 fixed_mW, fl::u32 controllable_mW,
                                        fl::u8 target_brightness,
                                        fl::u32 max_power_mW) FL_NO_EXCEPT {
@@ -413,12 +415,21 @@ static fl::u8 brightness_within_budget(fl::u32 fixed_mW, fl::u32 controllable_mW
     if (requested_mW <= max_power_mW) {
         return target_brightness;
     }
-    if (controllable_mW == 0 || max_power_mW <= fixed_mW) {
-        // Nothing left to scale, or the baseline alone is already over the
-        // budget. Either way no brightness meets it, and returning here is
-        // also what keeps the subtraction below from underflowing and the
-        // division from dividing by zero on an all-dark strip.
+    if (controllable_mW == 0) {
+        // Nothing left to scale: every brightness draws the same baseline.
+        // Also keeps the division below from dividing by zero.
         return 0;
+    }
+    if (max_power_mW <= fixed_mW) {
+        // Classic proportional answer over the whole full-brightness
+        // estimate, capped at the request. Also keeps the subtraction below
+        // from underflowing. Saturating sum: 32-bit only, as on AVR.
+        const fl::u32 full_mW = fixed_mW + controllable_mW < fixed_mW
+                                    ? 0xFFFFFFFFu
+                                    : fixed_mW + controllable_mW;
+        const fl::u32 classic = power_ratio_of_255(max_power_mW, full_mW);
+        return classic < target_brightness ? static_cast<fl::u8>(classic)
+                                           : target_brightness;
     }
     // The ratio is taken over the whole 0-255 scaled range, because
     // `controllable_mW` is the demand at *full* brightness. Scaling it by the
@@ -448,7 +459,8 @@ static fl::u8 brightness_within_budget(fl::u32 fixed_mW, fl::u32 controllable_mW
     // over the budget, which was 176 mW of a 5000 mW budget on the default
     // model. Demand is monotone in brightness, so stepping down until it fits
     // is exact whatever the rounding, and terminates: 0 always fits here,
-    // because the branch above already returned for a budget under baseline.
+    // because the branch above already returned for a budget at or under
+    // baseline.
     while (recommended > 0 &&
            fixed_mW + scale_power_for_brightness(controllable_mW, recommended) >
                max_power_mW) {

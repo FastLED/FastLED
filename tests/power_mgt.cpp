@@ -418,7 +418,7 @@ FL_TEST_CASE("Power limiter - zero brightness still draws the dark current") {
     FL_CHECK_GT(baseline_mW, 0u);
 }
 
-FL_TEST_CASE("Power limiter - a budget under the baseline turns the strip off") {
+FL_TEST_CASE("Power limiter - a budget under the baseline keeps the strip lit") {
     ScopedDefaultPowerModel guard;
     const int kCount = 300;
     CRGB leds[kCount];
@@ -427,19 +427,35 @@ FL_TEST_CASE("Power limiter - a budget under the baseline turns the strip off") 
     }
     const fl::u32 baseline_mW =
         static_cast<fl::u32>(get_power_model().dark_mW) * kCount;
+    const fl::u32 full_mW = calculate_unscaled_power_mW(leds, kCount);
 
-    // No brightness meets a budget below the dark current, so the only honest
-    // answer is zero. It used to return a lit strip and claim the budget was
-    // met -- 1000 mW asked for, 2480 mW drawn.
-    const fl::u32 budgets[] = {baseline_mW - 1, baseline_mW / 2, 1u};
+    // #5139: no brightness meets a budget below the dark current, and a dark
+    // strip draws that current too, so zero bought nothing and lit no pixels
+    // for budgets written against the classic model. Those budgets get the
+    // classic proportional answer instead.
+    const fl::u32 budgets[] = {baseline_mW - 1, baseline_mW / 2, baseline_mW};
     for (fl::u32 budget : budgets) {
-        FL_CHECK_EQ(calculate_max_brightness_for_power_mW(leds, kCount, 255, budget),
-                    0);
+        const fl::u8 got =
+            calculate_max_brightness_for_power_mW(leds, kCount, 255, budget);
+        FL_CHECK_GT(got, 0);
+        FL_CHECK_EQ(static_cast<fl::u32>(got), (255u * budget) / full_mW);
     }
-    // Exactly at the baseline nothing can be lit either, since any emitter
-    // adds to it.
-    FL_CHECK_EQ(
-        calculate_max_brightness_for_power_mW(leds, kCount, 255, baseline_mW), 0);
+    // The answer still never exceeds the request.
+    FL_CHECK_LE(calculate_max_brightness_for_power_mW(leds, kCount, 3, baseline_mW / 2),
+                3);
+}
+
+// #5139 as reported: 271 WS2812B, 1 W budget, classic addLeds + the global
+// limiter. The MCU and dark-current baseline alone exceed 1 W.
+FL_TEST_CASE("Power limiter - 1 W on 271 LEDs still lights the strip (#5139)") {
+    ScopedDefaultPowerModel guard;
+    const int kCount = 271;
+    CRGB leds[kCount];
+    for (int i = 0; i < kCount; ++i) {
+        leds[i] = CRGB(255, 255, 255);
+    }
+    FL_CHECK_GT(static_cast<fl::u32>(get_power_model().dark_mW) * kCount, 1000u);
+    FL_CHECK_GT(calculate_max_brightness_for_power_mW(leds, kCount, 255, 1000), 0);
 }
 
 FL_TEST_CASE("Power limiter - an all-dark strip over budget is still answerable") {
@@ -1077,8 +1093,13 @@ fl::u8 ref_limit(const CRGB* leds, fl::u16 n, fl::u8 target, fl::u32 max_mW) {
     if (fixed + ref_scale32by8(ctrl, target) <= max_mW) {
         return target;
     }
-    if (ctrl == 0 || max_mW <= fixed) {
+    if (ctrl == 0) {
         return 0;
+    }
+    if (max_mW <= fixed) {
+        // #5139: the classic proportional answer over the whole estimate.
+        const fl::u64 classic = (static_cast<fl::u64>(255) * max_mW) / total;
+        return classic < target ? static_cast<fl::u8>(classic) : target;
     }
     fl::u64 allowed = (static_cast<fl::u64>(255) * (max_mW - fixed)) / ctrl;
     if (allowed > target) {
