@@ -300,6 +300,15 @@ foreach test_name : test_names
     test_pch,
   ]
   test_cpp_args = shared_test_cpp_args
+  if test_name == 'fl_channels_encoder_availability'
+    # Caller macros deliberately differ from the library; never reuse its PCH.
+    test_sources = [test_file]
+    test_cpp_args = test_abs_include_args + unit_test_compile_args + [
+      '-DTEST_DLL_MODE',
+      '-DFASTLED_DISABLE_UCS7604=1',
+      '-DFASTLED_DISABLE_SPI_CHIPSETS=1',
+    ]
+  endif
 
   # host_sim.cpp is now compiled as part of libfastled.a when STUB_PLATFORM is defined
   # No need to add it explicitly to individual tests anymore
@@ -307,6 +316,11 @@ foreach test_name : test_names
   # Build test as a shared library (DLL)
   # Add system libraries needed by crash handler (dbghelp, psapi on Windows)
   test_link_args = unit_test_link_args
+  if test_name == 'fl_stl_function_list' and host_machine.system() == 'linux' and host_machine.cpu_family() in ['x86_64', 'aarch64']
+    # Fail only this DLL's State allocations, without a production test hook.
+    test_cpp_args += ['-DFASTLED_TEST_ALLOC_FAILURE_WRAP=1']
+    test_link_args += ['-Wl,--wrap=_ZN2fl9libc_impl13aligned_allocEmm']
+  endif
   test_link_with = [fastled_lib, crash_handler_lib]  # crash_handler_lib from root meson.build
 
   if host_machine.system() == 'windows'

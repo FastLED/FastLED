@@ -213,6 +213,7 @@ static void emitDisabledDriverError(const fl::string& channelName,
 
 }  // anonymous namespace
 
+
 i32 Channel::nextId() FL_NO_EXCEPT {
     static fl::atomic<i32> gNextChannelId(0); // okay static in header
     return gNextChannelId.fetch_add(1);
@@ -237,7 +238,7 @@ fl::string Channel::makeName(i32 id, const fl::optional<fl::string>& configName)
 }
 
 ChannelPtr Channel::create(const ChannelConfig &config) FL_NO_EXCEPT {
-    return createWithEncoder(config, selectPixelEncoder(config.chipset));
+    return createWithEncoder(config, EncoderAvailability::select(config.chipset));
 }
 
 ChannelPtr Channel::createWithEncoder(const ChannelConfig &config,
@@ -281,7 +282,7 @@ const ChipsetTimingConfig& Channel::getTiming() const FL_NO_EXCEPT {
 
 Channel::Channel(const ChipsetVariant& chipset, fl::span<CRGB> leds,
                  EOrder rgbOrder, const ChannelOptions& options) FL_NO_EXCEPT
-    : Channel(chipset, leds, rgbOrder, options, selectPixelEncoder(chipset)) {}
+    : Channel(chipset, leds, rgbOrder, options, EncoderAvailability::select(chipset)) {}
 
 Channel::Channel(const ChipsetVariant& chipset, fl::span<CRGB> leds,
                  EOrder rgbOrder, const ChannelOptions& options, PixelEncoder encoder) FL_NO_EXCEPT
@@ -319,7 +320,7 @@ Channel::Channel(int pin, const ChipsetTimingConfig& timing, fl::span<CRGB> leds
                  EOrder rgbOrder, const ChannelOptions& options) FL_NO_EXCEPT
     : CPixelLEDController<RGB>(RegistrationMode::DeferRegister)  // Defer registration until FastLED.add()
     , mChipset(ClocklessChipset(pin, timing))  // Convert to variant
-    , mPixelEncoder(selectPixelEncoder(mChipset))
+    , mPixelEncoder(EncoderAvailability::select(mChipset))
     , mRgbOrder(rgbOrder)
     , mDriver()  // Empty weak_ptr - late binding on first showPixels()
     , mBus(options.mBus)  // Bus selection (#2459)

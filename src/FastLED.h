@@ -850,7 +850,7 @@ public:
 	/// A chipset-family mismatch returns nullptr without registering anything.
 	template<fl::Bus B, typename Chipset = fl::ClocklessChipset, fl::u8 Which = 0>
 	FL_ALWAYS_INLINE fl::ChannelPtr add(const fl::ChannelConfig& config) FL_NO_EXCEPT {
-		fl::ChannelPtr channel = fl::TypedChannel<B, Chipset, Which>::create(config);
+		fl::ChannelPtr channel = fl::TypedChannel<B, Chipset, Which>::createWithKnownEncoder(config);
 		if (channel != nullptr) add(channel);
 		return channel;
 	}

@@ -25,6 +25,7 @@
 #include "fl/stl/weak_ptr.h"
 #include "fl/stl/stdint.h"
 #include "fl/channels/config.h"
+#include "fl/channels/encoder_availability.h"
 #include "fl/channels/channel_events.h"
 #include "fl/stl/compiler_control.h"
 
@@ -319,6 +320,7 @@ private:
     friend fl::shared_ptr<T> fl::adl_barrier::make_shared(Args&&... args) FL_NO_EXCEPT;  // see fl/stl/adl_barrier.h
     template<const EmitterProfile& Profile>
     friend class StaticProfileChannel;
+    friend struct EncoderAvailability;
     template<Bus B, typename Chipset, fl::u8 Which>
     friend class TypedChannel;
 
@@ -327,8 +329,7 @@ protected:
     // (e.g., UCS7604's DelegateController) can call through the base class chain.
     void showPixels(PixelController<RGB, 1, 0xFFFFFFFF>& pixels) FL_NO_EXCEPT override;
     void init() FL_NO_EXCEPT override;
-    using PixelEncoder = void (*)(Channel&, PixelIterator&, bool,
-                                  fl::vector_psram<u8>&);
+    using PixelEncoder = EncoderAvailability::PixelEncoder;
 
 private:
     static ChannelPtr createWithEncoder(const ChannelConfig&, PixelEncoder) FL_NO_EXCEPT;
@@ -362,55 +363,14 @@ private:
     /// retain only their encoder. Erased construction uses the full selector.
     /// The encoder callbacks remain channel-side: drivers receive
     /// ChannelData only after it has been encoded.
-    FL_ALWAYS_INLINE PixelEncoder selectPixelEncoder(const ChipsetVariant& chipset) FL_NO_EXCEPT {
-        if (const ClocklessChipset* clockless = chipset.ptr<ClocklessChipset>()) {
-            switch (clockless->encoder) {
-                case ClocklessEncoder::CLOCKLESS_ENCODER_WS2812:
-                    return &Channel::encodeWS2812;
-                case ClocklessEncoder::CLOCKLESS_ENCODER_TM1812_RGBWW:
-                    return &Channel::encodeTM1812RGBWW;
-                case ClocklessEncoder::CLOCKLESS_ENCODER_TM1908:
-                    return &Channel::encodeTM1908;
-#if !defined(FASTLED_DISABLE_UCS7604) || !FASTLED_DISABLE_UCS7604
-                case ClocklessEncoder::CLOCKLESS_ENCODER_UCS7604_8BIT:
-                case ClocklessEncoder::CLOCKLESS_ENCODER_UCS7604_16BIT:
-                case ClocklessEncoder::CLOCKLESS_ENCODER_UCS7604_16BIT_1600:
-                    return &Channel::encodeUCS7604;
-#endif
-            }
-        } else if (const SpiChipsetConfig* spi = chipset.ptr<SpiChipsetConfig>()) {
-#if !defined(FASTLED_DISABLE_SPI_CHIPSETS) || !FASTLED_DISABLE_SPI_CHIPSETS
-            switch (spi->timing.chipset) {
-                case SpiChipset::APA102:
-                case SpiChipset::DOTSTAR:
-                case SpiChipset::APA102HD:
-                case SpiChipset::DOTSTARHD:
-                case SpiChipset::HD107:
-                case SpiChipset::HD107HD:
-                    return &Channel::encodeAPA102;
-                case SpiChipset::SK9822:
-                case SpiChipset::SK9822HD:
-                    return &Channel::encodeSK9822;
-                case SpiChipset::WS2801:
-                    return &Channel::encodeWS2801;
-                case SpiChipset::WS2803:
-                    return &Channel::encodeWS2803;
-                case SpiChipset::P9813:
-                    return &Channel::encodeP9813;
-                case SpiChipset::LPD8806:
-                    return &Channel::encodeLPD8806;
-                case SpiChipset::LPD6803:
-                    return &Channel::encodeLPD6803;
-                case SpiChipset::SM16716:
-                    return &Channel::encodeSM16716;
-                case SpiChipset::MY9221:
-                    return &Channel::encodeMY9221;
-                case SpiChipset::HD108:
-                    return &Channel::encodeHD108;
-            }
-#endif  // !FASTLED_DISABLE_SPI_CHIPSETS
-        }
-        return nullptr;
+    FL_ALWAYS_INLINE PixelEncoder knownPixelEncoder(const ClocklessChipset& chipset) FL_NO_EXCEPT {
+        return EncoderAvailability::known(chipset, &Channel::encodeWS2812);
+    }
+    FL_ALWAYS_INLINE PixelEncoder knownPixelEncoder(const SpiChipsetConfig& chipset) FL_NO_EXCEPT {
+        return EncoderAvailability::known(chipset, nullptr);
+    }
+    FL_ALWAYS_INLINE PixelEncoder knownPixelEncoder(const ChipsetVariant& chipset) FL_NO_EXCEPT {
+        return EncoderAvailability::known(chipset, &Channel::encodeWS2812);
     }
     FL_NO_INLINE static void encodeWS2812(Channel&, PixelIterator&, bool,
                                          fl::vector_psram<u8>&) FL_NO_EXCEPT;
