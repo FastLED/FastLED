@@ -5,7 +5,7 @@
 
 #include "platforms/arm/nrf51/is_nrf51.h"
 #include "fl/stl/noexcept.h"
-#include "fl/system/fastpin_base.h"
+#include "platforms/arm/nrf51/fastpin_arm_nrf51.h"  // Nrf51HwPin, fastpin_base.h
 #include "fastspi_types.h"
 #include "fl/gfx/eorder.h"
 
@@ -57,8 +57,8 @@ class NRF51SPIOutput {
     }
 
 public:
-    NRF51SPIOutput() { FastPin<_DATA_PIN>::setOutput(); FastPin<_CLOCK_PIN>::setOutput(); }
-    NRF51SPIOutput(Selectable *pSelect) {  FastPin<_DATA_PIN>::setOutput(); FastPin<_CLOCK_PIN>::setOutput();  }
+    NRF51SPIOutput() { Nrf51HwPin<_DATA_PIN>::setOutput(); Nrf51HwPin<_CLOCK_PIN>::setOutput(); }
+    NRF51SPIOutput(Selectable *pSelect) {  Nrf51HwPin<_DATA_PIN>::setOutput(); Nrf51HwPin<_CLOCK_PIN>::setOutput();  }
 
     // set the object representing the selectable
     void setSelect(Selectable *pSelect) { /* TODO */ }
@@ -91,8 +91,8 @@ public:
 
     // initialize the SPI subssytem
     void init() FL_NO_EXCEPT {
-        FastPin<_DATA_PIN>::setOutput();
-        FastPin<_CLOCK_PIN>::setOutput();
+        Nrf51HwPin<_DATA_PIN>::setOutput();
+        Nrf51HwPin<_CLOCK_PIN>::setOutput();
     }
 
     // latch the CS select
@@ -161,12 +161,12 @@ public:
         waitFully();
         NRF_SPI0->ENABLE = 0;
         if(b & 1<<BIT) {
-            FastPin<_DATA_PIN>::hi();
+            Nrf51HwPin<_DATA_PIN>::hi();
         } else {
-            FastPin<_DATA_PIN>::lo();
+            Nrf51HwPin<_DATA_PIN>::lo();
         }
-        FastPin<_CLOCK_PIN>::toggle();
-        FastPin<_CLOCK_PIN>::toggle();
+        Nrf51HwPin<_CLOCK_PIN>::toggle();
+        Nrf51HwPin<_CLOCK_PIN>::toggle();
         NRF_SPI0->ENABLE = 1;
     }
 
