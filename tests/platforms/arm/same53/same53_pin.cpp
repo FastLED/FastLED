@@ -125,6 +125,29 @@ template <> class FastPin<243> : public ValidPinBase {
 int FastPin<243>::sHi = 0;
 int FastPin<243>::sLo = 0;
 
+// A user-defined, active-high data pin on the same port as the ClearCore clock
+// pin. Its policy is the non-atomic default, so before #5112 the writer built
+// whole-port words with the clock bit set for "high", which is backwards here.
+template <> class FastPin<245> : public ValidPinBase {
+  public:
+    typedef volatile u32* port_ptr_t;
+    typedef u32 port_t;
+    static constexpr u32 kMask = same53_test::kData;
+    static void setOutput() {}
+    static void hi() { gFakePort.Group[0].OUT.reg = gFakePort.Group[0].OUT.reg | kMask; }
+    static void lo() { gFakePort.Group[0].OUT.reg = gFakePort.Group[0].OUT.reg & ~kMask; }
+    static void hi(port_ptr_t) { hi(); }
+    static void lo(port_ptr_t) { lo(); }
+    static void fastset(port_ptr_t, port_t value) {
+        ++same53_test::gFullPortStores;
+        same53_test::storeOut(value);
+    }
+    static port_t hival() { return gFakePort.Group[0].OUT.reg | kMask; }
+    static port_t loval() { return gFakePort.Group[0].OUT.reg & ~kMask; }
+    static port_ptr_t port() { return &gFakePort.Group[0].OUT.reg; }
+    static port_t mask() { return kMask; }
+};
+
 FL_STATIC_ASSERT(!BitbangPin<FastPin<243>>::kAtomicWrite, "user-defined pins keep the default policy");
 FL_STATIC_ASSERT(BitbangPin<FastPin<same53_test::kDataPin>>::kAtomicWrite && BitbangPin<FastPin<3>>::kAtomicWrite,
                  "ClearCore pins must use polarity-correct atomic writes");
@@ -260,6 +283,18 @@ FL_TEST_CASE("ClearCore bulk writes keep concurrent unrelated changes") {
     Spi::writeBytesValueRaw(0x5A, 1);
     FL_CHECK_EQ(gFakePort.Group[0].OUT.reg & gConcurrentBit, gConcurrentBit);
     FL_CHECK_EQ(gFakePort.Group[0].OUT.reg & kOther, kOther);
+}
+
+FL_TEST_CASE("ClearCore clock with a user-defined data pin on its port uses per-pin writes") {
+    using MixedSpi = GenericSoftwareSPIOutput<245, kClockPin, kDivider>;
+    reset();
+    MixedSpi::writeBytesValueRaw(0xA5, 1);
+    // The ClearCore clock must go through its own hi()/lo(): no whole-port words.
+    FL_CHECK_EQ(gFullPortStores, 0);
+    FL_CHECK_EQ(gClockHiCalls, 8);
+    FL_CHECK_EQ(gClockLoCalls, 8);
+    FL_CHECK_EQ(gEdges.size(), 8U);
+    FL_CHECK_FALSE(clockHigh());
 }
 
 FL_TEST_CASE("ClearCore user-defined pins use hi and lo") {

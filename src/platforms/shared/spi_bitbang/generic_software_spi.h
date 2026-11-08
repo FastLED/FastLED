@@ -70,7 +70,11 @@ class GenericSoftwareSPIOutput {
 			isNoPinMapPin(static_cast<const fl::FastPin<CLOCK_PIN>*>(nullptr))) {
 			return true;
 		}
-		return BitbangPin<fl::FastPin<DATA_PIN>>::kAtomicWrite &&
+		// Either pin's policy can require atomic writes: the whole-port words
+		// assume an active-high clock, so a clock pin such as ClearCore's must
+		// keep its own hi()/lo() even beside a non-atomic data pin (#5112).
+		return (BitbangPin<fl::FastPin<DATA_PIN>>::kAtomicWrite ||
+				BitbangPin<fl::FastPin<CLOCK_PIN>>::kAtomicWrite) &&
 			(!kCanStreamSamePort ||
 			 fl::FastPin<DATA_PIN>::port() != fl::FastPin<CLOCK_PIN>::port());
 #endif
