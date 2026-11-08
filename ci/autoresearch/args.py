@@ -59,6 +59,7 @@ MEMORY_BENCH_CONFLICT_FLAGS = (
     "usb_console",
     "strip_sizes",
     "frames",
+    "max_power_mw",
     "lanes",
     "lane_counts",
     "worker_core",
@@ -67,6 +68,19 @@ MEMORY_BENCH_CONFLICT_FLAGS = (
     "tx_pin",
     "rx_pin",
 )
+
+
+def _parse_power_budgets(value: str) -> list[int]:
+    """Parse '100,500,1000' into positive milliwatt budgets."""
+    budgets: list[int] = []
+    for part in value.split(","):
+        part = part.strip()
+        if not part.isdigit() or int(part) <= 0:
+            raise argparse.ArgumentTypeError(
+                f"power budgets must be positive integers, got {part!r}"
+            )
+        budgets.append(int(part))
+    return budgets
 
 
 def memory_bench_conflicts(args: object) -> list[str]:
@@ -216,6 +230,7 @@ class Args:
     # None = driver-default (SPI → 2, others → 1). Explicit value overrides.
     # See issues #2254 and #2288 (ESP32-S3 SPI second-frame degradation).
     frames: int | None
+    max_power_mw: list[int] | None
 
     # Tight timing metric (#2991)
     tight_timing: bool
@@ -971,6 +986,18 @@ See Also:
             "See issues #2254, #2288.",
         )
 
+        parser.add_argument(
+            "--max-power-mw",
+            type=_parse_power_budgets,
+            default=None,
+            metavar="MW[,MW...]",
+            help="Run each test once per power budget with "
+            "FastLED.setMaxPowerInMilliWatts(MW) and dithering off, and check "
+            "the captured wire against the limiter's brightness "
+            "(e.g. '100,500,1000,3000,100000'). One RGB clockless lane only. "
+            "See issue #5139.",
+        )
+
         timing_group = parser.add_argument_group(
             "Tight Timing Metric",
             "Measure show()+wait() latency against expected LED wire time.",
@@ -1157,6 +1184,7 @@ See Also:
             rp_pio_both=parsed.rp_pio_both,
             test_fault_emit=parsed.test_fault_emit,
             frames=parsed.frames,
+            max_power_mw=parsed.max_power_mw,
             tight_timing=parsed.tight_timing,
             tight_timing_iterations=parsed.tight_timing_iterations,
             tight_timing_max_overhead_us=parsed.tight_timing_max_overhead_us,

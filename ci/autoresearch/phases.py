@@ -36,6 +36,7 @@ from ci.autoresearch.gpio import (
     run_pin_discovery,
     run_pin_discovery_segmented,
 )
+from ci.autoresearch.power_check import check_power_frames, display_power_frames
 from ci.autoresearch.usb_power import absent_port_error, warn_selective_suspend
 from ci.debug_attached import run_cpp_lint
 from ci.rpc_client import (
@@ -1298,6 +1299,17 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
                         test_config["tightTimingMaxOverheadUs"] = (
                             args.tight_timing_max_overhead_us
                         )
+                    if args.max_power_mw:
+                        # One run per budget, same pixels, so the frames line
+                        # up across budgets (#5139).
+                        for budget_mw in args.max_power_mw:
+                            rpc_commands_list.append(
+                                {
+                                    "method": "runSingleTest",
+                                    "params": {**test_config, "maxPowerMw": budget_mw},
+                                }
+                            )
+                        continue
                     rpc_command = {"method": "runSingleTest", "params": test_config}
                     rpc_commands_list.append(rpc_command)
 
@@ -5114,6 +5126,24 @@ async def _run_rpc_tests(ctx: RunContext, qctx: QuietContext) -> int:
                     qctx.emit(f"FAILURE class=malformed_response method={method}")
                     break
 
+                elif test_method and (
+                    power_errors := check_power_frames(
+                        test_data,
+                        (cmd.get("params") or {}).get("maxPowerMw")
+                        if isinstance(cmd.get("params"), dict)
+                        else None,
+                    )
+                ):
+                    stop_word_found = "ERROR"
+                    test_failed = True
+                    display_power_frames(test_data)
+                    print(f"{Fore.RED}\u274c Power limit check failed{Style.RESET_ALL}")
+                    print("   Failure class: power_limit_policy")
+                    for error in power_errors:
+                        print(f"   - {error}")
+                    qctx.emit("FAILURE class=power_limit_policy")
+                    break
+
                 elif test_data.get("success") and test_data.get("passed"):
                     stop_word_found = "OK"
                     print(f"{Fore.GREEN}\u2705 Test passed{Style.RESET_ALL}")
@@ -5138,6 +5168,7 @@ async def _run_rpc_tests(ctx: RunContext, qctx: QuietContext) -> int:
                         print(f"   Duration: {duration_str}")
 
                     display_tight_timing(test_data)
+                    display_power_frames(test_data)
                     display_objectfled_diagnostics(test_data)
                     _display_rp_uart_diagnostics(test_data)
 
@@ -5204,6 +5235,7 @@ async def _run_rpc_tests(ctx: RunContext, qctx: QuietContext) -> int:
                                 )
 
                     display_tight_timing(test_data)
+                    display_power_frames(test_data)
                     display_objectfled_diagnostics(test_data)
                     _display_rp_uart_diagnostics(test_data)
 

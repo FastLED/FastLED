@@ -359,9 +359,18 @@ fl::u32 scale_power_for_brightness(fl::u32 total_mW, fl::u8 brightness) FL_NO_EX
 ///
 /// - **The baseline is not scalable.** `PowerModel::dark_mW` is drawn per LED
 ///   at every brightness including zero, so it is subtracted from the budget
-///   first and only the remainder is divided among the emitters. A budget at
-///   or below the baseline returns **0**: no brightness meets it, and a lit
-///   strip would be promising a bound that cannot be held at any setting.
+///   first and only the remainder is divided among the emitters.
+/// - **A budget at or below the baseline cannot be met.** No brightness meets
+///   it, and a dark strip draws the baseline too, so such a budget gets the
+///   classic answer `255 * budget / full` (capped at the request) instead of
+///   a blank strip (#5139).
+/// - **The result never falls as the budget rises.** Just above the baseline
+///   the headroom buys almost nothing, so the answer is floored at what a
+///   budget at the baseline gets. Until the headroom answer overtakes that
+///   floor (a budget of about `baseline + controllable * baseline / full`),
+///   the modeled draw exceeds the budget by up to
+///   `controllable * baseline / full`. Above the crossover, demand stays
+///   inside the budget.
 /// - **The bound is on the pre-dither frame.** Demand is computed from the
 ///   `CRGB` values, and `BINARY_DITHER` adds its offset afterwards, inside the
 ///   encoder. That offset is shared across the frame, so a dithered frame can

@@ -340,12 +340,32 @@ FL_TEST_CASE("Power limiter - the recommendation stays inside the budget") {
     // Every one of these used to come back over budget, by 5.6% at 20 W and
     // by 73% at 2 W: the whole estimate including the baseline was multiplied
     // by brightness, so lowering brightness "reduced" a draw that is constant.
+    //
+    // Close to the baseline the answer is floored at what a budget *at* the
+    // baseline gets, so raising the budget never dims the strip (#5139
+    // follow-up). Where the floor wins the model is over budget by design, but
+    // only by the overshoot a budget at the baseline already has -- never more
+    // than controllable * baseline / full. Everywhere else it must fit.
+    const fl::u32 full_mW = calculate_unscaled_power_mW(leds, kCount);
+    const fl::u32 controllable_mW = full_mW - baseline_mW;
+    const fl::u8 at_baseline = static_cast<fl::u8>((255u * baseline_mW) / full_mW);
+    const fl::u32 max_overshoot_mW =
+        static_cast<fl::u32>((static_cast<fl::u64>(controllable_mW) * baseline_mW) / full_mW);
     const fl::u32 budgets[] = {60000u, 40000u, 20000u, 10000u, 5000u, 3000u, 2000u};
     for (fl::u32 budget : budgets) {
         const fl::u8 recommended =
             calculate_max_brightness_for_power_mW(leds, kCount, 255, budget);
         FL_CHECK_GT(budget, baseline_mW);
-        FL_CHECK_LE(true_demand_mW(span, recommended), budget);
+        FL_CHECK_GE(recommended, at_baseline);
+        const fl::u32 demand = true_demand_mW(span, recommended);
+        if (recommended > at_baseline) {
+            FL_CHECK_LE(demand, budget);
+        } else {
+            // The floor won: the draw is the baseline budget's, and its
+            // excess over this (larger) budget is inside the documented bound.
+            FL_CHECK_EQ(demand, true_demand_mW(span, at_baseline));
+            FL_CHECK_LE(demand, budget + max_overshoot_mW);
+        }
     }
 }
 
@@ -443,6 +463,36 @@ FL_TEST_CASE("Power limiter - a budget under the baseline keeps the strip lit") 
     // The answer still never exceeds the request.
     FL_CHECK_LE(calculate_max_brightness_for_power_mW(leds, kCount, 3, baseline_mW / 2),
                 3);
+}
+
+// #5139 follow-up, found on hardware: the under-baseline branch answers the
+// classic ratio, but one milliwatt above the baseline the headroom answer took
+// over and was far smaller -- on 100 LEDs, 625 mW lit the strip at 11 and
+// 626 mW blanked it. Raising a budget must never dim the strip.
+FL_TEST_CASE("Power limiter - raising the budget never dims the strip") {
+    ScopedDefaultPowerModel guard;
+    const int kCount = 100;
+    CRGB leds[kCount];
+    for (int i = 0; i < kCount; ++i) {
+        leds[i] = CRGB(255, 255, 255);
+    }
+    const fl::u32 baseline_mW =
+        static_cast<fl::u32>(get_power_model().dark_mW) * kCount;
+    const fl::u32 full_mW = calculate_unscaled_power_mW(leds, kCount);
+    const fl::u8 at_baseline =
+        calculate_max_brightness_for_power_mW(leds, kCount, 255, baseline_mW);
+    FL_CHECK_GT(at_baseline, 0);
+    FL_CHECK_GE(calculate_max_brightness_for_power_mW(leds, kCount, 255, baseline_mW + 1),
+                at_baseline);
+
+    fl::u8 previous = 0;
+    for (fl::u32 budget = baseline_mW / 2; budget <= full_mW + 10; budget += 7) {
+        const fl::u8 got =
+            calculate_max_brightness_for_power_mW(leds, kCount, 255, budget);
+        FL_CHECK_GE(got, previous);
+        previous = got;
+    }
+    FL_CHECK_EQ(previous, 255);
 }
 
 // #5139 as reported: 271 WS2812B, 1 W budget, classic addLeds + the global
@@ -1109,7 +1159,12 @@ fl::u8 ref_limit(const CRGB* leds, fl::u16 n, fl::u8 target, fl::u32 max_mW) {
     while (b > 0 && fixed + ref_scale32by8(ctrl, b) > max_mW) {
         --b;
     }
-    return b;
+    // Never dimmer than the classic answer at the baseline (#5139 follow-up).
+    fl::u64 floor_b = (static_cast<fl::u64>(255) * fixed) / total;
+    if (floor_b > target) {
+        floor_b = target;
+    }
+    return b > floor_b ? b : static_cast<fl::u8>(floor_b);
 }
 
 }  // namespace power_equivalence
