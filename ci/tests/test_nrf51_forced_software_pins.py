@@ -49,3 +49,12 @@ def test_drivers_use_the_native_pin() -> None:
         text = _read(name)
         assert not re.search(r"\bFastPin(BB)?<", text), name
         assert "Nrf51HwPin<" in text, name
+
+
+def test_pin_writes_never_read_modify_write_the_whole_port() -> None:
+    # #5047: `NRF_GPIO->OUT ^= mask` (or |=, &=) writes the whole port back and
+    # reverts any pin an interrupt changed in between; toggle() must go
+    # through OUTSET/OUTCLR.
+    text = _read("fastpin_arm_nrf51.h")
+    assert not re.search(r"->\s*OUT\s*[\^|&]=", text)
+    assert "OUTCLR = _MASK" in text and "OUTSET = _MASK" in text
