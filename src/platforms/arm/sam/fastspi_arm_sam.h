@@ -148,10 +148,20 @@ public:
 		// need to wait for all exisiting data to go out the door, first
 		waitFully();
 		disableSPI();
+		// init() gave both pins to peripheral A, where PIO output writes do not
+		// reach the pads. Hand them to the PIO controller for the bit, then back
+		// (ABSR still selects peripheral A) (#5117). The clock is preloaded low
+		// so the pad cannot go high as it leaves the peripheral. Like init(), this
+		// assumes the SPI0 pins on PIOA (Due MOSI PA26, SCK PA27).
+		const u32 pins = FastPin<_DATA_PIN>::mask() | FastPin<_CLOCK_PIN>::mask();
+		FastPin<_CLOCK_PIN>::lo();
+		PIOA->PIO_OER = pins;
+		PIOA->PIO_PER = pins;
 		BitbangPin<FastPin<_DATA_PIN>>::template write<BIT>(b);
 
 		FastPin<_CLOCK_PIN>::hi();
 		FastPin<_CLOCK_PIN>::lo();
+		PIOA->PIO_PDR = pins;
 		enableSPI();
 	}
 
@@ -346,7 +356,8 @@ public:
 
 #endif  // FL_IS_SAMD21 || FL_IS_SAMD51
 
-
-FL_DISABLE_WARNING_POP
+#if defined(FL_IS_SAMD21) || defined(FL_IS_SAMD51)
+FL_DISABLE_WARNING_POP  // Matches the PUSH in the SAMD include block above.
+#endif
 
 #endif
