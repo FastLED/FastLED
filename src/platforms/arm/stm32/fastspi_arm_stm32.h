@@ -211,13 +211,16 @@ public:
 #endif
     }
 
+    // SPI clock for SPISettings. STM32 SPI can typically handle up to 18 MHz
+    // on APB1 and 36 MHz on APB2, so cap at 36 MHz.
+    static constexpr u32 spiSpeed() FL_NO_EXCEPT {
+        return SPI_SPEED > 36000000 ? 36000000 : SPI_SPEED;
+    }
+
     // Select the SPI output (begin transaction)
     void select() FL_NO_EXCEPT {
 #if FASTLED_STM32_USE_HAL
-        // Calculate SPI settings based on SPI_SPEED
-        // STM32 SPI can typically handle up to 18 MHz on APB1, 36 MHz on APB2
-        u32 spi_speed = SPI_SPEED;
-        if (spi_speed > 36000000) spi_speed = 36000000; // Cap at 36 MHz
+        const u32 spi_speed = spiSpeed();
 
         #ifdef FL_IS_STM32_MBED
             if (mSpi) {
@@ -302,13 +305,27 @@ public:
     template <u8 BIT>
     inline void writeBit(u8 b) FL_NO_EXCEPT {
 #if FASTLED_STM32_USE_HAL
-        // For single bit writes, we need to use GPIO directly
-        // This is typically only used for specific LED chipsets
         waitFully();
+#endif
+#if FASTLED_STM32_USE_HAL && !defined(FL_IS_STM32_MBED)
+        // SPI.begin() put the pins in their SPI alternate function, where ODR
+        // writes do not reach the pads (#5116). transfer() is blocking, so no
+        // byte is in flight. Take the pins as GPIO outputs with the clock held
+        // low, send the bit, then let spi_init() restore the alternate function.
+        FastPin<CLOCK_PIN>::lo();
+        FastPin<CLOCK_PIN>::setOutput();
+        FastPin<DATA_PIN>::setOutput();
 #endif
         BitbangPin<FastPin<DATA_PIN>>::template write<BIT>(b);
         FastPin<CLOCK_PIN>::hi();
         FastPin<CLOCK_PIN>::lo();
+#if FASTLED_STM32_USE_HAL && !defined(FL_IS_STM32_MBED)
+        // begin() always runs spi_init(), which re-applies the pins' SPI
+        // function; it also resets the cached settings, so beginTransaction()
+        // re-applies this output's rate. STM32duino keeps no transaction count.
+        mSpi.begin();
+        mSpi.beginTransaction(SPISettings(spiSpeed(), MSBFIRST, SPI_MODE0));
+#endif
     }
 
     // Write pixels with color order and optional flags
