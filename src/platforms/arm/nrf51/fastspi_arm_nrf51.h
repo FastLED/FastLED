@@ -1,16 +1,25 @@
 // IWYU pragma: private
 
-// ok no namespace fl
 #ifndef __INC_FASTSPI_NRF_H
 #define __INC_FASTSPI_NRF_H
 
-#include "platforms/arm/nrf52/is_nrf52.h"
+#include "platforms/arm/nrf51/is_nrf51.h"
 #include "fl/stl/noexcept.h"
+#include "fl/system/fastpin_base.h"
+#include "fastspi_types.h"
+#include "fl/gfx/eorder.h"
 
-#ifdef FL_IS_NRF52
+#ifdef FL_IS_NRF51
 
 #ifndef FASTLED_FORCE_SOFTWARE_SPI
 #define FASTLED_ALL_PINS_HARDWARE_SPI
+
+// IWYU pragma: begin_keep
+#include <nrf51.h>            // vendor CMSIS: NRF_SPI0 / NRF_SPI_Type
+#include <nrf51_bitfields.h>  // SPI_ENABLE_* / SPI_FREQUENCY_*
+// IWYU pragma: end_keep
+
+namespace fl {
 
 // A nop/stub class, mostly to show the SPI methods that are needed/used by the various SPI chipset implementations.  Should
 // be used as a definition for the set of methods that the spi implementation classes should use (since C++ doesn't support the
@@ -23,6 +32,7 @@ class NRF51SPIOutput {
         fl::u32 mosi;
         fl::u32 miso;
         fl::u32 freq;
+        fl::u32 config;
         fl::u32 enable;
     } mSavedData;
 
@@ -31,15 +41,19 @@ class NRF51SPIOutput {
         mSavedData.mosi = NRF_SPI0->PSELMOSI;
         mSavedData.miso = NRF_SPI0->PSELMISO;
         mSavedData.freq = NRF_SPI0->FREQUENCY;
+        mSavedData.config = NRF_SPI0->CONFIG;
         mSavedData.enable = NRF_SPI0->ENABLE;
     }
 
     void restoreSPIData() FL_NO_EXCEPT {
+        // PSEL*/FREQUENCY may only be changed while the SPI is disabled.
+        NRF_SPI0->ENABLE = 0;
         NRF_SPI0->PSELSCK = mSavedData.sck;
         NRF_SPI0->PSELMOSI = mSavedData.mosi;
         NRF_SPI0->PSELMISO = mSavedData.miso;
         NRF_SPI0->FREQUENCY = mSavedData.freq;
-        mSavedData.enable = NRF_SPI0->ENABLE;
+        NRF_SPI0->CONFIG = mSavedData.config;
+        NRF_SPI0->ENABLE = mSavedData.enable;
     }
 
 public:
@@ -53,40 +67,45 @@ public:
     void init() FL_NO_EXCEPT {
         FastPin<_DATA_PIN>::setOutput();
         FastPin<_CLOCK_PIN>::setOutput();
+        // PSEL*/FREQUENCY/CONFIG may only be changed while the SPI is disabled.
+        NRF_SPI0->ENABLE = SPI_ENABLE_ENABLE_Disabled << SPI_ENABLE_ENABLE_Pos;
         NRF_SPI0->PSELSCK = _CLOCK_PIN;
         NRF_SPI0->PSELMOSI = _DATA_PIN;
-        NRF_SPI0->PSELMISO = 0xFFFFFFFF;
-        NRF_SPI0->FREQUENCY = 0x80000000;
-        NRF_SPI0->ENABLE = 1;
+        NRF_SPI0->PSELMISO = 0xFFFFFFFF;  // MISO not connected
+        NRF_SPI0->FREQUENCY = SPI_FREQUENCY_FREQUENCY_M8;
+        NRF_SPI0->CONFIG = 0;  // SPI mode 0, MSB first
         NRF_SPI0->EVENTS_READY = 0;
+        NRF_SPI0->ENABLE = SPI_ENABLE_ENABLE_Enabled << SPI_ENABLE_ENABLE_Pos;
     }
 
     // latch the CS select
     void select() { saveSPIData(); init(); }
 
     // release the CS select
-    void release() { shouldWait(); restoreSPIData(); }
+    void release() { restoreSPIData(); }
 
     void endTransaction() FL_NO_EXCEPT {
         waitFully();
         release();
     }
 
-    static bool shouldWait(bool wait = false) FL_NO_EXCEPT __attribute__((always_inline)) __attribute__((always_inline)) {
-        // static bool sWait=false;
-        // bool oldWait = sWait;
-        // sWait = wait;
-        // never going to bother with waiting since we're always running the spi clock at max speed on the rfduino
-        // TODO: When we set clock rate, implement/fix waiting properly, otherwise the world hangs up
-        return false;
-    }
-    
-    // wait until all queued up data has been written
-    static void waitFully() __attribute__((always_inline)){ if(shouldWait()) { while(NRF_SPI0->EVENTS_READY==0); } NRF_SPI0->INTENCLR; }
-    static void wait() __attribute__((always_inline)){ if(shouldWait()) { while(NRF_SPI0->EVENTS_READY==0); } NRF_SPI0->INTENCLR; }
+    // nRF51 legacy SPI master (Reference Manual, SPI chapter): TXD/RXD are
+    // double-buffered and EVENTS_READY fires once per byte when its received
+    // byte lands in RXD. RXD must be read for the next byte to complete, and
+    // EVENTS_READY must be cleared by software. writeByte() therefore keeps
+    // nothing in flight: it returns only after the byte has been clocked out,
+    // so wait()/waitFully() have nothing left to wait for.
+    static void waitFully() FL_NO_EXCEPT __attribute__((always_inline)) {}
+    static void wait() FL_NO_EXCEPT __attribute__((always_inline)) {}
 
-    // write a byte out via SPI (returns immediately on writing register)
-    static void writeByte(fl::u8 b) __attribute__((always_inline)) { wait(); NRF_SPI0->TXD = b; NRF_SPI0->INTENCLR; shouldWait(true); }
+    // write a byte out via SPI and wait for it to be shifted out
+    static void writeByte(fl::u8 b) FL_NO_EXCEPT __attribute__((always_inline)) {
+        NRF_SPI0->TXD = b;
+        while (NRF_SPI0->EVENTS_READY == 0) {
+        }
+        NRF_SPI0->EVENTS_READY = 0;
+        (void)NRF_SPI0->RXD;  // pop RXD so the next transfer can complete
+    }
 
     // write a word out via SPI (returns immediately on writing register)
     static void writeWord(fl::u16 w) __attribute__((always_inline)){ writeByte(w>>8); writeByte(w & 0xFF);  }
@@ -159,7 +178,9 @@ public:
     static void finalizeTransmission() { }
 };
 
-#endif
-#endif
+}  // namespace fl
+
+#endif  // FASTLED_FORCE_SOFTWARE_SPI
+#endif  // FL_IS_NRF51
 
 #endif

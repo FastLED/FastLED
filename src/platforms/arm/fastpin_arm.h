@@ -11,7 +11,7 @@
 
 #include "platforms/is_platform.h"
 
-#if defined(NRF51)
+#if defined(FL_IS_NRF51)
     #include "platforms/arm/nrf51/fastpin_arm_nrf51.h"
 #elif defined(NRF52_SERIES)
     #include "platforms/arm/nrf52/fastpin_arm_nrf52.h"

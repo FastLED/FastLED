@@ -17,6 +17,9 @@
 #include "lpc/is_lpc.h"
 // IWYU pragma: end_keep
 // IWYU pragma: begin_keep
+#include "nrf51/is_nrf51.h"
+// IWYU pragma: end_keep
+// IWYU pragma: begin_keep
 #include "nrf52/is_nrf52.h"
 // IWYU pragma: end_keep
 // IWYU pragma: begin_keep
@@ -59,6 +62,8 @@
     defined(FL_IS_RENESAS) || \
     /* Arduino STM32H747 (GIGA) */ \
     defined(ARDUINO_GIGA) || defined(ARDUINO_GIGA_M7) || \
+    /* Nordic nRF51 (Cortex-M0) - defined by is_nrf51.h */ \
+    defined(FL_IS_NRF51) || \
     /* Nordic nRF52 */ \
     defined(NRF52_SERIES) || defined(ARDUINO_ARCH_NRF52) || \
     defined(NRF52840_XXAA) || defined(ARDUINO_NRF52840_FEATHER_SENSE) || \

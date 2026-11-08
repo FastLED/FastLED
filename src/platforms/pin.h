@@ -33,6 +33,8 @@
     #include "platforms/arm/sam/pin_sam.hpp"
 #elif defined(FL_IS_RP)
     #include "platforms/arm/rp/pin_rp.hpp"
+#elif defined(FL_IS_NRF51)
+    #include "platforms/arm/nrf51/pin_nrf51.hpp"
 #elif defined(FL_IS_NRF52)
     #include "platforms/arm/nrf52/pin_nrf52.hpp"
 #elif defined(FL_IS_RENESAS)

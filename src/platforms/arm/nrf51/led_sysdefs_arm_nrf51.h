@@ -4,11 +4,10 @@
 #ifndef __LED_SYSDEFS_ARM_NRF51
 #define __LED_SYSDEFS_ARM_NRF51
 
-#include "platforms/arm/nrf52/is_nrf52.h"
+#include "platforms/arm/nrf51/is_nrf51.h"
 
 #define LED_TIMER NRF_TIMER1
 #define FASTLED_NO_PINMAP
-#define FL_CLOCKLESS_CONTROLLER_DEFINED
 
 #define FASTLED_SPI_BYTE_ONLY
 
@@ -31,7 +30,7 @@
 typedef volatile fl::u32 RoReg;
 typedef volatile fl::u32 RwReg;
 typedef fl::u32 prog_uint32_t;
-typedef fl::u8 boolean;
+// `boolean` comes from the arduino-nRF5 core (Arduino.h: typedef bool boolean).
 
 #define PROGMEM
 #define NO_PROGMEM

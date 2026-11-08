@@ -14,7 +14,7 @@
 
 #if defined(FL_IS_ARM_LPC)
 #include "platforms/arm/lpc/fastled_arm_lpc.h"  // ok platform headers
-#elif defined(NRF51)
+#elif defined(FL_IS_NRF51)
 #include "platforms/arm/nrf51/fastled_arm_nrf51.h"  // ok platform headers
 #elif defined(NRF52_SERIES)
 #include "platforms/arm/nrf52/fastled_arm_nrf52.h"  // ok platform headers

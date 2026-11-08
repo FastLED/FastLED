@@ -326,6 +326,7 @@ class Board:
             "atmelavr",  # AVR classic
             "atmelmegaavr",  # AVR modern (mega)
             "renesas-ra",  # Renesas (UNO R4)
+            "nordicnrf51",  # nRF51 (16KB RAM; matches sketch_macros.h FL_IS_NRF51)
         }
 
         # Check low-memory first
@@ -390,6 +391,8 @@ class Board:
             return "sam"
         elif "raspberrypi" in platform_lower or "rp2040" in platform_lower:
             return "rp"
+        elif "nordicnrf51" in platform_lower or "nrf51" in platform_lower:
+            return "nrf51"
         elif "nordicnrf52" in platform_lower or "nrf52" in platform_lower:
             return "nrf52"
         elif "renesas" in platform_lower:
@@ -490,6 +493,10 @@ class Board:
             if "2" in board_lower:
                 return "RP2350"
             return "RP2040"
+
+        # NRF51 boards
+        elif "microbit" in board_lower or "nrf51" in board_lower:
+            return "NRF51822"
 
         # NRF52 boards
         elif "nrf52" in board_lower:
@@ -1066,6 +1073,14 @@ ADA_FEATHER_NRF52840_SENSE = Board(
     # See #2653 — arm-gnu 15.2.rel1 + Adafruit BSP LTO offset overflow.
     build_unflags=["-flto"],
     build_flags=["-fno-lto"],
+)
+
+# BBC micro:bit v1 (nRF51822, Cortex-M0, 16KB RAM) on the sandeepmistry
+# arduino-nRF5 core (#5119). Building it needs an fbuild with nordicnrf51
+# platform support (FastLED/fbuild#1955).
+BBC_MICROBIT = Board(
+    board_name="bbcmicrobit",
+    platform="nordicnrf51",
 )
 
 # Seeed XIAO BLE Sense (nRF52840) -- community board (issue #2634)

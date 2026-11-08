@@ -196,6 +196,7 @@ class ReorderingPixelIteratorAny {
 /// pattern the maintainer adopted for `resolveDynamicDriver()` in PR
 /// #2830 â€” keep the diagnostic chain in a `FL_NO_INLINE` helper so it
 /// can't fold back into the hot path. (#2773 follow-up to #2832.)
+#if FASTLED_LOG_RUNTIME_ENABLED  // only caller is guarded the same way
 FL_NO_INLINE
 static void emitDisabledDriverError(const fl::string& channelName,
                                     const fl::string& driverName,
@@ -208,6 +209,7 @@ static void emitDisabledDriverError(const fl::string& channelName,
         FL_ERROR("Channel '" << channelName << "': bound driver '" << driverName << "' is currently DISABLED. Frame will be silently dropped. Resolve with: FastLED.enableDrivers<fl::Bus::" << driverName << ">() or FastLED.enableAllDrivers().");
     }
 }
+#endif  // FASTLED_LOG_RUNTIME_ENABLED
 
 }  // anonymous namespace
 

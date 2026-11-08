@@ -1,17 +1,15 @@
 // IWYU pragma: private
 
-// ok no namespace fl
 #ifndef __INC_CLOCKLESS_ARM_NRF51
 #define __INC_CLOCKLESS_ARM_NRF51
 
-#include "platforms/arm/nrf52/is_nrf52.h"
+#include "platforms/arm/nrf51/is_nrf51.h"
 
-#if defined(FL_IS_NRF52)
+#if defined(FL_IS_NRF51)
 
 // IWYU pragma: begin_keep
 #include <nrf51_bitfields.h>
 // IWYU pragma: end_keep
-#define FL_CLOCKLESS_CONTROLLER_DEFINED 1
 
 #if (FASTLED_ALLOW_INTERRUPTS==1)
 #define SEI_CHK LED_TIMER->CC[0] = (WAIT_TIME * (F_CPU/1000000)); LED_TIMER->TASKS_CLEAR; LED_TIMER->EVENTS_COMPARE[0] = 0;
@@ -26,16 +24,17 @@
 
 #include "platforms/arm/common/m0clockless.h"
 #include "fl/chipsets/timing_traits.h"
+#include "eorder.h"
+#include "fastled_delay.h"
 #include "fl/stl/noexcept.h"
+
+namespace fl {
+#define FL_CLOCKLESS_CONTROLLER_DEFINED 1
+
 template <fl::u8 DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 75>
 class ClocklessController : public CPixelLEDController<RGB_ORDER> {
     typedef typename FastPinBB<DATA_PIN>::port_ptr_t data_ptr_t;
     typedef typename FastPinBB<DATA_PIN>::port_t data_t;
-
-    // Extract timing values from ChipsetTiming struct at compile-time
-    static constexpr fl::u32 T1 = TIMING::T1;
-    static constexpr fl::u32 T2 = TIMING::T2;
-    static constexpr fl::u32 T3 = TIMING::T3;
 
     data_t mPinMask;
     data_ptr_t mPort;
@@ -93,6 +92,8 @@ public:
     }
 };
 
+}  // namespace fl
 
-#endif // FL_IS_NRF52
+
+#endif // FL_IS_NRF51
 #endif // __INC_CLOCKLESS_ARM_NRF51
