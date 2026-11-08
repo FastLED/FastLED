@@ -269,7 +269,7 @@ public:
 				SIM_SCGC6 = sim6 | SIM_SCGC6_SPI0;
 				SPIX.CTAR0 = SPI_CTAR_FMSZ(7) | SPI_CTAR_PBR(1) | SPI_CTAR_BR(1);
 			}
-		} else if((SPI_t*)pSPIX == &SPI1) {
+		} else if(pSPIX == 0x4002D000) { // SPI1; the SPI1 macro only exists with hardware pins (#5096)
 			if (!(sim6 & SIM_SCGC6_SPI1)) {
 				//serial_print("init1\n");
 				SIM_SCGC6 = sim6 | SIM_SCGC6_SPI1;
