@@ -27,6 +27,26 @@ Guidelines for how agents should approach work in the FastLED project.
 - Ask yourself: "Would a staff engineer approve this?"
 - Run tests, check logs, demonstrate correctness
 
+### Test on attached hardware before calling a hardware bug blocked
+The bench has real boards with physical pin loopbacks (jumpers from output
+pins to an RX/capture pin). A bug about pin output, SPI/clockless timing, or
+other wire-level behaviour is not "blocked on hardware" or "needs a waveform
+capture" until you have tried the boards that are present:
+
+1. List attached boards: `fbuild port scan`.
+2. If any board shares the bug's code path (same platform, or a shared driver
+   such as the generic bit-bang SPI writer that runs everywhere), run
+   `bash autoresearch <env> --upload-port <port>`. Pin discovery reports which
+   pins are jumpered.
+3. Measure over the loopback, RED on master and GREEN with the fix, through an
+   existing AutoResearch RPC or a small addition to its harness (see
+   `agents/docs/hardware-autoresearch.md`). Never add a new `.ino`.
+4. Put the measured numbers in the PR's Evidence section.
+
+Defer to "needs hardware" only when no attached board can exercise the code
+path, such as a SAMD- or Renesas-only bug with neither board connected. Say
+which boards were present and why none of them applied.
+
 ## 5. Demand Elegance (Balanced)
 - For non-trivial changes: pause and ask "is there a more elegant way?"
 - If a fix feels hacky: "Knowing everything I know now, implement the elegant solution"
