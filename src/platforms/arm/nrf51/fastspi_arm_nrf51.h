@@ -165,8 +165,11 @@ public:
         } else {
             Nrf51HwPin<_DATA_PIN>::lo();
         }
-        Nrf51HwPin<_CLOCK_PIN>::toggle();
-        Nrf51HwPin<_CLOCK_PIN>::toggle();
+        // SPI mode 0 idles the clock low, so the pulse is OUTSET then OUTCLR:
+        // two atomic stores, no read-modify-write of OUT that an interrupt
+        // writing another pin on the port could race (#5047).
+        Nrf51HwPin<_CLOCK_PIN>::hi();
+        Nrf51HwPin<_CLOCK_PIN>::lo();
         NRF_SPI0->ENABLE = 1;
     }
 

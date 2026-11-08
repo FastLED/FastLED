@@ -49,3 +49,20 @@ def test_drivers_use_the_native_pin() -> None:
         text = _read(name)
         assert not re.search(r"\bFastPin(BB)?<", text), name
         assert "Nrf51HwPin<" in text, name
+
+
+def test_writebit_clock_pulse_uses_atomic_set_clear() -> None:
+    # #5047: toggle() is a read-modify-write of NRF_GPIO->OUT that can race
+    # an interrupt writing another pin; the start-bit clock pulse must be
+    # OUTSET then OUTCLR.
+    body = re.search(
+        r"inline static void writeBit\(fl::u8 b\).*?\n    }\n",
+        _read("fastspi_arm_nrf51.h"),
+        re.S,
+    )
+    assert body
+    assert "toggle()" not in body.group(0)
+    assert re.search(
+        r"Nrf51HwPin<_CLOCK_PIN>::hi\(\);\s*Nrf51HwPin<_CLOCK_PIN>::lo\(\);",
+        body.group(0),
+    )
