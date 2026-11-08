@@ -63,23 +63,40 @@ public:
     // set the object representing the selectable
     void setSelect(Selectable *pSelect) { /* TODO */ }
 
-    // initialize the SPI subssytem
-    void init() FL_NO_EXCEPT {
-        FastPin<_DATA_PIN>::setOutput();
-        FastPin<_CLOCK_PIN>::setOutput();
+    // nRF51 SPI FREQUENCY for F_CPU / _SPI_CLOCK_DIVIDER, rounded down to the
+    // nearest supported rate (8 MHz max, 125 kHz min).
+    static constexpr fl::u32 spiFrequency() FL_NO_EXCEPT {
+        return (_SPI_CLOCK_DIVIDER <= F_CPU / 8000000UL) ? SPI_FREQUENCY_FREQUENCY_M8
+             : (_SPI_CLOCK_DIVIDER <= F_CPU / 4000000UL) ? SPI_FREQUENCY_FREQUENCY_M4
+             : (_SPI_CLOCK_DIVIDER <= F_CPU / 2000000UL) ? SPI_FREQUENCY_FREQUENCY_M2
+             : (_SPI_CLOCK_DIVIDER <= F_CPU / 1000000UL) ? SPI_FREQUENCY_FREQUENCY_M1
+             : (_SPI_CLOCK_DIVIDER <= F_CPU / 500000UL) ? SPI_FREQUENCY_FREQUENCY_K500
+             : (_SPI_CLOCK_DIVIDER <= F_CPU / 250000UL) ? SPI_FREQUENCY_FREQUENCY_K250
+             : SPI_FREQUENCY_FREQUENCY_K125;
+    }
+
+    // Program SPI0 for this controller. Only called from select(), after the
+    // previous SPI0 settings have been saved, so other SPI0 clients survive.
+    void configure() FL_NO_EXCEPT {
         // PSEL*/FREQUENCY/CONFIG may only be changed while the SPI is disabled.
         NRF_SPI0->ENABLE = SPI_ENABLE_ENABLE_Disabled << SPI_ENABLE_ENABLE_Pos;
         NRF_SPI0->PSELSCK = _CLOCK_PIN;
         NRF_SPI0->PSELMOSI = _DATA_PIN;
         NRF_SPI0->PSELMISO = 0xFFFFFFFF;  // MISO not connected
-        NRF_SPI0->FREQUENCY = SPI_FREQUENCY_FREQUENCY_M8;
+        NRF_SPI0->FREQUENCY = spiFrequency();
         NRF_SPI0->CONFIG = 0;  // SPI mode 0, MSB first
         NRF_SPI0->EVENTS_READY = 0;
         NRF_SPI0->ENABLE = SPI_ENABLE_ENABLE_Enabled << SPI_ENABLE_ENABLE_Pos;
     }
 
+    // initialize the SPI subssytem
+    void init() FL_NO_EXCEPT {
+        FastPin<_DATA_PIN>::setOutput();
+        FastPin<_CLOCK_PIN>::setOutput();
+    }
+
     // latch the CS select
-    void select() { saveSPIData(); init(); }
+    void select() { saveSPIData(); configure(); }
 
     // release the CS select
     void release() { restoreSPIData(); }
