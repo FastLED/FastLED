@@ -434,16 +434,12 @@ class function_list<void(Args...)> {
         : mState(other.mState ? fl::make_shared<State>(*other.mState)
                               : fl::shared_ptr<State>()) {}
     function_list(function_list&& other) FL_NO_EXCEPT = default;
+    // Copies own independent state. If allocation fails, both construction
+    // and assignment produce an empty list (the source is unchanged).
     function_list& operator=(const function_list& other) FL_NO_EXCEPT {
         if (this != &other) {
-            if (!other.mState) {
-                mState.reset();
-            } else {
-                auto copy = fl::make_shared<State>(*other.mState);
-                if (copy) {
-                    mState = fl::move(copy);
-                }
-            }
+            mState = other.mState ? fl::make_shared<State>(*other.mState)
+                                 : fl::shared_ptr<State>();
         }
         return *this;
     }
@@ -479,18 +475,7 @@ class function_list<void(Args...)> {
     // Compact the storage by removing invalid (cleared) callbacks
     // Used internally after invocation if removals occurred
     void compact() FL_NO_EXCEPT {
-        if (!mState || !mState->mNeedsCompact) return;
-        size_t write_pos = 0;
-        for (size_t read_pos = 0; read_pos < mState->mFunctions.size(); ++read_pos) {
-            if (mState->mFunctions[read_pos].fn) {  // Check if function is still valid
-                if (write_pos != read_pos) {
-                    mState->mFunctions[write_pos] = mState->mFunctions[read_pos];
-                }
-                write_pos++;
-            }
-        }
-        mState->mFunctions.resize(write_pos);
-        mState->mNeedsCompact = false;
+        if (mState) compactState(*mState);
     }
 
     // Size information - counts only valid (non-cleared) functions
@@ -514,12 +499,31 @@ class function_list<void(Args...)> {
         self.invokeImpl(args...);
     }
 
+    static void compactState(State& state) FL_NO_EXCEPT {
+        if (!state.mNeedsCompact) return;
+        size_t write_pos = 0;
+        for (size_t read_pos = 0; read_pos < state.mFunctions.size(); ++read_pos) {
+            if (state.mFunctions[read_pos].fn) {  // Check if function is still valid
+                if (write_pos != read_pos) {
+                    state.mFunctions[write_pos] = state.mFunctions[read_pos];
+                }
+                write_pos++;
+            }
+        }
+        state.mFunctions.resize(write_pos);
+        state.mNeedsCompact = false;
+    }
+
     void invokeImpl(Args... args) FL_NO_EXCEPT {
-        if (mState->mFunctions.empty()) return;
+        // Reassignment from a callback must not destroy or replace the state
+        // being dispatched. Reassignment ends this dispatch; replacement state
+        // starts receiving events on the next call.
+        auto state = mState;
+        if (state->mFunctions.empty()) return;
         // Compact the storage by removing invalid (cleared) callbacks
-        compact();
+        compactState(*state);
         // Save size at start - newly added callbacks won't execute until next call
-        const size_t invoke_size = mState->mFunctions.size();
+        const size_t invoke_size = state->mFunctions.size();
         // Early return if no callbacks
         if (invoke_size == 0) {
             return;
@@ -528,9 +532,9 @@ class function_list<void(Args...)> {
         // Collect unique priorities into a small vector (usually very few unique values)
         fl::vector_inlined<int, 16> priorities;
         for (size_t i = 0; i < invoke_size; ++i) {
-            if (!mState->mFunctions[i].fn) continue;  // Skip already-cleared functions
+            if (!state->mFunctions[i].fn) continue;  // Skip already-cleared functions
 
-            int p = mState->mFunctions[i].priority;
+            int p = state->mFunctions[i].priority;
             // Only add if not already present
             if (priorities.find(p) == priorities.end()) {
                 priorities.push_back(p);
@@ -544,15 +548,15 @@ class function_list<void(Args...)> {
         for (size_t p_idx = 0; p_idx < priorities.size(); ++p_idx) {
             int current_priority = priorities[p_idx];
             for (size_t i = 0; i < invoke_size; ++i) {
-                if (mState->mFunctions.empty()) {
-                    return;  // Clear happened.
+                if (mState.get() != state.get() || i >= state->mFunctions.size()) {
+                    return;  // Cleared or replaced during a callback.
                 }
-                if (mState->mFunctions[i].fn && mState->mFunctions[i].priority == current_priority) {
-                    mState->mFunctions[i].fn(args...);
+                if (state->mFunctions[i].fn && state->mFunctions[i].priority == current_priority) {
+                    state->mFunctions[i].fn(args...);
                 }
             }
         }
-        compact();
+        compactState(*state);
     }
 
   public:

@@ -16,20 +16,20 @@ ChannelConfig::ChannelConfig(const fl::string& name, const ChipsetVariant& chips
 // ========== Backwards-Compatible Constructors ==========
 
 ChannelConfig::ChannelConfig(const ChannelConfig& other) FL_NO_EXCEPT
-    : chipset(other.chipset)
-    , mLeds(other.mLeds)
+    : mLeds(other.mLeds)
     , rgb_order(other.rgb_order)
     , options(other.options)
     , mScreenMap(other.mScreenMap)
-    , mName(other.mName) {}
+    , mName(other.mName)
+    , chipset(other.chipset) {}
 
 ChannelConfig::ChannelConfig(ChannelConfig&& other) FL_NO_EXCEPT
-    : chipset(fl::move(other.chipset))
-    , mLeds(other.mLeds)
+    : mLeds(other.mLeds)
     , rgb_order(other.rgb_order)
     , options(fl::move(other.options))
     , mScreenMap(fl::move(other.mScreenMap))
-    , mName(fl::move(other.mName)) {}
+    , mName(fl::move(other.mName))
+    , chipset(fl::move(other.chipset)) {}
 
 // ========== Accessor Methods ==========
 

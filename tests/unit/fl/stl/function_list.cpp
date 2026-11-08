@@ -11,6 +11,17 @@
 #include "fl/stl/move.h"
 #include "fl/stl/vector.h"
 
+#if defined(FASTLED_TEST_ALLOC_FAILURE_WRAP)
+namespace {
+bool failFunctionListAllocation = false;
+}
+extern "C" void* __real__ZN2fl9libc_impl13aligned_allocEmm(fl::size_t, fl::size_t) FL_NO_EXCEPT;
+extern "C" void* __wrap__ZN2fl9libc_impl13aligned_allocEmm(fl::size_t alignment, fl::size_t size) FL_NO_EXCEPT {
+    return failFunctionListAllocation ? nullptr
+        : __real__ZN2fl9libc_impl13aligned_allocEmm(alignment, size);
+}
+#endif
+
 FL_TEST_FILE(FL_FILEPATH) {
 
 using namespace fl;
@@ -489,6 +500,50 @@ FL_TEST_CASE("function_list - lazy storage keeps copy and move value semantics")
     moveAssigned();
     FL_CHECK_TRUE(moveAssigned.empty());
     FL_CHECK_EQ(calls, 113);
+}
+
+#if defined(FASTLED_TEST_ALLOC_FAILURE_WRAP)
+FL_TEST_CASE("function_list - failed copies consistently become empty") {
+    struct AllocationProbe {};
+    function_list<void(AllocationProbe)> source;
+    function_list<void(AllocationProbe)> destination;
+    source.add([](AllocationProbe) {});
+    destination.add([](AllocationProbe) {});
+    failFunctionListAllocation = true;
+    function_list<void(AllocationProbe)> copied(source);
+    destination = source;
+    failFunctionListAllocation = false;
+    FL_CHECK_TRUE(copied.empty());
+    FL_CHECK_TRUE(destination.empty());
+    FL_CHECK_EQ(source.size(), 1u);
+}
+#endif
+
+FL_TEST_CASE("function_list - reassignment during dispatch retains the active state") {
+    function_list<void()> callbacks;
+    function_list<void()> replacement;
+    int action = 0;
+    FL_SUBCASE("self move") { action = 2; }
+    FL_SUBCASE("assign other") { action = 1; }
+    FL_SUBCASE("assign empty") { action = 0; }
+    int first = 0;
+    int tail = 0;
+    int next = 0;
+    replacement.add([&]() { ++next; });
+    callbacks.add([&]() {
+        ++first;
+        if (action == 0) callbacks = function_list<void()>();
+        else if (action == 1) callbacks = replacement;
+        else callbacks = fl::move(callbacks);
+    }, 10);
+    callbacks.add([&]() { ++tail; });
+    callbacks();
+    FL_CHECK_EQ(first, 1);
+    FL_CHECK_EQ(tail, action == 2 ? 1 : 0);
+    FL_CHECK_EQ(next, 0);
+    callbacks();
+    FL_CHECK_EQ(next, action == 1 ? 1 : 0);
+    FL_CHECK_EQ(tail, action == 2 ? 2 : 0);
 }
 
 // Compile-time error test - commented out because it should NOT compile
