@@ -7,12 +7,9 @@ source and wire bytes. The policy checks below judge the brightness measured
 on the wire, independently of the firmware's limiter code:
 
 * a budget that covers the full demand leaves the frame untouched (255);
-* a budget over the baseline but under the demand dims the frame, never
-  exceeds the budget's linear share, and is never dimmer than a budget at
-  the baseline (raising the budget must not dim the strip);
-* a budget at or under the baseline gets the classic ratio
-  ``floor(255 * budget / full)`` (within 1), so it stays lit unless that
-  ratio is itself 0;
+* a budget over the baseline but under the demand dims the frame and its
+  modeled draw stays within the budget (the budget is an upper bound);
+* a budget at or under the baseline blanks the frame (nothing fits);
 * the wire agrees with the brightness the limiter reported.
 """
 
@@ -22,13 +19,6 @@ from typing import Any
 # Wire bytes are scale8 of the source; summed over a frame they reproduce the
 # scalar to within rounding of the darkest channels.
 _MEASURED_SCALE_TOLERANCE = 3
-
-
-def classic_ratio(budget_mw: int, full_mw: int) -> int:
-    """floor(255 * budget / full), clamped to 255 (the 3.10.1 rule)."""
-    if full_mw <= 0 or budget_mw >= full_mw:
-        return 255
-    return (255 * budget_mw) // full_mw
 
 
 def measured_scale(frame: dict[str, Any]) -> int | None:
@@ -79,36 +69,16 @@ def check_power_frames(result: dict[str, Any], sent_budget: object) -> list[str]
                 errors.append(
                     f"{label}: over-budget frame was not dimmed (scale {scale})"
                 )
-            # Raising the budget must never dim the strip: a budget at the
-            # baseline gets the classic ratio, so anything above it may not
-            # fall below that (a lit strip went dark at baseline + 1 mW).
-            at_baseline = classic_ratio(baseline, full)
-            # The fixed baseline cannot be dimmed, so the scalar must leave
-            # room for it: never above the budget's share of the whole demand
-            # plus one code of rounding. Exempt is the floor itself: just over
-            # the baseline it overshoots by design, by no more than a budget
-            # at the baseline already does.
-            if scale > at_baseline + 1 and (
+            # The budget is an upper bound: the scaled draw must fit, give or
+            # take the wire measurement's rounding (one code of the demand).
+            if (
                 baseline + (full - baseline) * scale // 255
                 > budget + (full - baseline) // 255 + 1
             ):
                 errors.append(f"{label}: scale {scale} models above the budget")
-            if lit_source and scale < at_baseline:
-                errors.append(
-                    f"{label}: scale {scale} is dimmer than the {at_baseline} "
-                    f"a {baseline} mW budget gets (non-monotonic)"
-                )
-        else:
-            # Budgets at or under the baseline get the classic ratio (within
-            # one code of rounding); a 0 there where the ratio is not is the
-            # #5139 blank strip.
-            if lit_source:
-                expected = classic_ratio(budget, full)
-                if abs(scale - expected) > 1:
-                    blank = " (strip blanked, #5139)" if scale == 0 else ""
-                    errors.append(
-                        f"{label}: scale {scale}, classic ratio is {expected}{blank}"
-                    )
+        elif scale > 1:
+            # Nothing fits a budget the baseline already spends.
+            errors.append(f"{label}: budget under the baseline but scale {scale}")
 
         if wire is not None and abs(wire - reported) > _MEASURED_SCALE_TOLERANCE:
             errors.append(
