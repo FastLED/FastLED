@@ -5,14 +5,14 @@
 
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/static_assert.h"
+#include "platforms/arm/nrf51/is_nrf51.h"
 
 // nRF51 has no Arduino port-register map. Define this before fastpin_base.h
 // so a forced FastPin is NoPinMapPin whichever nRF51 header comes first.
-#ifndef FASTLED_NO_PINMAP
+#if defined(FL_IS_NRF51) && !defined(FASTLED_NO_PINMAP)
 #define FASTLED_NO_PINMAP
 #endif
 #include "fl/system/fastpin_base.h"
-#include "platforms/arm/nrf51/is_nrf51.h"
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_DEPRECATED_REGISTER
@@ -46,7 +46,12 @@ public:
 
     inline static void strobe() __attribute__ ((always_inline)) { toggle(); toggle(); }
 
-    inline static void toggle() __attribute__ ((always_inline)) { NRF_GPIO->OUT ^= _MASK; }
+    // Read OUT, then write only this pin through OUTCLR/OUTSET. A plain
+    // `OUT ^= mask` writes the whole port back and reverts any other pin an
+    // interrupt changed between the load and the store (#5047).
+    inline static void toggle() __attribute__ ((always_inline)) {
+        if (NRF_GPIO->OUT & _MASK) { NRF_GPIO->OUTCLR = _MASK; } else { NRF_GPIO->OUTSET = _MASK; }
+    }
 
     inline static void hi(FASTLED_REGISTER port_ptr_t port) __attribute__ ((always_inline)) { hi(); }
     inline static void lo(FASTLED_REGISTER port_ptr_t port) __attribute__ ((always_inline)) { lo(); }
