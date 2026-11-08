@@ -12,7 +12,9 @@
 // See clockless.h for detailed info on how the template parameters are used.
 #include "platforms/arm/teensy/is_teensy.h"
 
-#if defined(FL_IS_TEENSY_3X)
+// The block driver writes whole GPIO ports through FastPin::sport()/cport(),
+// which forced software pins do not have (#5096).
+#if defined(FL_IS_TEENSY_3X) && !defined(FASTLED_FORCE_SOFTWARE_PINS)
 #define FASTLED_HAS_BLOCKLESS 1
 
 #define PORTB_FIRST_PIN 0
