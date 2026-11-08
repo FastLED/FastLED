@@ -12,6 +12,7 @@
 #include "fl/stl/int.h"
 #include "fl/stl/noexcept.h"
 #include "fl/stl/static_assert.h"
+#include "fl/stl/compiler_control.h"
 
 namespace fl {
 
@@ -57,13 +58,15 @@ To bit_cast(const From& from) FL_NO_EXCEPT {
 
 // Overload for pointer types - converts storage pointer to typed pointer safely
 template <typename To>
-To* bit_cast_ptr(void* storage) FL_NO_EXCEPT {
-    return bit_cast<To*>(storage);
+FASTLED_FORCE_INLINE To* bit_cast_ptr(void* storage) FL_NO_EXCEPT {
+    // Converting a void pointer back to an object pointer is a standard
+    // conversion. Copying its representation hides the target from -Os.
+    return static_cast<To*>(storage);
 }
 
 template <typename To>
-const To* bit_cast_ptr(const void* storage) FL_NO_EXCEPT {
-    return bit_cast<const To*>(storage);
+FASTLED_FORCE_INLINE const To* bit_cast_ptr(const void* storage) FL_NO_EXCEPT {
+    return static_cast<const To*>(storage);
 }
 
 // Additional utility for uptr conversions (common pattern in the codebase)

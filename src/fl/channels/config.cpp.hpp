@@ -13,35 +13,7 @@ ChannelConfig::ChannelConfig(const fl::string& name, const ChipsetVariant& chips
     mName = name;
 }
 
-ChannelConfig::ChannelConfig(const ChipsetVariant& chipset, fl::span<CRGB> leds,
-                              EOrder rgbOrder, const ChannelOptions& options) FL_NO_EXCEPT
-    : chipset(chipset)
-    , mLeds(leds)
-    , rgb_order(rgbOrder)
-    , options(options) {}
-
-ChannelConfig::ChannelConfig(const ClocklessChipset& clockless, fl::span<CRGB> leds,
-                              EOrder rgbOrder, const ChannelOptions& options) FL_NO_EXCEPT
-    : chipset(clockless)
-    , mLeds(leds)
-    , rgb_order(rgbOrder)
-    , options(options) {}
-
-ChannelConfig::ChannelConfig(const SpiChipsetConfig& spi, fl::span<CRGB> leds,
-                              EOrder rgbOrder, const ChannelOptions& options) FL_NO_EXCEPT
-    : chipset(spi)
-    , mLeds(leds)
-    , rgb_order(rgbOrder)
-    , options(options) {}
-
 // ========== Backwards-Compatible Constructors ==========
-
-ChannelConfig::ChannelConfig(int pin, const ChipsetTimingConfig& timing, fl::span<CRGB> leds,
-                              EOrder rgbOrder, const ChannelOptions& options) FL_NO_EXCEPT
-    : chipset(ClocklessChipset(pin, timing))
-    , mLeds(leds)
-    , rgb_order(rgbOrder)
-    , options(options) {}
 
 ChannelConfig::ChannelConfig(const ChannelConfig& other) FL_NO_EXCEPT
     : chipset(other.chipset)

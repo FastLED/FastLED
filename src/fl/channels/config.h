@@ -18,6 +18,7 @@
 #include "color.h"  // IWYU pragma: keep
 #include "dither_mode.h"  // IWYU pragma: keep
 #include "fl/stl/noexcept.h"
+#include "fl/stl/compiler_control.h"
 
 namespace fl {
 
@@ -182,24 +183,40 @@ struct ChannelConfig {
     /// @param leds LED data array
     /// @param rgbOrder RGB channel ordering
     /// @param options Channel options (correction, temperature, dither, affinity)
-    ChannelConfig(const ChipsetVariant& chipset, fl::span<CRGB> leds,
-                  EOrder rgbOrder = RGB, const ChannelOptions& options = ChannelOptions()) FL_NO_EXCEPT;
+    FASTLED_FORCE_INLINE ChannelConfig(const ChipsetVariant& chipset, fl::span<CRGB> leds,
+                  EOrder rgbOrder = RGB, const ChannelOptions& options = ChannelOptions()) FL_NO_EXCEPT
+    : chipset(chipset)
+    , mLeds(leds)
+    , rgb_order(rgbOrder)
+    , options(options) {}
 
     /// @brief Constructor with clockless chipset
     /// @param clockless Clockless chipset configuration
     /// @param leds LED data array
     /// @param rgbOrder RGB channel ordering
     /// @param options Channel options
-    ChannelConfig(const ClocklessChipset& clockless, fl::span<CRGB> leds,
-                  EOrder rgbOrder = RGB, const ChannelOptions& options = ChannelOptions()) FL_NO_EXCEPT;
+    FASTLED_FORCE_INLINE ChannelConfig(const ClocklessChipset& clockless, fl::span<CRGB> leds,
+                  EOrder rgbOrder = RGB, const ChannelOptions& options = ChannelOptions()) FL_NO_EXCEPT
+    : chipset()
+    , mLeds(leds)
+    , rgb_order(rgbOrder)
+    , options(options) {
+        // Finish the concrete chipset after the out-of-line settings and
+        // ScreenMap constructors, keeping its encoder visible to typed add().
+        chipset = clockless;
+    }
 
     /// @brief Constructor with SPI chipset
     /// @param spi SPI chipset configuration
     /// @param leds LED data array
     /// @param rgbOrder RGB channel ordering
     /// @param options Channel options
-    ChannelConfig(const SpiChipsetConfig& spi, fl::span<CRGB> leds,
-                  EOrder rgbOrder = RGB, const ChannelOptions& options = ChannelOptions()) FL_NO_EXCEPT;
+    FASTLED_FORCE_INLINE ChannelConfig(const SpiChipsetConfig& spi, fl::span<CRGB> leds,
+                  EOrder rgbOrder = RGB, const ChannelOptions& options = ChannelOptions()) FL_NO_EXCEPT
+    : chipset()
+    , mLeds(leds)
+    , rgb_order(rgbOrder)
+    , options(options) { chipset = spi; }
 
     // ========== Backwards-Compatible Constructors (Deprecated) ==========
 
@@ -214,8 +231,12 @@ struct ChannelConfig {
     /// @brief Basic constructor with timing (backwards compatibility)
     /// @deprecated Use ClocklessChipset constructor instead
     /// @note This constructor creates a ClocklessChipset internally
-    ChannelConfig(int pin, const ChipsetTimingConfig& timing, fl::span<CRGB> leds,
-                  EOrder rgbOrder = RGB, const ChannelOptions& options = ChannelOptions()) FL_NO_EXCEPT;
+    FASTLED_FORCE_INLINE ChannelConfig(int pin, const ChipsetTimingConfig& timing, fl::span<CRGB> leds,
+                  EOrder rgbOrder = RGB, const ChannelOptions& options = ChannelOptions()) FL_NO_EXCEPT
+    : chipset()
+    , mLeds(leds)
+    , rgb_order(rgbOrder)
+    , options(options) { chipset = ClocklessChipset(pin, timing); }
 
     // Copy constructor (needed because of variant)
     ChannelConfig(const ChannelConfig& other) FL_NO_EXCEPT;

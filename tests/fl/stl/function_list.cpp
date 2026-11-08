@@ -421,6 +421,76 @@ FL_TEST_CASE("function_list - add during iteration") {
     FL_REQUIRE(call_count_2 == 1);  // Now the second callback executes
 }
 
+FL_TEST_CASE("function_list - empty dispatch then late subscription and copy") {
+    function_list<void(int)> callbacks;
+    callbacks(1);
+    callbacks.clear();
+    callbacks(2);
+    int received = 0;
+    int id = callbacks.add([&](int value) { received += value; });
+    callbacks(3);
+    FL_CHECK_EQ(received, 3);
+    auto copied = callbacks;
+    copied(4);
+    FL_CHECK_EQ(received, 7);
+    callbacks.remove(id);
+    callbacks(5);
+    FL_CHECK_EQ(received, 7);
+    callbacks.add([&](int value) { received += value; });
+    callbacks(6);
+    FL_CHECK_EQ(received, 13);
+}
+
+FL_TEST_CASE("function_list - priorities preserve insertion and removal") {
+    function_list<void()> callbacks;
+    fl::vector<int> order;
+    int removed = callbacks.add([&]() { order.push_back(0); }, -1);
+    callbacks.add([&]() { order.push_back(1); callbacks.remove(removed); }, 10);
+    callbacks.add([&]() { order.push_back(2); }, 10);
+    callbacks.add([&]() { order.push_back(3); }, 0);
+    callbacks();
+    FL_REQUIRE_EQ(order.size(), 3);
+    FL_CHECK_EQ(order[0], 1);
+    FL_CHECK_EQ(order[1], 2);
+    FL_CHECK_EQ(order[2], 3);
+}
+
+FL_TEST_CASE("function_list - lazy storage keeps copy and move value semantics") {
+    function_list<void()> original;
+    original();
+    int calls = 0;
+    int id = original.add([&]() { ++calls; });
+    function_list<void()> assigned;
+    assigned = original;
+    original.remove(id);
+    original();
+    assigned();
+    FL_CHECK_EQ(calls, 1);
+
+    function_list<void()> moved(fl::move(assigned));
+    assigned();
+    assigned.add([&]() { calls += 10; });
+    assigned();
+    FL_CHECK_EQ(calls, 11);
+    moved();
+    FL_CHECK_EQ(calls, 12);
+
+    function_list<void()> moveAssigned;
+    moveAssigned = fl::move(moved);
+    moved();
+    moved.add([&]() { calls += 100; });
+    moved();
+    FL_CHECK_EQ(calls, 112);
+    moveAssigned();
+    FL_CHECK_EQ(calls, 113);
+
+    function_list<void()> empty;
+    moveAssigned = empty;
+    moveAssigned();
+    FL_CHECK_TRUE(moveAssigned.empty());
+    FL_CHECK_EQ(calls, 113);
+}
+
 // Compile-time error test - commented out because it should NOT compile
 // Uncomment this test to verify that non-void return types trigger static_assert
 /*

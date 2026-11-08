@@ -849,7 +849,7 @@ public:
 	/// pass SpiChipsetConfig explicitly for an erased clocked configuration.
 	/// A chipset-family mismatch returns nullptr without registering anything.
 	template<fl::Bus B, typename Chipset = fl::ClocklessChipset, fl::u8 Which = 0>
-	static fl::ChannelPtr add(const fl::ChannelConfig& config) FL_NO_EXCEPT {
+	FL_ALWAYS_INLINE fl::ChannelPtr add(const fl::ChannelConfig& config) FL_NO_EXCEPT {
 		fl::ChannelPtr channel = fl::TypedChannel<B, Chipset, Which>::create(config);
 		if (channel != nullptr) add(channel);
 		return channel;
@@ -858,7 +858,7 @@ public:
 	/// Add a typed configuration, deducing its chipset family.
 	/// The template bus and instance take precedence over runtime bus options.
 	template<fl::Bus B, typename Chipset, fl::u8 Which = 0>
-	static fl::ChannelPtr add(const fl::ChannelConfigOf<Chipset>& config) FL_NO_EXCEPT {
+	FL_ALWAYS_INLINE fl::ChannelPtr add(const fl::ChannelConfigOf<Chipset>& config) FL_NO_EXCEPT {
 		fl::ChannelPtr channel = fl::TypedChannel<B, Chipset, Which>::create(config);
 		if (channel != nullptr) add(channel);
 		return channel;

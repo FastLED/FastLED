@@ -8,6 +8,7 @@
 #include "fl/channels/bus_traits.h"
 #include "fl/channels/channel.h"
 #include "fl/channels/channel_events.h"
+#include "fl/channels/channel_typed.h"
 #include "fl/channels/data.h"
 #include "fl/channels/driver.h"
 #include "fl/channels/manager.h"
@@ -24,6 +25,7 @@
 #include "fl/stl/string.h"
 #include "fl/stl/vector.h"
 #include "test.h"
+#include "power_mgt.h"
 #include "platforms/stub/bus_traits.h"
 
 using namespace fl;
@@ -944,6 +946,68 @@ fl::vector<u8> encodeOnce(CRGB colour, bool bindProfile, float gamma, int pin) {
 
 }  // namespace
 
+FL_TEST_CASE("[#5157] typed and erased encoders produce identical bytes") {
+    auto& manager = ChannelManager::instance();
+    auto cleanup = fl::make_scope_exit([&]() { manager.clearAllDrivers(); });
+    CRGB leds[3] = {CRGB(127, 3, 255), CRGB(1, 200, 37), CRGB::Black};
+    ChannelOptions options;
+    options.mDitherMode = DISABLE_DITHER;
+    auto compare = [&](const ChannelConfig& config, bool spi) {
+        manager.clearAllDrivers();
+        auto typed = spi
+            ? TypedChannel<Bus::BIT_BANG, SpiChipsetConfig>::create(config)
+            : TypedChannel<Bus::BIT_BANG, ClocklessChipset>::create(config);
+        auto erased = Channel::create(config);
+        FL_REQUIRE(typed != nullptr);
+        FL_REQUIRE(erased != nullptr);
+        // Replace the registered hardware driver after construction so both
+        // paths expose exactly the bytes they would enqueue.
+        manager.clearAllDrivers();
+        auto driver = fl::make_shared<CapturingDriver>();
+        manager.addDriver(9100, driver);
+        typed->showLeds(173);
+        const auto expected = driver->last;
+        FL_REQUIRE_EQ(driver->frames, 1);
+        const auto* spiConfig = config.getSpiChipset();
+        if (spiConfig && spiConfig->timing.chipset == SpiChipset::MY9221) {
+            // The existing unmanaged Channels MY9221 encoder emits no bytes;
+            // legacy MY9221 output uses its dedicated controller instead.
+            FL_CHECK_EQ(expected.size(), 0u);
+        } else {
+            FL_REQUIRE_GT(expected.size(), 0u);
+        }
+        erased->showLeds(173);
+        FL_REQUIRE_EQ(driver->frames, 2);
+        FL_REQUIRE_EQ(driver->last.size(), expected.size());
+        for (fl::size i = 0; i < expected.size(); ++i) {
+            FL_CHECK_EQ(driver->last[i], expected[i]);
+        }
+    };
+    compare(ChannelConfig(makeClockless<TIMING_WS2812_800KHZ>(14), leds, GRB, options), false);
+    const ClocklessEncoder clocklessEncoders[] = {
+        ClocklessEncoder::CLOCKLESS_ENCODER_TM1812_RGBWW,
+        ClocklessEncoder::CLOCKLESS_ENCODER_TM1908,
+        ClocklessEncoder::CLOCKLESS_ENCODER_UCS7604_8BIT,
+        ClocklessEncoder::CLOCKLESS_ENCODER_UCS7604_16BIT,
+        ClocklessEncoder::CLOCKLESS_ENCODER_UCS7604_16BIT_1600};
+    for (const auto encoder : clocklessEncoders) {
+        auto chipset = ucs16(14);
+        chipset.encoder = encoder;
+        compare(ChannelConfig(chipset, leds, GRB, options), false);
+    }
+    const SpiEncoder encoders[] = {
+        SpiEncoder::apa102(), SpiEncoder::apa102HD(),
+        SpiEncoder::sk9822(), SpiEncoder::sk9822HD(),
+        SpiEncoder::dotstar(), SpiEncoder::dotstarHD(),
+        SpiEncoder::hd107(), SpiEncoder::hd107HD(), SpiEncoder::hd108(),
+        SpiEncoder::ws2801(), SpiEncoder::ws2803(), SpiEncoder::p9813(),
+        SpiEncoder::lpd8806(), SpiEncoder::lpd6803(),
+        SpiEncoder::sm16716(), SpiEncoder::my9221()};
+    for (const auto& encoder : encoders) {
+        compare(ChannelConfig(SpiChipsetConfig(14, 15, encoder), leds, BGR, options), true);
+    }
+}
+
 FL_TEST_CASE("[#4326] the Channels UCS7604 path encodes a frame at all") {
     // The floor this file exists to lay down. `tests/fl/chipsets/ucs7604.cpp`
     // drives the legacy CLEDController; `fl::Channel`'s writeUCS7604 lives in
@@ -1620,6 +1684,64 @@ FL_TEST_CASE("[#4566] a pre-bound mBus channel matches the dynamic path byte-for
     ch->showLeds(255);
     FL_CHECK_EQ(driver->mCapturedChannels.size(), 2);
     FL_CHECK_EQ(enqueueEvents, 2);
+}
+
+
+FL_TEST_CASE("[#5157] typed RGB channels accept late direct RGBW and RGBWW options") {
+    bool rgbww = false;
+    FL_SUBCASE("RGBW") { rgbww = false; }
+    FL_SUBCASE("RGBWW") { rgbww = true; }
+
+    CRGB leds[2] = {CRGB(150, 120, 90), CRGB(11, 22, 33)};
+    ChannelOptions whiteOptions;
+    whiteOptions.mDitherMode = DISABLE_DITHER;
+    if (rgbww) {
+        Rgbww white = RgbwwInvalid::value();
+        white.rgbww_mode = RGBWW_MODE::kRGBWWColorimetric;
+        whiteOptions.mWhiteCfg = white;
+    } else {
+        Rgbw white = RgbwInvalid::value();
+        white.rgbw_mode = RGBW_MODE::kRGBWExactColors;
+        whiteOptions.mWhiteCfg = white;
+    }
+    const auto expected = showOnce4566(fl::span<CRGB>(leds, 2), 255, whiteOptions);
+    FL_REQUIRE_EQ(expected.size(), rgbww ? 10u : 8u);
+
+    ChannelOptions rgbOptions;
+    rgbOptions.mDitherMode = DISABLE_DITHER;
+    const auto timing = makeTimingConfig<TIMING_WS2812_800KHZ>();
+    const ChannelConfig rgbConfig(143, timing, fl::span<CRGB>(leds, 2), GRB, rgbOptions);
+    auto channel = TypedChannel<Bus::AUTO, ClocklessChipset>::create(rgbConfig);
+    FL_REQUIRE(channel != nullptr);
+
+    auto& manager = ChannelManager::instance();
+    manager.clearAllDrivers();
+    auto driver = fl::make_shared<ByteCapturingMockEngine>("LATE_WHITE_5157");
+    manager.addDriver(9400, driver);
+    auto cleanup = fl::make_scope_exit([&manager]() { manager.clearAllDrivers(); });
+    channel->showLeds(255);
+    FL_REQUIRE_EQ(driver->mCapturedChannels.size(), 1u);
+    FL_CHECK_EQ(driver->mCapturedChannels.back()->getData().size(), 6u);
+
+    channel->applyConfig(ChannelConfig(143, timing, fl::span<CRGB>(leds, 2), GRB, whiteOptions));
+    channel->showLeds(255);
+    FL_REQUIRE_EQ(driver->mCapturedChannels.size(), 2u);
+    FL_CHECK_EQ(driver->mCapturedChannels.back()->getData(), expected);
+    FL_CHECK_EQ(driver->mCapturedChannels.back()->getPixelFormat(),
+                (rgbww ? ChannelPixelFormat::RGBWW : ChannelPixelFormat::RGBW));
+    if (!rgbww) {
+        FL_CHECK_EQ(controller_unscaled_power_mW(*channel),
+                    calculate_unscaled_power_mW(fl::span<const CRGB>(leds, 2), whiteOptions.rgbw()));
+    }
+
+    // Legacy setters continue to synchronize the channel after construction.
+    channel->clearWhiteChannel();
+    channel->showLeds(255);
+    FL_CHECK_EQ(driver->mCapturedChannels.back()->getData().size(), 6u);
+    if (rgbww) channel->setRgbww(whiteOptions.rgbww());
+    else channel->setRgbw(whiteOptions.rgbw());
+    channel->showLeds(255);
+    FL_CHECK_EQ(driver->mCapturedChannels.back()->getData(), expected);
 }
 
 }  // FL_TEST_FILE

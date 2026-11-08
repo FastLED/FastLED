@@ -213,58 +213,6 @@ static void emitDisabledDriverError(const fl::string& channelName,
 
 }  // anonymous namespace
 
-Channel::PixelEncoder
-Channel::selectPixelEncoder(const ChipsetVariant& chipset) FL_NO_EXCEPT {
-    if (const ClocklessChipset* clockless = chipset.ptr<ClocklessChipset>()) {
-        switch (clockless->encoder) {
-            case ClocklessEncoder::CLOCKLESS_ENCODER_WS2812:
-                return &Channel::encodeWS2812;
-            case ClocklessEncoder::CLOCKLESS_ENCODER_TM1812_RGBWW:
-                return &Channel::encodeTM1812RGBWW;
-            case ClocklessEncoder::CLOCKLESS_ENCODER_TM1908:
-                return &Channel::encodeTM1908;
-#if !defined(FASTLED_DISABLE_UCS7604) || !FASTLED_DISABLE_UCS7604
-            case ClocklessEncoder::CLOCKLESS_ENCODER_UCS7604_8BIT:
-            case ClocklessEncoder::CLOCKLESS_ENCODER_UCS7604_16BIT:
-            case ClocklessEncoder::CLOCKLESS_ENCODER_UCS7604_16BIT_1600:
-                return &Channel::encodeUCS7604;
-#endif
-        }
-    } else if (const SpiChipsetConfig* spi = chipset.ptr<SpiChipsetConfig>()) {
-#if !defined(FASTLED_DISABLE_SPI_CHIPSETS) || !FASTLED_DISABLE_SPI_CHIPSETS
-        switch (spi->timing.chipset) {
-            case SpiChipset::APA102:
-            case SpiChipset::DOTSTAR:
-            case SpiChipset::APA102HD:
-            case SpiChipset::DOTSTARHD:
-            case SpiChipset::HD107:
-            case SpiChipset::HD107HD:
-                return &Channel::encodeAPA102;
-            case SpiChipset::SK9822:
-            case SpiChipset::SK9822HD:
-                return &Channel::encodeSK9822;
-            case SpiChipset::WS2801:
-                return &Channel::encodeWS2801;
-            case SpiChipset::WS2803:
-                return &Channel::encodeWS2803;
-            case SpiChipset::P9813:
-                return &Channel::encodeP9813;
-            case SpiChipset::LPD8806:
-                return &Channel::encodeLPD8806;
-            case SpiChipset::LPD6803:
-                return &Channel::encodeLPD6803;
-            case SpiChipset::SM16716:
-                return &Channel::encodeSM16716;
-            case SpiChipset::MY9221:
-                return &Channel::encodeMY9221;
-            case SpiChipset::HD108:
-                return &Channel::encodeHD108;
-        }
-#endif  // !FASTLED_DISABLE_SPI_CHIPSETS
-    }
-    return nullptr;
-}
-
 i32 Channel::nextId() FL_NO_EXCEPT {
     static fl::atomic<i32> gNextChannelId(0); // okay static in header
     return gNextChannelId.fetch_add(1);
@@ -289,13 +237,18 @@ fl::string Channel::makeName(i32 id, const fl::optional<fl::string>& configName)
 }
 
 ChannelPtr Channel::create(const ChannelConfig &config) FL_NO_EXCEPT {
+    return createWithEncoder(config, selectPixelEncoder(config.chipset));
+}
+
+ChannelPtr Channel::createWithEncoder(const ChannelConfig &config,
+                                      PixelEncoder encoder) FL_NO_EXCEPT {
     // Late binding strategy: Always create with empty driver
     // Engine binding happens on first showPixels() call:
     // - Affinity channels: Look up by name and cache
     // - Non-affinity channels: Select dynamically each frame
 
     auto channel = fl::make_shared<Channel>(config.chipset, config.mLeds,
-                                              config.rgb_order, config.options);
+                                              config.rgb_order, config.options, encoder);
     auto& events = ChannelEvents::instance();
 #if FL_COLOR_PROFILE_RUNTIME
     if (channel->reconcileColorProfile(config.options)) {
@@ -328,9 +281,13 @@ const ChipsetTimingConfig& Channel::getTiming() const FL_NO_EXCEPT {
 
 Channel::Channel(const ChipsetVariant& chipset, fl::span<CRGB> leds,
                  EOrder rgbOrder, const ChannelOptions& options) FL_NO_EXCEPT
+    : Channel(chipset, leds, rgbOrder, options, selectPixelEncoder(chipset)) {}
+
+Channel::Channel(const ChipsetVariant& chipset, fl::span<CRGB> leds,
+                 EOrder rgbOrder, const ChannelOptions& options, PixelEncoder encoder) FL_NO_EXCEPT
     : CPixelLEDController<RGB>(RegistrationMode::DeferRegister)  // Defer registration until FastLED.add()
     , mChipset(chipset)
-    , mPixelEncoder(selectPixelEncoder(chipset))
+    , mPixelEncoder(encoder)
     , mRgbOrder(rgbOrder)
     , mDriver()  // Empty weak_ptr - late binding on first showPixels()
     , mBus(options.mBus)  // Bus selection (#2459)
