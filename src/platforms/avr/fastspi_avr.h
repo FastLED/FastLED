@@ -143,6 +143,7 @@ public:
 	void disable_pins() { }
 
 	void select() FL_NO_EXCEPT {
+		waitFully(); // Do not reprogram the rate under a byte that is still shifting.
 		if(mPSelect != nullptr) {
 			mPSelect->select();
 		}
@@ -151,6 +152,7 @@ public:
 	}
 
 	void release() FL_NO_EXCEPT {
+		waitFully(); // The last byte must finish before the device is deselected.
 		if(mPSelect != nullptr) {
 			mPSelect->release();
 		}
@@ -338,6 +340,7 @@ public:
 	void disable_pins() { }
 
 	void select() FL_NO_EXCEPT {
+		waitFully(); // Do not reprogram the rate under a byte that is still shifting.
 		if(mPSelect != nullptr) {
 			mPSelect->select();
 		}
@@ -346,6 +349,7 @@ public:
 	}
 
 	void release() FL_NO_EXCEPT {
+		waitFully(); // The last byte must finish before the device is deselected.
 		if(mPSelect != nullptr) {
 			mPSelect->release();
 		}
@@ -524,6 +528,7 @@ public:
 	void disable_pins() { }
 
 	void select() FL_NO_EXCEPT {
+		waitFully(); // Do not reprogram the rate under a byte that is still shifting.
 		if(mPSelect != nullptr) {
 			mPSelect->select();
 		}
@@ -532,6 +537,7 @@ public:
 	}
 
 	void release() FL_NO_EXCEPT {
+		waitFully(); // The last byte must finish before the device is deselected.
 		if(mPSelect != nullptr) {
 			mPSelect->release();
 		}
@@ -724,6 +730,7 @@ public:
 	}
 
 	void select() FL_NO_EXCEPT {
+		waitFully(); // Do not reprogram the rate under a byte that is still shifting.
 		if(mPSelect != nullptr) { mPSelect->select(); }
 		enable_pins();
 		setSPIRate();
@@ -917,6 +924,7 @@ public:
 	}
 
 	void select() FL_NO_EXCEPT {
+		waitFully(); // Do not reprogram the rate under a byte that is still shifting.
 		if(mPSelect != nullptr) { mPSelect->select(); }
 		enable_pins();
 		setSPIRate();

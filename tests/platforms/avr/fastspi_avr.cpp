@@ -341,6 +341,17 @@ template <typename Output> void checkAllBits() {
     checkBit<Output, 7>();
 }
 
+// A chip-select that records whether a byte was still shifting when the
+// output deselected it, or when select() was about to reprogram the rate (#5133).
+struct BusyProbeSelect : Selectable {
+    const avr_regs::Shifter* shifter = nullptr;
+    int busyAtSelect = 0;
+    int busyAtRelease = 0;
+    void select() FL_NO_EXCEPT override { busyAtSelect += shifter->busy ? 1 : 0; }
+    void release() FL_NO_EXCEPT override { busyAtRelease += shifter->busy ? 1 : 0; }
+    bool isSelected() FL_NO_EXCEPT override { return false; }
+};
+
 // Byte, bit, byte: the shape of each SM16716 pixel, repeated across pixels.
 template <typename Output> void checkHandoff(avr_regs::Shifter& shifter, avr_regs::ControlReg& control,
                                              u8 initialControl) {
@@ -407,6 +418,24 @@ template <typename Output> void checkHandoff(avr_regs::Shifter& shifter, avr_reg
     FL_REQUIRE_EQ(AvrPinTrace::risingEdges, 1);
     FL_REQUIRE_EQ(avr_regs::StatusReg::hangs, 0);
     control.value = initialControl;
+
+    // A device behind a Selectable must see its last byte finish before it is
+    // deselected, and select() must not change the rate under a shifting byte.
+    {
+        BusyProbeSelect cs;
+        cs.shifter = &shifter;
+        Output selected(&cs);
+        selected.select();
+        Output::writeByte(0x33);
+        selected.release();
+        FL_REQUIRE_EQ(cs.busyAtRelease, 0);
+        Output::writeByte(0x44);
+        selected.select();
+        FL_REQUIRE_EQ(cs.busyAtSelect, 0);
+        selected.release();
+        FL_REQUIRE_EQ(avr_regs::StatusReg::hangs, 0);
+        control.value = initialControl;
+    }
 
     // The real SM16716 pixel path, then its header with no drain in between, as in
     // showPixels. The header sequence is replayed: SM16716Controller needs fl::SPIOutput.
