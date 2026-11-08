@@ -121,9 +121,13 @@ LABEL_SPECS: dict[str, tuple[str, str]] = {
 
 # Authors whose text is not screened: the maintainer's own words are trusted by
 # definition, as are repository members and invited collaborators. Bot text
-# is screened too: integrations can relay attacker-controlled content.
+# is screened too: integrations can relay attacker-controlled content, except
+# for the review bots in TRUSTED_BOT_LOGINS, which the maintainer has accepted.
 # Keep in sync with the maintainer concurrency group in sanitize_issues.yml.
 TRUSTED_LOGINS: frozenset[str] = frozenset({"zackees"})
+# Matched only when the author's type is "Bot"; GitHub reserves the "[bot]"
+# suffix for apps, so a user account cannot claim these logins.
+TRUSTED_BOT_LOGINS: frozenset[str] = frozenset({"coderabbitai[bot]"})
 TRUSTED_ASSOCIATIONS: frozenset[str] = frozenset({"OWNER", "MEMBER", "COLLABORATOR"})
 
 # One ``noul``-style question per signal: the probability that the statement in
@@ -403,7 +407,7 @@ def is_trusted(login: str, association: str, user_type: str) -> bool:
     if (login or "").lower() in TRUSTED_LOGINS:
         return True
     if user_type == "Bot":
-        return False
+        return (login or "").lower() in TRUSTED_BOT_LOGINS
     return (association or "").upper() in TRUSTED_ASSOCIATIONS
 
 

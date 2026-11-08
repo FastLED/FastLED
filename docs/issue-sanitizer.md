@@ -68,7 +68,9 @@ Text is excluded from the corpus when its author is:
 | `author_association` in `OWNER`, `MEMBER`, `COLLABORATOR` | the same set the repository's `claude.yml` gate uses |
 
 Bot-authored text is screened even when the bot has a trusted repository
-association: integrations can relay attacker-controlled text.
+association: integrations can relay attacker-controlled text.  The one
+exception is CodeRabbit (`coderabbitai[bot]`, author type `Bot`): the
+maintainer accepts its review comments as safe, so they are not screened.
 
 Everyone else — `CONTRIBUTOR`, `FIRST_TIME_CONTRIBUTOR`, `FIRST_TIMER`, `NONE`
 — is screened.  Note the consequence: **one untrusted comment holds the whole

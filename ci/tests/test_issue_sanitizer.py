@@ -1317,6 +1317,19 @@ class TestTextItem(unittest.TestCase):
             ).trusted
         )
 
+    def test_coderabbit_bot_is_trusted_only_as_the_app(self) -> None:
+        self.assertTrue(
+            TextItem("body", "x", "coderabbitai[bot]", "NONE", "Bot", "").trusted
+        )
+        # A user account cannot carry the reserved [bot] suffix, but require the
+        # Bot type anyway so a lookalike login is still screened.
+        self.assertFalse(
+            TextItem("body", "x", "coderabbitai", "NONE", "User", "").trusted
+        )
+        self.assertFalse(
+            TextItem("body", "x", "coderabbitai[bot]", "NONE", "User", "").trusted
+        )
+
 
 class TestReviewSecurityRegressions(unittest.TestCase):
     def setUp(self) -> None:
