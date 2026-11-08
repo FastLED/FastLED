@@ -125,15 +125,15 @@ DOWN = r"$\color{green}\downarrow$"
 
 
 def _delta(delta: int) -> str:
-    """A red up arrow for growth, a green down arrow for shrinkage, plain `0`.
+    """A red up arrow for growth, a green down arrow for shrinkage, `Same` if equal.
 
     No emoji is a green arrow, so the arrows are GitHub inline math, which
     renders colored in PR comments. An unchanged size gets no arrow: a down
-    arrow beside 0 would claim a decrease, and leaving it plain makes the
-    rows that did change stand out.
+    arrow beside 0 would claim a decrease. "Same" reads as unchanged at a
+    glance, where "(0)" looked like a size (#5088).
     """
     if delta == 0:
-        return "0"
+        return "Same"
     arrow = DOWN if delta < 0 else UP
     return f"{arrow} {abs(delta):,}"
 
@@ -149,7 +149,7 @@ def render(base: Sizes, head: Sizes, example: str) -> str:
         "",
         f"Change in `examples/{example}` per target. The left number is this PR's "
         "image flash / attributed RAM in bytes; the colored delta is the change "
-        "from the merge base (red ↑ is larger, green ↓ is smaller, 0 is unchanged).",
+        "from the merge base (red ↑ is larger, green ↓ is smaller, Same is unchanged).",
         "",
         "| Target | FLASH [bytes] | RAM [bytes] |",
         "|---|---:|---:|",
