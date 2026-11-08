@@ -21,9 +21,8 @@
 ///   - PINCFG[n]: Pin configuration (input enable, pull, etc.)
 ///
 /// Pin Mapping:
-/// - Arduino pin numbers must be converted to (port_group, pin_bit) pairs
-/// - This implementation uses a simple lookup table approach
-/// - Board-specific mappings can be extended as needed
+/// - Arduino pin numbers are converted to (port_group, pin_bit) pairs through
+///   the variant's g_APinDescription table when it is available
 
 #include "platforms/arm/samd/is_samd.h"
 
@@ -33,6 +32,18 @@
 // IWYU pragma: begin_keep
 #include <sam.h>  // SAMD register definitions
 #include "fl/stl/noexcept.h"
+#include "fl/stl/has_include.h"
+// Arduino SAMD cores (Arduino, Adafruit, Seeed, SparkFun) describe each
+// Arduino pin's pad in the variant's g_APinDescription table (#5130).
+#if defined(ARDUINO) && FL_HAS_INCLUDE(<variant.h>)
+#include <variant.h>
+#define FL_SAMD_HAS_PIN_DESCRIPTION 1
+#ifndef PINS_COUNT
+// Without the table size, the lookup cannot be bounds-checked. Falling back to
+// the linear mapping would silently drive the wrong pads again (#5130).
+#error "SAMD variant.h does not define PINS_COUNT; FastLED cannot map Arduino pins to pads"
+#endif
+#endif
 // IWYU pragma: end_keep
 
 namespace fl {
@@ -49,27 +60,27 @@ struct PinMapping {
 };
 
 /// Get pin mapping for Arduino pin number
-/// @note This is a simplified implementation. Board-specific variants
-///       should provide accurate mappings via g_APinDescription table.
+/// With an Arduino variant, the pad comes from g_APinDescription, so Arduino
+/// pin 24 on a Zero is PB11 (SCK), not PA24 (a USB pad). Without a variant
+/// (bare-metal builds) the pin number is taken as group * 32 + bit.
 /// @param pin Arduino pin number
 /// @return PinMapping with group and bit, or {0xFF, 0xFF} if invalid
 inline PinMapping getPinMapping(int pin) FL_NO_EXCEPT {
-    // Simple default mapping for common SAMD boards
-    // In a real implementation, this would use the variant's g_APinDescription table
-    // or compile-time board-specific lookup tables.
-
-    // For now, assume a simple linear mapping as fallback
-    // Most SAMD boards have pins mapped sequentially within port groups
+#if defined(FL_SAMD_HAS_PIN_DESCRIPTION)
+    if (pin < 0 || static_cast<u32>(pin) >= static_cast<u32>(PINS_COUNT)) {
+        return {0xFF, 0xFF};  // Invalid pin
+    }
+    const PinDescription& desc = g_APinDescription[pin];
+    if (desc.ulPort == NOT_A_PORT || desc.ulPin > 31) {
+        return {0xFF, 0xFF};  // Pin has no pad on this variant
+    }
+    return {static_cast<u8>(desc.ulPort), static_cast<u8>(desc.ulPin)};
+#else
     if (pin < 0 || pin > 127) {
         return {0xFF, 0xFF};  // Invalid pin
     }
-
-    // Simple heuristic: first 32 pins on PORTA, next 32 on PORTB, etc.
-    // Real board definitions should override this
-    u8 group = static_cast<u8>(pin / 32);
-    u8 bit = static_cast<u8>(pin % 32);
-
-    return {group, bit};
+    return {static_cast<u8>(pin / 32), static_cast<u8>(pin % 32)};
+#endif
 }
 
 // ============================================================================
