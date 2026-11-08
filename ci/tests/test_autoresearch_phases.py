@@ -162,6 +162,9 @@ def _make_args(**overrides) -> Args:
         parallel=False,
         decode=None,
         frames=None,
+        # Power-limiter budgets (#5139/#5159). The benchmark Args field is
+        # required, so any Args(...) built here has to name it.
+        max_power_mw=None,
         tight_timing=False,
         tight_timing_iterations=8,
         tight_timing_max_overhead_us=2000,
