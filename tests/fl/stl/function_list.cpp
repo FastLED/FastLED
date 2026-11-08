@@ -11,6 +11,17 @@
 #include "fl/stl/move.h"
 #include "fl/stl/vector.h"
 
+#if defined(FASTLED_TEST_ALLOC_FAILURE_WRAP)
+namespace {
+bool failFunctionListAllocation = false;
+}
+extern "C" void* __real__ZN2fl9libc_impl13aligned_allocEmm(fl::size_t, fl::size_t) FL_NO_EXCEPT;
+extern "C" void* __wrap__ZN2fl9libc_impl13aligned_allocEmm(fl::size_t alignment, fl::size_t size) FL_NO_EXCEPT {
+    return failFunctionListAllocation ? nullptr
+        : __real__ZN2fl9libc_impl13aligned_allocEmm(alignment, size);
+}
+#endif
+
 FL_TEST_FILE(FL_FILEPATH) {
 
 using namespace fl;
@@ -419,6 +430,475 @@ FL_TEST_CASE("function_list - add during iteration") {
     callbacks.invoke();
     FL_REQUIRE(call_count_1 == 2);
     FL_REQUIRE(call_count_2 == 1);  // Now the second callback executes
+}
+
+FL_TEST_CASE("function_list - empty dispatch then late subscription and copy") {
+    function_list<void(int)> callbacks;
+    callbacks(1);
+    callbacks.clear();
+    callbacks(2);
+    int received = 0;
+    int id = callbacks.add([&](int value) { received += value; });
+    callbacks(3);
+    FL_CHECK_EQ(received, 3);
+    auto copied = callbacks;
+    copied(4);
+    FL_CHECK_EQ(received, 7);
+    callbacks.remove(id);
+    callbacks(5);
+    FL_CHECK_EQ(received, 7);
+    callbacks.add([&](int value) { received += value; });
+    callbacks(6);
+    FL_CHECK_EQ(received, 13);
+}
+
+FL_TEST_CASE("function_list - priorities preserve insertion and removal") {
+    function_list<void()> callbacks;
+    fl::vector<int> order;
+    int removed = callbacks.add([&]() { order.push_back(0); }, -1);
+    callbacks.add([&]() { order.push_back(1); callbacks.remove(removed); }, 10);
+    callbacks.add([&]() { order.push_back(2); }, 10);
+    callbacks.add([&]() { order.push_back(3); }, 0);
+    callbacks();
+    FL_REQUIRE_EQ(order.size(), 3);
+    FL_CHECK_EQ(order[0], 1);
+    FL_CHECK_EQ(order[1], 2);
+    FL_CHECK_EQ(order[2], 3);
+}
+
+FL_TEST_CASE("function_list - lazy storage keeps copy and move value semantics") {
+    function_list<void()> original;
+    original();
+    int calls = 0;
+    int id = original.add([&]() { ++calls; });
+    function_list<void()> assigned;
+    assigned = original;
+    original.remove(id);
+    original();
+    assigned();
+    FL_CHECK_EQ(calls, 1);
+
+    function_list<void()> moved(fl::move(assigned));
+    assigned();
+    assigned.add([&]() { calls += 10; });
+    assigned();
+    FL_CHECK_EQ(calls, 11);
+    moved();
+    FL_CHECK_EQ(calls, 12);
+
+    function_list<void()> moveAssigned;
+    moveAssigned = fl::move(moved);
+    moved();
+    moved.add([&]() { calls += 100; });
+    moved();
+    FL_CHECK_EQ(calls, 112);
+    moveAssigned();
+    FL_CHECK_EQ(calls, 113);
+
+    function_list<void()> empty;
+    moveAssigned = empty;
+    moveAssigned();
+    FL_CHECK_TRUE(moveAssigned.empty());
+    FL_CHECK_EQ(calls, 113);
+}
+
+#if defined(FASTLED_TEST_ALLOC_FAILURE_WRAP)
+FL_TEST_CASE("function_list - failed copies consistently become empty") {
+    struct AllocationProbe {};
+    function_list<void(AllocationProbe)> source;
+    function_list<void(AllocationProbe)> destination;
+    source.add([](AllocationProbe) {});
+    destination.add([](AllocationProbe) {});
+    failFunctionListAllocation = true;
+    function_list<void(AllocationProbe)> copied(source);
+    destination = source;
+    failFunctionListAllocation = false;
+    FL_CHECK_TRUE(copied.empty());
+    FL_CHECK_TRUE(destination.empty());
+    FL_CHECK_EQ(source.size(), 1u);
+}
+#endif
+
+template <typename List>
+void reassignmentDuringDispatch(int action) {
+    List callbacks;
+    List replacement;
+    int first = 0;
+    int tail = 0;
+    int next = 0;
+    replacement.add([&]() { ++next; });
+    callbacks.add([&]() {
+        ++first;
+        if (action == 0) callbacks = List();
+        else if (action == 1) callbacks = replacement;
+        else callbacks = fl::move(callbacks);
+    }, 10);
+    callbacks.add([&]() { ++tail; });
+    callbacks();
+    FL_CHECK_EQ(first, 1);
+    FL_CHECK_EQ(tail, action == 2 ? 1 : 0);
+    FL_CHECK_EQ(next, 0);
+    callbacks();
+    FL_CHECK_EQ(next, action == 1 ? 1 : 0);
+    FL_CHECK_EQ(tail, action == 2 ? 2 : 0);
+}
+
+FL_TEST_CASE("function_list - reassignment during dispatch retains the active state") {
+    FL_SUBCASE("small tier") {
+        for (int action = 0; action < 3; ++action) reassignmentDuringDispatch<fl::detail::FunctionListImpl<void(), false>>(action);
+    }
+    FL_SUBCASE("large tier") {
+        for (int action = 0; action < 3; ++action) reassignmentDuringDispatch<function_list<void()>>(action);
+    }
+}
+
+template <typename List>
+void runningCallbackLifetime(bool grow) {
+    List callbacks;
+    int result = 0;
+    auto captured = fl::make_shared<int>(73);
+    callbacks.add([captured, &callbacks, &result, grow]() {
+        auto& list = callbacks;
+        auto& output = result;
+        if (grow) {
+            for (int i = 0; i < 64; ++i) list.add([]() {});
+        } else {
+            list.clear();
+        }
+        output = *captured;
+    });
+    captured.reset();
+    callbacks();
+    FL_CHECK_EQ(result, 73);
+}
+
+FL_TEST_CASE("function_list - running callback survives clear and vector growth") {
+    using SmallList = fl::detail::FunctionListImpl<void(), false>;
+    FL_SUBCASE("small reallocate then read capture") { runningCallbackLifetime<SmallList>(true); }
+    FL_SUBCASE("small clear then read capture") { runningCallbackLifetime<SmallList>(false); }
+    FL_SUBCASE("large clear then read capture") { runningCallbackLifetime<function_list<void()>>(false); }
+    FL_SUBCASE("large reallocate then read capture") { runningCallbackLifetime<function_list<void()>>(true); }
+}
+
+#if defined(FASTLED_TEST_ALLOC_FAILURE_WRAP)
+FL_TEST_CASE("function_list - small tier add has no State allocation failure") {
+    fl::detail::FunctionListImpl<void(), false> callbacks;
+    int calls = 0;
+    failFunctionListAllocation = true;
+    const int id = callbacks.add([&]() { ++calls; });
+    callbacks();
+    failFunctionListAllocation = false;
+    FL_CHECK_EQ(id, 0);
+    FL_CHECK_EQ(calls, 1);
+}
+#endif
+
+template <typename List>
+void mutableCallbackAndCopy() {
+    List callbacks;
+    List copied;
+    int observed = 0;
+    struct Counter {
+        fl::shared_ptr<int> value;
+        List* list;
+        List* copy;
+        int* output;
+        Counter(List& source, List& target, int& result) FL_NO_EXCEPT
+            : value(fl::make_shared<int>(0)), list(&source), copy(&target), output(&result) {}
+        Counter(const Counter& other) FL_NO_EXCEPT
+            : value(fl::make_shared<int>(*other.value)), list(other.list), copy(other.copy), output(other.output) {}
+        Counter(Counter&&) FL_NO_EXCEPT = default;
+        void operator()() const FL_NO_EXCEPT {
+            ++*value;
+            if (*value == 1) {
+                for (int i = 0; i < 64; ++i) list->add([]() {});
+                ++*value;
+                *copy = *list;
+            }
+            *output = *value;
+        }
+    };
+    callbacks.add(Counter(callbacks, copied, observed));
+    callbacks();
+    FL_CHECK_EQ(observed, 2);
+    callbacks();
+    FL_CHECK_EQ(observed, 3);
+    copied();
+    FL_CHECK_EQ(observed, 3);
+    callbacks();
+    FL_CHECK_EQ(observed, 4);
+}
+
+FL_TEST_CASE("function_list - active owned callbacks keep state and copy safely") {
+    FL_SUBCASE("small tier") { mutableCallbackAndCopy<fl::detail::FunctionListImpl<void(), false>>(); }
+    FL_SUBCASE("large tier") { mutableCallbackAndCopy<function_list<void()>>(); }
+}
+
+template <typename List>
+void clearAndRefillDuringDispatch() {
+    List callbacks;
+    int oldTail = 0;
+    int added = 0;
+    callbacks.add([&]() {
+        callbacks.clear();
+        callbacks.add([&]() { ++added; });
+        callbacks.add([&]() { ++added; });
+    });
+    callbacks.add([&]() { ++oldTail; });
+    callbacks();
+    FL_CHECK_EQ(oldTail, 0);
+    FL_CHECK_EQ(added, 0);
+    callbacks();
+    FL_CHECK_EQ(added, 2);
+}
+
+FL_TEST_CASE("function_list - clear and refill defers new callbacks") {
+    FL_SUBCASE("small tier") { clearAndRefillDuringDispatch<fl::detail::FunctionListImpl<void(), false>>(); }
+    FL_SUBCASE("large tier") { clearAndRefillDuringDispatch<function_list<void()>>(); }
+}
+
+template <typename List>
+void recursiveRemovalKeepsOuterIndices() {
+    List callbacks;
+    bool inner = false;
+    int c = 0;
+    int d = 0;
+    const int a = callbacks.add([]() {});
+    callbacks.add([&]() {
+        if (!inner) {
+            inner = true;
+            callbacks.remove(a);
+            callbacks();
+        }
+    });
+    callbacks.add([&]() { ++c; });
+    callbacks.add([&]() { ++d; });
+    callbacks();
+    FL_CHECK_EQ(c, 2);
+    FL_CHECK_EQ(d, 2);
+}
+
+FL_TEST_CASE("function_list - recursive removal preserves outer callback indices") {
+    FL_SUBCASE("small tier") { recursiveRemovalKeepsOuterIndices<fl::detail::FunctionListImpl<void(), false>>(); }
+    FL_SUBCASE("large tier") { recursiveRemovalKeepsOuterIndices<function_list<void()>>(); }
+}
+
+template <typename List>
+void removalReleasesAfterDispatchOnly() {
+    List callbacks;
+    auto captured = fl::make_shared<int>(73);
+    int id = callbacks.add([captured]() {});
+    FL_CHECK_EQ(captured.use_count(), 2);
+    callbacks.remove(id);
+    FL_CHECK_EQ(captured.use_count(), 1);
+    int during = 0;
+    id = callbacks.add([captured, &callbacks, &id, &during]() {
+        callbacks.remove(id);
+        during = captured.use_count();
+    });
+    callbacks();
+    FL_CHECK_EQ(during, 2);
+    FL_CHECK_EQ(captured.use_count(), 1);
+}
+
+FL_TEST_CASE("function_list - removal releases captures immediately unless dispatching") {
+    FL_SUBCASE("small tier") { removalReleasesAfterDispatchOnly<fl::detail::FunctionListImpl<void(), false>>(); }
+    FL_SUBCASE("large tier") { removalReleasesAfterDispatchOnly<function_list<void()>>(); }
+}
+
+template <typename List>
+void nestedSubscriptionWaitsForOutermostReturn() {
+    List callbacks;
+    fl::vector<int> order;
+    bool nested = false;
+    int late = 0;
+    const int removed = callbacks.add([&]() { order.push_back(9); }, -1);
+    callbacks.add([&]() {
+        order.push_back(1);
+        if (!nested) {
+            nested = true;
+            callbacks.remove(removed);
+            callbacks.add([&]() { ++late; }, 100);
+            callbacks();
+        }
+    }, 10);
+    callbacks.add([&]() { order.push_back(2); }, 0);
+    callbacks();
+    FL_CHECK_EQ(late, 0);
+    FL_REQUIRE_EQ(order.size(), 4);
+    FL_CHECK_EQ(order[0], 1);
+    FL_CHECK_EQ(order[1], 1);
+    FL_CHECK_EQ(order[2], 2);
+    FL_CHECK_EQ(order[3], 2);
+    callbacks();
+    FL_CHECK_EQ(late, 1);
+}
+
+FL_TEST_CASE("function_list - nested dispatch preserves priorities and defers subscriptions") {
+    FL_SUBCASE("small tier") { nestedSubscriptionWaitsForOutermostReturn<fl::detail::FunctionListImpl<void(), false>>(); }
+    FL_SUBCASE("large tier") { nestedSubscriptionWaitsForOutermostReturn<function_list<void()>>(); }
+}
+
+#if defined(FASTLED_TEST_ALLOC_FAILURE_WRAP)
+FL_TEST_CASE("function_list - failed subscription reports minus one and recovers") {
+    function_list<void()> callbacks;
+    failFunctionListAllocation = true;
+    const int id = callbacks.add([]() {});
+    failFunctionListAllocation = false;
+    FL_CHECK_EQ(id, -1);
+    FL_CHECK_TRUE(callbacks.empty());
+    int calls = 0;
+    FL_CHECK_EQ(callbacks.add([&]() { ++calls; }), 0);
+    callbacks();
+    FL_CHECK_EQ(calls, 1);
+}
+#endif
+
+template <typename List>
+void replacementWaitsForOuterDispatch() {
+    List callbacks;
+    List replacement;
+    fl::vector<int> order;
+    replacement.add([&]() { order.push_back(3); });
+    callbacks.add([&]() {
+        order.push_back(1);
+        callbacks = replacement;
+        callbacks();
+        order.push_back(2);
+    });
+    callbacks();
+    FL_CHECK_EQ(order.size(), 2);
+    if (order.size() < 2) return;
+    FL_CHECK_EQ(order[0], 1);
+    FL_CHECK_EQ(order[1], 2);
+    callbacks();
+    FL_CHECK_EQ(order.size(), 3);
+    if (order.size() < 3) return;
+    FL_CHECK_EQ(order[2], 3);
+}
+
+FL_TEST_CASE("function_list - replacement nested invocation waits for outer return") {
+    FL_SUBCASE("small tier") { replacementWaitsForOuterDispatch<fl::detail::FunctionListImpl<void(), false>>(); }
+    FL_SUBCASE("large tier") { replacementWaitsForOuterDispatch<function_list<void()>>(); }
+}
+
+template <typename List>
+void activeMovePreservesLaterMutation() {
+    List source;
+    List destination;
+    int observed = 0;
+    struct Counter {
+        fl::shared_ptr<int> value;
+        List* source;
+        List* destination;
+        int* observed;
+        Counter(List& from, List& to, int& output) FL_NO_EXCEPT
+            : value(fl::make_shared<int>(0)), source(&from), destination(&to), observed(&output) {}
+        Counter(const Counter& other) FL_NO_EXCEPT
+            : value(fl::make_shared<int>(*other.value)), source(other.source), destination(other.destination), observed(other.observed) {}
+        Counter(Counter&&) FL_NO_EXCEPT = default;
+        void operator()() const FL_NO_EXCEPT {
+            if (*value == 0) {
+                *destination = fl::move(*source);
+                *value = 7;
+            } else {
+                *observed = *value;
+            }
+        }
+    };
+    source.add(Counter(source, destination, observed));
+    source();
+    FL_CHECK_TRUE(source.empty());
+    destination();
+    FL_CHECK_EQ(observed, 7);
+}
+
+FL_TEST_CASE("function_list - active move retains later owned callback mutation") {
+    FL_SUBCASE("small tier") { activeMovePreservesLaterMutation<fl::detail::FunctionListImpl<void(), false>>(); }
+    FL_SUBCASE("large tier") { activeMovePreservesLaterMutation<function_list<void()>>(); }
+}
+
+template <typename List>
+void outsideCleanupAllowsRegistration(bool clearAll) {
+    List callbacks;
+    int calls = 0;
+    struct RegisterOnDestroy {
+        List* list;
+        int* calls;
+        RegisterOnDestroy(List& target, int& output) FL_NO_EXCEPT : list(&target), calls(&output) {}
+        ~RegisterOnDestroy() {
+            int* output = calls;
+            for (int i = 0; i < 64; ++i) list->add([output]() { ++*output; });
+        }
+    };
+    auto owner = fl::make_shared<RegisterOnDestroy>(callbacks, calls);
+    const int removed = callbacks.add([owner]() {});
+    owner.reset();
+    callbacks.add([]() {});
+    if (clearAll) callbacks.clear();
+    else callbacks.remove(removed);
+    callbacks();
+    FL_CHECK_EQ(calls, 64);
+}
+
+FL_TEST_CASE("function_list - outside cleanup permits destructor registration") {
+    FL_SUBCASE("small remove") { outsideCleanupAllowsRegistration<fl::detail::FunctionListImpl<void(), false>>(false); }
+    FL_SUBCASE("small clear") { outsideCleanupAllowsRegistration<fl::detail::FunctionListImpl<void(), false>>(true); }
+    FL_SUBCASE("large remove") { outsideCleanupAllowsRegistration<function_list<void()>>(false); }
+    FL_SUBCASE("large clear") { outsideCleanupAllowsRegistration<function_list<void()>>(true); }
+}
+
+template <typename List>
+void destructorMutatesDuringCompaction(int operation) {
+    List callbacks;
+    int added = 0;
+    int victimCalls = 0;
+    int survivorCalls = 0;
+    int victim = -1;
+    struct OnDestroy {
+        List* list;
+        int operation;
+        int* victim;
+        int* added;
+        OnDestroy(List& target, int action, int& removed, int& count) FL_NO_EXCEPT
+            : list(&target), operation(action), victim(&removed), added(&count) {}
+        ~OnDestroy() {
+            if (operation == 0) {
+                int* output = added;
+                for (int i = 0; i < 64; ++i) list->add([output]() { ++*output; });
+            } else if (operation == 1) {
+                list->remove(*victim);
+            } else {
+                list->clear();
+            }
+        }
+    };
+    auto owner = fl::make_shared<OnDestroy>(callbacks, operation, victim, added);
+    int removed = -1;
+    removed = callbacks.add([owner]() {});
+    callbacks.add([&]() { callbacks.remove(removed); });
+    owner.reset();
+    victim = callbacks.add([&]() { ++victimCalls; });
+    callbacks.add([&]() { ++survivorCalls; });
+    callbacks();
+    FL_CHECK_EQ(victimCalls, 1);
+    FL_CHECK_EQ(survivorCalls, 1);
+    callbacks();
+    FL_CHECK_EQ(added, operation == 0 ? 64 : 0);
+    FL_CHECK_EQ(victimCalls, operation == 0 ? 2 : 1);
+    FL_CHECK_EQ(survivorCalls, operation == 2 ? 1 : 2);
+    if (operation == 2) FL_CHECK_TRUE(callbacks.empty());
+}
+
+FL_TEST_CASE("function_list - destructors mutate safely during compaction") {
+    using Small = fl::detail::FunctionListImpl<void(), false>;
+    using Large = function_list<void()>;
+    FL_SUBCASE("small add") { destructorMutatesDuringCompaction<Small>(0); }
+    FL_SUBCASE("small remove") { destructorMutatesDuringCompaction<Small>(1); }
+    FL_SUBCASE("small clear") { destructorMutatesDuringCompaction<Small>(2); }
+    FL_SUBCASE("large add") { destructorMutatesDuringCompaction<Large>(0); }
+    FL_SUBCASE("large remove") { destructorMutatesDuringCompaction<Large>(1); }
+    FL_SUBCASE("large clear") { destructorMutatesDuringCompaction<Large>(2); }
 }
 
 // Compile-time error test - commented out because it should NOT compile

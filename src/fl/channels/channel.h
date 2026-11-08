@@ -25,6 +25,7 @@
 #include "fl/stl/weak_ptr.h"
 #include "fl/stl/stdint.h"
 #include "fl/channels/config.h"
+#include "fl/channels/encoder_availability.h"
 #include "fl/channels/channel_events.h"
 #include "fl/stl/compiler_control.h"
 
@@ -43,6 +44,8 @@ enum class ColorProfileStatus : u8 { Unconfigured, Configured, Fallback, Rejecte
 enum class ProfileId : u8 { WS2812B };
 FASTLED_SHARED_PTR(Channel);
 FASTLED_SHARED_PTR(ChannelData);
+
+using ChannelFactory = ChannelPtr (*)(const ChannelConfig&);
 
 #if FL_COLOR_PIPELINE_SHARED
 shared_ptr<StreamingPipelineQ16> channelColorPipeline(const CLEDController& controller) FL_NO_EXCEPT;
@@ -319,16 +322,20 @@ private:
     friend fl::shared_ptr<T> fl::adl_barrier::make_shared(Args&&... args) FL_NO_EXCEPT;  // see fl/stl/adl_barrier.h
     template<const EmitterProfile& Profile>
     friend class StaticProfileChannel;
+    friend struct EncoderAvailability;
+    template<Bus B, typename Chipset, fl::u8 Which>
+    friend class TypedChannel;
 
 protected:
     // CPixelLEDController interface implementation - protected so subclass delegates
     // (e.g., UCS7604's DelegateController) can call through the base class chain.
     void showPixels(PixelController<RGB, 1, 0xFFFFFFFF>& pixels) FL_NO_EXCEPT override;
     void init() FL_NO_EXCEPT override;
-    using PixelEncoder = void (*)(Channel&, PixelIterator&, bool,
-                                  fl::vector_psram<u8>&);
+    using PixelEncoder = EncoderAvailability::PixelEncoder;
 
 private:
+    FL_NO_INLINE static ChannelPtr createWithEncoder(const ChannelConfig&, PixelEncoder, Bus, u8) FL_NO_EXCEPT;
+
     /// @brief Cold slow-path helper for `showPixels()`. Handles dynamic
     ///        `ChannelManager::selectDriverForChannel()` lookup AND the
     ///        bus-key-miss diagnostics (#2455 / #2459). This is now the only
@@ -354,10 +361,10 @@ private:
     FL_NO_INLINE void submitFrame(const fl::shared_ptr<IChannelDriver>& driver) FL_NO_EXCEPT;
 
     /// The chipset is fixed when a Channel is constructed, so bind its pixel
-    /// encoder once instead of switching over every supported chipset on
-    /// every frame. The encoder callbacks remain channel-side: drivers receive
+    /// encoder at the inline typed construction boundary so constant chipsets
+    /// retain only their encoder. Erased construction uses the full selector.
+    /// The encoder callbacks remain channel-side: drivers receive
     /// ChannelData only after it has been encoded.
-    static PixelEncoder selectPixelEncoder(const ChipsetVariant&) FL_NO_EXCEPT;
     FL_NO_INLINE static void encodeWS2812(Channel&, PixelIterator&, bool,
                                          fl::vector_psram<u8>&) FL_NO_EXCEPT;
     FL_NO_INLINE static void encodeTM1812RGBWW(Channel&, PixelIterator&, bool,
@@ -395,6 +402,9 @@ private:
     /// @param options Channel options (correction, temperature, dither, rgbw, affinity)
     Channel(const ChipsetVariant& chipset, fl::span<CRGB> leds,
             EOrder rgbOrder, const ChannelOptions& options) FL_NO_EXCEPT;
+
+    Channel(const ChipsetVariant& chipset, fl::span<CRGB> leds,
+            EOrder rgbOrder, const ChannelOptions& options, PixelEncoder encoder) FL_NO_EXCEPT;
 
     /// @brief Backwards-compatible constructor (deprecated)
     /// @deprecated Use variant-based constructor instead

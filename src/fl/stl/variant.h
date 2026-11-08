@@ -212,14 +212,14 @@ class FL_ALIGN_AS_T(max_align<Types...>::value) variant {
         return _tag == type_to_tag<T>();
     }
 
-    template <typename T> T *ptr() FL_NO_EXCEPT {
+    template <typename T> FASTLED_FORCE_INLINE T *ptr() FL_NO_EXCEPT {
         if (!is<T>()) return nullptr;
         // Use bit_cast_ptr for safe type-punning on properly aligned storage
         // The storage is guaranteed to be properly aligned by alignas(max_align<Types...>::value)
         return fl::bit_cast_ptr<T>(&_storage[0]);
     }
 
-    template <typename T> const T *ptr() const FL_NO_EXCEPT {
+    template <typename T> FASTLED_FORCE_INLINE const T *ptr() const FL_NO_EXCEPT {
         if (!is<T>()) return nullptr;
         // Use bit_cast_ptr for safe type-punning on properly aligned storage
         // The storage is guaranteed to be properly aligned by alignas(max_align<Types...>::value)
