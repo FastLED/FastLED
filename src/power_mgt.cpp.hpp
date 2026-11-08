@@ -238,8 +238,30 @@ fl::u32 scale_power_for_brightness(fl::u32 total_mW, fl::u8 brightness) FL_NO_EX
 #define POWER_DEBUG_PRINT 0
 
 
-// Power consumed by the MCU
-static const fl::u8 gMCU_mW  =  25 * 5; // 25mA @ 5v = 125 mW
+// Power consumed by the MCU board (typical active draw, radios idle), charged
+// as an undimmable baseline. Compile-time per family; define
+// FL_MCU_POWER_MW to override for a specific board.
+#ifndef FL_MCU_POWER_MW
+#if defined(FL_IS_TEENSY_4X)
+#define FL_MCU_POWER_MW 500   // ~100 mA @ 5 V (600 MHz Cortex-M7)
+#elif defined(FL_IS_TEENSY_3X)
+#define FL_MCU_POWER_MW 200   // ~40 mA @ 5 V
+#elif defined(FL_IS_ESP_32C2) || defined(FL_IS_ESP_32C3) || \
+      defined(FL_IS_ESP_32C5) || defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2)
+#define FL_MCU_POWER_MW 150   // ~30 mA @ 5 V (single-core RISC-V)
+#elif defined(FL_IS_ESP_32P4)
+#define FL_MCU_POWER_MW 500   // ~100 mA @ 5 V (dual-core 360 MHz)
+#elif defined(FL_IS_ESP32) || defined(FL_IS_ESP8266)
+#define FL_MCU_POWER_MW 250   // ~50 mA @ 5 V (Xtensa, radio idle)
+#else
+#define FL_MCU_POWER_MW 125   // 25 mA @ 5 V: AVR, RP2040 and the default
+#endif
+#endif
+// FL_LINT_ALLOW_GLOBAL(two bytes in .data; runtime override of the MCU baseline)
+static fl::u16 gMCU_mW = FL_MCU_POWER_MW;
+
+void set_mcu_power_mW(fl::u16 mcu_mW) FL_NO_EXCEPT { gMCU_mW = mcu_mW; }
+fl::u16 get_mcu_power_mW() FL_NO_EXCEPT { return gMCU_mW; }
 
 static fl::u8  gMaxPowerIndicatorLEDPinNumber = 0; // default = Arduino onboard LED pin.  set to zero to skip this.
 
@@ -422,17 +444,16 @@ static fl::u8 brightness_within_budget(fl::u32 fixed_mW, fl::u32 controllable_mW
         // Also keeps the division below from dividing by zero.
         return 0;
     }
-    // Whole full-brightness estimate. Saturating sum: 32-bit only, as on AVR.
-    const fl::u32 full_mW = fixed_mW + controllable_mW < fixed_mW
-                                ? 0xFFFFFFFFu
-                                : fixed_mW + controllable_mW;
     if (max_power_mW <= fixed_mW) {
-        // Classic proportional answer over the whole full-brightness
-        // estimate, capped at the request. Also keeps the subtraction below
-        // from underflowing.
-        const fl::u32 classic = power_ratio_of_255(max_power_mW, full_mW);
-        return classic < target_brightness ? static_cast<fl::u8>(classic)
-                                           : target_brightness;
+        // The baseline alone meets or exceeds the budget: no brightness fits,
+        // and the budget is an upper bound. Dark is also the monotone answer,
+        // since just above the baseline the headroom buys almost nothing.
+        // Also keeps the subtraction below from underflowing.
+        FL_WARN_EVERY(1000, "power: budget " << max_power_mW
+                      << " mW is at or under the " << fixed_mW
+                      << " mW baseline (MCU + LED dark current); LEDs blanked."
+                      << " Raise the budget or set FL_MCU_POWER_MW.");
+        return 0;
     }
     // The ratio is taken over the whole 0-255 scaled range, because
     // `controllable_mW` is the demand at *full* brightness. Scaling it by the
@@ -463,28 +484,14 @@ static fl::u8 brightness_within_budget(fl::u32 fixed_mW, fl::u32 controllable_mW
     // model. Demand is monotone in brightness, so stepping down until it fits
     // is exact whatever the rounding, and terminates: 0 always fits here,
     // because the branch above already returned for a budget at or under
-    // baseline.
+    // baseline. The result is the largest brightness whose modeled draw fits,
+    // so it never exceeds the budget and never falls as the budget rises.
     while (recommended > 0 &&
            fixed_mW + scale_power_for_brightness(controllable_mW, recommended) >
                max_power_mW) {
         --recommended;
     }
-
-    // Never dimmer than a budget at the baseline gets. Just above it the
-    // headroom buys almost nothing, so without this floor 1 mW more than the
-    // baseline blanked a strip the baseline itself lit (on 100 LEDs, 625 mW
-    // gave 11 and 626 mW gave 0). Raising a budget must never dim the strip.
-    //
-    // The cost: the floor holds until the headroom answer overtakes it, at a
-    // budget of about fixed + controllable * fixed / full. Across that range
-    // the modeled draw is the floor's, the same as a budget at the baseline
-    // gets -- over the budget by up to controllable * fixed / full mW, which
-    // shrinks to zero as the budget reaches the crossover.
-    const fl::u32 at_baseline = power_ratio_of_255(fixed_mW, full_mW);
-    const fl::u8 floor_brightness =
-        at_baseline < target_brightness ? static_cast<fl::u8>(at_baseline)
-                                        : target_brightness;
-    return recommended > floor_brightness ? recommended : floor_brightness;
+    return recommended;
 }
 
 fl::u8 calculate_max_brightness_for_power_vmA(const CRGB* ledbuffer, fl::u16 numLeds, fl::u8 target_brightness, fl::u32 max_power_V, fl::u32 max_power_mA) FL_NO_EXCEPT {

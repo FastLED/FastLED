@@ -31,7 +31,14 @@ struct PowerModelRGB {
     fl::u8 red_mW;    ///< Red channel power at full brightness (255), in milliwatts
     fl::u8 green_mW;  ///< Green channel power at full brightness (255), in milliwatts
     fl::u8 blue_mW;   ///< Blue channel power at full brightness (255), in milliwatts
-    fl::u8 dark_mW;   ///< Dark LED baseline power consumption, in milliwatts
+    /// Dark (all channels off) draw per LED IC, in milliwatts, charged as an
+    /// undimmable baseline. Default 5 (1 mA @ 5 V). It is chipset specific; per
+    /// FastLED/datasheets quiescent IDD x VDD: SK6812, SK9822, WS2801, TM1809,
+    /// TM1914 ~5; WS2813A/B 3; WS2813C/D 1; WS2816B <=4; HD107/HD108 ~0;
+    /// UCS7604 10; TM1812/TM1829 15; SM16824E 19; WS2815 ~10-25; GS8208
+    /// 30 (12 V). WS2811/WS2812B/APA102 publish no figure. Set it to match
+    /// your strip, or 0 to charge no dark current.
+    fl::u8 dark_mW;
     float  exponent;  ///< Brightness-to-power response exponent (1.0 = linear)
 
     /// Default constructor - WS2812 @ 5V (16mA/11mA/15mA @ 5V), linear response
@@ -168,6 +175,14 @@ struct PowerModelRGBWW {
 /// @note `exponent <= 0` or values within 1e-4 of 1.0 fall back to linear
 ///       (identity tables) rather than rebuilding with a degenerate curve.
 void set_power_model(const PowerModelRGB& model) FL_NO_EXCEPT;
+
+/// Override the MCU board's undimmable baseline draw, in milliwatts. The
+/// compile-time default is per MCU family (define FL_MCU_POWER_MW to
+/// change it); pass 0 to charge no MCU draw. LED dark current is the power
+/// model's `dark_mW` (set it to 0 with set_power_model to drop it).
+void set_mcu_power_mW(fl::u16 mcu_mW) FL_NO_EXCEPT;
+/// The MCU baseline currently charged, in milliwatts.
+fl::u16 get_mcu_power_mW() FL_NO_EXCEPT;
 
 /// Set a non-linear brightness-to-power response exponent
 /// @param exponent 1.0 = linear (default), values below 1.0 model higher-than-linear
@@ -360,17 +375,13 @@ fl::u32 scale_power_for_brightness(fl::u32 total_mW, fl::u8 brightness) FL_NO_EX
 /// - **The baseline is not scalable.** `PowerModel::dark_mW` is drawn per LED
 ///   at every brightness including zero, so it is subtracted from the budget
 ///   first and only the remainder is divided among the emitters.
-/// - **A budget at or below the baseline cannot be met.** No brightness meets
-///   it, and a dark strip draws the baseline too, so such a budget gets the
-///   classic answer `255 * budget / full` (capped at the request) instead of
-///   a blank strip (#5139).
-/// - **The result never falls as the budget rises.** Just above the baseline
-///   the headroom buys almost nothing, so the answer is floored at what a
-///   budget at the baseline gets. Until the headroom answer overtakes that
-///   floor (a budget of about `baseline + controllable * baseline / full`),
-///   the modeled draw exceeds the budget by up to
-///   `controllable * baseline / full`. Above the crossover, demand stays
-///   inside the budget.
+/// - **The budget is an upper bound.** The answer is the largest brightness
+///   whose modeled draw fits, so it never exceeds the budget and never falls
+///   as the budget rises.
+/// - **A budget at or below the baseline cannot be met.** No brightness fits,
+///   so the answer is 0 and a warning is logged once a second. Lower the
+///   baseline with `FastLED.setMcuPowerMilliWatts()` and the power model's
+///   `dark_mW`, or raise the budget.
 /// - **The bound is on the pre-dither frame.** Demand is computed from the
 ///   `CRGB` values, and `BINARY_DITHER` adds its offset afterwards, inside the
 ///   encoder. That offset is shared across the frame, so a dithered frame can

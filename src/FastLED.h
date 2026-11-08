@@ -1770,6 +1770,17 @@ public:
 		set_power_model(model);
 	}
 
+	/// Override the MCU's undimmable baseline draw (mW) charged against the
+	/// power budget; 0 charges none. Default is per MCU family.
+	/// @example FastLED.setMcuPowerMilliWatts(0);
+	inline void setMcuPowerMilliWatts(fl::u16 mcu_mW) FL_NO_EXCEPT {
+		set_mcu_power_mW(mcu_mW);
+	}
+	/// @return the MCU baseline draw (mW) currently charged
+	inline fl::u16 getMcuPowerMilliWatts() const FL_NO_EXCEPT {
+		return get_mcu_power_mW();
+	}
+
 	/// Set a non-linear brightness-to-power response exponent
 	/// @param exponent 1.0 = linear (default), values below 1.0 model higher power at mid brightness
 	/// @note Convenience wrapper: equivalent to setting `model.exponent` and

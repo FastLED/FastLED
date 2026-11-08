@@ -341,31 +341,13 @@ FL_TEST_CASE("Power limiter - the recommendation stays inside the budget") {
     // by 73% at 2 W: the whole estimate including the baseline was multiplied
     // by brightness, so lowering brightness "reduced" a draw that is constant.
     //
-    // Close to the baseline the answer is floored at what a budget *at* the
-    // baseline gets, so raising the budget never dims the strip (#5139
-    // follow-up). Where the floor wins the model is over budget by design, but
-    // only by the overshoot a budget at the baseline already has -- never more
-    // than controllable * baseline / full. Everywhere else it must fit.
-    const fl::u32 full_mW = calculate_unscaled_power_mW(leds, kCount);
-    const fl::u32 controllable_mW = full_mW - baseline_mW;
-    const fl::u8 at_baseline = static_cast<fl::u8>((255u * baseline_mW) / full_mW);
-    const fl::u32 max_overshoot_mW =
-        static_cast<fl::u32>((static_cast<fl::u64>(controllable_mW) * baseline_mW) / full_mW);
+    // The budget is an upper bound: the answer always fits.
     const fl::u32 budgets[] = {60000u, 40000u, 20000u, 10000u, 5000u, 3000u, 2000u};
     for (fl::u32 budget : budgets) {
         const fl::u8 recommended =
             calculate_max_brightness_for_power_mW(leds, kCount, 255, budget);
         FL_CHECK_GT(budget, baseline_mW);
-        FL_CHECK_GE(recommended, at_baseline);
-        const fl::u32 demand = true_demand_mW(span, recommended);
-        if (recommended > at_baseline) {
-            FL_CHECK_LE(demand, budget);
-        } else {
-            // The floor won: the draw is the baseline budget's, and its
-            // excess over this (larger) budget is inside the documented bound.
-            FL_CHECK_EQ(demand, true_demand_mW(span, at_baseline));
-            FL_CHECK_LE(demand, budget + max_overshoot_mW);
-        }
+        FL_CHECK_LE(true_demand_mW(span, recommended), budget);
     }
 }
 
@@ -438,7 +420,7 @@ FL_TEST_CASE("Power limiter - zero brightness still draws the dark current") {
     FL_CHECK_GT(baseline_mW, 0u);
 }
 
-FL_TEST_CASE("Power limiter - a budget under the baseline keeps the strip lit") {
+FL_TEST_CASE("Power limiter - a budget under the baseline blanks the strip") {
     ScopedDefaultPowerModel guard;
     const int kCount = 300;
     CRGB leds[kCount];
@@ -447,22 +429,12 @@ FL_TEST_CASE("Power limiter - a budget under the baseline keeps the strip lit") 
     }
     const fl::u32 baseline_mW =
         static_cast<fl::u32>(get_power_model().dark_mW) * kCount;
-    const fl::u32 full_mW = calculate_unscaled_power_mW(leds, kCount);
-
-    // #5139: no brightness meets a budget below the dark current, and a dark
-    // strip draws that current too, so zero bought nothing and lit no pixels
-    // for budgets written against the classic model. Those budgets get the
-    // classic proportional answer instead.
+    // No brightness meets a budget the undimmable baseline already spends, and
+    // the budget is an upper bound, so the answer is dark (with a warning).
     const fl::u32 budgets[] = {baseline_mW - 1, baseline_mW / 2, baseline_mW};
     for (fl::u32 budget : budgets) {
-        const fl::u8 got =
-            calculate_max_brightness_for_power_mW(leds, kCount, 255, budget);
-        FL_CHECK_GT(got, 0);
-        FL_CHECK_EQ(static_cast<fl::u32>(got), (255u * budget) / full_mW);
+        FL_CHECK_EQ(calculate_max_brightness_for_power_mW(leds, kCount, 255, budget), 0);
     }
-    // The answer still never exceeds the request.
-    FL_CHECK_LE(calculate_max_brightness_for_power_mW(leds, kCount, 3, baseline_mW / 2),
-                3);
 }
 
 // #5139 follow-up, found on hardware: the under-baseline branch answers the
@@ -479,11 +451,6 @@ FL_TEST_CASE("Power limiter - raising the budget never dims the strip") {
     const fl::u32 baseline_mW =
         static_cast<fl::u32>(get_power_model().dark_mW) * kCount;
     const fl::u32 full_mW = calculate_unscaled_power_mW(leds, kCount);
-    const fl::u8 at_baseline =
-        calculate_max_brightness_for_power_mW(leds, kCount, 255, baseline_mW);
-    FL_CHECK_GT(at_baseline, 0);
-    FL_CHECK_GE(calculate_max_brightness_for_power_mW(leds, kCount, 255, baseline_mW + 1),
-                at_baseline);
 
     fl::u8 previous = 0;
     for (fl::u32 budget = baseline_mW / 2; budget <= full_mW + 10; budget += 7) {
@@ -495,9 +462,10 @@ FL_TEST_CASE("Power limiter - raising the budget never dims the strip") {
     FL_CHECK_EQ(previous, 255);
 }
 
-// #5139 as reported: 271 WS2812B, 1 W budget, classic addLeds + the global
-// limiter. The MCU and dark-current baseline alone exceed 1 W.
-FL_TEST_CASE("Power limiter - 1 W on 271 LEDs still lights the strip (#5139)") {
+// #5139 as reported: 271 WS2812B, 1 W budget. The dark-current baseline alone
+// exceeds 1 W, so the default model blanks the strip; overriding the MCU and
+// dark current (both user-settable) makes the same budget light it in-bound.
+FL_TEST_CASE("Power limiter - 1 W on 271 LEDs: dark by default, lit once overridden (#5139)") {
     ScopedDefaultPowerModel guard;
     const int kCount = 271;
     CRGB leds[kCount];
@@ -505,7 +473,19 @@ FL_TEST_CASE("Power limiter - 1 W on 271 LEDs still lights the strip (#5139)") {
         leds[i] = CRGB(255, 255, 255);
     }
     FL_CHECK_GT(static_cast<fl::u32>(get_power_model().dark_mW) * kCount, 1000u);
-    FL_CHECK_GT(calculate_max_brightness_for_power_mW(leds, kCount, 255, 1000), 0);
+    FL_CHECK_EQ(calculate_max_brightness_for_power_mW(leds, kCount, 255, 1000), 0);
+
+    PowerModelRGB no_dark = get_power_model();
+    no_dark.dark_mW = 0;
+    set_power_model(no_dark);
+    const fl::u8 lit = calculate_max_brightness_for_power_mW(leds, kCount, 255, 1000);
+    FL_CHECK_GT(lit, 0);
+    FL_CHECK_LE(true_demand_mW(fl::span<const CRGB>(leds, kCount), lit), 1000u);
+
+    const fl::u16 mcu = get_mcu_power_mW();
+    set_mcu_power_mW(0);
+    FL_CHECK_EQ(get_mcu_power_mW(), 0);
+    set_mcu_power_mW(mcu);
 }
 
 FL_TEST_CASE("Power limiter - an all-dark strip over budget is still answerable") {
@@ -1147,9 +1127,7 @@ fl::u8 ref_limit(const CRGB* leds, fl::u16 n, fl::u8 target, fl::u32 max_mW) {
         return 0;
     }
     if (max_mW <= fixed) {
-        // #5139: the classic proportional answer over the whole estimate.
-        const fl::u64 classic = (static_cast<fl::u64>(255) * max_mW) / total;
-        return classic < target ? static_cast<fl::u8>(classic) : target;
+        return 0;  // nothing fits; the budget is an upper bound
     }
     fl::u64 allowed = (static_cast<fl::u64>(255) * (max_mW - fixed)) / ctrl;
     if (allowed > target) {
@@ -1159,12 +1137,7 @@ fl::u8 ref_limit(const CRGB* leds, fl::u16 n, fl::u8 target, fl::u32 max_mW) {
     while (b > 0 && fixed + ref_scale32by8(ctrl, b) > max_mW) {
         --b;
     }
-    // Never dimmer than the classic answer at the baseline (#5139 follow-up).
-    fl::u64 floor_b = (static_cast<fl::u64>(255) * fixed) / total;
-    if (floor_b > target) {
-        floor_b = target;
-    }
-    return b > floor_b ? b : static_cast<fl::u8>(floor_b);
+    return b;
 }
 
 }  // namespace power_equivalence
