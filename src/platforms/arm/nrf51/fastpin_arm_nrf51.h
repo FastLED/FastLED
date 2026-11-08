@@ -13,6 +13,7 @@ FL_DISABLE_WARNING_DEPRECATED_REGISTER
 #if defined(FL_IS_NRF51)
 // IWYU pragma: begin_keep
 #include <nrf51.h>  // vendor CMSIS: NRF_GPIO / NRF_GPIO_Type
+#include <nrf51_bitfields.h>  // GPIO_PIN_CNF_INPUT_Msk
 // IWYU pragma: end_keep
 
 namespace fl {
@@ -25,7 +26,12 @@ public:
     typedef fl::u32 port_t;
 
     inline static void setOutput() { NRF_GPIO->DIRSET = _MASK; }
-    inline static void setInput() { NRF_GPIO->DIRCLR = _MASK; }
+    inline static void setInput() {
+        NRF_GPIO->DIRCLR = _MASK;
+        // Reconnect the input buffer (PIN_CNF.INPUT = Connect = 0) in case an
+        // earlier analogWrite()/pinMode() disconnected it, so isset() reads.
+        NRF_GPIO->PIN_CNF[PIN] &= ~GPIO_PIN_CNF_INPUT_Msk;
+    }
 
     inline static void hi() __attribute__ ((always_inline)) { NRF_GPIO->OUTSET = _MASK; }
     inline static void lo() __attribute__ ((always_inline)) { NRF_GPIO->OUTCLR = _MASK; }

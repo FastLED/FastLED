@@ -94,6 +94,7 @@ fn esp_architecture_macro(name: &str) -> EspArchitectureTruth {
         "FL_IS_SAME53",
         "FL_IS_RP",
         "FL_IS_SILABS",
+        "FL_IS_NRF51",
         "FL_IS_NRF52",
         "FL_IS_RENESAS",
         "FL_IS_APOLLO3",
