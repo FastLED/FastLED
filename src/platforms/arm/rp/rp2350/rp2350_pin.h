@@ -21,38 +21,48 @@ FL_DISABLE_WARNING_DEPRECATED_REGISTER
 namespace fl {
 
 // warning: set and fastset are not thread-safe! use with caution!
+// GPIO0-31 use the SIO GPIO registers. GPIO32-47 (RP2350B) use the GPIO_HI
+// registers, where bit (PIN - 32) is the pin; _MASK is that bit (#5100).
 template<uint PIN, u32 _MASK> class _RP2350PIN {
+  static constexpr bool kHiBank = PIN >= 32;
+  static volatile u32* outReg() { return kHiBank ? &sio_hw->gpio_hi_out : &sio_hw->gpio_out; }
+  static volatile u32* setReg() { return kHiBank ? &sio_hw->gpio_hi_set : &sio_hw->gpio_set; }
+  static volatile u32* clrReg() { return kHiBank ? &sio_hw->gpio_hi_clr : &sio_hw->gpio_clr; }
+  static volatile u32* toglReg() { return kHiBank ? &sio_hw->gpio_hi_togl : &sio_hw->gpio_togl; }
+  static volatile u32* oeSetReg() { return kHiBank ? &sio_hw->gpio_hi_oe_set : &sio_hw->gpio_oe_set; }
+  static volatile u32* oeClrReg() { return kHiBank ? &sio_hw->gpio_hi_oe_clr : &sio_hw->gpio_oe_clr; }
+
 public:
   typedef volatile u32 * port_ptr_t;
   typedef u32 port_t;
 
   inline static constexpr bool validpin() { return true; }
 
-  inline static void setOutput() { gpio_set_function(PIN, GPIO_FUNC_SIO); sio_hw->gpio_oe_set = _MASK; }
-  inline static void setInput() { gpio_set_function(PIN, GPIO_FUNC_SIO); sio_hw->gpio_oe_clr = _MASK; }
+  inline static void setOutput() { gpio_set_function(PIN, GPIO_FUNC_SIO); *oeSetReg() = _MASK; }
+  inline static void setInput() { gpio_set_function(PIN, GPIO_FUNC_SIO); *oeClrReg() = _MASK; }
 
-  inline static void hi() __attribute__ ((always_inline)) { sio_hw->gpio_set = _MASK; }
-  inline static void lo() __attribute__ ((always_inline)) { sio_hw->gpio_clr = _MASK; }
-  inline static void set(FASTLED_REGISTER port_t val) __attribute__ ((always_inline)) { sio_hw->gpio_out = val; }
+  inline static void hi() __attribute__ ((always_inline)) { *setReg() = _MASK; }
+  inline static void lo() __attribute__ ((always_inline)) { *clrReg() = _MASK; }
+  inline static void set(FASTLED_REGISTER port_t val) __attribute__ ((always_inline)) { *outReg() = val; }
 
   inline static void strobe() __attribute__ ((always_inline)) { toggle(); toggle(); }
 
-  inline static void toggle() __attribute__ ((always_inline)) { sio_hw->gpio_togl = _MASK; }
+  inline static void toggle() __attribute__ ((always_inline)) { *toglReg() = _MASK; }
 
   inline static void hi(FASTLED_REGISTER port_ptr_t port) __attribute__ ((always_inline)) { hi(); }
   inline static void lo(FASTLED_REGISTER port_ptr_t port) __attribute__ ((always_inline)) { lo(); }
   inline static void fastset(FASTLED_REGISTER port_ptr_t port, FASTLED_REGISTER port_t val) __attribute__ ((always_inline)) { *port = val; }
 
-  inline static port_t hival() __attribute__ ((always_inline)) { return sio_hw->gpio_out | _MASK; }
-  inline static port_t loval() __attribute__ ((always_inline)) { return sio_hw->gpio_out & ~_MASK; }
-  inline static port_ptr_t port() __attribute__ ((always_inline)) { return &sio_hw->gpio_out; }
-  inline static port_ptr_t sport() __attribute__ ((always_inline)) { return &sio_hw->gpio_set; }
-  inline static port_ptr_t cport() __attribute__ ((always_inline)) { return &sio_hw->gpio_clr; }
+  inline static port_t hival() __attribute__ ((always_inline)) { return *outReg() | _MASK; }
+  inline static port_t loval() __attribute__ ((always_inline)) { return *outReg() & ~_MASK; }
+  inline static port_ptr_t port() __attribute__ ((always_inline)) { return outReg(); }
+  inline static port_ptr_t sport() __attribute__ ((always_inline)) { return setReg(); }
+  inline static port_ptr_t cport() __attribute__ ((always_inline)) { return clrReg(); }
   inline static port_t mask() __attribute__ ((always_inline)) { return _MASK; }
 };
 
-/// True only for GPIO0-31 backed by a real _RP2350PIN. GPIO32-47 live in the
-/// separate GPIO_HI bank that _RP2350PIN does not address, so they are excluded.
+/// True only for GPIO0-31 backed by a real _RP2350PIN. GPIO32-47 (GPIO_HI bank)
+/// keep the plain hi()/lo() writer: the set/clear stream is only audited for bank 0.
 template <uint PIN, u32 MASK>
 constexpr bool isRp2350LowBankPin(const _RP2350PIN<PIN, MASK>*) { return PIN < 32; }
 constexpr bool isRp2350LowBankPin(const void*) { return false; }
