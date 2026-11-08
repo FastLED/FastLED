@@ -7,6 +7,11 @@
 #warning "Software pin support forced, pin access will be slightly slower."
 #define NO_HARDWARE_PIN_SUPPORT
 #undef HAS_HARDWARE_PIN_SUPPORT
+// The pin tables below are skipped, and they were what pulled in FastPin and
+// Selectable for fastspi_arm_stm32.h and the clockless driver (#5114).
+// IWYU pragma: begin_keep
+#include "fl/system/fastpin_base.h"
+// IWYU pragma: end_keep
 #else
 
 #ifndef USE_NEW_STM32_PIN_DEFINITIONS
