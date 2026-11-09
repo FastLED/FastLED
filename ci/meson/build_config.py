@@ -220,7 +220,8 @@ def setup_meson_build(
             force_reconfigure_reason = example_reason
 
     skip_meson_setup = already_configured and not reconfigure and not force_reconfigure
-    native_file_path = build_dir / "meson_native.txt"
+    # Meson preserves private *.ini files across --wipe, including this input.
+    native_file_path = build_dir / "meson-private" / "fastled-native.ini"
 
     # Build the meson setup command (or defer it for compiler-version-late reconfigure).
     cmd: "list[str] | None" = None
@@ -291,6 +292,18 @@ def setup_meson_build(
 
         if compiler_version_changed:
             cleanup_build_artifacts(build_dir, "Compiler version changed")
+            cmd = build_meson_setup_cmd(
+                native_file_path=native_file_path,
+                build_dir=build_dir,
+                build_mode=build_mode,
+                native_linker=native_linker,
+                native_linker_identity=native_linker_identity,
+                enable_examples=enable_examples,
+                enable_unit_tests=enable_unit_tests,
+                enable_full_examples=enable_full_examples,
+                reconfigure=False,
+                wipe=True,
+            )
 
         # Late-stage zccache version check
         if compiler.zccache_version:

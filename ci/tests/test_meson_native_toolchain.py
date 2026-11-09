@@ -22,6 +22,64 @@ from ci.meson.sanitizer_env import setup_sanitizer_env
 
 
 class TestMesonNativeToolchain(unittest.TestCase):
+    def test_same_version_provider_switch_invalidates_cached_compiler(self) -> None:
+        """Switch both directions even when compiler versions and marker ages match."""
+        with TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            markers = MarkerPaths.for_build_dir(root)
+            ctc = root / "ctc-clang++"
+            soldr = root / "soldr-clang++"
+            ctc.touch()
+            soldr.touch()
+
+            def selected_compiler() -> str:
+                """Return the raw compiler selected by the current opt-in."""
+                return str(soldr if os.environ.get("FASTLED_NATIVE_CLANG") else ctc)
+
+            with (
+                patch("ci.meson.meson_setup_execute.sys.platform", "linux"),
+                patch(
+                    "ci.meson.meson_setup_execute.shutil.which", return_value=str(ctc)
+                ),
+                patch(
+                    "ci.meson.meson_setup_execute._find_zccache_binary",
+                    return_value="/venv/zccache",
+                ),
+                patch(
+                    "ci.meson.meson_setup_execute.get_zccache_version",
+                    return_value="1.15.6",
+                ),
+                patch(
+                    "ci.meson.meson_setup_execute._resolve_fast_compiler_binary",
+                    side_effect=selected_compiler,
+                ),
+                patch(
+                    "ci.meson.meson_setup_execute.get_compiler_version",
+                    return_value="clang version 21.1.5",
+                ) as get_version,
+            ):
+                identities: list[str] = []
+                for provider in ("", "soldr", "", ""):
+                    with patch.dict(os.environ, {"FASTLED_NATIVE_CLANG": provider}):
+                        detected = detect_compiler_and_cache(markers, False, "quick")
+                    identities.append(detected.compiler_version)
+                    markers.compiler_version.write_text(
+                        detected.compiler_version, encoding="utf-8"
+                    )
+                    newer = max(ctc.stat().st_mtime, soldr.stat().st_mtime) + 10
+                    os.utime(markers.compiler_version, (newer, newer))
+
+                changed = ctc.stat().st_mtime + 20
+                os.utime(ctc, (changed, changed))
+                with patch.dict(os.environ, {"FASTLED_NATIVE_CLANG": ""}):
+                    updated = detect_compiler_and_cache(markers, False, "quick")
+
+            self.assertNotEqual(identities[0], identities[1])
+            self.assertEqual(identities[0], identities[2])
+            self.assertEqual(identities[2], identities[3])
+            self.assertNotEqual(identities[3], updated.compiler_version)
+            self.assertEqual(get_version.call_count, 4)
+
     def test_docker_selects_zccache_for_pch_consumers(self) -> None:
         with (
             TemporaryDirectory() as temp_dir,
