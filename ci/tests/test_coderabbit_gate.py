@@ -1,3 +1,7 @@
+from pathlib import Path
+
+import pytest
+
 from ci.coderabbit_gate import RATE_LIMIT_MARKER, Thread, decide, pr_from_ref
 
 
@@ -37,7 +41,9 @@ def test_pr_from_queue_ref() -> None:
     assert pr_from_ref("master") is None
 
 
-def test_gh_json_keeps_stderr_out_of_json(monkeypatch, tmp_path) -> None:
+def test_gh_json_keeps_stderr_out_of_json(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
     import ci.coderabbit_gate as gate
 
     fake = tmp_path / "gh"
@@ -47,9 +53,9 @@ def test_gh_json_keeps_stderr_out_of_json(monkeypatch, tmp_path) -> None:
     assert gate._gh_json(["api", "x"]) == {"ok": 1}
 
 
-def test_gh_json_reports_stderr_on_failure(monkeypatch, tmp_path) -> None:
-    import pytest
-
+def test_gh_json_reports_stderr_on_failure(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
     import ci.coderabbit_gate as gate
 
     fake = tmp_path / "gh"
