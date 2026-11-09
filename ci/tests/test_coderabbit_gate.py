@@ -1,16 +1,8 @@
-import os
-import sys
 from pathlib import Path
 
 import pytest
 
-from ci.coderabbit_gate import (
-    RATE_LIMIT_MARKER,
-    Thread,
-    _gh_json,
-    decide,
-    pr_from_ref,
-)
+from ci.coderabbit_gate import RATE_LIMIT_MARKER, Thread, decide, pr_from_ref
 
 
 def _thread(resolved: bool, author: str = "coderabbitai") -> Thread:
@@ -49,15 +41,26 @@ def test_pr_from_queue_ref() -> None:
     assert pr_from_ref("master") is None
 
 
-@pytest.mark.skipif(sys.platform == "win32", reason="fake gh is a POSIX script")
-def test_gh_json_ignores_stderr_diagnostics(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+def test_gh_json_keeps_stderr_out_of_json(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
-    fake_gh: Path = tmp_path / "gh"
-    fake_gh.write_text(
-        '#!/bin/sh\necho \'{"ok": true}\'\necho "* Request to https://api" >&2\n',
-        encoding="utf-8",
-    )
-    fake_gh.chmod(0o755)
-    monkeypatch.setenv("PATH", f"{tmp_path}{os.pathsep}{os.environ['PATH']}")
-    assert _gh_json(["api", "x"]) == {"ok": True}
+    import ci.coderabbit_gate as gate
+
+    fake = tmp_path / "gh"
+    fake.write_text('#!/bin/sh\necho "debug noise" >&2\necho \'{"ok": 1}\'\n')
+    fake.chmod(0o755)
+    monkeypatch.setenv("PATH", f"{tmp_path}:{__import__('os').environ['PATH']}")
+    assert gate._gh_json(["api", "x"]) == {"ok": 1}
+
+
+def test_gh_json_reports_stderr_on_failure(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    import ci.coderabbit_gate as gate
+
+    fake = tmp_path / "gh"
+    fake.write_text('#!/bin/sh\necho "HTTP 401: Bad credentials" >&2\nexit 1\n')
+    fake.chmod(0o755)
+    monkeypatch.setenv("PATH", f"{tmp_path}:{__import__('os').environ['PATH']}")
+    with pytest.raises(RuntimeError, match="Bad credentials"):
+        gate._gh_json(["api", "x"])
