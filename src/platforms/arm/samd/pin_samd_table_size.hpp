@@ -2,7 +2,7 @@
 
 // IWYU pragma: private
 
-/// @file platforms/arm/samd/pin_samd_table_size.h
+/// @file platforms/arm/samd/pin_samd_table_size.hpp
 /// Number of entries FastLED may read from a SAMD variant's g_APinDescription.
 ///
 /// g_APinDescription is declared `extern const PinDescription
@@ -12,7 +12,14 @@
 /// g_APinDescription[26] (PA27) is a real entry. The count is therefore the
 /// largest of PINS_COUNT and (pin + 1) for each named variant pin that indexes
 /// the table. NUM_DIGITAL_PINS is deliberately not used: variants set it
-/// inconsistently.
+/// inconsistently. PIN_ATN is not used either: the Adafruit Crickit M0 defines
+/// it as 38 but has a 37-entry table.
+///
+/// Not constexpr: Arduino SAMD 1.8.x variants define PINS_COUNT as
+/// PINCOUNT_fn(), a runtime function returning the exact table size.
+///
+/// Unnamed entries past the largest named pin (the SparkFun SAMD21 Dev has
+/// some) are not covered; such variants set FL_SAMD_PIN_DESCRIPTION_COUNT.
 ///
 /// Define FL_SAMD_PIN_DESCRIPTION_COUNT to override the count for a
 /// variant whose table is larger still.
@@ -29,14 +36,14 @@ namespace fl {
 namespace platforms {
 namespace samd_detail {
 
-constexpr fl::u32 pin_count_max(fl::u32 a, fl::u32 b) FL_NO_EXCEPT {
+inline fl::u32 pin_count_max(fl::u32 a, fl::u32 b) FL_NO_EXCEPT {
     return a > b ? a : b;
 }
 
 }  // namespace samd_detail
 
 /// Entries of g_APinDescription that getPinMapping() may index.
-constexpr fl::u32 samd_pin_description_count() FL_NO_EXCEPT {
+inline fl::u32 samd_pin_description_count() FL_NO_EXCEPT {
 #if defined(FL_SAMD_PIN_DESCRIPTION_COUNT)
     return static_cast<fl::u32>(FL_SAMD_PIN_DESCRIPTION_COUNT);
 #else
@@ -56,9 +63,6 @@ constexpr fl::u32 samd_pin_description_count() FL_NO_EXCEPT {
 #endif
 #ifdef PIN_LED3
            pin_count_max(static_cast<fl::u32>(PIN_LED3) + 1u,
-#endif
-#ifdef PIN_ATN
-           pin_count_max(static_cast<fl::u32>(PIN_ATN) + 1u,
 #endif
 #ifdef PIN_USB_HOST_ENABLE
            pin_count_max(static_cast<fl::u32>(PIN_USB_HOST_ENABLE) + 1u,
@@ -98,9 +102,6 @@ constexpr fl::u32 samd_pin_description_count() FL_NO_EXCEPT {
            )
 #endif
 #ifdef PIN_LED3
-           )
-#endif
-#ifdef PIN_ATN
            )
 #endif
 #ifdef PIN_USB_HOST_ENABLE

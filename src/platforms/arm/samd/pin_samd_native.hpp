@@ -44,7 +44,7 @@
 #error "SAMD variant.h does not define PINS_COUNT; FastLED cannot map Arduino pins to pads"
 #endif
 // Variants index pins past PINS_COUNT (#5185); this computes the real bound.
-#include "platforms/arm/samd/pin_samd_table_size.h"
+#include "platforms/arm/samd/pin_samd_table_size.hpp"
 #endif
 // IWYU pragma: end_keep
 
