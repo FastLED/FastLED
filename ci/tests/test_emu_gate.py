@@ -12,12 +12,22 @@ from typing import NamedTuple
 
 
 SCRIPT = Path(__file__).resolve().parents[1] / "emu_gate.py"
-MAPPING = """[allow]
-platform-code = [
-  { paths = ["src/platforms/widget/**", "src/platforms/shared/**"], gates = ["sim:board"] },
-  { paths = ["src/platforms/shared/**"], gates = ["sim:other", "sim:board"] },
-  { paths = ["src/platforms/gap/**"], gates = [], gap = "no emulator" },
-]
+MAPPING = """version = 1
+
+[[platforms]]
+paths = ["src/platforms/widget/**", "src/platforms/shared/**"]
+gates = ["sim:board"]
+gap = ""
+
+[[platforms]]
+paths = ["src/platforms/shared/**"]
+gates = ["sim:other", "sim:board"]
+gap = ""
+
+[[platforms]]
+paths = ["src/platforms/gap/**"]
+gates = []
+gap = "no emulator"
 """
 
 
@@ -52,7 +62,8 @@ class EmuGateTest(unittest.TestCase):
         self.git("init", "-q")
         self.git("config", "user.email", "test@example.invalid")
         self.git("config", "user.name", "Emu Gate Test")
-        (self.repo / "ci.toml").write_text(MAPPING)
+        (self.repo / "ci").mkdir(exist_ok=True)
+        (self.repo / "ci" / "emu_map.toml").write_text(MAPPING)
         self.git("add", ".")
         self.git("commit", "-qm", "base")
         self.base = self.git("rev-parse", "HEAD").strip()
@@ -230,7 +241,8 @@ class EmuGateTest(unittest.TestCase):
         self.assertEqual(payload["unmapped"][0]["platform"], "gap")
 
     def test_empty_mapping_reports_all_paths(self) -> None:
-        (self.repo / "ci.toml").write_text("[allow]\nplatform-code = []\n")
+        (self.repo / "ci").mkdir(exist_ok=True)
+        (self.repo / "ci" / "emu_map.toml").write_text("version = 1\nplatforms = []\n")
         self.change("src/platforms/widget/driver.h")
         code, stdout, stderr = self.gate("--json")
         self.assertEqual(code, 3, stderr)
@@ -253,8 +265,8 @@ class EmuGateTest(unittest.TestCase):
                 )
 
     def test_top_level_glob_does_not_match_nested_headers(self) -> None:
-        (self.repo / "ci.toml").write_text(
-            '[allow]\nplatform-code = [{ paths = ["src/platforms/*.h"], gates = ["sim:board"] }]\n'
+        (self.repo / "ci" / "emu_map.toml").write_text(
+            'version = 1\n[[platforms]]\npaths = ["src/platforms/*.h"]\ngates = ["sim:board"]\n'
         )
         self.change("src/platforms/widget/driver.h")
         self.assertEqual(self.gate()[0], 3)
@@ -270,7 +282,7 @@ class EmuGateTest(unittest.TestCase):
         self.assertEqual(self.gate("--head", "not-a-ref")[0], 1)
 
     def test_invalid_mapping_is_error(self) -> None:
-        (self.repo / "ci.toml").write_text('[allow]\nplatform-code = ["legacy"]\n')
+        (self.repo / "ci" / "emu_map.toml").write_text('version = 1\nplatforms = ["legacy"]\n')
         self.assertEqual(self.gate()[0], 1)
 
 

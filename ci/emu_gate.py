@@ -57,12 +57,19 @@ class Result:
 
 
 def read_mapping(repo: Path) -> list[Mapping]:
-    with (repo / "ci.toml").open("rb") as source:
-        entries = tomllib.load(source).get("allow", {}).get("platform-code")
+    """Read the platform -> emulator-test map.
+
+    It lives in `ci/emu_map.toml`, not in `[allow].platform-code`: ci-lint's
+    schema types that field as a flat list of path globs (a classification of
+    what counts as platform code), so a record shape there would fail precheck.
+    """
+    source_path = repo / "ci" / "emu_map.toml"
+    if not source_path.is_file():
+        raise ValueError("ci/emu_map.toml is missing")
+    with source_path.open("rb") as source:
+        entries = tomllib.load(source).get("platforms")
     if not isinstance(entries, list):
-        raise ValueError(
-            "[allow].platform-code must be a list of {paths, gates, gap?} records"
-        )
+        raise ValueError("ci/emu_map.toml must declare a [[platforms]] array")
     mappings: list[Mapping] = []
     for entry in entries:
         if not isinstance(entry, dict):
