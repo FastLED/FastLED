@@ -17,6 +17,8 @@ import subprocess
 import sys
 from dataclasses import dataclass
 
+from running_process import RunningProcess
+
 
 CODERABBIT_LOGINS = frozenset({"coderabbitai", "coderabbitai[bot]"})
 RATE_LIMIT_MARKER = (
@@ -89,10 +91,19 @@ def decide(threads: list[Thread], coderabbit_comments: list[str]) -> Verdict:
 
 
 def _gh_json(args: list[str]) -> object:
-    out = subprocess.run(
-        ["gh", *args], check=True, capture_output=True, text=True
-    ).stdout
-    return json.loads(out)
+    result = RunningProcess.run(
+        ["gh", *args],
+        check=False,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        encoding="utf-8",
+        errors="replace",
+    )
+    if result.returncode != 0:
+        raise RuntimeError(
+            f"gh {' '.join(args[:2])} exited {result.returncode}: {result.stderr}"
+        )
+    return json.loads(result.stdout)
 
 
 def _first_line(body: str) -> str:
@@ -123,7 +134,9 @@ def fetch_threads(repo: str, pr: int) -> list[Thread]:
         if after:
             args += ["-F", f"after={after}"]
         data = _gh_json(args)
-        page = data["data"]["repository"]["pullRequest"]["reviewThreads"]  # type: ignore[index]
+        if not isinstance(data, dict):
+            raise ValueError(f"unexpected GraphQL response: {data!r}")
+        page = data["data"]["repository"]["pullRequest"]["reviewThreads"]
         for node in page["nodes"]:
             first = (node["comments"]["nodes"] or [{}])[0]
             author = ((first.get("author") or {}).get("login")) or ""

@@ -98,7 +98,7 @@ jobs:
     if: github.event_name == 'merge_group'
     uses: ./.github/workflows/template_unit_test.yml
     with:
-      os: ubuntu-latest
+      os: ubuntu-24.04
       build-mode: debug-thin
       full-suite: false
 
@@ -113,7 +113,7 @@ jobs:
     if: github.event_name == 'merge_group'
     uses: ./.github/workflows/template_example_test.yml
     with:
-      os: ubuntu-latest
+      os: ubuntu-24.04
       build-mode: debug-thin
       example-group: CompileTests
 
@@ -135,7 +135,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           QUEUE_REF: ${{ github.event.merge_group.head_ref }}
-        run: uv run --no-project --python 3.12 python ci/coderabbit_gate.py --repo "$GITHUB_REPOSITORY" --ref "$QUEUE_REF"
+        run: uv run --no-project --python 3.12 --with 'running-process>=4.0.0,<4.10.10' python ci/coderabbit_gate.py --repo "$GITHUB_REPOSITORY" --ref "$QUEUE_REF"
 
   # Required by the master ruleset on PRs and in the queue. Fork PRs skip
   # `validate` and get no hosted CI until a maintainer enqueues them, so
