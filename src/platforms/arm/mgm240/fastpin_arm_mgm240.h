@@ -116,6 +116,7 @@ _FL_DEFPIN(14,  3, B, (1 << 3));  // A6 - SPI1 SDO - Tx1 - DAC3 - WU - 14
 _FL_DEFPIN(15,  4, B, (1 << 4));  // A7 - SPI1 SDI - Rx1 - 15
 _FL_DEFPIN(16,  7, C, (1 << 7));  // Button - WU - 16
 _FL_DEFPIN(17,  0, A, (1 << 0));  // Rx - 17
+_FL_DEFPIN(18,  7, A, (1 << 7));  // Tx - 18
 #elif defined(ARDUINO_NANO_MATTER)
 // Silicon Labs Arduino core 2.2.0, variants/nano_matter/arduino_variant.cpp gPinNames
 #define FL_MGM240_PIN_TABLE_FROM_VARIANT 1
@@ -277,6 +278,7 @@ _FL_DEFPIN(23,  9, C, (1 << 9));  // MIC data - 23
 _FL_DEFPIN(24,  4, D, (1 << 4));  // VBAT ADC - 24
 _FL_DEFPIN(25,  3, D, (1 << 3));  // Battery charger enable - 25
 _FL_DEFPIN(26,  4, B, (1 << 4));  // RF switch - 26
+_FL_DEFPIN(27,  5, B, (1 << 5));  // RF switch enable - 27
 #else
 #warning "fastpin_arm_mgm240.h has no pin table for this Silicon Labs variant; FastPin<N> may drive a different pad than digitalWrite(N)."
 // Generic fallback, not taken from any vendor variant.
