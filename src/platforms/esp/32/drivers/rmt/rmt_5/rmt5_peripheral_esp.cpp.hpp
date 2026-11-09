@@ -199,7 +199,8 @@ bool Rmt5PeripheralESPImpl::createTxChannel(const Rmt5ChannelConfig& config,
     // With io_loop_back=1, ESP-IDF may reconfigure GPIO in ways that break subsequent TX.
     esp_config.flags.io_loop_back = 0;
 #endif
-#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 2, 0)
+// intr_priority first appears in rmt_tx_channel_config_t in IDF v5.1.2 (FastLED#5194).
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 1, 2)
     esp_config.intr_priority = config.intr_priority;
 #endif
 
