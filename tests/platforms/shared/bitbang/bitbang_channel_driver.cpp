@@ -15,6 +15,7 @@
 #include "fl/channels/data.h"
 #include "fl/channels/config.h"
 #include "fl/system/pin.h"
+#include "fl/stl/chrono.h"
 #include "fl/stl/vector.h"
 #include "platforms/stub/stub_gpio.h"
 
@@ -292,6 +293,32 @@ FL_TEST_CASE("SPI trace: a channel with no clock pin writes no data") {
     driver.show();
     fl::stub::clearPinEdgeCallback(51);
     FL_CHECK_EQ(edges, 0);
+}
+
+// #5127: channels sharing a clock pin used the first channel's rate, so a fast
+// device enqueued first overclocked a slow one. 32 bytes at 250 kHz take at
+// least 256 x 4 us = 1024 us; at 4 MHz about 64 us. The stub's delays spin in
+// real time, so a 16x gap is safe to time on the host.
+FL_TEST_CASE("SPI: a shared clock runs at the slowest requested rate in either order") {
+    for (int fastFirst = 0; fastFirst < 2; ++fastFirst) {
+        BitBangChannelDriver driver;
+        const fl::vector<u8> bytes(32, 0x55);
+        const auto make = [&bytes](int dataPin, u32 hz) {
+            fl::vector_psram<u8> data(bytes.begin(), bytes.end());
+            ChipsetVariant chipset = SpiChipsetConfig(dataPin, 54, SpiEncoder::apa102(hz));
+            return ChannelData::create(chipset, fl::move(data));
+        };
+        auto fast = make(52, 4000000);
+        auto slow = make(53, 250000);
+        driver.enqueue(fastFirst ? fast : slow);
+        driver.enqueue(fastFirst ? slow : fast);
+        const u32 start = fl::micros();
+        driver.show();
+        const u32 elapsed = fl::micros() - start;
+        FL_CAPTURE(fastFirst);
+        FL_CAPTURE(elapsed);
+        FL_CHECK_GE(elapsed, 900u);
+    }
 }
 
 } // FL_TEST_SUITE
