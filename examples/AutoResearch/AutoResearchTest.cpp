@@ -421,6 +421,36 @@ void collectRawEdgeDiagnostics(fl::shared_ptr<fl::RxChannel> rx_channel,
     diagnostics->rawEdgeSample = sample.str();
 }
 
+// Resolve the UART wire geometry the RX decoder must match.
+//
+// Take the geometry the engine recorded when it transmitted, rather than
+// re-deriving it. Which geometry gets chosen depends on the backend's
+// *maximum* baud, not on anything visible here, and the achieved baud is the
+// wrong input: it is allowed to sit up to 1% under the requested one, and fed
+// back as a ceiling that shortfall makes the transmitted geometry look
+// infeasible and selects the other. Re-deriving from the generic ceiling is
+// the fallback for backends that do not report one.
+static fl::ChipsetTiming resolveUartWireTiming(const fl::ChipsetTimingConfig& timing,
+                                               const char* driver_name) {
+    (void)driver_name;
+    fl::ChipsetTiming uart_timing{0, 0, 0, 0, nullptr};
+#if defined(FL_IS_RP2040) || defined(FL_IS_RP2350)
+    if (fl::strcmp(driver_name, "UART0") == 0) {
+        uart_timing =
+            fl::BusTraits<fl::Bus::UART, 0>::instance().lastWireTiming();
+    } else if (fl::strcmp(driver_name, "UART1") == 0) {
+        uart_timing =
+            fl::BusTraits<fl::Bus::UART, 1>::instance().lastWireTiming();
+    }
+#endif
+    if (uart_timing.T1 == 0) {
+        // uartWireTiming() carries timing.reset_us and names the result
+        // "uart_wire", so nothing further needs setting here.
+        uart_timing = fl::uartWireTiming(timing, fl::kMaxUartBaudRate);
+    }
+    return uart_timing;
+}
+
 // Build the 4-phase RX decode thresholds for a TX driver's waveform.
 static fl::ChipsetTiming4Phase buildRxDecodeTiming(const fl::ChipsetTimingConfig& timing,
                                                   const char* driver_name) {
@@ -655,7 +685,34 @@ size_t capture(fl::shared_ptr<fl::RxChannel> rx_channel,
     rx_config.backend = rx_channel->backend();
     // Backends that decode while capturing (Teensy 4.x FlexPWM) need the
     // decode thresholds up front.
-    const fl::ChipsetTiming4Phase rx_timing = buildRxDecodeTiming(timing, driver_name);
+    //
+    // Stream and decode must share the same thresholds (FastLED#5197,
+    // CodeRabbit on #4723): a backend that classifies bits while capturing
+    // against one timing and is then decoded against another can split a gap
+    // bit differently and report INVALID_ARGUMENT or an inexact stream. So
+    // the UART timing is resolved here, once, and reused by the UART decode.
+    fl::ChipsetTiming uart_timing{0, 0, 0, 0, nullptr};
+    fl::ChipsetTiming4Phase uart_rx_timing{};
+    if (is_uart_driver) {
+        // On RP2040/RP2350 lastWireTiming() read before this frame's TX holds
+        // the previous frame's geometry, or zero on the first frame (then the
+        // uartWireTiming() fallback applies). The chipset timing does not
+        // change between frames, so either answer matches this frame.
+        uart_timing = resolveUartWireTiming(timing, driver_name);
+        if (uart_timing.T1 == 0 && uart_timing.T2 == 0) {
+            // No representable geometry. Decoding against zeros would reject
+            // every symbol and report it as a capture fault; say what it is.
+            AR_FL_WARN("[CAPTURE] UART: no representable wave geometry for "
+                       << timing.name);
+            return 0;
+        }
+        // Use wider tolerance (250ns) for UART because the UART clock and RMT
+        // sample clock are asynchronous, and GPIO matrix adds ~10-20ns jitter
+        uart_rx_timing = fl::make4PhaseTiming(uart_timing, 250);
+        uart_rx_timing.gap_tolerance_ns = 100000; // 100µs for UART inter-frame gaps
+    }
+    const fl::ChipsetTiming4Phase rx_timing =
+        is_uart_driver ? uart_rx_timing : buildRxDecodeTiming(timing, driver_name);
     rx_config.stream_timing = rx_timing;
     if (use_rmt_internal_loopback) {
         AR_FL_WARN("[CAPTURE] RMT TX -> RMT RX: Same-pin internal loopback enabled");
@@ -822,47 +879,16 @@ size_t capture(fl::shared_ptr<fl::RxChannel> rx_channel,
     // windows -- so a correct frame decoded to nothing. See FastLED#4379.
     if (is_uart_driver) {
         AR_FL_WARN("[CAPTURE] UART (inverted TX): using standard WS2812 decoder with UART timing...");
-        // Take the geometry the engine recorded when it transmitted, rather
-        // than re-deriving it. Which geometry gets chosen depends on the
-        // backend's *maximum* baud, not on anything visible here, and the
-        // achieved baud is the wrong input: it is allowed to sit up to 1%
-        // under the requested one, and fed back as a ceiling that shortfall
-        // makes the transmitted geometry look infeasible and selects the
-        // other. Re-deriving from the generic ceiling is the fallback for
-        // backends that do not report one.
-        fl::ChipsetTiming uart_timing{0, 0, 0, 0, nullptr};
-#if defined(FL_IS_RP2040) || defined(FL_IS_RP2350)
-        if (fl::strcmp(driver_name, "UART0") == 0) {
-            uart_timing =
-                fl::BusTraits<fl::Bus::UART, 0>::instance().lastWireTiming();
-        } else if (fl::strcmp(driver_name, "UART1") == 0) {
-            uart_timing =
-                fl::BusTraits<fl::Bus::UART, 1>::instance().lastWireTiming();
-        }
-#endif
-        if (uart_timing.T1 == 0) {
-            // uartWireTiming() carries timing.reset_us and names the result
-            // "uart_wire", so nothing further needs setting here.
-            uart_timing = fl::uartWireTiming(timing, fl::kMaxUartBaudRate);
-        }
-        if (uart_timing.T1 == 0 && uart_timing.T2 == 0) {
-            // No representable geometry. Decoding against zeros would reject
-            // every symbol and report it as a capture fault; say what it is.
-            AR_FL_WARN("[CAPTURE] UART: no representable wave geometry for "
-                       << timing.name);
-            return 0;
-        }
-        // Use wider tolerance (250ns) for UART because the UART clock and RMT
-        // sample clock are asynchronous, and GPIO matrix adds ~10-20ns jitter
-        auto rx_timing = fl::make4PhaseTiming(uart_timing, 250);
-        rx_timing.gap_tolerance_ns = 100000; // 100µs for UART inter-frame gaps
+        // uart_timing / uart_rx_timing were resolved (resolveUartWireTiming())
+        // before RX was armed and already fed rx_config.stream_timing; decode
+        // against the same thresholds (FastLED#5197).
 
         AR_FL_WARN("[CAPTURE] UART RX timing: T0H=" << uart_timing.T1
                 << " T1H=" << (uart_timing.T1 + uart_timing.T2)
                 << " T0L=" << (uart_timing.T2 + uart_timing.T3)
                 << " T1L=" << uart_timing.T3);
 
-        auto decode_result = rx_channel->decode(rx_timing, rx_buffer);
+        auto decode_result = rx_channel->decode(uart_rx_timing, rx_buffer);
         if (!decode_result.ok()) {
             AR_FL_WARN("[CAPTURE] UART decode failed (error: " << static_cast<int>(decode_result.error()) << ")");
             // Was EdgeRange(0, 256) -- 257 FL_WARN lines per decode failure
