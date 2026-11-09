@@ -40,6 +40,7 @@ from ci.meson.native_launchers import (
     _resolve_fast_native_entries,
     get_zccache_version,
     resolve_soldr_clang,
+    resolve_soldr_linker,
 )
 from ci.meson.output import print_banner
 from ci.meson.path_normalization import (
@@ -67,7 +68,7 @@ def resolve_native_linker(build_mode: str) -> tuple[str, str]:
     """Select reld, FastLED's only native linker, and identify its contents.
 
     reld links every host build on Linux, macOS and Windows; it routes ThinLTO
-    and non-ELF links to the clang-tool-chain bridge linker exported as
+    and non-ELF links to the selected compiler provider's bridge exported as
     ``RELD_BRIDGE_LINKER``. ``FASTLED_NATIVE_LINKER`` may point at a different
     reld build (e.g. a local checkout) but never at another linker.
     """
@@ -89,7 +90,8 @@ def resolve_native_linker(build_mode: str) -> tuple[str, str]:
     # shell must never win over the pinned toolchain. Every supported build
     # entry point (bash test / compile / profile) resolves this before Ninja
     # runs, and Ninja inherits it; bare `ninja` is banned by repo policy.
-    bridge = bridge_linker()
+    soldr_linker = resolve_soldr_linker()
+    bridge = Path(soldr_linker) if soldr_linker is not None else bridge_linker()
     os.environ["RELD_BRIDGE_LINKER"] = str(bridge)
     # The identity covers reld *and* its bridge, so a changed bridge relinks.
     return str(

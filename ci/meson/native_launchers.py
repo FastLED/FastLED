@@ -138,6 +138,13 @@ def resolve_soldr_clang() -> Optional[SoldrClang]:
     )
 
 
+def resolve_soldr_linker() -> str | None:
+    """Return soldr's self-contained bridge for opted-in Linux builds."""
+    if not soldr_clang_requested():
+        return None
+    return _soldr_print("--print-linker")
+
+
 def _native_launcher_output_dir(project_root: Path) -> Path:
     """Directory where compiled native launchers live."""
     return project_root / ".cached" / "clang-native"

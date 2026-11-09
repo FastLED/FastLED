@@ -20,6 +20,7 @@ from ci.meson.native_launchers import (
     _resolve_fast_compiler_binary,
     _resolve_fast_native_entries,
     resolve_soldr_clang,
+    resolve_soldr_linker,
 )
 
 
@@ -34,6 +35,7 @@ class TestSoldrClangGate(unittest.TestCase):
         }
         with patch.dict(os.environ, env, clear=True):
             self.assertIsNone(resolve_soldr_clang())
+            self.assertIsNone(resolve_soldr_linker())
 
     def test_opt_in_uses_soldr_print_paths(self) -> None:
         """Preserve tool paths through Meson parsing and setup environment."""
@@ -45,6 +47,7 @@ class TestSoldrClangGate(unittest.TestCase):
                 ("--print-cc", "clang"),
                 ("--print-cxx", "clang++"),
                 ("--print-ar", "llvm-ar"),
+                ("--print-linker", "bridge-linker"),
             ):
                 path = bundle / name
                 path.write_text("", encoding="utf-8")
@@ -81,6 +84,7 @@ class TestSoldrClangGate(unittest.TestCase):
                 self.assertEqual(parsed["cpp"], [tools["--print-cxx"]])
                 self.assertEqual(parsed["ar"], [tools["--print-ar"]])
                 self.assertEqual(_resolve_fast_compiler_binary(), tools["--print-cxx"])
+                self.assertEqual(resolve_soldr_linker(), tools["--print-linker"])
                 compiler = CompilerDetection("", "", "", None, None, "", "")
                 env = build_setup_env(compiler, build_mode="quick")
                 self.assertEqual(env["CC"], tools["--print-cc"])
@@ -118,6 +122,8 @@ class TestSoldrClangGate(unittest.TestCase):
                 ):
                     with self.assertRaisesRegex(RuntimeError, "failed"):
                         resolve_soldr_clang()
+                    with self.assertRaisesRegex(RuntimeError, "failed"):
+                        resolve_soldr_linker()
 
 
 if __name__ == "__main__":
