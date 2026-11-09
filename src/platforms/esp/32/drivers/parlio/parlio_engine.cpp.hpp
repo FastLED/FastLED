@@ -346,6 +346,7 @@ ParlioEngine::ParlioEngine() FL_NO_EXCEPT
       mPollNeededCallback(),
       mRingBuffer(),
       mRingBufferCapacity(0),
+      mRingBufferCount(ParlioRingBuffer3::RING_BUFFER_COUNT),
       mScratchBuffer(nullptr),
       mLaneStride(0),
       mErrorOccurred(false),
@@ -1145,6 +1146,50 @@ bool ParlioEngine::hasRingSpace() const FL_NO_EXCEPT {
 }
 
 
+size_t ParlioEngine::ringMaxTransferBytes() const FL_NO_EXCEPT {
+    // The largest single transmit() is one ring buffer. IDF sizes the TX
+    // unit's DMA descriptor lists from max_transfer_size, so passing the
+    // 65534-byte ceiling for a small frame wastes ~400 B (FastLED#5161).
+    constexpr size_t kMaxTransferCeiling = 65534;
+    return mRingBufferCapacity < kMaxTransferCeiling ? mRingBufferCapacity
+                                                     : kMaxTransferCeiling;
+}
+
+void ParlioEngine::sizeRingBuffers(const ParlioBufferCalculator& calc,
+                                  size_t maxLeds, u32 resetUs,
+                                  size_t totalCapBytes) FL_NO_EXCEPT {
+    const size_t raw_capacity = calc.calculateRingBufferCapacity(
+        maxLeds, resetUs, ParlioRingBuffer3::RING_BUFFER_COUNT, totalCapBytes);
+    // Round up to 64-byte multiple: cache sync needs address AND size aligned.
+    mRingBufferCapacity = ((raw_capacity + 63) / 64) * 64;
+    mRingBufferCount = calc.ringBufferCount(
+        maxLeds, resetUs, ParlioRingBuffer3::RING_BUFFER_COUNT, totalCapBytes);
+}
+
+bool ParlioEngine::ensureRingSlotsFor(size_t laneBytes) FL_NO_EXCEPT {
+    if (!mRingBuffer || mRingBufferCount >= ParlioRingBuffer3::RING_BUFFER_COUNT) {
+        return true;
+    }
+    // Same fit test calculateBufferByteCount() applies at transmit time.
+    ParlioBufferCalculator calc{mDataWidth, mUseWave3, mClockFreqHz};
+    const size_t overhead = calc.boundaryPaddingBytes() + calc.resetPaddingBytes(mResetUs);
+    const size_t maxInput = (mRingBufferCapacity > overhead)
+                                ? (mRingBufferCapacity - overhead) / calc.outputBytesPerInputByte()
+                                : 0;
+    if (laneBytes <= maxInput) {
+        return true;
+    }
+    for (size_t i = mRingBufferCount; i < ParlioRingBuffer3::RING_BUFFER_COUNT; i++) {
+        u8* buffer = mPeripheral->allocateDmaBuffer(mRingBufferCapacity);
+        if (!buffer) {
+            return false;  // slots allocated so far stay owned by mRingBuffer
+        }
+        mRingBuffer->ptrs[i] = buffer;
+        mRingBufferCount = i + 1;
+    }
+    return true;
+}
+
 bool ParlioEngine::allocateRingBuffers() FL_NO_EXCEPT {
     // One-time ring buffer allocation and initialization
     // Called once during initialize(), NOT per transmission
@@ -1165,18 +1210,18 @@ bool ParlioEngine::allocateRingBuffers() FL_NO_EXCEPT {
     u8* buffers[3] = {nullptr, nullptr, nullptr};
 
     if (!parlioDmaPsramAvailable() &&
-        !parlioCanAllocateInternalDmaRing(mRingBufferCapacity,
-                                          ParlioRingBuffer3::RING_BUFFER_COUNT)) {
-        FL_LOG_PARLIO("PARLIO: Insufficient DMA heap for " << (ParlioRingBuffer3::RING_BUFFER_COUNT) << " ring buffers of " << mRingBufferCapacity << " bytes");
+        !parlioCanAllocateInternalDmaRing(mRingBufferCapacity, mRingBufferCount)) {
+        FL_LOG_PARLIO("PARLIO: Insufficient DMA heap for " << mRingBufferCount << " ring buffers of " << mRingBufferCapacity << " bytes");
         return false;
     }
 
-    // Allocate all 3 buffers via peripheral interface (handles DMA requirements)
-    for (size_t i = 0; i < 3; i++) {
+    // Allocate only the slots a frame can use (sizeRingBuffers()); a frame
+    // that fits in one buffer never touches slots 1-2, which stay nullptr.
+    for (size_t i = 0; i < mRingBufferCount; i++) {
         buffers[i] = mPeripheral->allocateDmaBuffer(mRingBufferCapacity);
 
         if (!buffers[i]) {
-            FL_LOG_PARLIO("PARLIO: Failed to allocate ring buffer " << i << "/3 (requested " << mRingBufferCapacity << " bytes)");
+            FL_LOG_PARLIO("PARLIO: Failed to allocate ring buffer " << i << "/" << mRingBufferCount << " (requested " << mRingBufferCapacity << " bytes)");
 
             // Clean up any buffers we already allocated
             for (size_t j = 0; j < i; j++) {
@@ -1202,7 +1247,7 @@ bool ParlioEngine::allocateRingBuffers() FL_NO_EXCEPT {
     if (!mRingBuffer) {
         FL_LOG_PARLIO("PARLIO: Failed to allocate ring buffer structure");
         // Clean up DMA buffers
-        for (size_t i = 0; i < 3; i++) {
+        for (size_t i = 0; i < mRingBufferCount; i++) {
             mPeripheral->freeDmaBuffer(buffers[i]);
         }
         return false;
@@ -1362,23 +1407,22 @@ bool ParlioEngine::initialize(size_t dataWidth,
             // Recalculate ring buffer capacity for larger LED count
             ParlioBufferCalculator calc{mDataWidth, mUseWave3, mClockFreqHz};
             const bool psram_cap_available = parlioDmaPsramAvailable();
-            size_t raw_capacity = calc.calculateRingBufferCapacity(
-                maxLedsPerChannel, mResetUs, ParlioRingBuffer3::RING_BUFFER_COUNT,
-                psram_cap_available ? FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES_PSRAM
-                                     : FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES);
-            size_t new_capacity = ((raw_capacity + 63) / 64) * 64;
+            const size_t old_capacity = mRingBufferCapacity;
+            const size_t old_count = mRingBufferCount;
+            sizeRingBuffers(calc, maxLedsPerChannel, mResetUs,
+                            psram_cap_available ? FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES_PSRAM
+                                                : FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES);
 
-            if (new_capacity > mRingBufferCapacity) {
-                mRingBufferCapacity = new_capacity;
+            // A frame that outgrows its single buffer needs the full ring even
+            // when the streaming per-buffer capacity is smaller.
+            if (mRingBufferCapacity > old_capacity || mRingBufferCount > old_count) {
                 // Release old ring buffers before allocating new ones
                 mRingBuffer.reset();
                 if (!allocateRingBuffers()) {
                     if (psram_cap_available) {
                         // PSRAM-sized allocation failed, retry with SRAM cap
-                        raw_capacity = calc.calculateRingBufferCapacity(
-                            maxLedsPerChannel, mResetUs, ParlioRingBuffer3::RING_BUFFER_COUNT,
-                            FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES);
-                        mRingBufferCapacity = ((raw_capacity + 63) / 64) * 64;
+                        sizeRingBuffers(calc, maxLedsPerChannel, mResetUs,
+                                        FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES);
                     }
                     if (!psram_cap_available || !allocateRingBuffers()) {
                         FL_LOG_PARLIO("PARLIO_INIT: FAILED to reallocate ring buffers");
@@ -1387,6 +1431,10 @@ bool ParlioEngine::initialize(size_t dataWidth,
                     }
                 }
                 FL_LOG_PARLIO("PARLIO_INIT: Ring buffers reallocated (capacity=" << mRingBufferCapacity << ")");
+            } else {
+                // Keep the existing (larger) allocation.
+                mRingBufferCapacity = old_capacity;
+                mRingBufferCount = old_count;
             }
             mMaxLedsPerChannel = maxLedsPerChannel;
         }
@@ -1404,11 +1452,11 @@ bool ParlioEngine::initialize(size_t dataWidth,
 #else
         constexpr auto packing = ParlioBitPackOrder::FL_PARLIO_MSB;
 #endif
-        ParlioPeripheralConfig config(
+        auto config = ParlioPeripheralConfig(
             pins,
             mClockFreqHz,
             FL_ESP_PARLIO_HARDWARE_QUEUE_DEPTH,
-            65534,
+            ringMaxTransferBytes(),
             packing,
             parlioDmaPsramAvailable()
         );
@@ -1531,11 +1579,24 @@ bool ParlioEngine::initialize(size_t dataWidth,
 #else
     constexpr auto packing = ParlioBitPackOrder::FL_PARLIO_MSB;
 #endif
-    ParlioPeripheralConfig config(
+    // Calculate ring buffer capacity first: it also bounds the TX unit's
+    // max_transfer_size below. Use the PSRAM cap only when a DMA-capable
+    // PSRAM heap exists; C6 has no PSRAM and should go straight to the SRAM cap.
+    ParlioBufferCalculator calc{mDataWidth, mUseWave3, mClockFreqHz};
+    // NEEDS REVIEW!!! are we potentially accessing memory outside of the cache??
+    // Please invesatigate
+    // sizeRingBuffers() rounds up to a 64-byte multiple to ensure cache line
+    // alignment. This addresses byte offset 318 error (2 bytes before cache
+    // boundary 320). Cache sync requires both address AND size to be aligned.
+    sizeRingBuffers(calc, maxLedsPerChannel, mResetUs,
+                    psram_cap_available ? FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES_PSRAM
+                                        : FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES);
+
+    auto config = ParlioPeripheralConfig(
         pins,  // Uses actual pin vector (size = dataWidth)
         mClockFreqHz,
         FL_ESP_PARLIO_HARDWARE_QUEUE_DEPTH,
-        65534,
+        ringMaxTransferBytes(),
         packing,
         psram_cap_available  // prefer_psram only when DMA-capable PSRAM exists
     );
@@ -1569,34 +1630,13 @@ bool ParlioEngine::initialize(size_t dataWidth,
     }
     FL_LOG_PARLIO("PARLIO_INIT: ISR callback registered successfully");
 
-    // Calculate ring buffer capacity. Use the PSRAM cap only when a DMA-capable
-    // PSRAM heap exists; C6 has no PSRAM and should go straight to the SRAM cap.
-    ParlioBufferCalculator calc{mDataWidth, mUseWave3, mClockFreqHz};
-    size_t raw_capacity = calc.calculateRingBufferCapacity(
-        maxLedsPerChannel, mResetUs, ParlioRingBuffer3::RING_BUFFER_COUNT,
-        psram_cap_available ? FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES_PSRAM
-                             : FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES);
-
-    // NEEDS REVIEW!!! are we potentially accessing memory outside of the cache??
-    // Please invesatigate
-    // Round up to 64-byte multiple to ensure cache line alignment
-    // This addresses byte offset 318 error (2 bytes before cache boundary 320)
-    // Cache sync requires both address AND size to be cache-aligned
-    mRingBufferCapacity = ((raw_capacity + 63) / 64) * 64;
-
-    if (mRingBufferCapacity != raw_capacity) {
-        FL_LOG_PARLIO("PARLIO: Rounded buffer capacity from " << raw_capacity << " to " << mRingBufferCapacity << " bytes (64-byte alignment)");
-    }
-
     // Allocate ring buffers - try PSRAM-sized first only when PSRAM exists.
     FL_LOG_PARLIO("PARLIO_INIT: Allocating ring buffers (capacity=" << mRingBufferCapacity << ")");
     if (!allocateRingBuffers()) {
         if (psram_cap_available) {
             FL_LOG_PARLIO("PARLIO_INIT: PSRAM-sized allocation failed, retrying with SRAM cap");
-            raw_capacity = calc.calculateRingBufferCapacity(
-                maxLedsPerChannel, mResetUs, ParlioRingBuffer3::RING_BUFFER_COUNT,
-                FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES);
-            mRingBufferCapacity = ((raw_capacity + 63) / 64) * 64;
+            sizeRingBuffers(calc, maxLedsPerChannel, mResetUs,
+                            FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES);
         }
 
         if (!psram_cap_available || !allocateRingBuffers()) {
@@ -1715,18 +1755,18 @@ bool ParlioEngine::initializeSpi(const fl::vector<int>& pins,
     // Each input byte produces 4 DMA bytes
     ParlioBufferCalculator calc{mDataWidth};
     const bool psram_cap_available = parlioDmaPsramAvailable();
-    size_t raw_capacity = calc.calculateRingBufferCapacity(
-        maxLedsEquivalent, 0, ParlioRingBuffer3::RING_BUFFER_COUNT,
-        psram_cap_available ? FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES_PSRAM
-                             : FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES);
-    mRingBufferCapacity = ((raw_capacity + 63) / 64) * 64;
+    sizeRingBuffers(calc, maxLedsEquivalent, 0,
+                    psram_cap_available ? FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES_PSRAM
+                                        : FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES);
+    // SPI mode sizes with the wave8 calculator, not its own 4:1 expansion,
+    // so keep the full ring rather than rely on the single-buffer fit test.
+    mRingBufferCount = ParlioRingBuffer3::RING_BUFFER_COUNT;
 
     if (!allocateRingBuffers()) {
         if (psram_cap_available) {
-            raw_capacity = calc.calculateRingBufferCapacity(
-                maxLedsEquivalent, 0, ParlioRingBuffer3::RING_BUFFER_COUNT,
-                FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES);
-            mRingBufferCapacity = ((raw_capacity + 63) / 64) * 64;
+            sizeRingBuffers(calc, maxLedsEquivalent, 0,
+                            FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES);
+            mRingBufferCount = ParlioRingBuffer3::RING_BUFFER_COUNT;
         }
 
         if (!psram_cap_available || !allocateRingBuffers()) {
@@ -1877,6 +1917,14 @@ bool ParlioEngine::beginTransmission(const u8* scratchBuffer,
         mLaneStride = computed_lane_stride;
     } else {
         mLaneStride = laneStride;
+    }
+
+    // Ring sizing used a capped LED count (FL_ESP_PARLIO_MAX_LEDS_PER_CHANNEL,
+    // bytes/3 rounding), so a real frame can outgrow a single-slot ring.
+    if (!ensureRingSlotsFor(mLaneStride)) {
+        FL_LOG_PARLIO("PARLIO: Failed to allocate streaming ring slots");
+        mErrorOccurred = true;
+        return false;
     }
 
     // Initialize IsrContext state for ring buffer streaming
