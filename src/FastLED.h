@@ -189,6 +189,7 @@
 #include "fl/channels/config.h"  // for ChannelConfig, MultiChannelConfig
 #include "fl/channels/bus.h"          // for fl::Bus, fl::DefaultBus (Phase 3b, #2428)
 #include "fl/channels/bus_info.h"     // for fl::deviceInfo (portable bus introspection)
+#include "fl/channels/driver_bindings.h"  // for fl::bindDriver (FastLED.enable<>)
 #include "fl/channels/bus_traits.h"   // for fl::BusTraits, fl::BusSupports (Phase 3b, #2428)
 #include "fl/channels/clockless_bus_controller.h"
 #include "fl/channels/channel_typed.h"  // for fl::TypedChannel<B, Chipset> (Phase 3b, #2428)
@@ -1021,6 +1022,23 @@ public:
 	/// }
 	/// @endcode
 	static void enableAllDrivers() FL_NO_EXCEPT;
+
+	/// @brief Enable one bus for the runtime `FastLED.add(cfg)` path.
+	///
+	/// Links only that bus's driver and defers constructing it until a
+	/// channel first needs it. `fl::Bus::AUTO` names the platform default
+	/// for `Chipset`. Returns `*this`, so calls chain:
+	/// @code
+	/// FastLED.enable<fl::Bus::RMT>().enable<fl::Bus::FLEX_IO>();
+	/// FastLED.add(cfg);
+	/// @endcode
+	/// `add(cfg)` warns, rather than linking every driver, when the channel's
+	/// bus was not enabled. `enableAllDrivers()` remains the catch-all.
+	template<fl::Bus B, typename Chipset = fl::ClocklessChipset, fl::u8 Which = 0>
+	CFastLED& enable() FL_NO_EXCEPT {
+		fl::bindDriver<B, Chipset, Which>();
+		return *this;
+	}
 
 	/// @brief Remove a channel from the LED controller list
 	///

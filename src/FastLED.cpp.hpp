@@ -10,6 +10,7 @@
 #include "fl/stl/compiler_control.h"
 #include "fl/channels/all_drivers.h"
 #include "fl/channels/channel.h"
+#include "fl/channels/driver_bindings.h"
 #include "fl/channels/channel_events.h"
 #include "fl/channels/five_bit_semantics.h"
 #include "fl/channels/manager.h"
@@ -822,36 +823,28 @@ fl::u32 CFastLED::_getWaitSpinBudgetUs() FL_NO_EXCEPT {
 // ============================================================================
 
 fl::ChannelPtr CFastLED::add(const fl::ChannelConfig& config) FL_NO_EXCEPT {
-    // Issue #2459: the non-template `FastLED.add(cfg)` path is the runtime-
-    // selection mode. To make sure `cfg.options.mBus` (or priority dispatch
-    // when `mBus == Bus::AUTO`) can actually find the requested driver at
-    // runtime, we eagerly enroll every driver available on this platform.
-    // That trades binary size for ergonomics â€” the user wanted runtime
-    // selection, so they get runtime selection.
-    //
-    // For minimum binary size, callers should use the compile-time path:
-    //   FastLED.add<fl::Bus::X>(config);  // clockless chipset
-    //   FastLED.add<fl::Bus::X, fl::SpiChipsetConfig>(config);  // erased SPI
-    // or FastLED.addLeds<CHIPSET, PIN, ORDER, fl::Bus::X>(leds, n);
-    // which ODR-uses only `BusTraits<X>::instancePtr()` and lets
-    // `--gc-sections` drop every other driver TU.
-    //
-    // The warning fires at most once per process (FL_WARN_ONCE) and can be
-    // disabled with `-DFASTLED_SUPPRESS_RUNTIME_DRIVER_WARNING`.
-    #ifndef FASTLED_SUPPRESS_RUNTIME_DRIVER_WARNING
-    FL_WARN_ONCE("FastLED.add(cfg): runtime-selection mode â€” enrolling every "
-                 "available driver via fl::enableAllDrivers(). For minimum "
-                 "binary size, prefer FastLED.add<fl::Bus::X>(cfg) for clockless "
-                 "chipsets, or FastLED.add<fl::Bus::X, fl::SpiChipsetConfig>(cfg) "
-                 "for erased SPI configurations. The bus must support the chipset. "
-                 "Each call links only the named driver. "
-                 "Suppress this warning with -DFASTLED_SUPPRESS_RUNTIME_DRIVER_WARNING.");
-    #endif
-    fl::enableAllDrivers();
+    // Runtime-selection mode links no driver by itself. Drivers come from
+    // FastLED.enable<fl::Bus::X>() bindings (constructed here, on first use),
+    // from FastLED.enableAllDrivers() (the catch-all), or from anything else
+    // that registered one. A channel no driver can serve gets a warning, not
+    // every driver on the platform.
+    const fl::Bus bus = config.options.mBus;
+    const fl::u8 which = config.options.mBusWhich;
+    fl::DriverBindings::instance().bind(bus, which);
 
-    fl::ChannelManager& manager = fl::channelManager();
-    FL_ASSERT(manager.getDriverCount() > 0,
-              "No channel drivers available - channel API requires at least one registered driver");
+    fl::ChannelManager& manager = fl::ChannelManager::registry();
+    bool served = manager.getDriverCount() > 0;
+    if (served && bus != fl::Bus::AUTO) {
+        const bool spi = config.getChipset().is<fl::SpiChipsetConfig>();
+        served = manager.findDriverByName(fl::string::from_literal(
+                     fl::busDriverName(bus, which, spi))) != nullptr;
+    }
+    if (!served) {
+        FL_WARN_EVERY(1000, "FastLED.add(cfg): no channel driver is enabled for bus '"
+                      << fl::busName(bus) << "'. Call FastLED.enable<fl::Bus::"
+                      << fl::busName(bus) << ">() before add() to link only that "
+                      "driver, or FastLED.enableAllDrivers() to link every driver.");
+    }
     auto channel = fl::Channel::create(config);
     add(channel);
     return channel;
