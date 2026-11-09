@@ -132,6 +132,16 @@ def test_discovery_applies_link_mask_and_console_mode() -> None:
     assert "fl::pinProbeDriveSkipReason(tx)" in remote
 
 
+def test_psram_present_uses_installed_size() -> None:
+    source = PROBE.read_text(encoding="utf-8")
+    # A fully allocated PSRAM heap still owns its pins (#5196).
+    body = source[source.index("inline bool psramPresent()") :]
+    body = body[: body.index("\n}\n")]
+    assert "heap_caps_get_free_size" not in body
+    assert "esp_psram_get_size" in source
+    assert "esp_spiram_get_size" in source
+
+
 def test_vdd_spi_pins_skipped_by_probe_table() -> None:
     source = PROBE.read_text(encoding="utf-8")
     memory = source[source.index("inline u64 memoryPinMask()") :]
