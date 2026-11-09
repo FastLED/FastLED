@@ -13,6 +13,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import subprocess
 import sys
 from dataclasses import dataclass
 
@@ -90,14 +91,19 @@ def decide(threads: list[Thread], coderabbit_comments: list[str]) -> Verdict:
 
 
 def _gh_json(args: list[str]) -> object:
-    out = RunningProcess.run(
+    result = RunningProcess.run(
         ["gh", *args],
-        check=True,
-        capture_output=True,
+        check=False,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
         encoding="utf-8",
         errors="replace",
-    ).stdout
-    return json.loads(out)
+    )
+    if result.returncode != 0:
+        raise RuntimeError(
+            f"gh {' '.join(args[:2])} exited {result.returncode}: {result.stderr}"
+        )
+    return json.loads(result.stdout)
 
 
 def _first_line(body: str) -> str:

@@ -35,3 +35,26 @@ def test_pr_from_queue_ref() -> None:
     assert pr_from_ref("gh-readonly-queue/master/pr-5202-c96d28048002b41e89bb") == 5202
     assert pr_from_ref("refs/heads/gh-readonly-queue/master/pr-7-abc123") == 7
     assert pr_from_ref("master") is None
+
+
+def test_gh_json_keeps_stderr_out_of_json(monkeypatch, tmp_path) -> None:
+    import ci.coderabbit_gate as gate
+
+    fake = tmp_path / "gh"
+    fake.write_text('#!/bin/sh\necho "debug noise" >&2\necho \'{"ok": 1}\'\n')
+    fake.chmod(0o755)
+    monkeypatch.setenv("PATH", f"{tmp_path}:{__import__('os').environ['PATH']}")
+    assert gate._gh_json(["api", "x"]) == {"ok": 1}
+
+
+def test_gh_json_reports_stderr_on_failure(monkeypatch, tmp_path) -> None:
+    import pytest
+
+    import ci.coderabbit_gate as gate
+
+    fake = tmp_path / "gh"
+    fake.write_text('#!/bin/sh\necho "HTTP 401: Bad credentials" >&2\nexit 1\n')
+    fake.chmod(0o755)
+    monkeypatch.setenv("PATH", f"{tmp_path}:{__import__('os').environ['PATH']}")
+    with pytest.raises(RuntimeError, match="Bad credentials"):
+        gate._gh_json(["api", "x"])
