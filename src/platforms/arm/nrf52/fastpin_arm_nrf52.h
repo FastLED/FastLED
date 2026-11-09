@@ -119,6 +119,17 @@ template <u8 PIN> class Nrf52HwPin {
                      "This pin is not in the nRF52 variant pin table, so the PWM and SPIM drivers cannot route it. Use a pin listed in fastpin_arm_nrf52_variants.h for your board.");
 };
 
+/// True when Nrf52HwPin<PIN> names a real pad the PWM and SPIM drivers may
+/// route. Invalid pins derive from _INVALID_ARMPIN<0, NRF_P0, 0, 0>, so routing
+/// them would drive P0.00 (#5190). The derived-to-base pointer conversion is
+/// preferred over the conversion to const void*.
+template <u32 _MASK, typename _PORT, u8 _PORT_NUMBER, u8 _PIN_NUMBER>
+constexpr bool nrf52_is_invalid_pin(const _INVALID_ARMPIN<_MASK, _PORT, _PORT_NUMBER, _PIN_NUMBER>*) FL_NO_EXCEPT { return true; }
+constexpr bool nrf52_is_invalid_pin(const void*) FL_NO_EXCEPT { return false; }
+template <u8 PIN> constexpr bool nrf52_pin_routable() FL_NO_EXCEPT {
+    return !nrf52_is_invalid_pin(static_cast<const Nrf52HwPin<PIN>*>(nullptr));
+}
+
 }  // namespace fl
 
 
