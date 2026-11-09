@@ -25,7 +25,7 @@ namespace fl {
 
 template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
 class ClocklessController : public CPixelLEDController<RGB_ORDER> {
-#if defined(FASTLED_FORCE_SOFTWARE_PINS) && defined(FASTLED_NO_PINMAP)
+#ifdef FL_FASTPIN_USES_NO_PINMAP
     FL_STATIC_ASSERT(DATA_PIN != DATA_PIN,
                      "FASTLED_FORCE_SOFTWARE_PINS is not supported by this clockless driver");
 #endif

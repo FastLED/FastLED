@@ -50,7 +50,7 @@ namespace fl {
 /// bridge's `PixelIterator`; this driver only shifts the bytes out.
 template <int DATA_PIN, typename TIMING, int XTRA0, int WAIT_TIME>
 class ClocklessSamd51Driver : public IChannelDriver {
-#if defined(FASTLED_FORCE_SOFTWARE_PINS) && defined(FASTLED_NO_PINMAP)
+#ifdef FL_FASTPIN_USES_NO_PINMAP
     FL_STATIC_ASSERT(DATA_PIN != DATA_PIN,
                      "FASTLED_FORCE_SOFTWARE_PINS is not supported by this clockless driver");
 #endif
