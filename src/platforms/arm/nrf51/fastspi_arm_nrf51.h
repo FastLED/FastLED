@@ -5,6 +5,7 @@
 
 #include "platforms/arm/nrf51/is_nrf51.h"
 #include "fl/stl/noexcept.h"
+#include "fl/stl/static_assert.h"
 #include "platforms/arm/nrf51/fastpin_arm_nrf51.h"  // Nrf51HwPin, fastpin_base.h
 #include "fastspi_types.h"
 #include "fl/gfx/eorder.h"
@@ -63,8 +64,11 @@ public:
     // set the object representing the selectable
     void setSelect(Selectable *pSelect) { /* TODO */ }
 
+    FL_STATIC_ASSERT(_SPI_CLOCK_DIVIDER <= F_CPU / 125000UL, "nRF51 SPI0 cannot run below 125 kHz; use a faster DATA_RATE or the bit-bang SPI backend (#5188)");
+
     // nRF51 SPI FREQUENCY for F_CPU / _SPI_CLOCK_DIVIDER, rounded down to the
-    // nearest supported rate (8 MHz max, 125 kHz min).
+    // nearest supported rate (8 MHz max, 125 kHz min). Requests below 125 kHz
+    // are rejected at compile time above (#5188).
     static constexpr fl::u32 spiFrequency() FL_NO_EXCEPT {
         return (_SPI_CLOCK_DIVIDER <= F_CPU / 8000000UL) ? SPI_FREQUENCY_FREQUENCY_M8
              : (_SPI_CLOCK_DIVIDER <= F_CPU / 4000000UL) ? SPI_FREQUENCY_FREQUENCY_M4
