@@ -833,11 +833,22 @@ fl::ChannelPtr CFastLED::add(const fl::ChannelConfig& config) FL_NO_EXCEPT {
     fl::DriverBindings::instance().bind(bus, which);
 
     fl::ChannelManager& manager = fl::ChannelManager::registry();
-    bool served = manager.getDriverCount() > 0;
-    if (served && bus != fl::Bus::AUTO) {
-        const bool spi = config.getChipset().is<fl::SpiChipsetConfig>();
+    const bool spi = config.getChipset().is<fl::SpiChipsetConfig>();
+    bool served = false;
+    if (bus != fl::Bus::AUTO) {
         served = manager.findDriverByName(fl::string::from_literal(
                      fl::busDriverName(bus, which, spi))) != nullptr;
+    } else {
+        // AUTO needs a registered driver for this chipset family, not just
+        // any driver: an SPI-only binding cannot serve a clockless channel.
+        for (const fl::DriverInfo& info : manager.getDriverInfos()) {
+            auto driver = manager.findDriverByName(info.name);
+            if (driver && (spi ? driver->getCapabilities().supportsSpi
+                               : driver->getCapabilities().supportsClockless)) {
+                served = true;
+                break;
+            }
+        }
     }
     if (!served) {
         FL_WARN_EVERY(1000, "FastLED.add(cfg): no channel driver is enabled for bus '"
