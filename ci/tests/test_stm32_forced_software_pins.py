@@ -34,6 +34,19 @@ def test_stm32_clockless_rejects_forced_software_pins() -> None:
     assert len(guards) == 2
 
 
+def test_no_pinmap_clockless_rejects_forced_software_pins() -> None:
+    for platform in ("d51", "renesas"):
+        text = _read(f"arm/{platform}/clockless_arm_{platform}.h")
+        assert re.search(
+            r"#if defined\(FASTLED_FORCE_SOFTWARE_PINS\) && defined\(FASTLED_NO_PINMAP\)\s*\n\s*FL_STATIC_ASSERT\(DATA_PIN != DATA_PIN,",
+            text,
+        ), platform
+        assert (
+            "FASTLED_FORCE_SOFTWARE_PINS is not supported by this clockless driver"
+            in text
+        )
+
+
 def test_premise_forced_stm32_pins_have_no_port() -> None:
     # If a hardware pin type for the clockless driver lands, this fails and the
     # guard can be replaced by real forced-software-pin support.
