@@ -198,7 +198,8 @@ void SPIBusManager::transmit(SPIBusHandle handle, const u8* data, size_t length)
             // For testing/stub builds, this is a no-op (see softwareSPIWrite implementation).
             if (handle.lane_id < bus.num_devices) {
                 const SPIDeviceInfo& device = bus.devices[handle.lane_id];
-                softwareSPIWrite(device.clock_pin, device.data_pin, data, length);
+                softwareSPIWrite(device.clock_pin, device.data_pin, data, length,
+                                 device.requested_speed_hz);
             }
             break;
         }
@@ -1037,13 +1038,15 @@ void SPIBusManager::releaseBusHardware(SPIBusInfo& bus) FL_NO_EXCEPT {
     bus.num_devices = 0;  // Reset device count to prevent stale state
 }
 
-void SPIBusManager::softwareSPIWrite(u8 clock_pin, u8 data_pin, const u8* data, size_t length) FL_NO_EXCEPT {
+void SPIBusManager::softwareSPIWrite(u8 clock_pin, u8 data_pin, const u8* data, size_t length,
+                                    u32 speed_hz) FL_NO_EXCEPT {
 #if !defined(FASTLED_STUB_IMPL) && !defined(FL_IS_WASM)
     // Real hardware implementation using Pin class for bit-banging
     // At this point in the header (after class definition), Pin should be available
     // if the user included FastLED.h before using SPIBusManager.
 
     // Create runtime Pin objects
+    const u32 half_period_ns = softwareSpiHalfPeriodNs(speed_hz);
     Pin clock(clock_pin);
     Pin dataOut(data_pin);
 
@@ -1056,7 +1059,7 @@ void SPIBusManager::softwareSPIWrite(u8 clock_pin, u8 data_pin, const u8* data, 
     RuntimeGpio gpioClock;
     RuntimeGpio gpioData;
     if (resolveRuntimeGpio(clock_pin, &gpioClock) && resolveRuntimeGpio(data_pin, &gpioData)) {
-        writeRuntimeSoftwareSpi(gpioClock, gpioData, data, length);
+        writeRuntimeSoftwareSpi(gpioClock, gpioData, data, length, half_period_ns);
         return;
     }
 
@@ -1076,10 +1079,12 @@ void SPIBusManager::softwareSPIWrite(u8 clock_pin, u8 data_pin, const u8* data, 
                 dataOut.lo();
             }
 
-            // Clock high (data is latched on rising edge)
+            // Data setup, then clock high (data is latched on rising edge)
+            softwareSpiHalfDelay(half_period_ns);
             clock.hi();
 
             // Clock low (prepare for next bit)
+            softwareSpiHalfDelay(half_period_ns);
             clock.lo();
 
             // Shift to next bit
@@ -1092,6 +1097,7 @@ void SPIBusManager::softwareSPIWrite(u8 clock_pin, u8 data_pin, const u8* data, 
     FL_UNUSED(data_pin);
     FL_UNUSED(data);
     FL_UNUSED(length);
+    FL_UNUSED(speed_hz);
 #endif
 }
 

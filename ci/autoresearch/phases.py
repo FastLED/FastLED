@@ -1418,6 +1418,7 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
         bench_defines.append("FASTLED_LPC_PWM_DMA=1")
     if getattr(args, "test_fault_emit", False):
         bench_defines.append("FASTLED_AUTORESEARCH_FAULT_TEST=1")
+    bench_defines.extend(getattr(args, "define", None) or [])
 
     # Resolve project root (always the user's invocation cwd) and build_dir.
     #
