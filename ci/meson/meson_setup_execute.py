@@ -39,6 +39,7 @@ from ci.meson.native_launchers import (
     _resolve_fast_compiler_binary,
     _resolve_fast_native_entries,
     get_zccache_version,
+    resolve_soldr_clang,
 )
 from ci.meson.output import print_banner
 from ci.meson.path_normalization import (
@@ -371,6 +372,13 @@ def build_setup_env(compiler: CompilerDetection, build_mode: str) -> dict[str, s
         env["CXX"] = _resolve_xcode_tool("clang++")
         env["AR"] = _resolve_xcode_tool("ar")
         env["SDKROOT"] = _resolve_xcode_sdk_root()
+        return env
+
+    soldr_clang = resolve_soldr_clang()
+    if soldr_clang is not None:
+        env["CC"] = soldr_clang.cc
+        env["CXX"] = soldr_clang.cxx
+        env["AR"] = soldr_clang.ar
         return env
 
     fast_compiler = _resolve_fast_compiler_binary()

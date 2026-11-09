@@ -201,6 +201,7 @@ CXX=clang-tool-chain-cpp CC=clang-tool-chain-c meson setup builddir
 - Clang 21.1.5 provides proper MSVC compatibility layer and cross-platform support
 - test.py automatically uses clang-tool-chain (no alternative compilers supported)
 - The clang-tool-chain wrappers and Meson tooling handle the native test/toolchain setup
+- **Opt-in on Linux:** `FASTLED_NATIVE_CLANG=soldr` takes clang, clang++ and llvm-ar for the native build from `soldr c++ --clang --print-cxx` (and `--print-cc` / `--print-ar`) instead. soldr's LLVM bundle carries its own libxml2/libz, so it keeps working when a runner image drops `libxml2.so.2`. It needs a soldr release that contains forge-ci/soldr#4127, and the build fails loudly if soldr can't provide the tools. The linker stays reld. WASM, IWYU and the lint tooling still use clang-tool-chain.
 
 ## Unified GNU Build (Windows = Linux)
 clang-tool-chain provides a uniform GNU-style build environment across all platforms:
