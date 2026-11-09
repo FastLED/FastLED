@@ -4,6 +4,14 @@
 /// These tests verify the memory accounting logic for ESP32 RMT5 driver
 /// using the test constructor to mock different platform configurations.
 
+// Record whether FL_RMT5_USE_DMA came from the command line before any
+// include can apply the config.h default (#5186).
+#ifdef FL_RMT5_USE_DMA
+#define FL_TEST_RMT5_USE_DMA_PRESET 1
+#else
+#define FL_TEST_RMT5_USE_DMA_PRESET 0
+#endif
+
 #include "test.h"
 #include "platforms/esp/32/drivers/rmt/rmt_5/config.h"
 #include "platforms/esp/32/drivers/rmt/rmt_5/rmt_allocation_ledger.h"
@@ -34,7 +42,11 @@ FL_TEST_CASE("RMT fixed allocation ledger rejects overflow and resets") {
 
 FL_TEST_CASE("RMT DMA is enabled unless FL_RMT5_USE_DMA=0") {
     // #5161: -DFL_RMT5_USE_DMA=0 keeps ESP32-S3 TX off the 4 KB DMA block.
+    // #5186: 0 is a supported setting; only the default must be 1.
+    FL_CHECK((FL_RMT5_USE_DMA == 0) || (FL_RMT5_USE_DMA == 1));
+#if !FL_TEST_RMT5_USE_DMA_PRESET
     FL_CHECK_EQ(FL_RMT5_USE_DMA, 1);
+#endif
 }
 
 FL_TEST_CASE("RMT static allocation ledger is bounded to one strip") {
