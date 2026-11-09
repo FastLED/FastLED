@@ -26,6 +26,9 @@
 #if !defined(FL_IS_ESP32) || FASTLED_RMT5
 
 #include "platforms/esp/32/drivers/rmt/rmt_5/channel_driver_rmt.h"
+// FL_RMT5_USE_DMA / FL_RMT5_DMA_AUTO / FL_RMT5_DMA_MIN_SYMBOLS. Header-only and
+// ESP-IDF-free, so it is available on the stub build too.
+#include "platforms/esp/32/drivers/rmt/rmt_5/config.h"
 #include "fl/chipsets/led_timing.h"
 #include "fl/log/log.h"
 #include "fl/system/delay.h"
@@ -782,6 +785,27 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
 #endif
             tryDMA = false;
         }
+        // Short-strip sizing policy (#5161 follow-up). A DMA TX channel costs a
+        // fixed 4 KB DMA-capable internal-RAM block regardless of how many LEDs
+        // are on the strip. When the whole encoded frame fits in a fraction of
+        // that block there is nothing to stream, so DMA only spends heap: fall
+        // back to the double-buffered on-chip RMT path. See
+        // FL_RMT5_DMA_AUTO / FL_RMT5_DMA_MIN_SYMBOLS in config.h.
+#if FL_RMT5_DMA_AUTO
+        if (tryDMA && dataSize > 0) {
+            // One RMT symbol per encoded bit; LED data is raw bytes here, so
+            // the encoded frame is dataSize * 8 symbols.
+            const fl::size encodedSymbols = dataSize * 8u;
+            if (encodedSymbols <= static_cast<fl::size>(FL_RMT5_DMA_MIN_SYMBOLS)) {
+                FL_LOG_RMT("TX Channel #" << ((mChannels.size() + 1))
+                          << ": short strip (" << encodedSymbols
+                          << " symbols <= " << FL_RMT5_DMA_MIN_SYMBOLS
+                          << "), using on-chip RMT memory");
+                tryDMA = false;
+            }
+        }
+#endif
+
         if (tryDMA) {
             // DMA slot available - first channel across TX/RX
             FL_LOG_RMT("TX Channel #" << ((mChannels.size() + 1)) << ": DMA slot available for pin " << (static_cast<int>(pin)) << " (data size: " << dataSize << " bytes)");

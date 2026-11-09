@@ -112,8 +112,17 @@ public:
     void free(u8, bool) FL_NO_EXCEPT {}  // ok bare allocation
     void rollbackAllocation(u8, bool) FL_NO_EXCEPT { ++mRollbackAllocationCount; }
     void recordRecoveryAllocation(u8, fl::size, bool) FL_NO_EXCEPT {}
-    bool isDMAAvailable() FL_NO_EXCEPT { return false; }
-    bool allocateDMA(u8, bool) FL_NO_EXCEPT { return false; }
+    /// @brief Test hook: pretend the chip has RMT DMA hardware
+    ///
+    /// The stub has no real DMA peripheral, so `isDMAAvailable()` is false by
+    /// default. Tests that need to exercise the driver's DMA-vs-on-chip policy
+    /// (#5161) set this to true. Reset it to false when the test finishes.
+    void setDMAHardwareAvailable(bool available) FL_NO_EXCEPT {
+        mDMAHardwareAvailable = available;
+    }
+
+    bool isDMAAvailable() FL_NO_EXCEPT { return mDMAHardwareAvailable; }
+    bool allocateDMA(u8, bool) FL_NO_EXCEPT { return mDMAHardwareAvailable; }
     void freeDMA(u8, bool) FL_NO_EXCEPT {}
     void rollbackDMA(u8, bool) FL_NO_EXCEPT {}
     fl::size availableTxWords() FL_NO_EXCEPT { return 256; }
@@ -122,6 +131,7 @@ public:
 
 private:
     fl::size mRollbackAllocationCount = 0;
+    bool mDMAHardwareAvailable = false;
 };
 
 //=============================================================================

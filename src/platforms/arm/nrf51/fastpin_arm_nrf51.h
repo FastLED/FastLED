@@ -37,7 +37,13 @@ public:
         NRF_GPIO->DIRCLR = _MASK;
         // Reconnect the input buffer (PIN_CNF.INPUT = Connect = 0) in case an
         // earlier analogWrite()/pinMode() disconnected it, so isset() reads.
+        // PIN_CNF is read-modify-written: mask IRQs so an ISR (e.g. enabling
+        // SENSE for wake) cannot be undone by a stale write (#5188). Restores
+        // the prior PRIMASK, so it is safe with IRQs already off.
+        const fl::u32 primask = __get_PRIMASK();
+        __disable_irq();
         NRF_GPIO->PIN_CNF[PIN] &= ~GPIO_PIN_CNF_INPUT_Msk;
+        __set_PRIMASK(primask);
     }
 
     inline static void hi() __attribute__ ((always_inline)) { NRF_GPIO->OUTSET = _MASK; }

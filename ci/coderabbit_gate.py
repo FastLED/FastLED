@@ -15,7 +15,6 @@ import json
 import re
 import sys
 from dataclasses import dataclass
-from typing import Any
 
 from running_process import PIPE, RunningProcess
 
@@ -90,18 +89,20 @@ def decide(threads: list[Thread], coderabbit_comments: list[str]) -> Verdict:
     )
 
 
-def _gh_json(args: list[str]) -> Any:
-    # Separate stderr so gh warnings can never corrupt the JSON on stdout.
-    out = RunningProcess.run(
+def _gh_json(args: list[str]) -> object:
+    result = RunningProcess.run(
         ["gh", *args],
-        check=True,
+        check=False,
         stdout=PIPE,
         stderr=PIPE,
-        text=True,
         encoding="utf-8",
         errors="replace",
-    ).stdout
-    return json.loads(out)
+    )
+    if result.returncode != 0:
+        raise RuntimeError(
+            f"gh {' '.join(args[:2])} exited {result.returncode}: {result.stderr}"
+        )
+    return json.loads(result.stdout)
 
 
 def _first_line(body: str) -> str:
@@ -132,6 +133,8 @@ def fetch_threads(repo: str, pr: int) -> list[Thread]:
         if after:
             args += ["-F", f"after={after}"]
         data = _gh_json(args)
+        if not isinstance(data, dict):
+            raise ValueError(f"unexpected GraphQL response: {data!r}")
         page = data["data"]["repository"]["pullRequest"]["reviewThreads"]
         for node in page["nodes"]:
             first = (node["comments"]["nodes"] or [{}])[0]

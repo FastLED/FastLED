@@ -38,11 +38,13 @@
 #if defined(ARDUINO) && FL_HAS_INCLUDE(<variant.h>)
 #include <variant.h>
 #define FL_SAMD_HAS_PIN_DESCRIPTION 1
-#ifndef PINS_COUNT
+#if !defined(PINS_COUNT) && !defined(FL_SAMD_PIN_DESCRIPTION_COUNT)
 // Without the table size, the lookup cannot be bounds-checked. Falling back to
 // the linear mapping would silently drive the wrong pads again (#5130).
-#error "SAMD variant.h does not define PINS_COUNT; FastLED cannot map Arduino pins to pads"
+#error "SAMD variant.h does not define PINS_COUNT and FL_SAMD_PIN_DESCRIPTION_COUNT is unset; FastLED cannot map Arduino pins to pads"
 #endif
+// Variants index pins past PINS_COUNT (#5185); this computes the real bound.
+#include "platforms/arm/samd/pin_samd_table_size.hpp"
 #endif
 // IWYU pragma: end_keep
 
@@ -63,11 +65,14 @@ struct PinMapping {
 /// With an Arduino variant, the pad comes from g_APinDescription, so Arduino
 /// pin 24 on a Zero is PB11 (SCK), not PA24 (a USB pad). Without a variant
 /// (bare-metal builds) the pin number is taken as group * 32 + bit.
+/// The table is bounded by samd_pin_description_count(), not PINS_COUNT,
+/// because variants such as the SparkFun SAMD21 Dev put real pins (PA27 at
+/// index 26) past PINS_COUNT (#5185).
 /// @param pin Arduino pin number
 /// @return PinMapping with group and bit, or {0xFF, 0xFF} if invalid
 inline PinMapping getPinMapping(int pin) FL_NO_EXCEPT {
 #if defined(FL_SAMD_HAS_PIN_DESCRIPTION)
-    if (pin < 0 || static_cast<u32>(pin) >= static_cast<u32>(PINS_COUNT)) {
+    if (pin < 0 || static_cast<u32>(pin) >= samd_pin_description_count()) {
         return {0xFF, 0xFF};  // Invalid pin
     }
     const PinDescription& desc = g_APinDescription[pin];

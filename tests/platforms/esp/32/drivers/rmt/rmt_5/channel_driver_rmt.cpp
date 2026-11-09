@@ -509,6 +509,62 @@ FL_TEST_CASE("RMT5 driver - rapid show() calls") {
     }
 }
 
+//=============================================================================
+// Test Suite: DMA sizing policy (#5161 follow-up)
+//=============================================================================
+
+namespace {
+
+/// @brief Run one frame through a fresh driver and report whether the channel
+/// that carried it was created with DMA. Resets the mock and the memory
+/// manager's fake DMA capability on the way out so tests stay isolated.
+bool frameUsedDma(size_t num_leds, bool dma_hardware_available) {
+    resetMock();
+    auto& memMgr = RmtMemoryManager::instance();
+    memMgr.setDMAHardwareAvailable(dma_hardware_available);
+
+    auto driver = ChannelEngineRMT::create();
+    auto ch = createChannelData(18, num_leds);
+
+    driver->enqueue(ch);
+    driver->show();
+
+    auto& mock = Rmt5PeripheralMock::instance();
+    bool used_dma = false;
+    const auto& history = mock.getTransmissionHistory();
+    if (!history.empty()) {
+        used_dma = history.back().used_dma;
+        mock.simulateTransmitDone(reinterpret_cast<void*>(1));
+        for (int i = 0; i < 10 && ch->isInUse(); i++) {
+            driver->poll();
+        }
+    }
+
+    memMgr.setDMAHardwareAvailable(false);
+    return used_dma;
+}
+
+} // anonymous namespace
+
+FL_TEST_CASE("RMT5 driver - short strip stays on on-chip RMT memory") {
+    // 12 LEDs = 36 bytes = 288 RMT symbols, well under the 1024-symbol DMA
+    // block. Even with DMA hardware present the driver must not take the DMA
+    // channel: it would cost a 4 KB heap block and stream nothing.
+    FL_CHECK(frameUsedDma(12, true) == false);
+}
+
+FL_TEST_CASE("RMT5 driver - long strip still uses DMA when available") {
+    // 300 LEDs = 900 bytes = 7200 RMT symbols, past the DMA block size, so the
+    // streaming backend is still worth its heap.
+    FL_CHECK(frameUsedDma(300, true) == true);
+}
+
+FL_TEST_CASE("RMT5 driver - no DMA hardware means no DMA channel") {
+    // Sanity check on the stub hook itself: with no DMA hardware the channel is
+    // always on-chip, however long the strip.
+    FL_CHECK(frameUsedDma(300, false) == false);
+}
+
 #endif // FASTLED_STUB_IMPL
 
 } // FL_TEST_FILE

@@ -134,6 +134,7 @@ static ObjectFLEDPadState sSpiPadState;  // FL_LINT_ALLOW_GLOBAL(DMA-ISR-shared 
 
 static ObjectFLEDPadRegs spi_pad_regs(const ObjectFLEDSPIPinInfo& pins) FL_NO_EXCEPT {
     return ObjectFLEDPadRegs{&IOMUXC_GPR_GPR26, &GPIO1_GDIR, &GPIO1_DR,
+                             &GPIO1_DR_SET, &GPIO1_DR_CLEAR,
                              pins.mosi_mux_reg, pins.mosi_pad_reg,
                              pins.sclk_mux_reg, pins.sclk_pad_reg};
 }

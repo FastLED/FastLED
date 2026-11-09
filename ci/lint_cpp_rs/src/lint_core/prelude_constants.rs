@@ -769,8 +769,7 @@ const NATIVE_TO_MODERN_DEFINES: &[(&str, &str)] = &[
     ("FASTLED_TEENSY3", "FL_IS_TEENSY_3X"),
     ("FASTLED_TEENSY4", "FL_IS_TEENSY_4X"),
     ("FASTLED_TEENSYLC", "FL_IS_TEENSY_LC"),
-    ("__RFduino__", "FL_IS_NRF51"),
-    ("__Simblee__", "FL_IS_NRF51"),
+    // Board-specific guards (__RFduino__, __Simblee__) are allowed because FL_IS_NRF51 also covers micro:bit (#5188).
     ("__APPLE__", "FL_IS_APPLE"),
     ("__linux__", "FL_IS_LINUX"),
     ("__unix__", "FL_IS_POSIX"),
