@@ -14,7 +14,7 @@
 /// the table. NUM_DIGITAL_PINS is deliberately not used: variants set it
 /// inconsistently.
 ///
-/// Define FASTLED_SAMD_PIN_DESCRIPTION_COUNT to override the count for a
+/// Define FL_SAMD_PIN_DESCRIPTION_COUNT to override the count for a
 /// variant whose table is larger still.
 ///
 /// This header includes no vendor headers; the caller includes <variant.h>
@@ -23,7 +23,7 @@
 #include "fl/stl/int.h"
 #include "fl/stl/noexcept.h"
 
-#if defined(FASTLED_SAMD_PIN_DESCRIPTION_COUNT) || defined(PINS_COUNT)
+#if defined(FL_SAMD_PIN_DESCRIPTION_COUNT) || defined(PINS_COUNT)
 
 namespace fl {
 namespace platforms {
@@ -37,8 +37,8 @@ constexpr fl::u32 pin_count_max(fl::u32 a, fl::u32 b) FL_NO_EXCEPT {
 
 /// Entries of g_APinDescription that getPinMapping() may index.
 constexpr fl::u32 samd_pin_description_count() FL_NO_EXCEPT {
-#if defined(FASTLED_SAMD_PIN_DESCRIPTION_COUNT)
-    return static_cast<fl::u32>(FASTLED_SAMD_PIN_DESCRIPTION_COUNT);
+#if defined(FL_SAMD_PIN_DESCRIPTION_COUNT)
+    return static_cast<fl::u32>(FL_SAMD_PIN_DESCRIPTION_COUNT);
 #else
     using samd_detail::pin_count_max;
     return pin_count_max(static_cast<fl::u32>(PINS_COUNT),
@@ -134,4 +134,4 @@ constexpr fl::u32 samd_pin_description_count() FL_NO_EXCEPT {
 }  // namespace platforms
 }  // namespace fl
 
-#endif  // FASTLED_SAMD_PIN_DESCRIPTION_COUNT || PINS_COUNT
+#endif  // FL_SAMD_PIN_DESCRIPTION_COUNT || PINS_COUNT
