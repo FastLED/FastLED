@@ -48,6 +48,13 @@ class SAMHardwareSPIOutput {
 		bits -= 8;
 		// don't change the number of transfer bits while data is still being transferred from TDR to the shift register
 		waitForEmpty();
+		setTransferBits(bits + 8);
+	}
+
+	// Write channel 0's CSR without polling TDRE. TDRE reads zero while the SPI
+	// is disabled, so readyTransferBits() would spin forever there (#5181).
+	static inline void setTransferBits(FASTLED_REGISTER u32 bits) FL_NO_EXCEPT {
+		bits -= 8;
 		m_SPI->SPI_CSR[0] = SPI_CSR_NCPHA | SPI_CSR_CSAAT | (bits << SPI_CSR_BITS_Pos) | SPI_CSR_DLYBCT(1) | SPI_CSR_SCBR(_SPI_CLOCK_DIVIDER);
 	}
 
@@ -153,6 +160,12 @@ public:
 		// (ABSR still selects peripheral A) (#5117). The clock is preloaded low
 		// so the pad cannot go high as it leaves the peripheral. Like init(), this
 		// assumes the SPI0 pins on PIOA (Due MOSI PA26, SCK PA27).
+		// On the way back the SPI is re-enabled before PIO_PDR releases the pads:
+		// the PIO keeps SCK driven low until the idle SPI (CPOL=0) drives it, so
+		// the pad never floats and a pull-up or interrupt cannot make a spurious
+		// rising edge that SM16716 would count as a data bit (#5181). Channel 0's
+		// CSR is rewritten first so the LED mode (CPOL=0, 8 bits) is in force even
+		// if another SPI user left channel 0 in CPOL=1, which would idle SCK high.
 		const u32 pins = FastPin<_DATA_PIN>::mask() | FastPin<_CLOCK_PIN>::mask();
 		FastPin<_CLOCK_PIN>::lo();
 		PIOA->PIO_OER = pins;
@@ -161,8 +174,16 @@ public:
 
 		FastPin<_CLOCK_PIN>::hi();
 		FastPin<_CLOCK_PIN>::lo();
-		PIOA->PIO_PDR = pins;
+		// Mask interrupts across the handoff, restoring the caller's state: an
+		// ISR that started an SPI0 transfer between enableSPI() and PIO_PDR
+		// would clock it out while the PIO still holds SCK low (#5181).
+		const u32 primask = __get_PRIMASK();
+		__disable_irq();
+		// The SPI is disabled here, so TDRE is zero: set the CSR without waiting.
+		setTransferBits(8);
 		enableSPI();
+		PIOA->PIO_PDR = pins;
+		__set_PRIMASK(primask);
 	}
 
 	// write a block of uint8_ts out in groups of three.  len is the total number of uint8_ts to write out.  The template
