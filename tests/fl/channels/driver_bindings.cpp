@@ -33,9 +33,17 @@ FL_TEST_CASE("DriverBindings - a bus that was never enabled does not match") {
 }
 
 FL_TEST_CASE("DriverBindings - enable<Bus::AUTO>() names the platform default") {
-    using AutoBinding = fl::detail::BusBinding<fl::Bus::AUTO, fl::ClocklessChipset, 0>;
-    const fl::Bus resolved = AutoBinding::kBus;
+    const fl::Bus resolved =
+        fl::detail::ResolveBus<fl::Bus::AUTO, fl::ClocklessChipset>::value;
     FL_CHECK(resolved == fl::DefaultBus<fl::ClocklessChipset>::value);
+}
+
+struct NoDefaultChipset {};  // no DefaultBus<> specialization
+
+FL_TEST_CASE("DriverBindings - enable<Bus::AUTO>() without a platform default is a no-op") {
+    const fl::Bus resolved = fl::detail::ResolveBus<fl::Bus::AUTO, NoDefaultChipset>::value;
+    FL_CHECK(resolved == fl::Bus::AUTO);
+    fl::bindDriver<fl::Bus::AUTO, NoDefaultChipset>();  // must compile and link nothing
 }
 
 }  // FL_TEST_FILE

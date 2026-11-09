@@ -12,6 +12,7 @@
 
 #include "platforms/esp/32/init_esp32.h"
 #include "platforms/esp/32/init_channel_driver.h"
+#include "fl/channels/manager.h"
 #include "platforms/shared/spi_manager.h"
 #include "fl/log/log.h"
 
@@ -34,7 +35,9 @@ void init() FL_NO_EXCEPT {
     // Initialize channel bus manager (PARLIO, SPI, RMT, UART drivers)
     // Note: This is actually called lazily on first access to ChannelManager::instance()
     // but we ensure it's initialized here for predictable behavior
+#if FL_CHANNEL_DEFAULT_DRIVERS
     fl::platforms::initChannelDrivers();
+#endif
 
     // Initialize SPI bus manager
     // Note: The SPIBusManager is lazily initialized on first use, but we can
