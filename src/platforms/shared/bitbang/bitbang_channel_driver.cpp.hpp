@@ -244,8 +244,9 @@ void BitBangChannelDriver::transmitSpi(
         if (!spiCfg) continue;
 
         int clockPin = spiCfg->clockPin;
+        // A shared clock must suit every device on it, so the group runs at
+        // the slowest rate any of its channels requested (0 = unspecified).
         u32 clockHz = spiCfg->timing.clock_hz;
-        u32 halfPeriodNs = (clockHz > 0) ? (500000000u / clockHz) : 500u;
 
         // Collect all channels sharing this clock pin
         fl::vector<fl::size> groupIndices;
@@ -259,8 +260,13 @@ void BitBangChannelDriver::transmitSpi(
             if (otherSpi && otherSpi->clockPin == clockPin) {
                 groupIndices.push_back(j);
                 processed[j] = true;
+                const u32 otherHz = otherSpi->timing.clock_hz;
+                if (otherHz > 0 && (clockHz == 0 || otherHz < clockHz)) {
+                    clockHz = otherHz;
+                }
             }
         }
+        const u32 halfPeriodNs = (clockHz > 0) ? (500000000u / clockHz) : 500u;
 
         if (clockPin < 0) continue;  // Nothing to clock; setup skipped this pin too.
 
@@ -305,16 +311,17 @@ void BitBangChannelDriver::transmitSpi(
             for (int bit = 7; bit >= 0; --bit) {
                 const u8 dataMask = masks[bit];
 
-                // Set data pins (SPI mode 0: data before rising edge)
+                // Set data pins, then hold them for half a period before the
+                // rising edge (SPI mode 0 setup time)
                 mMultiWriter.writeByte(dataMask);
+                fl::delayNanoseconds(halfPeriodNs, hz);
 
-                // Clock rising edge
+                // Clock rising edge; data stays put while the clock is high
                 (fl::digitalWrite)(clockPin, PinValue::High);
                 fl::delayNanoseconds(halfPeriodNs, hz);
 
                 // Clock falling edge
                 (fl::digitalWrite)(clockPin, PinValue::Low);
-                fl::delayNanoseconds(halfPeriodNs, hz);
             }
         }
     }
