@@ -50,6 +50,8 @@ void setup() {
     // For TM1812 RGBCCT strips that pack two pixels into each 12-channel IC,
     // use this instead (issue #995):
     // auto chipset = fl::makeClockless<fl::TIMING_TM1812_RGBWW_800KHZ>(DATA_PIN);
+    // Link only the platform's default clockless driver for add(cfg).
+    FastLED.enable<fl::Bus::AUTO>();
     FastLED.add(fl::ChannelConfig(
         chipset,
         fl::span<CRGB>(leds, NUM_LEDS),

@@ -92,6 +92,8 @@ void setup() {
     fl::ClocklessChipset chipset(DATA_PIN, timing);
     fl::ChannelConfig config(chipset, fl::span<CRGB>(leds, NUM_LEDS), COLOR_ORDER, opts);
     config.setScreenMap(screenMap);
+    // Link only the platform's default clockless driver for add(cfg).
+    FastLED.enable<fl::Bus::AUTO>();
     FastLED.add(config);
     FastLED.setBrightness(BRIGHTNESS);
 

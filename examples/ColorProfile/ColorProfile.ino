@@ -43,6 +43,8 @@ void setup() {
     // brightness. Without a profile this is the default legacy dither, so
     // both budget builds (see docs/color-pipeline-budgets.md) set it alike.
     opts.mDitherMode = BINARY_DITHER;
+    // Link only the platform's default clockless driver for add(cfg).
+    FastLED.enable<fl::Bus::AUTO>();
     FastLED.add(fl::ChannelConfig(
         fl::makeClockless<fl::TIMING_WS2812_800KHZ>(PIN_DATA),
         fl::span<CRGB>(leds, NUM_LEDS), GRB, opts));
