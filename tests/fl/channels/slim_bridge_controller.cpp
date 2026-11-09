@@ -406,6 +406,8 @@ FL_TEST_CASE("Disabled driver: addLeds falls back to the enabled driver") {
     FL_CHECK_EQ(mockDriverInstance().enqueueCount, enqueueBefore);
     FL_CHECK_EQ(fallback->enqueueCount, 1);
     FL_CHECK_EQ(fallback->lastBytes.size(), 12u);
+    // ...and was flushed by the end-of-show manager pass.
+    FL_CHECK_GE(fallback->showCount, 1);
 }
 
 FL_TEST_CASE("Disabled driver with no enabled alternative drops the frame") {
