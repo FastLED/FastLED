@@ -128,7 +128,9 @@ class EmuGateTest(unittest.TestCase):
         self.assertEqual(code, 3)
         self.assertIn("unmapped src/platforms/gap/driver.h (gap: no emulator)", stderr)
         self.assertIn("unmapped src/platforms/unknown/driver.h", stderr)
-        self.assertIn("unmapped README.md", stderr)
+        # Non-platform files are not this gate's business: listing them buried
+        # the real gaps (a platform path nobody mapped) in noise.
+        self.assertNotIn("README.md", stderr)
 
     def test_no_changes_exits_three(self) -> None:
         self.assertEqual(self.gate("--check")[0], 3)
@@ -240,13 +242,14 @@ class EmuGateTest(unittest.TestCase):
         )
         self.assertEqual(payload["unmapped"][0]["platform"], "gap")
 
-    def test_empty_mapping_reports_all_paths(self) -> None:
+    def test_empty_mapping_reports_platform_paths_only(self) -> None:
         (self.repo / "ci").mkdir(exist_ok=True)
         (self.repo / "ci" / "emu_map.toml").write_text("version = 1\nplatforms = []\n")
-        self.change("src/platforms/widget/driver.h")
+        self.change("src/platforms/widget/driver.h", "docs/readme.md")
         code, stdout, stderr = self.gate("--json")
         self.assertEqual(code, 3, stderr)
-        self.assertEqual(len(json.loads(stdout)["unmapped"]), 2)
+        unmapped = json.loads(stdout)["unmapped"]
+        self.assertEqual([item["path"] for item in unmapped], ["src/platforms/widget/driver.h"])
 
     def test_stdlib_only(self) -> None:
         import ast

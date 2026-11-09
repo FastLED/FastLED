@@ -119,6 +119,9 @@ def matches_path(path: str, pattern: str) -> bool:
     return match(0, 0)
 
 
+PLATFORM_ROOT = "src/platforms/"
+
+
 def select(
     changed: list[str], mappings: list[Mapping]
 ) -> tuple[list[str], list[Unmapped]]:
@@ -126,6 +129,11 @@ def select(
     unmapped: list[Unmapped] = []
     for path in changed:
         matches = [m for m in mappings if any(matches_path(path, p) for p in m.paths)]
+        if not matches and not path.startswith(PLATFORM_ROOT):
+            # Not platform code, so this gate has no opinion. Reporting it would
+            # bury the real gaps (a platform path nobody mapped) in noise, and
+            # noise is what teaches people to ignore the output.
+            continue
         required.update(g for m in matches for g in m.gates)
         gaps = [m.gap for m in matches if not m.gates]
         if not matches or gaps:
