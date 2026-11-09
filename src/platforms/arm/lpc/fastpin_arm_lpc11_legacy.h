@@ -14,11 +14,7 @@
 #include "platforms/arm/lpc/is_lpc.h"
 #include "platforms/shared/spi_bitbang/bitbang_pin.h"
 
-// Same guard as fastpin_arm_lpc.h, for direct includes of this header (#5073):
-// LPC has no core pin API, so forced software pins could not drive anything.
-#if defined(FL_IS_ARM_LPC) && defined(FASTLED_FORCE_SOFTWARE_PINS)
-#error "FASTLED_FORCE_SOFTWARE_PINS is not supported on LPC: there is no LPC core pin API (fl::pinMode/digitalWrite are no-ops), so software pins could not drive anything. Remove the define to use the native GPIO pins."
-#endif
+// The LPC forced-software-pin rejection lives in fl/system/fastpin_base.h (included above).
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_DEPRECATED_REGISTER

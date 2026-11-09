@@ -10,6 +10,15 @@
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/noexcept.h"
 #include "fl/stl/static_assert.h"
+
+// LPC has no core pin API: fl::pinMode / digitalWrite resolve to
+// platforms/shared/pin_noop.hpp, so forced FastPin = NoPinMapPin would
+// silently do nothing (#5073, #5189). The guard lives here so every fastpin
+// route, including a direct fl/system/fastpin.h include, sees it.
+#if defined(FL_IS_ARM_LPC) && defined(FASTLED_FORCE_SOFTWARE_PINS)
+#error "FASTLED_FORCE_SOFTWARE_PINS is not supported on LPC: there is no LPC core pin API (fl::pinMode/digitalWrite are no-ops), so software pins could not drive anything. Remove the define to use the native GPIO pins."
+#endif
+
 #ifdef FASTLED_FORCE_SOFTWARE_PINS
 #include "fl/system/pin.h"  // IWYU pragma: keep
 #if defined(FASTLED_NO_PINMAP)
