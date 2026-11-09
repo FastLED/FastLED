@@ -24,6 +24,7 @@
 #include "fl/stl/string.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/has_include.h"
+#include "fl/stl/static_assert.h"
 #include "eorder.h"
 #include "fastled_delay.h"
 #include "platforms/arm/stm32/interrupts_stm32_inline.h"
@@ -72,8 +73,8 @@ class ClocklessStm32Driver : public IChannelDriver {
 #if defined(FASTLED_FORCE_SOFTWARE_PINS)
     // Forced software FastPin::port() is nullptr; this driver writes the GPIO
     // output register directly (#5184).
-    static_assert(DATA_PIN != DATA_PIN,
-                  "FASTLED_FORCE_SOFTWARE_PINS is not supported by the STM32 clockless driver: it needs a hardware GPIO port");
+    FL_STATIC_ASSERT(DATA_PIN != DATA_PIN,
+                     "FASTLED_FORCE_SOFTWARE_PINS is not supported by the STM32 clockless driver: it needs a hardware GPIO port");
 #endif
     // Stable id unique to this template specialization.
     static u32 typeId() FL_NO_EXCEPT;
@@ -124,8 +125,8 @@ class ClocklessStm32Driver : public IChannelDriver {
 #if defined(FASTLED_FORCE_SOFTWARE_PINS)
     // Forced software FastPin::port() is nullptr; this driver writes the GPIO
     // output register directly (#5184).
-    static_assert(DATA_PIN != DATA_PIN,
-                  "FASTLED_FORCE_SOFTWARE_PINS is not supported by the STM32 clockless driver: it needs a hardware GPIO port");
+    FL_STATIC_ASSERT(DATA_PIN != DATA_PIN,
+                     "FASTLED_FORCE_SOFTWARE_PINS is not supported by the STM32 clockless driver: it needs a hardware GPIO port");
 #endif
     // Stable id unique to this template specialization.
     static u32 typeId() FL_NO_EXCEPT;

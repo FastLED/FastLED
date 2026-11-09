@@ -5,7 +5,7 @@ In forced mode `fastpin_arm_stm32.h` skips the STM32 pin tables, so
 `port()` returns `nullptr`. The clockless driver writes the GPIO output
 register through `FastPin<DATA_PIN>::port()`, so a forced build would fault at
 the first `show()`. Both driver class templates (M0/M0+ and M3+) carry a
-DATA_PIN-dependent `static_assert`, so the build fails only when a sketch
+DATA_PIN-dependent `FL_STATIC_ASSERT`, so the build fails only when a sketch
 instantiates the driver; SPI-only forced builds still compile.
 """
 
@@ -28,7 +28,7 @@ def test_stm32_clockless_rejects_forced_software_pins() -> None:
     # One guard per driver class (M0/M0+ and Cortex-M3/M4/M7).
     assert text.count(message) == 2
     guards = re.findall(
-        r"#if defined\(FASTLED_FORCE_SOFTWARE_PINS\)\s*\n(?:\s*//[^\n]*\n)*\s*static_assert\(DATA_PIN != DATA_PIN,\s*\n?\s*\"FASTLED_FORCE_SOFTWARE_PINS is not supported by the STM32 clockless driver",
+        r"#if defined\(FASTLED_FORCE_SOFTWARE_PINS\)\s*\n(?:\s*//[^\n]*\n)*\s*FL_STATIC_ASSERT\(DATA_PIN != DATA_PIN,\s*\n?\s*\"FASTLED_FORCE_SOFTWARE_PINS is not supported by the STM32 clockless driver",
         text,
     )
     assert len(guards) == 2
