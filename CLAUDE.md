@@ -96,6 +96,7 @@ See `agents/docs/build-system.md` for full command execution rules and forbidden
 ### Examples Policy
 - **Keep the `examples/` tree minimal.** Do NOT create new one-off `.ino` sketches to try out functionality.
 - **Test new functionality in `examples/AutoResearch/AutoResearch.ino`** — that is the canonical scratch target for live/device testing.
+- **`examples/Blink/Blink.ino` is frozen — never use it as a probe.** `bash lint` pins its hash (`ci/lint/blink_lockdown.py`) and the same hook blocks agent Write/Edit on it. For a throwaway sketch, `git archive` the repo into the scratchpad and edit the copy there.
 - A `PreToolUse` hook (`ci/hooks/protect_example_ino.py`) **blocks creation of any new `.ino` under `examples/`**. Editing an existing `.ino` is always allowed.
 - **Override (only when a genuinely new example is required):** prepend a comment containing the `FL_AGENT_ALLOW_NEW_EXAMPLE` directive to the file (e.g. `// FL_AGENT_ALLOW_NEW_EXAMPLE`), or launch with the `FL_AGENT_ALLOW_NEW_EXAMPLE=1` env var.
 

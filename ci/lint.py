@@ -14,6 +14,7 @@ from pathlib import Path
 from ci.lint.args_parser import LintArgs, parse_lint_args
 from ci.lint.banned_build_tools import run_banned_build_tools_lint
 from ci.lint.banned_linkers import run_banned_linkers_lint
+from ci.lint.blink_lockdown import run as run_blink_lockdown
 from ci.lint.check_size_thresholds import run as run_size_thresholds_check
 from ci.lint.duration_tracker import DurationTracker
 from ci.lint.orchestrator import LintOrchestrator
@@ -322,6 +323,15 @@ def create_stages(args: LintArgs) -> list[LintStage]:
                 name="size_thresholds_locked",
                 display_name="SIZE-CHECK YML THRESHOLDS LOCKED",
                 run_fn=run_size_thresholds_check,
+                timeout=10.0,
+            )
+        )
+        # Blink.ino is frozen by hash; probes go in AutoResearch instead.
+        stages.append(
+            LintStage(
+                name="blink_lockdown",
+                display_name="BLINK SKETCH LOCKED",
+                run_fn=run_blink_lockdown,
                 timeout=10.0,
             )
         )

@@ -31,6 +31,9 @@ import sys
 # (the Write tool has no command string to prepend the env var to).
 OVERRIDE_ENV_VAR = "FL_AGENT_ALLOW_NEW_EXAMPLE"
 
+# Frozen sketch: Write/Edit is always blocked (no in-content override).
+BLINK_REL_PATH = "examples/Blink/Blink.ino"
+
 
 def main() -> int:
     try:
@@ -48,7 +51,7 @@ def main() -> int:
         return 2
 
     tool_name = input_data.get("tool_name", "")
-    if tool_name != "Write":
+    if tool_name not in ("Write", "Edit"):
         return 0
 
     tool_input = input_data.get("tool_input", {})
@@ -71,7 +74,8 @@ def main() -> int:
             first_non_empty_line = line.strip()
             break
     if (
-        first_non_empty_line.startswith("//")
+        not file_path.replace("\\", "/").endswith(BLINK_REL_PATH)
+        and first_non_empty_line.startswith("//")
         and OVERRIDE_ENV_VAR in first_non_empty_line
     ):
         return 0
@@ -98,6 +102,18 @@ def main() -> int:
     # Only guard .ino files under examples/.
     if not rel_path.startswith("examples/") or not rel_path.endswith(".ino"):
         return 0
+
+    # Blink is frozen (ci/lint/blink_lockdown.py): never a probe sketch.
+    if rel_path == BLINK_REL_PATH:
+        print(
+            f"BLOCKED: editing '{rel_path}'. Blink is a frozen, structured sketch\n"
+            "and must not be used as a probe. Test in\n"
+            "examples/AutoResearch/AutoResearch.ino or in a scratch export\n"
+            "(git archive) instead. A deliberate change needs a human edit plus\n"
+            "the matching hash update in ci/lint/blink_lockdown.py.",
+            file=sys.stderr,
+        )
+        return 2
 
     # If the file already exists, this is an edit/overwrite — always allowed.
     full_path = os.path.join(project_root, rel_path)

@@ -13,11 +13,10 @@ from __future__ import annotations
 import argparse
 import json
 import re
-import subprocess
 import sys
 from dataclasses import dataclass
 
-from running_process import RunningProcess
+from running_process import PIPE, RunningProcess
 
 
 CODERABBIT_LOGINS = frozenset({"coderabbitai", "coderabbitai[bot]"})
@@ -94,8 +93,8 @@ def _gh_json(args: list[str]) -> object:
     result = RunningProcess.run(
         ["gh", *args],
         check=False,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+        stdout=PIPE,
+        stderr=PIPE,
         encoding="utf-8",
         errors="replace",
     )
