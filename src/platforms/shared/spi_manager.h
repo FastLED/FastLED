@@ -203,7 +203,8 @@ private:
     /// @note This function is only available when Pin class is fully defined.
     ///       In normal usage (when FastLED.h is included), Pin will be available.
     ///       In test/stub builds or when Pin is not available, this is a no-op.
-    void softwareSPIWrite(u8 clock_pin, u8 data_pin, const u8* data, size_t length) FL_NO_EXCEPT;
+    void softwareSPIWrite(u8 clock_pin, u8 data_pin, const u8* data, size_t length,
+                          u32 speed_hz) FL_NO_EXCEPT;
 
     /// Get maximum supported SPI type for this platform
     /// Uses runtime detection via getAll() - platforms provide via weak linkage

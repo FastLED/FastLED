@@ -237,6 +237,8 @@ class Args:
     tight_timing_iterations: int
     tight_timing_max_overhead_us: int
 
+    # Extra NAME[=VALUE] compile defines for the staged build (--define).
+    define: tuple[str, ...] = ()
     watchdog_soak: bool = False
     mp3: bool = False
     embedded_fs: bool = False
@@ -489,6 +491,12 @@ See Also:
             "--spi-streaming",
             action="store_true",
             help="ESP32-S3 native SPI2 APA102/SK9822 memory and full-frame SPI3-slave loopback",
+        )
+        parser.add_argument(
+            "--define",
+            action="append",
+            metavar="NAME[=VALUE]",
+            help="Extra compile define for the staged build (repeatable), e.g. --define FASTLED_FORCE_SOFTWARE_SPI",
         )
         driver_group.add_argument(
             "--spi-provider",
@@ -1188,4 +1196,5 @@ See Also:
             tight_timing=parsed.tight_timing,
             tight_timing_iterations=parsed.tight_timing_iterations,
             tight_timing_max_overhead_us=parsed.tight_timing_max_overhead_us,
+            define=tuple(parsed.define or ()),
         )

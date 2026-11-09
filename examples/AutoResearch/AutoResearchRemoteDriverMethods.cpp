@@ -385,6 +385,95 @@ void AutoResearchRemoteControl::bindDriverMethods(fl::Remote& remote) {
         return response;
 #endif
     });
+    // Register "softSpiClockLoopback" — measures the software SPI clock rate
+    // (#5124). Build with FASTLED_FORCE_SOFTWARE_SPI; jumper GPIO 0 (APA102
+    // clock) to GPIO 1 (RX). Data goes to GPIO 2, unmeasured. Reports clock
+    // high/low widths from raw RX edges, skipping the first edge.
+    remote.bind("softSpiClockLoopback", [this](const fl::json& args) -> fl::json {
+        (void)args;
+        fl::json response = fl::json::object();
+        constexpr int kLedCount = 16;
+        static bool already_run = false;
+        if (already_run) {
+            response.set("success", false);
+            response.set("error", "ResetBoardBeforeNextRun");
+            return response;
+        }
+        already_run = true;
+#if !defined(FL_IS_ESP32) // ok platform specific - SPIOutput is the ESP32 SPIBusManager proxy here
+        (void)this;
+        response.set("success", false);
+        response.set("error", "Esp32Only");
+        return response;
+#else
+        // addLeds<APA102> goes through the Channels SPI driver, which never
+        // reaches SPIBusManager's software writer, so drive the legacy
+        // SPIOutput proxy directly: under FASTLED_FORCE_SOFTWARE_SPI it flushes
+        // through SPIBusManager::softwareSPIWrite.
+        struct SoftSpiProbe : public CPixelLEDController<RGB> {
+            fl::SPIOutput<2, 0, 250000> spi;
+            void init() FL_NO_EXCEPT override { spi.init(); }
+            void showPixels(PixelController<RGB>& pixels) FL_NO_EXCEPT override {
+                spi.select();
+                for (int i = 0; i < pixels.size() * 4; ++i) {
+                    spi.writeByte(0x55);
+                }
+                spi.finalizeTransmission();
+                spi.release();
+            }
+        };
+        static SoftSpiProbe probe;
+        static CRGB leds[kLedCount];
+        FastLED.addLeds(&probe, leds, kLedCount);
+        fl::RunResult diagnostics;
+        capture(mState->rx_channel, mState->rx_buffer, kLedCount * 4, 1,
+                fl::makeTimingConfig<fl::TIMING_WS2812B_V5>(),
+                "SOFT_SPI_CLOCK", &diagnostics);
+        fl::SPIBusManager& manager = fl::getSPIBusManager();
+        response.set("buses", static_cast<int>(manager.getNumBuses()));
+        if (const fl::SPIBusInfo* bus = manager.getBusInfo(0)) {
+            response.set("busType", static_cast<int>(bus->bus_type));
+            response.set("busDevices", static_cast<int>(bus->num_devices));
+            response.set("busInitialized", bus->is_initialized);
+        }
+        response.set("rxBeginError", diagnostics.rxBeginError.c_str());
+        response.set("rxWaitResult", diagnostics.captureWaitResult);
+        fl::EdgeTime edges[256];
+        const size_t edge_count = mState->rx_channel->getRawEdgeTimes(
+            fl::span<fl::EdgeTime>(edges, 256), 0);
+        u32 high_sum = 0, low_sum = 0, high_n = 0, low_n = 0;
+        u32 high_min = 0xFFFFFFFFu, low_min = 0xFFFFFFFFu;
+        for (size_t i = 1; i < edge_count; ++i) {
+            const u32 ns = edges[i].ns;
+            if (ns > 100000u) {
+                continue;  // frame gap, not a clock half-period
+            }
+            if (edges[i].high) {
+                high_sum += ns; ++high_n; high_min = fl::min(high_min, ns);
+            } else {
+                low_sum += ns; ++low_n; low_min = fl::min(low_min, ns);
+            }
+        }
+        const u32 high_avg = high_n ? high_sum / high_n : 0;
+        const u32 low_avg = low_n ? low_sum / low_n : 0;
+        const u32 period = high_avg + low_avg;
+        // Only a successful RX begin and wait with real clock edges counts.
+        const bool primed = diagnostics.rxBeginError.empty() &&
+            diagnostics.captureWaitResult == 0 && high_n >= 8 && low_n >= 8;
+        response.set("primed", primed);
+        response.set("rawEdges", static_cast<int>(edge_count));
+        response.set("highAvgNs", static_cast<int>(high_avg));
+        response.set("lowAvgNs", static_cast<int>(low_avg));
+        response.set("highMinNs", static_cast<int>(high_n ? high_min : 0));
+        response.set("lowMinNs", static_cast<int>(low_n ? low_min : 0));
+        response.set("periodNs", static_cast<int>(period));
+        response.set("measuredKhz", static_cast<int>(period ? 1000000u / period : 0));
+        response.set("requestedKhz", 250);
+        // Pass when the 250 kHz clock is no faster than requested (10% tolerance).
+        response.set("success", primed && period >= 3600u);
+        return response;
+#endif
+    });
     // Register "flexioRxBenchmark" — square-wave validation for the new
     // FlexIO RX backend (Phase 2 of FastLED#2764).
     //

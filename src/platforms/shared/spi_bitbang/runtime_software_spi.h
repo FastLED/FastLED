@@ -10,6 +10,7 @@
 #include "fl/stl/cstddef.h"
 #include "fl/stl/int.h"
 #include "fl/stl/noexcept.h"
+#include "fl/system/delay.h"
 #include "platforms/shared/spi_bitbang/bitbang_pin.h"
 
 #if defined(ESP8266)
@@ -73,12 +74,25 @@ FASTLED_FORCE_INLINE void runtimeGpioBarrier() FL_NO_EXCEPT {
 #endif
 }
 
-/// Writes bytes MSB first, with one data store per bit. No delay is added: this
-/// path has never had a programmable clock rate, and requested device speed is
-/// not applied.
+/// Half of one clock period in ns for a requested rate; 0 (no pacing) when the
+/// rate is unknown. The loop's own cost adds to it, so the clock never runs
+/// faster than requested but can run slower.
+inline u32 softwareSpiHalfPeriodNs(u32 speed_hz) FL_NO_EXCEPT {
+    return speed_hz ? 500000000u / speed_hz : 0;
+}
+
+/// Waits for a software SPI half period; free when unpaced.
+FASTLED_FORCE_INLINE void softwareSpiHalfDelay(u32 half_period_ns) FL_NO_EXCEPT {
+    if (half_period_ns) {
+        fl::delayNanoseconds(half_period_ns);
+    }
+}
+
+/// Writes bytes MSB first, with one data store per bit. Data is set half a
+/// period before the rising edge, and the clock stays high for half a period.
 template <class Clock>
 inline void writeRuntimeSoftwareSpi(const Clock& clock, const RuntimeGpio& data, const u8* bytes,
-                                    size_t length) FL_NO_EXCEPT {
+                                    size_t length, u32 half_period_ns = 0) FL_NO_EXCEPT {
     clock.lo();
     for (size_t i = 0; i < length; ++i) {
         u8 byte = bytes[i];
@@ -86,7 +100,9 @@ inline void writeRuntimeSoftwareSpi(const Clock& clock, const RuntimeGpio& data,
             runtimeGpioBarrier();
             writeBitSetClearNoBranch<7>(byte, data.mask, data.set, data.clear);
             runtimeGpioBarrier();
+            softwareSpiHalfDelay(half_period_ns);
             clock.hi();
+            softwareSpiHalfDelay(half_period_ns);
             clock.lo();
             byte = static_cast<u8>(byte << 1);
         }
