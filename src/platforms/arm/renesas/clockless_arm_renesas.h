@@ -7,6 +7,7 @@
 #include "fastled_delay.h"
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/noexcept.h"
+#include "fl/stl/static_assert.h"
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_DEPRECATED_REGISTER
@@ -24,6 +25,10 @@ namespace fl {
 
 template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
 class ClocklessController : public CPixelLEDController<RGB_ORDER> {
+#if defined(FASTLED_FORCE_SOFTWARE_PINS) && defined(FASTLED_NO_PINMAP)
+    FL_STATIC_ASSERT(DATA_PIN != DATA_PIN,
+                     "FASTLED_FORCE_SOFTWARE_PINS is not supported by this clockless driver");
+#endif
 	// Extract timing values from ChipsetTiming struct and convert from nanoseconds to clock cycles
 	// Formula: cycles = (nanoseconds * CPU_MHz + 500) / 1000
 	// The +500 provides rounding to nearest integer

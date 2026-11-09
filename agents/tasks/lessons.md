@@ -1,5 +1,9 @@
 # Lessons Learned
 
+- Reproduce embedded consumer build bugs with fbuild and verify the exact
+  resolved dependency. After changing a dependency, rebuild before treating
+  artifacts as evidence; cached artifacts do not validate the new dependency.
+
 - Before asking for hardware rewiring, scan the attached safe GPIO pairs in both
   directions. Use the user-authorized current wiring for generic bit-bang tests;
   keep original GPIO4/16 RTC measurements separate from GPIO4/14 results.

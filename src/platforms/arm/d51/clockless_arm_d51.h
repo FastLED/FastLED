@@ -22,6 +22,7 @@
 #include "fl/channels/driver.h"
 #include "fl/channels/manager.h"
 #include "fl/channels/slim_bridge_controller.h"
+#include "fl/stl/static_assert.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/string.h"
 #include "fl/stl/vector.h"
@@ -49,6 +50,10 @@ namespace fl {
 /// bridge's `PixelIterator`; this driver only shifts the bytes out.
 template <int DATA_PIN, typename TIMING, int XTRA0, int WAIT_TIME>
 class ClocklessSamd51Driver : public IChannelDriver {
+#if defined(FASTLED_FORCE_SOFTWARE_PINS) && defined(FASTLED_NO_PINMAP)
+    FL_STATIC_ASSERT(DATA_PIN != DATA_PIN,
+                     "FASTLED_FORCE_SOFTWARE_PINS is not supported by this clockless driver");
+#endif
 	// Extract timing values from struct and convert from nanoseconds to clock cycles
 	// Formula: cycles = (nanoseconds * CPU_MHz + 500) / 1000
 	// The +500 provides rounding to nearest integer
