@@ -39,6 +39,8 @@ permissions:
 jobs:
   audit:
     runs-on: ubuntu-24.04
+    env:
+      FASTLED_NATIVE_CLANG: soldr
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
