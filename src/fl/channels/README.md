@@ -839,7 +839,7 @@ void loop() {
 
 **`mBus` is typed.** `cfg.options.mBus` is an `enum class` (#2459), so typos like `fl::Bus::RTM` are compile errors. The canonical driver name is derived via `busName(B)` — string literals never appear at the call site.
 
-**Bus-miss diagnostic (one-shot, from #2456 / #2459 / #2460):** when `cfg.options.mBus != fl::Bus::AUTO` resolves to a driver that isn't registered with `ChannelManager`, the first `Channel::showPixels()` call emits a single `FL_ERROR` and falls back to AUTO/priority dispatch. Subsequent shows on the same channel suppress the warning via `mBusWarned`. The diagnostic uses `ChannelManager::findDriverByName()` (silent lookup) to distinguish two cases:
+**Bus-miss diagnostic (#2456 / #2459 / #2460):** when `cfg.options.mBus != fl::Bus::AUTO` names a driver that is not registered, is disabled, or cannot handle the chipset, `Channel::showPixels()` falls back to the highest-priority enabled driver that can, and warns with `FL_WARN_EVERY(1000, ...)` naming the fallback and the fix for as long as the miss lasts. Legacy `addLeds<>` bridges do the same when their driver is disabled. The diagnostic uses `ChannelManager::findDriverByName()` (silent lookup) to distinguish two cases:
 
 - Driver isn't registered at all — message lists three remediations: `fl::enableDrivers<fl::Bus::X>()`, `FastLED.enableAllDrivers()`, or `FastLED.addLeds<..., fl::Bus::X>(...)` (pins Bus + triggers linker keep-alive).
 - Driver is registered but `canHandle()` rejected the chipset (bus/chipset mismatch) — message suggests picking a different `Bus`.

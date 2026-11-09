@@ -446,19 +446,29 @@ fl::shared_ptr<IChannelDriver> ChannelManager::selectDriverForChannel(const Chan
             FL_WARN_ONCE("ChannelManager: Affinity driver '" << affinity << "' cannot handle channel data (chipset/bus mismatch). Falling back to AUTO/priority dispatch.");
             break;
         }
+        if (!isDriverEnabled(*driver)) {
+            break;  // disabled: fall back to an enabled driver (channel layer warns)
+        }
         return driver;
     } while (false);
-    
 
-    // No affinity: iterate drivers by priority (already sorted descending)
+    auto driver = selectEnabledDriverForChannel(data);
+    if (!driver) {
+        FL_ERROR("ChannelManager: No compatible driver found for channel data");
+    }
+    return driver;
+}
+
+fl::shared_ptr<IChannelDriver> ChannelManager::selectEnabledDriverForChannel(const ChannelDataPtr& data) const FL_NO_EXCEPT {
+    if (!data) {
+        return fl::shared_ptr<IChannelDriver>();
+    }
+    // Drivers are kept sorted by priority, highest first.
     for (const auto& entry : mDrivers) {
-        if (!entry.enabled) continue;
-        if (entry.driver->canHandle(data)) {
-            return entry.driver;  // Return shared_ptr
+        if (entry.enabled && entry.driver->canHandle(data)) {
+            return entry.driver;
         }
     }
-
-    FL_ERROR("ChannelManager: No compatible driver found for channel data");
     return fl::shared_ptr<IChannelDriver>();
 }
 

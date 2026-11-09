@@ -856,24 +856,31 @@ fl::shared_ptr<IChannelDriver> Channel::resolveDynamicDriver() FL_NO_EXCEPT {
     }
     mDriver = driver;
 
-    // #2455 / #2459: one-shot diagnostic when a typed-Bus miss happens.
-    // Probe via `findDriverByName` (silent) to distinguish "driver wasn't
-    // instantiated" from "driver exists but canHandle() rejected this
-    // chipset" â€” resolution paths differ. The mBusWarned guard suppresses
-    // duplicate logs on subsequent shows of the same channel.
+    // #2455 / #2459: diagnostic when a typed-Bus request is not honored.
+    // Probe via `findDriverByName` (silent) to tell "not enabled", "disabled"
+    // and "cannot handle this chipset" apart; each names its own fix.
 #if FASTLED_LOG_RUNTIME_ENABLED
-    if (mBus != Bus::AUTO && !mBusWarned &&
-        (!driver || driver->getName() != busKey)) {
+    if (mBus != Bus::AUTO && (!driver || driver->getName() != busKey)) {
+        // Repeats once a second while the requested driver is unavailable, so
+        // the problem stays visible for as long as it lasts.
+        const fl::string using_name = driver ? driver->getName()
+                                             : fl::string::from_literal("nothing (frame dropped)");
         auto busDriver = ChannelManager::instance().findDriverByName(busKey);
         if (!busDriver) {
-            // Typed Bus miss â€” emit the actionable hint with the three
-            // currently-shipping remediations (option 3 added in #2460).
-            FL_ERROR("Channel '" << mName << "': Driver '" << busKey << "' wasn't instantiated. Resolve with: (1) fl::enableDrivers<fl::Bus::" << busKey << ">() (links only this driver), (2) FastLED.enableAllDrivers() (links every driver), or (3) FastLED.addLeds<..., fl::Bus::" << busKey << ">(...) (legacy API; pins Bus + triggers linker keep-alive). Defaulting to AUTO/priority dispatch.");
+            FL_WARN_EVERY(1000, "Channel '" << mName << "': driver '" << busKey
+                          << "' is not enabled - falling back to " << using_name
+                          << ". Fix: FastLED.enable<fl::Bus::" << busKey
+                          << ">() (links only this driver) or FastLED.enableAllDrivers().");
+        } else if (!ChannelManager::instance().isDriverEnabled(*busDriver)) {
+            FL_WARN_EVERY(1000, "Channel '" << mName << "': driver '" << busKey
+                          << "' is disabled - falling back to " << using_name
+                          << ". Fix: FastLED.setDriverEnabled(\"" << busKey
+                          << "\", true), or drop the setExclusiveDriver() that disabled it.");
         } else {
-            // Registered, but canHandle() said no â€” bus/chipset mismatch.
-            FL_ERROR("Channel '" << mName << "': Driver '" << busKey << "' is registered but cannot handle this channel's chipset (bus/chipset mismatch). Defaulting to AUTO/priority dispatch.");
+            FL_WARN_EVERY(1000, "Channel '" << mName << "': driver '" << busKey
+                          << "' cannot handle this chipset (bus/chipset mismatch) - falling back to "
+                          << using_name << ". Fix: pick a bus that supports this chipset.");
         }
-        mBusWarned = true;
     }
     if (!driver) {
         FL_ERROR("Channel '" << mName << "': No compatible driver found - cannot transmit");
