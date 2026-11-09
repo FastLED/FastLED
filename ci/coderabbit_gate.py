@@ -13,10 +13,11 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import subprocess
 import sys
 from dataclasses import dataclass
 
-from running_process import PIPE, RunningProcess
+from running_process import RunningProcess
 
 
 CODERABBIT_LOGINS = frozenset({"coderabbitai", "coderabbitai[bot]"})
@@ -90,17 +91,19 @@ def decide(threads: list[Thread], coderabbit_comments: list[str]) -> Verdict:
 
 
 def _gh_json(args: list[str]) -> object:
-    out = RunningProcess.run(
+    result = RunningProcess.run(
         ["gh", *args],
-        check=True,
-        # Separate pipes: with GH_DEBUG=api, gh writes debug lines to stderr,
-        # which must not reach json.loads.
-        stdout=PIPE,
-        stderr=PIPE,
+        check=False,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
         encoding="utf-8",
         errors="replace",
-    ).stdout
-    return json.loads(out)
+    )
+    if result.returncode != 0:
+        raise RuntimeError(
+            f"gh {' '.join(args[:2])} exited {result.returncode}: {result.stderr}"
+        )
+    return json.loads(result.stdout)
 
 
 def _first_line(body: str) -> str:
