@@ -111,7 +111,10 @@ Additional I2S defines and guidance:
   - **`FASTLED_DEBUG_COUNT_FRAME_RETRIES`**: When defined, enable counters/logging of frame retries due to timing issues (used in blockless/clockless drivers).
 
 - **RMT (IDF5 path in `rmt_5/`)**
-  - Uses the ESP-IDF v5 LED Strip driver through `IRmtStrip`. DMA is used automatically (`FASTLED_RMT_USE_DMA` marker macro). No user macro to select DMA mode (the driver picks it at runtime with `DMA_AUTO`).
+  - Uses the ESP-IDF v5 LED Strip driver through `IRmtStrip`. On chips with RMT DMA (ESP32-S3) the first TX channel takes the single DMA slot, which costs a fixed 4 KB DMA-capable internal-RAM block.
+  - **`FL_RMT5_DMA_AUTO`**: When `1` (default), the driver only takes the DMA channel when the encoded frame is longer than `FL_RMT5_DMA_MIN_SYMBOLS`. Short strips stay on the double-buffered on-chip RMT path and spend no DMA heap. Set `0` to always use DMA when the hardware supports it.
+  - **`FL_RMT5_DMA_MIN_SYMBOLS`**: Encoded RMT symbols at or below which a strip counts as short and skips DMA. Default `1024` (one DMA block, about 42 WS2812 RGB LEDs).
+  - **`FL_RMT5_USE_DMA`**: Set `0` to force non-DMA for every TX (and RX) channel regardless of strip length. Default `1`.
 
 - **I2S-parallel**
   - **`I2S_DEVICE`**: I2S device index. Default `0`.
