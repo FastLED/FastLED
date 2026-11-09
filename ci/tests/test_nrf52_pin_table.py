@@ -9,6 +9,9 @@ Two bugs lived here unnoticed because only hardware could show them:
   names (the Metro's D36 said P1.02 but encoded P1.00).
 * Every macro specialized `fl::FastPin` unconditionally, so
   `FASTLED_FORCE_SOFTWARE_PINS` could never select the software template.
+* In forced-software mode an invalid pin's `Nrf52HwPin` still resolves to
+  P0.00, so the PWM and SPIM drivers must reject it at compile time and its
+  `FastPin` must fall to the software template (#5190).
 
 The table is parsed textually. Entries without a `Pp.nn` comment are not
 checked; the test asserts that most entries have one, so the check cannot
@@ -90,10 +93,52 @@ def test_valid_pins_specialize_fastpin_only_without_forced_software_pins() -> No
         assert "fl::Nrf52HwPin<ARDUINO_PIN>" in body, name
 
 
-def test_invalid_pins_keep_their_warning_fastpin_in_both_modes() -> None:
+def _forced_branches() -> tuple[str, str]:
+    forced = re.search(
+        r"#if defined\(FASTLED_FORCE_SOFTWARE_PINS\)\n(.*?)#else\n(.*?)#endif",
+        _text(),
+        re.S,
+    )
+    assert forced
+    return forced.group(1), forced.group(2)
+
+
+def test_invalid_pin_macro_defers_fastpin_to_mode_macro() -> None:
     body = _macro("_FL_DEF_INVALID_PIN")
     assert "fl::_INVALID_ARMPIN" in body
-    assert (
-        "template<> class fl::FastPin<ARDUINO_PIN> : public fl::Nrf52HwPin<ARDUINO_PIN>"
-        in body
+    assert "_FL_NRF52_INVALID_FASTPIN(ARDUINO_PIN)" in body
+    assert "fl::FastPin" not in body
+
+
+def test_invalid_pins_specialize_fastpin_only_without_forced_software_pins() -> None:
+    forced_branch, normal_branch = _forced_branches()
+    assert "#define _FL_NRF52_INVALID_FASTPIN(ARDUINO_PIN)" in forced_branch
+    assert "fl::FastPin" not in forced_branch
+    normal = re.search(
+        r"#define _FL_NRF52_INVALID_FASTPIN\(ARDUINO_PIN\)((?:.*\\\n)*.*)",
+        normal_branch,
     )
+    assert normal
+    assert (
+        "fl::FastPin<ARDUINO_PIN> : public fl::Nrf52HwPin<ARDUINO_PIN>"
+        in normal.group(1)
+    )
+
+
+def _forced_guarded(path: Path) -> str:
+    text = path.read_text(encoding="utf-8")
+    blocks = re.findall(
+        r"#if defined\(FASTLED_FORCE_SOFTWARE_PINS\)\n(.*?)#endif", text, re.S
+    )
+    return "\n".join(blocks)
+
+
+def test_drivers_reject_invalid_pins_in_forced_software_mode() -> None:
+    nrf52 = REPO_ROOT / "src" / "platforms" / "arm" / "nrf52"
+    clockless = _forced_guarded(nrf52 / "clockless_arm_nrf52.h")
+    assert "nrf52_pin_routable<_DATA_PIN>()" in clockless
+    spi = _forced_guarded(nrf52 / "fastspi_arm_nrf52.h")
+    assert "nrf52_pin_routable<_DATA_PIN>()" in spi
+    assert "nrf52_pin_routable<_CLOCK_PIN>()" in spi
+    fastpin = (nrf52 / "fastpin_arm_nrf52.h").read_text(encoding="utf-8")
+    assert "constexpr bool nrf52_pin_routable()" in fastpin

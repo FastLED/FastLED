@@ -147,6 +147,11 @@ namespace fl {
         // Low frequency GPIO is for signals with a frequency up to 10 kHz.  Lowest speed SPIM is 125kbps.
         FL_STATIC_ASSERT(!Nrf52HwPin<_DATA_PIN>::LowSpeedOnlyRecommended(),  "Invalid (low-speed only) pin specified");
         FL_STATIC_ASSERT(!Nrf52HwPin<_CLOCK_PIN>::LowSpeedOnlyRecommended(), "Invalid (low-speed only) pin specified");
+#if defined(FASTLED_FORCE_SOFTWARE_PINS)
+        // Forced mode has no runtime FastPin warning to catch an invalid pin (#5190).
+        FL_STATIC_ASSERT(nrf52_pin_routable<_DATA_PIN>(),  "This pin is marked invalid in the nRF52 variant table; the SPIM driver would drive P0.00 instead. Use a different pin.");
+        FL_STATIC_ASSERT(nrf52_pin_routable<_CLOCK_PIN>(), "This pin is marked invalid in the nRF52 variant table; the SPIM driver would drive P0.00 instead. Use a different pin.");
+#endif
 
         /// initialize the SPI subssytem
         void init() FL_NO_EXCEPT {
