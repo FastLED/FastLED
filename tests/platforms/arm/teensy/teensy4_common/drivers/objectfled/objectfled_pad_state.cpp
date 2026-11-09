@@ -30,6 +30,8 @@ struct Chip {
     volatile u32 gpr26 = 0;
     volatile u32 gpio1_gdir = 0;
     volatile u32 gpio1_dr = 0;
+    volatile u32 gpio1_dr_set = 0;    // Write-only: OR into gpio1_dr on latch().
+    volatile u32 gpio1_dr_clear = 0;  // Write-only: clear from gpio1_dr on latch().
     volatile u32 gpio6_gdir = 0;
     volatile u32 gpio6_dr = 0;
     volatile u32 mosi_mux = 0;
@@ -38,8 +40,17 @@ struct Chip {
     volatile u32 sclk_pad = 0;
 
     ObjectFLEDPadRegs regs() {
-        return ObjectFLEDPadRegs{&gpr26, &gpio1_gdir, &gpio1_dr, &mosi_mux,
-                                 &mosi_pad, &sclk_mux, &sclk_pad};
+        return ObjectFLEDPadRegs{&gpr26, &gpio1_gdir, &gpio1_dr, &gpio1_dr_set,
+                                 &gpio1_dr_clear, &mosi_mux, &mosi_pad,
+                                 &sclk_mux, &sclk_pad};
+    }
+
+    // What the hardware does with the DR_SET/DR_CLEAR writes: touch only the
+    // written bits of the latch.
+    void latch() {
+        gpio1_dr = (gpio1_dr | gpio1_dr_set) & ~gpio1_dr_clear;
+        gpio1_dr_set = 0;
+        gpio1_dr_clear = 0;
     }
 
     // What a GPIO pad drives: -1 when it is not a driven GPIO output.
@@ -140,6 +151,7 @@ FL_TEST_CASE("pads that started on GPIO6 work with ordinary GPIO after deinit") 
     FL_CHECK_EQ(c.mosiLevel(), 0); // While owned, the pads follow GPIO1.
     FL_CHECK_EQ(c.sclkLevel(), 1);
     state.restore(c.regs());
+    c.latch();
     expectRestored(before, c, 0xFFFFFFFFU & ~kBoth, 0, 0);
     FL_CHECK_EQ(c.mosiLevel(), 1); // Back on GPIO6 with its old latch.
     FL_CHECK_EQ(c.sclkLevel(), 0);
@@ -175,6 +187,7 @@ FL_TEST_CASE("other prior states come back exactly: GPIO1 bank, another mux, inp
     state.capture(c.regs(), kBoth);
     own(c);
     state.restore(c.regs());
+    c.latch();
     expectRestored(before, c, 0x5U, 0x100U, 0x200U);
     FL_CHECK_EQ(c.mosiLevel(), 1);
     FL_CHECK_EQ(c.sclkLevel(), -1); // ALT3 again: not GPIO.
@@ -199,6 +212,7 @@ FL_TEST_CASE("an input pin that reads high is released without a high pulse") {
     c.gpio1_dr = c.gpio1_dr & ~kSclk; // The mode parks SCLK low at deinit.
     FL_CHECK_EQ(c.gpio1_dr & kMosi, 0U);
     state.restore(c.regs());
+    c.latch();
     // The sampled input level never reaches the latch: with the old order the
     // pad, still an output from the mode, would have been driven high.
     FL_CHECK_EQ(c.gpio1_dr & kMosi, 0U);
@@ -208,6 +222,28 @@ FL_TEST_CASE("an input pin that reads high is released without a high pulse") {
     FL_CHECK_EQ(c.gpio1_dr & kSclk, kSclk);
     FL_CHECK_EQ(c.gpio1_gdir & kSclk, kSclk);
     FL_CHECK_EQ(c.sclkLevel(), 1);
+}
+
+FL_TEST_CASE("restore never rewrites the whole GPIO1 latch") {
+    Chip c;
+    // An unrelated GPIO1 input (0x400) reads high while its latch is low.
+    // Writing DR back would latch it high, so a later switch to output would
+    // drive the pin high. Only DR_SET/DR_CLEAR, limited to the saved outputs,
+    // may be used.
+    constexpr u32 kOtherInput = 0x400U;
+    c.gpr26 = 0;
+    c.gpio1_gdir = kSclk;
+    c.gpio1_dr = kSclk;
+    c.mosi_mux = kAlt5;
+    c.sclk_mux = kAlt5;
+    ObjectFLEDPadState state;
+    state.capture(c.regs(), kBoth);
+    own(c);
+    c.gpio1_dr = (c.gpio1_dr & ~kSclk) | kOtherInput;  // SCLK parked low.
+    state.restore(c.regs());
+    FL_CHECK_EQ(c.gpio1_dr, kOtherInput);  // DR itself was not written.
+    FL_CHECK_EQ(c.gpio1_dr_set, kSclk);
+    FL_CHECK_EQ(c.gpio1_dr_clear, 0U);
 }
 
 FL_TEST_CASE("unrelated bits that change during ownership are kept") {
@@ -226,6 +262,7 @@ FL_TEST_CASE("unrelated bits that change during ownership are kept") {
     c.gpio1_gdir = c.gpio1_gdir | 0x3U;
     c.gpio1_dr = c.gpio1_dr | 0x1U;
     state.restore(c.regs());
+    c.latch();
     expectRestored(before, c, 0xFFFFFFFFU & ~kBoth & ~0x3U, 0x3U, 0x1U);
 }
 
@@ -248,6 +285,7 @@ FL_TEST_CASE("restore is one-shot, needs a capture, and repeats cleanly") {
         FL_CHECK(state.captured());
         own(c);
         state.restore(c.regs());
+    c.latch();
         FL_CHECK_FALSE(state.captured());
         FL_CHECK_EQ(c.gpr26, 0xFFFFFFFFU);
         FL_CHECK_EQ(c.mosi_mux, kAlt5Sion);
@@ -255,6 +293,7 @@ FL_TEST_CASE("restore is one-shot, needs a capture, and repeats cleanly") {
     // A second restore after a deinit must not undo later changes.
     c.gpr26 = 0;
     state.restore(c.regs());
+    c.latch();
     FL_CHECK_EQ(c.gpr26, 0U);
 }
 
