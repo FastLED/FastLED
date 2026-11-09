@@ -83,13 +83,22 @@ void own(Chip& c) {
     c.sclk_pad = 0x18U;
 }
 
+// GPIO1 latch bits own() leaves on the pads.
+constexpr u32 kOwnDr = kSclk;
+
 // Every register as it should read after restore, given the starting chip and
-// unrelated bits that changed while the mode owned the pads.
+// unrelated bits that changed while the mode owned the pads. A pad saved as a
+// GPIO1 output gets its old latch back; a pad saved as an input keeps the
+// latch the mode left (DR reads the pad level for inputs, so the old latch is
+// unknowable and irrelevant while the pin is an input).
 void expectRestored(const Chip& before, const Chip& after, u32 gprOthers, u32 gdirOthers,
                     u32 drOthers) {
+    const u32 savedOutputs = before.gpio1_gdir & kBoth;
+    const u32 savedInputs = kBoth & ~savedOutputs;
     FL_CHECK_EQ(after.gpr26, (before.gpr26 & kBoth) | gprOthers);
-    FL_CHECK_EQ(after.gpio1_gdir, (before.gpio1_gdir & kBoth) | gdirOthers);
-    FL_CHECK_EQ(after.gpio1_dr, (before.gpio1_dr & kBoth) | drOthers);
+    FL_CHECK_EQ(after.gpio1_gdir, savedOutputs | gdirOthers);
+    FL_CHECK_EQ(after.gpio1_dr,
+                (before.gpio1_dr & savedOutputs) | (kOwnDr & savedInputs) | drOthers);
     FL_CHECK_EQ(after.gpio6_gdir, before.gpio6_gdir);
     FL_CHECK_EQ(after.gpio6_dr, before.gpio6_dr);
     FL_CHECK_EQ(after.mosi_mux, before.mosi_mux);
@@ -169,6 +178,36 @@ FL_TEST_CASE("other prior states come back exactly: GPIO1 bank, another mux, inp
     expectRestored(before, c, 0x5U, 0x100U, 0x200U);
     FL_CHECK_EQ(c.mosiLevel(), 1);
     FL_CHECK_EQ(c.sclkLevel(), -1); // ALT3 again: not GPIO.
+}
+
+FL_TEST_CASE("an input pin that reads high is released without a high pulse") {
+    Chip c;
+    // Both pads on GPIO1 (GPR26 bits clear). MOSI is an input whose pad reads
+    // high, so DR shows kMosi set although the latch is low; SCLK is a high
+    // output whose latch must come back.
+    c.gpr26 = 0;
+    c.gpio1_gdir = kSclk;
+    c.gpio1_dr = kMosi | kSclk;
+    c.mosi_mux = kAlt5;
+    c.sclk_mux = kAlt5;
+    Chip before;
+    copyChip(before, c);
+
+    ObjectFLEDPadState state;
+    state.capture(c.regs(), kBoth);
+    own(c);
+    c.gpio1_dr = c.gpio1_dr & ~kSclk; // The mode parks SCLK low at deinit.
+    FL_CHECK_EQ(c.gpio1_dr & kMosi, 0U);
+    state.restore(c.regs());
+    // The sampled input level never reaches the latch: with the old order the
+    // pad, still an output from the mode, would have been driven high.
+    FL_CHECK_EQ(c.gpio1_dr & kMosi, 0U);
+    FL_CHECK_EQ(c.gpio1_gdir & kMosi, 0U);
+    FL_CHECK_EQ(c.mosiLevel(), -1);
+    // The saved output's high latch and direction come back.
+    FL_CHECK_EQ(c.gpio1_dr & kSclk, kSclk);
+    FL_CHECK_EQ(c.gpio1_gdir & kSclk, kSclk);
+    FL_CHECK_EQ(c.sclkLevel(), 1);
 }
 
 FL_TEST_CASE("unrelated bits that change during ownership are kept") {

@@ -41,7 +41,11 @@ class ObjectFLEDPadState {
         mMask = mask;
         mGpr26 = *regs.gpr26 & mask;
         mGdir = *regs.gpio1_gdir & mask;
-        mDr = *regs.gpio1_dr & mask;
+        // Reading DR for an input pin returns the pad level, not the latch, so
+        // the latch of a pin that was an input cannot be known here. Record it
+        // only for outputs; restore leaves input pins' latch alone (its value
+        // does not matter while the pin is an input).
+        mDr = *regs.gpio1_dr & mGdir;
         mMosiMux = *regs.mosi_mux;
         mMosiPad = *regs.mosi_pad;
         mSclkMux = *regs.sclk_mux;
@@ -53,15 +57,21 @@ class ObjectFLEDPadState {
     /// nothing. Call only once the DMA has stopped writing GPIO1. Order: the
     /// bank select first, so a pad that started on GPIO6 goes straight to its
     /// old GPIO6 state while GPIO1 still holds the mode's parked-low outputs;
-    /// then GPIO1's latch before its direction, so a pad that started on GPIO1
-    /// never drives a stale level; then pad control, then the mux, which gives
-    /// the pad back to its previous owner last.
+    /// then GPIO1 pins saved as inputs are released (GDIR cleared) before any
+    /// latch write, so no input pin is driven a high pulse; then the latch of
+    /// pins saved as outputs before their direction, so a pad that started as
+    /// a GPIO1 output never drives a stale level; then pad control, then the
+    /// mux, which gives the pad back to its previous owner last. Input pins'
+    /// latch is left as the mode left it (see capture()).
     void restore(const ObjectFLEDPadRegs& regs) FL_NO_EXCEPT {
         if (!mCaptured) {
             return;
         }
+        const u32 inputs = mMask & ~mGdir;
+        const u32 outputs = mGdir;
         *regs.gpr26 = (*regs.gpr26 & ~mMask) | mGpr26;
-        *regs.gpio1_dr = (*regs.gpio1_dr & ~mMask) | mDr;
+        *regs.gpio1_gdir = *regs.gpio1_gdir & ~inputs;
+        *regs.gpio1_dr = (*regs.gpio1_dr & ~outputs) | mDr;
         *regs.gpio1_gdir = (*regs.gpio1_gdir & ~mMask) | mGdir;
         *regs.mosi_pad = mMosiPad;
         *regs.sclk_pad = mSclkPad;
