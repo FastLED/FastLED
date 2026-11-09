@@ -48,6 +48,13 @@ class SAMHardwareSPIOutput {
 		bits -= 8;
 		// don't change the number of transfer bits while data is still being transferred from TDR to the shift register
 		waitForEmpty();
+		setTransferBits(bits + 8);
+	}
+
+	// Write channel 0's CSR without polling TDRE. TDRE reads zero while the SPI
+	// is disabled, so readyTransferBits() would spin forever there (#5181).
+	static inline void setTransferBits(FASTLED_REGISTER u32 bits) FL_NO_EXCEPT {
+		bits -= 8;
 		m_SPI->SPI_CSR[0] = SPI_CSR_NCPHA | SPI_CSR_CSAAT | (bits << SPI_CSR_BITS_Pos) | SPI_CSR_DLYBCT(1) | SPI_CSR_SCBR(_SPI_CLOCK_DIVIDER);
 	}
 
@@ -172,7 +179,8 @@ public:
 		// would clock it out while the PIO still holds SCK low (#5181).
 		const u32 primask = __get_PRIMASK();
 		__disable_irq();
-		readyTransferBits(8);
+		// The SPI is disabled here, so TDRE is zero: set the CSR without waiting.
+		setTransferBits(8);
 		enableSPI();
 		PIOA->PIO_PDR = pins;
 		__set_PRIMASK(primask);

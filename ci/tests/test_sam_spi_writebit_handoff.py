@@ -43,11 +43,11 @@ def test_write_bit_reenables_spi_before_releasing_pads() -> None:
     assert "disableSPI();" not in body[enable:pdr], (
         "the SPI must stay enabled between enableSPI() and PIO_PDR (#5181)"
     )
-    csr: int = body.rfind("readyTransferBits(")
+    csr: int = body.rfind("setTransferBits(")
     assert 0 <= csr < enable, (
         "channel 0's CSR (CPOL=0) must be restored before enableSPI() (#5181)"
     )
-    assert body.startswith("readyTransferBits(8);", csr), (
+    assert body.startswith("setTransferBits(8);", csr), (
         "channel 0's CSR must be restored to 8-bit width (#5181)"
     )
     mask: int = body.rfind("__disable_irq();")
@@ -57,6 +57,10 @@ def test_write_bit_reenables_spi_before_releasing_pads() -> None:
     )
     assert body.find("__set_PRIMASK(", pdr) > pdr, (
         "the caller's interrupt state must be restored after PIO_PDR (#5181)"
+    )
+    assert "readyTransferBits(" not in body[:enable], (
+        "readyTransferBits() polls TDRE, which is zero while the SPI is "
+        "disabled, so it would hang before enableSPI() (#5181)"
     )
     assert body.rindex("FastPin<_CLOCK_PIN>::lo();") < pdr, (
         "SCK must be driven low before the pads are released (#5181)"
