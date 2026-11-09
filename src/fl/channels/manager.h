@@ -47,6 +47,18 @@ struct DriverInfo {
 /// This manager acts as a registry for concrete driver implementations (RMT, SPI, PARLIO).
 /// Channels select drivers via selectDriverForChannel() and bind directly to them via weak_ptr.
 ///
+/// @brief Compile-time switch for the platform's default Channel-API drivers.
+///
+/// `1` (default): the first `ChannelManager::instance()` call registers the
+/// platform defaults (`platforms::initChannelDrivers()`). `0`: nothing is
+/// registered implicitly and `initChannelDrivers()` drops out of the link, so
+/// only drivers named by `FastLED.enable<fl::Bus::X>()`, an `addLeds<..., Bus>`
+/// controller or `FastLED.enableAllDrivers()` exist. Build flag:
+/// `-DFL_CHANNEL_DEFAULT_DRIVERS=0`.
+#ifndef FL_CHANNEL_DEFAULT_DRIVERS
+#define FL_CHANNEL_DEFAULT_DRIVERS 1
+#endif
+
 /// Platform-specific code registers drivers during static initialization.
 class ChannelManager : public EngineEvents::Listener {
 public:

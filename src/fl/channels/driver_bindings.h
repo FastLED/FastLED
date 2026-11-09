@@ -55,31 +55,53 @@ private:
 
 namespace detail {
 
-template<Bus B, typename Chipset, u8 Which>
+template<typename...> struct BindingVoid { using type = void; };
+
+// `Bus::AUTO` resolves through `DefaultBus<Chipset>`, which some platforms
+// (RP2040, SAMD, ...) leave undefined for a chipset family. There it stays
+// AUTO, and enabling it is a no-op: those platforms' default drivers come
+// from `platforms::initChannelDrivers()`.
+template<Bus B, typename Chipset, typename = void>
+struct ResolveBus { static constexpr Bus value = B; };
+
+template<typename Chipset>
+struct ResolveBus<Bus::AUTO, Chipset,
+    typename BindingVoid<decltype(DefaultBus<Chipset>::value)>::type> {
+    static constexpr Bus value = DefaultBus<Chipset>::value;
+};
+
+template<Bus B, typename Chipset, u8 Which, bool RESOLVED = (B != Bus::AUTO)>
 struct BusBinding {
-    static constexpr Bus kBus =
-        B == Bus::AUTO ? DefaultBus<Chipset>::value : B;
+    static constexpr Bus kBus = B;
 
     static void bind() FL_NO_EXCEPT {
         enable_clockless_for<Chipset, BusTraits<kBus, Which>>::apply();  // #4793
         BusTraits<kBus, Which>::registerWithManager();
     }
 
-    static DriverBinding& node() FL_NO_EXCEPT {
+    static void push(DriverBindings& list) FL_NO_EXCEPT {
         static DriverBinding sNode = {kBus, Which, &BusBinding::bind,
                                       nullptr, false};  // okay static in header
-        return sNode;
+        list.push(sNode);
     }
+};
+
+/// No platform default for this chipset family: nothing to link.
+template<Bus B, typename Chipset, u8 Which>
+struct BusBinding<B, Chipset, Which, false> {
+    static constexpr Bus kBus = B;
+    static void push(DriverBindings&) FL_NO_EXCEPT {}
 };
 
 }  // namespace detail
 
 /// Enable one bus for `FastLED.add(cfg)`. `Bus::AUTO` names the platform
-/// default for `Chipset`. Links that bus only; construction is deferred.
+/// default for `Chipset` (a no-op where the platform defines none). Links that
+/// bus only; construction is deferred.
 template<Bus B, typename Chipset = ClocklessChipset, u8 Which = 0>
 inline void bindDriver() FL_NO_EXCEPT {
-    DriverBindings::instance().push(
-        detail::BusBinding<B, Chipset, Which>::node());
+    constexpr Bus kBus = detail::ResolveBus<B, Chipset>::value;
+    detail::BusBinding<kBus, Chipset, Which>::push(DriverBindings::instance());
 }
 
 }  // namespace fl

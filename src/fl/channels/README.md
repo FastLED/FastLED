@@ -27,7 +27,7 @@ Two complementary dispatch modes are available (introduced by issue #2428, refin
   - `FastLED.addLeds<WS2812, 4, GRB, fl::Bus::RMT>(leds, NUM)` — every `addLeds<>` variant takes an optional trailing `fl::Bus B = fl::Bus::AUTO` template parameter (#2460).
 
   Naming `Bus::X` at the call site is what links the driver's translation unit, so `--gc-sections` drops every driver the sketch doesn't reference. Unsupported bus/chipset combinations produce `static_assert` errors. An erased `ChannelConfig` with the wrong chipset family returns `nullptr` before registering a driver.
-- **Runtime selection** — `FastLED.add(cfg)` is **non-template**. Pick the driver by setting `cfg.options.mBus = fl::Bus::RMT` (typed `enum class`). The non-template path auto-enrolls every driver on the platform via `fl::enableAllDrivers()` and emits a one-time `FL_WARN_ONCE` explaining the binary-size trade-off (suppress with `-DFASTLED_SUPPRESS_RUNTIME_DRIVER_WARNING`). For minimum binary size, use the compile-time path instead. Custom/mock drivers (whose names aren't in the `fl::Bus` enum) bind via priority dispatch — register the mock with `manager.addDriver()` and either let it win by priority, or use `manager.setExclusiveDriver(name)` to force-select.
+- **Runtime selection** — `FastLED.add(cfg)` is **non-template**. Pick the driver by setting `cfg.options.mBus = fl::Bus::RMT` (typed `enum class`). `add(cfg)` links no drivers on its own: it binds the buses enabled with `FastLED.enable<fl::Bus::X>()` (or everything after `FastLED.enableAllDrivers()`) and warns once a second when none can serve the channel. Custom/mock drivers (whose names aren't in the `fl::Bus` enum) bind via priority dispatch — register the mock with `manager.addDriver()` and either let it win by priority, or use `manager.setExclusiveDriver(name)` to force-select.
 
 **Why `Channel` still derives from `CPixelLEDController<RGB>`:** `FastLED.add(ChannelPtr)` puts the channel on the `CLEDController` draw list via `addToDrawList()` (`DeferRegister`), and the MY9221 `addLeds<>` path returns a `Channel` as a `CLEDController&`. Removing the base would need a separate channel draw list in `FastLED.show()` and a slim/managed MY9221 path.
 
@@ -411,7 +411,7 @@ Non-Channel-API controllers (older `ClocklessController` subclasses that pre-dat
 
 For **custom / third-party / mock drivers** whose names aren't in the `fl::Bus` enum, register the driver with `manager.addDriver(priority, driver)` and either (a) clear competing drivers first so priority dispatch picks it, or (b) call `manager.setExclusiveDriverByName(name)` for process-wide binding (the by-name escape hatch — `manager.setExclusiveDriver(fl::Bus)` is the typed form for built-in drivers).
 
-The non-template path **auto-enrolls every driver** on the platform (`fl::enableAllDrivers()` runs inside) so any `mBus` value can be dispatched at runtime. A one-time `FL_WARN_ONCE` explains the binary-size trade-off; suppress it with `-DFASTLED_SUPPRESS_RUNTIME_DRIVER_WARNING`. For minimum binary size, use the compile-time `TypedChannel<...>::create()` path above.
+The non-template path **does not link every driver**. Enable the buses that `mBus` may name with `FastLED.enable<fl::Bus::X>()`, or call `FastLED.enableAllDrivers()` as the catch-all when the choice is fully data-driven. If no enabled driver can serve the channel, `add(cfg)` warns once a second (`FL_WARN_EVERY(1000, ...)`) and names the fix.
 
 ```cpp
 #include "FastLED.h"
@@ -426,7 +426,8 @@ void setup() {
         fl::span<CRGB>(leds, 60), RGB);
 
     cfg.options.mBus = userPreferredBus();   // data-driven choice
-    FastLED.add(cfg);                         // auto-enables all drivers, dispatches by mBus
+    FastLED.enableAllDrivers();               // any mBus may be chosen at runtime
+    FastLED.add(cfg);                         // dispatches by mBus
 }
 ```
 
@@ -488,6 +489,48 @@ SK9822, or other clocked-SPI controller per data pin, give every controller the
 same clock pin, and select `Bus::FLEX_IO, 0` before registration as above. The
 I2S-SPI engine batches up to 16 data lanes into one transmission. ESP32-S3 uses
 the shown `lcd_spi/bus_traits.h` include with the same public API.
+
+### Extreme Driver Control (`FL_CHANNEL_DEFAULT_DRIVERS=0`)
+
+By default the first `ChannelManager::instance()` call (any `FastLED.add(cfg)`,
+`Channel` dispatch or driver query) runs `platforms::initChannelDrivers()`,
+which registers the platform's **default** Channel-API drivers. On Teensy 4.x
+that is ObjectFLED; on RP2040/RP2350 the hardware SPI, UART and PIO drivers;
+on SAMD, nRF52 and STM32 hardware SPI (ESP32 and the host stub register none). Those defaults are linked **in
+addition** to whatever bus you pick, so overriding the bus does not by itself
+remove the default driver from the binary.
+
+To link and register **only** the drivers you name, turn the defaults off at
+build time:
+
+```ini
+build_flags = -DFL_CHANNEL_DEFAULT_DRIVERS=0
+```
+
+With the flag at `0`, nothing is registered implicitly and
+`initChannelDrivers()` drops out of the link (`--gc-sections`). A driver exists
+only if one of these names it:
+
+| Names a driver | Effect |
+|---|---|
+| `FastLED.enable<fl::Bus::X>()` | links bus X; built on first `FastLED.add(cfg)` |
+| `FastLED.addLeds<..., fl::Bus::X>(...)` | links and registers bus X for that strip |
+| `FastLED.addLeds<CHIPSET, PIN>(...)` (no bus) | links the platform `DefaultBus` only |
+| `FastLED.enableAllDrivers()` | catch-all: every driver on the platform |
+
+```cpp
+// build_flags = -DFL_CHANNEL_DEFAULT_DRIVERS=0
+void setup() {
+    FastLED.enable<fl::Bus::FLEX_IO>();   // the only driver in the binary
+    FastLED.add(cfg);
+}
+```
+
+The constraint: a `FastLED.add(cfg)` strip whose bus was never enabled gets no
+driver. It does not fail silently: `add(cfg)` warns once a second
+(`FL_WARN_EVERY(1000, ...)`) with the `FastLED.enable<fl::Bus::X>()` fix.
+Combine with `FastLED.setExclusiveDriver<>()` / `setDriverEnabled()` for
+runtime control over the drivers that are linked.
 
 ---
 

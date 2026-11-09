@@ -36,7 +36,9 @@ ChannelManager& ChannelManager::instance() FL_NO_EXCEPT {
     static bool sInitialized = false; // okay static in header
     if (!sInitialized) {
         sInitialized = true;
+#if FL_CHANNEL_DEFAULT_DRIVERS
         platforms::initChannelDrivers();
+#endif
     }
     return out;
 }
