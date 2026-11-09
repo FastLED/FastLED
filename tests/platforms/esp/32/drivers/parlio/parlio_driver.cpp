@@ -2208,6 +2208,99 @@ FL_TEST_CASE("ParlioBufferCalculator - calculateRingBufferCapacity") {
     }
 }
 
+// FastLED#5161: a frame that fits in one ring buffer is sent from slot 0
+// alone, so only one DMA buffer may be allocated for it.
+FL_TEST_CASE("ParlioBufferCalculator - ringBufferCount") {
+    FL_SUBCASE("12 LEDs, single lane, WS2812 reset: one buffer") {
+        ParlioBufferCalculator calc{1};
+        FL_CHECK(calc.ringBufferCount(12, 280, 3) == 1);
+    }
+
+    FL_SUBCASE("3000 LEDs, single lane: still one buffer") {
+        ParlioBufferCalculator calc{1};
+        FL_CHECK(calc.ringBufferCount(3000, 280, 3) == 1);
+    }
+
+    FL_SUBCASE("frame larger than one buffer: full ring") {
+        ParlioBufferCalculator calc{1};
+        // 4000 LEDs: dmaBufferSize(12000, 280) + 128 = 96416 > 12 KB / 3.
+        FL_CHECK(calc.ringBufferCount(4000, 280, 3, 12UL * 1024UL) == 3);
+        // Exactly at the fit boundary the capacity rule and the count agree.
+        const size_t perBufferCap = (12UL * 1024UL) / 3;
+        for (size_t leds = 1; leds < 400; ++leds) {
+            const size_t full = calc.dmaBufferSize(leds * 3, 280) + 128;
+            const size_t expected = (full <= perBufferCap) ? 1 : 3;
+            FL_CHECK(calc.ringBufferCount(leds, 280, 3, 12UL * 1024UL) == expected);
+            if (expected == 1) {
+                FL_CHECK(calc.calculateRingBufferCapacity(leds, 280, 3, 12UL * 1024UL) == full);
+            }
+        }
+    }
+}
+
+// Growing past the single-buffer fit must allocate the full ring, even though
+// the streaming per-buffer capacity is smaller than the old full-frame one.
+FL_TEST_CASE("ParlioEngine mock - grow from single buffer to streaming ring") {
+    resetMockFull();
+    auto& driver = ParlioEngine::getInstance();
+    fl::vector<int> pins = {1};
+    ChipsetTimingConfig timing = getWS2812Timing();
+
+    auto transmit = [&](size_t num_leds) {
+        FL_REQUIRE(driver.initialize(1, pins, timing, num_leds));
+        fl::vector<uint8_t> scratch(num_leds * 3);
+        for (size_t i = 0; i < scratch.size(); i++) {
+            scratch[i] = static_cast<uint8_t>(i & 0xFF);
+        }
+        FL_REQUIRE(driver.beginTransmission(scratch.data(), scratch.size(), 1, scratch.size()));
+        ParlioEngineState state = ParlioEngineState::DRAINING;
+        for (int i = 0; i < 2000 && state != ParlioEngineState::READY; i++) {
+            state = driver.poll();
+            if (state == ParlioEngineState::ERROR) break;
+            if (state == ParlioEngineState::DRAINING) delay(1);
+        }
+        FL_CHECK(state == ParlioEngineState::READY);
+    };
+
+    transmit(12);  // one ring slot
+    auto& mock = ParlioPeripheralMock::instance();
+    // The TX unit's max_transfer_size tracks the one-buffer frame, not the
+    // 65534-byte ceiling (IDF sizes DMA descriptors from it).
+    FL_CHECK(mock.getConfig().max_transfer_size < 1024);
+    FL_CHECK(mock.getConfig().max_transfer_size % 64 == 0);
+    // Larger than FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES / 3 at 1 lane
+    // with either encoding, so it must stream through all three slots.
+    transmit(40000);
+    FL_CHECK(mock.getTransmitCount() >= 3);
+    FL_CHECK(mock.getConfig().max_transfer_size <= 65534);
+}
+
+// ChannelDriverPARLIO sizes the ring from a capped LED count
+// (FL_ESP_PARLIO_MAX_LEDS_PER_CHANNEL), so a frame longer than the size the
+// engine was initialized for must still stream instead of hitting a
+// missing ring slot.
+FL_TEST_CASE("ParlioEngine mock - frame longer than sized ring still streams") {
+    resetMockFull();
+    auto& driver = ParlioEngine::getInstance();
+    fl::vector<int> pins = {1};
+    ChipsetTimingConfig timing = getWS2812Timing();
+    FL_REQUIRE(driver.initialize(1, pins, timing, 12));  // one ring slot
+
+    const size_t num_leds = 40000;
+    fl::vector<uint8_t> scratch(num_leds * 3);
+    for (size_t i = 0; i < scratch.size(); i++) {
+        scratch[i] = static_cast<uint8_t>(i & 0xFF);
+    }
+    FL_REQUIRE(driver.beginTransmission(scratch.data(), scratch.size(), 1, scratch.size()));
+    ParlioEngineState state = ParlioEngineState::DRAINING;
+    for (int i = 0; i < 2000 && state != ParlioEngineState::READY; i++) {
+        state = driver.poll();
+        if (state == ParlioEngineState::ERROR) break;
+        if (state == ParlioEngineState::DRAINING) delay(1);
+    }
+    FL_CHECK(state == ParlioEngineState::READY);
+}
+
 FL_TEST_CASE("ParlioBufferCalculator - consistency across data widths") {
     size_t input_bytes = 30;
     uint32_t reset_us = 80;

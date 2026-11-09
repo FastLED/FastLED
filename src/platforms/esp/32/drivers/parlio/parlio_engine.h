@@ -279,6 +279,19 @@ private:
     /// @brief Allocate and initialize all ring buffers (one-time)
     bool allocateRingBuffers() FL_NO_EXCEPT;
 
+    /// @brief Set mRingBufferCapacity (64-byte aligned) and mRingBufferCount
+    /// for a frame of maxLeds per lane under the given total DMA byte cap.
+    void sizeRingBuffers(const ParlioBufferCalculator& calc, size_t maxLeds,
+                         u32 resetUs, size_t totalCapBytes) FL_NO_EXCEPT;
+
+    /// @brief max_transfer_size for the TX unit: one ring buffer, capped at
+    /// the 65534-byte IDF ceiling. Valid after sizeRingBuffers().
+    size_t ringMaxTransferBytes() const FL_NO_EXCEPT;
+
+    /// @brief Allocate the remaining ring slots when a frame of laneBytes
+    /// per lane will not fit in the single slot allocated for it.
+    bool ensureRingSlotsFor(size_t laneBytes) FL_NO_EXCEPT;
+
 private:
     // Initialization state
     bool mInitialized;
@@ -332,6 +345,9 @@ private:
     // Ring buffer for DMA streaming (fixed 3-buffer architecture)
     fl::unique_ptr<ParlioRingBuffer3> mRingBuffer;
     size_t mRingBufferCapacity;  // Capacity of each ring buffer (64-byte aligned)
+    // Ring slots actually allocated: 1 when one buffer holds the whole frame
+    // (slots 1-2 would never be written), else RING_BUFFER_COUNT.
+    size_t mRingBufferCount;
 
     // Scratch buffer pointer (owned by caller, NOT by this class)
     const u8* mScratchBuffer;

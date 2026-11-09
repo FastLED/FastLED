@@ -208,7 +208,7 @@ struct ParlioBufferCalculator {
     /// - With safety margin: 24000 + 280 + 128 = 24408 bytes
     size_t calculateRingBufferCapacity(size_t maxLedsPerChannel, u32 reset_us, size_t numRingBuffers = 3,
                                        size_t totalCapBytes = FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES) const FL_NO_EXCEPT {
-        size_t safetyMargin = 128;
+        const size_t safetyMargin = kRingSafetyMargin;
         size_t perBufferCap = totalCapBytes / numRingBuffers;
 
         // CRITICAL: Try to fit the ENTIRE frame in a single DMA buffer.
@@ -219,12 +219,9 @@ struct ParlioBufferCalculator {
         // The engine streams byte positions across all lanes. Its input byte
         // count is therefore bytes per lane, while outputBytesPerInputByte()
         // already accounts for mDataWidth during waveform transposition.
-        size_t totalInputBytes = maxLedsPerChannel * 3;
-        size_t fullFrameDmaSize = dmaBufferSize(totalInputBytes, reset_us);
-
-        if (fullFrameDmaSize + safetyMargin <= perBufferCap) {
+        if (fullFrameFitsOneBuffer(maxLedsPerChannel, reset_us, numRingBuffers, totalCapBytes)) {
             // Full frame fits in one ring buffer - no DMA transitions needed
-            return fullFrameDmaSize + safetyMargin;
+            return dmaBufferSize(maxLedsPerChannel * 3, reset_us) + safetyMargin;
         }
 
         // Full frame doesn't fit - fall back to streaming with multiple ring buffers.
@@ -246,6 +243,33 @@ struct ParlioBufferCalculator {
 
         return dmaBufferCapacity;
     }
+
+    /// @brief Number of ring buffers a frame of this size actually uses
+    /// @return 1 when calculateRingBufferCapacity() sized one buffer to hold
+    ///         the whole frame, otherwise numRingBuffers
+    ///
+    /// A frame that fits in one buffer is always encoded into ring slot 0 and
+    /// sent as a single DMA transfer (calculateBufferByteCount() forces
+    /// effective_ring_count = 1), so the other slots would never be written.
+    /// Allocating them costs 2x the full-frame DMA size of internal RAM for
+    /// nothing (FastLED#5161).
+    size_t ringBufferCount(size_t maxLedsPerChannel, u32 reset_us, size_t numRingBuffers = 3,
+                           size_t totalCapBytes = FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES) const FL_NO_EXCEPT {
+        return fullFrameFitsOneBuffer(maxLedsPerChannel, reset_us, numRingBuffers, totalCapBytes)
+                   ? 1
+                   : numRingBuffers;
+    }
+
+    /// @brief True when the whole frame fits in a single ring buffer
+    bool fullFrameFitsOneBuffer(size_t maxLedsPerChannel, u32 reset_us, size_t numRingBuffers,
+                                size_t totalCapBytes) const FL_NO_EXCEPT {
+        const size_t perBufferCap = totalCapBytes / numRingBuffers;
+        const size_t fullFrameDmaSize = dmaBufferSize(maxLedsPerChannel * 3, reset_us);
+        return fullFrameDmaSize + kRingSafetyMargin <= perBufferCap;
+    }
+
+    /// Slack added to each ring buffer for boundary checks.
+    static constexpr size_t kRingSafetyMargin = 128;
 };
 
 } // namespace detail
