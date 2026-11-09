@@ -19,6 +19,7 @@
 #include "fl/stl/iterator.h"
 #include "fl/stl/singleton.h"
 #include "fl/stl/static_assert.h"
+#include "platforms/esp/32/drivers/rmt/rmt_5/config.h"
 
 // RX device logging: Disabled by default to reduce noise
 // Enable with: #define FASTLED_RX_LOG_ENABLED 1
@@ -751,10 +752,17 @@ class RmtRxChannelImpl : public RmtRxChannel {
         // AutoResearchTest keep passing use_dma=true every capture, and
         // comparing the raw request against the already-clamped mUseDma
         // would tear down and rebuild the channel on every begin().
+        // FastLED#5186 — FL_RMT5_USE_DMA=0 also clamps RX, mirroring TX.
         bool use_dma_req = config.use_dma;
 #if !SOC_RMT_SUPPORT_DMA
         if (use_dma_req) {
             FL_WARN("[RMT RX] DMA requested but unsupported on this chip — using non-DMA mode");
+            use_dma_req = false;
+        }
+#endif
+#if !FL_RMT5_USE_DMA
+        if (use_dma_req) {
+            FL_WARN("[RMT RX] DMA requested but FL_RMT5_USE_DMA=0 — using non-DMA mode");
             use_dma_req = false;
         }
 #endif
