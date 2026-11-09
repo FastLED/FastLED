@@ -14,7 +14,7 @@ ROOT = Path(__file__).resolve().parents[2]
 def test_sketch_startup_header(tmp_path: Path, user_main: bool) -> None:
     compiler = shutil.which("c++")
     if compiler is None:
-        pytest.skip("C++ compiler unavailable")
+        pytest.fail("C++ compiler required: c++ not found on PATH")
     headers = {
         "esp_arduino_version.h": "#define ESP_ARDUINO_VERSION_VAL(a,b,c) ((a)*10000+(b)*100+(c))\n#define ESP_ARDUINO_VERSION 30311\n",
         "sdkconfig.h": "#define CONFIG_AUTOSTART_ARDUINO 1\n",
@@ -65,7 +65,7 @@ def test_shared_arduino_header(
 ) -> None:
     compiler = shutil.which("c++")
     if compiler is None:
-        pytest.skip("C++ compiler unavailable")
+        pytest.fail("C++ compiler required: c++ not found on PATH")
     (tmp_path / "Arduino.h").write_text("#define TEST_ARDUINO_INCLUDED 1\n")
     source = tmp_path / "guard.cpp"
     source.write_text(
@@ -114,7 +114,7 @@ def test_user_app_main_keeps_loop_task_globals(tmp_path: Path) -> None:
     """
     compiler = shutil.which("c++")
     if compiler is None:
-        pytest.skip("C++ compiler unavailable")
+        pytest.fail("C++ compiler required: c++ not found on PATH")
     headers = {
         "esp_arduino_version.h": "#define ESP_ARDUINO_VERSION_VAL(a,b,c) ((a)*10000+(b)*100+(c))\n#define ESP_ARDUINO_VERSION 30311\n",
         "sdkconfig.h": "#define CONFIG_AUTOSTART_ARDUINO 1\n",
