@@ -437,11 +437,6 @@ private:
                                      // to `ChannelManager` priority dispatch; any other value
                                      // pins this channel to `busName(mBus)`.
     fl::u8 mBusWhich = 0;            // Instance selector for portable buses.
-    bool mBusWarned = false;         // One-shot guard for the #2455 FL_ERROR. Flipped on the
-                                     // first showPixels() that observes a `mBus` miss (the
-                                     // named driver wasn't registered with ChannelManager).
-                                     // Subsequent shows on the same channel skip the warn even
-                                     // though the priority-dispatch fallback re-runs every frame.
     /// This channel's temporal-dither phase. Advanced when its driver accepts
     /// a frame rather than when one is attempted, so dropped submissions do
     /// not skew the cycle (#4347).

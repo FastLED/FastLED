@@ -196,9 +196,14 @@ private:
             ChannelManager::registry().selectDriverForChannel(mData, busKey);
 
 #if FASTLED_LOG_RUNTIME_ENABLED
-        if (!driver && !mBusWarned) {
-            FL_ERROR("SlimSpiBridgeController: no compatible driver found for bus '" << busKey << "' - cannot transmit");
-            mBusWarned = true;
+        if (!driver) {
+            FL_WARN_EVERY(1000, "addLeds: no enabled driver can take bus '" << busKey
+                          << "' - dropping frame. Fix: FastLED.setDriverEnabled(\"" << busKey
+                          << "\", true) or FastLED.enableAllDrivers().");
+        } else if (kBus != Bus::AUTO && driver->getName() != busKey) {
+            FL_WARN_EVERY(1000, "addLeds: driver '" << busKey << "' is not enabled - falling back to '"
+                          << driver->getName() << "'. Fix: FastLED.setDriverEnabled(\"" << busKey
+                          << "\", true), or name the enabled bus in addLeds<..., fl::Bus::X>().");
         }
 #endif  // FASTLED_LOG_RUNTIME_ENABLED
         return driver;
@@ -263,7 +268,6 @@ private:
 #endif
     u8 mDitherPhase = 0;
 #if FASTLED_LOG_RUNTIME_ENABLED
-    bool mBusWarned = false;
 #endif
 };
 

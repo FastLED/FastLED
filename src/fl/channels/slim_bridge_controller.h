@@ -75,6 +75,10 @@ struct SlimBridgeShowPolicy<false, BATCHED> {
     static bool enabled(IChannelDriver& driver) FL_NO_EXCEPT {
         return ChannelManager::registry().isDriverEnabled(driver);
     }
+    /// An enabled driver that can take `data`, in priority order.
+    static fl::shared_ptr<IChannelDriver> fallback(const ChannelDataPtr& data) FL_NO_EXCEPT {
+        return ChannelManager::registry().selectEnabledDriverForChannel(data);
+    }
     static void afterEnqueue(IChannelDriver&) FL_NO_EXCEPT {}
     template <typename DriverTraits>
     static void endShow() FL_NO_EXCEPT {}
@@ -87,6 +91,7 @@ struct SlimBridgeShowPolicy<true, false> {
     template <typename DriverTraits>
     static void attach() FL_NO_EXCEPT {}
     static bool enabled(IChannelDriver&) FL_NO_EXCEPT { return true; }
+    static fl::shared_ptr<IChannelDriver> fallback(const ChannelDataPtr&) FL_NO_EXCEPT { return {}; }
     static void afterEnqueue(IChannelDriver& driver) FL_NO_EXCEPT { driver.show(); }
     template <typename DriverTraits>
     static void endShow() FL_NO_EXCEPT {}
@@ -195,16 +200,27 @@ public:
 
 protected:
     void showPixels(PixelController<RGB_ORDER>& pixels) FL_NO_EXCEPT override {
-        IChannelDriver& driver = DriverTraits::instance();
-
         // (A1) Respect runtime driver enable/disable: ChannelManager is the
-        // single source of truth. A disabled driver means "drop this frame",
-        // not "enqueue and hope" -- silently enqueuing to a disabled driver
-        // is the #2517 silent-drop failure mode.
-        if (!Policy::enabled(driver)) {
-            FL_WARN_ONCE("SlimBridgeController: driver '" << driver.getName().c_str() << "' is disabled - dropping frame");
-            return;
+        // single source of truth. A disabled driver is never enqueued to (the
+        // #2517 silent-drop failure mode); the frame goes to an enabled driver
+        // that can handle it instead, with a warning naming the fix.
+        fl::shared_ptr<IChannelDriver> fallback;
+        if (!Policy::enabled(DriverTraits::instance())) {
+            fallback = Policy::fallback(mData);
+            IChannelDriver& wanted = DriverTraits::instance();
+            if (!fallback) {
+                FL_WARN_EVERY(1000, "addLeds: driver '" << wanted.getName().c_str()
+                              << "' is not enabled and no enabled driver can take this strip - dropping frame. "
+                              "Fix: FastLED.setDriverEnabled(\"" << wanted.getName().c_str()
+                              << "\", true), or drop the setExclusiveDriver() that disabled it.");
+                return;
+            }
+            FL_WARN_EVERY(1000, "addLeds: driver '" << wanted.getName().c_str()
+                          << "' is not enabled - falling back to '" << fallback->getName().c_str()
+                          << "'. Fix: FastLED.setDriverEnabled(\"" << wanted.getName().c_str()
+                          << "\", true), or name the enabled bus in addLeds<..., fl::Bus::X>().");
         }
+        IChannelDriver& driver = fallback ? *fallback : DriverTraits::instance();
 
         // (A8) If the previous frame's buffer is still in flight, block
         // (bounded) until the driver reports it can accept more work rather

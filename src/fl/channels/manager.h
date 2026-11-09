@@ -248,6 +248,10 @@ public:
     /// @note This is called lazily in Channel::showPixels() if no driver is bound
     fl::shared_ptr<IChannelDriver> selectDriverForChannel(const ChannelDataPtr& data, const fl::string& affinity) FL_NO_EXCEPT;
 
+    /// @brief Highest-priority enabled driver that can handle `data`, or null.
+    /// Silent on miss; used for fallback when a requested driver is disabled.
+    fl::shared_ptr<IChannelDriver> selectEnabledDriverForChannel(const ChannelDataPtr& data) const FL_NO_EXCEPT;
+
     /// @brief Poll all registered drivers and return aggregate state
     /// @return Aggregate state (READY if all ready, BUSY if any busy, ERROR if any error)
     /// @note This is NOT an IChannelDriver override - it's a diagnostic/test helper

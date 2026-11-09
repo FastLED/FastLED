@@ -378,16 +378,53 @@ FL_TEST_CASE("FastLED.show() flushes the frame and calls driver show() once") {
     FL_CHECK_EQ(mockDriverInstance().showCount, showBefore + 1);
 }
 
-FL_TEST_CASE("Disabled/exclusive-to-another-driver: no enqueue, returns promptly") {
+FL_TEST_CASE("Disabled driver: addLeds falls back to the enabled driver") {
     SlimBridgeFixture fixture;
     TestController controller;
     CRGB leds[4] = {};
     FastLED.addLeds(&controller, leds, 4);
     auto cleanup = fl::make_scope_exit([&]() { FastLED.clear(true); });
 
-    ChannelManager::instance().setDriverEnabled("SLIM_BRIDGE_MOCK", false);
+    // The one other enabled driver that can take a clockless strip.
+    struct FallbackDriver : SlimBridgeMockDriver {
+        fl::string getName() const FL_NO_EXCEPT override {
+            return fl::string::from_literal("FALLBACK_MOCK");
+        }
+    };
+    auto fallback = fl::make_shared<FallbackDriver>();
+    ChannelManager& mgr = ChannelManager::registry();
+    mgr.addDriver(1000, fallback);
+    mgr.setDriverEnabled("SLIM_BRIDGE_MOCK", false);
     auto restore = fl::make_scope_exit([&]() {
-        ChannelManager::instance().setDriverEnabled("SLIM_BRIDGE_MOCK", true);
+        mgr.setDriverEnabled("SLIM_BRIDGE_MOCK", true);
+        mgr.removeDriver(fallback);
+    });
+
+    int enqueueBefore = mockDriverInstance().enqueueCount;
+    FastLED.show();
+    // Never enqueued to the disabled driver; the frame went to the fallback.
+    FL_CHECK_EQ(mockDriverInstance().enqueueCount, enqueueBefore);
+    FL_CHECK_EQ(fallback->enqueueCount, 1);
+    FL_CHECK_EQ(fallback->lastBytes.size(), 12u);
+    // ...and was flushed by the end-of-show manager pass.
+    FL_CHECK_GE(fallback->showCount, 1);
+}
+
+FL_TEST_CASE("Disabled driver with no enabled alternative drops the frame") {
+    SlimBridgeFixture fixture;
+    TestController controller;
+    CRGB leds[4] = {};
+    FastLED.addLeds(&controller, leds, 4);
+    auto cleanup = fl::make_scope_exit([&]() { FastLED.clear(true); });
+
+    ChannelManager& mgr = ChannelManager::registry();
+    fl::vector<fl::string> disabled;
+    for (const fl::DriverInfo& info : mgr.getDriverInfos()) {
+        if (info.enabled) disabled.push_back(info.name);
+    }
+    for (const fl::string& name : disabled) mgr.setDriverEnabled(name.c_str(), false);
+    auto restore = fl::make_scope_exit([&]() {
+        for (const fl::string& name : disabled) mgr.setDriverEnabled(name.c_str(), true);
     });
 
     int enqueueBefore = mockDriverInstance().enqueueCount;
@@ -521,10 +558,16 @@ FL_TEST_CASE("onBeforeEncode() hook fires once per accepted frame, not on droppe
     FastLED.show();
     FL_CHECK_EQ(controller.beforeEncodeCount, 1);
 
-    // Disable the driver: the frame is dropped before onBeforeEncode() runs.
-    ChannelManager::instance().setDriverEnabled("SLIM_BRIDGE_MOCK", false);
+    // Disable every driver, so there is no fallback either: the frame is
+    // dropped before onBeforeEncode() runs.
+    ChannelManager& mgr = ChannelManager::registry();
+    fl::vector<fl::string> disabled;
+    for (const fl::DriverInfo& info : mgr.getDriverInfos()) {
+        if (info.enabled) disabled.push_back(info.name);
+    }
+    for (const fl::string& name : disabled) mgr.setDriverEnabled(name.c_str(), false);
     auto restore = fl::make_scope_exit([&]() {
-        ChannelManager::instance().setDriverEnabled("SLIM_BRIDGE_MOCK", true);
+        for (const fl::string& name : disabled) mgr.setDriverEnabled(name.c_str(), true);
     });
 
     FastLED.show();
