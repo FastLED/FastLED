@@ -38,10 +38,10 @@
 #if defined(ARDUINO) && FL_HAS_INCLUDE(<variant.h>)
 #include <variant.h>
 #define FL_SAMD_HAS_PIN_DESCRIPTION 1
-#ifndef PINS_COUNT
+#if !defined(PINS_COUNT) && !defined(FL_SAMD_PIN_DESCRIPTION_COUNT)
 // Without the table size, the lookup cannot be bounds-checked. Falling back to
 // the linear mapping would silently drive the wrong pads again (#5130).
-#error "SAMD variant.h does not define PINS_COUNT; FastLED cannot map Arduino pins to pads"
+#error "SAMD variant.h does not define PINS_COUNT and FL_SAMD_PIN_DESCRIPTION_COUNT is unset; FastLED cannot map Arduino pins to pads"
 #endif
 // Variants index pins past PINS_COUNT (#5185); this computes the real bound.
 #include "platforms/arm/samd/pin_samd_table_size.hpp"
