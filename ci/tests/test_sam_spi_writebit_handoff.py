@@ -24,20 +24,28 @@ SIGNATURE = "template <u8 BIT> inline void writeBit("
 
 
 def _write_bit_body() -> str:
-    lines = SAM_SPI_HEADER.read_text(encoding="utf-8").splitlines()
-    start = next(i for i, line in enumerate(lines) if SIGNATURE in line)
-    end = next(i for i in range(start + 1, len(lines)) if lines[i] == "\t}")
-    body = lines[start : end + 1]
+    lines: list[str] = SAM_SPI_HEADER.read_text(encoding="utf-8").splitlines()
+    start: int = next(i for i, line in enumerate(lines) if SIGNATURE in line)
+    end: int = next(i for i in range(start + 1, len(lines)) if lines[i] == "\t}")
+    body: list[str] = lines[start : end + 1]
     return "\n".join(re.sub(r"//.*", "", line) for line in body)
 
 
 def test_write_bit_reenables_spi_before_releasing_pads() -> None:
-    body = _write_bit_body()
+    body: str = _write_bit_body()
     assert "PIO_PDR" in body, "writeBit must hand the pads back to peripheral A"
     assert "enableSPI();" in body, "writeBit must re-enable the SPI"
-    pdr = body.index("PIO_PDR")
-    assert body.rindex("enableSPI();") < pdr, (
+    pdr: int = body.index("PIO_PDR")
+    enable: int = body.rindex("enableSPI();")
+    assert enable < pdr, (
         "enableSPI() must run before PIO_PDR so SCK is never undriven (#5181)"
+    )
+    assert "disableSPI();" not in body[enable:pdr], (
+        "the SPI must stay enabled between enableSPI() and PIO_PDR (#5181)"
+    )
+    csr: int = body.rfind("readyTransferBits(")
+    assert 0 <= csr < enable, (
+        "channel 0's CSR (CPOL=0) must be restored before enableSPI() (#5181)"
     )
     assert body.rindex("FastPin<_CLOCK_PIN>::lo();") < pdr, (
         "SCK must be driven low before the pads are released (#5181)"

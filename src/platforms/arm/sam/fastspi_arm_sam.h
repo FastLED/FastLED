@@ -156,7 +156,9 @@ public:
 		// On the way back the SPI is re-enabled before PIO_PDR releases the pads:
 		// the PIO keeps SCK driven low until the idle SPI (CPOL=0) drives it, so
 		// the pad never floats and a pull-up or interrupt cannot make a spurious
-		// rising edge that SM16716 would count as a data bit (#5181).
+		// rising edge that SM16716 would count as a data bit (#5181). Channel 0's
+		// CSR is rewritten first so the LED mode (CPOL=0, 8 bits) is in force even
+		// if another SPI user left channel 0 in CPOL=1, which would idle SCK high.
 		const u32 pins = FastPin<_DATA_PIN>::mask() | FastPin<_CLOCK_PIN>::mask();
 		FastPin<_CLOCK_PIN>::lo();
 		PIOA->PIO_OER = pins;
@@ -165,6 +167,7 @@ public:
 
 		FastPin<_CLOCK_PIN>::hi();
 		FastPin<_CLOCK_PIN>::lo();
+		readyTransferBits(8);
 		enableSPI();
 		PIOA->PIO_PDR = pins;
 	}
@@ -360,7 +363,8 @@ public:
 
 #endif  // FL_IS_SAMD21 || FL_IS_SAMD51
 
-
-FL_DISABLE_WARNING_POP
+#if defined(FL_IS_SAMD21) || defined(FL_IS_SAMD51)
+FL_DISABLE_WARNING_POP  // Matches the PUSH in the SAMD include block above.
+#endif
 
 #endif
