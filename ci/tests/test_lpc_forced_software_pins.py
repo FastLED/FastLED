@@ -14,11 +14,16 @@ builds are unaffected; this test pins the guard and its preconditions.
 """
 
 import re
+import shutil
 from pathlib import Path
 
+import pytest
+from running_process import CompletedProcess, RunningProcess
 
-SRC = Path(__file__).resolve().parents[2] / "src" / "platforms"
-FASTPIN_BASE_INCLUDE = '#include "fl/system/fastpin_base.h"'
+
+ROOT: Path = Path(__file__).resolve().parents[2]
+SRC: Path = ROOT / "src" / "platforms"
+FASTPIN_BASE_INCLUDE: str = '#include "fl/system/fastpin_base.h"'
 
 
 def _read(rel: str) -> str:
@@ -26,9 +31,9 @@ def _read(rel: str) -> str:
 
 
 def test_shared_fastpin_base_rejects_lpc_forced_software_pins() -> None:
-    text = (
-        Path(__file__).resolve().parents[2] / "src" / "fl" / "system" / "fastpin_base.h"
-    ).read_text(encoding="utf-8")
+    text: str = (ROOT / "src" / "fl" / "system" / "fastpin_base.h").read_text(
+        encoding="utf-8"
+    )
     guard = re.search(
         r"#if defined\(FL_IS_ARM_LPC\) && defined\(FASTLED_FORCE_SOFTWARE_PINS\)\n#error \"FASTLED_FORCE_SOFTWARE_PINS is not supported on LPC",
         text,
@@ -41,8 +46,8 @@ def test_shared_fastpin_base_rejects_lpc_forced_software_pins() -> None:
 
 
 def test_lpc_header_includes_shared_guard_before_any_pin_map() -> None:
-    text = _read("arm/lpc/fastpin_arm_lpc.h")
-    include = text.index(FASTPIN_BASE_INCLUDE)
+    text: str = _read("arm/lpc/fastpin_arm_lpc.h")
+    include: int = text.index(FASTPIN_BASE_INCLUDE)
     assert include < text.index(
         '#include "platforms/arm/lpc/fastpin_arm_lpc11_legacy.h"'
     )
@@ -61,7 +66,71 @@ def test_premise_lpc_pin_api_is_a_noop() -> None:
 
 
 def test_legacy_header_includes_shared_guard() -> None:
-    text = _read("arm/lpc/fastpin_arm_lpc11_legacy.h")
+    text: str = _read("arm/lpc/fastpin_arm_lpc11_legacy.h")
     assert text.index(FASTPIN_BASE_INCLUDE) < text.index(
         "template<> class FastPin<PIN>"
     )
+
+
+# Vendor CMSIS headers are not on the host; stub just what the LPC sysdefs check.
+_LPC_VARIANTS: list[tuple[str, str, str]] = [
+    ("__LPC845__", "LPC845.h", "#define SCT0_BASE 0\n"),
+    ("__LPC804__", "LPC804.h", "#define PLU_BASE 0\n"),
+]
+
+
+def _preprocess_direct_fastpin(
+    tmp_path: Path, define: str, header: str, body: str, forced: bool
+) -> CompletedProcess[str]:
+    compiler: str | None = shutil.which("clang++") or shutil.which("g++")
+    if compiler is None:
+        pytest.skip("no host C++ compiler to preprocess with")
+    (tmp_path / header).write_text(body, encoding="utf-8")
+    cmd: list[str] = [
+        compiler,
+        "-std=gnu++17",
+        "-E",
+        "-x",
+        "c++",
+        "-",
+        "-o",
+        str(tmp_path / "out.i"),
+        f"-I{ROOT / 'src'}",
+        f"-I{tmp_path}",
+        f"-D{define}",
+    ]
+    if forced:
+        cmd.append("-DFASTLED_FORCE_SOFTWARE_PINS")
+    return RunningProcess.run(
+        cmd,
+        input='#include "fl/system/fastpin.h"\n',
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        timeout=120,
+        check=False,
+    )
+
+
+@pytest.mark.parametrize("define,header,body", _LPC_VARIANTS)
+def test_direct_fastpin_include_rejects_forced_software_pins(
+    tmp_path: Path, define: str, header: str, body: str
+) -> None:
+    result: CompletedProcess[str] = _preprocess_direct_fastpin(
+        tmp_path, define, header, body, forced=True
+    )
+    assert result.returncode != 0
+    output: str = (result.stdout or "") + (result.stderr or "")
+    assert "FASTLED_FORCE_SOFTWARE_PINS is not supported on LPC" in output
+
+
+@pytest.mark.parametrize("define,header,body", _LPC_VARIANTS)
+def test_direct_fastpin_include_succeeds_without_forced_pins(
+    tmp_path: Path, define: str, header: str, body: str
+) -> None:
+    result: CompletedProcess[str] = _preprocess_direct_fastpin(
+        tmp_path, define, header, body, forced=False
+    )
+    output: str = (result.stdout or "") + (result.stderr or "")
+    assert result.returncode == 0, output[-2000:]
