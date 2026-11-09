@@ -46,13 +46,16 @@
 // primary template in fastpin_base.h (#5070). Invalid pins follow the same
 // rule through _FL_NRF52_INVALID_FASTPIN: without forced software pins their
 // FastPin keeps the runtime "marked as invalid" warning in _INVALID_ARMPIN; in
-// forced mode FastPin falls to the software template and the PWM and SPIM
-// drivers reject the pin at compile time via nrf52_pin_routable(), because
-// their Nrf52HwPin would otherwise drive P0.00 (#5190). Each macro ends in a
+// forced mode FastPin is declared but left incomplete, so any use is a compile
+// error rather than a software pin on a pad the board may reserve. In both
+// modes the PWM and SPIM drivers reject the pin at compile time via
+// nrf52_pin_routable(), because their Nrf52HwPin would drive P0.00 (#5190). Each macro ends in a
 // declaration that the call site's semicolon terminates.
 #if defined(FASTLED_FORCE_SOFTWARE_PINS)
     #define _FL_NRF52_FASTPIN(ARDUINO_PIN) FL_STATIC_ASSERT(true, "forced software pin")
-    #define _FL_NRF52_INVALID_FASTPIN(ARDUINO_PIN) FL_STATIC_ASSERT(true, "forced software invalid pin")
+    // Declared, never defined: any use of FastPin<invalid pin> fails to compile
+    // instead of reaching the software template (#5190).
+    #define _FL_NRF52_INVALID_FASTPIN(ARDUINO_PIN) template<> class fl::FastPin<ARDUINO_PIN>
 #else
     #define _FL_NRF52_FASTPIN(ARDUINO_PIN) \
         template<> class fl::FastPin<ARDUINO_PIN> : public fl::Nrf52HwPin<ARDUINO_PIN> {}

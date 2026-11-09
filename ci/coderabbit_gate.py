@@ -16,7 +16,7 @@ import re
 import sys
 from dataclasses import dataclass
 
-from running_process import RunningProcess
+from running_process import PIPE, RunningProcess
 
 
 CODERABBIT_LOGINS = frozenset({"coderabbitai", "coderabbitai[bot]"})
@@ -93,7 +93,10 @@ def _gh_json(args: list[str]) -> object:
     out = RunningProcess.run(
         ["gh", *args],
         check=True,
-        capture_output=True,
+        # Separate pipes: with GH_DEBUG=api, gh writes debug lines to stderr,
+        # which must not reach json.loads.
+        stdout=PIPE,
+        stderr=PIPE,
         encoding="utf-8",
         errors="replace",
     ).stdout

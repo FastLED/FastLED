@@ -76,10 +76,9 @@ class ClocklessNrf52Driver : public IChannelDriver {
     FL_STATIC_ASSERT(_T1+_T2     <  (0x8000u-2u), "_T1H must fit in 15 bits");
     FL_STATIC_ASSERT(_T1+_T2+_T3 <  (0x8000u-2u), "_TOP must fit in 15 bits");
     FL_STATIC_ASSERT(_T1+_T2+_T3 <= PWM_COUNTERTOP_COUNTERTOP_Msk, "_TOP too large for peripheral");
-#if defined(FASTLED_FORCE_SOFTWARE_PINS)
-    // Forced mode has no runtime FastPin warning to catch an invalid pin (#5190).
+    // An invalid pin's Nrf52HwPin resolves to P0.00, and this driver never
+    // constructs FastPin, so no runtime warning would fire (#5190).
     FL_STATIC_ASSERT(nrf52_pin_routable<_DATA_PIN>(), "This pin is marked invalid in the nRF52 variant table; the PWM driver would drive P0.00 instead. Use a different pin.");
-#endif
 
 private:
     static const bool     _INITIALIZE_PIN_HIGH = (_FLIP ? 1 : 0);

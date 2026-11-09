@@ -83,8 +83,9 @@ def test_valid_pins_specialize_fastpin_only_without_forced_software_pins() -> No
     )
     assert forced
     forced_branch, normal_branch = forced.groups()
-    assert "_FL_NRF52_FASTPIN" in forced_branch
-    assert "fl::FastPin" not in forced_branch
+    valid = re.search(r"#define _FL_NRF52_FASTPIN\(ARDUINO_PIN\)(.*)", forced_branch)
+    assert valid
+    assert "fl::FastPin" not in valid.group(1)
     assert "fl::FastPin<ARDUINO_PIN>" in normal_branch
     for name in ("_FL_DEFPIN", "_DEFPIN_ARM_IDENTITY_P0", "_DEFPIN_ARM_IDENTITY_P1"):
         body = _macro(name)
@@ -113,7 +114,7 @@ def test_invalid_pin_macro_defers_fastpin_to_mode_macro() -> None:
 def test_invalid_pins_specialize_fastpin_only_without_forced_software_pins() -> None:
     forced_branch, normal_branch = _forced_branches()
     assert "#define _FL_NRF52_INVALID_FASTPIN(ARDUINO_PIN)" in forced_branch
-    assert "fl::FastPin" not in forced_branch
+    assert "fl::Nrf52HwPin" not in forced_branch
     normal = re.search(
         r"#define _FL_NRF52_INVALID_FASTPIN\(ARDUINO_PIN\)((?:.*\\\n)*.*)",
         normal_branch,
@@ -125,20 +126,23 @@ def test_invalid_pins_specialize_fastpin_only_without_forced_software_pins() -> 
     )
 
 
-def _forced_guarded(path: Path) -> str:
-    text = path.read_text(encoding="utf-8")
-    blocks = re.findall(
-        r"#if defined\(FASTLED_FORCE_SOFTWARE_PINS\)\n(.*?)#endif", text, re.S
-    )
-    return "\n".join(blocks)
-
-
-def test_drivers_reject_invalid_pins_in_forced_software_mode() -> None:
+def test_drivers_reject_invalid_pins_in_every_mode() -> None:
     nrf52 = REPO_ROOT / "src" / "platforms" / "arm" / "nrf52"
-    clockless = _forced_guarded(nrf52 / "clockless_arm_nrf52.h")
-    assert "nrf52_pin_routable<_DATA_PIN>()" in clockless
-    spi = _forced_guarded(nrf52 / "fastspi_arm_nrf52.h")
-    assert "nrf52_pin_routable<_DATA_PIN>()" in spi
-    assert "nrf52_pin_routable<_CLOCK_PIN>()" in spi
+    clockless = (nrf52 / "clockless_arm_nrf52.h").read_text(encoding="utf-8")
+    spi = (nrf52 / "fastspi_arm_nrf52.h").read_text(encoding="utf-8")
+    assert "FL_STATIC_ASSERT(nrf52_pin_routable<_DATA_PIN>()" in clockless
+    assert "FL_STATIC_ASSERT(nrf52_pin_routable<_DATA_PIN>()" in spi
+    assert "FL_STATIC_ASSERT(nrf52_pin_routable<_CLOCK_PIN>()" in spi
+    for text in (clockless, spi):
+        assert "FASTLED_FORCE_SOFTWARE_PINS" not in text
     fastpin = (nrf52 / "fastpin_arm_nrf52.h").read_text(encoding="utf-8")
     assert "constexpr bool nrf52_pin_routable()" in fastpin
+
+
+def test_forced_mode_leaves_invalid_fastpin_incomplete() -> None:
+    forced_branch, _ = _forced_branches()
+    line = re.search(
+        r"#define _FL_NRF52_INVALID_FASTPIN\(ARDUINO_PIN\)(.*)", forced_branch
+    )
+    assert line
+    assert line.group(1).strip() == "template<> class fl::FastPin<ARDUINO_PIN>"
