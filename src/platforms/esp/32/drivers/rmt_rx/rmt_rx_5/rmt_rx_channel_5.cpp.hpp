@@ -918,7 +918,8 @@ class RmtRxChannelImpl : public RmtRxChannel {
         //   deterministically falls back to the non-DMA ping-pong path
         //   (FastLED#3591; observable via RmtRxDebug::dma_tally). See #2254.
         rx_config.mem_block_symbols = mUseDma ? kDmaRxSymbols : kNonDmaRxSymbols;
-#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 2, 0)
+// intr_priority first appears in rmt_rx_channel_config_t in IDF v5.1.2 (FastLED#5194).
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 1, 2)
         // Interrupt priority level 3 (maximum supported by ESP-IDF RMT driver
         // API) Note: Both RISC-V and Xtensa platforms are limited to level 3 by
         // driver validation RISC-V hardware supports 1-7, but ESP-IDF
