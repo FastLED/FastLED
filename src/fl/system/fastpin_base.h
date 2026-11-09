@@ -82,6 +82,7 @@ public:
 /// Note that these classes are all static functions.  So the proper usage is Pin<13>::hi(); or such.  Instantiating objects is not recommended,
 /// as passing Pin objects around will likely -not- have the effect you're expecting.
 #if defined(FASTLED_FORCE_SOFTWARE_PINS) && defined(FASTLED_NO_PINMAP)
+#define FL_FASTPIN_USES_NO_PINMAP 1
 /// No register map exists to read, so every access goes through the core's pin API.
 template<fl::u8 PIN> class FastPin : public NoPinMapPin<PIN> {};
 #elif defined(FASTLED_FORCE_SOFTWARE_PINS)
