@@ -29,6 +29,27 @@ def test_new_opt_in_define_is_flagged() -> None:
     assert "FL_MY_NEW_DRIVER" in issues[0]
 
 
+def test_guard_closed_before_include_is_not_flagged() -> None:
+    # A guard that closes before the include does not protect it (#5187).
+    assert (
+        _check(
+            "#if defined(FL_MY_NEW_DRIVER) && !defined(FASTLED_NO_PINMAP)\n"
+            "#define FASTLED_NO_PINMAP\n"
+            "#endif\n"
+            '#include "platforms/x/y.h"\n'
+        )
+        == []
+    )
+
+
+def test_no_pinmap_guard_around_include_is_flagged() -> None:
+    issues = _check(
+        '#ifndef FASTLED_NO_PINMAP\n#include "platforms/x/pinmap.h"\n#endif\n'
+    )
+    assert len(issues) == 1
+    assert "FASTLED_NO_PINMAP" in issues[0]
+
+
 def test_retired_pattern_is_flagged() -> None:
     # The exact shape retired in #4944 must not be reintroduced.
     issues = _check(
