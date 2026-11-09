@@ -49,8 +49,10 @@ namespace fl {
  *
  * Typical Usage:
  *   SpiBlock8 spi;
- *   spi.setPinMapping(gpio_d0, gpio_d1, gpio_d2, gpio_d3,
- *                     gpio_d4, gpio_d5, gpio_d6, gpio_d7, gpio_clk);
+ *   if (!spi.setPinMapping(gpio_d0, gpio_d1, gpio_d2, gpio_d3,
+ *                          gpio_d4, gpio_d5, gpio_d6, gpio_d7, gpio_clk)) {
+ *       return;  // false: mapping rejected
+ *   }
  *   spi.loadBuffer(data, len);
  *   spi.transmit();  // Blocks until complete
  *

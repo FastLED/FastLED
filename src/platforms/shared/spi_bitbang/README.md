@@ -139,8 +139,11 @@ void setup() {
     // Create 4-way SPI blocking driver instance
     SpiBlock4 spi;
 
-    // Configure pin mapping (4 data pins + 1 clock)
-    spi.setPinMapping(0, 1, 2, 3, 8);  // D0-D3 = GPIO0-3, CLK = GPIO8
+    // Configure pin mapping (4 data pins + 1 clock).
+    // A rejected mapping returns false and changes nothing.
+    if (!spi.setPinMapping(0, 1, 2, 3, 8)) {  // D0-D3 = GPIO0-3, CLK = GPIO8
+        return;
+    }
 
     // Prepare data buffer
     uint8_t data[4] = {0x0F, 0x0A, 0x05, 0x00};
@@ -164,8 +167,11 @@ void setup() {
     // Create 4-way SPI ISR driver instance
     SpiIsr4 spi;
 
-    // Configure pin mapping (4 data pins + 1 clock)
-    spi.setPinMapping(0, 1, 2, 3, 8);  // D0-D3 = GPIO0-3, CLK = GPIO8
+    // Configure pin mapping (4 data pins + 1 clock).
+    // A rejected mapping returns false and changes nothing.
+    if (!spi.setPinMapping(0, 1, 2, 3, 8)) {  // D0-D3 = GPIO0-3, CLK = GPIO8
+        return;
+    }
 
     // Prepare data buffer
     uint8_t data[4] = {0x0F, 0x0A, 0x05, 0x00};
@@ -199,9 +205,11 @@ void setup() {
 
 ```cpp
 // Pin configuration (varies by width)
-void setPinMapping(...);  // 1-way: (data, clk)
+bool setPinMapping(...);  // 1-way: (data, clk)
                           // 2-way: (d0, d1, clk)
                           // 4-way: (d0, d1, d2, d3, clk)
+                          // Returns false, changing nothing, when a mapping is
+                          // rejected (see "Pin mapping rules" below).
 
 // Data transfer (simple blocking API)
 void loadBuffer(const uint8_t* data, uint16_t n);  // Load up to 256 bytes
@@ -215,14 +223,25 @@ void transmit();                                    // Block and transmit inline
 - Lower overhead than ISR
 - Better timing precision
 
+### Pin mapping rules
+
+`setPinMapping()` is `FL_NO_DISCARD`: check its result. It returns `false` and
+keeps the previous mapping when:
+
+- a pin is outside GPIO 0-31;
+- two of data lanes 0-7 use the same pin, or one of them uses the clock pin;
+- a lane 8 or higher (16- and 32-way drivers) uses a pin that lanes 0-7 use.
+
 ### ISR-Based SPI API (All Widths)
 
 ```cpp
 // Pin configuration (varies by width)
-void setPinMapping(...);  // 1-way: (data, clk)
+bool setPinMapping(...);  // 1-way: (data, clk)
                           // 2-way: (d0, d1, clk)
                           // 4-way: (d0, d1, d2, d3, clk)
                           // 8-way: (d0-d7, clk)
+                          // Returns false, changing nothing, when a mapping is
+                          // rejected (see "Pin mapping rules" below).
 
 // Data transfer (async API)
 void loadBuffer(const uint8_t* data, uint16_t n);  // Load up to 256 bytes
