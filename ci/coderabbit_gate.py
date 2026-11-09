@@ -13,9 +13,11 @@ from __future__ import annotations
 import argparse
 import json
 import re
-import subprocess
 import sys
 from dataclasses import dataclass
+from typing import Any
+
+from running_process import PIPE, RunningProcess
 
 
 CODERABBIT_LOGINS = frozenset({"coderabbitai", "coderabbitai[bot]"})
@@ -88,9 +90,16 @@ def decide(threads: list[Thread], coderabbit_comments: list[str]) -> Verdict:
     )
 
 
-def _gh_json(args: list[str]) -> object:
-    out = subprocess.run(
-        ["gh", *args], check=True, capture_output=True, text=True
+def _gh_json(args: list[str]) -> Any:
+    # Separate stderr so gh warnings can never corrupt the JSON on stdout.
+    out = RunningProcess.run(
+        ["gh", *args],
+        check=True,
+        stdout=PIPE,
+        stderr=PIPE,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
     ).stdout
     return json.loads(out)
 
@@ -123,7 +132,7 @@ def fetch_threads(repo: str, pr: int) -> list[Thread]:
         if after:
             args += ["-F", f"after={after}"]
         data = _gh_json(args)
-        page = data["data"]["repository"]["pullRequest"]["reviewThreads"]  # type: ignore[index]
+        page = data["data"]["repository"]["pullRequest"]["reviewThreads"]
         for node in page["nodes"]:
             first = (node["comments"]["nodes"] or [{}])[0]
             author = ((first.get("author") or {}).get("login")) or ""
