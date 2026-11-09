@@ -34,6 +34,7 @@ if TYPE_CHECKING:
 _AMNESTY_PATH = Path(__file__).with_name("driver_enable_define_amnesty.txt")
 
 _GUARD = re.compile(r"^\s*#\s*(?P<kind>ifdef|ifndef|if)\b(?P<cond>.*)$")
+_GUARD_END = re.compile(r"^\s*#\s*(?:endif|else|elif)\b")
 _INCLUDE = re.compile(r'^\s*#\s*include\s+"(?P<header>platforms/[^"]+)"')
 _MACRO = re.compile(r"\b(?:FL|FASTLED)_[A-Z0-9_]+\b")
 
@@ -61,10 +62,12 @@ def _guarded_platform_macros(lines: list[str]) -> list[tuple[int, str]]:
         if not names:
             continue
         # Does this guard directly protect an `#include "platforms/...`? Allow a
-        # few blank/comment lines, and stop at a nested directive.
+        # few blank/comment lines, and stop at a nested directive or at the
+        # guard's matching `#endif`/`#else`/`#elif`, so an include that follows
+        # a closed guard is not attributed to it.
         for probe in range(index + 1, min(index + 5, len(lines))):
             probe_line = lines[probe]
-            if _GUARD.match(probe_line):
+            if _GUARD.match(probe_line) or _GUARD_END.match(probe_line):
                 break
             if _INCLUDE.match(probe_line):
                 for name in names:
