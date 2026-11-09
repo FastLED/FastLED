@@ -49,7 +49,7 @@ namespace fl {
  *
  * Typical Usage:
  *   SpiBlock1 spi;
- *   spi.setPinMapping(gpio_data, gpio_clk);
+ *   if (!spi.setPinMapping(gpio_data, gpio_clk)) return;  // false: mapping rejected
  *   spi.loadBuffer(data, len);
  *   spi.transmit();  // Blocks until complete
  *
