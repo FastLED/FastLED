@@ -69,6 +69,12 @@ inline u32 nextClocklessTypeId() FL_NO_EXCEPT;
 /// zero dither and simply shifts the bytes out.
 template <int DATA_PIN, typename TIMING, int WAIT_TIME, int XTRA0 = 0>
 class ClocklessStm32Driver : public IChannelDriver {
+#if defined(FASTLED_FORCE_SOFTWARE_PINS)
+    // Forced software FastPin::port() is nullptr; this driver writes the GPIO
+    // output register directly (#5184).
+    static_assert(DATA_PIN != DATA_PIN,
+                  "FASTLED_FORCE_SOFTWARE_PINS is not supported by the STM32 clockless driver: it needs a hardware GPIO port");
+#endif
     // Stable id unique to this template specialization.
     static u32 typeId() FL_NO_EXCEPT;
 
@@ -115,6 +121,12 @@ private:
 /// expanded) by the bridge's `PixelIterator`; the core only shifts bytes out.
 template <int DATA_PIN, typename TIMING, int WAIT_TIME, int XTRA0 = 0>
 class ClocklessStm32Driver : public IChannelDriver {
+#if defined(FASTLED_FORCE_SOFTWARE_PINS)
+    // Forced software FastPin::port() is nullptr; this driver writes the GPIO
+    // output register directly (#5184).
+    static_assert(DATA_PIN != DATA_PIN,
+                  "FASTLED_FORCE_SOFTWARE_PINS is not supported by the STM32 clockless driver: it needs a hardware GPIO port");
+#endif
     // Stable id unique to this template specialization.
     static u32 typeId() FL_NO_EXCEPT;
 
