@@ -98,7 +98,7 @@ jobs:
     if: github.event_name == 'merge_group'
     uses: ./.github/workflows/template_unit_test.yml
     with:
-      os: ubuntu-latest
+      os: ubuntu-24.04
       build-mode: debug-thin
       full-suite: false
 
@@ -113,9 +113,29 @@ jobs:
     if: github.event_name == 'merge_group'
     uses: ./.github/workflows/template_example_test.yml
     with:
-      os: ubuntu-latest
+      os: ubuntu-24.04
       build-mode: debug-thin
       example-group: CompileTests
+
+  # Merge queue gate: refuse a PR with unresolved CodeRabbit review threads,
+  # unless CodeRabbit is rate limited (exhausted) and cannot re-review.
+  queue-coderabbit:
+    if: github.event_name == 'merge_group'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@v6
+        with:
+          save-cache: false
+          version: "0.8.0"
+      - name: Check CodeRabbit threads are resolved
+        env:
+          GH_TOKEN: ${{ github.token }}
+          QUEUE_REF: ${{ github.event.merge_group.head_ref }}
+        run: uv run --no-project --python 3.12 --with 'running-process>=4.0.0,<4.10.10' python ci/coderabbit_gate.py --repo "$GITHUB_REPOSITORY" --ref "$QUEUE_REF"
 
   # Required by the master ruleset on PRs and in the queue. Fork PRs skip
   # `validate` and get no hosted CI until a maintainer enqueues them, so
@@ -123,7 +143,7 @@ jobs:
   ci-summary:
     name: CI summary
     if: always()
-    needs: [validate, queue-unit-linux, queue-unit-windows, queue-examples-linux]
+    needs: [validate, queue-unit-linux, queue-unit-windows, queue-examples-linux, queue-coderabbit]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
