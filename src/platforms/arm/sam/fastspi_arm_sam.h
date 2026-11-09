@@ -153,6 +153,10 @@ public:
 		// (ABSR still selects peripheral A) (#5117). The clock is preloaded low
 		// so the pad cannot go high as it leaves the peripheral. Like init(), this
 		// assumes the SPI0 pins on PIOA (Due MOSI PA26, SCK PA27).
+		// On the way back the SPI is re-enabled before PIO_PDR releases the pads:
+		// the PIO keeps SCK driven low until the idle SPI (CPOL=0) drives it, so
+		// the pad never floats and a pull-up or interrupt cannot make a spurious
+		// rising edge that SM16716 would count as a data bit (#5181).
 		const u32 pins = FastPin<_DATA_PIN>::mask() | FastPin<_CLOCK_PIN>::mask();
 		FastPin<_CLOCK_PIN>::lo();
 		PIOA->PIO_OER = pins;
@@ -161,8 +165,8 @@ public:
 
 		FastPin<_CLOCK_PIN>::hi();
 		FastPin<_CLOCK_PIN>::lo();
-		PIOA->PIO_PDR = pins;
 		enableSPI();
+		PIOA->PIO_PDR = pins;
 	}
 
 	// write a block of uint8_ts out in groups of three.  len is the total number of uint8_ts to write out.  The template
@@ -356,8 +360,7 @@ public:
 
 #endif  // FL_IS_SAMD21 || FL_IS_SAMD51
 
-#if defined(FL_IS_SAMD21) || defined(FL_IS_SAMD51)
-FL_DISABLE_WARNING_POP  // Matches the PUSH in the SAMD include block above.
-#endif
+
+FL_DISABLE_WARNING_POP
 
 #endif
