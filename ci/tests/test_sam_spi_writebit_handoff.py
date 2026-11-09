@@ -47,6 +47,17 @@ def test_write_bit_reenables_spi_before_releasing_pads() -> None:
     assert 0 <= csr < enable, (
         "channel 0's CSR (CPOL=0) must be restored before enableSPI() (#5181)"
     )
+    assert body.startswith("readyTransferBits(8);", csr), (
+        "channel 0's CSR must be restored to 8-bit width (#5181)"
+    )
+    mask: int = body.rfind("__disable_irq();")
+    assert 0 <= mask < csr, "interrupts must be masked across the handoff (#5181)"
+    assert "__get_PRIMASK()" in body[:mask], (
+        "the caller's interrupt state must be saved before masking (#5181)"
+    )
+    assert body.find("__set_PRIMASK(", pdr) > pdr, (
+        "the caller's interrupt state must be restored after PIO_PDR (#5181)"
+    )
     assert body.rindex("FastPin<_CLOCK_PIN>::lo();") < pdr, (
         "SCK must be driven low before the pads are released (#5181)"
     )

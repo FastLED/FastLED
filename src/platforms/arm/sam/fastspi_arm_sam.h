@@ -167,9 +167,15 @@ public:
 
 		FastPin<_CLOCK_PIN>::hi();
 		FastPin<_CLOCK_PIN>::lo();
+		// Mask interrupts across the handoff, restoring the caller's state: an
+		// ISR that started an SPI0 transfer between enableSPI() and PIO_PDR
+		// would clock it out while the PIO still holds SCK low (#5181).
+		const u32 primask = __get_PRIMASK();
+		__disable_irq();
 		readyTransferBits(8);
 		enableSPI();
 		PIOA->PIO_PDR = pins;
+		__set_PRIMASK(primask);
 	}
 
 	// write a block of uint8_ts out in groups of three.  len is the total number of uint8_ts to write out.  The template
