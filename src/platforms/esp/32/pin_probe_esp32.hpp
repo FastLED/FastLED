@@ -22,8 +22,25 @@
 #include "platforms/esp/esp_version.h"
 #include "fl/system/pin_probe.h"
 #include "fl/stl/noexcept.h"
-#include "esp_heap_caps.h"  // IWYU pragma: keep
 #include "sdkconfig.h"  // IWYU pragma: keep (CONFIG_SPIRAM_MODE_OCT, CONFIG_ESPTOOLPY_OCT_FLASH)
+// Installed-PSRAM size API: esp_psram_get_size() on IDF 5+, the per-chip
+// esp_spiram_get_size() on IDF 4. Neither exists without PSRAM support.
+#if ESP_IDF_VERSION_5_OR_HIGHER && defined(CONFIG_SPIRAM)
+#define FL_PIN_PROBE_PSRAM_SIZE() esp_psram_get_size()
+#include "esp_psram.h"  // IWYU pragma: keep
+#elif !ESP_IDF_VERSION_5_OR_HIGHER && defined(FL_IS_ESP_32DEV) && \
+    (defined(CONFIG_SPIRAM) || defined(CONFIG_ESP32_SPIRAM_SUPPORT) || defined(CONFIG_SPIRAM_SUPPORT))
+#define FL_PIN_PROBE_PSRAM_SIZE() esp_spiram_get_size()
+#include "esp32/spiram.h"  // IWYU pragma: keep
+#elif !ESP_IDF_VERSION_5_OR_HIGHER && defined(FL_IS_ESP_32S2) && \
+    (defined(CONFIG_SPIRAM) || defined(CONFIG_ESP32S2_SPIRAM_SUPPORT))
+#define FL_PIN_PROBE_PSRAM_SIZE() esp_spiram_get_size()
+#include "esp32s2/spiram.h"  // IWYU pragma: keep
+#elif !ESP_IDF_VERSION_5_OR_HIGHER && defined(FL_IS_ESP_32S3) && \
+    (defined(CONFIG_SPIRAM) || defined(CONFIG_ESP32S3_SPIRAM_SUPPORT))
+#define FL_PIN_PROBE_PSRAM_SIZE() esp_spiram_get_size()
+#include "esp32s3/spiram.h"  // IWYU pragma: keep
+#endif
 #if !ESP_IDF_VERSION_4_OR_HIGHER || defined(FL_IS_ESP_32DEV)
 #include "soc/efuse_reg.h"  // IWYU pragma: keep
 #include "soc/soc.h"  // IWYU pragma: keep
@@ -67,10 +84,15 @@ constexpr PinProbeLinkPins kLinkPins = {20, 19, -1, -1, -1, -1};
 constexpr PinProbeLinkPins kLinkPins = {-1, -1, -1, -1, -1, -1};
 #endif
 
-// PSRAM is present iff the heap has an SPIRAM region (same answer as
-// Arduino's psramFound(), without needing the Arduino core or CONFIG_SPIRAM).
+// PSRAM is present iff the chip reports an installed PSRAM size. This uses
+// the installed size, not free heap: a fully allocated PSRAM heap still owns
+// its pins. Without PSRAM support compiled in, the pins are not PSRAM pins.
 inline bool psramPresent() FL_NO_EXCEPT {
-    return heap_caps_get_free_size(MALLOC_CAP_SPIRAM) > 0;
+#ifdef FL_PIN_PROBE_PSRAM_SIZE
+    return FL_PIN_PROBE_PSRAM_SIZE() > 0;
+#else
+    return false;
+#endif
 }
 
 // Console pins. Native USB D-/D+ are always skipped: even when Serial is
