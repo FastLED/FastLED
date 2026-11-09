@@ -83,7 +83,7 @@ jobs:
   examples:
     uses: ./.github/workflows/template_example_test.yml
     with:
-      os: ubuntu-latest
+      os: ubuntu-24.04
       build-mode: debug-thin
       example-group: Nightly
 
