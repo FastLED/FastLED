@@ -45,12 +45,11 @@ def test_no_pinmap_clockless_rejects_forced_software_pins() -> None:
     assert re.search(
         r"#if defined\(FASTLED_FORCE_SOFTWARE_PINS\)\s*&&\s*"
         r"\(defined\(FASTLED_NO_PINMAP\)\s*\|\|\s*defined\(FL_IS_ESP32\)\)\s*\n"
-        r"#define FL_FASTPIN_HAS_NO_PINMAP\s*\n"
-        r"(?:\s*///[^\n]*\n)*"
-        r"template<fl::u8 PIN> class FastPin : public NoPinMapPin<PIN> \{\};",
+        r"#define FL_FASTPIN_HAS_NO_PINMAP\s*\n",
         fastpin,
     )
     assert fastpin.count("#define FL_FASTPIN_HAS_NO_PINMAP") == 1
+    assert "template<fl::u8 PIN> class FastPin : public NoPinMapPin<PIN> {};" in fastpin
     for platform in ("d51", "renesas"):
         text = _read(f"arm/{platform}/clockless_arm_{platform}.h")
         assert re.search(

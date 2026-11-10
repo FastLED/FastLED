@@ -36,6 +36,18 @@ def test_esp32_specializations_retain_portless_provider_and_pin_validity() -> No
     )
 
 
+def test_unspecified_esp32_software_pins_are_invalid() -> None:
+    source: str = BASE.read_text(encoding="utf-8")
+    selected: str = source.split("#define FL_FASTPIN_HAS_NO_PINMAP", 1)[1].split(
+        "#elif defined(FASTLED_FORCE_SOFTWARE_PINS)", 1
+    )[0]
+    assert "#ifdef FL_IS_ESP32" in selected
+    esp32: str = selected.split("#ifdef FL_IS_ESP32", 1)[1].split("#else", 1)[0]
+    assert "return false;" in esp32
+    assert "FL_STATIC_ASSERT(PIN != PIN" in esp32
+    assert "static void setOutput()" in esp32
+
+
 def test_core_api_provider_is_available_without_the_legacy_no_map_flag() -> None:
     source: str = BASE.read_text(encoding="utf-8")
     assert re.search(

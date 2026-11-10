@@ -84,7 +84,19 @@ public:
     (defined(FASTLED_NO_PINMAP) || defined(FL_IS_ESP32))
 #define FL_FASTPIN_HAS_NO_PINMAP
 /// No register map exists to read, so every access goes through the core's pin API.
+#ifdef FL_IS_ESP32
+// The ESP32 header supplies checked specializations for all supported pins.
+// An unspecified pin must not inherit the permissive portless fallback.
+template<fl::u8 PIN> class FastPin : public NoPinMapPin<PIN> {
+public:
+    static constexpr bool validpin() FL_NO_EXCEPT { return false; }
+    static void setOutput() FL_NO_EXCEPT {
+        FL_STATIC_ASSERT(PIN != PIN, "No FastPin specialization for this ESP32 pin");
+    }
+};
+#else
 template<fl::u8 PIN> class FastPin : public NoPinMapPin<PIN> {};
+#endif
 #elif defined(FASTLED_FORCE_SOFTWARE_PINS)
 #define FL_FASTPIN_HAS_RUNTIME_PORT
 template<fl::u8 PIN> class FastPin {
