@@ -7,6 +7,7 @@
 #if defined(FL_IS_RP2040) || defined(FL_IS_RP2350)
 
 #include "platforms/arm/rp/rpcommon/rp_pio_dma_resource_manager.h"
+#include "platforms/arm/rp/rpcommon/sdk_compat.h"
 #include "fl/stl/chrono.h"
 
 // IWYU pragma: begin_keep
@@ -74,7 +75,7 @@ bool RpSpiPeripheral::configure(const RpSpiConfig& config) FL_NO_EXCEPT {
     gpio_set_function(static_cast<uint>(mMosiPin), GPIO_FUNC_SPI);
     gpio_set_function(static_cast<uint>(mMisoPin), GPIO_FUNC_SPI);
     gpio_set_function(static_cast<uint>(mSckPin), GPIO_FUNC_SPI);
-    mActualClockHz = spi_init(spi, config.clock_hz);
+    mActualClockHz = rp_sdk::spiInit(spi, config.clock_hz);
     if (mActualClockHz == 0) {
         deinitialize();
         return false;

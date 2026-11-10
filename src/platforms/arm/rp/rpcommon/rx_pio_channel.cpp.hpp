@@ -7,6 +7,7 @@
 #if defined(FL_IS_RP2040) || defined(FL_IS_RP2350)
 
 #include "platforms/arm/rp/rpcommon/rp_pio_dma_resource_manager.h"
+#include "platforms/arm/rp/rpcommon/sdk_compat.h"
 #include "platforms/arm/rp/rpcommon/pio_asm.h"
 #include "fl/channels/rx/decode_ws2812.h"
 #include "fl/system/delay.h"
@@ -131,7 +132,7 @@ bool RpPioRxDevice::begin(const RxConfig& config) FL_NO_EXCEPT {
         if (state_machine >= 0) resources.releasePioStateMachine(pio, state_machine);
         return false;
     }
-    gpio_init(static_cast<uint>(mPin));
+    rp_sdk::gpioInit(static_cast<uint>(mPin));
     gpio_set_dir(static_cast<uint>(mPin), GPIO_IN);
     // Clockless LED data is idle-low.  Keep the input at that defined level
     // until the transmitter takes ownership; otherwise a preceding GPIO

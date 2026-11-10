@@ -33,6 +33,7 @@
 
 #if defined(FL_IS_RP2040)
 
+#include "platforms/arm/rp/rpcommon/sdk_compat.h"
 #include "fl/stl/isr/handler.h"
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/unique_ptr.h"
@@ -224,6 +225,10 @@ static void gpio_callback_wrapper(uint gpio, u32 events) FL_NO_EXCEPT {
 // =============================================================================
 
 int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) FL_NO_EXCEPT {
+    if (!rp_sdk::timerAvailable()) {
+        FL_WARN("attachTimerHandler: SDK default alarm pool is unavailable");
+        return -6;
+    }
     if (!config.handler) {
         FL_WARN("attachTimerHandler: handler is null");
         return -1;  // Invalid parameter
@@ -270,8 +275,8 @@ int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) F
     i64 interval_us = 1000000 / config.frequency_hz;
 
     // Add repeating timer using Pico SDK
-    handle_data->alarm_id = add_alarm_in_us(interval_us, alarm_callback_wrapper,
-                                             handle_data, true);
+    handle_data->alarm_id = rp_sdk::addAlarm(interval_us, alarm_callback_wrapper,
+                                             handle_data);
 
     if (handle_data->alarm_id == 0 || handle_data->alarm_id == -1) {
         // Alarm creation failed
@@ -402,7 +407,7 @@ int detach_handler(isr_handle_t& handle) FL_NO_EXCEPT {
     if (handle_data->is_timer) {
         // Cancel the alarm
         if (handle_data->alarm_id > 0) {
-            cancel_alarm(handle_data->alarm_id);
+            rp_sdk::cancelAlarm(handle_data->alarm_id);
         }
 
         // Free the alarm resource
@@ -442,8 +447,8 @@ int enable_handler(const isr_handle_t& handle) FL_NO_EXCEPT {
     if (handle_data->is_timer) {
         // For timer, we need to recreate the alarm
         i64 interval_us = 1000000 / handle_data->frequency_hz;
-        handle_data->alarm_id = add_alarm_in_us(interval_us, alarm_callback_wrapper,
-                                                 handle_data, true);
+        handle_data->alarm_id = rp_sdk::addAlarm(interval_us, alarm_callback_wrapper,
+                                                 handle_data);
         if (handle_data->alarm_id == 0 || handle_data->alarm_id == -1) {
             FL_WARN("enableHandler: failed to restart alarm");
             return -2;  // Failed to restart
@@ -476,7 +481,7 @@ int disable_handler(const isr_handle_t& handle) FL_NO_EXCEPT {
     if (handle_data->is_timer) {
         // Cancel the alarm but keep the handle data
         if (handle_data->alarm_id > 0) {
-            cancel_alarm(handle_data->alarm_id);
+            rp_sdk::cancelAlarm(handle_data->alarm_id);
             handle_data->alarm_id = 0;
         }
     } else {
@@ -509,6 +514,7 @@ const char* get_error_string(int error_code) FL_NO_EXCEPT {
         case -3: return "Out of resources";
         case -4: return "Internal error";
         case -5: return "Out of memory";
+        case -6: return "Timer alarm pool unavailable";
         default: return "Unknown error";
     }
 }
@@ -518,11 +524,11 @@ const char* get_platform_name() FL_NO_EXCEPT {
 }
 
 u32 get_max_timer_frequency() FL_NO_EXCEPT {
-    return 1000000;  // 1 MHz (limited by microsecond counter resolution)
+    return rp_sdk::timerAvailable() ? 1000000 : 0;  // 1 MHz maximum
 }
 
 u32 get_min_timer_frequency() FL_NO_EXCEPT {
-    return 1;  // 1 Hz (practical minimum given 32-bit alarm period)
+    return rp_sdk::timerAvailable() ? 1 : 0;  // 1 Hz practical minimum
 }
 
 u8 get_max_priority() FL_NO_EXCEPT {
