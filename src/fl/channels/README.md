@@ -784,7 +784,11 @@ void updateSettings(CRGB* newLeds, int count, EOrder order) {
 - RGB order, LED buffer (pointer/size), color correction, temperature, dither mode, RGBW settings
 
 **What stays the same:**
-- Pin assignment, chipset timing, driver binding, channel ID
+- Pin assignment, chipset timing and encoder, driver binding, channel ID
+
+A conflicting chipset or explicit bus binding rejects the entire configuration
+and emits a warning. Default `Bus::AUTO` options retain the existing bus and
+instance; pin fields remain unchanged.
 
 **Use cases:**
 - Web-based LED controllers with live configuration

@@ -147,7 +147,9 @@ public:
 
     /// @brief Apply reconfigurable settings from a ChannelConfig
     /// @param config The configuration to apply
-    /// @note Does NOT change: mChipset, mDriver, mId
+    /// @note Pin assignment, chipset timing/encoder, bus binding and ID stay
+    /// unchanged. A conflicting chipset or explicit bus rejects the entire
+    /// configuration; Bus::AUTO retains the existing bus and instance.
     void applyConfig(const ChannelConfig& config) FL_NO_EXCEPT;
 
     // Re-expose protected base class methods for external access
