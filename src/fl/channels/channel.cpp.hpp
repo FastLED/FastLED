@@ -543,9 +543,13 @@ void Channel::applyConfig(const ChannelConfig& config) FL_NO_EXCEPT {
               currentClockless->encoder == incomingClockless->encoder
         : currentSpi && incomingSpi && currentSpi->timing == incomingSpi->timing &&
               currentSpi->spiBus == incomingSpi->spiBus;
-    if (!compatible || (config.options.mBus != Bus::AUTO &&
-                        (config.options.mBus != mBus || config.options.mBusWhich != mBusWhich))) {
-        FL_WARN("Channel::applyConfig: chipset or bus conflicts with the existing binding");
+    if (!compatible) {
+        FL_WARN("Channel " << id() << ": applyConfig rejected, chipset conflicts with the existing binding");
+        return;
+    }
+    if (config.options.mBus != Bus::AUTO &&
+        (config.options.mBus != mBus || config.options.mBusWhich != mBusWhich)) {
+        FL_WARN("Channel " << id() << ": applyConfig rejected, bus conflicts with the existing binding");
         return;
     }
     mRgbOrder = config.rgb_order;
