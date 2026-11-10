@@ -77,7 +77,7 @@ class WasmNativeEntries:
 # Opt-in: FASTLED_NATIVE_CLANG=soldr takes the native (Linux host) compiler
 # from soldr's managed LLVM bundle instead of clang-tool-chain. The bundle
 # ships its own libxml2/libz, so it does not break when a runner image drops
-# libxml2.so.2. Requires soldr with `cc --clang` (forge-ci/soldr#4127).
+# libxml2.so.2. Requires soldr >=0.9.53 with `cc --clang`.
 SOLDR_CLANG_ENV = "FASTLED_NATIVE_CLANG"
 SOLDR_CLANG_VALUE = "soldr"
 
@@ -118,7 +118,7 @@ def _soldr_print(flag: str) -> str:
     if result.returncode != 0 or not Path(path[0]).is_file():
         raise RuntimeError(
             f"`soldr c++ --clang {flag}` failed (rc={result.returncode}); "
-            f"soldr with forge-ci/soldr#4127 is required: {result.stderr}"
+            f"soldr >=0.9.53 is required: {result.stderr}"
         )
     return path[0]
 
