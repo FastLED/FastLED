@@ -19,6 +19,8 @@ from typing import Any
 from running_process import RunningProcess
 from typeguard import typechecked
 
+from ci.meson.native_launchers import resolve_soldr_clang
+
 
 ROOT = Path(__file__).resolve().parents[2]
 TREND_PATH = ROOT / "codec_cpu_trend.json"
@@ -149,6 +151,9 @@ def compiler_path() -> Path:
         if compiler.exists() or shutil.which(override):
             return compiler
         raise RuntimeError(f"CODEC_CPU_COMPILER does not exist: {override}")
+    soldr = resolve_soldr_clang()
+    if soldr is not None:
+        return Path(soldr.cxx)
     candidates = cached_compiler_candidates(os.name)
     for candidate in candidates:
         if candidate.exists():

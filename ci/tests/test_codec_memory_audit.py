@@ -21,6 +21,27 @@ def test_checked_in_ledger_is_machine_readable_and_green() -> None:
     AUDIT.check_ledger(dict(values.summary), dict(values.tables))
 
 
+@pytest.mark.skipif(not sys.platform.startswith("linux"), reason="Linux-only provider")
+@pytest.mark.parametrize("provider", ["", "soldr"])
+def test_memory_compiler_honors_native_provider(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, provider: str
+) -> None:
+    """Prefer managed clang on opt-in, including before Meson is configured."""
+    monkeypatch.setattr(sys, "platform", "linux")
+    monkeypatch.setattr(AUDIT, "ROOT", tmp_path)
+    monkeypatch.setenv("FASTLED_NATIVE_CLANG", provider)
+    monkeypatch.setenv("PATH", str(tmp_path))
+    system = tmp_path / "clang++"
+    system.touch(mode=0o755)
+    soldr = tmp_path / "soldr"
+    soldr.write_text('#!/bin/sh\nprintf "%s\\n" "$0-tool"\n', encoding="utf-8")
+    soldr.chmod(0o755)
+    managed = tmp_path / "soldr-tool"
+    managed.touch(mode=0o755)
+
+    assert AUDIT.compiler_from_meson() == (managed if provider else system)
+
+
 def test_non_exact_metric_allows_two_percent_and_rejects_more() -> None:
     values = AUDIT.ledger_values()
     baseline = values.summary[("minimp3-float", "static-tables")]

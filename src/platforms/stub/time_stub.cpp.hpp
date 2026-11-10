@@ -64,4 +64,27 @@ bool isDelayOverrideActive(void) FL_NO_EXCEPT {
     return static_cast<bool>(g_delay_override);
 }
 
+namespace fl {
+namespace stub {
+namespace {
+fl::function<void(fl::u32)> g_nanosecond_delay_callback;
+}
+
+void setNanosecondDelayCallback(const fl::function<void(fl::u32)>& callback) FL_NO_EXCEPT {
+    g_nanosecond_delay_callback = callback;
+}
+
+void clearNanosecondDelayCallback() FL_NO_EXCEPT {
+    g_nanosecond_delay_callback.clear();
+}
+
+void recordNanosecondDelay(fl::u32 ns) FL_NO_EXCEPT {
+    if (g_nanosecond_delay_callback) {
+        g_nanosecond_delay_callback(ns);
+    }
+}
+
+} // namespace stub
+} // namespace fl
+
 #endif  // FASTLED_STUB_IMPL

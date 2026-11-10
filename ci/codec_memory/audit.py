@@ -15,6 +15,8 @@ from pathlib import Path
 from running_process import CalledProcessError, RunningProcess
 from typeguard import typechecked
 
+from ci.meson.native_launchers import resolve_soldr_clang
+
 
 ROOT = Path(__file__).resolve().parents[2]
 BUILD = ROOT / ".build" / "codec-memory-audit"
@@ -63,6 +65,9 @@ class AuditValues:
 
 
 def compiler_from_meson() -> Path:
+    soldr = resolve_soldr_clang()
+    if soldr is not None:
+        return Path(soldr.cxx)
     commands = ROOT / ".build" / "meson-quick" / "compile_commands.json"
     if commands.exists():
         entries = json.loads(commands.read_text(encoding="utf-8"))

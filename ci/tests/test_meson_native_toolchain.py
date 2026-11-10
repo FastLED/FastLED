@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import os
 import unittest
+from contextlib import ExitStack
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from types import SimpleNamespace
@@ -22,6 +23,106 @@ from ci.meson.sanitizer_env import setup_sanitizer_env
 
 
 class TestMesonNativeToolchain(unittest.TestCase):
+    def test_unknown_compiler_marker_forces_fresh_meson_discovery(self) -> None:
+        """Missing and unreadable identities must not bless Meson's old compiler."""
+        from ci.meson.build_config import setup_meson_build
+
+        for unreadable in (False, True):
+            with self.subTest(unreadable=unreadable), TemporaryDirectory() as temp_dir:
+                root = Path(temp_dir)
+                (root / "meson-info").mkdir()
+                markers = MarkerPaths.for_build_dir(root)
+                if unreadable:
+                    markers.compiler_version.mkdir()
+                with ExitStack() as stack:
+                    for name, result in {
+                        "resolve_native_linker": ("reld", "reld"),
+                        "check_meson_version_compatibility": (True, ""),
+                        "compute_source_hashes": SimpleNamespace(max_tests_dir_mtime=0),
+                        "check_reconfigure_markers": SimpleNamespace(
+                            force_reconfigure=False
+                        ),
+                        "check_meson_build_modified": False,
+                        "detect_test_file_changes": False,
+                        "detect_example_file_changes": None,
+                        "check_obsolete_zig_wrappers": None,
+                        "detect_compiler_and_cache": self._compiler(),
+                        "cleanup_build_artifacts": None,
+                        "write_meson_native_file": None,
+                        "build_setup_env": {},
+                        "run_meson_setup_command": True,
+                    }.items():
+                        stack.enter_context(
+                            patch(f"ci.meson.build_config.{name}", return_value=result)
+                        )
+                    command = stack.enter_context(
+                        patch(
+                            "ci.meson.build_config.build_meson_setup_cmd",
+                            return_value=["meson"],
+                        )
+                    )
+                    self.assertTrue(setup_meson_build(root, root, build_mode="quick"))
+                    self.assertTrue(command.call_args.kwargs.get("wipe", False))
+                    self.assertFalse(command.call_args.kwargs["reconfigure"])
+
+    def test_same_version_provider_switch_invalidates_cached_compiler(self) -> None:
+        """Switch both directions even when compiler versions and marker ages match."""
+        with TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            markers = MarkerPaths.for_build_dir(root)
+            ctc = root / "ctc-clang++"
+            soldr = root / "soldr-clang++"
+            ctc.touch()
+            soldr.touch()
+
+            def selected_compiler() -> str:
+                """Return the raw compiler selected by the current opt-in."""
+                return str(soldr if os.environ.get("FASTLED_NATIVE_CLANG") else ctc)
+
+            with (
+                patch("ci.meson.meson_setup_execute.sys.platform", "linux"),
+                patch(
+                    "ci.meson.meson_setup_execute.shutil.which", return_value=str(ctc)
+                ),
+                patch(
+                    "ci.meson.meson_setup_execute._find_zccache_binary",
+                    return_value="/venv/zccache",
+                ),
+                patch(
+                    "ci.meson.meson_setup_execute.get_zccache_version",
+                    return_value="1.15.6",
+                ),
+                patch(
+                    "ci.meson.meson_setup_execute._resolve_fast_compiler_binary",
+                    side_effect=selected_compiler,
+                ),
+                patch(
+                    "ci.meson.meson_setup_execute.get_compiler_version",
+                    return_value="clang version 21.1.5",
+                ) as get_version,
+            ):
+                identities: list[str] = []
+                for provider in ("", "soldr", "", ""):
+                    with patch.dict(os.environ, {"FASTLED_NATIVE_CLANG": provider}):
+                        detected = detect_compiler_and_cache(markers, False, "quick")
+                    identities.append(detected.compiler_version)
+                    markers.compiler_version.write_text(
+                        detected.compiler_version, encoding="utf-8"
+                    )
+                    newer = max(ctc.stat().st_mtime, soldr.stat().st_mtime) + 10
+                    os.utime(markers.compiler_version, (newer, newer))
+
+                changed = ctc.stat().st_mtime + 20
+                os.utime(ctc, (changed, changed))
+                with patch.dict(os.environ, {"FASTLED_NATIVE_CLANG": ""}):
+                    updated = detect_compiler_and_cache(markers, False, "quick")
+
+            self.assertNotEqual(identities[0], identities[1])
+            self.assertEqual(identities[0], identities[2])
+            self.assertEqual(identities[2], identities[3])
+            self.assertNotEqual(identities[3], updated.compiler_version)
+            self.assertEqual(get_version.call_count, 4)
+
     def test_docker_selects_zccache_for_pch_consumers(self) -> None:
         with (
             TemporaryDirectory() as temp_dir,

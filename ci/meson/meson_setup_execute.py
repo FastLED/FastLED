@@ -39,6 +39,9 @@ from ci.meson.native_launchers import (
     _resolve_fast_compiler_binary,
     _resolve_fast_native_entries,
     get_zccache_version,
+    resolve_soldr_clang,
+    resolve_soldr_linker,
+    soldr_clang_requested,
 )
 from ci.meson.output import print_banner
 from ci.meson.path_normalization import (
@@ -66,7 +69,7 @@ def resolve_native_linker(build_mode: str) -> tuple[str, str]:
     """Select reld, FastLED's only native linker, and identify its contents.
 
     reld links every host build on Linux, macOS and Windows; it routes ThinLTO
-    and non-ELF links to the clang-tool-chain bridge linker exported as
+    and non-ELF links to the selected compiler provider's bridge exported as
     ``RELD_BRIDGE_LINKER``. ``FASTLED_NATIVE_LINKER`` may point at a different
     reld build (e.g. a local checkout) but never at another linker.
     """
@@ -88,7 +91,8 @@ def resolve_native_linker(build_mode: str) -> tuple[str, str]:
     # shell must never win over the pinned toolchain. Every supported build
     # entry point (bash test / compile / profile) resolves this before Ninja
     # runs, and Ninja inherits it; bare `ninja` is banned by repo policy.
-    bridge = bridge_linker()
+    soldr_linker = resolve_soldr_linker()
+    bridge = Path(soldr_linker) if soldr_linker is not None else bridge_linker()
     os.environ["RELD_BRIDGE_LINKER"] = str(bridge)
     # The identity covers reld *and* its bridge, so a changed bridge relinks.
     return str(
@@ -206,10 +210,18 @@ def detect_compiler_and_cache(
     apple_debug = sys.platform == "darwin" and build_mode == "debug"
     current_compiler_version = ""
     version_from_cache = False
+    fast_compiler = None if apple_debug else _resolve_fast_compiler_binary()
     selected_clangxx = (
-        _resolve_xcode_tool("clang++") if apple_debug else clangxx_wrapper
+        _resolve_xcode_tool("clang++")
+        if apple_debug
+        else fast_compiler or clangxx_wrapper
     )
     clangxx_path = Path(selected_clangxx)
+    compiler_identity = ""
+    if sys.platform.startswith("linux"):
+        provider = "soldr" if soldr_clang_requested() else "clang-tool-chain"
+        modified = clangxx_path.stat().st_mtime_ns if clangxx_path.exists() else 0
+        compiler_identity = f"{provider}:{selected_clangxx}:{modified}|"
     # Always query Apple debug clang. A marker written by the former Clang 19
     # toolchain can be newer than the selected Xcode binary, and reusing that
     # marker would retain ASan objects with an incompatible runtime ABI.
@@ -221,15 +233,18 @@ def detect_compiler_and_cache(
                 cached_ver = markers.compiler_version.read_text(
                     encoding="utf-8"
                 ).strip()
-                if cached_ver and cached_ver != "unknown":
+                if (
+                    cached_ver
+                    and cached_ver != f"{compiler_identity}unknown"
+                    and cached_ver.startswith(compiler_identity)
+                ):
                     current_compiler_version = cached_ver
                     version_from_cache = True
         except OSError:
             pass
     if not version_from_cache:
-        fast_compiler = None if apple_debug else _resolve_fast_compiler_binary()
-        current_compiler_version = get_compiler_version(
-            fast_compiler if fast_compiler else selected_clangxx
+        current_compiler_version = compiler_identity + get_compiler_version(
+            selected_clangxx
         )
 
     current_zccache_version = get_zccache_version(cache_binary)
@@ -244,7 +259,9 @@ def detect_compiler_and_cache(
         )
 
     if verbose:
-        print(f"Toolchain: {current_compiler_version} + {cache_name}")
+        print(
+            f"Toolchain: {current_compiler_version.removeprefix(compiler_identity)} + {cache_name}"
+        )
 
     return CompilerDetection(
         clang_wrapper=clang_wrapper,
@@ -348,6 +365,7 @@ endian = 'little'
 [properties]
 # No additional properties needed - compiler flags are in meson.build
 """
+        native_file_path.parent.mkdir(parents=True, exist_ok=True)
         native_file_changed = write_if_different(native_file_path, native_file_content)
         if native_file_changed:
             _ts_print(f"[MESON] Regenerated native file: {native_file_path}")
@@ -371,6 +389,13 @@ def build_setup_env(compiler: CompilerDetection, build_mode: str) -> dict[str, s
         env["CXX"] = _resolve_xcode_tool("clang++")
         env["AR"] = _resolve_xcode_tool("ar")
         env["SDKROOT"] = _resolve_xcode_sdk_root()
+        return env
+
+    soldr_clang = resolve_soldr_clang()
+    if soldr_clang is not None:
+        env["CC"] = soldr_clang.cc
+        env["CXX"] = soldr_clang.cxx
+        env["AR"] = soldr_clang.ar
         return env
 
     fast_compiler = _resolve_fast_compiler_binary()
@@ -619,6 +644,7 @@ def build_meson_setup_cmd(
     reconfigure: bool,
     enable_full_examples: bool = True,
     source_hashes: Optional["SourceHashes"] = None,
+    wipe: bool = False,
 ) -> list[str]:
     """Build the ``meson setup [--reconfigure] ...`` command list.
 
@@ -656,6 +682,11 @@ def build_meson_setup_cmd(
         f"-Denable_unit_tests={str(enable_unit_tests).lower()}",
         f"-Denable_full_examples={str(enable_full_examples).lower()}",
     ]
+
+    if wipe:
+        # Reconfigure retains Meson's cached compiler; a provider change must
+        # rediscover it, without restoring an old configure-cache entry.
+        return [meson_exe, "setup", "--wipe", str(build_dir), *meson_args]
 
     capability = _get_zccache_meson_configure_path()
     sidecar: Optional[Path] = None

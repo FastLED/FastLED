@@ -29,6 +29,8 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      FASTLED_NATIVE_CLANG: soldr
     steps:
       - name: Checkout
         uses: actions/checkout@v4

@@ -37,6 +37,8 @@ permissions:
 jobs:
   audit:
     runs-on: ubuntu-24.04
+    env:
+      FASTLED_NATIVE_CLANG: soldr
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
@@ -56,7 +58,7 @@ jobs:
       - name: Install audit tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y clang llvm valgrind
+          sudo apt-get install -y llvm valgrind
 
       - name: Install project dependencies
         run: uv sync

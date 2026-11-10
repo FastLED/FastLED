@@ -30,6 +30,8 @@ defaults:
 jobs:
   build:
     runs-on: ${{ inputs.os }}
+    env:
+      FASTLED_NATIVE_CLANG: ${{ startsWith(inputs.os, 'ubuntu') && 'soldr' || '' }}
     timeout-minutes: 45
     steps:
       - name: Checkout

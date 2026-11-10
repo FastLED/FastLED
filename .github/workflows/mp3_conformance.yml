@@ -33,6 +33,8 @@ permissions:
 jobs:
   conformance:
     runs-on: ubuntu-24.04
+    env:
+      FASTLED_NATIVE_CLANG: soldr
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
@@ -48,11 +50,6 @@ jobs:
           save-cache: ${{ github.ref == 'refs/heads/master' && (github.event_name == 'push' || github.event_name == 'schedule') }}
           enable-cache: true
           version: '0.8.0'
-
-      - name: Install clang
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y clang
 
       - name: Install project dependencies
         run: uv sync

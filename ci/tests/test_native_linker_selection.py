@@ -4,7 +4,9 @@ import os
 from pathlib import Path
 
 import pytest
+from running_process import PIPE, RunningProcess
 
+from ci.meson import native_launchers
 from ci.meson.meson_setup_execute import (
     _migrate_native_linker_option,
     _write_zccache_input_sidecar,
@@ -19,6 +21,12 @@ from ci.meson.meson_setup_phases import (
     SourceHashes,
     check_reconfigure_markers,
 )
+
+
+@pytest.fixture(autouse=True)
+def _default_compiler_provider(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Keep default-linker tests independent of the invoking CI job's opt-in."""
+    monkeypatch.delenv("FASTLED_NATIVE_CLANG", raising=False)
 
 
 def _fake_bridge(tmp_path: Path, content: bytes = b"bridge") -> Path:
@@ -297,3 +305,114 @@ def test_missing_bridge_fails_loudly(
     monkeypatch.setattr(wrapper, "find_tool_binary", lambda tool: tmp_path / "nope")
     with pytest.raises(FileNotFoundError, match="bridge linker"):
         reld_tools.bridge_linker()
+
+
+def test_soldr_thinlto_bridge_stays_with_the_selected_compiler(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Release links use soldr's self-contained bridge behind the reld front end."""
+    reld = _fake_reld(tmp_path)
+    bridge = _fake_bridge(tmp_path, b"soldr bridge one")
+    monkeypatch.setattr(native_launchers.sys, "platform", "linux")
+    monkeypatch.setenv("FASTLED_NATIVE_CLANG", "soldr")
+    monkeypatch.setenv("FASTLED_NATIVE_LINKER", str(reld))
+    monkeypatch.setenv("RELD_BRIDGE_LINKER", "/stale/clang-tool-chain/bridge")
+    monkeypatch.setattr(
+        "ci.meson.meson_setup_execute.bridge_linker",
+        lambda: pytest.fail("soldr mode must not resolve clang-tool-chain's bridge"),
+    )
+
+    def soldr_print(flag: str) -> str:
+        """Verify bridge lookup uses the supported soldr print interface."""
+        assert flag == "--print-linker"
+        return str(bridge)
+
+    monkeypatch.setattr(native_launchers, "_soldr_print", soldr_print)
+    selected, first = resolve_native_linker("release")
+    assert selected == str(reld)
+    assert os.environ["RELD_BRIDGE_LINKER"] == str(bridge)
+    assert f"bridge={bridge}:" in first
+    bridge.write_bytes(b"soldr bridge two")
+    _, second = resolve_native_linker("release")
+    assert first != second
+
+
+def test_compiler_change_wipes_coredata_without_configure_cache(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Rediscover compilers instead of restoring a configure tree or reconfiguring."""
+    monkeypatch.setattr(
+        "ci.meson.meson_setup_execute.get_meson_executable", lambda: "/venv/meson"
+    )
+    monkeypatch.setattr(
+        "ci.meson.meson_setup_execute._get_zccache_meson_configure_path",
+        lambda: pytest.fail("compiler changes must bypass the configure cache"),
+    )
+    cmd = build_meson_setup_cmd(
+        native_file_path=tmp_path / "meson_native.txt",
+        build_dir=tmp_path,
+        build_mode="release",
+        native_linker="/opt/reld",
+        native_linker_identity="reld identity",
+        enable_examples=True,
+        enable_unit_tests=True,
+        enable_full_examples=True,
+        reconfigure=False,
+        wipe=True,
+    )
+    assert cmd[:4] == ["/venv/meson", "setup", "--wipe", str(tmp_path)]
+    assert "--reconfigure" not in cmd
+    assert cmd[cmd.index("--native-file") + 1] == str(tmp_path / "meson_native.txt")
+
+
+def test_meson_wipe_preserves_updated_native_file(tmp_path: Path) -> None:
+    """Use Meson's real wipe path to retain and reread a private native input."""
+    from ci.meson.compiler import get_meson_executable
+
+    source = tmp_path / "source"
+    source.mkdir()
+    (source / "meson.build").write_text(
+        "project('native-provider-wipe')\nmessage(meson.get_external_property('provider'))\n",
+        encoding="utf-8",
+    )
+    build = tmp_path / "build"
+    native = build / "meson-private" / "fastled-native.ini"
+    native.parent.mkdir(parents=True)
+    native.write_text("[properties]\nprovider = 'first-provider'\n", encoding="utf-8")
+    first = RunningProcess.run(
+        [
+            get_meson_executable(),
+            "setup",
+            str(build),
+            str(source),
+            "--native-file",
+            str(native),
+        ],
+        stdout=PIPE,
+        stderr=PIPE,
+        encoding="utf-8",
+        errors="replace",
+        timeout=60,
+        check=True,
+    )
+    assert "first-provider" in first.stdout
+    native.write_text("[properties]\nprovider = 'second-provider'\n", encoding="utf-8")
+    changed = RunningProcess.run(
+        [
+            get_meson_executable(),
+            "setup",
+            "--wipe",
+            str(build),
+            str(source),
+            "--native-file",
+            str(native),
+        ],
+        stdout=PIPE,
+        stderr=PIPE,
+        encoding="utf-8",
+        errors="replace",
+        timeout=60,
+        check=True,
+    )
+    assert native.is_file()
+    assert "second-provider" in changed.stdout

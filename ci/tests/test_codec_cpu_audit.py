@@ -338,6 +338,40 @@ def test_linux_compiler_discovery_rejects_windows_cache() -> None:
     )
 
 
+@pytest.mark.skipif(not sys.platform.startswith("linux"), reason="Linux-only provider")
+@pytest.mark.parametrize("provider", ["", "soldr"])
+def test_cpu_compiler_honors_native_provider(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, provider: str
+) -> None:
+    """Use the managed compiler on opt-in and retain PATH discovery otherwise."""
+    monkeypatch.setattr(sys, "platform", "linux")
+    monkeypatch.delenv("CODEC_CPU_COMPILER", raising=False)
+    monkeypatch.setenv("FASTLED_NATIVE_CLANG", provider)
+    monkeypatch.setenv("PATH", str(tmp_path))
+    system = tmp_path / "clang++"
+    system.touch(mode=0o755)
+    soldr = tmp_path / "soldr"
+    soldr.write_text('#!/bin/sh\nprintf "%s\\n" "$0-tool"\n', encoding="utf-8")
+    soldr.chmod(0o755)
+    managed = tmp_path / "soldr-tool"
+    managed.touch(mode=0o755)
+
+    assert AUDIT.compiler_path() == (managed if provider else system)
+
+
+def test_cpu_explicit_compiler_override_precedes_native_provider(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A named experiment compiler remains authoritative even with soldr enabled."""
+    compiler = tmp_path / "experiment-clang++"
+    compiler.touch()
+    monkeypatch.setenv("CODEC_CPU_COMPILER", str(compiler))
+    monkeypatch.setenv("FASTLED_NATIVE_CLANG", "soldr")
+    monkeypatch.setenv("PATH", str(tmp_path))
+
+    assert AUDIT.compiler_path() == compiler
+
+
 def test_instruction_parser_counts_inner_backedge() -> None:
     disassembly = """
 00000000 <kernel>:

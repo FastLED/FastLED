@@ -30,6 +30,8 @@ defaults:
 jobs:
   build:
     runs-on: ${{ inputs.os }}
+    env:
+      FASTLED_NATIVE_CLANG: ${{ startsWith(inputs.os, 'ubuntu') && 'soldr' || '' }}
     # Fail fast instead of waiting for the 6h default runner timeout.
     # Successful runs complete in ~8-20 minutes; anything past 45m is hung.
     # Observed Windows runners hanging in the Install step for 3+ hours

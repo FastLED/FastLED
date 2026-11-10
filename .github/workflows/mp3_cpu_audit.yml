@@ -39,6 +39,8 @@ permissions:
 jobs:
   audit:
     runs-on: ubuntu-24.04
+    env:
+      FASTLED_NATIVE_CLANG: soldr
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
@@ -63,7 +65,7 @@ jobs:
           sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list \
             /etc/apt/sources.list.d/microsoft-prod.sources
           sudo apt-get update
-          sudo apt-get install -y clang llvm valgrind
+          sudo apt-get install -y llvm valgrind
           for governor in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do
             if [ -e "$governor" ]; then
               echo performance | sudo tee "$governor"

@@ -18,8 +18,9 @@ NON_BOARD_BUILD_WORKFLOWS = {
 }
 
 # These profiles intentionally reuse another workflow, are aliases/fallbacks,
-# or are exercised outside the per-board badge wall.
+# are exercised outside the per-board badge wall, or explicitly lack a CI lane.
 KNOWN_UNBADGED_ALL_BOARD_ALIASES = {
+    "bbcmicrobit",  # nRF51 profile added in #5154; no dedicated build workflow.
     "digispark-tiny",
     "esp32dev_heapdbg",
     "esp32dev_qemu",

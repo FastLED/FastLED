@@ -28,4 +28,15 @@ void clearDelayFunction() FL_NO_EXCEPT;
 
 // Check if delay override is active (for fast testing)
 bool isDelayOverrideActive(void) FL_NO_EXCEPT;
+
+namespace fl {
+namespace stub {
+
+// Observe requested wire delays without depending on host NOP-loop timing.
+void setNanosecondDelayCallback(const fl::function<void(fl::u32)>& callback) FL_NO_EXCEPT;
+void clearNanosecondDelayCallback() FL_NO_EXCEPT;
+void recordNanosecondDelay(fl::u32 ns) FL_NO_EXCEPT;
+
+} // namespace stub
+} // namespace fl
 #endif  // !ARDUINO || FASTLED_USE_STUB_ARDUINO

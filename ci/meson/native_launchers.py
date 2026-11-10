@@ -17,7 +17,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
 
-from running_process import RunningProcess
+from running_process import PIPE, RunningProcess
 from typeguard import typechecked
 
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt
@@ -72,6 +72,77 @@ class WasmNativeEntries:
     ranlib: str
     nm: str
     wasm_ld: str
+
+
+# Opt-in: FASTLED_NATIVE_CLANG=soldr takes the native (Linux host) compiler
+# from soldr's managed LLVM bundle instead of clang-tool-chain. The bundle
+# ships its own libxml2/libz, so it does not break when a runner image drops
+# libxml2.so.2. Requires soldr >=0.9.53 with `cc --clang`.
+SOLDR_CLANG_ENV = "FASTLED_NATIVE_CLANG"
+SOLDR_CLANG_VALUE = "soldr"
+
+
+@dataclass(slots=True)
+class SoldrClang:
+    """Native compiler and archiver paths from soldr's managed LLVM bundle."""
+
+    cc: str
+    cxx: str
+    ar: str
+
+
+def soldr_clang_requested() -> bool:
+    """Return whether this Linux host opted into soldr's native compiler."""
+    return (
+        sys.platform.startswith("linux")
+        and os.environ.get(SOLDR_CLANG_ENV, "").strip().lower() == SOLDR_CLANG_VALUE
+    )
+
+
+def _soldr_print(flag: str) -> str:
+    """Query one tool path, allowing time for the first LLVM bundle download."""
+    soldr = shutil.which("soldr")
+    if soldr is None:
+        raise RuntimeError(f"{SOLDR_CLANG_ENV}=soldr but `soldr` is not on PATH")
+    result = RunningProcess.run(
+        [soldr, "c++", "--clang", flag],
+        stdout=PIPE,
+        stderr=PIPE,
+        text=True,
+        check=False,
+        timeout=600,
+        encoding="utf-8",
+        errors="replace",
+    )
+    path = (result.stdout or "").strip().splitlines()[-1:] or [""]
+    if result.returncode != 0 or not Path(path[0]).is_file():
+        raise RuntimeError(
+            f"`soldr c++ --clang {flag}` failed (rc={result.returncode}); "
+            f"soldr >=0.9.53 is required: {result.stderr}"
+        )
+    return path[0]
+
+
+def resolve_soldr_clang() -> Optional[SoldrClang]:
+    """Return soldr's clang/clang++/llvm-ar when opted in, else None.
+
+    Raises when opted in but soldr cannot provide them: a silent fallback
+    would hide the misconfiguration.
+    """
+    if not soldr_clang_requested():
+        return None
+    return SoldrClang(
+        cc=_soldr_print("--print-cc"),
+        cxx=_soldr_print("--print-cxx"),
+        ar=_soldr_print("--print-ar"),
+    )
+
+
+def resolve_soldr_linker() -> str | None:
+    """Return soldr's self-contained bridge for opted-in Linux builds."""
+    if not soldr_clang_requested():
+        return None
+    return _soldr_print("--print-linker")
 
 
 def _native_launcher_output_dir(project_root: Path) -> Path:
@@ -303,6 +374,26 @@ def get_zccache_version(zccache_path: Optional[str] = None) -> str:
         return ""
 
 
+def _quote_meson_path(path: str) -> str:
+    """Return a string expression that preserves a native-file tool path.
+
+    Meson's machine-file reader doubles backslashes before parsing strings,
+    so ordinary backslash escaping cannot quote apostrophes. Triple-quoted
+    chunks preserve apostrophes; separate ordinary strings preserve backslashes.
+    """
+    parts: list[str] = []
+    for part in path.split("\\"):
+        if "'" not in part:
+            parts.append(f"'{part}'")
+        elif "'''" in part or part.endswith("'"):
+            raise RuntimeError(
+                f"Meson cannot represent this native tool path: {path!r}"
+            )
+        else:
+            parts.append(f"'''{part}'''")
+    return " + '\\' + ".join(parts)
+
+
 def _resolve_fast_native_entries() -> FastNativeEntries:
     """
     Resolve native launcher binaries for the Meson native file.
@@ -329,6 +420,13 @@ def _resolve_fast_native_entries() -> FastNativeEntries:
         or all-None fields if resolution fails (falls back to wrappers).
     """
     _none = FastNativeEntries(cc=None, cxx=None, ar=None)
+    soldr = resolve_soldr_clang()
+    if soldr is not None:
+        return FastNativeEntries(
+            cc=f"[{_quote_meson_path(soldr.cc)}]",
+            cxx=f"[{_quote_meson_path(soldr.cxx)}]",
+            ar=f"[{_quote_meson_path(soldr.ar)}]",
+        )
     try:
         from clang_tool_chain.platform.paths import (
             find_tool_binary,
@@ -344,18 +442,10 @@ def _resolve_fast_native_entries() -> FastNativeEntries:
         if ctc_c is None or ctc_cpp is None:
             return _none
 
-        # Escape any single quotes in the path so the generated Meson
-        # list-of-strings remains valid even if a path happens to contain
-        # one. Paths under ``.cached/clang-native/`` are extremely unlikely
-        # to contain ``'`` in practice, but defensive escaping costs nothing
-        # and avoids a hard-to-debug native-file parse error.
-        def _q(p: str) -> str:
-            return p.replace("'", "\\'")
-
         return FastNativeEntries(
-            cc=f"['{_q(ctc_c)}']",
-            cxx=f"['{_q(ctc_cpp)}']",
-            ar=f"['{_q(ar_path)}']",
+            cc=f"[{_quote_meson_path(ctc_c)}]",
+            cxx=f"[{_quote_meson_path(ctc_cpp)}]",
+            ar=f"[{_quote_meson_path(ar_path)}]",
         )
 
     except KeyboardInterrupt as ki:
@@ -376,6 +466,9 @@ def _resolve_fast_compiler_binary() -> Optional[str]:
     Returns:
         Path to raw clang++ binary, or None if resolution fails.
     """
+    soldr = resolve_soldr_clang()
+    if soldr is not None:
+        return soldr.cxx
     try:
         from clang_tool_chain.platform.paths import find_tool_binary
 
