@@ -301,6 +301,13 @@ foreach test_name : test_names
   ]
   test_cpp_args = shared_test_cpp_args
 
+  # These tests select a different FastPin provider before including the header.
+  # The shared PCH has already selected the host provider, so it cannot be used.
+  if test_name in ['fl_system_fastpin_mapped_toggle', 'fl_system_fastpin_avr_toggle', 'fl_system_fastpin_forced_no_pinmap']
+    test_sources = [test_file]
+    test_cpp_args = test_abs_include_args + unit_test_compile_args + ['-DTEST_DLL_MODE']
+  endif
+
   # host_sim.cpp is now compiled as part of libfastled.a when STUB_PLATFORM is defined
   # No need to add it explicitly to individual tests anymore
 
