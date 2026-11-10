@@ -199,9 +199,9 @@ The project uses clang-tool-chain for all builds. The build system internally co
 CXX=clang-tool-chain-cpp CC=clang-tool-chain-c meson setup builddir
 ```
 - Clang 21.1.5 provides proper MSVC compatibility layer and cross-platform support
-- test.py automatically uses clang-tool-chain (no alternative compilers supported)
+- test.py defaults to clang-tool-chain; Linux can select soldr with the opt-in below
 - The clang-tool-chain wrappers and Meson tooling handle the native test/toolchain setup
-- **Opt-in on Linux:** `FASTLED_NATIVE_CLANG=soldr` takes clang, clang++ and llvm-ar for the native build from `soldr c++ --clang --print-cxx` (and `--print-cc` / `--print-ar`) instead. soldr >=0.9.53 carries its own libxml2/libz in the LLVM bundle, so it keeps working when a runner image drops `libxml2.so.2`. The build fails loudly if soldr can't provide the tools. The linker stays reld; its ThinLTO bridge comes from `soldr c++ --clang --print-linker`. The standalone codec CPU and memory audits use the same compiler selection. WASM, IWYU and the lint tooling still use clang-tool-chain.
+- **Opt-in on Linux:** `FASTLED_NATIVE_CLANG=soldr` takes clang, clang++ and llvm-ar for the native build from `soldr c++ --clang --print-cxx` (and `--print-cc` / `--print-ar`) instead. soldr >=0.9.53 carries its own libxml2/libz in the LLVM bundle, so it keeps working when a runner image drops `libxml2.so.2`. The build fails loudly if soldr can't provide the tools. The linker stays reld; its ThinLTO bridge comes from `soldr c++ --clang --print-linker`. The standalone codec CPU, memory and conformance harnesses use the same compiler selection. WASM, IWYU and the lint tooling still use clang-tool-chain.
 
 ## Unified GNU Build (Windows = Linux)
 clang-tool-chain provides a uniform GNU-style build environment across all platforms:
