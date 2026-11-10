@@ -7,6 +7,7 @@
 
 #if defined(FL_IS_RP2040) || defined(FL_IS_RP2350)
 // IWYU pragma: begin_keep
+#include "platforms/arm/rp/rpcommon/sdk_compat.h"
 #include "hardware/clocks.h"
 #include "hardware/gpio.h"
 #include "hardware/structs/sio.h"
@@ -78,7 +79,7 @@ class RpBitBangDevicePin final : public IRpBitBangPin {
   public:
     void begin(int pin) FL_NO_EXCEPT override {
         mMask = 1u << static_cast<u32>(pin);
-        gpio_init(static_cast<uint>(pin));
+        rp_sdk::gpioInit(static_cast<uint>(pin));
         gpio_put(static_cast<uint>(pin), false);
         gpio_set_dir(static_cast<uint>(pin), GPIO_OUT);
         mIrqState = save_and_disable_interrupts();

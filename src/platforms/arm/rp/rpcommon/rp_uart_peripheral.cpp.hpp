@@ -7,6 +7,7 @@
 #if defined(FL_IS_RP2040) || defined(FL_IS_RP2350)
 
 #include "platforms/arm/rp/rpcommon/rp_pio_dma_resource_manager.h"
+#include "platforms/arm/rp/rpcommon/sdk_compat.h"
 #include "fl/stl/chrono.h"
 #include "fl/stl/stdint.h"
 
@@ -76,7 +77,7 @@ bool RpUartPeripheral::configure(const RpUartConfig& config) FL_NO_EXCEPT {
         deinitialize();
         return false;
     }
-    gpio_set_function(static_cast<uint>(mTxPin), UART_FUNCSEL_NUM(uart, mTxPin));
+    gpio_set_function(static_cast<uint>(mTxPin), rp_sdk::uartFunction(uart, mTxPin));
     gpio_set_outover(static_cast<uint>(mTxPin),
                      config.invert_tx ? GPIO_OVERRIDE_INVERT : GPIO_OVERRIDE_NORMAL);
     mActualBaudRate = uart_init(uart, config.baud_rate);
@@ -124,7 +125,7 @@ bool RpUartPeripheral::startTxDma(const u8* data, size_t size) FL_NO_EXCEPT {
     channel_config_set_transfer_data_size(&config, DMA_SIZE_8);
     channel_config_set_read_increment(&config, true);
     channel_config_set_write_increment(&config, false);
-    channel_config_set_dreq(&config, uart_get_dreq_num(uart, true));
+    channel_config_set_dreq(&config, rp_sdk::uartDreq(uart, true));
     dma_channel_configure(static_cast<uint>(mDmaChannel), &config,
                           &uart_get_hw(uart)->dr, data,
                           static_cast<u32>(size), true);

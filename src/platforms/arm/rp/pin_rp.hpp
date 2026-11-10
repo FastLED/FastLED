@@ -19,6 +19,7 @@
 // IWYU pragma: begin_keep
 #include "hardware/pwm.h"
 // IWYU pragma: end_keep
+#include "platforms/arm/rp/rpcommon/sdk_compat.h"
 #include "fl/system/pin.h"
 #include "fl/stl/noexcept.h"
 
@@ -29,7 +30,7 @@ namespace platforms {
 /// @param pin GPIO pin number (0-29 for RP2040, 0-47 for RP2350)
 /// @param mode Pin mode: Input, Output, InputPullup, or InputPulldown
 inline void pinMode(int pin, PinMode mode) FL_NO_EXCEPT {
-    gpio_init(pin);
+    rp_sdk::gpioInit(pin);
 
     switch (mode) {
         case PinMode::Output:
