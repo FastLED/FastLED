@@ -114,7 +114,13 @@ public:
 	inline static void strobe() __attribute__ ((always_inline)) { toggle(); toggle(); }
 
 	/// @copydoc Pin::toggle()
-	inline static void toggle() __attribute__ ((always_inline)) { *sInPort = sPinMask; }
+	inline static void toggle() __attribute__ ((always_inline)) {
+#ifdef FL_IS_AVR
+		*sInPort = sPinMask; // AVR PIN registers toggle output bits when written with ones.
+#else
+		*sPort ^= sPinMask;
+#endif
+	}
 
 	/// @copydoc Pin::hi(FASTLED_REGISTER port_ptr_t)
 	inline static void hi(FASTLED_REGISTER port_ptr_t port) __attribute__ ((always_inline)) { *port |= sPinMask; }
