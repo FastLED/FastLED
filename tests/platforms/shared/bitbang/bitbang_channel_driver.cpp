@@ -15,9 +15,10 @@
 #include "fl/channels/data.h"
 #include "fl/channels/config.h"
 #include "fl/system/pin.h"
-#include "fl/stl/chrono.h"
+#include "fl/stl/shared_ptr.h"
 #include "fl/stl/vector.h"
 #include "platforms/stub/stub_gpio.h"
+#include "platforms/stub/time_stub.h"
 
 using namespace fl;
 
@@ -61,6 +62,20 @@ struct SpiTrace {
         });
     }
     ~SpiTrace() { fl::stub::clearPinEdgeCallback(clockPin); }
+};
+
+struct NanosecondDelayTrace {
+    fl::shared_ptr<fl::vector<u32>> mDelays = fl::make_shared<fl::vector<u32>>();
+
+    NanosecondDelayTrace() {
+        const auto delays = mDelays;
+        fl::stub::setNanosecondDelayCallback([delays](u32 ns) FL_NO_EXCEPT {
+            delays->push_back(ns);
+        });
+    }
+    ~NanosecondDelayTrace() { fl::stub::clearNanosecondDelayCallback(); }
+    NanosecondDelayTrace(const NanosecondDelayTrace&) = delete;
+    NanosecondDelayTrace& operator=(const NanosecondDelayTrace&) = delete;
 };
 
 // Checks MSB-first output with zero padding past the lane's end.
@@ -296,9 +311,8 @@ FL_TEST_CASE("SPI trace: a channel with no clock pin writes no data") {
 }
 
 // #5127: channels sharing a clock pin used the first channel's rate, so a fast
-// device enqueued first overclocked a slow one. 32 bytes at 250 kHz take at
-// least 256 x 4 us = 1024 us; at 4 MHz about 64 us. The stub's delays spin in
-// real time, so a 16x gap is safe to time on the host.
+// device enqueued first overclocked a slow one. Observe the actual driver's
+// requested half-periods: host NOP loops do not guarantee wall-clock timing.
 FL_TEST_CASE("SPI: a shared clock runs at the slowest requested rate in either order") {
     for (int fastFirst = 0; fastFirst < 2; ++fastFirst) {
         BitBangChannelDriver driver;
@@ -312,12 +326,18 @@ FL_TEST_CASE("SPI: a shared clock runs at the slowest requested rate in either o
         auto slow = make(53, 250000);
         driver.enqueue(fastFirst ? fast : slow);
         driver.enqueue(fastFirst ? slow : fast);
-        const u32 start = fl::micros();
+        SpiTrace trace(54, {52, 53});
+        NanosecondDelayTrace delays;
         driver.show();
-        const u32 elapsed = fl::micros() - start;
         FL_CAPTURE(fastFirst);
-        FL_CAPTURE(elapsed);
-        FL_CHECK_GE(elapsed, 900u);
+        FL_REQUIRE_EQ(delays.mDelays->size(), 512u);
+        for (u32 ns : *delays.mDelays) {
+            FL_CHECK_EQ(ns, 2000u);
+        }
+        checkLane(trace, 0, bytes, bytes.size());
+        checkLane(trace, 1, bytes, bytes.size());
+        // Each channel parks the shared clock low before the 256 data bits.
+        FL_CHECK_EQ(trace.falling, 258);
     }
 }
 

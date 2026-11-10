@@ -1,6 +1,8 @@
 // Unit test for the AVR mapped forced-software pin toggle.
 #include "led_sysdefs.h"
 #include "fl/system/pin.h"
+// Freeze native alignment before simulating AVR so the shared test harness ABI matches.
+#include "fl/stl/compiler_control.h"
 
 static volatile RwReg outputRegister = 0;
 static volatile RoReg inputRegister = 0;
