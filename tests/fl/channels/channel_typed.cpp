@@ -108,6 +108,78 @@ FL_TEST_CASE("runtime FastLED.add(cfg) with cfg.options.mBus = Bus::BIT_BANG") {
     channel->removeFromDrawList();
 }
 
+FL_TEST_CASE("Channel applyConfig rejects conflicting encoder without changing settings") {
+    CRGB original[1] = {CRGB::Red};
+    CRGB replacement[2] = {CRGB::Blue, CRGB::Green};
+    auto timing = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
+    fl::ClocklessChipset chipset(9, timing);
+    fl::ChannelConfig config(chipset, fl::span<CRGB>(original, 1), RGB);
+    auto channel = fl::TypedChannel<fl::Bus::BIT_BANG, fl::ClocklessChipset>::create(config);
+    FL_REQUIRE_TRUE(channel != nullptr);
+
+    fl::ClocklessChipset conflicting(9, timing,
+        fl::ClocklessEncoder::CLOCKLESS_ENCODER_UCS7604_8BIT);
+    fl::ChannelConfig replacementConfig(conflicting, fl::span<CRGB>(replacement, 2), BGR);
+    channel->applyConfig(replacementConfig);
+
+    FL_CHECK_EQ(channel->leds().data(), original);
+    FL_CHECK_EQ(channel->size(), 1);
+    FL_CHECK_EQ(channel->getRgbOrder(), RGB);
+    FL_CHECK_EQ(channel->getChipset().ptr<fl::ClocklessChipset>()->encoder,
+                fl::ClocklessEncoder::CLOCKLESS_ENCODER_WS2812);
+
+    fl::vector<u8> encoded;
+    auto& events = fl::ChannelEvents::instance();
+    int listener = events.onChannelDataEncoded.add(
+        [&](const fl::IChannel& source, const fl::ChannelData& data) {
+            if (&source == channel.get()) {
+                for (u8 byte : data.getData()) {
+                    encoded.push_back(byte);
+                }
+            }
+        });
+    FastLED.add(channel);
+    FastLED.show();
+    FastLED.remove(channel);
+    events.onChannelDataEncoded.remove(listener);
+    FL_REQUIRE_EQ(encoded.size(), 3u);
+    FL_CHECK_GT(encoded[0], 0);
+    FL_CHECK_EQ(encoded[1], 0);
+    FL_CHECK_EQ(encoded[2], 0);
+}
+
+FL_TEST_CASE("Typed channel keeps its bus across default reconfiguration") {
+    CRGB original[1] = {CRGB::Red};
+    CRGB updated[1] = {CRGB::Blue};
+    auto timing = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
+    fl::ClocklessChipset chipset(9, timing);
+    fl::ChannelConfig config(chipset, fl::span<CRGB>(original, 1), RGB);
+    auto channel = fl::TypedChannel<fl::Bus::BIT_BANG, fl::ClocklessChipset>::create(config);
+    FL_REQUIRE_TRUE(channel != nullptr);
+
+    fl::ChannelConfig defaults(chipset, fl::span<CRGB>(updated, 1), RGB);
+    channel->applyConfig(defaults);
+    FL_CHECK_EQ(channel->leds().data(), updated);
+
+    // An explicit repeat of the original binding must remain valid.
+    config.options.mBus = fl::Bus::BIT_BANG;
+    channel->applyConfig(config);
+    FL_CHECK_EQ(channel->leds().data(), original);
+
+    // A conflicting explicit binding must not modify even unrelated fields.
+    defaults.options.mBus = fl::Bus::RMT;
+    defaults.rgb_order = BGR;
+    channel->applyConfig(defaults);
+    FL_CHECK_EQ(channel->leds().data(), original);
+    FL_CHECK_EQ(channel->getRgbOrder(), RGB);
+
+    defaults.options.mBus = fl::Bus::BIT_BANG;
+    defaults.options.mBusWhich = 1;
+    channel->applyConfig(defaults);
+    FL_CHECK_EQ(channel->leds().data(), original);
+    FL_CHECK_EQ(channel->getRgbOrder(), RGB);
+}
+
 FL_TEST_CASE("ChannelConfig RGBW settings encode four bytes per pixel") {
     CRGB workspace[2] = {CRGB::Red, CRGB::Blue};
     auto timing = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();

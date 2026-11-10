@@ -534,6 +534,20 @@ bool Channel::reconcileColorProfile(const ChannelOptions& options) FL_NO_EXCEPT 
 #endif
 
 void Channel::applyConfig(const ChannelConfig& config) FL_NO_EXCEPT {
+    const auto* currentClockless = mChipset.ptr<ClocklessChipset>();
+    const auto* incomingClockless = config.chipset.ptr<ClocklessChipset>();
+    const auto* currentSpi = mChipset.ptr<SpiChipsetConfig>();
+    const auto* incomingSpi = config.chipset.ptr<SpiChipsetConfig>();
+    const bool compatible = currentClockless && incomingClockless
+        ? currentClockless->timing == incomingClockless->timing &&
+              currentClockless->encoder == incomingClockless->encoder
+        : currentSpi && incomingSpi && currentSpi->timing == incomingSpi->timing &&
+              currentSpi->spiBus == incomingSpi->spiBus;
+    if (!compatible || (config.options.mBus != Bus::AUTO &&
+                        (config.options.mBus != mBus || config.options.mBusWhich != mBusWhich))) {
+        FL_WARN("Channel::applyConfig: chipset or bus conflicts with the existing binding");
+        return;
+    }
     mRgbOrder = config.rgb_order;
     if (config.mName.has_value()) {
         mName = config.mName.value();
@@ -546,8 +560,8 @@ void Channel::applyConfig(const ChannelConfig& config) FL_NO_EXCEPT {
     // legacy transition, just like the base correction/temperature setters.
     mStaticProfileCleared = true;
 #endif
-    mBus = config.options.mBus;
-    mBusWhich = config.options.mBusWhich;
+    mSettings.mBus = mBus;
+    mSettings.mBusWhich = mBusWhich;
     syncLegacySettings();
     auto& events = ChannelEvents::instance();
 #if FL_COLOR_PROFILE_RUNTIME
