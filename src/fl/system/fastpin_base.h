@@ -21,9 +21,7 @@
 
 #ifdef FASTLED_FORCE_SOFTWARE_PINS
 #include "fl/system/pin.h"  // IWYU pragma: keep
-#if defined(FASTLED_NO_PINMAP)
 #include "fl/system/fastpin_no_pinmap.h"  // IWYU pragma: keep
-#endif
 #endif
 
 FL_DISABLE_WARNING_PUSH
@@ -81,10 +79,24 @@ public:
 ///
 /// Note that these classes are all static functions.  So the proper usage is Pin<13>::hi(); or such.  Instantiating objects is not recommended,
 /// as passing Pin objects around will likely -not- have the effect you're expecting.
-#if defined(FASTLED_FORCE_SOFTWARE_PINS) && defined(FASTLED_NO_PINMAP)
+// ESP32 uses SDK pin APIs rather than Arduino's register-port mapping macros.
+#if defined(FASTLED_FORCE_SOFTWARE_PINS) && \
+    (defined(FASTLED_NO_PINMAP) || defined(FL_IS_ESP32))
 #define FL_FASTPIN_HAS_NO_PINMAP
 /// No register map exists to read, so every access goes through the core's pin API.
+#ifdef FL_IS_ESP32
+// The ESP32 header supplies checked specializations for all supported pins.
+// An unspecified pin must not inherit the permissive portless fallback.
+template<fl::u8 PIN> class FastPin : public NoPinMapPin<PIN> {
+public:
+    static constexpr bool validpin() FL_NO_EXCEPT { return false; }
+    static void setOutput() FL_NO_EXCEPT {
+        FL_STATIC_ASSERT(PIN != PIN, "No FastPin specialization for this ESP32 pin");
+    }
+};
+#else
 template<fl::u8 PIN> class FastPin : public NoPinMapPin<PIN> {};
+#endif
 #elif defined(FASTLED_FORCE_SOFTWARE_PINS)
 #define FL_FASTPIN_HAS_RUNTIME_PORT
 template<fl::u8 PIN> class FastPin {
