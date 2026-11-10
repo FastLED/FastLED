@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import os
 import unittest
+from contextlib import ExitStack
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from types import SimpleNamespace
@@ -22,6 +23,48 @@ from ci.meson.sanitizer_env import setup_sanitizer_env
 
 
 class TestMesonNativeToolchain(unittest.TestCase):
+    def test_unknown_compiler_marker_forces_fresh_meson_discovery(self) -> None:
+        """Missing and unreadable identities must not bless Meson's old compiler."""
+        from ci.meson.build_config import setup_meson_build
+
+        for unreadable in (False, True):
+            with self.subTest(unreadable=unreadable), TemporaryDirectory() as temp_dir:
+                root = Path(temp_dir)
+                (root / "meson-info").mkdir()
+                markers = MarkerPaths.for_build_dir(root)
+                if unreadable:
+                    markers.compiler_version.mkdir()
+                with ExitStack() as stack:
+                    for name, result in {
+                        "resolve_native_linker": ("reld", "reld"),
+                        "check_meson_version_compatibility": (True, ""),
+                        "compute_source_hashes": SimpleNamespace(max_tests_dir_mtime=0),
+                        "check_reconfigure_markers": SimpleNamespace(
+                            force_reconfigure=False
+                        ),
+                        "check_meson_build_modified": False,
+                        "detect_test_file_changes": False,
+                        "detect_example_file_changes": None,
+                        "check_obsolete_zig_wrappers": None,
+                        "detect_compiler_and_cache": self._compiler(),
+                        "cleanup_build_artifacts": None,
+                        "write_meson_native_file": None,
+                        "build_setup_env": {},
+                        "run_meson_setup_command": True,
+                    }.items():
+                        stack.enter_context(
+                            patch(f"ci.meson.build_config.{name}", return_value=result)
+                        )
+                    command = stack.enter_context(
+                        patch(
+                            "ci.meson.build_config.build_meson_setup_cmd",
+                            return_value=["meson"],
+                        )
+                    )
+                    self.assertTrue(setup_meson_build(root, root, build_mode="quick"))
+                    self.assertTrue(command.call_args.kwargs.get("wipe", False))
+                    self.assertFalse(command.call_args.kwargs["reconfigure"])
+
     def test_same_version_provider_switch_invalidates_cached_compiler(self) -> None:
         """Switch both directions even when compiler versions and marker ages match."""
         with TemporaryDirectory() as temp_dir:

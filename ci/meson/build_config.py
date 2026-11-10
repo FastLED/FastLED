@@ -282,6 +282,9 @@ def setup_meson_build(
             compiler_version_reason = "compiler version marker missing"
 
         if compiler_version_reason:
+            # An unknown identity cannot prove Meson's cached compiler matches.
+            # Rediscover it through --wipe before recording the new identity.
+            compiler_version_changed = True
             if not force_reconfigure:
                 _ts_print(
                     f"[MESON] 🔄 Reconfiguration required: {compiler_version_reason}"
