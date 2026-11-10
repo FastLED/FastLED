@@ -70,14 +70,20 @@ class GenericSoftwareSPIOutput {
 			isNoPinMapPin(static_cast<const fl::FastPin<CLOCK_PIN>*>(nullptr))) {
 			return true;
 		}
-		// Either pin's policy can require atomic writes: the whole-port words
-		// assume an active-high clock, so a clock pin such as ClearCore's must
-		// keep its own hi()/lo() even beside a non-atomic data pin (#5112).
+		// Either pin's policy can require atomic writes; retain its own hi()/lo()
+		// even beside a non-atomic data pin unless both policies allow streaming.
+		// This is independent of the clock's active-high/active-low polarity.
 		return (BitbangPin<fl::FastPin<DATA_PIN>>::kAtomicWrite ||
 				BitbangPin<fl::FastPin<CLOCK_PIN>>::kAtomicWrite) &&
 			(!kCanStreamSamePort ||
 			 fl::FastPin<DATA_PIN>::port() != fl::FastPin<CLOCK_PIN>::port());
 #endif
+	}
+
+	// Replace only the clock bit, using its logical-level semantics (#5112).
+	FASTLED_FORCE_INLINE static data_t withClockLevel(data_t data, clock_t level) FL_NO_EXCEPT {
+		const data_t mask = static_cast<data_t>(fl::FastPin<CLOCK_PIN>::mask());
+		return (data & ~mask) | (static_cast<data_t>(level) & mask);
 	}
 
 public:
@@ -231,7 +237,8 @@ private:
 		const data_t low = (b & (1U << BIT)) ? datahi_clocklo : datalo_clocklo;
 		fl::FastPin<DATA_PIN>::fastset(port, low);
 		if (kNeedsGpioPadding) { CLOCK_LO_DELAY; }
-		fl::FastPin<DATA_PIN>::fastset(port, low | fl::FastPin<CLOCK_PIN>::mask());
+		// The cached low word already carries the clock's logical polarity.
+		fl::FastPin<DATA_PIN>::fastset(port, low ^ fl::FastPin<CLOCK_PIN>::mask());
 		if (kNeedsGpioPadding) { CLOCK_HI_DELAY; }
 	}
 
@@ -364,10 +371,10 @@ public:
 
 		} else {
 			// If data and clock are on the same port then we can combine setting the data and clock pins
-			FASTLED_REGISTER data_t datahi_clockhi = fl::FastPin<DATA_PIN>::hival() | fl::FastPin<CLOCK_PIN>::mask();
-			FASTLED_REGISTER data_t datalo_clockhi = fl::FastPin<DATA_PIN>::loval() | fl::FastPin<CLOCK_PIN>::mask();
-			FASTLED_REGISTER data_t datahi_clocklo = fl::FastPin<DATA_PIN>::hival() & ~fl::FastPin<CLOCK_PIN>::mask();
-			FASTLED_REGISTER data_t datalo_clocklo = fl::FastPin<DATA_PIN>::loval() & ~fl::FastPin<CLOCK_PIN>::mask();
+			FASTLED_REGISTER data_t datahi_clockhi = withClockLevel(fl::FastPin<DATA_PIN>::hival(), fl::FastPin<CLOCK_PIN>::hival());
+			FASTLED_REGISTER data_t datalo_clockhi = withClockLevel(fl::FastPin<DATA_PIN>::loval(), fl::FastPin<CLOCK_PIN>::hival());
+			FASTLED_REGISTER data_t datahi_clocklo = withClockLevel(fl::FastPin<DATA_PIN>::hival(), fl::FastPin<CLOCK_PIN>::loval());
+			FASTLED_REGISTER data_t datalo_clocklo = withClockLevel(fl::FastPin<DATA_PIN>::loval(), fl::FastPin<CLOCK_PIN>::loval());
 
 			const bool nonempty = len > 0;
 			while(len--) {
@@ -410,10 +417,10 @@ public:
 		} else {
 			// fl::FastPin<CLOCK_PIN>::hi();
 			// If data and clock are on the same port then we can combine setting the data and clock pins
-			FASTLED_REGISTER data_t datahi_clockhi = fl::FastPin<DATA_PIN>::hival() | fl::FastPin<CLOCK_PIN>::mask();
-			FASTLED_REGISTER data_t datalo_clockhi = fl::FastPin<DATA_PIN>::loval() | fl::FastPin<CLOCK_PIN>::mask();
-			FASTLED_REGISTER data_t datahi_clocklo = fl::FastPin<DATA_PIN>::hival() & ~fl::FastPin<CLOCK_PIN>::mask();
-			FASTLED_REGISTER data_t datalo_clocklo = fl::FastPin<DATA_PIN>::loval() & ~fl::FastPin<CLOCK_PIN>::mask();
+			FASTLED_REGISTER data_t datahi_clockhi = withClockLevel(fl::FastPin<DATA_PIN>::hival(), fl::FastPin<CLOCK_PIN>::hival());
+			FASTLED_REGISTER data_t datalo_clockhi = withClockLevel(fl::FastPin<DATA_PIN>::loval(), fl::FastPin<CLOCK_PIN>::hival());
+			FASTLED_REGISTER data_t datahi_clocklo = withClockLevel(fl::FastPin<DATA_PIN>::hival(), fl::FastPin<CLOCK_PIN>::loval());
+			FASTLED_REGISTER data_t datalo_clocklo = withClockLevel(fl::FastPin<DATA_PIN>::loval(), fl::FastPin<CLOCK_PIN>::loval());
 
 			fl::u8 *end = data + len;
 
@@ -489,10 +496,10 @@ public:
 
 		} else {
 			// If data and clock are on the same port then we can combine setting the data and clock pins
-			FASTLED_REGISTER data_t datahi_clockhi = fl::FastPin<DATA_PIN>::hival() | fl::FastPin<CLOCK_PIN>::mask();
-			FASTLED_REGISTER data_t datalo_clockhi = fl::FastPin<DATA_PIN>::loval() | fl::FastPin<CLOCK_PIN>::mask();
-			FASTLED_REGISTER data_t datahi_clocklo = fl::FastPin<DATA_PIN>::hival() & ~fl::FastPin<CLOCK_PIN>::mask();
-			FASTLED_REGISTER data_t datalo_clocklo = fl::FastPin<DATA_PIN>::loval() & ~fl::FastPin<CLOCK_PIN>::mask();
+			FASTLED_REGISTER data_t datahi_clockhi = withClockLevel(fl::FastPin<DATA_PIN>::hival(), fl::FastPin<CLOCK_PIN>::hival());
+			FASTLED_REGISTER data_t datalo_clockhi = withClockLevel(fl::FastPin<DATA_PIN>::loval(), fl::FastPin<CLOCK_PIN>::hival());
+			FASTLED_REGISTER data_t datahi_clocklo = withClockLevel(fl::FastPin<DATA_PIN>::hival(), fl::FastPin<CLOCK_PIN>::loval());
+			FASTLED_REGISTER data_t datalo_clocklo = withClockLevel(fl::FastPin<DATA_PIN>::loval(), fl::FastPin<CLOCK_PIN>::loval());
 
 			while(pixels.has(1)) {
 				if(FLAGS & FLAG_START_BIT) {
