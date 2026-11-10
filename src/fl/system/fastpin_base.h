@@ -86,6 +86,7 @@ public:
 /// No register map exists to read, so every access goes through the core's pin API.
 template<fl::u8 PIN> class FastPin : public NoPinMapPin<PIN> {};
 #elif defined(FASTLED_FORCE_SOFTWARE_PINS)
+#define FL_FASTPIN_HAS_RUNTIME_PORT
 template<fl::u8 PIN> class FastPin {
 	static RwReg sPinMask;            ///< Bitmask for the pin within its register
 	static volatile RwReg *sPort;     ///< Output register for the pin

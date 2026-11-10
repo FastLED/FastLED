@@ -216,6 +216,13 @@ inline u8& avr_time_accumulator() FL_NO_EXCEPT {
 
 #define FL_CLOCKLESS_CONTROLLER_DEFINED 1
 
+#ifdef FL_FASTPIN_HAS_RUNTIME_PORT
+// This driver needs a compile-time port address for its cycle-counted OUT instruction.
+template <u8 DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 10>
+class ClocklessController : public CPixelLEDController<RGB_ORDER> {
+	FL_STATIC_ASSERT(DATA_PIN != DATA_PIN, "FASTLED_FORCE_SOFTWARE_PINS is not supported by the AVR clockless driver; remove the define to use hardware pins");
+};
+#else // FL_FASTPIN_HAS_RUNTIME_PORT
 template <u8 DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 10>
 class ClocklessController : public CPixelLEDController<RGB_ORDER> {
 	// Extract timing values from struct and convert from nanoseconds to clock cycles
@@ -867,6 +874,7 @@ protected:
 	}
 
 };
+#endif // FL_FASTPIN_HAS_RUNTIME_PORT
 
 #endif
 }  // namespace fl
