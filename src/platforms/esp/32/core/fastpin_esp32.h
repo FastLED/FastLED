@@ -26,6 +26,17 @@ namespace fl {
 #pragma GCC diagnostic ignored "-Wpragmas"
 #pragma GCC diagnostic ignored "-Wvolatile"
 
+#ifdef FL_FASTPIN_HAS_NO_PINMAP
+// Keep the board's validity policy while forcing GPIO through the core API.
+template<u8 PIN, u32 MASK, bool VALIDPIN> class _ESPPIN : public NoPinMapPin<PIN> {
+public:
+  static constexpr bool validpin() FL_NO_EXCEPT { return VALIDPIN; }
+  static void setOutput() FL_NO_EXCEPT {
+    FL_STATIC_ASSERT(validpin(), "This pin has been marked as an invalid pin");
+    NoPinMapPin<PIN>::setOutput();
+  }
+};
+#else
 template<u8 PIN, u32 MASK, bool VALIDPIN> class _ESPPIN {
 public:
   typedef volatile u32 * port_ptr_t;
@@ -103,6 +114,7 @@ public:
       return (*port()) & MASK;
   }
 };
+#endif // FL_FASTPIN_HAS_NO_PINMAP
 
 #define _FL_BIT(B) (1ULL << B)
 
@@ -290,7 +302,9 @@ _FL_DEFPIN(52); _FL_DEFPIN(53); _FL_DEFPIN(54); _FL_DEFPIN(55);
 _FL_DEFPIN(56); _FL_DEFPIN(57); _FL_DEFPIN(58); _FL_DEFPIN(59);
 _FL_DEFPIN(60); _FL_DEFPIN(61); _FL_DEFPIN(62); _FL_DEFPIN(63);
 
+#ifndef FL_FASTPIN_HAS_NO_PINMAP
 #define HAS_HARDWARE_PIN_SUPPORT
+#endif
 
 /// Separates the data store from the clock edge, which can target the same
 /// set/clear register. Espressif erratum CPU-3.3 (ESP32 v0.0, fixed in v1.0) can
@@ -304,6 +318,7 @@ FASTLED_FORCE_INLINE void gpioStoreBarrier() FL_NO_EXCEPT {
 #endif
 }
 
+#ifndef FL_FASTPIN_HAS_NO_PINMAP
 /// Software SPI data updates are atomic per pin. Whole-port streaming stays off
 /// because a port snapshot could overwrite concurrent GPIO updates.
 template <u8 PIN> struct BitbangPin<FastPin<PIN>> : BitbangPinDefaults<FastPin<PIN>> {
@@ -327,6 +342,7 @@ template <u8 PIN> struct BitbangPin<FastPin<PIN>> : BitbangPinDefaults<FastPin<P
         gpioStoreBarrier();
     }
 };
+#endif // FL_FASTPIN_HAS_NO_PINMAP
 
 #pragma GCC diagnostic pop
 }  // namespace fl

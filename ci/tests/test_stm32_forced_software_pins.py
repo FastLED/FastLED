@@ -35,11 +35,16 @@ def test_stm32_clockless_rejects_forced_software_pins() -> None:
 
 
 def test_no_pinmap_clockless_rejects_forced_software_pins() -> None:
-    fastpin: str = (SRC.parent / "fl/system/fastpin_base.h").read_text(encoding="utf-8")
+    fastpin: str = (
+        (SRC.parent / "fl/system/fastpin_base.h")
+        .read_text(encoding="utf-8")
+        .replace("\\\n", "")
+    )
     # Derive the capability from the existing legacy selection branch, not
     # additional legacy-macro checks in each clockless driver.
     assert re.search(
-        r"#if defined\(FASTLED_FORCE_SOFTWARE_PINS\) && defined\(FASTLED_NO_PINMAP\)\s*\n"
+        r"#if defined\(FASTLED_FORCE_SOFTWARE_PINS\)\s*&&\s*"
+        r"\(defined\(FASTLED_NO_PINMAP\)\s*\|\|\s*defined\(FL_IS_ESP32\)\)\s*\n"
         r"#define FL_FASTPIN_HAS_NO_PINMAP\s*\n"
         r"(?:\s*///[^\n]*\n)*"
         r"template<fl::u8 PIN> class FastPin : public NoPinMapPin<PIN> \{\};",
