@@ -6,6 +6,14 @@ Software-based parallel SPI drivers for ESP32 platforms with two implementation 
 
 Both implementations use identical bit-banging logic - only the execution context differs.
 
+## Generic single-line SPI pin policies
+
+The generic template writer and its `BitbangPin` policy also live in this
+folder. Derived static `hi()`/`lo()` methods alone do not override an optimized
+hardware policy. See [the current limitation and explicit policy workaround](../../../../docs/SOFTWARE_SPI_PIN_POLICIES.md)
+before customizing those internal pin types. Runtime SPI engines use separate
+providers and are not covered by that workaround.
+
 ## 📐 Architecture Overview
 
 ### Two Implementation Strategies
