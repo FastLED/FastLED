@@ -1,0 +1,37 @@
+# Platform-specific code -> the emulator test that must run for it.
+#
+# Read by ci/emu_gate.py, which turns a diff into the fbuild invocations a
+# client must run before pushing (and which CI uses when no attestation
+# exists). It is a separate file rather than [allow].platform-code because
+# ci-lint types that field as a flat list of globs.
+#
+# `gap` marks a platform with no emulator: paths there are reported as an
+# unmapped gap instead of silently passing.
+version = 1
+
+[[platforms]]
+paths = ["src/platforms/esp32/**", "src/platforms/esp/32/**", "src/platforms/esp32c3/**"]
+gates = ["emu:esp32c3"]
+gap = ""
+
+[[platforms]]
+paths = ["src/platforms/esp32dev/**", "src/platforms/esp/32/**"]
+gates = ["emu:esp32dev"]
+gap = ""
+
+[[platforms]]
+paths = ["src/platforms/esp32s3/**", "src/platforms/esp/32/**"]
+gates = ["emu:esp32s3"]
+gap = ""
+
+# Shared code is compiled into every platform: a change there can break any
+# emulator, so it requires all three.
+[[platforms]]
+paths = ["src/platforms/shared/**"]
+gates = ["emu:esp32c3", "emu:esp32dev", "emu:esp32s3"]
+gap = ""
+
+[[platforms]]
+paths = ["src/platforms/arm/**", "src/platforms/apollo3/**", "src/platforms/adafruit/**", "src/platforms/apple/**", "src/platforms/arduino/**"]
+gates = []
+gap = "no host emulator for this family"
