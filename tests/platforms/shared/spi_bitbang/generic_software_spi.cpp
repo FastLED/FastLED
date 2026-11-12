@@ -50,8 +50,8 @@ template <u32 MASK, bool INVERTED, bool OTHER_PORT = false> struct FakePin {
     static void lo(port_ptr_t) { lo(); }
     static void fastset(port_ptr_t port, port_t value) { store(port, value); }
     static port_ptr_t port() { return reg(); }
-    static port_t hival() { return *reg() | MASK; }
-    static port_t loval() { return *reg() & ~MASK; }
+    static port_t hival() { return INVERTED ? (*reg() & ~MASK) : (*reg() | MASK); }
+    static port_t loval() { return INVERTED ? (*reg() | MASK) : (*reg() & ~MASK); }
     static port_t mask() { return MASK; }
 };
 
@@ -59,6 +59,13 @@ template <u32 MASK, bool INVERTED, bool OTHER_PORT = false> struct FakePin {
 
 using spi_init_test::kClockMask;
 using spi_init_test::kDataMask;
+
+// 226/227: active-low clock with whole-port snapshots.
+template <> class FastPin<226> : public spi_init_test::FakePin<kDataMask, false> {};
+template <> class FastPin<227> : public spi_init_test::FakePin<kClockMask, true> {};
+// 228/229: active-low clock with same-port streaming.
+template <> class FastPin<228> : public spi_init_test::FakePin<kDataMask, false> {};
+template <> class FastPin<229> : public spi_init_test::FakePin<kClockMask, true> {};
 
 // 230/231: default policy, whole-port snapshots.
 template <> class FastPin<230> : public spi_init_test::FakePin<kDataMask, false> {};
@@ -75,6 +82,15 @@ template <> class FastPin<237> : public spi_init_test::FakePin<kClockMask, true>
 // 238/239: default policy with the clock on another port.
 template <> class FastPin<238> : public spi_init_test::FakePin<kDataMask, false> {};
 template <> class FastPin<239> : public spi_init_test::FakePin<kClockMask, false, true> {};
+
+template <> struct BitbangPin<FastPin<228>> : BitbangPinDefaults<FastPin<228>> {
+    static constexpr bool kAtomicWrite = true;
+    static constexpr bool kTwoWriteStream = true;
+};
+template <> struct BitbangPin<FastPin<229>> : BitbangPinDefaults<FastPin<229>> {
+    static constexpr bool kAtomicWrite = true;
+    static constexpr bool kTwoWriteStream = true;
+};
 
 template <> struct BitbangPin<FastPin<232>> : BitbangPinDefaults<FastPin<232>> {
     static constexpr bool kAtomicWrite = true;
@@ -161,6 +177,8 @@ template <u8 DATA, u8 CLOCK> void checkFirstByte(bool inverted, bool otherPort =
 
 } // namespace
 
+FL_TEST_CASE("whole-port snapshots honor an active-low clock") { checkFirstByte<226, 227>(true); }
+FL_TEST_CASE("same-port streaming honors an active-low clock") { checkFirstByte<228, 229>(true); }
 FL_TEST_CASE("init parks a high clock low: snapshot pins") { checkFirstByte<230, 231>(false); }
 FL_TEST_CASE("init parks a high clock low: atomic pins") { checkFirstByte<232, 233>(false); }
 FL_TEST_CASE("init parks a high clock low: streaming pins") { checkFirstByte<234, 235>(false); }
