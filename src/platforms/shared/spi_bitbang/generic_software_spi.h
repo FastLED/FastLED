@@ -55,7 +55,9 @@ class GenericSoftwareSPIOutput {
 	static constexpr bool kCanStreamSamePort =
 		BitbangPin<fl::FastPin<DATA_PIN>>::kTwoWriteStream &&
 		BitbangPin<fl::FastPin<CLOCK_PIN>>::kTwoWriteStream;
-	static constexpr bool kNeedsGpioPadding = bitbangPhaseDelay(
+	// A policy without known GPIO work time keeps every 3.10.9 delay.
+	static constexpr bool kNeedsGpioPadding =
+		BitbangPin<fl::FastPin<CLOCK_PIN>>::kMinWriteCycles == 0 || bitbangPhaseDelay(
 		static_cast<cycle_t>(SPI_SPEED / 2 + (SPI_SPEED & 1)),
 		cycles_from_ns(35, FL_CPU_FREQUENCY()),
 		BitbangPin<fl::FastPin<CLOCK_PIN>>::kMinWriteCycles) > 0;
@@ -222,11 +224,37 @@ public:
 	/// @tparam BIT the bit index in the byte
 	/// @param b the byte to read the bit from
 	template <u8 BIT> __attribute__((always_inline, hot)) inline static void writeBit(u8 b) FL_NO_EXCEPT {
+#if defined(FL_IS_ESP32) && !(defined(FL_ESP32_ENABLE_FAST_SOFTWARE_SPI) && FL_ESP32_ENABLE_FAST_SOFTWARE_SPI)
+		// The fast pin policy is untested on ESP32 hardware; keep 3.10.9 output.
+		writeBitEsp32Legacy<BIT>(b);
+#else
+		writeBitPolicy<BIT>(b);
+#endif
+	}
+
+	/// writeBit() through the platform pin policy: data, clock high, clock low.
+	template <u8 BIT> FASTLED_FORCE_INLINE static void writeBitPolicy(u8 b) FL_NO_EXCEPT {
 		BitbangPin<fl::FastPin<DATA_PIN>>::template write<BIT>(b);
 		fl::FastPin<CLOCK_PIN>::hi();
 		if (kNeedsGpioPadding) { CLOCK_HI_DELAY; }
 		fl::FastPin<CLOCK_PIN>::lo();
 		if (kNeedsGpioPadding) { CLOCK_LO_DELAY; }
+	}
+
+	/// The FastLED 3.10.9 ESP32 writeBit(), byte for byte. The extra clock
+	/// write and the toggle avoid adjacent stores to the same GPIO register, and
+	/// both delays always run. Do not change this without ESP32 bench evidence.
+	template <u8 BIT> FASTLED_FORCE_INLINE static void writeBitEsp32Legacy(u8 b) FL_NO_EXCEPT {
+		if(b & (1 << BIT)) {
+			fl::FastPin<DATA_PIN>::hi();
+			fl::FastPin<CLOCK_PIN>::lo();
+			fl::FastPin<CLOCK_PIN>::hi(); CLOCK_HI_DELAY;
+			fl::FastPin<CLOCK_PIN>::toggle(); CLOCK_LO_DELAY;
+		} else {
+			fl::FastPin<DATA_PIN>::lo();
+			fl::FastPin<CLOCK_PIN>::hi(); CLOCK_HI_DELAY;
+			fl::FastPin<CLOCK_PIN>::toggle(); CLOCK_HI_DELAY;
+		}
 	}
 
 private:
