@@ -45,6 +45,7 @@ FL_DISABLE_WARNING_POP
 #endif
 
 #include "platforms/stub/coroutine_stub.h"  // for cleanup_coroutine_threads(), CoroutineRunner
+#include "platforms/stub/isr_stub.hpp"  // for fl::isr::stub_shutdown_timer_thread()
 #include "platforms/esp/32/drivers/parlio/parlio_peripheral_mock.h"
 #include "fl/channels/all_drivers.h"     // for fl::enableAllDrivers() (post-#2428)
 #include "fl/stl/cstdlib.h"
@@ -65,6 +66,9 @@ void fl_cleanup() {
     // This includes both coroutine threads and promise resolver threads
     fl::EngineEvents::onExit();
     fl::platforms::cleanup_coroutine_threads();
+    // Stop the host ISR timer thread: it runs handlers (e.g. software PWM)
+    // whose code lives in this DLL and would fault after the runner unloads it.
+    fl::isr::stub_shutdown_timer_thread();
 
     // Clean up PARLIO mock to prevent LSAN leak false positive reports.
     fl::detail::cleanup_parlio_mock();
