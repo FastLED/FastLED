@@ -1,5 +1,7 @@
 // IWYU pragma: private
 
+#pragma once
+
 
 
 #include "fl/stl/int.h"

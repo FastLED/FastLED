@@ -616,11 +616,23 @@ impl FileContentChecker for PragmaOnceChecker {
         if !is_under_project_subpath(&normalized, project_root, "src") {
             return false;
         }
-        !normalized.contains("/third_party/") && !normalized.contains("/platforms/")
+        if normalized.contains("/third_party/") {
+            return false;
+        }
+        // Platform trees hold unity-build `.hpp` fragments, so only plain `.h`
+        // headers are checked there (a missing guard redefines classes when a
+        // header is reached twice, e.g. src/platforms/adafruit/driver.h).
+        !normalized.contains("/platforms/") || file_path.ends_with(".h")
     }
 
     fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
-        let has_pragma_once = file_content.content.contains("#pragma once");
+        let in_platforms = normalize_path(&file_content.path).contains("/platforms/");
+        let has_pragma_once = file_content.content.contains("#pragma once")
+            || (in_platforms
+                && file_content
+                    .lines
+                    .iter()
+                    .any(|l| l.trim_start().starts_with("#ifndef")));
         let is_header = ends_with_any(&file_content.path, &[".h", ".hpp"]);
         let is_cpp = file_content.path.ends_with(".cpp");
 
