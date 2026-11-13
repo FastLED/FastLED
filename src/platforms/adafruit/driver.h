@@ -1,5 +1,7 @@
 // IWYU pragma: private
 
+#pragma once
+
 
 #include "fl/stl/unique_ptr.h"
 #include "pixel_iterator.h"

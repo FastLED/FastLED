@@ -598,6 +598,32 @@ impl FileContentChecker for ReinterpretCastChecker {
     }
 }
 
+/// True when the first code line (comments, blanks and #include skipped)
+/// is `#define G`.
+fn has_self_include_guard(lines: &[String]) -> bool {
+    let mut in_block_comment = false;
+    let mut code = lines.iter().map(|l| l.trim_start()).filter(|l| {
+        if in_block_comment {
+            in_block_comment = !l.contains("*/");
+            return false;
+        }
+        if l.starts_with("/*") {
+            in_block_comment = !l.contains("*/");
+            return false;
+        }
+        !(l.is_empty() || l.starts_with("//") || l.starts_with("#include"))
+    });
+    let guard = code
+        .next()
+        .and_then(|l| l.strip_prefix("#ifndef"))
+        .map(str::trim);
+    let define = code
+        .next()
+        .and_then(|l| l.strip_prefix("#define"))
+        .map(str::trim);
+    matches!((guard, define), (Some(g), Some(d)) if !g.is_empty() && g.split_whitespace().next() == d.split_whitespace().next())
+}
+
 struct PragmaOnceChecker;
 
 impl FileContentChecker for PragmaOnceChecker {
@@ -616,11 +642,19 @@ impl FileContentChecker for PragmaOnceChecker {
         if !is_under_project_subpath(&normalized, project_root, "src") {
             return false;
         }
-        !normalized.contains("/third_party/") && !normalized.contains("/platforms/")
+        if normalized.contains("/third_party/") {
+            return false;
+        }
+        // Platform trees hold unity-build `.hpp` fragments, so only plain `.h`
+        // headers are checked there (a missing guard redefines classes when a
+        // header is reached twice, e.g. src/platforms/adafruit/driver.h).
+        !normalized.contains("/platforms/") || file_path.ends_with(".h")
     }
 
     fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
-        let has_pragma_once = file_content.content.contains("#pragma once");
+        let in_platforms = normalize_path(&file_content.path).contains("/platforms/");
+        let has_pragma_once = file_content.content.contains("#pragma once")
+            || (in_platforms && has_self_include_guard(&file_content.lines));
         let is_header = ends_with_any(&file_content.path, &[".h", ".hpp"]);
         let is_cpp = file_content.path.ends_with(".cpp");
 

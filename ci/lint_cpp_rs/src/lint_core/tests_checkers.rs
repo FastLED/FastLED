@@ -864,3 +864,23 @@ fl::vector<int> pins; // fl-lint: int-template-ok GPIO numbers are int in the pu
         let over = "int x = static_cast<int>(y);\n".repeat(allowed + 1);
         assert_eq!(int_template_violations(path, &over).len(), allowed + 1);
     }
+
+    #[test]
+    fn pragma_once_covers_platform_h_headers_but_not_unity_hpp() {
+        let checker = PragmaOnceChecker;
+        let root = Path::new("/repo");
+        let bare = "#include \"a.h\"\nclass X {};\n";
+        let guarded = "#ifndef X_H\n#define X_H\nclass X {};\n#endif\n";
+        assert!(checker.should_process_file("/repo/src/platforms/adafruit/driver.h", root));
+        assert!(!checker.should_process_file("/repo/src/platforms/esp/foo.impl.hpp", root));
+        let path = "/repo/src/platforms/adafruit/driver.h";
+        assert_eq!(checker.check_file_content(&file(path, bare)).len(), 1);
+        assert!(checker.check_file_content(&file(path, guarded)).is_empty());
+        assert!(checker
+            .check_file_content(&file(path, "#pragma once\nclass X {};\n"))
+            .is_empty());
+        let spaced = "// c\n#ifndef X_H\n\n// c\n#define X_H\nclass X {};\n#endif\n";
+        assert!(checker.check_file_content(&file(path, spaced)).is_empty());
+        let unrelated = "class X {};\n#ifndef FEATURE\n#define FEATURE 1\n#endif\n";
+        assert_eq!(checker.check_file_content(&file(path, unrelated)).len(), 1);
+    }
