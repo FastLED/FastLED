@@ -69,6 +69,14 @@ template <u8 PIN, u8 BIT, u32 MASK, int GRP>
 constexpr bool isD21HardwarePin(const _ARMPIN<PIN, BIT, MASK, GRP>*) { return true; }
 constexpr bool isD21HardwarePin(const void*) { return false; }
 
+// FL_SAMD_ENABLE_FAST_SOFTWARE_SPI: optimized bit-bang software SPI pin policy (default 0).
+// UNTESTED ON HARDWARE: no bench evidence exists for this platform yet.
+// Default 0 keeps the legacy bit-bang writer. Define it to 1 to enable the
+// optimized path at your own risk.
+#ifndef FL_SAMD_ENABLE_FAST_SOFTWARE_SPI
+#define FL_SAMD_ENABLE_FAST_SOFTWARE_SPI 0
+#endif
+#if FL_SAMD_ENABLE_FAST_SOFTWARE_SPI
 /// Exclusive same-port bulk writes stream through the OUT latch; all other data
 /// updates use OUTSET/OUTCLR. kMinWriteCycles stays at its default: no IOBUS
 /// write latency has been measured here, so existing padding is kept.
@@ -91,6 +99,7 @@ template <u8 PIN> struct BitbangPin<FastPin<PIN>> : BitbangPinDefaults<FastPin<P
         BitbangPinDefaults<FastPin<PIN>>::template write<BIT>(value);
     }
 };
+#endif  // FL_SAMD_ENABLE_FAST_SOFTWARE_SPI
 
 #define _R(T) struct __gen_struct_ ## T
 #define _RD32(T) struct __gen_struct_ ## T { static FASTLED_FORCE_INLINE volatile PortGroup * r() { return T; } };

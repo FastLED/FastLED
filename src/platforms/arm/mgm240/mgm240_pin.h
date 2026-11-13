@@ -134,6 +134,14 @@ template <u32 MASK, typename PORT_STRUCT, u8 PORT_NUMBER, u8 PIN_NUMBER>
 constexpr bool isMgm240HardwarePin(const _ARMPIN<MASK, PORT_STRUCT, PORT_NUMBER, PIN_NUMBER>*) { return true; }
 constexpr bool isMgm240HardwarePin(const void*) { return false; }
 
+// FL_MGM240_ENABLE_FAST_SOFTWARE_SPI: optimized bit-bang software SPI pin policy (default 0).
+// UNTESTED ON HARDWARE: no bench evidence exists for this platform yet.
+// Default 0 keeps the legacy bit-bang writer. Define it to 1 to enable the
+// optimized path at your own risk.
+#ifndef FL_MGM240_ENABLE_FAST_SOFTWARE_SPI
+#define FL_MGM240_ENABLE_FAST_SOFTWARE_SPI 0
+#endif
+#if FL_MGM240_ENABLE_FAST_SOFTWARE_SPI
 /// Exclusive same-port bulk writes stream through DOUT; all other data updates use
 /// the P_SET/P_CLR aliases. kMinWriteCycles stays at its default: no GPIO write
 /// latency has been measured here, so existing padding is kept.
@@ -156,5 +164,6 @@ template <u8 PIN> struct BitbangPin<FastPin<PIN>> : BitbangPinDefaults<FastPin<P
         BitbangPinDefaults<FastPin<PIN>>::template write<BIT>(value);
     }
 };
+#endif  // FL_MGM240_ENABLE_FAST_SOFTWARE_SPI
 
 }  // namespace fl

@@ -7,6 +7,9 @@
 
 #include "test.h"
 
+// Exercise the opt-in optimized bit-bang policy; it defaults off.
+#define FL_SAM_ENABLE_FAST_SOFTWARE_SPI 1
+
 #include "fl/stl/int.h"
 #include "platforms/arm/sam/sam_pin.h"
 

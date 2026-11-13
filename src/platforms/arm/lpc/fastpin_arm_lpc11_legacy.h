@@ -170,6 +170,14 @@ template <u8 PIN, u32 MASK, u8 PORT_INDEX>
 constexpr bool isLpc11LegacyHardwarePin(const _ARMPIN_LPC11LEGACY<PIN, MASK, PORT_INDEX>*) { return true; }
 constexpr bool isLpc11LegacyHardwarePin(const void*) { return false; }
 
+// FL_LPC_ENABLE_FAST_SOFTWARE_SPI: optimized bit-bang software SPI pin policy (default 0).
+// UNTESTED ON HARDWARE: no bench evidence exists for this platform yet.
+// Default 0 keeps the legacy bit-bang writer. Define it to 1 to enable the
+// optimized path at your own risk.
+#ifndef FL_LPC_ENABLE_FAST_SOFTWARE_SPI
+#define FL_LPC_ENABLE_FAST_SOFTWARE_SPI 0
+#endif
+#if FL_LPC_ENABLE_FAST_SOFTWARE_SPI
 /// Data updates store the mask or zero to the pin's masked-access slot. sport() and
 /// cport() are the same address, so the shared set/clear helpers cannot clear a bit
 /// here. kTwoWriteStream stays false: no vendor header or hardware has confirmed the
@@ -194,6 +202,7 @@ template <u8 PIN> struct BitbangPin<FastPin<PIN>> : BitbangPinDefaults<FastPin<P
         BitbangPinDefaults<FastPin<PIN>>::template write<BIT>(value);
     }
 };
+#endif  // FL_LPC_ENABLE_FAST_SOFTWARE_SPI
 
 #define _FL_DEFPIN_LPC11LEGACY(PIN) \
     template<> class FastPin<PIN> : public _ARMPIN_LPC11LEGACY<PIN, \

@@ -19,6 +19,14 @@
 #include "fl/system/fastpin.h"  // IWYU pragma: keep
 #endif
 
+// ESP32 atomic runtime writes are part of the optimized bit-bang path, which is
+// untested on ESP32 hardware; see FL_ESP32_ENABLE_FAST_SOFTWARE_SPI in
+// fastpin_esp32.h. When it is off, callers keep their legacy Pin fallback.
+#if defined(ESP32) && defined(_FL_VALID_PIN_MASK) && \
+    defined(FL_ESP32_ENABLE_FAST_SOFTWARE_SPI) && FL_ESP32_ENABLE_FAST_SOFTWARE_SPI
+#define FL_RUNTIME_SOFTWARE_SPI_ESP32_ATOMIC
+#endif
+
 namespace fl {
 
 /// One pin's write-one-to-set and write-one-to-clear registers.
@@ -40,7 +48,7 @@ inline bool resolveRuntimeGpio(u8 pin, RuntimeGpio* out) FL_NO_EXCEPT {
     }
     *out = {&GPOS, &GPOC, 1UL << pin};
     return true;
-#elif defined(ESP32) && defined(_FL_VALID_PIN_MASK)
+#elif defined(FL_RUNTIME_SOFTWARE_SPI_ESP32_ATOMIC)
     // FastLED's mask also excludes the pins it marks unusable, such as flash or USB.
     if (pin >= 64 || ((_FL_VALID_PIN_MASK >> pin) & 1ULL) == 0) {
         return false;
@@ -69,7 +77,7 @@ inline bool resolveRuntimeGpio(u8 pin, RuntimeGpio* out) FL_NO_EXCEPT {
 /// Separates the data store from the neighbouring clock stores on ESP32, where
 /// they can target one register; see gpioStoreBarrier().
 FASTLED_FORCE_INLINE void runtimeGpioBarrier() FL_NO_EXCEPT {
-#if defined(ESP32) && defined(_FL_VALID_PIN_MASK)
+#ifdef FL_RUNTIME_SOFTWARE_SPI_ESP32_ATOMIC
     gpioStoreBarrier();
 #endif
 }

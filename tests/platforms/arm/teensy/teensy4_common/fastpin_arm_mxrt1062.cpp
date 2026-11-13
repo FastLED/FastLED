@@ -7,6 +7,9 @@
 
 #include "test.h"
 
+// Exercise the opt-in optimized bit-bang policy; it defaults off.
+#define FL_TEENSY_ENABLE_FAST_SOFTWARE_SPI 1
+
 #include "platforms/arm/teensy/teensy4_common/fastpin_arm_mxrt1062.h"
 
 #include "fastspi_types.h"

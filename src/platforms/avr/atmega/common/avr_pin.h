@@ -53,6 +53,14 @@ template <fl::u8 PIN, fl::u8 MASK, typename PortReg, typename DdrReg, typename P
 constexpr bool isAvrHardwarePin(const _AVRPIN<PIN, MASK, PortReg, DdrReg, PinReg>*) { return true; }
 constexpr bool isAvrHardwarePin(const void*) { return false; }
 
+// FL_AVR_ENABLE_FAST_SOFTWARE_SPI: optimized bit-bang software SPI pin policy (default 0).
+// UNTESTED ON HARDWARE: no bench evidence exists for this platform yet.
+// Default 0 keeps the legacy bit-bang writer. Define it to 1 to enable the
+// optimized path at your own risk.
+#ifndef FL_AVR_ENABLE_FAST_SOFTWARE_SPI
+#define FL_AVR_ENABLE_FAST_SOFTWARE_SPI 0
+#endif
+#if FL_AVR_ENABLE_FAST_SOFTWARE_SPI
 /// An _AVRPIN writes its whole 8-bit latch with one store, so the exclusive
 /// same-port software SPI path can merge each falling edge with the next data
 /// update. Forced software pins are not _AVRPINs and keep the per-bit writer.
@@ -60,5 +68,6 @@ template <fl::u8 PIN> struct BitbangPin<FastPin<PIN>> : BitbangPinDefaults<FastP
     static constexpr bool kTwoWriteStream =
         isAvrHardwarePin(static_cast<const FastPin<PIN>*>(nullptr));
 };
+#endif  // FL_AVR_ENABLE_FAST_SOFTWARE_SPI
 
 } // namespace fl

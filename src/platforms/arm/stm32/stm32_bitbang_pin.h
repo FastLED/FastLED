@@ -21,6 +21,14 @@ struct Stm32BsrrPin {};
 constexpr bool isStm32BsrrPin(const Stm32BsrrPin*) { return true; }
 constexpr bool isStm32BsrrPin(const void*) { return false; }
 
+// FL_STM32_ENABLE_FAST_SOFTWARE_SPI: optimized bit-bang software SPI pin policy (default 0).
+// UNTESTED ON HARDWARE: no bench evidence exists for this platform yet.
+// Default 0 keeps the legacy bit-bang writer. Define it to 1 to enable the
+// optimized path at your own risk.
+#ifndef FL_STM32_ENABLE_FAST_SOFTWARE_SPI
+#define FL_STM32_ENABLE_FAST_SOFTWARE_SPI 0
+#endif
+#if FL_STM32_ENABLE_FAST_SOFTWARE_SPI
 /// Data updates use one BSRR store whose value selects set (low half) or reset
 /// (high half), so no family needs a separate clear address and no data-dependent
 /// branch is required. Streaming and kMinWriteCycles stay at their defaults, as no
@@ -45,5 +53,6 @@ template <u8 PIN> struct BitbangPin<FastPin<PIN>> : BitbangPinDefaults<FastPin<P
         BitbangPinDefaults<FastPin<PIN>>::template write<BIT>(value);
     }
 };
+#endif  // FL_STM32_ENABLE_FAST_SOFTWARE_SPI
 
 } // namespace fl

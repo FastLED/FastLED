@@ -7,6 +7,9 @@
 
 #include "test.h"
 
+// Exercise the opt-in optimized bit-bang policy; it defaults off.
+#define FL_TEENSY_ENABLE_FAST_SOFTWARE_SPI 1
+
 #include "fl/stl/int.h"
 
 // The header's _FL_IO lines need these names; tests use their own Reg<> storage.

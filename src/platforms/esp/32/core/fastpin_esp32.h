@@ -319,6 +319,14 @@ FASTLED_FORCE_INLINE void gpioStoreBarrier() FL_NO_EXCEPT {
 }
 
 #ifndef FL_FASTPIN_HAS_NO_PINMAP
+// FL_ESP32_ENABLE_FAST_SOFTWARE_SPI: optimized bit-bang software SPI pin policy (default 0).
+// UNTESTED ON HARDWARE: no bench evidence exists for this platform yet.
+// Default 0 keeps the legacy bit-bang writer. Define it to 1 to enable the
+// optimized path at your own risk.
+#ifndef FL_ESP32_ENABLE_FAST_SOFTWARE_SPI
+#define FL_ESP32_ENABLE_FAST_SOFTWARE_SPI 0
+#endif
+#if FL_ESP32_ENABLE_FAST_SOFTWARE_SPI
 /// Software SPI data updates are atomic per pin. Whole-port streaming stays off
 /// because a port snapshot could overwrite concurrent GPIO updates.
 template <u8 PIN> struct BitbangPin<FastPin<PIN>> : BitbangPinDefaults<FastPin<PIN>> {
@@ -342,6 +350,7 @@ template <u8 PIN> struct BitbangPin<FastPin<PIN>> : BitbangPinDefaults<FastPin<P
         gpioStoreBarrier();
     }
 };
+#endif  // FL_ESP32_ENABLE_FAST_SOFTWARE_SPI
 #endif // FL_FASTPIN_HAS_NO_PINMAP
 
 #pragma GCC diagnostic pop

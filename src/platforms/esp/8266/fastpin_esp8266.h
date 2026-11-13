@@ -154,6 +154,13 @@ _FL_DEFPIN(8,15); _FL_DEFPIN(9,3); _FL_DEFPIN(10,1);
 
 #define HAS_HARDWARE_PIN_SUPPORT
 
+// FL_ESP8266_ENABLE_FAST_SOFTWARE_SPI: optimized bit-bang software SPI pin policy (default 1).
+// Bench-measured on ESP8266EX hardware (docs/ESP8266_GENERIC_SPI_4966.md).
+// Define it to 0 to fall back to the legacy per-pin bit-bang writer.
+#ifndef FL_ESP8266_ENABLE_FAST_SOFTWARE_SPI
+#define FL_ESP8266_ENABLE_FAST_SOFTWARE_SPI 1
+#endif
+#if FL_ESP8266_ENABLE_FAST_SOFTWARE_SPI
 template <u8 PIN> struct BitbangPin<FastPin<PIN>> {
     static constexpr bool kAtomicWrite = true;
     static constexpr bool kTwoWriteStream = FastPin<PIN>::kRealPin < 16;
@@ -194,6 +201,7 @@ template <u8 PIN> struct BitbangPin<FastPin<PIN>> {
         }
     }
 };
+#endif  // FL_ESP8266_ENABLE_FAST_SOFTWARE_SPI
 }  // namespace fl
 
 FL_DISABLE_WARNING_POP

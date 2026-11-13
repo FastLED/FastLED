@@ -67,6 +67,14 @@ template <uint PIN, u32 MASK>
 constexpr bool isRp2350LowBankPin(const _RP2350PIN<PIN, MASK>*) { return PIN < 32; }
 constexpr bool isRp2350LowBankPin(const void*) { return false; }
 
+// FL_RP_ENABLE_FAST_SOFTWARE_SPI: optimized bit-bang software SPI pin policy (default 0).
+// UNTESTED ON HARDWARE: no bench evidence exists for this platform yet.
+// Default 0 keeps the legacy bit-bang writer. Define it to 1 to enable the
+// optimized path at your own risk.
+#ifndef FL_RP_ENABLE_FAST_SOFTWARE_SPI
+#define FL_RP_ENABLE_FAST_SOFTWARE_SPI 0
+#endif
+#if FL_RP_ENABLE_FAST_SOFTWARE_SPI
 /// Data updates use gpio_set/gpio_clr. Both cores may write
 /// GPIO, so led_sysdefs defines FAST_SPI_INTERRUPTS_WRITE_PINS and the writer stays
 /// atomic; the two-store stream is reachable only by editing that define out for a
@@ -91,6 +99,7 @@ template <u8 PIN> struct BitbangPin<FastPin<PIN>> : BitbangPinDefaults<FastPin<P
     BitbangPinDefaults<FastPin<PIN>>::template write<BIT>(value);
   }
 };
+#endif  // FL_RP_ENABLE_FAST_SOFTWARE_SPI
 
 } // namespace fl
 FL_DISABLE_WARNING_POP
