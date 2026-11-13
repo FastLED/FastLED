@@ -9,6 +9,7 @@
 
 #include "platforms/stub_main.hpp"
 #include "fl/system/engine_events.h"
+#include "platforms/stub/isr_stub.hpp"  // for fl::isr::stub_shutdown_timer_thread()
 
 // Export function for DLL mode - called by example_runner.exe
 extern "C" {
@@ -21,15 +22,21 @@ extern "C" {
         (void)argc;  // Suppress unused parameter warning
         (void)argv;  // Examples don't typically use command-line args
 
-        // Scoped cleanup - destructor calls EngineEvents::onExit() automatically
-        fl::stub_main::ScopedEngineCleanup cleanup;
+        {
+            // Scoped cleanup - destructor calls EngineEvents::onExit() automatically
+            fl::stub_main::ScopedEngineCleanup cleanup;
 
-        // Run setup() once, then loop() until next_loop() returns false
-        fl::stub_main::setup();
-        while (fl::stub_main::next_loop()) {
-            // Loop continues based on FASTLED_STUB_MAIN_FAST_EXIT
+            // Run setup() once, then loop() until next_loop() returns false
+            fl::stub_main::setup();
+            while (fl::stub_main::next_loop()) {
+                // Loop continues based on FASTLED_STUB_MAIN_FAST_EXIT
+            }
         }
 
-        return 0;  // cleanup destructor called here
+        // Stop the host ISR timer thread before example_runner dlclose()s this
+        // library: it runs handlers (e.g. software PWM from analogWrite) whose
+        // code lives here and would fault once the library is unmapped.
+        fl::isr::stub_shutdown_timer_thread();
+        return 0;
     }
 }

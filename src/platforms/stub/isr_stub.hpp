@@ -17,6 +17,7 @@
 
 #include "fl/stl/isr/handler.h"
 #include "fl/stl/unique_ptr.h"
+#include "fl/stl/move.h"
 #include "fl/stl/atomic.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/mutex.h"
@@ -169,18 +170,38 @@ public:
         }
     }
 
-    ~TimerThreadManager() {
-        if (mTimerThread) {
-            {
-                fl::unique_lock<fl::mutex> lock(mMutex);
-                mShouldStop = true;
-                mCondVar.notify_one();  // Wake the thread so it can exit
+    /// Stop and join the timer thread and drop every registered handler.
+    ///
+    /// The manager is a never-destroyed singleton, so without this the timer
+    /// thread outlives the test: the test runner dlclose()s the test .so while
+    /// the thread is parked in timer_thread_func() and still holds handler
+    /// pointers into that .so (e.g. the software-PWM ISR). Its next wakeup then
+    /// executes unmapped code and SIGSEGVs after the test has passed. Call this
+    /// before unloading the code that owns the handlers. Handle storage stays
+    /// owned by the caller; a later attach starts a fresh thread.
+    void shutdown() FL_NO_EXCEPT {
+        fl::unique_ptr<fl::thread> thread;
+        {
+            fl::unique_lock<fl::mutex> lock(mMutex);
+            mHandlers.clear();
+            if (!mTimerThread) {
+                return;
             }
-            if (mTimerThread->joinable()) {
-                mTimerThread->join();
-            }
+            mShouldStop = true;
+            mCondVar.notify_one();  // Wake the thread so it can exit
+            thread = fl::move(mTimerThread);
+        }
+        if (thread->joinable()) {
+            thread->join();
         }
     }
+
+    bool is_thread_running() FL_NO_EXCEPT {
+        fl::unique_lock<fl::mutex> lock(mMutex);
+        return mTimerThread != nullptr;
+    }
+
+    ~TimerThreadManager() { shutdown(); }
 
 private:
     friend class fl::SingletonShared<TimerThreadManager>;
@@ -277,6 +298,13 @@ private:
 // =============================================================================
 // Stub ISR Implementation (Free Functions)
 // =============================================================================
+
+/// Stop the host timer thread before unloading code that registered handlers
+/// (see TimerThreadManager::shutdown()). The test harness calls this from its
+/// end-of-run cleanup, before the runner dlclose()s the test library.
+inline void stub_shutdown_timer_thread() FL_NO_EXCEPT {
+    TimerThreadManager::instance().shutdown();
+}
 
 inline int stub_attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) FL_NO_EXCEPT {
         if (!config.handler) {

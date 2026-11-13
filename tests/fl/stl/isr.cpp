@@ -373,6 +373,37 @@ FL_TEST_CASE("test_interrupts_global_disable_blocks_isr") {
 }
 
 // =============================================================================
+// Regression: a handler that is never detached (software PWM) kept the timer
+// thread alive after the test, so the runner's dlclose() of the test library
+// left the thread executing unmapped code and SIGSEGV'd after a passing run.
+FL_TEST_CASE("test_isr_shutdown_stops_thread_with_attached_handler") {
+    g_isr_call_count = 0;
+
+    isr::config config;
+    config.handler = test_isr_handler;
+    config.frequency_hz = 1000;
+    config.flags = isr::ISR_FLAG_IRAM_SAFE;
+
+    isr::handle handle;
+    FL_REQUIRE(isr::attach_timer_handler(config, &handle) == 0);
+    FL_REQUIRE(wait_for_condition([](){ return g_isr_call_count.load() >= 1; },
+                                  std::chrono::milliseconds(2000))); // okay std namespace
+
+    auto& manager = fl::isr::TimerThreadManager::instance();
+    FL_REQUIRE(manager.is_thread_running());
+
+    fl::isr::stub_shutdown_timer_thread();
+    FL_CHECK(!manager.is_thread_running());
+
+    const int count_after_shutdown = g_isr_call_count.load();
+    fl::this_thread::sleep_for(fl::chrono::milliseconds(10)); // ok sleep for
+    FL_CHECK_EQ(g_isr_call_count.load(), count_after_shutdown);
+
+    // Detaching after shutdown still releases the handle cleanly.
+    FL_CHECK_EQ(isr::detach_handler(handle), 0);
+}
+
+// =============================================================================
 // Test Main
 // =============================================================================
 // Note: setup() and loop() removed - not needed for this test
