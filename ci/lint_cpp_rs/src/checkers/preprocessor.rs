@@ -629,10 +629,11 @@ impl FileContentChecker for PragmaOnceChecker {
         let in_platforms = normalize_path(&file_content.path).contains("/platforms/");
         let has_pragma_once = file_content.content.contains("#pragma once")
             || (in_platforms
-                && file_content
-                    .lines
-                    .iter()
-                    .any(|l| l.trim_start().starts_with("#ifndef")));
+                && file_content.lines.windows(2).any(|w| {
+                    let guard = w[0].trim_start().strip_prefix("#ifndef").map(str::trim);
+                    let define = w[1].trim_start().strip_prefix("#define").map(str::trim);
+                    matches!((guard, define), (Some(g), Some(d)) if !g.is_empty() && g == d)
+                }));
         let is_header = ends_with_any(&file_content.path, &[".h", ".hpp"]);
         let is_cpp = file_content.path.ends_with(".cpp");
 
