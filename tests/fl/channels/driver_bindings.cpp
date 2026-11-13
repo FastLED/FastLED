@@ -10,6 +10,28 @@
 
 FL_TEST_FILE(FL_FILEPATH) {
 
+// Runs first: needs DriverBindings empty (3.10.9 compat for add(cfg)).
+FL_TEST_CASE("FastLED.add(cfg) with no enable<Bus>() registers the default driver") {
+    // Precondition for the legacy path: nothing opted in explicitly.
+    FL_REQUIRE(fl::DriverBindings::instance().empty());
+    fl::ChannelManager& mgr = fl::ChannelManager::registry();
+    mgr.clearAllDrivers();
+
+    CRGB leds[4];
+    auto timing = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
+    fl::ChannelConfig cfg(fl::ClocklessChipset(3, timing),
+                          fl::span<CRGB>(leds, 4), RGB);
+    auto channel = FastLED.add(cfg);
+    FL_REQUIRE(channel != nullptr);
+
+    const fl::Bus def = fl::DefaultBus<fl::ClocklessChipset>::value;
+    FL_CHECK(mgr.findDriverByName(fl::string::from_literal(
+                 fl::busDriverName(def, 0, false))) != nullptr);
+    FL_CHECK(mgr.getDriverCount() > 0);
+
+    channel->removeFromDrawList();
+}
+
 FL_TEST_CASE("DriverBindings - enable<Bus>() defers registration until bind") {
     fl::ChannelManager& mgr = fl::ChannelManager::registry();
     mgr.clearAllDrivers();
