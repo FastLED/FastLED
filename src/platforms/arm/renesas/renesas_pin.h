@@ -71,6 +71,14 @@ template <u8 PIN, bsp_io_port_pin_t BSP, u32 PORT_ADDR>
 constexpr bool isRenesasHardwarePin(const _ARMPIN<PIN, BSP, PORT_ADDR>*) { return true; }
 constexpr bool isRenesasHardwarePin(const void*) { return false; }
 
+// FL_RENESAS_ENABLE_FAST_SOFTWARE_SPI: optimized bit-bang software SPI pin policy (default 0).
+// UNTESTED ON HARDWARE: no bench evidence exists for this platform yet.
+// Default 0 keeps the legacy bit-bang writer. Define it to 1 to enable the
+// optimized path at your own risk.
+#ifndef FL_RENESAS_ENABLE_FAST_SOFTWARE_SPI
+#define FL_RENESAS_ENABLE_FAST_SOFTWARE_SPI 0
+#endif
+#if FL_RENESAS_ENABLE_FAST_SOFTWARE_SPI
 /// Exclusive same-PODR bulk writes stream through the 16-bit PODR; all other data
 /// updates use POSR/PORR at their native 16-bit width. kMinWriteCycles stays at its
 /// default: no GPIO write latency has been measured, so existing padding is kept.
@@ -93,6 +101,7 @@ template <u8 PIN> struct BitbangPin<FastPin<PIN>> : BitbangPinDefaults<FastPin<P
         BitbangPinDefaults<FastPin<PIN>>::template write<BIT>(value);
     }
 };
+#endif  // FL_RENESAS_ENABLE_FAST_SOFTWARE_SPI
 
 } // namespace fl
 FL_DISABLE_WARNING_POP

@@ -73,6 +73,14 @@ template <u32 MASK, typename PORT, u8 PORT_NUMBER, u8 PIN_NUMBER>
 constexpr bool isNrf52HardwarePin(const _ARMPIN<MASK, PORT, PORT_NUMBER, PIN_NUMBER>*) { return true; }
 constexpr bool isNrf52HardwarePin(const void*) { return false; }
 
+// FL_NRF52_ENABLE_FAST_SOFTWARE_SPI: optimized bit-bang software SPI pin policy (default 0).
+// UNTESTED ON HARDWARE: no bench evidence exists for this platform yet.
+// Default 0 keeps the legacy bit-bang writer. Define it to 1 to enable the
+// optimized path at your own risk.
+#ifndef FL_NRF52_ENABLE_FAST_SOFTWARE_SPI
+#define FL_NRF52_ENABLE_FAST_SOFTWARE_SPI 0
+#endif
+#if FL_NRF52_ENABLE_FAST_SOFTWARE_SPI
 /// Data updates use OUTSET/OUTCLR. Streaming stays off: BLE and RTOS tasks can
 /// change other outputs on the port, so exclusive OUT ownership cannot be assumed.
 /// kMinWriteCycles stays at its default: no GPIO write latency has been measured
@@ -95,5 +103,6 @@ template <u8 PIN> struct BitbangPin<FastPin<PIN>> : BitbangPinDefaults<FastPin<P
         BitbangPinDefaults<FastPin<PIN>>::template write<BIT>(value);
     }
 };
+#endif  // FL_NRF52_ENABLE_FAST_SOFTWARE_SPI
 
 } // namespace fl

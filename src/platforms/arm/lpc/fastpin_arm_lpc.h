@@ -150,6 +150,14 @@ template <u8 PIN, u32 MASK>
 constexpr bool isLpcHardwarePin(const _ARMPIN<PIN, MASK>*) { return true; }
 constexpr bool isLpcHardwarePin(const void*) { return false; }
 
+// FL_LPC_ENABLE_FAST_SOFTWARE_SPI: optimized bit-bang software SPI pin policy (default 0).
+// UNTESTED ON HARDWARE: no bench evidence exists for this platform yet.
+// Default 0 keeps the legacy bit-bang writer. Define it to 1 to enable the
+// optimized path at your own risk.
+#ifndef FL_LPC_ENABLE_FAST_SOFTWARE_SPI
+#define FL_LPC_ENABLE_FAST_SOFTWARE_SPI 0
+#endif
+#if FL_LPC_ENABLE_FAST_SOFTWARE_SPI
 /// Exclusive bulk writes stream through PIN[0], from a snapshot read through SET
 /// because reading SET returns the output latch and reading PIN returns pin state.
 /// Every other data update uses SET/CLR. kMinWriteCycles stays at its
@@ -173,6 +181,7 @@ template <u8 PIN> struct BitbangPin<FastPin<PIN>> : BitbangPinDefaults<FastPin<P
         BitbangPinDefaults<FastPin<PIN>>::template write<BIT>(value);
     }
 };
+#endif  // FL_LPC_ENABLE_FAST_SOFTWARE_SPI
 
 #define _FL_DEFPIN(PIN) template<> class FastPin<PIN> : public _ARMPIN<PIN, (1u << (PIN))> {};
 

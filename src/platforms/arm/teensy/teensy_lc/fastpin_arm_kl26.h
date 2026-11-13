@@ -58,6 +58,14 @@ template <u8 PIN, u32 MASK, typename PDOR, typename PSOR, typename PCOR, typenam
 constexpr bool isKl26HardwarePin(const _ARMPIN<PIN, MASK, PDOR, PSOR, PCOR, PTOR, PDIR, PDDR>*) { return true; }
 constexpr bool isKl26HardwarePin(const void*) { return false; }
 
+// FL_TEENSY_ENABLE_FAST_SOFTWARE_SPI: optimized bit-bang software SPI pin policy (default 0).
+// UNTESTED ON HARDWARE: no bench evidence exists for this platform yet.
+// Default 0 keeps the legacy bit-bang writer. Define it to 1 to enable the
+// optimized path at your own risk.
+#ifndef FL_TEENSY_ENABLE_FAST_SOFTWARE_SPI
+#define FL_TEENSY_ENABLE_FAST_SOFTWARE_SPI 0
+#endif
+#if FL_TEENSY_ENABLE_FAST_SOFTWARE_SPI
 /// Exclusive same-port bulk writes stream through PDOR; all other data updates
 /// use PSOR/PCOR without a data branch. kMinWriteCycles stays at its default: no
 /// GPIO write latency has been measured here, so existing padding is kept.
@@ -80,6 +88,7 @@ template <u8 PIN> struct BitbangPin<FastPin<PIN>> : BitbangPinDefaults<FastPin<P
     BitbangPinDefaults<FastPin<PIN>>::template write<BIT>(value);
   }
 };
+#endif  // FL_TEENSY_ENABLE_FAST_SOFTWARE_SPI
 
 // Macros for kl26 pin access/definition
 #define GPIO_BITBAND_ADDR(reg, bit) (((uptr)&(reg) - 0x40000000) * 32 + (bit) * 4 + 0x42000000)
