@@ -54,16 +54,6 @@ jobs:
         with:
           save: ${{ github.ref == 'refs/heads/master' && (github.event_name == 'push' || github.event_name == 'schedule') }}
           fbuild-version: latest
-          # Isolate the combined cache per job. The action's restore-keys prefix
-          # ends at the fbuild hash, so without a per-job cache-version every
-          # board restored a different board's entry and saved the union: the
-          # esp32dev/esp32s3/esp32dev_idf6/clone-and-compile entries all grew
-          # to ~3.07 GB (a near-identical all-toolchain blob; the isolated
-          # kitchensink entry is 0.4 GB), four live current-generation entries
-          # exceeded ci.toml's fbuild quota and the nightly cache budget check
-          # failed (live 13.4 GB vs 9 GB budget). The version stays under the
-          # "fbuild-v1-" family prefix declared in ci.toml.
-          cache-version: v1-clone-and-compile
           cache-key-extra: clone-and-compile-${{ hashFiles('platformio.ini', 'library.json', 'pyproject.toml') }}
 
       # A fresh clone must build the root project as-is: fbuild, the only
