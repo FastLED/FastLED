@@ -22,6 +22,7 @@ import os
 import platform
 import shutil
 import sys
+import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import cast
@@ -30,6 +31,11 @@ from running_process import RunningProcess
 from running_process.command_render import list2cmdline
 
 from ci.util.paths import PROJECT_ROOT
+
+
+_LOCK_CONTENDED_MARKER: str = "build lock"
+_LOCK_WAIT_SECONDS: int = 600
+_LOCK_RETRY_INTERVAL_SECONDS: int = 5
 
 
 @dataclass(frozen=True)
@@ -43,6 +49,7 @@ class _BuildStreamResult:
 
     returncode: int
     line_count: int
+    lock_contended: bool = False
 
 
 RUST_CRATE_DIR = PROJECT_ROOT / "ci" / "lint_cpp_rs"
@@ -268,15 +275,20 @@ def _stream_build_cmd(cmd: list[str], label: str, verbose: bool) -> _BuildStream
     )
     prefix = f"    [{label}] "
     line_count = 0
+    lock_contended: bool = False
     for line in proc.line_iter(timeout=None):
         stripped = line.rstrip()
         if stripped:
             line_count += 1
+        if _LOCK_CONTENDED_MARKER in stripped:
+            lock_contended = True
         # Preserve the raw line (cargo emits progress bars via \r; strip
         # trailing whitespace only, don't collapse internal spacing).
         print(f"{prefix}{stripped}", file=sys.stderr, flush=True)
     returncode = cast(int, proc.wait())
-    return _BuildStreamResult(returncode=returncode, line_count=line_count)
+    return _BuildStreamResult(
+        returncode=returncode, line_count=line_count, lock_contended=lock_contended
+    )
 
 
 def _run_build(verbose: bool = True) -> None:
@@ -330,6 +342,21 @@ def _run_build(verbose: bool = True) -> None:
     soldr = _resolve_soldr()
     soldr_cmd = [soldr, "--no-cache", "cargo", *cargo_args]
     result = _stream_build_cmd(soldr_cmd, "cargo", verbose)
+    # soldr --no-cache refuses (instead of waiting) when another cargo process
+    # in this checkout (e.g. `cargo test` on the crate) holds the target lock.
+    # Wait for that process to finish rather than failing the whole lint run.
+    deadline: float = time.monotonic() + _LOCK_WAIT_SECONDS
+    while (
+        result.returncode != 0 and result.lock_contended and time.monotonic() < deadline
+    ):
+        print(
+            "    ⏳ cargo target lock held by another process — retrying in "
+            f"{_LOCK_RETRY_INTERVAL_SECONDS}s.",
+            file=sys.stderr,
+            flush=True,
+        )
+        time.sleep(_LOCK_RETRY_INTERVAL_SECONDS)
+        result = _stream_build_cmd(soldr_cmd, "cargo", verbose)
 
     if (
         result.returncode == 0
