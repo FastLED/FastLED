@@ -33,9 +33,9 @@ from running_process.command_render import list2cmdline
 from ci.util.paths import PROJECT_ROOT
 
 
-_LOCK_CONTENDED_MARKER = "build lock"
-_LOCK_WAIT_SECONDS = 600
-_LOCK_RETRY_INTERVAL_SECONDS = 5
+_LOCK_CONTENDED_MARKER: str = "build lock"
+_LOCK_WAIT_SECONDS: int = 600
+_LOCK_RETRY_INTERVAL_SECONDS: int = 5
 
 
 @dataclass(frozen=True)
@@ -275,7 +275,7 @@ def _stream_build_cmd(cmd: list[str], label: str, verbose: bool) -> _BuildStream
     )
     prefix = f"    [{label}] "
     line_count = 0
-    lock_contended = False
+    lock_contended: bool = False
     for line in proc.line_iter(timeout=None):
         stripped = line.rstrip()
         if stripped:
@@ -345,7 +345,7 @@ def _run_build(verbose: bool = True) -> None:
     # soldr --no-cache refuses (instead of waiting) when another cargo process
     # in this checkout (e.g. `cargo test` on the crate) holds the target lock.
     # Wait for that process to finish rather than failing the whole lint run.
-    deadline = time.monotonic() + _LOCK_WAIT_SECONDS
+    deadline: float = time.monotonic() + _LOCK_WAIT_SECONDS
     while (
         result.returncode != 0 and result.lock_contended and time.monotonic() < deadline
     ):
