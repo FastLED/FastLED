@@ -879,4 +879,8 @@ fl::vector<int> pins; // fl-lint: int-template-ok GPIO numbers are int in the pu
         assert!(checker
             .check_file_content(&file(path, "#pragma once\nclass X {};\n"))
             .is_empty());
+        let spaced = "// c\n#ifndef X_H\n\n// c\n#define X_H\nclass X {};\n#endif\n";
+        assert!(checker.check_file_content(&file(path, spaced)).is_empty());
+        let unrelated = "class X {};\n#ifndef FEATURE\n#define FEATURE 1\n#endif\n";
+        assert_eq!(checker.check_file_content(&file(path, unrelated)).len(), 1);
     }

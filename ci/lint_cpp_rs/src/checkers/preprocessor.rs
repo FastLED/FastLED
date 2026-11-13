@@ -598,6 +598,32 @@ impl FileContentChecker for ReinterpretCastChecker {
     }
 }
 
+/// True when the first code line (comments, blanks and #include skipped)
+/// is `#define G`.
+fn has_self_include_guard(lines: &[String]) -> bool {
+    let mut in_block_comment = false;
+    let mut code = lines.iter().map(|l| l.trim_start()).filter(|l| {
+        if in_block_comment {
+            in_block_comment = !l.contains("*/");
+            return false;
+        }
+        if l.starts_with("/*") {
+            in_block_comment = !l.contains("*/");
+            return false;
+        }
+        !(l.is_empty() || l.starts_with("//") || l.starts_with("#include"))
+    });
+    let guard = code
+        .next()
+        .and_then(|l| l.strip_prefix("#ifndef"))
+        .map(str::trim);
+    let define = code
+        .next()
+        .and_then(|l| l.strip_prefix("#define"))
+        .map(str::trim);
+    matches!((guard, define), (Some(g), Some(d)) if !g.is_empty() && g.split_whitespace().next() == d.split_whitespace().next())
+}
+
 struct PragmaOnceChecker;
 
 impl FileContentChecker for PragmaOnceChecker {
@@ -628,12 +654,7 @@ impl FileContentChecker for PragmaOnceChecker {
     fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
         let in_platforms = normalize_path(&file_content.path).contains("/platforms/");
         let has_pragma_once = file_content.content.contains("#pragma once")
-            || (in_platforms
-                && file_content.lines.windows(2).any(|w| {
-                    let guard = w[0].trim_start().strip_prefix("#ifndef").map(str::trim);
-                    let define = w[1].trim_start().strip_prefix("#define").map(str::trim);
-                    matches!((guard, define), (Some(g), Some(d)) if !g.is_empty() && g == d)
-                }));
+            || (in_platforms && has_self_include_guard(&file_content.lines));
         let is_header = ends_with_any(&file_content.path, &[".h", ".hpp"]);
         let is_cpp = file_content.path.ends_with(".cpp");
 
