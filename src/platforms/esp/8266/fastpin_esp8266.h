@@ -165,6 +165,7 @@ _FL_DEFPIN(8,15); _FL_DEFPIN(9,3); _FL_DEFPIN(10,1);
 #if FL_ESP8266_ENABLE_FAST_SOFTWARE_SPI
 template <u8 PIN> struct BitbangPin<FastPin<PIN>> {
     static constexpr bool kAtomicWrite = true;
+    static constexpr bool kEsp32LegacyWriteBit = false;  // generic writer trait
     static constexpr bool kTwoWriteStream = FastPin<PIN>::kRealPin < 16;
     // Normal GPIO writes serialize through the 80 MHz peripheral bus. The
     // measured floor is six bus cycles (12 CPU cycles at 160 MHz); at 80 MHz
