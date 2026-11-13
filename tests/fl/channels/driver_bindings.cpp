@@ -4,6 +4,7 @@
 #include "FastLED.h"
 #include "fl/channels/driver_bindings.h"
 #include "fl/channels/manager.h"
+#include "fl/stl/static_assert.h"
 #include "fl/stl/string.h"
 #include "platforms/shared/bitbang/bus_traits.h"
 #include "test.h"
@@ -58,6 +59,18 @@ FL_TEST_CASE("DriverBindings - enable<Bus::AUTO>() names the platform default") 
     using AutoBinding = fl::detail::BusBinding<fl::Bus::AUTO, fl::ClocklessChipset, 0>;
     const fl::Bus resolved = AutoBinding::kBus;
     FL_CHECK(resolved == fl::DefaultBus<fl::ClocklessChipset>::value);
+}
+
+namespace {
+struct NoDefaultBusChipset {};  // no DefaultBus specialization (like Zephyr)
+}
+
+FL_TEST_CASE("DriverBindings - platforms without a DefaultBus bind nothing") {
+    FL_STATIC_ASSERT(!fl::detail::HasDefaultBus<NoDefaultBusChipset>::value,
+                  "incomplete DefaultBus must be detected");
+    FL_STATIC_ASSERT(fl::detail::HasDefaultBus<fl::ClocklessChipset>::value,
+                  "host specializes DefaultBus<ClocklessChipset>");
+    FL_CHECK_FALSE(fl::detail::bindDefaultDriver<NoDefaultBusChipset>());
 }
 
 }  // FL_TEST_FILE

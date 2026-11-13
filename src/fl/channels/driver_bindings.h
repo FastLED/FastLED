@@ -72,6 +72,33 @@ struct BusBinding {
     }
 };
 
+/// True when the platform specializes `DefaultBus<Chipset>`. Platforms with
+/// no default (e.g. Zephyr, or LPC11xx SPI) leave it incomplete.
+template<typename Chipset, typename = void>
+struct HasDefaultBus : fl::false_type {};
+
+template<typename Chipset>
+struct HasDefaultBus<Chipset, decltype(void(DefaultBus<Chipset>::value))>
+    : fl::true_type {};
+
+template<typename Chipset>
+inline bool bindDefaultDriverImpl(fl::true_type) FL_NO_EXCEPT {
+    BusBinding<Bus::AUTO, Chipset, 0>::bind();
+    return true;
+}
+
+template<typename Chipset>
+inline bool bindDefaultDriverImpl(fl::false_type) FL_NO_EXCEPT {
+    return false;  // no platform default: nothing to bind
+}
+
+/// Bind the platform default driver for `Chipset`, if one exists. Returns
+/// false (and links nothing) where `DefaultBus<Chipset>` is incomplete.
+template<typename Chipset>
+inline bool bindDefaultDriver() FL_NO_EXCEPT {
+    return bindDefaultDriverImpl<Chipset>(HasDefaultBus<Chipset>());
+}
+
 }  // namespace detail
 
 /// Enable one bus for `FastLED.add(cfg)`. `Bus::AUTO` names the platform
