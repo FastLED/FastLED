@@ -27,7 +27,7 @@ janitor = true
 # A post-cleanup retention TARGET, not a bound on concurrent saves or peaks.
 # No GitHub storage/billing setting is changed. Existing occupancy may exceed
 # it until maintenance runs; PRs report inherited occupancy as a warning.
-budget = "9GB"
+budget = "15GB"
 write-on = ["main", "nightly"]
 never = []
 retired = []
@@ -63,8 +63,12 @@ pr = { mode = "none", families = [], trim = "on-close" }
 # 100 deletes, and keeps entries when PR state cannot be read. Concurrent
 # saves and these protections may leave occupancy above target after a sweep;
 # the maintenance budget check reports that rather than asserting success.
+# 2026-11-12 (#5243): fbuild entries measured ~3.07 GB each (cross-board union
+# blobs, fixed per job via cache-version in the workflows), so the old 2304MB
+# aggregate quota and 9GB budget could not hold even one generation. fbuild max
+# is re-modelled to 6144MB and the budget to 15GB until isolated entries shrink.
 [cache.family]
-fbuild = { prefix = "fbuild-v1-", max = "2304MB", per = "none", lockfile = true, evict = "lru" }
+fbuild = { prefix = "fbuild-v1-", max = "6144MB", per = "none", lockfile = true, evict = "lru" }
 fbuild-install = { prefix = "fbuild-install-", max = "256MB", per = "none", lockfile = true, evict = "lru" }
 uv = { prefix = "setup-uv-", max = "256MB", per = "none", lockfile = true, evict = "lru" }
 rust-lint = { prefix = "rust-lint-", max = "512MB", per = "none", lockfile = true, evict = "lru" }
