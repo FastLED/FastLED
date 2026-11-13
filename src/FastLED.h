@@ -1034,6 +1034,10 @@ public:
 	/// @endcode
 	/// `add(cfg)` warns, rather than linking every driver, when the channel's
 	/// bus was not enabled. `enableAllDrivers()` remains the catch-all.
+	/// Legacy compatibility: if no bus was ever enabled, an AUTO-bus
+	/// `add(cfg)` registers the platform default driver for its chipset
+	/// family (as 3.10.9 did). An explicit `cfg.options.mBus` still
+	/// requires `enable<>()` or `enableAllDrivers()`.
 	template<fl::Bus B, typename Chipset = fl::ClocklessChipset, fl::u8 Which = 0>
 	CFastLED& enable() FL_NO_EXCEPT {
 		fl::bindDriver<B, Chipset, Which>();
