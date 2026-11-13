@@ -76,6 +76,9 @@ template <class Pin> struct BitbangPinDefaults {
     static constexpr bool kAtomicWrite = false;
     static constexpr bool kTwoWriteStream = false;
     static constexpr cycle_t kMinWriteCycles = 0;
+    /// ESP32 with its fast policy off: GenericSoftwareSPIOutput::writeBit()
+    /// emits the FastLED 3.10.9 ESP32 sequence (see fastpin_esp32.h).
+    static constexpr bool kEsp32LegacyWriteBit = false;
     template <fl::cycle_t CYCLES>
     FASTLED_FORCE_INLINE static void delay() FL_NO_EXCEPT {
         fl::delaycycles<CYCLES>();

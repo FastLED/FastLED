@@ -15,13 +15,20 @@
 
 #if defined(ESP8266)
 #include <esp8266_peri.h>  // IWYU pragma: keep
+#include "fl/system/fastpin.h"  // IWYU pragma: keep
 #elif defined(ESP32)
 #include "fl/system/fastpin.h"  // IWYU pragma: keep
 #endif
 
-// ESP32 atomic runtime writes are part of the optimized bit-bang path, which is
-// untested on ESP32 hardware; see FL_ESP32_ENABLE_FAST_SOFTWARE_SPI in
-// fastpin_esp32.h. When it is off, callers keep their legacy Pin fallback.
+// Atomic runtime writes are part of each platform's optimized bit-bang path and
+// follow the same FL_<PLATFORM>_ENABLE_FAST_SOFTWARE_SPI switch as the
+// compile-time writer (fastpin_esp8266.h / fastpin_esp32.h). This header is
+// compiled into FastLED's own sources, so the switch must be a build flag (-D)
+// to agree with the sketch. When it is off, callers keep their Pin fallback.
+#if defined(ESP8266) && defined(FL_ESP8266_ENABLE_FAST_SOFTWARE_SPI) && \
+    FL_ESP8266_ENABLE_FAST_SOFTWARE_SPI
+#define FL_RUNTIME_SOFTWARE_SPI_ESP8266_ATOMIC
+#endif
 #if defined(ESP32) && defined(_FL_VALID_PIN_MASK) && \
     defined(FL_ESP32_ENABLE_FAST_SOFTWARE_SPI) && FL_ESP32_ENABLE_FAST_SOFTWARE_SPI
 #define FL_RUNTIME_SOFTWARE_SPI_ESP32_ATOMIC
@@ -42,7 +49,7 @@ struct RuntimeGpio {
 /// Finds a pin's atomic registers. Returns false when the target has none known
 /// here, or the pin needs other handling; the caller then keeps its Pin fallback.
 inline bool resolveRuntimeGpio(u8 pin, RuntimeGpio* out) FL_NO_EXCEPT {
-#if defined(ESP8266)
+#if defined(FL_RUNTIME_SOFTWARE_SPI_ESP8266_ATOMIC)
     if (pin >= 16) { // GPIO16 has its own register with no set/clear pair.
         return false;
     }

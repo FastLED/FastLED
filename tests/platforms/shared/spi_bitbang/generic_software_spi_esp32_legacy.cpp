@@ -29,14 +29,23 @@ template <char NAME> struct RecordingPin {
 
 template <> class FastPin<250> : public spi_esp32_legacy_test::RecordingPin<'D'> {};
 template <> class FastPin<251> : public spi_esp32_legacy_test::RecordingPin<'C'> {};
+template <> class FastPin<252> : public spi_esp32_legacy_test::RecordingPin<'C'> {};
 
+namespace spi_esp32_legacy_test {
 // Default policy, except delays are recorded as "[cycles]".
-template <> struct BitbangPin<FastPin<251>> : BitbangPinDefaults<FastPin<251>> {
+template <class Pin> struct RecordingDelays : BitbangPinDefaults<Pin> {
     template <fl::cycle_t CYCLES> static void delay() {
-        spi_esp32_legacy_test::gOps += '[';
-        spi_esp32_legacy_test::gOps += fl::to_string(static_cast<long>(CYCLES));
-        spi_esp32_legacy_test::gOps += ']';
+        gOps += '[';
+        gOps += fl::to_string(static_cast<long>(CYCLES));
+        gOps += ']';
     }
+};
+} // namespace spi_esp32_legacy_test
+
+template <> struct BitbangPin<FastPin<251>> : spi_esp32_legacy_test::RecordingDelays<FastPin<251>> {};
+// The policy fastpin_esp32.h gives every pin when FL_ESP32_ENABLE_FAST_SOFTWARE_SPI is 0.
+template <> struct BitbangPin<FastPin<252>> : spi_esp32_legacy_test::RecordingDelays<FastPin<252>> {
+    static constexpr bool kEsp32LegacyWriteBit = true;
 };
 
 FL_TEST_FILE(FL_FILEPATH) {
@@ -45,6 +54,7 @@ using namespace spi_esp32_legacy_test;
 namespace {
 constexpr u32 kSpeed = 40;
 using Output = GenericSoftwareSPIOutput<250, 251, kSpeed>;
+using Esp32DefaultOutput = GenericSoftwareSPIOutput<250, 252, kSpeed>;
 
 fl::string delayStr(long cycles) {
     fl::string s = "[";
@@ -73,15 +83,28 @@ FL_TEST_CASE("ESP32 legacy writeBit keeps the 3.10.9 pin sequence") {
     Output::writeBitEsp32Legacy<0>(0);
     FL_CHECK_EQ(gOps, fl::string("D-C+") + hiDelay + "C~" + hiDelay);
 
-    // writeBit() dispatches to the legacy writer only on ESP32 with the fast
-    // policy off; the host build takes the policy writer.
+    // writeBit() takes the policy writer unless the clock pin's policy asks
+    // for the legacy ESP32 sequence.
     gOps.clear();
     Output::writeBit<0>(1);
-#if defined(FL_IS_ESP32) && !(defined(FL_ESP32_ENABLE_FAST_SOFTWARE_SPI) && FL_ESP32_ENABLE_FAST_SOFTWARE_SPI)
-    FL_CHECK_EQ(gOps, fl::string("D+C-C+") + hiDelay + "C~" + loDelay);
-#else
     FL_CHECK_EQ(gOps, fl::string("D+C+") + hiDelay + "C-" + loDelay);
-#endif
+
+    gOps.clear();
+    Esp32DefaultOutput::writeBit<0>(1);
+    FL_CHECK_EQ(gOps, fl::string("D+C-C+") + hiDelay + "C~" + loDelay);
+}
+
+FL_TEST_CASE("ESP32 default policy sends whole bytes through the 3.10.9 writeBit") {
+    const long minDelay = (NS(35) > 3) ? (NS(35) - 3) : 1;
+    const long half = (kSpeed - 6) / 2;
+    const fl::string hiDelay = delayStr(minDelay) + delayStr(half > minDelay ? half - minDelay : 0);
+    const fl::string loDelay = delayStr(half);
+    const fl::string one = fl::string("D+C-C+") + hiDelay + "C~" + loDelay;
+    const fl::string zero = fl::string("D-C+") + hiDelay + "C~" + hiDelay;
+
+    gOps.clear();
+    Esp32DefaultOutput::writeByte(0xA5); // 1010 0101, MSB first
+    FL_CHECK_EQ(gOps, one + zero + one + zero + zero + one + zero + one);
 }
 
 } // FL_TEST_FILE

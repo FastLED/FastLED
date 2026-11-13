@@ -8,7 +8,9 @@
 #include "test.h"
 
 // Exercise the opt-in optimized bit-bang policy; it defaults off.
+#ifndef FL_TEENSY_ENABLE_FAST_SOFTWARE_SPI
 #define FL_TEENSY_ENABLE_FAST_SOFTWARE_SPI 1
+#endif
 
 #include "fl/stl/int.h"
 

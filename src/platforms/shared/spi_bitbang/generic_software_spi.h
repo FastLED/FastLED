@@ -24,6 +24,7 @@
 #include "fastspi_types.h"
 #include "fl/stl/noexcept.h"
 #include "fl/stl/static_assert.h"
+#include "fl/stl/type_traits.h"
 #include "fl/system/fastpin_no_pinmap.h"
 #include "platforms/shared/spi_bitbang/bitbang_pin.h"
 
@@ -224,13 +225,18 @@ public:
 	/// @tparam BIT the bit index in the byte
 	/// @param b the byte to read the bit from
 	template <u8 BIT> __attribute__((always_inline, hot)) inline static void writeBit(u8 b) FL_NO_EXCEPT {
-#if defined(FL_IS_ESP32) && !(defined(FL_ESP32_ENABLE_FAST_SOFTWARE_SPI) && FL_ESP32_ENABLE_FAST_SOFTWARE_SPI)
-		// The fast pin policy is untested on ESP32 hardware; keep 3.10.9 output.
-		writeBitEsp32Legacy<BIT>(b);
-#else
-		writeBitPolicy<BIT>(b);
-#endif
+		// The fast pin policy is untested on ESP32 hardware; fastpin_esp32.h
+		// selects the 3.10.9 output unless FL_ESP32_ENABLE_FAST_SOFTWARE_SPI is 1.
+		// Tag dispatch: only the selected writer is instantiated, so pins
+		// without toggle() never reach writeBitEsp32Legacy.
+		writeBitSelect<BIT>(b, fl::integral_constant<bool,
+			BitbangPin<fl::FastPin<CLOCK_PIN>>::kEsp32LegacyWriteBit>());
 	}
+
+	template <u8 BIT> FASTLED_FORCE_INLINE static void writeBitSelect(
+		u8 b, fl::integral_constant<bool, true>) FL_NO_EXCEPT { writeBitEsp32Legacy<BIT>(b); }
+	template <u8 BIT> FASTLED_FORCE_INLINE static void writeBitSelect(
+		u8 b, fl::integral_constant<bool, false>) FL_NO_EXCEPT { writeBitPolicy<BIT>(b); }
 
 	/// writeBit() through the platform pin policy: data, clock high, clock low.
 	template <u8 BIT> FASTLED_FORCE_INLINE static void writeBitPolicy(u8 b) FL_NO_EXCEPT {
