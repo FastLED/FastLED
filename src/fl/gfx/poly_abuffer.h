@@ -26,7 +26,17 @@
 /// # Integer model
 ///
 /// Integer-only (repository convention): coordinates in Q16.16, sub-rows
-/// in .2 (4 per pixel). Per edge, once at setup:
+/// in .2 (4 per pixel). A sub-row is active for an edge when its TOP
+/// grid line lies within the edge's [ytop_q, ybot_q) span — the edge's
+/// segment reaches the sub-row's top. On the grid, a vertex shared by
+/// two edges belongs to exactly one of them; mid-sub-row, the vertex's
+/// sub-row belongs to the edge that ends there (its partner starts at
+/// the next sub-row), so no sub-row is claimed twice and the per-sub-row
+/// even-odd crossing set stays consistent. The edge's crossing of a
+/// sub-row is its line's x at the sub-row's top grid line, measured
+/// exactly from the top vertex in Q16 (never snapped to the sub-row
+/// grid), so a vertex mid-sub-row introduces no quantization shift. Per
+/// edge, once at setup:
 ///   xinc = floor(65536 * B / dy)          (one i64 division, i64 result)
 /// Per scanline, per active edge: x0 += xinc (i64 add, no libgcc).
 /// Per sub-row: X_r = X_0 + r * q + corr[r] (shifts/adds + a 2-bit table,
@@ -63,11 +73,22 @@
 /// 5. **Full pixels saturate at 255.** A mask with all 32 bits set yields
 ///    br = 255 (the reference's popcount << 3 would wrap to 0 there; its
 ///    full-span fast path is what actually keeps that case from shipping).
+/// 6. **Off-grid vertices.** The reference's shapes (line parallelograms)
+///    have every vertex on the sub-row grid by construction, so its
+///    half-open [ytop, ybottom) edge ranges never claim one sub-row
+///    twice. Arbitrary Q16 vertices can sit mid-sub-row, where the naive
+///    floor/ceil ranges make both edges sharing the vertex claim its
+///    sub-row — three crossings on one sub-row, and the even-odd rule
+///    fills a spurious tail to the canvas edge. This kernel instead
+///    activates a sub-row only when the edge's segment reaches its TOP
+///    grid line (ceil/ceil ranges, see the integer model above), which
+///    assigns the vertex's sub-row to exactly one of its edges.
 ///
-/// Sampling geometry (kept faithful to the reference): sub-row r samples
+/// Sampling geometry (kept faithful to the reference): sub-row r covers
 /// the half-open band [y + r/4, y + (r+1)/4) and sub-column c counts as
 /// covered when its RIGHT edge x + (c+1)/8 lies strictly to the right of
-/// the edge crossing (a sample exactly on the edge is outside).
+/// the edge crossing (the edge's line at the sub-row's top grid line,
+/// see the integer model above; a sample exactly on the edge is outside).
 
 #include "fl/stl/noexcept.h"
 #include "fl/stl/int.h"
@@ -186,20 +207,26 @@ inline fl::u8 polyABAlpha(fl::u32 mask) FL_NO_EXCEPT {
 /// advances exactly per scanline (x0 += xinc). Sub-row r's crossing is
 /// X_r = x0 + r*q + corr[r]:
 ///   q    = xinc >> 2                 (integer part of the per-sub-row step)
-///   corr = floor((R0 + r*m)/4),      (floor((k0+r)*xinc/4) - k0*xinc/4
-///          R0 = (k0*xinc) & 3,       - floor(k0*xinc/4), see setup)
-///          m  = xinc & 3
-/// R0 is invariant across scanlines because k0 advances by exactly 4
-/// (one pixel) per scanline. ytop/ybot bound the in-range sub-rows in .2
-/// (4 per pixel, half-open [ytop, ybot)); py0/py1 are the canvas rows
-/// they span (identical row convention to the exact kernel).
+///   corr = floor((n0 + r*16384*m)/65536),
+///          n0 = (off*xinc) & 65535,  (off = 65536*py0 - ytop_q, the
+///          m  = xinc & 3             vertex's offset from py0's top)
+/// n0 is invariant across scanlines because off advances by exactly 65536
+/// (one pixel) per scanline. X_r is the edge's line at sub-row r's TOP
+/// grid line, measured exactly from the top vertex in Q16, so a vertex
+/// mid-sub-row introduces no quantization shift. ytop/ybot bound the
+/// in-range sub-rows in .2 (4 per pixel, half-open [ytop, ybot)): a
+/// sub-row is in range when its TOP grid line lies in the edge's
+/// [ytop_q, ybot_q) span (the segment reaches the sub-row's top), so a
+/// vertex shared by two edges (on the grid or mid-sub-row) never makes a
+/// sub-row claimed twice. py0/py1 are the canvas rows they span
+/// (identical row convention to the exact kernel).
 struct AbEdge {
     fl::i64 x0;      // sub-row-0 crossing, Q16.16, current scanline
     fl::i64 xinc;    // per-scanline step, Q16.16: floor(65536 * B / dy)
     fl::i64 q;       // xinc >> 2
-    fl::u8  corr[4]; // per-sub-row correction, 0..2
-    fl::i32 ytop;    // first in-range sub-row, .2
-    fl::i32 ybot;    // one past last in-range sub-row, .2
+    fl::u8  corr[4]; // per-sub-row correction, 0..3
+    fl::i32 ytop;    // first in-range sub-row, .2 (ceil of top vertex)
+    fl::i32 ybot;    // one past last in-range sub-row, .2 (ceil of bottom)
     int py0;         // first active canvas row
     int py1;         // last active canvas row
 };
@@ -273,25 +300,40 @@ inline void drawPolygonABufferCore(Canvas<PixelT>& canvas, const PixelT& color,
         AbEdge& e = edges[nedges++];
         e.py0 = py0;
         e.py1 = py1;
-        // In-range sub-rows, .2 (4 per px), half-open: floor/ceil so the
-        // sub-rows exactly tile [ytop_q, ybot_q)
-        e.ytop = ytop_q >> 14;
+        // In-range sub-rows, .2 (4 per px), half-open [ytop, ybot): a
+        // sub-row is in range when its TOP grid line (s*16384 Q16) lies in
+        // the edge's [ytop_q, ybot_q) span — the segment reaches the
+        // sub-row's top. On the grid, a vertex shared by two edges
+        // belongs to exactly one of them; mid-sub-row, the vertex's
+        // sub-row belongs to the edge that ENDS there (its partner starts
+        // at the next sub-row), so no sub-row is claimed twice and the
+        // per-sub-row even-odd crossing set stays consistent.
+        e.ytop = (ytop_q + 16383) >> 14;
         e.ybot = (ybot_q + 16383) >> 14;
         // i64 step: |65536 * B| < 2^47, dy >= 1 -> exact floor, no wrap
         e.xinc = polyABFloorDivI64((fl::i64)65536L * (fl::i64)B, (fl::i64)dy2);
         e.q = e.xinc >> 2;
 
+        // x0: the edge's line at the TOP grid line of py0's sub-row 0,
+        // measured exactly from the top vertex in Q16: off = 65536*py0 -
+        // ytop_q, so a vertex mid-sub-row introduces no quantization
+        // shift. Every in-range sub-row's top lies within the segment
+        // (see [ytop, ybot) above), so the line value there is valid for
+        // either xinc sign — no clamping needed. off*xinc stays in i64
+        // (same bound as the vertex-snapped seed this replaces).
+        const fl::i64 off = ((fl::i64)py0 << 16) - (fl::i64)ytop_q;
+        e.x0 = (fl::i64)xtop + polyABFloorDivI64(off * e.xinc, 65536L);
+        // corr[r] = floor((n0 + r*16384*m)/65536), n0 = (off*xinc) mod
+        // 65536 in [0, 65536): the exact per-sub-row correction for the
+        // fractional part of xinc/4. X_r = xtop + floor((off + r*16384)
+        // * xinc / 65536) holds exactly, and the row advance (x0 +=
+        // xinc) is exact because off gains a multiple of 65536 per row.
         const fl::i32 m = (fl::i32)(e.xinc & 3);           // in [0, 4)
-        const fl::i32 k0 = 4 * py0 - (int)e.ytop;          // sub-rows from edge top to sub-row 0 of py0 (in [-3, ~4*height])
-        e.x0 = (fl::i64)xtop + (fl::i64)k0 * e.q
-             + ((((fl::i64)k0) * (fl::i64)m) >> 2);       // floor(k0*xinc/4)
-        // corr[r] = floor((R0 + r*m)/4) with R0 = (k0*xinc) & 3: exact
-        // per-sub-row correction for the fractional part of xinc/4
-        const fl::i32 R0 = (fl::i32)(((fl::i64)k0 * e.xinc) & 3);
+        const fl::i64 n0 = ((off & 65535L) * (e.xinc & 65535L)) & 65535L;
         e.corr[0] = 0;
-        e.corr[1] = (fl::u8)((R0 + m) >> 2);
-        e.corr[2] = (fl::u8)((R0 + 2 * m) >> 2);
-        e.corr[3] = (fl::u8)((R0 + 3 * m) >> 2);
+        e.corr[1] = (fl::u8)((n0 + 16384L * (fl::i64)m) >> 16);
+        e.corr[2] = (fl::u8)((n0 + 2L * 16384L * (fl::i64)m) >> 16);
+        e.corr[3] = (fl::u8)((n0 + 3L * 16384L * (fl::i64)m) >> 16);
 
         if (e.py0 < ymin) ymin = e.py0;
         if (e.py1 > ymax) ymax = e.py1;
@@ -312,9 +354,9 @@ inline void drawPolygonABufferCore(Canvas<PixelT>& canvas, const PixelT& color,
             if (py < ed.py0 || py > ed.py1) continue;
             if (py > ed.py0) ed.x0 += ed.xinc;
             // In-range sub-rows: ytop <= 4*py + r < ybot, r in [0, 4)
-            int rlo = (int)ed.ytop - 4 * py;  // in [-3, 3] for active edges
+            int rlo = (int)ed.ytop - 4 * py;  // in [-3, 4]; 4 only at py0
+            // (vertex below the row's top) -> skipped via rlo > rhi
             if (rlo < 0) rlo = 0;
-            if (rlo > 3) rlo = 3;
             int rhi = (int)ed.ybot - 1 - 4 * py;  // in [-3, 3]
             if (rhi < 0) rhi = 0;
             if (rhi > 3) rhi = 3;
