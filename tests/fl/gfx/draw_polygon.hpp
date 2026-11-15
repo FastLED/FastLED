@@ -6,8 +6,6 @@
 #include "fl/stl/chrono.h"
 #include "fl/math/fixed_point/s16x16.h"
 
-#include <cmath>
-
 // ============================================================================
 // drawPolygon test helpers (test-only; the double-precision reference math
 // below is independent of the implementation's Q16 integer model)
@@ -50,17 +48,8 @@ static double polyTestShoelace(const double* px, const double* py, int n) {
     double a = 0;
     for (int i = 0, j = n - 1; i < n; j = i++)
         a += px[j] * py[i] - px[i] * py[j];
-    return std::fabs(a) * 0.5;
-}
-
-/// Regular star-shaped polygon: radius radii[i] at angle (angle0 + step*i)°.
-static void polyTestRegular(int n, double cx, double cy, const double* radii,
-                            double angle0, double step, double* px, double* py) {
-    for (int i = 0; i < n; ++i) {
-        const double a = (angle0 + step * i) * 3.14159265358979323846 / 180.0;
-        px[i] = cx + radii[i] * std::cos(a);
-        py[i] = cy + radii[i] * std::sin(a);
-    }
+    if (a < 0) a = -a;
+    return a * 0.5;
 }
 
 static void polyTestZero(CRGB* buf) {
@@ -109,56 +98,99 @@ struct PolyTestShape {
     bool simple;  // simple (non-self-intersecting): parity + area checks
 };
 
-/// The test shapes (double coordinates). The implementation truncates each
-/// float vertex to Q16.16; the double reference uses the raw values — the
-/// sub-Q16 difference is far below the parity tolerance.
+// The test shapes (double coordinates). The implementation truncates each
+// float vertex to Q16.16; the double reference uses the raw values — the
+// sub-Q16 difference is far below the parity tolerance. The regular
+// polygon/star vertices are frozen literals of cx + r cos θ, cy + r sin θ
+// (θ = angle0 + step·i, center 15.5,15.5) so the oracle needs no libm in a
+// header; they are bit-identical to the values runtime trig produced.
+// Layout per shape: (x0, x1, ..., xn, y0, y1, ..., yn).
+const double pent17[10] = {
+    24.10674280366732, 15.65707165793555, 6.9903328196061496,
+    10.083664791631566, 20.662187927159415,
+    18.13134534250463, 24.498629256407522, 18.430113390114414,
+    8.312280409574365, 8.1276316013990737,
+};  // r 9, 17 + 72i deg
+const double star12[20] = {
+    25.281476007338057, 18.511087728614861, 16.545284632676534,
+    13.250000000000002, 6.3645454235739924, 11.098335796697874,
+    8.8086939364114158, 15.029621915295559, 20.5, 19.610954559391704,
+    17.579116908177593, 18.844151714648273, 25.445218953682733,
+    19.397114317029974, 19.567366430758003, 14.564397391320083,
+    8.0685517452260598, 11.02465147084277, 6.8397459621556145,
+    13.6696851061589,
+};  // r 10/4.5 alternating, 12 + 36i deg
+const double sq23[8] = {
+    22.864038827619524, 12.374150972085811, 8.1359611723804761,
+    18.625849027914189, 18.625849027914189, 22.864038827619524,
+    12.374150972085811, 8.1359611723804761,
+};  // r 8, 23 + 90i deg
+const double diamond[8] = {
+    23.5, 15.5, 7.5, 15.499999999999998,
+    15.5, 23.5, 15.500000000000002, 7.5,
+};  // r 8, 90i deg
+const double axissq[8] = {
+    21.15685424949238, 9.8431457505076203, 9.8431457505076185,
+    21.15685424949238, 21.15685424949238, 21.15685424949238,
+    9.8431457505076203, 9.8431457505076185,
+};  // r 8, 45 + 90i deg
+const double hexa12[24] = {
+    15.5, 13.833333333333334, 6.8397459621556127, 12.166666666666666,
+    6.8397459621556145, 13.833333333333332, 15.499999999999998,
+    17.166666666666668, 24.160254037844382, 18.833333333333332,
+    24.160254037844389, 17.166666666666664,
+    25.5, 18.386751345948131, 20.5, 15.5, 10.499999999999998,
+    12.613248654051873, 5.5, 12.613248654051871, 10.499999999999996,
+    15.5, 20.499999999999993, 18.386751345948131,
+};  // r 10 / 10/3 alternating, 90 + 30k deg
+const double tri[6] = {5, 20, 10, 5, 8, 22};
+const double shallow[6] = {2.0, 30.0, 16.0, 15.3, 15.7, 17.0};
+const double vcenter[6] = {15.5, 26.5, 15.5, 5.5, 15.5, 25.5};
+const double bowtie[8] = {10.5, 25.5, 25.5, 10.5, 10.5, 24.5, 10.5, 24.5};
+// 34-gon for the truncation test: r 9, (5 + 360/33·i) deg, x/y pairs.
+const double kGon34[68] = {
+    24.465752282825711, 16.284401684728923, 24.155280464141835, 17.967006300568499,
+    23.531984258370588, 19.560446880983307, 22.618391214370963, 21.007132331728219,
+    21.447520965096565, 22.254775671311137, 20.061691812028847, 23.258283818736523,
+    18.51099123150232, 23.981387374941445, 16.851465582808164, 24.39795149337672,
+    15.143094446742092, 24.492920461454869, 13.447622807279108, 24.262861853230319,
+    11.826329426977676, 23.716090586216161, 10.337812072840588, 22.87236839860093,
+    9.0358696403404934, 21.76218960854175, 7.9675577211658757, 20.425678970053994,
+    7.1714878915352518, 18.911141459857106, 6.6764321892311873, 17.273316409658598,
+    6.5002832171900025, 15.57139908408419, 6.6494074582129334, 13.866901209582482,
+    7.1184151736899928, 12.221427780363859, 7.8903552027961608, 10.694450493399478,
+    8.937327621609402, 9.3411582863407592, 10.221492119053782, 8.2104626655192536,
+    11.6964356443337, 7.3432299166701522, 13.308849895517659, 6.7708040908897553,
+    15.000458020463537, 6.5138741489627021, 16.71012089409378, 6.5817262084146764,
+    18.376046845672242, 6.9719079190302633, 19.938024970781139, 7.6703170971792822,
+    21.339601310284742, 8.6517114154760755, 22.530119243501833, 9.880620726259421,
+    23.466550350461748, 11.312629045145655, 24.115049571111488, 12.89597986042892,
+    24.452178453968539, 14.573446748264585, 24.465752282825708, 16.284401684728927,
+};
+// Pentagon (pent17) vertices rounded to Q16.16 raw, x/y pairs — the
+// performance test's draw input.
+const fl::i32 kPentQ16[10] = {
+    1579859L, 1188256L, 1026102L, 1605542L, 458118L,
+    1207836L, 660843L, 544754L, 1354117L, 532652L,
+};
+
+const PolyTestShape kPolyShapes[] = {
+    {"pent17", pent17, pent17 + 5, 5, true},
+    {"star12", star12, star12 + 10, 10, true},
+    {"sq23", sq23, sq23 + 4, 4, true},
+    {"diamond", diamond, diamond + 4, 4, true},
+    {"axissq", axissq, axissq + 4, 4, true},
+    {"hexa12", hexa12, hexa12 + 12, 12, true},
+    {"tri", tri, tri + 3, 3, true},
+    {"shallow", shallow, shallow + 3, 3, true},
+    {"vertex_center", vcenter, vcenter + 3, 3, true},
+    // Self-intersecting: even-odd span pairing, structural checks only
+    {"bowtie", bowtie, bowtie + 4, 4, false},
+    {0, 0, 0, 0, false},
+};
+
 static const PolyTestShape* polyTestShapes() {
-    static double pent17[10], star12[20], sq23[8], diamond[8], axissq[8];
-    static double hexa12[24], tri[6], shallow[6], vcenter[6], bowtie[8];
-    static bool init = false;
-    if (!init) {
-        static const double r9[5] = {9, 9, 9, 9, 9};
-        static const double r1045[10] = {10, 4.5, 10, 4.5, 10, 4.5, 10, 4.5, 10, 4.5};
-        static const double r8[4] = {8, 8, 8, 8};
-        polyTestRegular(5, 15.5, 15.5, r9, 17, 72, pent17, pent17 + 5);
-        polyTestRegular(10, 15.5, 15.5, r1045, 12, 36, star12, star12 + 10);
-        polyTestRegular(4, 15.5, 15.5, r8, 23, 90, sq23, sq23 + 4);
-        polyTestRegular(4, 15.5, 15.5, r8, 0, 90, diamond, diamond + 4);
-        polyTestRegular(4, 15.5, 15.5, r8, 45, 90, axissq, axissq + 4);
-        for (int k = 0; k < 12; ++k) {
-            const double a = (90 + 30 * k) * 3.14159265358979323846 / 180.0;
-            const double rad = (k % 2 == 0) ? 10.0 : 10.0 / 3.0;
-            hexa12[k] = 15.5 + rad * std::cos(a);
-            hexa12[12 + k] = 15.5 + rad * std::sin(a);
-        }
-        // Separate halves: (x0, x1, x2, ..., y0, y1, y2, ...)
-        tri[0] = 5;   tri[1] = 20;  tri[2] = 10;
-        tri[3] = 5;   tri[4] = 8;   tri[5] = 22;
-        shallow[0] = 2.0;  shallow[1] = 30.0;  shallow[2] = 16.0;
-        shallow[3] = 15.3; shallow[4] = 15.7;  shallow[5] = 17.0;
-        vcenter[0] = 15.5; vcenter[1] = 26.5; vcenter[2] = 15.5;
-        vcenter[3] = 5.5;  vcenter[4] = 15.5; vcenter[5] = 25.5;
-        bowtie[0] = 10.5; bowtie[1] = 25.5;
-        bowtie[2] = 25.5; bowtie[3] = 10.5;
-        bowtie[4] = 10.5; bowtie[5] = 24.5;
-        bowtie[6] = 10.5; bowtie[7] = 24.5;
-        init = true;
-    }
-    static const PolyTestShape list[] = {
-        {"pent17", pent17, pent17 + 5, 5, true},
-        {"star12", star12, star12 + 10, 10, true},
-        {"sq23", sq23, sq23 + 4, 4, true},
-        {"diamond", diamond, diamond + 4, 4, true},
-        {"axissq", axissq, axissq + 4, 4, true},
-        {"hexa12", hexa12, hexa12 + 12, 12, true},
-        {"tri", tri, tri + 3, 3, true},
-        {"shallow", shallow, shallow + 3, 3, true},
-        {"vertex_center", vcenter, vcenter + 3, 3, true},
-        // Self-intersecting: even-odd span pairing, structural checks only
-        {"bowtie", bowtie, bowtie + 4, 4, false},
-        {0, 0, 0, 0, false},
-    };
-    return list;
+    return kPolyShapes;
 }
 
 static const PolyTestShape* polyTestFind(const char* name) {
@@ -523,11 +555,9 @@ FL_TEST_CASE("drawPolygon more than 32 vertices truncates to the first 32") {
     polyTestZero(bufferB);
     // 34-gon: all vertices initialized (the array overload deduces N=34).
     fl::PolyPoint<float> pts[34];
-    for (int i = 0; i < 34; ++i) {
-        const double a = (5.0 + 360.0 / 33.0 * i) * 3.14159265358979323846 / 180.0;
-        pts[i] = {static_cast<float>(15.5 + 9 * std::cos(a)),
-                  static_cast<float>(15.5 + 9 * std::sin(a))};
-    }
+    for (int i = 0; i < 34; ++i)
+        pts[i] = {static_cast<float>(kGon34[2 * i]),
+                  static_cast<float>(kGon34[2 * i + 1])};
     {
         fl::CanvasRGB canvas(bufferA, 32, 32);
         canvas.drawPolygon(CRGB::Red, pts, fl::DrawMode::DRAW_MODE_OVERWRITE);
@@ -543,12 +573,10 @@ FL_TEST_CASE("drawPolygon more than 32 vertices truncates to the first 32") {
 
 FL_TEST_CASE("drawPolygon blend vs overwrite") {
     CRGB bufferA[1024], bufferB[1024], bufferC[1024], bufferD[1024];
-    // Pentagon (double coords) shared by all four renders.
-    double px[5], py[5];
-    {
-        const double r[5] = {9, 9, 9, 9, 9};
-        polyTestRegular(5, 15.5, 15.5, r, 17, 72, px, py);
-    }
+    // Pentagon (double coords) shared by all four renders: the pent17
+    // oracle shape.
+    const double* px = pent17;
+    const double* py = pent17 + 5;
     {
         fl::CanvasRGB canvas(bufferA, 32, 32);
         polyTestZero(bufferA);
@@ -859,18 +887,13 @@ FL_TEST_CASE("drawPolygon steep sub-pixel edge crossing a row boundary") {
 }
 
 FL_TEST_CASE("Graphics performance - drawPolygon") {
-    static const fl::u16 kPolyIters = 1000;
+    const fl::u16 kPolyIters = 1000;
     CRGB buffer[1024];
     fl::CanvasRGB canvas(buffer, 32, 32);
     fl::PolyPoint<fl::s16x16> pts[5];
-    {
-        const double r[5] = {9, 9, 9, 9, 9};
-        double px[5], py[5];
-        polyTestRegular(5, 15.5, 15.5, r, 17, 72, px, py);
-        for (int i = 0; i < 5; ++i)
-            pts[i] = {fl::s16x16::from_raw((fl::i32)std::lround(65536.0 * px[i])),
-                      fl::s16x16::from_raw((fl::i32)std::lround(65536.0 * py[i]))};
-    }
+    for (int i = 0; i < 5; ++i)
+        pts[i] = {fl::s16x16::from_raw(kPentQ16[2 * i]),
+                  fl::s16x16::from_raw(kPentQ16[2 * i + 1])};
     canvas.drawPolygon(CRGB::Red, pts, fl::DrawMode::DRAW_MODE_OVERWRITE);
 
     auto start = fl::chrono::steady_clock::now();

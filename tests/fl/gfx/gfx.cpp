@@ -3,7 +3,7 @@
 #include "tests/fl/gfx/draw_disc.hpp"
 #include "tests/fl/gfx/draw_disc_16.hpp"
 #include "tests/fl/gfx/draw_polygon.hpp"
-#include "tests/fl/gfx/draw_polygon_abuffer.hpp"
+#include "tests/fl/gfx/poly_abuffer.hpp"
 #include "tests/fl/gfx/draw_ring.hpp"
 #include "tests/fl/gfx/draw_thick_line.hpp"
 #include "tests/fl/gfx/perf_primitives.hpp"

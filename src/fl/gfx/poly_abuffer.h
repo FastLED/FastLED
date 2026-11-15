@@ -143,7 +143,9 @@ inline fl::i32 polyABToQ16<double>(double val) FL_NO_EXCEPT {
 }
 
 template<>
-inline fl::i32 polyABToQ16<int>(int val) FL_NO_EXCEPT {
+// 16-bit int coordinate overload: the public API accepts int PolyPoint
+// coords (int on AVR); values clamp to ±8191 px, so the i32 result is exact.
+inline fl::i32 polyABToQ16<int>(int val) FL_NO_EXCEPT {  // fl-lint: int-template-ok int coord API
     if (val > 8191) return polyABQ16Max;
     if (val < -8191) return -polyABQ16Max;
     return static_cast<fl::i32>(val) << 16;
@@ -256,7 +258,7 @@ inline void polyABFillRun(PixelT* pixels, int py, int width,
 template<typename PixelT, typename Coord, bool Overwrite, int MAXN>
 inline void drawPolygonABufferCore(Canvas<PixelT>& canvas, const PixelT& color,
                                    fl::span<const PolyPoint<Coord>> pts) FL_NO_EXCEPT {
-    const int n = static_cast<int>(pts.size());
+    const fl::i32 n = static_cast<fl::i32>(pts.size());
     if (n < 3) return;
     PixelT* pixels = canvas.pixels;
     int width = canvas.width;

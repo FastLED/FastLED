@@ -282,7 +282,9 @@ inline fl::i32 toQ16Clamped<double>(double val) FL_NO_EXCEPT {
 }
 
 template<>
-inline fl::i32 toQ16Clamped<int>(int val) FL_NO_EXCEPT {
+// 16-bit int coordinate overload: the public API accepts int PolyPoint
+// coords (int on AVR); values clamp to ±8191 px, so the i32 result is exact.
+inline fl::i32 toQ16Clamped<int>(int val) FL_NO_EXCEPT {  // fl-lint: int-template-ok int coord API
     if (val > 8191) return kPolyQ16Max;
     if (val < -8191) return -kPolyQ16Max;
     return static_cast<fl::i32>(val) << 16;
@@ -358,16 +360,16 @@ inline void polyMul128(fl::u64 a, fl::u64 b, fl::u64 &hi, fl::u64 &lo) FL_NO_EXC
     const fl::u32 b0 = (fl::u32)b, b1 = (fl::u32)(b >> 32);
     const fl::u64 p0 = (fl::u64)a0 * b0;
     const fl::u64 p1 = (fl::u64)a0 * b1 + (fl::u64)a1 * b0;
-    const fl::u64 lo_ = p0 + (p1 << 32);
-    hi = (fl::u64)a1 * b1 + (p1 >> 32) + (lo_ < p0 ? 1u : 0u);
-    lo = lo_;
+    const fl::u64 low = p0 + (p1 << 32);
+    hi = (fl::u64)a1 * b1 + (p1 >> 32) + (low < p0 ? 1u : 0u);
+    lo = low;
 }
 
 /// 128-bit add: (hi, lo) += (ahi, alo).
 inline void polyAdd128(fl::u64 &hi, fl::u64 &lo, fl::u64 ahi, fl::u64 alo) FL_NO_EXCEPT {
-    const fl::u64 lo_ = lo + alo;
-    hi += ahi + (lo_ < lo ? 1u : 0u);
-    lo = lo_;
+    const fl::u64 low = lo + alo;
+    hi += ahi + (low < lo ? 1u : 0u);
+    lo = low;
 }
 
 /// Sort a band's active edges (idx[0..nc)) by the committed
@@ -1328,7 +1330,7 @@ inline void drawStrokeLine(Canvas<PixelT>& canvas, const PixelT& color,
 template<typename PixelT, typename Coord, bool Overwrite, int MAXN, int CHUNK>
 inline void detail::drawPolygonCore(Canvas<PixelT>& canvas, const PixelT& color,
                                     fl::span<const PolyPoint<Coord>> pts) FL_NO_EXCEPT {
-    const int n = static_cast<int>(pts.size());
+    const fl::i32 n = static_cast<fl::i32>(pts.size());
     if (n < 3) return;
     PixelT* pixels = canvas.pixels;
     int width = canvas.width;
