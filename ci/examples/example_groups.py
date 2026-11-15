@@ -123,6 +123,7 @@ GROUPS: dict[str, tuple[str, ...]] = {
         "Overclock",
         "PerfDisc",
         "Pintest",
+        "PolyDemo",
         "PolyKernels",
         "PolyShow",
         "RGBCalibrate",
