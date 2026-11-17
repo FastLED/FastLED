@@ -42,3 +42,25 @@ def test_no_pairs() -> None:
     scan = parse_scan("pairs=;stuck=;skip=;od=")
     assert scan.pairs == []
     assert pick_pair(scan) is None
+
+
+class _Bench:
+    def __init__(self, reply: object) -> None:
+        self.reply = reply
+
+    def call_flat(self, *_a: object, **_k: object) -> object:
+        return self.reply
+
+
+def test_one_explicit_pin_is_rejected_not_dropped() -> None:
+    from ci.autoresearch.lpc_pin_scan import resolve_pins
+
+    assert resolve_pins(_Bench(BENCH_REPLY), 13, None, "t") is None
+
+
+def test_timeout_and_unbound_are_reported_differently() -> None:
+    from ci.autoresearch.lpc_pin_scan import run_scan
+    from ci.autoresearch.rpc_bench import METHOD_NOT_FOUND
+
+    assert "not bound" in str(run_scan(_Bench(METHOD_NOT_FOUND)))
+    assert "did not answer" in str(run_scan(_Bench(None)))

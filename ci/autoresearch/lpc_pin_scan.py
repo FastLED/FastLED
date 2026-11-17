@@ -90,11 +90,19 @@ def format_scan(scan: LpcPinScan) -> str:
     return "\n".join(lines)
 
 
-def run_scan(bench: Any, timeout: float = 15.0) -> LpcPinScan | None:
-    """Call `findConnectedPins` on an RpcBench; None if unbound or silent."""
+def run_scan(bench: Any, timeout: float = 15.0) -> LpcPinScan | str:
+    """Call `findConnectedPins` on an RpcBench.
+
+    Returns the scan, or a reason string when there is none: the firmware
+    does not bind it, or it did not answer in time.
+    """
+    from ci.autoresearch.rpc_bench import METHOD_NOT_FOUND
+
     reply = bench.call_flat("findConnectedPins", args=[], timeout=timeout)
+    if reply is METHOD_NOT_FOUND:
+        return "findConnectedPins is not bound on this firmware"
     if not isinstance(reply, str):
-        return None
+        return f"findConnectedPins did not answer within {timeout:.0f} s"
     return parse_scan(reply)
 
 
@@ -104,11 +112,15 @@ def resolve_pins(
     """Scan, print the wiring, and return (tx, rx).
 
     Explicit pins win (with a warning if the scan did not see them); else the
-    best discovered pair. None when nothing usable was found.
+    best discovered pair. None when nothing usable was found, or when only
+    one of the two pins was given.
     """
+    if (tx_pin is None) != (rx_pin is None):
+        print(f"[{tag}] give both --tx-pin and --rx-pin, or neither (scan picks)")
+        return None
     scan = run_scan(bench)
-    if scan is None:
-        print(f"[{tag}] findConnectedPins unavailable on this firmware")
+    if isinstance(scan, str):
+        print(f"[{tag}] {scan}")
         if tx_pin is not None and rx_pin is not None:
             return tx_pin, rx_pin
         return None

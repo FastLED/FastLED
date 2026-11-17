@@ -164,8 +164,6 @@ def main() -> int:
     args.tx_pin, args.rx_pin = pins
     print(f"  Wiring: jumper P0_{args.tx_pin} -> P0_{args.rx_pin}")
 
-    # Give the LPC845 a moment to boot after opening the port.
-
     all_pass = True
 
     # Case 1: single red LED. Simplest possible byte-match.

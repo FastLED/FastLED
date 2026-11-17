@@ -248,7 +248,10 @@ inline LowMemPinTogglePeriodStats computeLowMemPeriodStats(
             static_cast<fl::u32>(edges[i + 1].ns);
         if (period_ns == 0) continue;
         const fl::u64 d = (period_ns > mean) ? (period_ns - mean) : (mean - period_ns);
-        dev_sq += d * d;
+        const fl::u64 sq = d * d;  // d < 2^32
+        // Saturate: a few edges clamped to ~2.1 s would wrap the sum and
+        // report a tiny sigma.
+        dev_sq = (dev_sq > ~fl::u64(0) - sq) ? ~fl::u64(0) : dev_sq + sq;
     }
     const fl::u64 var = dev_sq / static_cast<fl::u64>(count);
     // Bitwise integer sqrt: 32 steps whatever `var` is. A linear search ran
@@ -280,7 +283,9 @@ inline LowMemPinTogglePeriodStats computeLowMemPeriodStats(
 // 7 kHz and added ~10 us of jitter to every edge. Valid while now() is
 // called at least once per SysTick period.
 struct LowMemTickClock {
-    fl::u32 last = SysTick->VAL;
+    // millis() starts the core's SysTick (core clock, 1 ms reload) if
+    // nothing has yet; a stopped SysTick would never reach a deadline.
+    fl::u32 last = (static_cast<void>(millis()), SysTick->VAL);
     fl::u32 elapsed = 0;
     fl::u32 now() FL_NO_EXCEPT {
         const fl::u32 v = SysTick->VAL;
@@ -487,8 +492,12 @@ inline void autoResearchLowMemorySetup() {
 
 #if defined(FL_IS_ARM_LPC) && !defined(FASTLED_AUTORESEARCH_IEEE754_MODE) && \
     !defined(FASTLED_AUTORESEARCH_FAULT_TEST)
+#if defined(FL_IS_ARM_LPC_845)
+    // LPC845 only: it is the LPC with a pin-probe skip table (SWD, RESET,
+    // ISP, console USART). Elsewhere the scan would drive those pads.
     remote.bind("findConnectedPins",
                 []() -> fl::string { return lowMemFindConnectedPins(); });
+#endif
 
     // pinToggleRx (FastLED #3021 Phase 1) — bit-bang square wave on tx_pin
     // and capture SCT edges on rx_pin. CSV stats out.
