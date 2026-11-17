@@ -306,7 +306,7 @@ This tool is **COMPLETELY DISABLED** for background agents and CI environments. 
 - Interactive browser windows in headless environments
 
 **CONSOLE.LOG CAPTURE PATTERN:**
-The tool follows the pattern established in `ci/wasm_test.py` and `ci/ci/scrapers/`:
+The tool follows the pattern established in `ci/wasm_test.py` and `ci/util/scrapers/`:
 ```javascript
 // Example captured console.log patterns:
 [14:25:30] log: FastLED_onFrame called: {"frame":1,"leds":100}
@@ -317,7 +317,7 @@ The tool follows the pattern established in `ci/wasm_test.py` and `ci/ci/scraper
 
 **INTEGRATION WITH EXISTING CI:**
 - Complements existing `ci/wasm_test.py` functionality
-- Uses same playwright patterns as `ci/ci/scrapers/`
+- Uses same playwright patterns as `ci/util/scrapers/`
 - Leverages existing pyproject.toml dependencies
 - Compatible with existing Docker-based compilation workflow
 
@@ -1871,10 +1871,10 @@ CHECK(json["enabled"] | false);
 The FastLED project includes WebAssembly (WASM) bindings that bridge C++ and JavaScript code. **Changing function signatures in these bindings is a major source of runtime errors and build failures.**
 
 ### Key Binding Files (⚠️ HIGH RISK ZONE ⚠️):
-- `src/platforms/wasm/js_bindings.cpp` - Main JavaScript interface via EM_ASM
-- `src/platforms/wasm/ui.cpp` - UI update bindings with extern "C" wrappers  
-- `src/platforms/wasm/active_strip_data.cpp` - Strip data bindings via EMSCRIPTEN_BINDINGS
-- `src/platforms/wasm/fs_wasm.cpp` - File system bindings via EMSCRIPTEN_BINDINGS
+- `src/platforms/wasm/js_bindings.cpp.hpp` - Main JavaScript interface via EM_ASM
+- `src/platforms/wasm/ui.cpp.hpp` - UI update bindings with extern "C" wrappers  
+- `src/platforms/wasm/active_strip_data.cpp.hpp` - Strip data bindings via EMSCRIPTEN_BINDINGS
+- `src/platforms/wasm/fs_wasm.cpp.hpp` - File system bindings via EMSCRIPTEN_BINDINGS
 
 ### Before Making ANY Changes to These Files:
 

@@ -24,6 +24,14 @@ struct FASTLED_ESP_IO {
 #define _GPB (*(FASTLED_ESP_IO*)(0x60000000+(0x300)))
 
 
+#ifdef FL_FASTPIN_HAS_NO_PINMAP
+// Keep the pin-order mapping while forcing GPIO through the core API.
+template<u8 PIN, u32 MASK> class _ESPPIN : public NoPinMapPin<PIN> {
+public:
+    /// GPIO number this logical pin resolves to (see the native class below).
+    static constexpr u8 kRealPin = PIN;
+};
+#else
 template<u8 PIN, u32 MASK> class _ESPPIN {
 public:
     typedef volatile u32 * port_ptr_t;
@@ -61,6 +69,7 @@ public:
 
     inline static constexpr bool validpin() FL_NO_EXCEPT { return true; }
 };
+#endif // FL_FASTPIN_HAS_NO_PINMAP
 
 // Forward declaration of FastPin template
 template<u8 PIN> class FastPin;
@@ -152,7 +161,9 @@ _FL_DEFPIN(8,15); _FL_DEFPIN(9,3); _FL_DEFPIN(10,1);
 
 #endif
 
+#ifndef FL_FASTPIN_HAS_NO_PINMAP
 #define HAS_HARDWARE_PIN_SUPPORT
+#endif
 
 // FL_ESP8266_ENABLE_FAST_SOFTWARE_SPI: optimized bit-bang software SPI pin policy (default 1).
 // Bench-measured on ESP8266EX hardware (docs/ESP8266_GENERIC_SPI_4966.md).
@@ -162,7 +173,8 @@ _FL_DEFPIN(8,15); _FL_DEFPIN(9,3); _FL_DEFPIN(10,1);
 #ifndef FL_ESP8266_ENABLE_FAST_SOFTWARE_SPI
 #define FL_ESP8266_ENABLE_FAST_SOFTWARE_SPI 1
 #endif
-#if FL_ESP8266_ENABLE_FAST_SOFTWARE_SPI
+// The fast policy writes GPIO registers directly, bypassing forced core-API pins.
+#if FL_ESP8266_ENABLE_FAST_SOFTWARE_SPI && !defined(FL_FASTPIN_HAS_NO_PINMAP)
 template <u8 PIN> struct BitbangPin<FastPin<PIN>> {
     static constexpr bool kAtomicWrite = true;
     static constexpr bool kEsp32LegacyWriteBit = false;  // generic writer trait
@@ -204,7 +216,7 @@ template <u8 PIN> struct BitbangPin<FastPin<PIN>> {
         }
     }
 };
-#endif  // FL_ESP8266_ENABLE_FAST_SOFTWARE_SPI
+#endif  // FL_ESP8266_ENABLE_FAST_SOFTWARE_SPI && !FL_FASTPIN_HAS_NO_PINMAP
 }  // namespace fl
 
 FL_DISABLE_WARNING_POP

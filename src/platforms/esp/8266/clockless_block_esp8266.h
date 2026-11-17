@@ -33,6 +33,11 @@ extern u32 _retry_cnt;
 
 template <u8 LANES, int FIRST_PIN, typename TIMING, EOrder RGB_ORDER = GRB, int XTRA0 = 0, bool FLIP = false>
 class InlineBlockClocklessController : public CPixelLEDController<RGB_ORDER, LANES, PORT_MASK> {
+#ifdef FL_FASTPIN_HAS_NO_PINMAP
+	// Parallel lanes need the GPIO set/clear registers that forced pins hide.
+	FL_STATIC_ASSERT(FIRST_PIN != FIRST_PIN,
+	                 "FASTLED_FORCE_SOFTWARE_PINS is not supported by the ESP8266 block clockless driver");
+#endif
 	typedef typename FastPin<FIRST_PIN>::port_ptr_t data_ptr_t;
 	typedef typename FastPin<FIRST_PIN>::port_t data_t;
 

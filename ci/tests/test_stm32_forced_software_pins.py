@@ -44,7 +44,8 @@ def test_no_pinmap_clockless_rejects_forced_software_pins() -> None:
     # additional legacy-macro checks in each clockless driver.
     assert re.search(
         r"#if defined\(FASTLED_FORCE_SOFTWARE_PINS\)\s*&&\s*"
-        r"\(defined\(FASTLED_NO_PINMAP\)\s*\|\|\s*defined\(FL_IS_ESP32\)\)\s*\n"
+        r"\(defined\(FASTLED_NO_PINMAP\)\s*\|\|\s*defined\(FL_IS_ESP32\)\s*\|\|\s*"
+        r"defined\(FL_IS_ESP8266\)\)\s*\n"
         r"#define FL_FASTPIN_HAS_NO_PINMAP\s*\n",
         fastpin,
     )

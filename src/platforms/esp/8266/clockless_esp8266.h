@@ -109,8 +109,10 @@ protected:
 				const u8 bytes[3] = {static_cast<u8>(b),
 				                     pixels.loadAndScale1(),
 				                     pixels.loadAndScale2()};
+				// sendPixel drives raw GPIO registers, so it needs the real pad,
+				// not the logical pin (D1/NodeMCU orders remap DATA_PIN).
 				if (!esp8266_clockless::sendPixel(last_mark, bytes, 8 + XTRA0,
-				                                  DATA_PIN, timing)) {
+				                                  FastPin<DATA_PIN>::kRealPin, timing)) {
 					return 0;
 				}
 
