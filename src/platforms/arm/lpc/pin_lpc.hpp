@@ -25,6 +25,11 @@
 ///
 /// pinMode(Input) selects no pull (high impedance), per PinMode::Input.
 ///
+/// LPC845 PIO0_10 / PIO0_11 are true open-drain I2C pads: no pull resistors,
+/// and IOCON bits 5:0 are reserved there (UM11029 Tables 207/208), so pinMode
+/// never writes MODE for them. Driving them HIGH needs an external pull-up
+/// (LPC84x datasheet, Table 4 note [6]). LPC804's PIO0_10/11 are normal pads.
+///
 /// Pins outside 0..31, and pads the package lacks (PIO0_6 and PIO0_31 on
 /// LPC804), are ignored; digitalRead() returns Low for them. The FastPin grid
 /// still declares those two LPC804 pins in native and forced mode alike.
@@ -101,9 +106,22 @@ inline bool validPin(int pin) FL_NO_EXCEPT {
     return pin >= 0 && pin < kPinCount && Iocon::kIndex[pin] != kNoIocon;
 }
 
+/// False for the LPC845 true open-drain pads, whose IOCON has no MODE field.
+inline bool hasPullResistors(int pin) FL_NO_EXCEPT {
+#if defined(FL_IS_ARM_LPC_845)
+    return pin != 10 && pin != 11;
+#else
+    (void)pin;
+    return true;
+#endif
+}
+
 inline u32 pinMask(int pin) FL_NO_EXCEPT { return 1u << static_cast<u32>(pin); }
 
 inline void setPull(int pin, u32 mode) FL_NO_EXCEPT {
+    if (!hasPullResistors(pin)) {
+        return;
+    }
     volatile u32& reg = IOCON->PIO[Iocon::kIndex[pin]];
     reg = (reg & ~static_cast<u32>(IOCON_PIO_MODE_MASK)) | IOCON_PIO_MODE(mode);
 }

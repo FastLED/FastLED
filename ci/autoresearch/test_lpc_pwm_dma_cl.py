@@ -58,7 +58,7 @@ def send_rpc(
     Device serial goes through fbuild's Rust monitor (never raw pyserial);
     see agents/docs/hardware-autoresearch.md -> "Device serial".
     """
-    result = s.call(method, args=args, timeout=timeout)
+    result = s.call_flat(method, args=args, timeout=timeout)
     if result is None:
         return None
     if result is METHOD_NOT_FOUND:

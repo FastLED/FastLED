@@ -369,18 +369,20 @@ inline void autoResearchLowMemorySetup() {
             cfg.start_low   = true;
             if (!rx->begin(cfg)) return fl::string("0,0,0,0,0,0,0");
 
-            pinMode(tx_pin, OUTPUT);
-            digitalWrite(tx_pin, LOW);
+            // FastLED's own pin backend (#5260), not the Arduino core's:
+            // this bench is the on-silicon check of fl::pinMode/digitalWrite.
+            fl::pinMode(tx_pin, fl::PinMode::Output);
+            fl::digitalWrite(tx_pin, fl::PinValue::Low);
 
             const fl::u32 half_us = 500000u / static_cast<fl::u32>(freq_hz);
             const fl::u32 cycles  = static_cast<fl::u32>(freq_hz) *
                                      static_cast<fl::u32>(duration_ms) / 1000u;
 
             for (fl::u32 i = 0; i < cycles; ++i) {
-                digitalWrite(tx_pin, HIGH);
+                fl::digitalWrite(tx_pin, fl::PinValue::High);
                 delayMicroseconds(half_us);
                 rx->pollOnce();
-                digitalWrite(tx_pin, LOW);
+                fl::digitalWrite(tx_pin, fl::PinValue::Low);
                 delayMicroseconds(half_us);
                 rx->pollOnce();
                 if ((i & 0x7Fu) == 0u) {
