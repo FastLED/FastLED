@@ -85,27 +85,26 @@ template<> struct DefaultBus<SpiChipsetConfig> {
 
 #elif defined(FL_IS_ARM_LPC)
 
-// LPC845 defaults clockless AUTO to the USART DMA engine. Other LPC8xx /
-// LPC11Uxx / LPC15xx targets keep the shared cycle-counted C++ driver
-// (FASTLED_M0_USE_C_IMPLEMENTATION in led_sysdefs_arm_lpc.h), which is
-// what Bus::BIT_BANG names.
-template<> struct DefaultBus<ClocklessChipset> {
+// Only LPC845 has a channels-API clockless engine: USART+DMA by default
+// (Bus::UART), or SCT+DMA under FASTLED_LPC_PWM_DMA (Bus::BIT_BANG, see
+// drivers/sct_dma/bus_traits.h). LPC804 / LPC11xx / LPC15xx clockless output
+// is the cycle-counted ClocklessController in clockless_arm_lpc.h, which is
+// not a channel driver, and the shared BitBangChannelDriver cannot meet WS2812
+// timing there, so DefaultBus<ClocklessChipset> stays unspecialized: the
+// add(cfg) fallback then binds nothing instead of naming a missing BusTraits.
 #if defined(FL_IS_ARM_LPC_845) && FASTLED_LPC_UART_DMA
+template<> struct DefaultBus<ClocklessChipset> {
     static constexpr Bus value = Bus::UART;
-#else
+};
+#elif defined(FL_IS_ARM_LPC_845) && defined(FASTLED_LPC_PWM_DMA)
+template<> struct DefaultBus<ClocklessChipset> {
     static constexpr Bus value = Bus::BIT_BANG;
-#endif
 };
+#endif
 
-// LPC845 / LPC804 have a hardware SPI driver (spi_arm_lpc.h, UM11029).
-// LPC11xx / LPC15xx do not yet ship one (#2845 Stage 4) — they fall
-// through to the unspecialized DefaultBus, which is intentional: a
-// link error there is the right signal that no SPI driver is wired.
-#if defined(FL_IS_ARM_LPC_845) || defined(FL_IS_ARM_LPC_804)
-template<> struct DefaultBus<SpiChipsetConfig> {
-    static constexpr Bus value = Bus::SPI;
-};
-#endif
+// No LPC family has a channels-API SPI driver (no BusTraits<Bus::SPI>): the
+// LPC8xx hardware SPI in spi_arm_lpc.h is a legacy SPIOutput, not a channel
+// driver. DefaultBus<SpiChipsetConfig> stays unspecialized for the same reason.
 
 #elif defined(FL_IS_RP2040) || defined(FL_IS_RP2350)
 

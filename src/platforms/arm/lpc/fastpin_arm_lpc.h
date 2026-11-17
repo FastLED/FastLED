@@ -14,7 +14,8 @@
 #include "platforms/arm/lpc/is_lpc.h"
 #include "platforms/shared/spi_bitbang/bitbang_pin.h"
 
-// The LPC forced-software-pin rejection lives in fl/system/fastpin_base.h (included above).
+// fl/system/fastpin_base.h (included above) rejects forced software pins on
+// LPC families without a pin backend (everything but LPC845 / LPC804).
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_DEPRECATED_REGISTER
@@ -93,6 +94,14 @@ static FASTLED_FORCE_INLINE volatile u32* lpc_gpio_dirclr() { return lpc_gpio_re
 
 }  // namespace lpc_detail
 
+#ifdef FL_FASTPIN_HAS_NO_PINMAP
+// FASTLED_FORCE_SOFTWARE_PINS (LPC845 / LPC804 only; fastpin_base.h rejects
+// the other families): keep the PIO0_0..31 grid below so unlisted pins stay
+// invalid, but route every access through fl::pinMode / fl::digitalWrite
+// (platforms/arm/lpc/pin_lpc.hpp) instead of the GPIO registers.
+template <u8 PIN, u32 _MASK>
+class _ARMPIN : public NoPinMapPin<PIN> {};
+#else
 // FastPin template for "modern" LPC GPIO pins (LPC8xx / LPC11Uxx / LPC15xx).
 // PORT0 is the primary port populated on the LPC845/LPC804 packages this
 // driver covers today; multi-port support is per-variant and not currently
@@ -149,6 +158,7 @@ public:
 template <u8 PIN, u32 MASK>
 constexpr bool isLpcHardwarePin(const _ARMPIN<PIN, MASK>*) { return true; }
 constexpr bool isLpcHardwarePin(const void*) { return false; }
+#endif  // FL_FASTPIN_HAS_NO_PINMAP
 
 // FL_LPC_ENABLE_FAST_SOFTWARE_SPI: optimized bit-bang software SPI pin policy (default 0).
 // UNTESTED ON HARDWARE: no bench evidence exists for this platform yet.
@@ -159,7 +169,8 @@ constexpr bool isLpcHardwarePin(const void*) { return false; }
 #ifndef FL_LPC_ENABLE_FAST_SOFTWARE_SPI
 #define FL_LPC_ENABLE_FAST_SOFTWARE_SPI 0
 #endif
-#if FL_LPC_ENABLE_FAST_SOFTWARE_SPI
+// The fast policy writes GPIO registers directly, bypassing forced core-API pins.
+#if FL_LPC_ENABLE_FAST_SOFTWARE_SPI && !defined(FL_FASTPIN_HAS_NO_PINMAP)
 /// Exclusive bulk writes stream through PIN[0], from a snapshot read through SET
 /// because reading SET returns the output latch and reading PIN returns pin state.
 /// Every other data update uses SET/CLR. kMinWriteCycles stays at its
@@ -183,7 +194,7 @@ template <u8 PIN> struct BitbangPin<FastPin<PIN>> : BitbangPinDefaults<FastPin<P
         BitbangPinDefaults<FastPin<PIN>>::template write<BIT>(value);
     }
 };
-#endif  // FL_LPC_ENABLE_FAST_SOFTWARE_SPI
+#endif  // FL_LPC_ENABLE_FAST_SOFTWARE_SPI && !FL_FASTPIN_HAS_NO_PINMAP
 
 #define _FL_DEFPIN(PIN) template<> class FastPin<PIN> : public _ARMPIN<PIN, (1u << (PIN))> {};
 
@@ -200,7 +211,9 @@ _FL_DEFPIN(20); _FL_DEFPIN(21); _FL_DEFPIN(22); _FL_DEFPIN(23);
 _FL_DEFPIN(24); _FL_DEFPIN(25); _FL_DEFPIN(26); _FL_DEFPIN(27);
 _FL_DEFPIN(28); _FL_DEFPIN(29); _FL_DEFPIN(30); _FL_DEFPIN(31);
 
+#ifndef FL_FASTPIN_HAS_NO_PINMAP
 #define HAS_HARDWARE_PIN_SUPPORT
+#endif
 
 }  // namespace fl
 

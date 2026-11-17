@@ -26,6 +26,7 @@
 #include "platforms/arm/common/m0clockless.h"
 #include "fl/chipsets/timing_traits.h"
 #include "fl/stl/noexcept.h"
+#include "fl/stl/static_assert.h"
 #include "eorder.h"
 
 namespace fl {
@@ -43,6 +44,12 @@ namespace fl {
 template <u8 DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB,
           int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
 class ClocklessController : public CPixelLEDController<RGB_ORDER> {
+#ifdef FL_FASTPIN_HAS_NO_PINMAP
+    // The cycle-counted loop writes SET/CLR at fixed offsets from port(), which
+    // forced pins do not have (NoPinMapPin::port() is nullptr).
+    FL_STATIC_ASSERT(DATA_PIN != DATA_PIN,
+                     "FASTLED_FORCE_SOFTWARE_PINS is not supported by the LPC bit-bang clockless driver");
+#endif
     typedef typename FastPin<DATA_PIN>::port_ptr_t data_ptr_t;
     typedef typename FastPin<DATA_PIN>::port_t     data_t;
 
