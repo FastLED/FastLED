@@ -65,6 +65,7 @@
 
 #include "fl/chipsets/timing_traits.h"
 #include "fl/stl/noexcept.h"
+#include "fl/stl/static_assert.h"
 #include "fl/stl/stdint.h"
 #include "fastled_delay.h"
 #include "eorder.h"
@@ -291,6 +292,12 @@ static void initPluGraph() FL_NO_EXCEPT {
 template <fl::u8 DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB,
           int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
 class ClocklessController : public CPixelLEDController<RGB_ORDER> {
+#ifdef FL_FASTPIN_HAS_NO_PINMAP
+    // Each data bit is a GPIO SET/CLR write; forced pins have no port() and a
+    // function call per bit cannot keep the PLU bit cadence.
+    FL_STATIC_ASSERT(DATA_PIN != DATA_PIN,
+                     "FASTLED_FORCE_SOFTWARE_PINS is not supported by the LPC804 PLU clockless driver");
+#endif
     typedef typename FastPin<DATA_PIN>::port_ptr_t data_ptr_t;
     typedef typename FastPin<DATA_PIN>::port_t     data_t;
 
