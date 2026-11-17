@@ -10,6 +10,8 @@
 
 #if defined(FL_IS_ESP32)
 #include "platforms/esp/32/pin_probe_esp32.hpp"
+#elif defined(FL_IS_ARM_LPC_845)
+#include "platforms/arm/lpc/pin_probe_lpc.hpp"
 #else
 #include "platforms/shared/pin_probe_null.hpp"
 #endif

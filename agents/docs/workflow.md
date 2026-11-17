@@ -37,7 +37,10 @@ capture" until you have tried the boards that are present:
 2. If any board shares the bug's code path (same platform, or a shared driver
    such as the generic bit-bang SPI writer that runs everywhere), run
    `bash autoresearch <env> --upload-port <port>`. Pin discovery reports which
-   pins are jumpered.
+   pins are jumpered. **Never ask the user what is wired**: scan the board
+   (`findConnectedPins`, both pull directions), or add the scan where it is
+   missing. See `agents/docs/hardware-autoresearch.md` → "Discover the
+   jumpers on the board".
 3. Measure over the loopback, RED on master and GREEN with the fix, through an
    existing AutoResearch RPC or a small addition to its harness (see
    `agents/docs/hardware-autoresearch.md`). Never add a new `.ino`.

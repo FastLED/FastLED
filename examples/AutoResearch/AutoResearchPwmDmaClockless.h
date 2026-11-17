@@ -222,7 +222,8 @@ inline fl::string captureSelfHandler(int led_count, fl::u32 rgb,
 
     // Decode captured edges → GRB bytes.
     const fl::size decoded_cap = static_cast<fl::size>(led_count * 3);
-    fl::u8* decoded = pwmDmaClocklessState().decoded;
+    // sizeof the array itself: on a pointer it is 4, rejecting > 1 LED.
+    auto& decoded = pwmDmaClocklessState().decoded;
     if (decoded_cap > sizeof(decoded)) return fl::string("0");
     auto result = rx->decode(ws2812b_decoder_timing(),
                              fl::span<fl::u8>(decoded, decoded_cap));

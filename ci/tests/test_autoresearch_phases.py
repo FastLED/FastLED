@@ -3447,6 +3447,46 @@ def test_lpc_subprocess_benches_release_the_harness_port(bench):
     assert seen_open_iface == [None]
 
 
+@pytest.mark.parametrize(
+    "bench", [_run_lpc_pin_toggle_rx_tests, _run_lpc_pwm_dma_cl_tests]
+)
+@pytest.mark.parametrize(
+    ("tx_pin", "rx_pin", "expected"),
+    [
+        (None, None, []),
+        (13, 10, ["--tx-pin", "13", "--rx-pin", "10"]),
+    ],
+)
+def test_lpc_loopback_benches_leave_pin_choice_to_the_jumper_scan(
+    bench, tx_pin, rx_pin, expected
+):
+    """Without explicit pins the bench script picks the pair the firmware's
+    findConnectedPins scan discovers; it never assumes P0_10 -> P0_11."""
+    iface = MagicMock()
+    iface.close = AsyncMock()
+    args = _make_args(parlio=False)
+    args.tx_pin = tx_pin
+    args.rx_pin = rx_pin
+    ctx = _make_ctx(
+        args=args,
+        drivers=[],
+        gpio_only_mode=False,
+        final_environment="lpc845",
+        upload_port="/dev/ttyACM3",
+        serial_iface=iface,
+    )
+    seen = []
+
+    def fake_run(cmd, *_a, **_k):
+        seen.append(cmd)
+        return MagicMock(returncode=0)
+
+    with patch(f"{_PATCH_MOD}.RunningProcess.run", side_effect=fake_run):
+        asyncio.run(bench(ctx))
+    cmd = seen[0]
+    assert cmd[cmd.index("--port") + 2 :] == expected
+
+
 def _single(driver: str) -> dict[str, Any]:
     return {"method": "runSingleTest", "params": {"driver": driver, "laneSizes": [100]}}
 

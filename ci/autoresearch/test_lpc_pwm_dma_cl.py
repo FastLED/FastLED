@@ -43,6 +43,7 @@ import time
 from pathlib import Path
 from typing import Any
 
+from ci.autoresearch.lpc_pin_scan import resolve_pins
 from ci.autoresearch.rpc_bench import METHOD_NOT_FOUND, RpcBench  # noqa: E402,F401
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt  # noqa: E402
 
@@ -58,7 +59,7 @@ def send_rpc(
     Device serial goes through fbuild's Rust monitor (never raw pyserial);
     see agents/docs/hardware-autoresearch.md -> "Device serial".
     """
-    result = s.call(method, args=args, timeout=timeout)
+    result = s.call_flat(method, args=args, timeout=timeout)
     if result is None:
         return None
     if result is METHOD_NOT_FOUND:
@@ -139,13 +140,13 @@ def main() -> int:
         description="LPC845 SCT+DMA channels-API bench (#3468)"
     )
     ap.add_argument("--port", default=DEFAULT_PORT)
-    ap.add_argument("--tx-pin", type=int, default=10)
-    ap.add_argument("--rx-pin", type=int, default=11)
+    # Default: the findConnectedPins jumper scan picks the pair.
+    ap.add_argument("--tx-pin", type=int, default=None)
+    ap.add_argument("--rx-pin", type=int, default=None)
     args = ap.parse_args()
 
     print("LPC SCT+DMA channels-API self-loopback — FastLED #3468")
     print(f"  Port: {args.port} @ {DEFAULT_BAUD}")
-    print(f"  Wiring: jumper P0_{args.tx_pin} -> P0_{args.rx_pin}")
 
     try:
         s = RpcBench(args.port)
@@ -156,7 +157,12 @@ def main() -> int:
         print(f"Could not connect to {args.port}: {e}")
         return 1
 
-    # Give the LPC845 a moment to boot after opening the port.
+    pins = resolve_pins(s, args.tx_pin, args.rx_pin, "lpc-pwm-dma-cl")
+    if pins is None:
+        s.close()
+        return 3
+    args.tx_pin, args.rx_pin = pins
+    print(f"  Wiring: jumper P0_{args.tx_pin} -> P0_{args.rx_pin}")
 
     all_pass = True
 

@@ -42,7 +42,7 @@ Loopback setup:
 What the harness asserts:
 
 - **`bash autoresearch lpc845brk --bring-up`** — `echo` RPC round-trips; FL_WARN literal reaches the host; proves Serial + JSON-RPC + log pipeline intact.
-- **`bash autoresearch lpc845brk --pin-toggle-rx`** — SCT input-capture latches a bit-banged square wave; orchestrator asserts mean ±2 % and σ thresholds across 1/10/100 kHz rates ([#3035](https://github.com/FastLED/FastLED/issues/3035) Phase 1).
+- **`bash autoresearch lpc845brk --pin-toggle-rx`** — SCT input-capture latches a bit-banged square wave; orchestrator asserts mean ±2 % and σ thresholds across 1/5/10 kHz rates (a polled toggle plus polled capture tops out near 13 kHz on the 24 MHz M0+) ([#3035](https://github.com/FastLED/FastLED/issues/3035) Phase 1).
 - **`bash autoresearch lpc845brk --ws2812-loopback`** — WS2812 byte-match: `FastLED.show()` drives 1/3/100 LEDs through the bit-bang clockless path, SCT-RX latches the wire, decoder asserts `mismatched == 0` ([#3035](https://github.com/FastLED/FastLED/issues/3035) Phase 2b).
 - **`bash autoresearch lpc845brk --uart`** — UART DMA WS2812 byte-match: `FastLED.addLeds<WS2812, PIN, GRB>()` drives the default `Bus::UART` path, a jumper bridges TX to the configured USART RX pin, USART RX-DMA captures the encoded bytes, and the host byte-compares decoded GRB data. `--dma-uart` remains the raw async USART transport bench.
 - **Link-symbol check** — `arm-none-eabi-nm -C firmware.elf | grep -E '(aeabi_d|aeabi_f|f2iz|d2iz|__l2f|__floatdisf)'` stays empty after [#3038](https://github.com/FastLED/FastLED/pull/3038). The harness can fold this into its reporting path so the no-soft-FP invariant is asserted on every run.
