@@ -69,6 +69,17 @@ which boards were present and why none of them applied.
 
 `master` is protected by the `main merge queue` ruleset (squash, required `CI summary`). Land every PR with `gh pr merge <N> --squash` once `CI summary` is green; GitHub adds it to the queue, runs `ci-labels.yml` plus the native smoke jobs on the exact merge result, and merges on success. A failed queue run ejects the PR, so fix and enqueue again. `--admin` bypasses the queue: reserve it for repairing a broken queue or a human-approved emergency.
 
+## Don't Leave Dead Branches Behind
+
+A branch is done when its PR merges or closes. Clean it up in the same session.
+
+- **Remote:** the repository auto-deletes a PR's head branch when it merges (`delete_branch_on_merge`). If you close a PR without merging, run `git push origin --delete <branch>` yourself. GitHub keeps the commits on `refs/pull/<N>/head`, and the PR page has a "Restore branch" button.
+- **Local:** after the merge, run `git checkout master && git pull --ff-only`, then `git branch -D <branch>`. Run `git fetch --prune` too, so stale `origin/*` refs disappear.
+- **Worktrees:** run `git worktree remove <path>` on any clean worktree whose PR has landed.
+- **Scratch and checkpoint branches** (`wip/`, `checkpoint/`, `exp/`, `diag/`): don't push them unless someone else needs them. Delete them when the experiment ends.
+- **Before deleting, confirm the work landed.** Delete a branch only if its tip is in `origin/master` or is the head of a merged or closed PR. Never delete a branch with commits that exist nowhere else. Report it instead. This checkout is shared between sessions, so never delete a branch that has an open PR or that is checked out somewhere else.
+- **Sweep:** to find dead branches in bulk, compare `gh pr list --state all --json headRefName,headRefOid,state` against `git branch` and `git branch -r`.
+
 ## CodeRabbit Review Loop
 
 When CodeRabbit posts review comments on a PR, run `/address-reviews` before any `gh pr merge`. The skill fetches open comments, classifies each, applies fixes for valid findings, and replies to threads. The pre-merge hook blocks merge while unresolved CodeRabbit threads remain. Security-critical findings are routed to a human — never auto-fixed. Max 3 iterations per PR; if CodeRabbit keeps asking after three rounds, stop and flag a human reviewer.
