@@ -259,6 +259,12 @@ inline void swmAssignSctInput0(fl::u8 swm_byte) FL_NO_EXCEPT {
 // we saturate above that.
 inline fl::u32 ticksToNs(fl::u32 ticks) FL_NO_EXCEPT {
     constexpr fl::u32 kFcpuMHz = (F_CPU + 500000u) / 1000000u;  // 30 on LPC845
+    // pollOnce() converts every edge inside the capture loop, and a 64-bit
+    // software divide costs the M0+ tens of microseconds -- enough to stall a
+    // 10 kHz pin toggle. Up to ~179 ms at 24 MHz the 32-bit form is exact.
+    if (ticks <= (0xFFFFFFFFu - kFcpuMHz / 2) / 1000u) {
+        return (ticks * 1000u + kFcpuMHz / 2) / kFcpuMHz;
+    }
     fl::u64 ns64 = (static_cast<fl::u64>(ticks) * 1000u + (kFcpuMHz / 2)) / kFcpuMHz;
     if (ns64 > 0x7FFFFFFFull) ns64 = 0x7FFFFFFFull;
     return static_cast<fl::u32>(ns64);
@@ -547,37 +553,37 @@ fl::size LpcSctRxChannel::pollOnce() FL_NO_EXCEPT {
     // of the EVFLAG bit, so the read/W1C order matters only for the
     // poll-once semantic (one capture per poll-cycle per event).
 
+    // Both edges can land between two polls. They must then be recorded in
+    // capture order, not rise-then-fall: taking the rise first when the fall
+    // came first makes `tick - mPrevTick` wrap, and the edge saturates to
+    // ~2.1 s.
     fl::size pushed = 0;
-    const fl::u32 evflag = sct(kOffEVFLAG);
-
-    if (evflag & 0x1u) {
-        const fl::u32 tick = sct_cap(0);
-        sct(kOffEVFLAG) = 0x1u;  // W1C
-        if (mPrevSeen) {
-            const fl::u32 delta = tick - mPrevTick;   // u32 wrap is fine — modulo arithmetic over 32-bit counter
-            if (mEdges.size() < mCapacity) {
-                mEdges.push_back(EdgeTime(mLastRising, ticksToNs(delta)));
-                ++pushed;
-            }
-        }
-        mPrevTick = tick;
-        mPrevSeen = true;
-        mLastRising = true;  // a rising edge just fired → line was LOW before, HIGH now
+    const fl::u32 evflag = sct(kOffEVFLAG) & 0x3u;
+    if (evflag == 0u) {
+        return 0;
     }
+    const fl::u32 rise_tick = sct_cap(0);
+    const fl::u32 fall_tick = sct_cap(1);
+    sct(kOffEVFLAG) = evflag;  // W1C, after reading CAP[n]
 
-    if (evflag & 0x2u) {
-        const fl::u32 tick = sct_cap(1);
-        sct(kOffEVFLAG) = 0x2u;
-        if (mPrevSeen) {
-            const fl::u32 delta = tick - mPrevTick;
-            if (mEdges.size() < mCapacity) {
-                mEdges.push_back(EdgeTime(mLastRising, ticksToNs(delta)));
-                ++pushed;
-            }
+    auto record = [&](fl::u32 tick, bool rising) {
+        if (mPrevSeen && mEdges.size() < mCapacity) {
+            // u32 wrap is fine: modulo arithmetic over the 32-bit counter.
+            mEdges.push_back(EdgeTime(mLastRising, ticksToNs(tick - mPrevTick)));
+            ++pushed;
         }
         mPrevTick = tick;
         mPrevSeen = true;
-        mLastRising = false;
+        mLastRising = rising;  // level of the phase that starts at this edge
+    };
+
+    if (evflag == 0x3u) {
+        // Earlier capture first (modulo the free-running counter).
+        const bool rise_first = (fall_tick - rise_tick) < 0x80000000u;
+        record(rise_first ? rise_tick : fall_tick, rise_first);
+        record(rise_first ? fall_tick : rise_tick, !rise_first);
+    } else {
+        record(evflag == 0x1u ? rise_tick : fall_tick, evflag == 0x1u);
     }
 
     return pushed;

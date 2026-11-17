@@ -790,11 +790,16 @@ ArrayType classify_array(const json_array& arr) FL_NO_EXCEPT {
         return ALL_INT16;
     }
 
+#if FL_PLATFORM_HAS_LARGE_MEMORY
     // Large integers (>32767 or <-32768) that don't fit in int16 but can be represented as float
     // Convert to float if within float's integer precision range (+/-2^24)
     if (min_val >= -16777216 && max_val <= 16777216) {
         return ALL_FLOATS;
     }
+#endif
+    // Low-memory builds keep them as i64: their RPC layer has no float -> int
+    // conversion, so packing [13, 10, 100000, 100] as vector<float> rejected
+    // every integer argument (LPC845 pinToggleRx at 100 kHz).
 
     return GENERIC_ARRAY;
 }
