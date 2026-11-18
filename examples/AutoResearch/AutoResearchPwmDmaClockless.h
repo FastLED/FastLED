@@ -20,14 +20,16 @@
 //   `pwmDmaClCaptureSelf(led_count, color_rgb, data_pin, rx_pin, hold_us,
 //                        step_rgb)`
 //     LED i is `(color_rgb + i * step_rgb) & 0xFFFFFF`, so a nonzero step
-//     gives every chunk different bytes. Drive one frame and capture every bit's high time on `rx_pin` with
+//     gives every chunk different bytes. Drive one frame and capture every
+//     bit's high time on `rx_pin` with
 //     `LpcCtimerPulseCapture` (CTIMER0 + DMA). The SCT RX capture can't be
 //     used: the transmitter owns the chip's only SCT. `hold_us` > 0
 //     busy-waits that long after show() without calling poll(), as
 //     FastLED.show() does between frames, so chunk hand-over must come from
-//     the DMA interrupt. A rise more than 2 us after the previous one (the
-//     line idling mid-frame) stops the capture, so such a frame decodes
-//     short. Returns
+//     the DMA interrupt. Bits use WS2812 T0H/T1H with a 1450 ns low phase
+//     (see captureTiming()). A rise more than 3 us after the previous one
+//     (the line idling mid-frame) stops the capture, so such a frame
+//     decodes short. Returns
 //     "1,<n>,<byte>...,bits=<b>,t0h=<min>-<max>,t1h=<min>-<max>,gap_guard=<ns>"
 //     (ns), for a host-side byte compare.
 //
@@ -85,12 +87,26 @@ inline fl::ChipsetTimingConfig ws2812b_timing() FL_NO_EXCEPT {
                                    /*reset_us=*/50, "WS2812B");
 }
 
+// WS2812B high times with a 1450 ns low phase (period 2250 ns), for the
+// CTIMER capture. The capture copies each bit's CR0 by DMA after the bit's
+// fall and must finish before the next bit's fall. At 1250 ns that window
+// is T3 + T0H = 800 ns (19 ticks at 24 MHz). On the bit whose EV2 makes
+// the TX reload its next descriptor, the TX transfer and descriptor fetch
+// on DMA0 come first and the capture copy misses the window (FastLED
+// #5276). The TX itself is unaffected: on the same bits its writes land
+// in time. A longer low phase gives the copy room while the TX runs the
+// identical path (masks, chunk refills, slot reuse, halt step).
+inline fl::ChipsetTimingConfig captureTiming() FL_NO_EXCEPT {
+    return fl::ChipsetTimingConfig(/*T1=*/350, /*T2=*/450, /*T3=*/1450,
+                                   /*reset_us=*/50, "WS2812B-long-low");
+}
+
 // Build a `ChannelData` of N LEDs; LED i is `(rgb + i * step) & 0xFFFFFF`
 // (step 0: one solid color). Colors come from the host as 24-bit RGB and
 // are stored GRB (WS2812 wire order).
 inline fl::ChannelDataPtr makeChannelData(
-        int pin, int num_leds, fl::u32 rgb, fl::u32 step) FL_NO_EXCEPT {
-    fl::ChipsetTimingConfig t = ws2812b_timing();
+        int pin, int num_leds, fl::u32 rgb, fl::u32 step,
+        const fl::ChipsetTimingConfig& t = ws2812b_timing()) FL_NO_EXCEPT {
     fl::vector_psram<fl::u8> encoded(static_cast<fl::size>(num_leds * 3));
     for (int i = 0; i < num_leds; ++i) {
         const fl::u32 c = (rgb + static_cast<fl::u32>(i) * step) & 0xFFFFFFu;
@@ -216,9 +232,9 @@ inline fl::u32 ticksToNs(fl::u32 ticks) FL_NO_EXCEPT {
 }
 
 // A rise this long after the previous one ends the capture, so the frame
-// comes up short. WS2812 bits rise every 1250 ns; some WS2812-class LEDs
+// comes up short. Capture bits rise every 2250 ns; some WS2812-class LEDs
 // latch after only ~6 us low, so any stretch mid-frame is a failure.
-constexpr fl::u32 kMaxRiseGapNs = 2000;
+constexpr fl::u32 kMaxRiseGapNs = 3000;
 
 // Drive one frame AND measure it on `rx_pin`. Each bit's high time is
 // captured by CTIMER0 + DMA; a high time above the midpoint of T0H and T1H
@@ -229,7 +245,7 @@ constexpr fl::u32 kMaxRiseGapNs = 2000;
 inline fl::string captureFrame(int led_count, fl::u32 rgb, fl::u32 step,
                                int data_pin, int rx_pin, int hold_us,
                                fl::u32 max_gap_ns) FL_NO_EXCEPT {
-    const fl::ChipsetTimingConfig t = ws2812b_timing();
+    const fl::ChipsetTimingConfig t = captureTiming();
     const fl::u32 t0h = fl::lpc_sct_ticks(t.t1_ns);
     const fl::u32 t1h = fl::lpc_sct_ticks(t.t1_ns + t.t2_ns);
     const fl::u32 period = fl::lpc_sct_ticks(t.t1_ns + t.t2_ns + t.t3_ns);
@@ -245,7 +261,7 @@ inline fl::string captureFrame(int led_count, fl::u32 rgb, fl::u32 step,
     }
 
     auto& engine = fl::BusTraits<fl::Bus::BIT_BANG>::instance();
-    auto ch = makeChannelData(data_pin, led_count, rgb, step);
+    auto ch = makeChannelData(data_pin, led_count, rgb, step, t);
     if (!engine.canHandle(ch)) {
         cap.end();
         return fl::string("0,cannot_handle");

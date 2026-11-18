@@ -192,6 +192,17 @@ def main() -> int:
 
     all_pass = True
 
+    # #5276 regressions: frames ending in bits '1,0' (B = 0x02, 0xFE).
+    for b_byte in (0x02, 0xFE):
+        all_pass &= run_capture_self(
+            s,
+            led_count=1,
+            rgb=b_byte,
+            data_pin=args.tx_pin,
+            rx_pin=args.rx_pin,
+            hold_us=0,
+        )
+
     # Case 1: single red LED. Simplest possible byte-match.
     all_pass &= run_capture_self(
         s,

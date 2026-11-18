@@ -182,15 +182,22 @@ inline void lpcSctTxWriteHaltSlot(volatile fl::lpc::DmaChannelDescriptor& slot) 
     slot.reserved = kTxXferValid | kTxXferWidth32 | kTxXferCount(1u);
 }
 
+// Only a chunk with a successor needs its INTA (to refill the slot after
+// it); the frame's last chunk raises none, which also keeps the DMA ISR off
+// the bus while the frame's last bits go out.
+constexpr u32 lpcSctTxChunkIntA(bool last) {
+    return last ? 0u : kTxXferSetIntA;
+}
+
 // Make `slot` play `nbits` masks from `masks`, then go on to `next`.
 inline void lpcSctTxWriteChunkSlot(volatile fl::lpc::DmaChannelDescriptor& slot,
-                                   const u32* masks, u32 nbits,
+                                   const u32* masks, u32 nbits, bool last,
                                    volatile fl::lpc::DmaChannelDescriptor& next) FL_NO_EXCEPT {
     slot.link = lpcSctTxAddr(&next);
     slot.dst_end = lpcSctTxAddr(&SCT0->OUT[kTxSctOut].CLR);
     slot.src_end = lpcSctTxAddr(&masks[nbits - 1u]);
-    slot.reserved = kTxXferValid | kTxXferReload | kTxXferSetIntA | kTxXferWidth32 |
-                    kTxXferSrcInc1 | kTxXferCount(nbits);
+    slot.reserved = kTxXferValid | kTxXferReload | lpcSctTxChunkIntA(last) |
+                    kTxXferWidth32 | kTxXferSrcInc1 | kTxXferCount(nbits);
 }
 
 // UM11029 16.6.15: disable, wait for the channel's pipeline to drain, then
@@ -251,7 +258,8 @@ void LpcSctDmaTransmitter::transmit(const u8* bytes, u32 len, bool is_rgbw) FL_N
     const u32 n1 = encodeChunk(1);
     lpcSctTxWriteHaltSlot(slots[0]);
     if (n1 > 0u) {
-        lpcSctTxWriteChunkSlot(slots[1], mChunkBuf[1], n1, slots[0]);
+        lpcSctTxWriteChunkSlot(slots[1], mChunkBuf[1], n1,
+                               mBitsEncoded == mTotalBits, slots[0]);
     }
     volatile fl::lpc::DmaChannelDescriptor& d = lpcSctTxChannelDesc();
     d.src_end = lpcSctTxAddr(&mChunkBuf[0][n0 - 1u]);
@@ -268,7 +276,8 @@ void LpcSctDmaTransmitter::transmit(const u8* bytes, u32 len, bool is_rgbw) FL_N
     SCT0->OUT[kTxSctOut].CLR = mChunkBuf[0][0];
     DMA0->COMMON[0].INTA = (1u << kTxDmaCh);
     DMA0->COMMON[0].ERRINT = (1u << kTxDmaCh);   // W1C a stale error
-    DMA0->CHANNEL[kTxDmaCh].XFERCFG = kTxXferValid | kTxXferReload | kTxXferSetIntA |
+    DMA0->CHANNEL[kTxDmaCh].XFERCFG = kTxXferValid | kTxXferReload |
+                                      lpcSctTxChunkIntA(n1 == 0u) |
                                       kTxXferWidth32 | kTxXferSrcInc1 |
                                       kTxXferCount(n0 - 1u);
     DMA0->COMMON[0].SETVALID = (1u << kTxDmaCh);
@@ -314,7 +323,8 @@ void LpcSctDmaTransmitter::onChunkEnd() FL_NO_EXCEPT {
     __disable_irq();
     if ((DMA0->COMMON[0].INTA & (1u << kTxDmaCh)) == 0u &&
         lpcSctTxTransfersLeft() >= kTxRefillMarginBits) {
-        lpcSctTxWriteChunkSlot(slots[freed], mChunkBuf[freed], n, slots[freed ^ 1u]);
+        lpcSctTxWriteChunkSlot(slots[freed], mChunkBuf[freed], n,
+                               mBitsEncoded == mTotalBits, slots[freed ^ 1u]);
         mBitsQueued += n;
     }
     __set_PRIMASK(primask);
