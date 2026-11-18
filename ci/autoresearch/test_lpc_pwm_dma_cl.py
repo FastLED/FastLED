@@ -2,8 +2,9 @@
 
 Sibling of `test_lpc_ws2812_loopback.py` for the channels-API path.
 Drives `ChannelEngineLpcSctDma` on the LPC845-BRK (via
-`BusTraits<Bus::BIT_BANG>::instance()`) and captures the wire through
-`LpcSctRxChannel` for a byte-match self-loopback.
+`BusTraits<Bus::BIT_BANG>::instance()`) and measures every bit's high time
+on the jumpered RX pin with CTIMER0 + DMA (the transmitter owns the SCT,
+so the SCT capture can't be used) for a byte-match self-loopback.
 
 Three RPC handlers are called in sequence:
 
@@ -11,10 +12,14 @@ Three RPC handlers are called in sequence:
         Drive one frame; report timing.
     pwmDmaClFrameBurst(led_count, rgb, n_frames, data_pin)
         Drive N frames back-to-back; report fps.
-    pwmDmaClCaptureSelf(led_count, rgb, data_pin, rx_pin, capture_ms)
-        Drive one frame AND capture via LpcSctRxChannel. Returns the
-        decoded byte sequence. Host-side byte-compares against the
-        driven rgb (mapped to WS2812 GRB order per LED).
+    pwmDmaClCaptureSelf(led_count, rgb, data_pin, rx_pin, hold_us)
+        Drive one frame AND capture each bit's high time. `hold_us` > 0
+        skips poll() for that long after show(), like FastLED.show(). A
+        rise more than `gap_guard` ns after the previous one (the line
+        idling mid-frame) stops the device-side capture, so such a frame
+        decodes short. Returns the decoded bytes plus the measured T0H/T1H
+        ranges. Host-side byte-compares against the driven rgb (WS2812 GRB
+        order per LED).
 
 The three RPCs are bound automatically when the LPC845 firmware is
 compiled with `-DFASTLED_LPC_PWM_DMA=1`; the `bash autoresearch
@@ -85,19 +90,19 @@ def run_capture_self(
     rgb: int,
     data_pin: int,
     rx_pin: int,
-    capture_ms: int,
+    hold_us: int,
 ) -> bool:
     """Drive one frame + capture; byte-compare against expected."""
     print()
     print(
         f"  RPC pwmDmaClCaptureSelf(led_count={led_count}, "
         f"rgb=0x{rgb:06X}, data_pin={data_pin}, "
-        f"rx_pin={rx_pin}, capture_ms={capture_ms})"
+        f"rx_pin={rx_pin}, hold_us={hold_us})"
     )
     reply = send_rpc(
         s,
         "pwmDmaClCaptureSelf",
-        args=[led_count, rgb, data_pin, rx_pin, capture_ms],
+        args=[led_count, rgb, data_pin, rx_pin, hold_us],
     )
     if reply is None or "result" not in reply:
         print("    FAIL — no reply or error result")
@@ -124,14 +129,21 @@ def run_capture_self(
         print(f"    FAIL — CSV parse error: {e} ({csv!r})")
         return False
 
+    timing = " ".join(parts[2 + n_decoded :])
+    if "gap_guard=" not in timing:
+        print(f"    FAIL — reply lacks the mid-frame gap guard: {csv!r}")
+        return False
     expected = expected_grb_bytes(led_count, rgb)
     if decoded_bytes != expected:
-        print(f"    FAIL — byte mismatch")
+        print("    FAIL — byte mismatch")
         print(f"      expected: {expected}")
         print(f"      decoded:  {decoded_bytes}")
+        print(f"      measured: {timing}")
+        if len(decoded_bytes) < len(expected):
+            print("      (short: the line idled past gap_guard mid-frame)")
         return False
 
-    print(f"    PASS — {n_decoded} bytes match expected pattern")
+    print(f"    PASS — {n_decoded} bytes match expected pattern ({timing} ns)")
     return True
 
 
@@ -173,7 +185,7 @@ def main() -> int:
         rgb=0xFF0000,
         data_pin=args.tx_pin,
         rx_pin=args.rx_pin,
-        capture_ms=20,
+        hold_us=0,
     )
 
     # Case 2: three LEDs, R/G/B chain. Exercises byte ordering + LED offset.
@@ -183,7 +195,7 @@ def main() -> int:
         rgb=0x00FF00,
         data_pin=args.tx_pin,
         rx_pin=args.rx_pin,
-        capture_ms=30,
+        hold_us=0,
     )
 
     # Case 3: alternating bit pattern within bytes. Exercises T0/T1 fidelity.
@@ -193,10 +205,43 @@ def main() -> int:
         rgb=0x55AA33,
         data_pin=args.tx_pin,
         rx_pin=args.rx_pin,
-        capture_ms=20,
+        hold_us=0,
     )
 
-    # Case 4: multiple frames, timing regression. Just checks the burst
+    # Case 4: ten LEDs = 240 bits, three transmitter chunks (96 bits each),
+    # so the chunk hand-over is on the wire.
+    all_pass &= run_capture_self(
+        s,
+        led_count=10,
+        rgb=0xA5C30F,
+        data_pin=args.tx_pin,
+        rx_pin=args.rx_pin,
+        hold_us=0,
+    )
+
+    # Case 5: same frame, but nothing calls poll() for 2 ms after show(),
+    # as with FastLED.show(): chunk hand-over must come from the DMA ISR.
+    all_pass &= run_capture_self(
+        s,
+        led_count=10,
+        rgb=0xA5C30F,
+        data_pin=args.tx_pin,
+        rx_pin=args.rx_pin,
+        hold_us=2000,
+    )
+
+    # Case 6: 20 LEDs = 480 bits = 5 chunks, so both descriptor slots are
+    # reused (chunks 3 and 4), with no poll() for 2 ms after show().
+    all_pass &= run_capture_self(
+        s,
+        led_count=20,
+        rgb=0x3CA5F0,
+        data_pin=args.tx_pin,
+        rx_pin=args.rx_pin,
+        hold_us=2000,
+    )
+
+    # Case 7: multiple frames, timing regression. Just checks the burst
     # RPC completes cleanly (no wire byte-compare here).
     print()
     print(

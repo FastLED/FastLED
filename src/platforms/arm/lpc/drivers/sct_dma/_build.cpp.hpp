@@ -12,6 +12,7 @@
 // because the engine instantiates a `LpcSctDmaTransmitter` member.
 #include "platforms/arm/lpc/drivers/sct_dma/lpc_sct_dma_runtime.cpp.hpp"
 #include "platforms/arm/lpc/drivers/sct_dma/channel_engine_lpc_sct_dma.cpp.hpp"
+#include "platforms/arm/lpc/drivers/sct_dma/lpc_ctimer_pulse_capture.cpp.hpp"
 
 // BusTraits<Bus::BIT_BANG> specialization + BusSupports for ClocklessChipset.
 #include "platforms/arm/lpc/drivers/sct_dma/bus_traits.h"

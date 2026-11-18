@@ -42,8 +42,10 @@ bool ChannelEngineLpcSctDma::canHandle(
     if (!data->isClockless()) {
         return false;
     }
-    const u32 period = data->getTiming().total_period_ns();
-    return period >= kLpcSctMinPeriodNs && period <= kLpcSctMaxPeriodNs;
+    const ChipsetTimingConfig& t = data->getTiming();
+    const u32 period = t.total_period_ns();
+    return period >= kLpcSctMinPeriodNs && period <= kLpcSctMaxPeriodNs &&
+           LpcSctDmaTransmitter::timingFits(t.t1_ns, t.t2_ns, t.t3_ns);
 }
 
 void ChannelEngineLpcSctDma::enqueue(ChannelDataPtr channelData) FL_NO_EXCEPT {
@@ -59,6 +61,11 @@ void ChannelEngineLpcSctDma::show() FL_NO_EXCEPT {
         return;
     }
 
+    // A frame still on the wire reads its bytes from mTransmittingChannels,
+    // so stop it before that ChannelData can be released.
+    if (mTransmissionActive) {
+        mTransmitter.abort();
+    }
     // Hand the queue to the transmitting slot so poll() can clear it
     // when the DMA completes.
     mTransmittingChannels = mEnqueuedChannels;
@@ -76,10 +83,9 @@ void ChannelEngineLpcSctDma::show() FL_NO_EXCEPT {
     const ChipsetTimingConfig& t = ch->getTiming();
     const int pin = ch->getPin();
     if (pin < 0 || pin > 31) {
-        // LPC845 GPIO port 0 holds PIO0_0..PIO0_31. Out-of-range pins
-        // would index a bit outside the port mask — refuse silently
-        // rather than corrupting other channels. (The legacy template
-        // path enforces this via FastPin<DATA_PIN> at compile time.)
+        // The pin becomes an SWM PINASSIGN byte for SCT_OUT0; only
+        // PIO0_0..PIO0_31 are valid there, and any other value would
+        // misroute or unroute the output.
         return;
     }
     const fl::vector_psram<u8>& bytes = ch->getData();
@@ -101,10 +107,9 @@ IChannelDriver::DriverState ChannelEngineLpcSctDma::poll() FL_NO_EXCEPT {
     if (!mTransmissionActive) {
         return DriverState::READY;
     }
-    // Drive chunk progression via the runtime transmitter. On LPC845
-    // this probes `DMA0->COMMON[0].ACTIVE` for the three SCT-tied
-    // channels — when they drop, if bytes remain the next chunk gets
-    // encoded and kicked in this same call. #3459 acceptance
+    // On LPC845 the DMA interrupt refills chunks; this reports the frame
+    // done once the SCT has halted after the last bit (and refills a
+    // chunk itself in builds without the DMA ISR hub). #3459 acceptance
     // criterion 3: no busy-wait in show(); the state machine
     // transitions READY→BUSY→DRAINING→READY are all driven from
     // here. On host the transmit was synchronous so pollAndAdvance()

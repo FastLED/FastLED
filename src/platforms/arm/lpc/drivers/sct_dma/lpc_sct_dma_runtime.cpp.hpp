@@ -9,298 +9,349 @@
 
 #include "platforms/arm/lpc/drivers/sct_dma/lpc_sct_dma_runtime.h"
 #include "platforms/arm/lpc/lpc_dma_descriptor_table.h"
+#include "platforms/arm/lpc/lpc_dma_isr.h"   // LPC845-gated inside
 #include "fl/stl/cstring.h"
 #include "fl/stl/noexcept.h"
-
-// ------------------------------------------------------------------
-// SCT match-register slot defaults. The legacy template driver
-// (`clockless_arm_lpc_pwm_dma.h`) references these as project-supplied
-// `-D` flags without providing fallbacks. The runtime form provides
-// defaults that match the documented layout in the header comment block
-// (MATCH0 = RISE, MATCH1 = T0_FALL, MATCH2 = T1_FALL, MATCH3 = END) so
-// downstream callers don't have to define them.
-// ------------------------------------------------------------------
-#ifndef FASTLED_LPC_PWM_DMA_BASECH
-#define FASTLED_LPC_PWM_DMA_BASECH 0u
-#endif
-#ifndef FASTLED_LPC_PWM_DMA_SCT_MATCH_RISE
-#define FASTLED_LPC_PWM_DMA_SCT_MATCH_RISE 0u
-#endif
-#ifndef FASTLED_LPC_PWM_DMA_SCT_MATCH_T0FALL
-#define FASTLED_LPC_PWM_DMA_SCT_MATCH_T0FALL 1u
-#endif
-#ifndef FASTLED_LPC_PWM_DMA_SCT_MATCH_T1FALL
-#define FASTLED_LPC_PWM_DMA_SCT_MATCH_T1FALL 2u
-#endif
-#ifndef FASTLED_LPC_PWM_DMA_SCT_MATCH_END
-#define FASTLED_LPC_PWM_DMA_SCT_MATCH_END 3u
-#endif
+#include "fl/stl/static_assert.h"
 
 namespace fl {
 
 LpcSctDmaTransmitter::LpcSctDmaTransmitter() FL_NO_EXCEPT {
-    // Zero-init the buffer at construction so the first transmit() sees
-    // clean state. (Not strictly needed — encode pass overwrites every
-    // word — but cheap and defensive.)
-    fl::memset(mChannelBuf, 0, sizeof(mChannelBuf));
+    fl::memset(mChunkBuf, 0, sizeof(mChunkBuf));
+}
+
+u32 LpcSctDmaTransmitter::encodeChunk(u32 buf) FL_NO_EXCEPT {
+    const u32 left = mTotalBits - mBitsEncoded;
+    const u32 n = left > FASTLED_LPC_PWM_DMA_CHUNK_BITS
+                      ? FASTLED_LPC_PWM_DMA_CHUNK_BITS
+                      : left;
+    lpcSctDmaEncodeClrMasks(mCurrentBytes, mBitsEncoded, n, mChunkBuf[buf]);
+    mBitsEncoded += n;
+    return n;
 }
 
 #if defined(FL_IS_ARM_LPC_845)
+
+// The unity build puts this file in one TU with the SCT RX capture and the
+// CTIMER capture, so these names carry a kTx / lpcSctTx prefix.
+
+constexpr u32 kTxDmaCh = FASTLED_LPC_PWM_DMA_BASECH;
+FL_STATIC_ASSERT(kTxDmaCh < 25u, "FASTLED_LPC_PWM_DMA_BASECH must be a DMA0 channel (0..24)");
+
+// SCT events (UM11029 ch. 21). EVn uses MATCHn; all live in state 0.
+constexpr u32 kTxEvRise = 0u;     // MATCH0: output SET
+constexpr u32 kTxEvT0h  = 1u;     // MATCH1: '0' bit falls
+constexpr u32 kTxEvT1h  = 2u;     // MATCH2: every bit has fallen; DMA trigger
+constexpr u32 kTxEvEnd  = 3u;     // MATCH3: counter limit (bit period)
+constexpr u32 kTxEvCtrlMatchOnly = (1u << 12);   // COMBMODE = MATCH
+constexpr u32 kTxSctOut = 0u;                    // SCT output 0 -> data pin
+
+// INPUTMUX DMA_ITRIG_INMUX source SCT_DMA0 (UM11029 Table 288).
+constexpr u32 kTxItrigSctDma0 = 0x2u;
+
+// DMA channel CFG: hardware trigger on the rising edge of SCT_DMA0, one
+// transfer per trigger (TRIGBURST, BURSTPOWER = 0). No PERIPHREQEN: the
+// channel's fixed peripheral request is unrelated, and with it set the
+// channel waits on that peripheral forever.
+constexpr u32 kTxDmaCfg = (1u << 1)     // HWTRIGEN
+                        | (1u << 4)     // TRIGPOL = rising
+                        | (1u << 6);    // TRIGBURST
+
+// XFERCFG fields (UM11029 Table 321).
+constexpr u32 kTxXferValid  = (1u << 0);
+constexpr u32 kTxXferReload = (1u << 1);
+constexpr u32 kTxXferSetIntA = (1u << 4);
+constexpr u32 kTxXferWidth32 = (2u << 8);
+constexpr u32 kTxXferSrcInc1 = (1u << 12);
+constexpr u32 kTxXferCount(u32 n) { return ((n - 1u) & 0x3FFu) << 16; }
+
+// Written into SCT0->CTRL by the last transfer of each chunk: HALT_L, and
+// HALT_H as at reset. PRE = 0 and BIDIR = 0 match init().
+constexpr u32 kTxSctCtrlHalt = SCT_CTRL_HALT_L_MASK | SCT_CTRL_HALT_H_MASK;
+
+// Linked descriptors need 16-byte alignment and a fixed address, so they
+// are function-local statics (one SCT, one transmitter; unused builds drop
+// them with the function).
+inline volatile fl::u32& lpcSctTxHaltWord() FL_NO_EXCEPT {
+    static volatile fl::u32 word = kTxSctCtrlHalt;
+    return word;
+}
+// The two ping-pong slots: chunk k >= 1 runs from slot k & 1, and each
+// slot links to the other.
+inline volatile fl::lpc::DmaChannelDescriptor* lpcSctTxSlots() FL_NO_EXCEPT {
+    static volatile fl::lpc::DmaChannelDescriptor slots[2];
+    return slots;
+}
+
+inline fl::u32 lpcSctTxAddr(const volatile void* p) FL_NO_EXCEPT {
+    return reinterpret_cast<fl::u32>(p);  // ok reinterpret cast - DMA descriptor addresses
+}
+
+inline volatile fl::lpc::DmaChannelDescriptor& lpcSctTxChannelDesc() FL_NO_EXCEPT {
+    return reinterpret_cast<volatile fl::lpc::DmaChannelDescriptor*>(  // ok reinterpret cast - DMA descriptor table base
+        DMA0->SRAMBASE)[kTxDmaCh];
+}
 
 void LpcSctDmaTransmitter::init() FL_NO_EXCEPT {
     if (mInitialized) {
         return;
     }
+    SYSCON->SYSAHBCLKCTRL0 |= SYSCON_SYSAHBCLKCTRL0_SCT_MASK |
+                              SYSCON_SYSAHBCLKCTRL0_DMA_MASK |
+                              SYSCON_SYSAHBCLKCTRL0_SWM_MASK;
+    // Reset only the SCT, which this transmitter owns. DMA0 and SWM are
+    // shared with the console, the UART-DMA driver and every movable pin;
+    // resetting them breaks those (#4676). The SCT reset also drops any DMA
+    // request a previous SCT user left pending.
+    SYSCON->PRESETCTRL0 &= ~SYSCON_PRESETCTRL0_SCT_RST_N_MASK;
+    SYSCON->PRESETCTRL0 |= SYSCON_PRESETCTRL0_SCT_RST_N_MASK;
 
-    // ----- Power up SCT + DMA in SYSAHBCLKCTRL0 -----
-    // UM11029 §4.6.13 Table 41. Verified against NXP mcux-sdk:
-    //   SYSCON_SYSAHBCLKCTRL0_SCT_MASK = 0x100U    (SHIFT = 8U)
-    //   SYSCON_SYSAHBCLKCTRL0_DMA_MASK = 0x20000000U (SHIFT = 29U)
-    SYSCON->SYSAHBCLKCTRL0 |=
-        SYSCON_SYSAHBCLKCTRL0_SCT_MASK | SYSCON_SYSAHBCLKCTRL0_DMA_MASK;
-
-    // ----- SCT skeleton -----
-    // CONFIG: UNIFY (bit 0) — one 32-bit counter; CLKMODE = SYS clock.
-    SCT0->CONFIG = 0x00000001UL;        // UNIFY
-    SCT0->CTRL   = 0x00000004UL;        // HALT_L = 1 (paused while configuring)
-
-    // Event bindings (MATCH0..MATCH3 → EV0..EV3, all active in STATE 0).
-    // EVx_CTRL bits 0..3 = MATCHSEL, bit 12 = COMBMODE (MATCH only).
-    // TODO(2842): verify EVx_CTRL bit layout vs UM11029 §16.6.21.
-    for (u32 ev = 0; ev < 4; ++ev) {
-        SCT0->EV[ev].STATE = 0x00000001UL;          // active in STATE 0
-        SCT0->EV[ev].CTRL  = (ev & 0xF) |
-                              (0x1UL << 12);        // COMBMODE = MATCH
-    }
-    SCT0->LIMIT = (1UL << 3);           // EV3 (T_END) reloads counter
-
-    // SCT events 0/1/2 → DMA0 trigger lines.
-    // TODO(2842): verify SCT->DMAREQ0/1 vs UM11029 §16.6.18.
-    SCT0->DMAREQ0 = (1UL << 0) | (1UL << 1) | (1UL << 2);
-    SCT0->EVEN    = 0xFUL;              // enable EV0..EV3
-
-    // ----- DMA controller -----
-    DMA0->CTRL = 1UL;                   // enable controller
-    // Own the descriptor table (shared 25-channel block from
-    // lpc_dma_descriptor_table.h). SRAMBASE resets to 0 and nothing in
-    // the ACLPC startup programs it — arming a channel without this
-    // makes the engine fetch descriptors from the flash vector table
-    // and scribble RAM through garbage pointers (FastLED #3580).
+    DMA0->CTRL = 1u;
     fl::lpc::ensureDmaSramBase();
 
-    const u32 base = FASTLED_LPC_PWM_DMA_BASECH;
-    for (u32 i = 0; i < 3; ++i) {
-        // CFG: PERIPHREQEN + HWTRIGEN, edge-triggered, normal polarity.
-        // (@phatpaul caught the missing PERIPHREQEN in FastLED #3349.)
-        DMA0->CHANNEL[base + i].CFG =
-            (1UL << 0) |                // PERIPHREQEN
-            (1UL << 1) |                // HWTRIGEN
-            (0UL << 4) |                // TRIGPOL = 0
-            (0UL << 5);                 // TRIGTYPE = 0 (edge)
-        // TODO(2842): set up DMA_ITRIG_INMUX[i] = SCT_DMA0_inmux_source.
-    }
-    DMA0->COMMON[0].ENABLESET |= (7UL << base);     // 3 contiguous channels
+    // Each chunk's descriptor raises INTA when it runs out. With the DMA ISR
+    // hub (on by default with the LPC845 UART-DMA driver) the freed buffer
+    // is refilled from the interrupt whether or not anyone calls poll().
+    // The transmitter lives inside the engine singleton, so `this` outlives
+    // the registration.
+    fl::lpc::registerDmaChannelIsr(kTxDmaCh, &LpcSctDmaTransmitter::onDmaIsr, this);
 
     mInitialized = true;
+}
+
+// Every frame re-applies the SCT and DMA channel setup: other code (the SCT
+// RX capture, another DMA user) may have used them since the last frame.
+inline void lpcSctTxApplySetup() FL_NO_EXCEPT {
+    SCT0->CONFIG = SCT_CONFIG_UNIFY_MASK;       // one 32-bit counter, bus clock
+    SCT0->CTRL = kTxSctCtrlHalt | SCT_CTRL_CLRCTR_L_MASK;
+    for (u32 ev = 0; ev < 4u; ++ev) {
+        SCT0->EV[ev].STATE = 1u;                  // active in state 0
+        SCT0->EV[ev].CTRL = ev | kTxEvCtrlMatchOnly;  // MATCHSEL = ev
+    }
+    SCT0->LIMIT = (1u << kTxEvEnd);
+    SCT0->OUT[kTxSctOut].SET = (1u << kTxEvRise);
+    SCT0->OUT[kTxSctOut].CLR = (1u << kTxEvT1h);
+// Arduino's OUTPUT macro would rewrite the SCT register name.
+#pragma push_macro("OUTPUT")
+#undef OUTPUT
+    SCT0->OUTPUT &= ~(1u << kTxSctOut);              // idle low
+#pragma pop_macro("OUTPUT")
+    SCT0->EVEN = 0u;                              // no interrupts
+    SCT0->DMAREQ0 = (1u << kTxEvT1h);
+    SCT0->DMAREQ1 = 0u;
+
+    DMA0->CTRL = 1u;
+    DMA0->COMMON[0].ENABLECLR = (1u << kTxDmaCh);
+    INPUTMUX->DMA_ITRIG_INMUX[kTxDmaCh] = kTxItrigSctDma0;
+    DMA0->CHANNEL[kTxDmaCh].CFG = kTxDmaCfg;
 }
 
 void LpcSctDmaTransmitter::configureForChannel(
         u8 pin, u32 t1_ns, u32 t2_ns, u32 t3_ns) FL_NO_EXCEPT {
     init();
-
-    // GPIO port-0 mask. Per the legacy driver, the SCT is not routed to
-    // the data pin via the SCTOUT mux — the DMA writes the configured
-    // bitmask to LPC_GPIO->SET[0] / CLR[0] at SCT match time, so any
-    // PIO0_n pin works.
-    mPinMask = (1UL << pin);
-
-    // Compute SCT tick counts at the active F_CPU.
-    mT0Rise = 0;
-    mT0Fall = lpc_sct_ticks(t1_ns);
-    mT1Fall = lpc_sct_ticks(t1_ns + t2_ns);
-    mBitEnd = lpc_sct_ticks(t1_ns + t2_ns + t3_ns);
-
-    // Latch into SCT MATCH + MATCHREL.
-    SCT0->MATCH[FASTLED_LPC_PWM_DMA_SCT_MATCH_RISE]      = mT0Rise;
-    SCT0->MATCH[FASTLED_LPC_PWM_DMA_SCT_MATCH_T0FALL]    = mT0Fall;
-    SCT0->MATCH[FASTLED_LPC_PWM_DMA_SCT_MATCH_T1FALL]    = mT1Fall;
-    SCT0->MATCH[FASTLED_LPC_PWM_DMA_SCT_MATCH_END]       = mBitEnd;
-    SCT0->MATCHREL[FASTLED_LPC_PWM_DMA_SCT_MATCH_RISE]   = mT0Rise;
-    SCT0->MATCHREL[FASTLED_LPC_PWM_DMA_SCT_MATCH_T0FALL] = mT0Fall;
-    SCT0->MATCHREL[FASTLED_LPC_PWM_DMA_SCT_MATCH_T1FALL] = mT1Fall;
-    SCT0->MATCHREL[FASTLED_LPC_PWM_DMA_SCT_MATCH_END]    = mBitEnd;
-}
-
-namespace {
-
-// Encode one chunk of WS2812 bits into the three stream slices.
-//   rise_stream[i]    = pin_mask  for every bit  (line goes HIGH at T0_RISE)
-//   t0fall_stream[i]  = pin_mask if the source bit is '0', else 0
-//   t1fall_stream[i]  = pin_mask if the source bit is '1', else 0
-// A DMA write of 0 to LPC_GPIO->CLR[0] is a documented no-op
-// (UM11029 §12.4.2.6), so the "skip this bit" entries are zero-cost
-// stream filler.
-void encodeChunkFromBytes(const u8* bytes, u32 bytes_avail,
-                          u32 chunk_bits, u32 pin_mask,
-                          u32* rise_stream,
-                          u32* t0fall_stream,
-                          u32* t1fall_stream) FL_NO_EXCEPT {
-    for (u32 i = 0; i < chunk_bits; ++i) {
-        rise_stream[i] = pin_mask;
-    }
-
-    u32 bit_idx = 0;
-    u32 byte_idx = 0;
-    while (bit_idx < chunk_bits && byte_idx < bytes_avail) {
-        const u8 byte_value = bytes[byte_idx++];
-        // MSB first (WS2812 standard).
-        for (u8 b = 0; b < 8; ++b) {
-            const u32 dst = bit_idx + b;
-            if (dst >= chunk_bits) break;
-            const bool bit = (byte_value & (0x80u >> b)) != 0;
-            t0fall_stream[dst] = bit ? 0u : pin_mask;
-            t1fall_stream[dst] = bit ? pin_mask : 0u;
-        }
-        bit_idx += 8;
-    }
-
-    // Pad tail of chunk with no-op CLR words.
-    for (; bit_idx < chunk_bits; ++bit_idx) {
-        t0fall_stream[bit_idx] = 0u;
-        t1fall_stream[bit_idx] = 0u;
+    abort();   // never reconfigure under a running frame
+    lpcSctTxApplySetup();
+    // Route SCT_OUT0 to the data pin (SWM PINASSIGN7[31:24]) on every frame,
+    // in case something else re-muxed it. Only that byte changes; a previous
+    // pin goes back to GPIO.
+    SWM0->PINASSIGN.PINASSIGN7 =
+        (SWM0->PINASSIGN.PINASSIGN7 & ~SWM_PINASSIGN7_SCT_OUT0_O_MASK) |
+        SWM_PINASSIGN7_SCT_OUT0_O(pin);
+    mPin = pin;
+    mT0h = lpc_sct_ticks(t1_ns);
+    mT1h = lpc_sct_ticks(t1_ns + t2_ns);
+    mPeriod = lpc_sct_ticks(t1_ns + t2_ns + t3_ns);
+    // The rise sits one tick into the period so it never coincides with
+    // the limit reload. MATCHREL keeps the values across limit events.
+    const u32 match[4] = {1u, 1u + mT0h, 1u + mT1h, mPeriod - 1u};
+    for (u32 i = 0; i < 4u; ++i) {
+        SCT0->MATCH[i] = match[i];
+        SCT0->MATCHREL[i] = match[i];
     }
 }
 
-}  // namespace
-
-namespace {
-
-// Encode + arm the next chunk (up to `chunk_bits` bits from
-// `bytes + byte_offset`) into the transmitter's per-instance buffer,
-// then release SCT HALT so the SCT match events start streaming DMA.
-// Returns the number of BITS actually kicked (== chunk_bits for
-// non-final chunks; possibly less for the last).
-void kickNextChunk(u32* channel_buf,
-                    const u8* bytes,
-                    u32 total_len,
-                    u32 byte_offset,
-                    u32 pin_mask,
-                    u32& chunk_bits_out) FL_NO_EXCEPT {
-    constexpr u32 chunk_words = FASTLED_LPC_PWM_DMA_CHUNK_BITS;
-    constexpr u32 xfercfg_base =
-        (1UL << 0) |                            // CFGVALID
-        (2UL << 8) |                            // WIDTH = 32-bit
-        (1UL << 12) |                           // SRCINC = +1 word
-        (0UL << 14);                            // DSTINC = no
-    const u32 base = FASTLED_LPC_PWM_DMA_BASECH;
-
-    const u32 bytes_remaining = total_len - byte_offset;
-    const u32 bits_remaining = bytes_remaining * 8u;
-    const u32 chunk_bits = bits_remaining > chunk_words ? chunk_words : bits_remaining;
-
-    u32* rise_stream   = &channel_buf[0];
-    u32* t0fall_stream = &channel_buf[chunk_words];
-    u32* t1fall_stream = &channel_buf[2u * chunk_words];
-
-    encodeChunkFromBytes(bytes + byte_offset, bytes_remaining,
-                          chunk_bits, pin_mask,
-                          rise_stream, t0fall_stream, t1fall_stream);
-
-    // Arm the 3 DMA channels for this chunk.
-    const u32 count_field = ((chunk_bits - 1u) & 0x3FFu) << 16;
-    for (u32 i = 0; i < 3; ++i) {
-        DMA0->CHANNEL[base + i].XFERCFG = xfercfg_base | count_field;
-    }
-    DMA0->COMMON[0].SETVALID = (7UL << base);
-
-    // Release HALT — SCT runs, match events fire, DMA channels stream
-    // asynchronously. Control returns to the caller; poll() advances
-    // when this chunk completes.
-    SCT0->CTRL &= ~0x00000004UL;
-
-    chunk_bits_out = chunk_bits;
+// Make `slot` the halt step: one transfer that writes HALT into SCT CTRL
+// on the next EV2.
+inline void lpcSctTxWriteHaltSlot(volatile fl::lpc::DmaChannelDescriptor& slot) FL_NO_EXCEPT {
+    slot.link = 0u;
+    slot.dst_end = lpcSctTxAddr(&SCT0->CTRL);
+    slot.src_end = lpcSctTxAddr(&lpcSctTxHaltWord());
+    slot.reserved = kTxXferValid | kTxXferWidth32 | kTxXferCount(1u);
 }
 
-}  // namespace
+// Make `slot` play `nbits` masks from `masks`, then go on to `next`.
+inline void lpcSctTxWriteChunkSlot(volatile fl::lpc::DmaChannelDescriptor& slot,
+                                   const u32* masks, u32 nbits,
+                                   volatile fl::lpc::DmaChannelDescriptor& next) FL_NO_EXCEPT {
+    slot.link = lpcSctTxAddr(&next);
+    slot.dst_end = lpcSctTxAddr(&SCT0->OUT[kTxSctOut].CLR);
+    slot.src_end = lpcSctTxAddr(&masks[nbits - 1u]);
+    slot.reserved = kTxXferValid | kTxXferReload | kTxXferSetIntA | kTxXferWidth32 |
+                    kTxXferSrcInc1 | kTxXferCount(nbits);
+}
+
+// UM11029 16.6.15: disable, wait for the channel's pipeline to drain, then
+// abort. Shared with the CTIMER capture.
+inline void lpcDmaStopChannel(u32 ch) FL_NO_EXCEPT {
+    DMA0->COMMON[0].ENABLECLR = (1u << ch);
+    for (u32 i = 0; i < 1000u && (DMA0->COMMON[0].BUSY & (1u << ch)); ++i) {
+    }
+    DMA0->COMMON[0].ABORT = (1u << ch);
+}
+
+void LpcSctDmaTransmitter::abort() FL_NO_EXCEPT {
+    if (!mInitialized) {
+        return;   // never touched the SCT or the DMA channel
+    }
+    const u32 primask = __get_PRIMASK();
+    __disable_irq();   // the chunk ISR reads the state cleared here
+    if (mTransmitInProgress || !isStopped()) {
+        SCT0->CTRL = kTxSctCtrlHalt;
+        lpcDmaStopChannel(kTxDmaCh);
+        DMA0->COMMON[0].INTA = (1u << kTxDmaCh);   // W1C a completion we dropped
+// A frame cut mid-bit would leave the line high; drive it low (Arduino's
+// OUTPUT macro would rewrite the SCT register name).
+#pragma push_macro("OUTPUT")
+#undef OUTPUT
+        SCT0->OUTPUT &= ~(1u << kTxSctOut);
+#pragma pop_macro("OUTPUT")
+    }
+    mTransmitInProgress = false;
+    mCurrentBytes = nullptr;
+    __set_PRIMASK(primask);
+}
 
 void LpcSctDmaTransmitter::transmit(const u8* bytes, u32 len, bool is_rgbw) FL_NO_EXCEPT {
-    (void)is_rgbw;  // bytes are already chipset-encoded by ChannelData; the
-                    // is_rgbw flag is reserved for future per-pixel padding
-                    // logic (RGBW-XTRA0). For now the byte stream is consumed
-                    // verbatim.
-
-    if (bytes == nullptr || len == 0u) {
-        mCurrentBytes = nullptr;
-        mCurrentLen = 0;
-        mBytesSent = 0;
-        mTransmitInProgress = false;
+    (void)is_rgbw;  // ChannelData bytes are already in wire order.
+    if (!mInitialized) {
         return;
     }
-
-    // Latch the buffer + progression state and kick the first chunk.
-    // The caller drives progression from here via pollAndAdvance().
+    // A frame still on the wire (the caller gave up waiting) is cut off
+    // before its descriptors and buffers are reused.
+    abort();
+    if (bytes == nullptr || len == 0u) {
+        return;
+    }
     mCurrentBytes = bytes;
-    mCurrentLen = len;
-    mBytesSent = 0;
-    mTransmitInProgress = true;
+    mTotalBits = len * 8u;
+    mBitsEncoded = 0;
 
-    u32 chunk_bits = 0;
-    kickNextChunk(mChannelBuf, mCurrentBytes, mCurrentLen, mBytesSent,
-                   mPinMask, chunk_bits);
-    mBytesSent += chunk_bits / 8u;
+    // Chunk 0 runs from the channel's own descriptor; its first mask goes
+    // into OUT0.CLR by hand, and EV2 of each bit makes the DMA load the
+    // next bit's mask. Chunk 1 is encoded up front into slot 1; slot 0 is
+    // the halt step until the ISR refills it. So nothing is encoded with
+    // interrupts off while a chunk plays.
+    volatile fl::lpc::DmaChannelDescriptor* slots = lpcSctTxSlots();
+    const u32 n0 = encodeChunk(0);   // >= 8: whole bytes, CHUNK_BITS >= 8
+    const u32 n1 = encodeChunk(1);
+    lpcSctTxWriteHaltSlot(slots[0]);
+    if (n1 > 0u) {
+        lpcSctTxWriteChunkSlot(slots[1], mChunkBuf[1], n1, slots[0]);
+    }
+    volatile fl::lpc::DmaChannelDescriptor& d = lpcSctTxChannelDesc();
+    d.src_end = lpcSctTxAddr(&mChunkBuf[0][n0 - 1u]);
+    d.dst_end = lpcSctTxAddr(&SCT0->OUT[kTxSctOut].CLR);
+    d.link = lpcSctTxAddr(n1 > 0u ? &slots[1] : &slots[0]);
+    mPlayingChunk = 0;
+    mLastChunk = (mTotalBits + FASTLED_LPC_PWM_DMA_CHUNK_BITS - 1u) /
+                     FASTLED_LPC_PWM_DMA_CHUNK_BITS - 1u;
+
+    const u32 primask = __get_PRIMASK();
+    __disable_irq();   // the chunk ISR must see a complete state
+    SCT0->CTRL = kTxSctCtrlHalt | SCT_CTRL_CLRCTR_L_MASK;
+    SCT0->OUT[kTxSctOut].CLR = mChunkBuf[0][0];
+    DMA0->COMMON[0].INTA = (1u << kTxDmaCh);
+    DMA0->CHANNEL[kTxDmaCh].XFERCFG = kTxXferValid | kTxXferReload | kTxXferSetIntA |
+                                      kTxXferWidth32 | kTxXferSrcInc1 |
+                                      kTxXferCount(n0 - 1u);
+    DMA0->COMMON[0].SETVALID = (1u << kTxDmaCh);
+    DMA0->COMMON[0].ENABLESET = (1u << kTxDmaCh);
+    SCT0->CTRL = SCT_CTRL_HALT_H_MASK;   // release the unified counter
+    mTransmitInProgress = true;
+    __set_PRIMASK(primask);
+}
+
+// Transfers the playing descriptor has left (XFERCOUNT counts down to 0,
+// then wraps to 0x3FF when the descriptor runs out).
+inline u32 lpcSctTxTransfersLeft() FL_NO_EXCEPT {
+    const u32 residual = (DMA0->CHANNEL[kTxDmaCh].XFERCFG >> 16) & 0x3FFu;
+    return residual == 0x3FFu ? 0u : residual + 1u;
+}
+
+// A slot is rewritten only while the playing chunk has at least this many
+// bits to go (5 us at WS2812 rates), so the DMA never reloads it mid-write.
+constexpr u32 kTxRefillMarginBits = 4u;
+
+void LpcSctDmaTransmitter::onChunkEnd() FL_NO_EXCEPT {
+    if (!mTransmitInProgress || mPlayingChunk >= mLastChunk) {
+        return;   // the halt step is running; isStopped() ends the frame
+    }
+    // Chunk j ran out and chunk j + 1 was loaded from slot (j + 1) & 1; it
+    // goes on to slot j & 1. Slot (j + 1) & 1 has been read, so it becomes
+    // the halt step at once: if the next refill comes late, the frame ends
+    // there instead of replaying an old chunk. Slot j & 1 has been the halt
+    // step since the previous call (or transmit()); refill it with chunk
+    // j + 2 if chunk j + 1 still has time left, else let the frame end.
+    // Each call handles one INTA; if two chunk ends were merged, chunk j + 1
+    // has already run into the halt step and the margin check fails.
+    const u32 j = mPlayingChunk;
+    mPlayingChunk = j + 1u;
+    volatile fl::lpc::DmaChannelDescriptor* slots = lpcSctTxSlots();
+    const u32 freed = j & 1u;
+    lpcSctTxWriteHaltSlot(slots[freed ^ 1u]);
+    const u32 n = encodeChunk(freed);   // buffer j & 1 is free either way
+    if (n == 0u) {
+        return;   // chunk j + 1 is the last; slot j & 1 stays the halt step
+    }
+    const u32 primask = __get_PRIMASK();
+    __disable_irq();
+    if ((DMA0->COMMON[0].INTA & (1u << kTxDmaCh)) == 0u &&
+        lpcSctTxTransfersLeft() >= kTxRefillMarginBits) {
+        lpcSctTxWriteChunkSlot(slots[freed], mChunkBuf[freed], n, slots[freed ^ 1u]);
+    }
+    __set_PRIMASK(primask);
+}
+
+void LpcSctDmaTransmitter::onDmaIsr(void* ctx) FL_NO_EXCEPT {
+    static_cast<LpcSctDmaTransmitter*>(ctx)->onChunkEnd();   // hub cleared INTA
 }
 
 bool LpcSctDmaTransmitter::pollAndAdvance() FL_NO_EXCEPT {
-    if (!mTransmitInProgress) {
-        return true;
+    // Builds without the DMA ISR hub refill from here; with it, the ISR
+    // usually has already. Interrupts are off, so only one context sees
+    // each INTA.
+    const u32 primask = __get_PRIMASK();
+    __disable_irq();
+    if (mTransmitInProgress && (DMA0->COMMON[0].INTA & (1u << kTxDmaCh)) != 0u) {
+        DMA0->COMMON[0].INTA = (1u << kTxDmaCh);
+        onChunkEnd();
     }
-
-    // Is the current chunk still streaming? Any of the 3 SCT-tied DMA
-    // channels reporting ACTIVE means we're mid-chunk.
-    const u32 mask = (7UL << FASTLED_LPC_PWM_DMA_BASECH);
-    if ((DMA0->COMMON[0].ACTIVE & mask) != 0u) {
-        return false;   // still DRAINING
-    }
-
-    // Chunk done — halt SCT before we advance so it doesn't consume
-    // stale match events between chunks.
-    SCT0->CTRL |= 0x00000004UL;
-
-    if (mBytesSent >= mCurrentLen) {
-        // Full frame transmitted; idle.
+    if (mTransmitInProgress && isStopped()) {
+        // The halt step ran: normally after the last chunk, or early if a
+        // refill came later than one chunk time (frame cut short).
         mTransmitInProgress = false;
         mCurrentBytes = nullptr;
-        mCurrentLen = 0;
-        return true;
     }
+    const bool done = !mTransmitInProgress;
+    __set_PRIMASK(primask);
+    return done;
+}
 
-    // Encode + kick the next chunk. Poll() will observe DRAINING again
-    // until that chunk drains.
-    u32 chunk_bits = 0;
-    kickNextChunk(mChannelBuf, mCurrentBytes, mCurrentLen, mBytesSent,
-                   mPinMask, chunk_bits);
-    mBytesSent += chunk_bits / 8u;
-    return false;
+bool LpcSctDmaTransmitter::isStopped() const FL_NO_EXCEPT {
+    return (DMA0->COMMON[0].ACTIVE & (1u << kTxDmaCh)) == 0u &&
+           (SCT0->CTRL & SCT_CTRL_HALT_L_MASK) != 0u;
 }
 
 bool LpcSctDmaTransmitter::isDone() const FL_NO_EXCEPT {
-    // Legacy done probe: idle if no transmission in flight AND no DMA
-    // channel is currently active. Callers that use the older isDone()
-    // interface won't auto-advance chunks; poll() with pollAndAdvance()
-    // is the preferred surface.
-    if (mTransmitInProgress) {
-        return false;
-    }
-    const u32 mask = (7UL << FASTLED_LPC_PWM_DMA_BASECH);
-    return (DMA0->COMMON[0].ACTIVE & mask) == 0u;
+    return !mTransmitInProgress && isStopped();
 }
 
 #else  // host / stub build
 
-// Host-mode stubs — methods are no-ops. The channels-API engine can
-// hold an instance and call into these without any peripheral access,
-// preserving the state-machine behavior verified by
-// `tests/fl/channels/lpc_sct_dma_engine.cpp`.
+// Host-mode stubs — no peripheral access. The channels-API engine can
+// hold an instance and call into these, preserving the state-machine
+// behavior verified by
+// `tests/platforms/arm/lpc/drivers/sct_dma/channel_engine_lpc_sct_dma.cpp`.
 
 void LpcSctDmaTransmitter::init() FL_NO_EXCEPT {
     mInitialized = true;
@@ -309,11 +360,10 @@ void LpcSctDmaTransmitter::init() FL_NO_EXCEPT {
 void LpcSctDmaTransmitter::configureForChannel(
         u8 pin, u32 t1_ns, u32 t2_ns, u32 t3_ns) FL_NO_EXCEPT {
     init();
-    mPinMask = (1UL << pin);
-    mT0Rise = 0;
-    mT0Fall = lpc_sct_ticks(t1_ns);
-    mT1Fall = lpc_sct_ticks(t1_ns + t2_ns);
-    mBitEnd = lpc_sct_ticks(t1_ns + t2_ns + t3_ns);
+    mPin = pin;
+    mT0h = lpc_sct_ticks(t1_ns);
+    mT1h = lpc_sct_ticks(t1_ns + t2_ns);
+    mPeriod = lpc_sct_ticks(t1_ns + t2_ns + t3_ns);
 }
 
 void LpcSctDmaTransmitter::transmit(const u8* bytes, u32 len, bool is_rgbw) FL_NO_EXCEPT {
@@ -328,8 +378,8 @@ void LpcSctDmaTransmitter::transmit(const u8* bytes, u32 len, bool is_rgbw) FL_N
     // span out between calls.
     mTxCapture.clear();
     mCurrentBytes = nullptr;
-    mCurrentLen = 0;
-    mBytesSent = 0;
+    mTotalBits = 0;
+    mBitsEncoded = 0;
     mTransmitInProgress = false;  // host completes synchronously
     if (bytes == nullptr || len == 0u) {
         return;
@@ -344,9 +394,19 @@ bool LpcSctDmaTransmitter::pollAndAdvance() FL_NO_EXCEPT {
     return true;  // host completes transmit() synchronously.
 }
 
-bool LpcSctDmaTransmitter::isDone() const FL_NO_EXCEPT {
+void LpcSctDmaTransmitter::abort() FL_NO_EXCEPT {
+    mTransmitInProgress = false;
+    mCurrentBytes = nullptr;
+}
+
+bool LpcSctDmaTransmitter::isStopped() const FL_NO_EXCEPT {
     return true;  // host has no real DMA stream to wait on.
 }
+
+bool LpcSctDmaTransmitter::isDone() const FL_NO_EXCEPT {
+    return true;
+}
+
 
 #endif  // FL_IS_ARM_LPC_845
 
