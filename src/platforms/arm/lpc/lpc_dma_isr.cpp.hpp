@@ -36,7 +36,9 @@ extern "C" void DMA0_IRQHandler(void) {
     const fl::u32 pending =
         DMA0->COMMON[0].INTA & DMA0->COMMON[0].INTENSET;
     DMA0->COMMON[0].INTA = pending;  // W1C
-    fl::u32 bits = pending;
+    // Channels that asked for it also hear about their errors here; their
+    // callback reads the latch through takeDmaChannelError.
+    fl::u32 bits = pending | (errors & fl::lpc::dmaErrorCallbackMask());
     while (bits != 0u) {
         // Cortex-M0+ has no CLZ instruction; walk set bits from the LSB.
         const fl::u32 ch = static_cast<fl::u32>(__builtin_ctz(bits));

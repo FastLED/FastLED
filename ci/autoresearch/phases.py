@@ -4009,7 +4009,8 @@ async def _run_lpc_pwm_dma_cl_tests(ctx: RunContext) -> int:
     `ChannelEngineLpcSctDma` engine (channels-API path) instead of the
     legacy `ClocklessController` template. LPC845 low-memory builds
     bind the `pwmDmaClFrameOnce` / `pwmDmaClFrameBurst` /
-    `pwmDmaClCaptureSelf` handlers automatically when
+    `pwmDmaClCaptureSelf` / `pwmDmaClDmaError` / `pwmDmaClCaptureStress`
+    handlers automatically when
     `FASTLED_LPC_PWM_DMA` is set at compile time — this phase driver
     injects that macro via `build_flags` before delegating to the
     test runner.

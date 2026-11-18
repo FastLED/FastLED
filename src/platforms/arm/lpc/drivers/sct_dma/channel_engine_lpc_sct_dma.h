@@ -49,6 +49,7 @@
 #include "fl/stl/string.h"
 #include "fl/stl/noexcept.h"
 #include "platforms/arm/lpc/drivers/sct_dma/lpc_sct_dma_runtime.h"
+#include "platforms/arm/lpc/lpc_dma_isr.h"
 
 namespace fl {
 
@@ -74,6 +75,25 @@ public:
     ///         `ARMHardwareSPIOutputDMA` driver) and HD chipsets like
     ///         WS2816 that need different encoding.
     bool canHandle(const ChannelDataPtr& data) const FL_NO_EXCEPT override;
+
+    /// Longest frame, in bits, this build sends; 0 means no limit. Without
+    /// the DMA ISR hub (`FASTLED_LPC_DMA_ISR=0`) only poll() hands chunks to
+    /// the DMA, and nothing polls between `FastLED.show()` calls, so the
+    /// frame would halt after the two preloaded chunks (192 of 240 bits for
+    /// 10 WS2812 LEDs on silicon, #5278). show() drops a longer frame with
+    /// a one-time FL_ERROR rather than send it cut short. Not a canHandle()
+    /// condition, so the manager still routes the strip here and the error
+    /// that names the fix is printed.
+    static constexpr u32 kMaxFrameBits =
+#if defined(FL_IS_ARM_LPC_845) && !FASTLED_LPC_DMA_ISR
+        2u * FASTLED_LPC_PWM_DMA_CHUNK_BITS;
+#else
+        0u;
+#endif
+
+    /// Whether show() sends a frame of `bytes` encoded bytes (see
+    /// kMaxFrameBits).
+    static bool frameFits(fl::size bytes) FL_NO_EXCEPT;
 
     /// @brief Store channel data for later show().
     void enqueue(ChannelDataPtr channelData) FL_NO_EXCEPT override;

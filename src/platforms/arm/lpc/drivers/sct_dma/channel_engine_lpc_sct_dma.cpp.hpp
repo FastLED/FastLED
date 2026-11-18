@@ -12,6 +12,7 @@
 
 #include "platforms/arm/lpc/drivers/sct_dma/channel_engine_lpc_sct_dma.h"
 #include "platforms/arm/lpc/drivers/sct_dma/lpc_sct_dma_runtime.h"
+#include "fl/log/log.h"
 #include "fl/stl/chrono.h"
 #include "fl/stl/noexcept.h"
 
@@ -36,6 +37,11 @@ static constexpr u32 kLpcSctMaxPeriodNs = 2500;
 // frame always ends on its own (halt step, early halt, or DMA error), so
 // this only guards against a wedged peripheral; 1000 WS2812 LEDs take 30 ms.
 static constexpr u32 kLpcSctShowWaitMs = 100;
+
+bool ChannelEngineLpcSctDma::frameFits(fl::size bytes) FL_NO_EXCEPT {
+    return kMaxFrameBits == 0u ||
+           bytes <= static_cast<fl::size>(kMaxFrameBits / 8u);
+}
 
 ChannelEngineLpcSctDma::ChannelEngineLpcSctDma() FL_NO_EXCEPT = default;
 ChannelEngineLpcSctDma::~ChannelEngineLpcSctDma() = default;
@@ -101,6 +107,20 @@ void ChannelEngineLpcSctDma::show() FL_NO_EXCEPT {
     // event layout would put EV2 past the counter limit, and the frame
     // would never reach its halt step. Drop such a frame before arming.
     if (!canHandle(ch)) {
+        releaseTransmitting();
+        return;
+    }
+    if (!frameFits(ch->getSize())) {
+        static bool sReportedTooLong = false;   // once, not every frame
+        if (!sReportedTooLong) {
+            sReportedTooLong = true;
+            FL_ERROR("LPC SCT+DMA: frame dropped, "
+                     << ch->getSize() * 8u << " bits exceeds the "
+                     << static_cast<u32>(kMaxFrameBits)
+                     << "-bit limit without the DMA interrupt hub; "
+                        "build with FASTLED_LPC_DMA_ISR=1");
+        }
+        mTransmitter.markFrameRefused();
         releaseTransmitting();
         return;
     }

@@ -113,8 +113,11 @@ void LpcSctDmaTransmitter::init() FL_NO_EXCEPT {
     // hub (on by default with the LPC845 UART-DMA driver) the freed buffer
     // is refilled from the interrupt whether or not anyone calls poll().
     // The transmitter lives inside the engine singleton, so `this` outlives
-    // the registration.
-    fl::lpc::registerDmaChannelIsr(kTxDmaCh, &LpcSctDmaTransmitter::onDmaIsr, this);
+    // the registration. on_error: after a DMA error the SCT keeps clocking
+    // stale bits until halted, so the ISR halts it instead of the next
+    // poll() (#5278).
+    fl::lpc::registerDmaChannelIsr(kTxDmaCh, &LpcSctDmaTransmitter::onDmaIsr, this,
+                                   /*on_error=*/true);
 
     mInitialized = true;
 }
@@ -331,7 +334,17 @@ void LpcSctDmaTransmitter::onChunkEnd() FL_NO_EXCEPT {
 }
 
 void LpcSctDmaTransmitter::onDmaIsr(void* ctx) FL_NO_EXCEPT {
-    static_cast<LpcSctDmaTransmitter*>(ctx)->onChunkEnd();   // hub cleared INTA
+    LpcSctDmaTransmitter* self = static_cast<LpcSctDmaTransmitter*>(ctx);
+    // The hub runs this for the chunk's INTA (already cleared) and, because
+    // init() registered on_error, for a DMA error on the channel. A failed
+    // reload errors one bit after its INTA, usually while onChunkEnd()
+    // encodes; that error pends DMA0_IRQn and lands here as soon as this
+    // ISR returns, so this is the one place the ISR build halts on it.
+    if (self->mTransmitInProgress && fl::lpc::takeDmaChannelError(kTxDmaCh)) {
+        self->abort();   // halts the SCT; leaves mFrameComplete false
+        return;
+    }
+    self->onChunkEnd();
 }
 
 bool LpcSctDmaTransmitter::pollAndAdvance() FL_NO_EXCEPT {

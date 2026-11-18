@@ -226,6 +226,9 @@ public:
     ///        deadline), hit a DMA error, or was aborted. Read it once
     ///        `pollAndAdvance()` has returned true.
     bool lastFrameComplete() const FL_NO_EXCEPT { return mFrameComplete; }
+    /// Record a frame the engine refused without sending (#5278), so
+    /// lastFrameComplete() does not report the previous frame's outcome.
+    void markFrameRefused() FL_NO_EXCEPT { mFrameComplete = false; }
 
     /// @brief Return the byte stream captured by the most recent
     ///        `transmit()` call.

@@ -65,6 +65,15 @@ inline volatile u32& dmaErrorLatch() FL_NO_EXCEPT {
     return latch;
 }
 
+/// Channels whose callback the hub also runs when the channel raises
+/// ERRINT (after latching it), set through `registerDmaChannelIsr`'s
+/// `on_error`. For a driver that must stop at once rather than at its next
+/// poll: the SCT transmitter's SCT keeps clocking stale bits after its DMA
+/// channel errors until something halts it (#5278).
+inline volatile u32& dmaErrorCallbackMask() FL_NO_EXCEPT {
+    static volatile u32 mask = 0;
+    return mask;
+}
 /// Whether `channel` raised a DMA error, from the ERRINT register or from
 /// the hub's latch; clears both. Call with interrupts disabled.
 inline bool takeDmaChannelError(u32 channel) FL_NO_EXCEPT {
@@ -81,12 +90,24 @@ inline bool takeDmaChannelError(u32 channel) FL_NO_EXCEPT {
 /// Register (or replace) the completion callback for `channel`. Passing
 /// `fn == nullptr` unregisters. Enables the channel's INTA in the DMA
 /// controller and the shared DMA0 IRQ in the NVIC when the ISR build is
-/// on; inert no-op otherwise (poll fallback drives the driver).
+/// on; inert no-op otherwise (poll fallback drives the driver). With
+/// `on_error`, the callback also runs when the channel raises a DMA error;
+/// it then finds the error with `takeDmaChannelError`.
 inline void registerDmaChannelIsr(fl::u32 channel, DmaChannelIsr fn,
-                                  void* ctx) FL_NO_EXCEPT {
+                                  void* ctx, bool on_error = false) FL_NO_EXCEPT {
     if (channel >= 25u) return;
 #if FASTLED_LPC_DMA_ISR
+    // The slot and its error opt-in change together: DMA0_IRQn between the
+    // two writes could run a completion-only callback for an error.
+    const u32 primask = __get_PRIMASK();
+    __disable_irq();
     dmaIsrTable()[channel] = DmaIsrSlot{fn, ctx};
+    if (fn != nullptr && on_error) {
+        dmaErrorCallbackMask() |= (1UL << channel);
+    } else {
+        dmaErrorCallbackMask() &= ~(1UL << channel);
+    }
+    __set_PRIMASK(primask);
     if (fn != nullptr) {
         // Clear any STALE completion before opening the gate: a prior
         // synchronous transfer on this channel (XFERCFG.SETINTA) leaves
@@ -103,6 +124,7 @@ inline void registerDmaChannelIsr(fl::u32 channel, DmaChannelIsr fn,
 #else
     (void)fn;
     (void)ctx;
+    (void)on_error;
 #endif
 }
 
