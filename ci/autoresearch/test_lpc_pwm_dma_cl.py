@@ -39,8 +39,11 @@ compiled with `-DFASTLED_LPC_PWM_DMA=1`; the `bash autoresearch
 Frames over two chunks need the DMA ISR hub (`FASTLED_LPC_DMA_ISR`, on by
 default): with nothing calling poll(), only the DMA interrupt can hand over
 chunks. A `--define FASTLED_LPC_DMA_ISR=0` build refuses such frames
-(#5278); the device answers `0,hub_off_refused` and those cases pass as
-refusals.
+(#5278). The bench reads the build's hub setting from the device first
+(`hub=` in the pwmDmaClDmaError reply, an 8-LED frame that fits either
+way), then requires byte-exact frames where they fit and, in a hub-off
+build only, `0,hub_off_refused` from pwmDmaClCaptureSelf and
+pwmDmaClCaptureStress for longer ones.
 
 **Silicon status.** This is the on-device version of the host-side
 TX->RX byte-flow readback in
@@ -110,8 +113,13 @@ def run_capture_self(
     rx_pin: int,
     hold_us: int,
     step: int = 0,
+    hub_on: bool = True,
 ) -> bool:
-    """Drive one frame + capture; byte-compare against expected."""
+    """Drive one frame + capture; byte-compare against expected.
+
+    A hub-off build must refuse a frame over two chunks; any other frame
+    must arrive byte-exact.
+    """
     print()
     print(
         f"  RPC pwmDmaClCaptureSelf(led_count={led_count}, "
@@ -133,11 +141,12 @@ def run_capture_self(
         return False
 
     parts = csv.split(",")
-    if csv == "0,hub_off_refused":
-        # A FASTLED_LPC_DMA_ISR=0 build refuses frames over two chunks
-        # rather than cutting them short (#5278).
-        print("    PASS - refused: over two chunks without the DMA ISR hub")
-        return True
+    if expects_refusal(led_count, hub_on):
+        if csv == "0,hub_off_refused":
+            print("    PASS - refused: over two chunks without the DMA ISR hub")
+            return True
+        print(f"    FAIL - a hub-off build must refuse this frame: {csv!r}")
+        return False
     if not parts or parts[0] != "1":
         print(f"    FAIL - device reported failure: {csv!r}")
         return False
@@ -180,6 +189,31 @@ def parse_fields(csv: str) -> dict[str, str]:
     return dict(f.split("=", 1) for f in csv.split(",") if "=" in f)
 
 
+# Without the DMA ISR hub the engine sends at most two 96-bit chunks.
+HUB_OFF_MAX_BITS = 2 * 96
+
+
+def expects_refusal(led_count: int, hub_on: bool) -> bool:
+    """Whether the build must refuse this frame (#5278)."""
+    return not hub_on and led_count * 24 > HUB_OFF_MAX_BITS
+
+
+def probe_hub(s: "RpcBench", data_pin: int, rx_pin: int) -> bool | None:
+    """The deployed build's FASTLED_LPC_DMA_ISR, from the device itself.
+
+    An 8-LED forced-error frame (two chunks) runs in either build and its
+    reply carries `hub=`. None if the reply is unusable.
+    """
+    reply = send_rpc(s, "pwmDmaClDmaError", args=[8, 0xA5C30F, data_pin, rx_pin, 0])
+    csv = str(reply["result"]) if reply and "result" in reply else ""
+    hub = parse_fields(csv).get("hub") if csv.startswith("1,") else None
+    if hub not in ("0", "1"):
+        print(f"  FAIL - cannot read the hub setting: {csv!r}")
+        return None
+    print(f"  DMA ISR hub: {'on' if hub == '1' else 'off'} (FASTLED_LPC_DMA_ISR={hub})")
+    return hub == "1"
+
+
 # Stale bits allowed past the first chunk after a forced DMA error: the
 # error is taken one bit after the failed reload, and the ISR then needs a
 # few bit times to halt the SCT (5 on silicon).
@@ -201,9 +235,14 @@ def run_dma_error(s: "RpcBench", data_pin: int, rx_pin: int, hold_us: int) -> bo
         print(f"    FAIL - no reply or device failure: {csv!r}")
         return False
     f = parse_fields(csv)
-    bits, chunk = int(f["bits"]), int(f["chunk_bits"])
-    ended = f["ready"] == "1" and f["complete"] == "0" and f["line"] == "0"
-    if f["hub"] == "1":
+    try:
+        bits, chunk = int(f["bits"]), int(f["chunk_bits"])
+        ended = f["ready"] == "1" and f["complete"] == "0" and f["line"] == "0"
+        hub = f["hub"]
+    except (KeyError, ValueError):
+        print(f"    FAIL - malformed reply: {csv!r}")
+        return False
+    if hub == "1":
         ok = ended and chunk <= bits <= chunk + DMA_ERROR_SLACK_BITS
     elif hold_us == 0:
         # Without the hub only poll() sees the error, here in a busy wait;
@@ -211,8 +250,8 @@ def run_dma_error(s: "RpcBench", data_pin: int, rx_pin: int, hold_us: int) -> bo
         ok = ended and chunk <= bits <= 2 * chunk
     else:
         # Without the hub nothing sees the error during the hold, so stale
-        # bits run on through it: a documented limit, not bounded here.
-        ok = ended
+        # bits run on through it: a documented limit, not bounded above.
+        ok = ended and bits >= chunk
     print(f"    {'PASS' if ok else 'FAIL'} - {csv}")
     return ok
 
@@ -232,7 +271,7 @@ CONTENTION_CASES = [
 ]
 
 
-def run_contention(s: "RpcBench", data_pin: int, rx_pin: int) -> bool:
+def run_contention(s: "RpcBench", data_pin: int, rx_pin: int, hub_on: bool) -> bool:
     """#5278: T0H/T1H, overall and at reload bits, under DMA0 contention."""
     all_ok = True
     for real_timing in (1, 0):
@@ -253,14 +292,19 @@ def run_contention(s: "RpcBench", data_pin: int, rx_pin: int) -> bool:
                 ],
             )
             csv = str(reply["result"]) if reply and "result" in reply else ""
-            if csv == "0,hub_off_refused":
-                print(f"  [{name}] {label}: refused (no DMA ISR hub)")
+            if expects_refusal(17, hub_on):
+                refused = csv == "0,hub_off_refused"
+                print(
+                    f"  [{name}] {label}: {'PASS - refused' if refused else 'FAIL'}"
+                    f" (no DMA ISR hub) {csv if not refused else ''}"
+                )
+                all_ok &= refused
                 continue
             f = parse_fields(csv)
             ok = csv.startswith("1,") and f.get("bad") == "0" and f.get("bits") == "408"
             # A documented limit is a frame that went out wrong or stalled;
             # no reply, a rejected call or a crash is a failure either way.
-            measured = csv.startswith("1,") or csv.startswith("0,tx_stalled")
+            measured = csv.startswith(("1,", "0,tx_stalled", "0,tx_short"))
             verdict = (
                 "PASS" if ok else ("LIMIT" if not must_pass and measured else "FAIL")
             )
@@ -299,6 +343,11 @@ def main() -> int:
     args.tx_pin, args.rx_pin = pins
     print(f"  Wiring: jumper P0_{args.tx_pin} -> P0_{args.rx_pin}")
 
+    hub_on = probe_hub(s, args.tx_pin, args.rx_pin)
+    if hub_on is None:
+        s.close()
+        return 1
+
     all_pass = True
 
     # #5276 regressions: frames ending in bits '1,0' (B = 0x02, 0xFE).
@@ -310,6 +359,7 @@ def main() -> int:
             data_pin=args.tx_pin,
             rx_pin=args.rx_pin,
             hold_us=0,
+            hub_on=hub_on,
         )
 
     # Case 1: single red LED. Simplest possible byte-match.
@@ -320,6 +370,7 @@ def main() -> int:
         data_pin=args.tx_pin,
         rx_pin=args.rx_pin,
         hold_us=0,
+        hub_on=hub_on,
     )
 
     # Case 2: three LEDs, R/G/B chain. Exercises byte ordering + LED offset.
@@ -330,6 +381,7 @@ def main() -> int:
         data_pin=args.tx_pin,
         rx_pin=args.rx_pin,
         hold_us=0,
+        hub_on=hub_on,
     )
 
     # Case 3: alternating bit pattern within bytes. Exercises T0/T1 fidelity.
@@ -340,6 +392,7 @@ def main() -> int:
         data_pin=args.tx_pin,
         rx_pin=args.rx_pin,
         hold_us=0,
+        hub_on=hub_on,
     )
 
     # Case 4: ten LEDs = 240 bits, three transmitter chunks (96 bits each),
@@ -351,6 +404,7 @@ def main() -> int:
         data_pin=args.tx_pin,
         rx_pin=args.rx_pin,
         hold_us=0,
+        hub_on=hub_on,
     )
 
     # Case 5: same frame, but nothing calls poll() for 2 ms after show(),
@@ -364,6 +418,7 @@ def main() -> int:
         rx_pin=args.rx_pin,
         hold_us=2000,
         step=0x1F3B57,
+        hub_on=hub_on,
     )
 
     # Case 6: 17 LEDs = 408 bits = 5 chunks, so both descriptor slots are
@@ -378,6 +433,7 @@ def main() -> int:
         rx_pin=args.rx_pin,
         hold_us=2000,
         step=0x1F3B57,
+        hub_on=hub_on,
     )
 
     # Case 7 (#5278): a forced DMA error at the first chunk reload ends the
@@ -393,12 +449,13 @@ def main() -> int:
         rx_pin=args.rx_pin,
         hold_us=0,
         step=0x1F3B57,
+        hub_on=hub_on,
     )
 
     # Case 8 (#5278): a second DMA0 channel running during the frame.
     print()
     print("  RPC pwmDmaClCaptureStress (17 LEDs, 5 chunks)")
-    all_pass &= run_contention(s, args.tx_pin, args.rx_pin)
+    all_pass &= run_contention(s, args.tx_pin, args.rx_pin, hub_on)
 
     # Case 9: multiple frames, timing regression. 8 LEDs (two chunks), so a
     # FASTLED_LPC_DMA_ISR=0 build runs it too. Just checks the burst

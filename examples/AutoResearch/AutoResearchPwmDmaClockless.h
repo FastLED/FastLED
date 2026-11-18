@@ -385,13 +385,18 @@ inline fl::string captureFrame(int led_count, fl::u32 rgb, fl::u32 step,
     // transmitter's (#5278), not ~250 ns tighter.
     const fl::u32 sample = reload_stats ? t1h + fl::lpc_sct_ticks(100)
                                         : (t1h + period) / 2u;
+    // A frame left running by an earlier RPC (one that timed out) must end
+    // before the capture is armed, or its edges count as this frame's bits.
+    auto& engine = fl::BusTraits<fl::Bus::BIT_BANG>::instance();
+    if (!waitReady(engine, frameTimeoutUs(kMaxCaptureLeds))) {
+        return fl::string("0,busy");
+    }
     fl::LpcCtimerPulseCapture cap;
     if (!cap.begin(rx_pin, sample, fl::lpc_sct_ticks(max_gap_ns),
                    fl::span<fl::u32>(st.highTicks, n_bits))) {
         return fl::string("0,capture_begin");
     }
 
-    auto& engine = fl::BusTraits<fl::Bus::BIT_BANG>::instance();
     auto ch = makeChannelData(data_pin, led_count, rgb, step, t);
     if (!engine.canHandle(ch)) {
         cap.end();
@@ -416,10 +421,11 @@ inline fl::string captureFrame(int led_count, fl::u32 rgb, fl::u32 step,
     }
     const fl::u32 got = cap.count();
     cap.end();
-    if (!fl::ChannelEngineLpcSctDma::frameFits(ch)) {
+    if (!fl::ChannelEngineLpcSctDma::frameFits(ch->getSize())) {
         // A FASTLED_LPC_DMA_ISR=0 build drops frames over its limit in
-        // show() (#5278): nothing may reach the wire.
-        if (got == 0u) {
+        // show() (#5278): the engine must go idle at once with nothing on
+        // the wire. A timeout is a stall, not a refusal.
+        if (sent && got == 0u && !lastFrameComplete(engine)) {
             return fl::string("0,hub_off_refused");
         }
         fl::sstream s;
@@ -558,6 +564,11 @@ inline fl::string dmaErrorHandler(int led_count, fl::u32 rgb, int data_pin,
     auto ch = makeChannelData(data_pin, led_count, rgb, 0u, t);
     if (!engine.canHandle(ch)) {
         return fl::string("0,cannot_handle");
+    }
+    // A frame show() would drop leaves no descriptor of its own to corrupt;
+    // the link would be an earlier frame's.
+    if (!fl::ChannelEngineLpcSctDma::frameFits(ch->getSize())) {
+        return fl::string("0,too_long_without_hub");
     }
     auto& st = pwmDmaClocklessState();
     fl::LpcCtimerPulseCapture cap;

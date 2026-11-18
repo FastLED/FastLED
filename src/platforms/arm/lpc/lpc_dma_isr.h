@@ -97,12 +97,17 @@ inline void registerDmaChannelIsr(fl::u32 channel, DmaChannelIsr fn,
                                   void* ctx, bool on_error = false) FL_NO_EXCEPT {
     if (channel >= 25u) return;
 #if FASTLED_LPC_DMA_ISR
+    // The slot and its error opt-in change together: DMA0_IRQn between the
+    // two writes could run a completion-only callback for an error.
+    const u32 primask = __get_PRIMASK();
+    __disable_irq();
     dmaIsrTable()[channel] = DmaIsrSlot{fn, ctx};
     if (fn != nullptr && on_error) {
         dmaErrorCallbackMask() |= (1UL << channel);
     } else {
         dmaErrorCallbackMask() &= ~(1UL << channel);
     }
+    __set_PRIMASK(primask);
     if (fn != nullptr) {
         // Clear any STALE completion before opening the gate: a prior
         // synchronous transfer on this channel (XFERCFG.SETINTA) leaves

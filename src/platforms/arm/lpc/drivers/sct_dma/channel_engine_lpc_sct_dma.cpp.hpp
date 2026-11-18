@@ -38,6 +38,11 @@ static constexpr u32 kLpcSctMaxPeriodNs = 2500;
 // this only guards against a wedged peripheral; 1000 WS2812 LEDs take 30 ms.
 static constexpr u32 kLpcSctShowWaitMs = 100;
 
+bool ChannelEngineLpcSctDma::frameFits(fl::size bytes) FL_NO_EXCEPT {
+    return kMaxFrameBits == 0u ||
+           bytes <= static_cast<fl::size>(kMaxFrameBits / 8u);
+}
+
 ChannelEngineLpcSctDma::ChannelEngineLpcSctDma() FL_NO_EXCEPT = default;
 ChannelEngineLpcSctDma::~ChannelEngineLpcSctDma() = default;
 
@@ -105,7 +110,7 @@ void ChannelEngineLpcSctDma::show() FL_NO_EXCEPT {
         releaseTransmitting();
         return;
     }
-    if (!frameFits(ch)) {
+    if (!frameFits(ch->getSize())) {
         static bool sReportedTooLong = false;   // once, not every frame
         if (!sReportedTooLong) {
             sReportedTooLong = true;
@@ -115,6 +120,7 @@ void ChannelEngineLpcSctDma::show() FL_NO_EXCEPT {
                      << "-bit limit without the DMA interrupt hub; "
                         "build with FASTLED_LPC_DMA_ISR=1");
         }
+        mTransmitter.markFrameRefused();
         releaseTransmitting();
         return;
     }

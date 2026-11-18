@@ -91,11 +91,9 @@ public:
         0u;
 #endif
 
-    /// Whether show() sends `data` (see kMaxFrameBits).
-    static bool frameFits(const ChannelDataPtr& data) FL_NO_EXCEPT {
-        return kMaxFrameBits == 0u ||
-               static_cast<u32>(data->getSize()) * 8u <= kMaxFrameBits;
-    }
+    /// Whether show() sends a frame of `bytes` encoded bytes (see
+    /// kMaxFrameBits).
+    static bool frameFits(fl::size bytes) FL_NO_EXCEPT;
 
     /// @brief Store channel data for later show().
     void enqueue(ChannelDataPtr channelData) FL_NO_EXCEPT override;
