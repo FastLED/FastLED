@@ -327,6 +327,15 @@ class RpcBench:
                 continue
             except Exception:  # noqa: BLE001 - best-effort detach on the interrupt path
                 break
+        if not closing.done():
+            # Ctrl-C kept landing: give up rather than hang, but say so, since
+            # the port may still be attached until the daemon reclaims it.
+            closing.cancel()
+            print(
+                "[rpc] Ctrl-C repeated during detach; the serial session may "
+                "still be attached",
+                flush=True,
+            )
         self._loop.close()
 
     # Context-manager support so runners written as `with s: ...` (a

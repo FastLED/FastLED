@@ -314,8 +314,10 @@ class _InterruptedTwiceSerial(_InterruptedAttachSerial):
     def __init__(self, responder: object) -> None:
         super().__init__(responder)
         self.interrupted_detach = False
+        self.close_calls = 0
 
     async def close(self) -> None:
+        self.close_calls += 1
         if not self.interrupted_detach:
             self.interrupted_detach = True
 
@@ -353,5 +355,6 @@ def test_a_second_interrupt_in_the_detach_still_closes_the_loop(
         RpcBench("FAKE_PORT", timeout=1.0)
     assert created[0].interrupted_detach is True
     assert created[0].closed is True
+    assert created[0].close_calls == 1  # the same detach resumed, not a new one
     assert benches[0]._loop.is_closed()
     assert len(handled) == 1
