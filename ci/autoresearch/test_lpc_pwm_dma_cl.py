@@ -6,7 +6,7 @@ Drives `ChannelEngineLpcSctDma` on the LPC845-BRK (via
 on the jumpered RX pin with CTIMER0 + DMA (the transmitter owns the SCT,
 so the SCT capture can't be used) for a byte-match self-loopback.
 
-Three RPC handlers are called in sequence:
+These RPC handlers are called in sequence:
 
     pwmDmaClFrameOnce(led_count, rgb, data_pin)
         Drive one frame; report timing.
@@ -22,16 +22,25 @@ Three RPC handlers are called in sequence:
         decodes short. Returns the decoded bytes plus the measured T0H/T1H
         ranges. Host-side byte-compares against a GRB stream it builds
         itself from rgb and step_rgb.
+    pwmDmaClDmaError(led_count, rgb, data_pin, rx_pin, hold_us)
+        #5278: corrupt the second chunk's descriptor so its reload raises a
+        DMA error, then report whether the frame ended (and how many bits
+        reached the wire).
+    pwmDmaClCaptureStress(led_count, rgb, data_pin, rx_pin, step_rgb,
+                          real_timing, stress_priority, paced)
+        #5278: pwmDmaClCaptureSelf with a second DMA0 channel running for
+        the whole frame; compares bytes on the device and reports T0H/T1H
+        overall and at the chunk reload bits.
 
-The three RPCs are bound automatically when the LPC845 firmware is
+The RPCs are bound automatically when the LPC845 firmware is
 compiled with `-DFASTLED_LPC_PWM_DMA=1`; the `bash autoresearch
 --pwm-dma-cl` wrapper injects the flag via `build_flags`.
 
-The `hold_us=2000` cases also need the DMA ISR hub (`FASTLED_LPC_DMA_ISR`,
-on by default): with nothing calling poll() during the hold, only the DMA
-interrupt can hand over chunks. A build with `-DFASTLED_LPC_DMA_ISR=0`
-halts those frames after two chunks by design, and the device reports
-`tx_short`; that is not a driver regression.
+Frames over two chunks need the DMA ISR hub (`FASTLED_LPC_DMA_ISR`, on by
+default): with nothing calling poll(), only the DMA interrupt can hand over
+chunks. A `--define FASTLED_LPC_DMA_ISR=0` build refuses such frames
+(#5278); the device answers `0,hub_off_refused` and those cases pass as
+refusals.
 
 **Silicon status.** This is the on-device version of the host-side
 TX->RX byte-flow readback in
@@ -124,6 +133,11 @@ def run_capture_self(
         return False
 
     parts = csv.split(",")
+    if csv == "0,hub_off_refused":
+        # A FASTLED_LPC_DMA_ISR=0 build refuses frames over two chunks
+        # rather than cutting them short (#5278).
+        print("    PASS - refused: over two chunks without the DMA ISR hub")
+        return True
     if not parts or parts[0] != "1":
         print(f"    FAIL - device reported failure: {csv!r}")
         return False
@@ -159,6 +173,96 @@ def run_capture_self(
 
     print(f"    PASS - {n_decoded} bytes match expected pattern ({timing} ns)")
     return True
+
+
+def parse_fields(csv: str) -> dict[str, str]:
+    """Parse the `key=value` fields of a device CSV reply."""
+    return dict(f.split("=", 1) for f in csv.split(",") if "=" in f)
+
+
+# Stale bits allowed past the first chunk after a forced DMA error: the
+# error is taken one bit after the failed reload, and the ISR then needs a
+# few bit times to halt the SCT (5 on silicon).
+DMA_ERROR_SLACK_BITS = 8
+
+
+def run_dma_error(s: "RpcBench", data_pin: int, rx_pin: int, hold_us: int) -> bool:
+    """#5278: force a DMA error at the first reload; the frame must end."""
+    print()
+    print(
+        f"  RPC pwmDmaClDmaError(led_count=8, data_pin={data_pin}, "
+        f"rx_pin={rx_pin}, hold_us={hold_us})"
+    )
+    reply = send_rpc(
+        s, "pwmDmaClDmaError", args=[8, 0xA5C30F, data_pin, rx_pin, hold_us]
+    )
+    csv = str(reply["result"]) if reply and "result" in reply else ""
+    if not csv.startswith("1,"):
+        print(f"    FAIL - no reply or device failure: {csv!r}")
+        return False
+    f = parse_fields(csv)
+    bits, chunk = int(f["bits"]), int(f["chunk_bits"])
+    ended = f["ready"] == "1" and f["complete"] == "0" and f["line"] == "0"
+    if f["hub"] == "1":
+        ok = ended and chunk <= bits <= chunk + DMA_ERROR_SLACK_BITS
+    elif hold_us == 0:
+        # Without the hub, poll() sees the error after it encodes the next
+        # chunk (~50 us; 118 bits on silicon), still inside that chunk.
+        ok = ended and chunk <= bits <= 2 * chunk
+    else:
+        # Without the hub nothing sees the error during the hold, so stale
+        # bits run on through it: a documented limit, not bounded here.
+        ok = ended
+    print(f"    {'PASS' if ok else 'FAIL'} - {csv}")
+    return ok
+
+
+# Contention cases: (label, stress_priority, paced). paced 0 = unpaced
+# (always requesting), n >= 1 = one 2^(n-1)-word burst per bit on the
+# transmitter's own DMA trigger event. `must_pass` cases are asserted; the
+# others are measured and printed, as documented limits.
+CONTENTION_CASES = [
+    ("no stressor", -1, 0, True),
+    ("paced 1 word, priority 0", 0, 1, True),
+    ("paced 4 words, priority 0", 0, 3, False),
+    ("paced 4 words, priority 1", 1, 3, True),
+    ("unpaced, priority 0", 0, 0, False),
+    ("unpaced, priority 1", 1, 0, True),
+    ("unpaced, priority 7", 7, 0, True),
+]
+
+
+def run_contention(s: "RpcBench", data_pin: int, rx_pin: int) -> bool:
+    """#5278: T0H/T1H, overall and at reload bits, under DMA0 contention."""
+    all_ok = True
+    for real_timing in (1, 0):
+        name = "WS2812 1250 ns" if real_timing else "capture 2250 ns"
+        for label, prio, paced, must_pass in CONTENTION_CASES:
+            reply = send_rpc(
+                s,
+                "pwmDmaClCaptureStress",
+                args=[
+                    17,
+                    0xA5C30C,
+                    data_pin,
+                    rx_pin,
+                    0x1F3B57,
+                    real_timing,
+                    prio,
+                    paced,
+                ],
+            )
+            csv = str(reply["result"]) if reply and "result" in reply else ""
+            if csv == "0,hub_off_refused":
+                print(f"  [{name}] {label}: refused (no DMA ISR hub)")
+                continue
+            f = parse_fields(csv)
+            ok = csv.startswith("1,") and f.get("bad") == "0" and f.get("bits") == "408"
+            verdict = "PASS" if ok else ("FAIL" if must_pass else "LIMIT")
+            print(f"  [{name}] {label}: {verdict} - {csv}")
+            if must_pass and not ok:
+                all_ok = False
+    return all_ok
 
 
 def main() -> int:
@@ -257,13 +361,13 @@ def main() -> int:
         step=0x1F3B57,
     )
 
-    # Case 6: 20 LEDs = 480 bits = 5 chunks, so both descriptor slots are
+    # Case 6: 17 LEDs = 408 bits = 5 chunks, so both descriptor slots are
     # reused (chunks 3 and 4), with no poll() for 2 ms after show(). Every
     # LED differs, so a stale chunk replayed in place of a later one shows
     # up as a byte mismatch even with no gap on the wire.
     all_pass &= run_capture_self(
         s,
-        led_count=20,
+        led_count=17,
         rgb=0x3CA5F0,
         data_pin=args.tx_pin,
         rx_pin=args.rx_pin,
@@ -271,16 +375,37 @@ def main() -> int:
         step=0x1F3B57,
     )
 
-    # Case 7: multiple frames, timing regression. Just checks the burst
+    # Case 7 (#5278): a forced DMA error at the first chunk reload ends the
+    # frame within a few bits, with and without poll() during the frame.
+    for hold_us in (0, 2000):
+        all_pass &= run_dma_error(s, args.tx_pin, args.rx_pin, hold_us)
+    # The next ordinary frame is byte-exact again.
+    all_pass &= run_capture_self(
+        s,
+        led_count=8,
+        rgb=0xA5C30F,
+        data_pin=args.tx_pin,
+        rx_pin=args.rx_pin,
+        hold_us=0,
+        step=0x1F3B57,
+    )
+
+    # Case 8 (#5278): a second DMA0 channel running during the frame.
+    print()
+    print("  RPC pwmDmaClCaptureStress (17 LEDs, 5 chunks)")
+    all_pass &= run_contention(s, args.tx_pin, args.rx_pin)
+
+    # Case 9: multiple frames, timing regression. 8 LEDs (two chunks), so a
+    # FASTLED_LPC_DMA_ISR=0 build runs it too. Just checks the burst
     # RPC completes cleanly (no wire byte-compare here).
     print()
     print(
-        f"  RPC pwmDmaClFrameBurst(led_count=10, rgb=0x00FF00, n_frames=8, data_pin={args.tx_pin})"
+        f"  RPC pwmDmaClFrameBurst(led_count=8, rgb=0x00FF00, n_frames=8, data_pin={args.tx_pin})"
     )
     burst_reply = send_rpc(
         s,
         "pwmDmaClFrameBurst",
-        args=[10, 0x00FF00, 8, args.tx_pin],
+        args=[8, 0x00FF00, 8, args.tx_pin],
     )
     if burst_reply is None or "result" not in burst_reply:
         print("    FAIL - no reply from frameBurst")

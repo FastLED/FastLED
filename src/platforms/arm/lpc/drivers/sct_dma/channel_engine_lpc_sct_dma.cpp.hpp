@@ -12,8 +12,10 @@
 
 #include "platforms/arm/lpc/drivers/sct_dma/channel_engine_lpc_sct_dma.h"
 #include "platforms/arm/lpc/drivers/sct_dma/lpc_sct_dma_runtime.h"
+#include "fl/log/log.h"
 #include "fl/stl/chrono.h"
 #include "fl/stl/noexcept.h"
+#include "platforms/arm/lpc/lpc_dma_isr.h"
 
 namespace fl {
 
@@ -37,6 +39,25 @@ static constexpr u32 kLpcSctMaxPeriodNs = 2500;
 // this only guards against a wedged peripheral; 1000 WS2812 LEDs take 30 ms.
 static constexpr u32 kLpcSctShowWaitMs = 100;
 
+// Without the DMA ISR hub (FASTLED_LPC_DMA_ISR=0) only poll() hands chunks
+// to the DMA, and nothing polls between FastLED.show() calls, so a frame
+// longer than the two preloaded chunks would halt after them: 192 of 240
+// bits for 10 WS2812 LEDs on silicon (#5278). Such frames are refused
+// instead of cut short. LPC845 only: host builds have no DMA timing.
+#if defined(FL_IS_ARM_LPC_845) && !FASTLED_LPC_DMA_ISR
+static constexpr u32 kLpcSctMaxFrameBits = 2u * FASTLED_LPC_PWM_DMA_CHUNK_BITS;
+#endif
+
+// Whether `data` fits what this build can send without cutting it short.
+static bool lpcSctFrameFits(const ChannelDataPtr& data) FL_NO_EXCEPT {
+#if defined(FL_IS_ARM_LPC_845) && !FASTLED_LPC_DMA_ISR
+    return data->getSize() * 8u <= kLpcSctMaxFrameBits;
+#else
+    (void)data;
+    return true;
+#endif
+}
+
 ChannelEngineLpcSctDma::ChannelEngineLpcSctDma() FL_NO_EXCEPT = default;
 ChannelEngineLpcSctDma::~ChannelEngineLpcSctDma() = default;
 
@@ -51,7 +72,8 @@ bool ChannelEngineLpcSctDma::canHandle(
     const ChipsetTimingConfig& t = data->getTiming();
     const u32 period = t.total_period_ns();
     return period >= kLpcSctMinPeriodNs && period <= kLpcSctMaxPeriodNs &&
-           LpcSctDmaTransmitter::timingFits(t.t1_ns, t.t2_ns, t.t3_ns);
+           LpcSctDmaTransmitter::timingFits(t.t1_ns, t.t2_ns, t.t3_ns) &&
+           lpcSctFrameFits(data);
 }
 
 void ChannelEngineLpcSctDma::enqueue(ChannelDataPtr channelData) FL_NO_EXCEPT {
@@ -101,6 +123,15 @@ void ChannelEngineLpcSctDma::show() FL_NO_EXCEPT {
     // event layout would put EV2 past the counter limit, and the frame
     // would never reach its halt step. Drop such a frame before arming.
     if (!canHandle(ch)) {
+        static bool sReportedTooLong = false;   // once, not every frame
+        if (ch && !sReportedTooLong && !lpcSctFrameFits(ch)) {
+            sReportedTooLong = true;
+            FL_ERROR("LPC SCT+DMA: frame dropped, "
+                     << ch->getSize() * 8u << " bits exceeds the "
+                     << 2u * FASTLED_LPC_PWM_DMA_CHUNK_BITS
+                     << "-bit limit without the DMA interrupt hub; "
+                        "build with FASTLED_LPC_DMA_ISR=1");
+        }
         releaseTransmitting();
         return;
     }

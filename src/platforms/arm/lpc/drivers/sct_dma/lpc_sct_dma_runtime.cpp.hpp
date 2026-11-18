@@ -113,8 +113,11 @@ void LpcSctDmaTransmitter::init() FL_NO_EXCEPT {
     // hub (on by default with the LPC845 UART-DMA driver) the freed buffer
     // is refilled from the interrupt whether or not anyone calls poll().
     // The transmitter lives inside the engine singleton, so `this` outlives
-    // the registration.
-    fl::lpc::registerDmaChannelIsr(kTxDmaCh, &LpcSctDmaTransmitter::onDmaIsr, this);
+    // the registration. on_error: after a DMA error the SCT keeps clocking
+    // stale bits until halted, so the ISR halts it instead of the next
+    // poll() (#5278).
+    fl::lpc::registerDmaChannelIsr(kTxDmaCh, &LpcSctDmaTransmitter::onDmaIsr, this,
+                                   /*on_error=*/true);
 
     mInitialized = true;
 }
@@ -321,6 +324,14 @@ void LpcSctDmaTransmitter::onChunkEnd() FL_NO_EXCEPT {
     }
     const u32 primask = __get_PRIMASK();
     __disable_irq();
+    // A failed reload errors on its first transfer, one bit after the INTA
+    // that brought us here, i.e. usually during the encode above. Stop the
+    // frame now rather than linking more chunks behind a dead channel.
+    if (fl::lpc::takeDmaChannelError(kTxDmaCh)) {
+        abort();   // leaves mFrameComplete false
+        __set_PRIMASK(primask);
+        return;
+    }
     if ((DMA0->COMMON[0].INTA & (1u << kTxDmaCh)) == 0u &&
         lpcSctTxTransfersLeft() >= kTxRefillMarginBits) {
         lpcSctTxWriteChunkSlot(slots[freed], mChunkBuf[freed], n,
@@ -331,7 +342,14 @@ void LpcSctDmaTransmitter::onChunkEnd() FL_NO_EXCEPT {
 }
 
 void LpcSctDmaTransmitter::onDmaIsr(void* ctx) FL_NO_EXCEPT {
-    static_cast<LpcSctDmaTransmitter*>(ctx)->onChunkEnd();   // hub cleared INTA
+    LpcSctDmaTransmitter* self = static_cast<LpcSctDmaTransmitter*>(ctx);
+    // The hub runs this for the chunk's INTA (already cleared) and, because
+    // init() registered on_error, for a DMA error on the channel.
+    if (self->mTransmitInProgress && fl::lpc::takeDmaChannelError(kTxDmaCh)) {
+        self->abort();   // halts the SCT; leaves mFrameComplete false
+        return;
+    }
+    self->onChunkEnd();
 }
 
 bool LpcSctDmaTransmitter::pollAndAdvance() FL_NO_EXCEPT {
