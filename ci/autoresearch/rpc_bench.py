@@ -49,13 +49,25 @@ LIVENESS_PROBE_METHOD = "ping"
 
 
 def describe_error_chain(error: BaseException) -> str:
-    """`Type: message` for `error` and each error it was raised from."""
+    """`Type: message` for `error` and each error it was raised from.
+
+    Notes on an error (the attach retry records its earlier attempts there)
+    are shown in brackets on that error, so they do not read as causes.
+    """
     parts: list[str] = []
     seen: set[int] = set()
     current: BaseException | None = error
     while current is not None and id(current) not in seen:
         seen.add(id(current))
-        parts.append(f"{type(current).__name__}: {current}")
+        entry = f"{type(current).__name__}: {current}"
+        notes: list[str] = []
+        raw_notes = getattr(current, "__notes__", None)
+        if raw_notes is not None:  # traceback also treats None as no notes
+            for note in raw_notes:
+                notes.append(str(note))
+        if notes:
+            entry += " [" + "; ".join(notes) + "]"
+        parts.append(entry)
         if current.__cause__ is not None:
             current = current.__cause__
         elif current.__suppress_context__:
@@ -96,14 +108,31 @@ class RpcBench:
         try:
             self._loop.run_until_complete(connect)
         except KeyboardInterrupt as interrupt:
-            # Ctrl-C leaves `connect` pending; finish it before close() so a
-            # late attach cannot grab the port after the client is closed.
-            connect.cancel()
-            with suppress(asyncio.CancelledError, Exception):
-                self._loop.run_until_complete(connect)
-            with suppress(Exception):
-                self.close()
-            handle_keyboard_interrupt(interrupt)
+            try:
+                if connect.done():
+                    # The interrupt came from inside `connect` (e.g. during
+                    # daemon recovery) and is stored on the task: retrieve
+                    # it, since running the task again would re-raise it.
+                    stored = None if connect.cancelled() else connect.exception()
+                    if stored is not None and not isinstance(stored, KeyboardInterrupt):
+                        # The attach had already failed; do not hide why.
+                        print(
+                            f"[rpc] attach failed before Ctrl-C: "
+                            f"{describe_error_chain(stored)}",
+                            flush=True,
+                        )
+                else:
+                    # Ctrl-C left `connect` pending; finish it before close()
+                    # so a late attach cannot grab the port after the client
+                    # is closed.
+                    connect.cancel()
+                    with suppress(asyncio.CancelledError, Exception):
+                        self._loop.run_until_complete(connect)
+            finally:
+                # Even a second Ctrl-C during the drain or the close must not
+                # skip the detach; the first interrupt is the one raised.
+                self._close_after_interrupt()
+                handle_keyboard_interrupt(interrupt)
             raise
         except Exception as error:
             # The caller never gets an object to close, so release the loop
@@ -283,6 +312,22 @@ class RpcBench:
             self._loop.run_until_complete(self._client.close())
         finally:
             self._loop.close()
+
+    def _close_after_interrupt(self) -> None:
+        """close() for the Ctrl-C path: one close task, finished even if
+        another Ctrl-C lands in it, so the monitor really detaches before
+        the loop closes. Errors are dropped; the interrupt is what the
+        caller gets."""
+        closing = self._loop.create_task(self._client.close())
+        for _ in range(3):  # bounded: a further Ctrl-C resumes the same task
+            try:
+                self._loop.run_until_complete(closing)
+                break
+            except KeyboardInterrupt:  # noqa: KBI002 - absorbed: the caller re-raises the first interrupt after this cleanup
+                continue
+            except Exception:  # noqa: BLE001 - best-effort detach on the interrupt path
+                break
+        self._loop.close()
 
     # Context-manager support so runners written as `with s: ...` (a
     # drop-in for `with serial.Serial(...) as s`) work unchanged.

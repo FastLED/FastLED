@@ -418,3 +418,94 @@ def test_native_adapter_does_not_retry_other_attach_errors(monkeypatch) -> None:
     with pytest.raises(ConnectionError, match="permission denied"):
         asyncio.run(adapter.connect())
     assert [m.enters for m in monitors] == [1, 0]
+
+
+def test_native_adapter_final_error_keeps_the_first_attempt(monkeypatch) -> None:
+    """FastLED#5281: 'session closed', a lost daemon, then a timeout after
+    recovery: the raised error is the timeout, caused by the daemon error,
+    with the first 'session closed' attempt kept as a note."""
+    from ci.util import serial_interface
+
+    monkeypatch.setattr(serial_interface, "ensure_fbuild_daemon", lambda: None)
+    adapter, _monitors = _attach_adapter(
+        monkeypatch,
+        [
+            ConnectionError("session closed"),
+            RuntimeError(_DAEMON_ERROR),
+            TimeoutError("handshake timed out"),
+            None,
+        ],
+    )
+    with pytest.raises(TimeoutError) as raised:
+        asyncio.run(adapter.connect())
+    assert isinstance(raised.value.__cause__, RuntimeError)
+    assert raised.value.__notes__ == [
+        "attach attempt 1 of 3 failed: ConnectionError: session closed"
+    ]
+
+
+def test_fbuild_adapter_close_exits_the_monitor_current_when_it_runs() -> None:
+    """FastLED#5281: a connect() still queued on the executor may replace
+    the monitor before close()'s exit runs; the replacement must close."""
+    import threading
+
+    from ci.util import serial_interface
+    from ci.util.serial_interface import FbuildSerialAdapter
+
+    class _Monitor:
+        def __init__(self) -> None:
+            self.exits = 0
+
+        def __exit__(self, *_exc: object) -> None:
+            self.exits += 1
+
+    old, new = _Monitor(), _Monitor()
+    adapter = object.__new__(FbuildSerialAdapter)
+    adapter._monitor = old
+    adapter._executor = serial_interface.ThreadPoolExecutor(max_workers=1)
+    release = threading.Event()
+
+    def _queued_connect() -> None:
+        # Only swap once close() has queued its exit; a timed-out gate must
+        # fail the test, not let it pass without the race.
+        assert release.wait(5), "close() never queued its exit"
+        adapter._monitor = new  # what daemon recovery does
+
+    async def _run() -> None:
+        busy = asyncio.get_running_loop().run_in_executor(
+            adapter._executor, _queued_connect
+        )
+        closing = asyncio.ensure_future(adapter.close())
+        await asyncio.sleep(0)  # close() runs up to its executor submit
+        release.set()
+        await busy
+        await closing
+
+    try:
+        asyncio.run(_run())
+    finally:
+        release.set()  # never strand the worker, even on failure
+        adapter._executor.shutdown(wait=True)
+    assert (old.exits, new.exits) == (0, 1)
+
+
+def test_native_adapter_notes_number_the_real_attempt(monkeypatch) -> None:
+    """FastLED#5281 review: a daemon recovery uses up attempt 1, so the
+    retried 'session closed' is attempt 2 in the note too."""
+    from ci.util import serial_interface
+
+    monkeypatch.setattr(serial_interface, "ensure_fbuild_daemon", lambda: None)
+    adapter, _monitors = _attach_adapter(
+        monkeypatch,
+        [
+            RuntimeError(_DAEMON_ERROR),
+            ConnectionError("session closed"),
+            TimeoutError("handshake timed out"),
+            None,
+        ],
+    )
+    with pytest.raises(TimeoutError) as raised:
+        asyncio.run(adapter.connect())
+    assert raised.value.__notes__ == [
+        "attach attempt 2 of 3 failed: ConnectionError: session closed"
+    ]

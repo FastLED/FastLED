@@ -219,7 +219,10 @@ class FbuildSerialAdapter:
         await self._run_in_thread(self._connect_with_daemon_recovery)
 
     async def close(self) -> None:
-        await self._run_in_thread(self._monitor.__exit__, None, None, None)
+        # Look up the monitor when the exit runs, not now: a connect() still
+        # queued on the single-worker executor (Ctrl-C during daemon
+        # recovery) may replace it first, and that replacement must close.
+        await self._run_in_thread(lambda: self._monitor.__exit__(None, None, None))
         # NOTE: do NOT shut down self._executor here. The autoresearch
         # recovery path (ci/autoresearch/gpio.py) calls close() then reuses
         # the same adapter on a new RpcClient. Shutting the executor down
@@ -348,6 +351,34 @@ ATTACH_ATTEMPTS = 3
 ATTACH_RETRY_PAUSE_SECONDS = 1.0
 
 
+def _describe_attempt(attempt: int, error: BaseException) -> str:
+    """One retried attach attempt, as recorded on the final error."""
+    return (
+        f"attach attempt {attempt} of {ATTACH_ATTEMPTS} failed: "
+        f"{type(error).__name__}: {error}"
+    )
+
+
+def _note_earlier_attempts(error: BaseException, retried: list[str]) -> None:
+    """Record the retried attempts on the error that ends the attach.
+
+    The first failure is usually the symptom (#5271), but the error raised is
+    the last one. These are notes, so the error's type and cause are kept;
+    `__notes__` is what `add_note` sets on 3.11+ (we also run on 3.10).
+    `retried` holds text, not the exceptions, so no traceback (and with it
+    the attach frame) is kept alive.
+    """
+    if not retried:
+        return
+    notes: list[str] = []
+    existing = getattr(error, "__notes__", None)
+    if existing is not None:
+        for note in existing:
+            notes.append(str(note))
+    notes.extend(retried)
+    setattr(error, "__notes__", notes)  # noqa: B010 - also on 3.10, which lacks add_note
+
+
 def is_transient_attach_error(exc: Exception) -> bool:
     """True for the attach failure FastLED/fbuild#2083 produces.
 
@@ -396,6 +427,7 @@ class NativeFbuildSerialAdapter:
         # Every `__aenter__` counts against ATTACH_ATTEMPTS, the daemon
         # recovery attempt included.
         daemon_error: Exception | None = None
+        retried: list[str] = []  # earlier "session closed" attempts
         for attempt in range(1, ATTACH_ATTEMPTS + 1):
             try:  # noqa: KBI001 - connect() handles KeyboardInterrupt once for the whole attach
                 await self._monitor.__aenter__()
@@ -413,9 +445,11 @@ class NativeFbuildSerialAdapter:
                     self._monitor = self._new_monitor()
                     continue
                 if last or not is_transient_attach_error(error):
+                    _note_earlier_attempts(error, retried)
                     if daemon_error is not None:
                         raise error from daemon_error
                     raise
+                retried.append(_describe_attempt(attempt, error))
                 # The failed monitor holds no daemon session, but release
                 # whatever client-side state it may hold before replacing it.
                 with suppress(Exception):
@@ -427,8 +461,11 @@ class NativeFbuildSerialAdapter:
                     f"{ATTACH_RETRY_PAUSE_SECONDS:g}s -- FastLED/fbuild#2083",
                     flush=True,
                 )
-                await asyncio.sleep(ATTACH_RETRY_PAUSE_SECONDS)
+                # Replace the exited monitor before the pause: a cancel that
+                # lands in the sleep must leave close() a fresh monitor, not
+                # exit the failed one a second time.
                 self._monitor = self._new_monitor()
+                await asyncio.sleep(ATTACH_RETRY_PAUSE_SECONDS)
 
     async def close(self) -> None:
         try:
