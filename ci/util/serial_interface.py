@@ -15,6 +15,7 @@ import warnings
 from collections import deque
 from collections.abc import AsyncIterator
 from concurrent.futures import ThreadPoolExecutor
+from contextlib import suppress
 from typing import Protocol, runtime_checkable
 
 import serial as pyserial
@@ -332,6 +333,30 @@ class FbuildSerialAdapter:
             return False
 
 
+# fbuild's daemon caps a WebSocket serial attach's `open_port` at 3 s and
+# counts its board-family lookup against that cap, so on a loaded host a
+# healthy port can miss it. The daemon then sends an error frame that
+# fbuild's Python client reports only as "session closed"
+# (FastLED/fbuild#2083, FastLED#5271). A failed attach leaves no session, so
+# trying again is safe; on the LPC845-BRK the next attach succeeded each time.
+# The retry is best effort: fbuild 2.5.51's client also reports a definitive
+# rejection (e.g. another workflow's exclusive lease) as "session closed", so
+# that rejection is repeated too, costing at most ~2 s before it propagates.
+# Bounded to 3 attempts so a really dead port still fails within seconds.
+# Remove once fbuild ships the fix and preserves the daemon's reason.
+ATTACH_ATTEMPTS = 3
+ATTACH_RETRY_PAUSE_SECONDS = 1.0
+
+
+def is_transient_attach_error(exc: Exception) -> bool:
+    """True for the attach failure FastLED/fbuild#2083 produces.
+
+    A client-side handshake timeout mentions the daemon WebSocket and already
+    goes through the lost-daemon recovery, so it is not counted here.
+    """
+    return "session closed" in str(exc).lower()
+
+
 class NativeFbuildSerialAdapter:
     """Use fbuild's supported async monitor without a thread or read cap."""
 
@@ -359,23 +384,51 @@ class NativeFbuildSerialAdapter:
 
     async def connect(self) -> None:
         self._pending_lines.clear()
+        # One handler around the whole attach, daemon recovery included, so a
+        # KeyboardInterrupt anywhere in it is handled exactly once.
         try:
-            await self._monitor.__aenter__()
+            await self._attach()
         except KeyboardInterrupt as ki:
             handle_keyboard_interrupt(ki)
             raise
-        except Exception as first_error:
-            if not FbuildSerialAdapter._is_daemon_connection_error(first_error):
-                raise
-            try:
-                await asyncio.to_thread(ensure_fbuild_daemon)
-                self._monitor = self._new_monitor()
+
+    async def _attach(self) -> None:
+        # Every `__aenter__` counts against ATTACH_ATTEMPTS, the daemon
+        # recovery attempt included.
+        daemon_error: Exception | None = None
+        for attempt in range(1, ATTACH_ATTEMPTS + 1):
+            try:  # noqa: KBI001 - connect() handles KeyboardInterrupt once for the whole attach
                 await self._monitor.__aenter__()
-            except KeyboardInterrupt as ki:
-                handle_keyboard_interrupt(ki)
-                raise
-            except Exception as recovery_error:
-                raise recovery_error from first_error
+                return
+            except Exception as error:
+                last = attempt == ATTACH_ATTEMPTS
+                if (
+                    not last
+                    and daemon_error is None
+                    and FbuildSerialAdapter._is_daemon_connection_error(error)
+                ):
+                    # A lost post-deploy daemon: restart it once.
+                    daemon_error = error
+                    await asyncio.to_thread(ensure_fbuild_daemon)
+                    self._monitor = self._new_monitor()
+                    continue
+                if last or not is_transient_attach_error(error):
+                    if daemon_error is not None:
+                        raise error from daemon_error
+                    raise
+                # The failed monitor holds no daemon session, but release
+                # whatever client-side state it may hold before replacing it.
+                with suppress(Exception):
+                    await self._monitor.__aexit__(None, None, None)
+                port = self._monitor_args["port"]
+                print(
+                    f"[serial] attach to {port} failed ({error}); retrying "
+                    f"({attempt}/{ATTACH_ATTEMPTS - 1}) in "
+                    f"{ATTACH_RETRY_PAUSE_SECONDS:g}s -- FastLED/fbuild#2083",
+                    flush=True,
+                )
+                await asyncio.sleep(ATTACH_RETRY_PAUSE_SECONDS)
+                self._monitor = self._new_monitor()
 
     async def close(self) -> None:
         try:
