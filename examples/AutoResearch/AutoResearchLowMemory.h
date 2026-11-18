@@ -65,10 +65,13 @@
 #endif
 
 // The LPC845-BRK low-memory build fits FastLED + Remote + the WS2812 loopback
-// RPC in normal mode. The dedicated IEEE754 mode deliberately omits it.
+// RPC in normal mode. The dedicated IEEE754 mode deliberately omits it. The
+// loopback drives the default clockless bus (UART DMA), so a
+// FASTLED_LPC_UART_DMA=0 (bit-bang) build leaves it out.
 #if defined(FL_IS_ARM_LPC_845) && !defined(FASTLED_AUTORESEARCH_IEEE754_MODE) && \
     !defined(FASTLED_AUTORESEARCH_FAULT_TEST) && !defined(FASTLED_LPC_SPI_DMA) && \
-    !defined(FASTLED_LPC_PWM_DMA) && !FASTLED_AUTORESEARCH_LPC_UART_DMA
+    !defined(FASTLED_LPC_PWM_DMA) && !FASTLED_AUTORESEARCH_LPC_UART_DMA && \
+    FASTLED_LPC_UART_DMA
 #define FASTLED_AUTORESEARCH_LPC_WS2812 1
 #endif
 
@@ -109,6 +112,10 @@
 
 #if defined(FASTLED_AUTORESEARCH_LPC_WS2812)
 #include "FastLED.h"
+#include "fl/channels/bus_traits.h"
+#include "fl/channels/config.h"
+#include "fl/channels/data.h"
+#include "fl/channels/driver.h"
 #include "fl/chipsets/timing_traits.h"
 #endif
 
@@ -187,13 +194,8 @@ inline PinToggleState& pinToggleState() {
 
 #if defined(FASTLED_AUTORESEARCH_LPC_WS2812)
 struct Ws2812State {
-    CRGB leds[100];
-    uint8_t expected[300];
     uint8_t decoded[300];
     fl::EdgeTime probe[64];
-    bool fastled_initialized;
-
-    Ws2812State() : fastled_initialized(false) {}
 };
 
 inline Ws2812State& ws2812State() {
@@ -648,9 +650,17 @@ inline void autoResearchLowMemorySetup() {
     // ws2812SctTest (FastLED #3021 Phase 2) -- WS2812 byte-match loopback.
     remote.bind("ws2812SctTest",
         [](int test_case, int tx_pin, int rx_pin, int capture_ms) -> fl::string {
-            if (test_case < 0 || test_case > 4 ||
-                tx_pin < 0 || rx_pin < 0 || capture_ms <= 0) {
-                return fl::string("0,0,0,0,0,0,0,0");
+            // TX/RX come from the host's findConnectedPins scan. An
+            // open-drain pad cannot drive TX: it only sinks, and its rising
+            // edge is the ~1.7 us pull-up, longer than any WS2812 HIGH.
+            // Reserved pads (SWD, ISP, console) are refused: routing USART
+            // TXD or the SCT input onto them cuts the link to the host.
+            // A rejected request replies with num_leds=0.
+            if (test_case < 0 || test_case > 4 || tx_pin < 0 || tx_pin > 31 ||
+                rx_pin < 0 || rx_pin > 31 || tx_pin == rx_pin ||
+                lowMemOpenDrainPin(tx_pin) || fl::pinProbeSkipReason(tx_pin) ||
+                fl::pinProbeSkipReason(rx_pin) || capture_ms <= 0) {
+                return fl::string("0,0,0,0,0,0,0,0,0");
             }
             int num_leds = 1;
             switch (test_case) {
@@ -658,97 +668,120 @@ inline void autoResearchLowMemorySetup() {
                 case 4: num_leds = 100; break;
                 default: num_leds = 1; break;
             }
+            const int expected_bytes = num_leds * 3;
+            // Setup failures keep the case fields, with nothing decoded.
+            auto setupFailed = [&]() -> fl::string {
+                fl::sstream f;
+                f << "0," << test_case << ',' << num_leds << ',' << expected_bytes
+                  << ",0,0,0,0,0";
+                return f.str();
+            };
+
+            // Wire bytes in WS2812 GRB order: what addLeds<WS2812, PIN, GRB>
+            // would hand the driver for these colors at full brightness.
+            fl::vector_psram<u8> grb(static_cast<fl::size>(expected_bytes));
+            for (int i = 0; i < num_leds; ++i) {
+                u8 r = 0, g = 0, b = 0;
+                switch (test_case) {
+                    case 0: r = 0xFF; break;
+                    case 1: r = (i == 0) ? 0xFF : 0; g = (i == 1) ? 0xFF : 0;
+                            b = (i == 2) ? 0xFF : 0; break;
+                    case 3: r = g = b = 0xFF; break;
+                    case 4: r = (i % 3 == 0) ? 0xFF : 0; g = (i % 3 == 1) ? 0xFF : 0;
+                            b = (i % 3 == 2) ? 0xFF : 0; break;
+                    default: break;  // case 2: all zeros
+                }
+                grb[i * 3 + 0] = g;
+                grb[i * 3 + 1] = r;
+                grb[i * 3 + 2] = b;
+            }
             autoresearch::low_memory::Ws2812State& ws_state =
                 autoresearch::low_memory::ws2812State();
-            CRGB* leds_buf = ws_state.leds;
-            for (int i = 0; i < num_leds; ++i) {
-                switch (test_case) {
-                    case 0: leds_buf[i] = CRGB(0xFF, 0x00, 0x00); break;
-                    case 1: {
-                        if (i == 0)      leds_buf[i] = CRGB(0xFF, 0x00, 0x00);
-                        else if (i == 1) leds_buf[i] = CRGB(0x00, 0xFF, 0x00);
-                        else             leds_buf[i] = CRGB(0x00, 0x00, 0xFF);
-                        break;
-                    }
-                    case 2: leds_buf[i] = CRGB(0x00, 0x00, 0x00); break;
-                    case 3: leds_buf[i] = CRGB(0xFF, 0xFF, 0xFF); break;
-                    case 4: {
-                        const uint8_t r = (i % 3 == 0) ? 0xFFu : 0u;
-                        const uint8_t g = (i % 3 == 1) ? 0xFFu : 0u;
-                        const uint8_t b = (i % 3 == 2) ? 0xFFu : 0u;
-                        leds_buf[i] = CRGB(r, g, b);
-                        break;
-                    }
-                }
-            }
-            const int expected_bytes = num_leds * 3;
-            uint8_t* expected_buf = ws_state.expected;
-            for (int i = 0; i < num_leds; ++i) {
-                expected_buf[i * 3 + 0] = leds_buf[i].g;
-                expected_buf[i * 3 + 1] = leds_buf[i].r;
-                expected_buf[i * 3 + 2] = leds_buf[i].b;
-            }
+
+            // The TX pin is a run-time value (from the jumper scan), which
+            // addLeds<WS2812, PIN>() cannot take, and the 64 KB part has no
+            // room for the runtime Channel API (+21 KB). So drive the frame
+            // the way addLeds<> does on a low-memory part (SlimBridgeController
+            // direct show): GRB bytes in a ChannelData for the pin, handed to
+            // the platform default clockless driver.
+            using TxBus = fl::BusTraits<fl::DefaultBus<fl::ClocklessChipset>::value>;
+            fl::IChannelDriver& tx = TxBus::instance();
+            auto frame = fl::ChannelData::create(
+                fl::ChipsetVariant(fl::makeClockless<fl::TIMING_WS2812_800KHZ>(tx_pin)),
+                fl::move(grb));
+            if (!frame || !tx.canHandle(frame)) return setupFailed();
+            const u8* expected_buf = frame->getData().data();
+
             auto rx = fl::LpcSctRxChannel::create(rx_pin);
-            if (!rx) return fl::string("0,0,0,0,0,0,0,0");
+            if (!rx) return setupFailed();
             fl::RxConfig cfg;
             const fl::u32 expected_edges = (fl::u32)num_leds * 24u * 2u;
             fl::u32 cap = expected_edges + (expected_edges / 2u);
             // The low-memory sketch cannot afford the old 2048-edge reserve
             // on a 16 KB SRAM LPC845. 192 edges covers the 1- and 3-LED
-            // sanity cases and fails the larger diagnostic cases without
-            // starving setup()/loop() stack.
+            // cases; the 100-LED case (4800 edges) is checked on the prefix
+            // that fits, reported in the `cap` field.
             constexpr fl::u32 kLowMemWs2812EdgeCapacity = 192u;
             if (cap < 48u) cap = 48u;
             if (cap > kLowMemWs2812EdgeCapacity) cap = kLowMemWs2812EdgeCapacity;
             cfg.buffer_size = cap;
             cfg.start_low   = true;
-            if (!rx->begin(cfg)) return fl::string("0,0,0,0,0,0,0,0");
+            if (!rx->begin(cfg)) return setupFailed();
 
-            constexpr int kFixedTxPin = 10;  // P0_10
-            if (tx_pin != kFixedTxPin) {
-                return fl::string("0,0,0,0,0,0,0,0");
-            }
-            if (!ws_state.fastled_initialized) {
-                FastLED.addLeds<WS2812, kFixedTxPin, GRB>(leds_buf, 100);
-                ws_state.fastled_initialized = true;
-            }
-            FastLED.show();
+            tx.enqueue(frame);
+            tx.show();
+            tx.waitForReady(static_cast<fl::u32>(capture_ms));
             rx->wait(capture_ms);
+            // Give the TX pad back to GPIO, so a later findConnectedPins in
+            // this boot sees the jumper and not a USART-held pin.
+            fl::lpc::LpcUartDmaRuntime::releaseTxPin();
 
             uint8_t* decoded_buf = ws_state.decoded;
             for (int i = 0; i < expected_bytes; ++i) decoded_buf[i] = 0;
 
+            // The second argument is the window half-width, not a reset
+            // time (passing 0 demanded exact widths). The UART encoder sends
+            // whole 250 ns slots -- a 1 is H750/L500 against the nominal
+            // T1H 875/T1L 375 -- so the window must exceed that 125 ns.
+            constexpr fl::u32 kWs2812DecodeToleranceNs = 200u;
             fl::ChipsetTiming4Phase timing =
                 fl::make4PhaseTiming(
                     fl::to_runtime_timing<fl::WS2812ChipsetTiming>(),
-                    /*reset_us=*/0u);
+                    kWs2812DecodeToleranceNs);
 
             auto dec = rx->decode(timing, fl::span<u8>(decoded_buf, expected_bytes));
             const fl::u32 decoded_bytes = dec.ok() ? dec.value() : 0u;
 
+            // mismatched counts decoded bytes that differ; bytes that were
+            // never decoded are exp_bytes - dec_bytes.
             fl::u32 matched    = 0;
             fl::u32 mismatched = 0;
             for (fl::u32 i = 0; i < decoded_bytes && i < (fl::u32)expected_bytes; ++i) {
                 if (decoded_buf[i] == expected_buf[i]) ++matched;
                 else                                    ++mismatched;
             }
-            const fl::u32 missing = (fl::u32)expected_bytes - decoded_bytes;
-            mismatched += missing;
 
-            // Diagnostic-only raw-edge sample. Keep this small in .bss; the
-            // decoder uses the RX channel's bounded capture vector above.
+            // Count every captured edge, reading through a small .bss window
+            // (one read would stop at the window size).
             constexpr fl::size kLowMemWs2812ProbeSize = 64u;
-            fl::EdgeTime* probe = ws_state.probe;
-            const fl::size edges_captured = rx->getRawEdgeTimes(
-                fl::span<fl::EdgeTime>(probe, kLowMemWs2812ProbeSize));
+            fl::span<fl::EdgeTime> probe(ws_state.probe, kLowMemWs2812ProbeSize);
+            fl::size edges_captured = 0;
+            for (fl::size n; (n = rx->getRawEdgeTimes(probe, edges_captured)) > 0;) {
+                edges_captured += n;
+            }
 
-            const bool success = (mismatched == 0 && decoded_bytes == (fl::u32)expected_bytes);
+            // A capture of `cap` edges holds cap / 16 bytes (16 edges per
+            // byte), so the 100-LED frame is checked on that prefix; the
+            // smaller frames fit whole. Same rule as the host bench.
+            fl::u32 need = cap / 16u;
+            if (need > (fl::u32)expected_bytes) need = (fl::u32)expected_bytes;
+            const bool success = (mismatched == 0 && need > 0 && matched >= need);
 
             fl::sstream s;
             s << (success ? 1 : 0) << ',' << test_case << ',' << num_leds << ','
               << expected_bytes << ',' << decoded_bytes << ','
               << matched << ',' << mismatched << ','
-              << static_cast<fl::u32>(edges_captured);
+              << static_cast<fl::u32>(edges_captured) << ',' << cap;
             return s.str();
         });
 #endif  // FASTLED_AUTORESEARCH_LPC_WS2812

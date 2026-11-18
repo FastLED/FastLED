@@ -35,7 +35,7 @@ to force the older bit-bang default.
 Loopback setup:
 
 1. `fbuild build lpc845 --examples AutoResearch` flashes the consolidated `examples/AutoResearch/AutoResearch.ino` (its low-memory mode auto-engages on LPC8xx via `FL_PLATFORM_HAS_LARGE_MEMORY == 0`).
-2. Jumper TX pin → RX pin externally on the LPC845-BRK header (default: `P0_10` → `P0_11`).
+2. Jumper a TX pin to an RX pin on the LPC845-BRK header. The `findConnectedPins` scan finds the jumper and the bench drives TX from a push-pull pad; `P0_10`/`P0_11` are open-drain I2C pads and can only be the RX end.
 
 > **Pin discovery is on by default.** `bash autoresearch <board>` auto-sweeps the GPIO matrix for wired loopback pairs before running any driver test — no `--tx-pin`/`--rx-pin` flags required for the canonical fixture. Pass `--no-auto-discover-pins` to opt out (e.g. for known-bad wiring debug or CI determinism). Explicit `--tx-pin <N>`/`--rx-pin <N>` overrides keep working. See [#3296](https://github.com/FastLED/FastLED/issues/3296).
 
@@ -43,7 +43,7 @@ What the harness asserts:
 
 - **`bash autoresearch lpc845brk --bring-up`** — `echo` RPC round-trips; FL_WARN literal reaches the host; proves Serial + JSON-RPC + log pipeline intact.
 - **`bash autoresearch lpc845brk --pin-toggle-rx`** — SCT input-capture latches a bit-banged square wave; orchestrator asserts mean ±2 % and σ thresholds across 1/5/10 kHz rates (a polled toggle plus polled capture tops out near 13 kHz on the 24 MHz M0+) ([#3035](https://github.com/FastLED/FastLED/issues/3035) Phase 1).
-- **`bash autoresearch lpc845brk --ws2812-loopback`** — WS2812 byte-match: `FastLED.show()` drives 1/3/100 LEDs through the bit-bang clockless path, SCT-RX latches the wire, decoder asserts `mismatched == 0` ([#3035](https://github.com/FastLED/FastLED/issues/3035) Phase 2b).
+- **`bash autoresearch lpc845brk --ws2812-loopback`** — WS2812 byte-match: 1/3/100-LED frames go through the default clockless driver (UART DMA) on the scanned TX pin, SCT-RX+DMA latches the wire, and the decoder must match every byte. The 100-LED case checks only the first 12 bytes, because the 16 KB part captures 192 of the frame's 4800 edges ([#3035](https://github.com/FastLED/FastLED/issues/3035) Phase 2b, [#5266](https://github.com/FastLED/FastLED/issues/5266)).
 - **`bash autoresearch lpc845brk --uart`** — UART DMA WS2812 byte-match: `FastLED.addLeds<WS2812, PIN, GRB>()` drives the default `Bus::UART` path, a jumper bridges TX to the configured USART RX pin, USART RX-DMA captures the encoded bytes, and the host byte-compares decoded GRB data. `--dma-uart` remains the raw async USART transport bench.
 - **Link-symbol check** — `arm-none-eabi-nm -C firmware.elf | grep -E '(aeabi_d|aeabi_f|f2iz|d2iz|__l2f|__floatdisf)'` stays empty after [#3038](https://github.com/FastLED/FastLED/pull/3038). The harness can fold this into its reporting path so the no-soft-FP invariant is asserted on every run.
 
