@@ -183,3 +183,15 @@ def test_unbound_fails_even_when_the_scan_fails() -> None:
             return METHOD_NOT_FOUND
 
     assert check_core_pulls(_NoScan(), "t") is False
+
+
+def test_unanswered_binding_probe_fails() -> None:
+    # A timed-out probe (None) has not confirmed the binding, so the run must
+    # not fall through to a skip.
+    from ci.autoresearch.lpc_pin_scan import check_core_pulls
+
+    class _Silent:
+        def call_flat(self, method: str, **_k: object) -> object:
+            return None
+
+    assert check_core_pulls(_Silent(), "t") is False

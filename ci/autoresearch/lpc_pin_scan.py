@@ -125,13 +125,18 @@ def check_core_pulls(bench: Any, tag: str, timeout: float = 5.0) -> bool | None:
 
     # Probe the binding first, so a missing RPC fails even when the scan or
     # the idle-pin choice would skip the check. Four -1 slots touch no pad.
-    if (
-        bench.call_flat("corePullCheck", args=[-1] * 4, timeout=timeout)
-        is METHOD_NOT_FOUND
-    ):
+    # A bound RPC acknowledges an all-unused call with an empty string.
+    probe = bench.call_flat("corePullCheck", args=[-1] * 4, timeout=timeout)
+    if probe is METHOD_NOT_FOUND:
         print(
             f"[{tag}] core pull check FAIL: corePullCheck is not bound "
             "(FASTLED_AUTORESEARCH_LPC_CORE_PULL_CHECK missing from the build)"
+        )
+        return False
+    if not isinstance(probe, str):
+        print(
+            f"[{tag}] core pull check FAIL: binding probe got no answer "
+            f"within {timeout:.0f} s"
         )
         return False
     scan = run_scan(bench)
