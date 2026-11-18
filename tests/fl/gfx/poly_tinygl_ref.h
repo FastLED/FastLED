@@ -52,58 +52,19 @@
 ///    model — OVERWRITE: assign; BLEND: additive — so all three polygon
 ///    backends compose the same way and quality comparisons measure the
 ///    sampling, not the compositing.
-/// 5. **Division by 4.** Go's `v / 4` (int32) truncates toward zero; this
-///    port writes it as the exact shift form
-///    `v >= 0 ? (v >> 2) : ((v + 3) >> 2)` (polyTGDiv4). The result is
-///    bit-identical for every int32 (4 is a power of two), but the shift
-///    form is required, not merely faster: the clang AVR backend used by
-///    the fbuild firmware build (clang++ --target=avr -Os) miscompiles the
-///    plain `product / 4` form in this file, inverting the operands of the
-///    product division — it emits `4 / product` (verified by
-///    disassembly: `__mulsi3` followed by `__divmodsi4` with the constant
-///    4 loaded as the dividend). In the x-walk that garbage makes the
-///    reference walk non-terminating (a 300M-instruction AVR profile spent
-///    ~60% of its instructions in `__udivmodsi4` and completed 0 frames).
-///    The shift form compiles to a few instructions on every target.
-/// 6. **Loop form.** That same backend also miscompiles the reference's
-///    plain scanline loops in this file: it inverts the induction
-///    increment without flipping the loop condition. The y-walk
-///    `for (y = ymin; y < ymax; ++y)` is emitted as "keep looping while
-///    y < ymax" with a `y--` latch (disassembly: condition at 0x1416,
-///    decrement at 0x14b2 in the affected firmware), and the x-walk
-///    `while (x < width) { ...; ++x }` the same way (0x155a / 0x1a16).
-///    Both loops therefore never terminate: a 300M-instruction AVR
-///    profile of the affected firmware completed 0 frames with ~79% of
-///    its cycles spinning inside the walk. The bug is code-layout-
-///    dependent — the same source in the fbuild ATmega328P build
-///    (different layout) completed scenes — so the port writes both
-///    loops as explicit countdowns, which are behavior-identical: the
-///    y-rows in bottom-to-top order (row order is irrelevant — each row
-///    touches only its own pixels and the per-pixel compositing is
-///    commutative), and the x-walk as a countdown over the remaining
-///    pixel count with the pixel derived as `x = width - n` (strictly
-///    left-to-right, which the mask-extension semantics require). Both
-///    forms were verified directionally correct by disassembly of the
-///    fixed firmware.
-/// 7. **Fast-path termination on the sentinel.** Once the loops are fixed,
-///    the full-span fast path (`mask == 0xffffffff`) must end the row when
-///    `edgeEndLeft` has become the `0x7fffffff` "no more edges" sentinel,
-///    but two AVR-specific defects made it spin forever (0 frames):
-///    (a) the backend cached `edgeEndLeft` in a register that the
-///    subline loop's `__mulsi3` clobbers without a reload, so the fast
-///    path read a stale value (the last real `polyTGXleft` result) rather
-///    than the fresh slot — made `volatile` so every read comes from the
-///    slot; and (b) `int` is 16-bit on AVR, so the Go-faithful
-///    `n = width - (int)edgeEndLeft` truncated the sentinel to `0xffff`
-///    (-1) and wrapped `n` to `width+1` — a small positive value that
-///    re-armed the walk at `x = -1` (both the stale -1 and the fresh
-///    0x7fffffff truncate to the same 0xffff, which is why (a) alone
-///    fixed nothing). The port now tests the at/past-right-edge case in
-///    full 32-bit and ends the row there; a real in-range edge is always
-///    `< width`, so the remaining 16-bit casts are safe. A register probe
-///    of the affected firmware showed the walk stuck at `n=width+1,
-///    x=-1` with the advance-check reading the correct sentinel while the
-///    fast path used the truncated one (~8.7k fast-path spins per row).
+/// 5. **Pixel-column width.** Go's `int` is 64-bit, so `x = edgeEndLeft`
+///    carries the `0x7fffffff` "no more edges" sentinel intact and the
+///    `x < width` walk ends the row. C++ `int` is only 16-bit on AVR, so
+///    truncating that sentinel into an `int` column gives -1 and restarts
+///    the walk at x = -1 forever (reproduced in simavr with avr-gcc 7.3
+///    and clang 21: the bowtie and diamond scenes never finish a row).
+///    The x-walk is therefore explicitly 16-bit on every target (cheap
+///    on AVR): edge columns are saturated to `fl::i16` and the sentinel
+///    is `0x7fff`. This is exact, not an approximation. Vertices are
+///    clamped to ±8191 px, so every non-wrapped edge column lies in
+///    ±8192, and saturation only touches the already-garbage results of
+///    the Go int32 wrap. Canvases must be narrower than 0x7fff px. The
+///    division, loops, and edge pointers are the plain Go forms.
 ///
 /// # Sampling geometry (kept faithful)
 ///
@@ -132,9 +93,26 @@ inline fl::i32 polyTGWrapMul(fl::i32 a, fl::i32 b) FL_NO_EXCEPT {
     return static_cast<fl::i32>(static_cast<fl::u32>(a) * static_cast<fl::u32>(b));
 }
 
-/// Signed division by 4, truncating toward zero — Go/C++ semantics, written
-/// as shifts (deviation 5 below). Bit-identical to `p / 4` for every int32,
-/// and immune to the clang-avr miscompilation that inverts the plain form.
+/// Wrapping int32 add (Go's int32 + int32), without UB.
+inline fl::i32 polyTGWrapAdd(fl::i32 a, fl::i32 b) FL_NO_EXCEPT {
+    return static_cast<fl::i32>(static_cast<fl::u32>(a) + static_cast<fl::u32>(b));
+}
+
+/// "No more edges" sentinel for the 16-bit x-walk (deviation 5).
+constexpr fl::i16 kPolyTGNoEdge = 0x7fff;
+
+/// Saturate a pixel column (Q0) to i16 (deviation 5).
+inline fl::i16 polyTGSat16(fl::i32 v) FL_NO_EXCEPT {
+    if (v > 0x7fff) return 0x7fff;
+    if (v < -0x7fff) return -0x7fff;
+    return static_cast<fl::i16>(v);
+}
+
+/// Go's int32 `v / 4`: signed division truncating toward zero, written as
+/// shifts. Bit-identical to `p / 4` for every int32. The shift form is a
+/// speed choice, not a correctness fix: at -Os avr-gcc lowers a signed
+/// 32-bit `p / 4` to a `__divmodsi4` library call (~3x slower kernel on an
+/// ATmega2560) rather than a biased shift.
 inline fl::i32 polyTGDiv4(fl::i32 p) FL_NO_EXCEPT {
     return (p >= 0) ? (p >> 2) : ((p + 3) >> 2);
 }
@@ -147,28 +125,25 @@ struct TgEdge {
     fl::i32 xinc;     // .16 per pixel
 };
 
-/// polygon.go: (e polygonEdge) inrange — Go int32 division (truncating,
-/// written as shifts; deviation 5).
+/// polygon.go: (e polygonEdge) inrange — Go int32 division (truncating).
 inline bool polyTGInrange(const TgEdge& e, int y) FL_NO_EXCEPT {
     return y >= polyTGDiv4(e.ytop) && y < polyTGDiv4(e.ybottom + 3);
 }
 
 /// polygon.go: (e polygonEdge) xleft — Go precedence: the product/division
-/// first, then the add of xstart. Wrapping product, truncating /4
-/// (deviation 5), arithmetic >>16 (all Go semantics).
-inline fl::i32 polyTGXleft(const TgEdge& e, int y) FL_NO_EXCEPT {
-    const fl::i32 edgeY = y * 4 - e.ytop;
-    if (e.xinc > 0)
-        return (e.xstart + polyTGDiv4(polyTGWrapMul(edgeY, e.xinc))) >> 16;
-    return (e.xstart + polyTGDiv4(polyTGWrapMul(edgeY + 3, e.xinc))) >> 16;
+/// first, then the add of xstart. Wrapping product, truncating /4,
+/// arithmetic >>16 (all Go semantics), saturated to i16 (deviation 5).
+inline fl::i16 polyTGXleft(const TgEdge& e, int y) FL_NO_EXCEPT {
+    const fl::i32 edgeY = (fl::i32)y * 4 - e.ytop;
+    const fl::i32 dy = (e.xinc > 0) ? edgeY : edgeY + 3;
+    return polyTGSat16(polyTGWrapAdd(e.xstart, polyTGDiv4(polyTGWrapMul(dy, e.xinc))) >> 16);
 }
 
 /// polygon.go: (e polygonEdge) xright.
-inline fl::i32 polyTGXright(const TgEdge& e, int y) FL_NO_EXCEPT {
-    const fl::i32 edgeY = y * 4 - e.ytop;
-    if (e.xinc > 0)
-        return (e.xstart + polyTGDiv4(polyTGWrapMul(edgeY + 3, e.xinc))) >> 16;
-    return (e.xstart + polyTGDiv4(polyTGWrapMul(edgeY, e.xinc))) >> 16;
+inline fl::i16 polyTGXright(const TgEdge& e, int y) FL_NO_EXCEPT {
+    const fl::i32 edgeY = (fl::i32)y * 4 - e.ytop;
+    const fl::i32 dy = (e.xinc > 0) ? edgeY + 3 : edgeY;
+    return polyTGSat16(polyTGWrapAdd(e.xstart, polyTGDiv4(polyTGWrapMul(dy, e.xinc))) >> 16);
 }
 
 /// Popcount of a u32 (Go's bits.OnesCount32; gcc/clang builtin on host and
@@ -238,8 +213,7 @@ inline void drawPolygonTinyGLRef(Canvas<PixelT>& canvas, const PixelT& color,
         edges[b + 1] = v;
     }
 
-    // Vertical bounds (polygon.go updateBounds, Go truncating division
-    // written as shifts; deviation 5).
+    // Vertical bounds (polygon.go updateBounds, Go truncating division).
     int ymin = height, ymax = -1;
     for (int i = 0; i < ne; ++i) {
         const int yt = polyTGDiv4(edges[i].ytop);
@@ -252,50 +226,33 @@ inline void drawPolygonTinyGLRef(Canvas<PixelT>& canvas, const PixelT& color,
     if (ymin >= ymax) return;
 
     // The scanline walk (polygon.go drawPolygon), verbatim structure.
-    // (deviation 6: explicit bottom-to-top countdown; row order is
-    // irrelevant — each row touches only its own pixels.)
-    for (int y = ymax - 1; y >= ymin; --y) {
+    for (int y = ymin; y < ymax; ++y) {
         int edgeStart = 0;
         while (edgeStart < ne && !polyTGInrange(edges[edgeStart], y)) ++edgeStart;
         if (edgeStart >= ne) continue;
 
-        fl::i32 edgeStartRight = polyTGXright(edges[edgeStart], y);
+        fl::i16 edgeStartRight = polyTGXright(edges[edgeStart], y);
         int edgeEnd = edgeStart;
-        // volatile: deviation 7. The full-span fast path below reads
-        // edgeEndLeft *after* the per-pixel subline loop, and under
-        // clang-avr -Os the subline loop's __mulsi3 clobbers the register
-        // edgeEndLeft is cached in without it being reloaded from its
-        // stack slot. The advance-loop condition reads the (correct,
-        // up-to-date) slot, but the fast path read the stale register —
-        // the last real polyTGXleft result instead of the 0x7fffffff
-        // sentinel — and jumped the walk backwards, spinning forever.
-        // volatile forces every read (in particular the fast-path read)
-        // to come from the slot.
-        volatile fl::i32 edgeEndLeft = polyTGXleft(edges[edgeEnd], y);
+        fl::i16 edgeEndLeft = polyTGXleft(edges[edgeEnd], y);
 
         fl::u32 mask = 0;
         // The x-walk starts at the UNCLAMPED xleft (possibly negative;
-        // deviation 3 keeps the walk faithful, writes are clamped).
-        // (deviation 6: countdown over the remaining pixel count with x
-        // derived per iteration — strictly left-to-right, but in a form
-        // the clang AVR backend compiles correctly.)
-        const int x0 = static_cast<int>(polyTGXleft(edges[edgeStart], y));
-        int n = width - x0;
-        while (n > 0) {
-            const int x = width - n;
-            --n;
-            while (edgeStartRight < (fl::i32)x) {
+        // deviation 3 keeps the walk faithful, writes are clamped). x is
+        // i16 on every target (deviation 5).
+        fl::i16 x = polyTGXleft(edges[edgeStart], y);
+        while (x < width) {
+            while (edgeStartRight < x) {
                 ++edgeStart;
                 while (edgeStart < ne && !polyTGInrange(edges[edgeStart], y)) ++edgeStart;
                 edgeStartRight = (edgeStart < ne) ? polyTGXright(edges[edgeStart], y)
-                                                  : 0x7fffffff;
+                                                  : kPolyTGNoEdge;
             }
             if (edgeStart >= ne) break;
-            while (edgeEndLeft <= (fl::i32)x) {
+            while (edgeEndLeft <= x) {
                 ++edgeEnd;
                 while (edgeEnd < ne && !polyTGInrange(edges[edgeEnd], y)) ++edgeEnd;
                 edgeEndLeft = (edgeEnd < ne) ? polyTGXleft(edges[edgeEnd], y)
-                                             : 0x7fffffff;
+                                             : kPolyTGNoEdge;
             }
 
             for (int i = edgeStart; i < edgeEnd; ++i) {
@@ -305,44 +262,34 @@ inline void drawPolygonTinyGLRef(Canvas<PixelT>& canvas, const PixelT& color,
                     const fl::i32 sublineY = y * 4 + subline - ed.ytop;  // .2
                     if (static_cast<fl::u32>(sublineY) >=
                         static_cast<fl::u32>(ed.ybottom - ed.ytop)) continue;
-                    const fl::i32 xoffset = ed.xstart + polyTGDiv4(polyTGWrapMul(sublineY, ed.xinc));
-                    const fl::i32 bitOffsetX = (xoffset - ((fl::i32)x << 16)) >> 13;
+                    const fl::i32 xoffset = polyTGWrapAdd(
+                        ed.xstart, polyTGDiv4(polyTGWrapMul(sublineY, ed.xinc)));
+                    const fl::i32 bitOffsetX =
+                        polyTGWrapAdd(xoffset, polyTGWrapMul(-(fl::i32)x, 65536L)) >> 13;
                     if (static_cast<fl::u32>(bitOffsetX) >= 8u) continue;
-                    const fl::u32 bits = (1u << (8u - static_cast<fl::u32>(bitOffsetX))) - 1u;
+                    const fl::u32 bits = (1UL << (8u - static_cast<fl::u32>(bitOffsetX))) - 1UL;
                     mask ^= bits << (subline * 8);
                 }
             }
 
             if (mask != 0) {
-                if (mask == 0xffffffffu) {
+                if (mask == 0xffffffffUL) {
                     // Full-span fast path (polygon.go drawLine): the whole
-                    // run up to the next edge's xleft is solid color.
-                    //
-                    // edgeEndLeft is the 0x7fffffff sentinel once the edge
-                    // walk has advanced past the last in-range edge. `int`
-                    // is 16-bit on AVR, so the Go-faithful
-                    // `n = width - (int)edgeEndLeft` would truncate the
-                    // sentinel to 0xffff (-1) and wrap n to width+1 — a
-                    // small positive value that re-arms the walk and spins
-                    // it forever instead of ending the row (deviation 7).
-                    // Test the at/past-right-edge case in full 32-bit first
-                    // (a real in-range edge is always < width, so the
-                    // 16-bit casts below are safe for it) and end the row.
-                    const bool runToRightEdge = edgeEndLeft >= (fl::i32)width;
-                    int runX0 = x;
-                    if (runX0 < 0) runX0 = 0;
-                    int runX1 = runToRightEdge ? width
-                                               : static_cast<int>(edgeEndLeft);
+                    // run up to the next edge's xleft is solid color, then
+                    // jump there. Past the last edge edgeEndLeft is the
+                    // kPolyTGNoEdge sentinel, which ends the row via x < width.
+                    const int runX0 = (x < 0) ? 0 : x;
+                    const int runX1 = (edgeEndLeft < width) ? edgeEndLeft : width;
                     if (runX1 > runX0) {
                         PixelT* row = pixels + y * width + runX0;
+                        const int count = runX1 - runX0;
                         if (Overwrite) {
-                            for (int i = 0; i < runX1 - runX0; ++i) row[i] = color;
+                            for (int i = 0; i < count; ++i) row[i] = color;
                         } else {
-                            for (int i = 0; i < runX1 - runX0; ++i) row[i] += color;
+                            for (int i = 0; i < count; ++i) row[i] += color;
                         }
                     }
-                    if (runToRightEdge) break;  // run reached the right edge
-                    n = width - runX1;  // jump (skips the --n)
+                    x = edgeEndLeft;
                     continue;
                 }
                 // alpha = popcount(mask) << 3 (0..248; all-32 is the fast
@@ -359,8 +306,9 @@ inline void drawPolygonTinyGLRef(Canvas<PixelT>& canvas, const PixelT& color,
                     else px += c;
                 }
                 // Extend rightmost subpixels to full sub-scanlines.
-                mask = (mask & 0x01010101u) * 255u;
+                mask = (mask & 0x01010101UL) * 255UL;
             }
+            ++x;
         }
     }
 }
