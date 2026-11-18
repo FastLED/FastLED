@@ -1,5 +1,6 @@
 #pragma once
 
+#include "fl/stl/compiler_control.h"
 #include "fl/stl/noexcept.h"
 #include "fl/stl/static_assert.h"
 
@@ -404,6 +405,91 @@ static inline int polyTopBit128(fl::u32 m3, fl::u32 m2, fl::u32 m1,
     return -1;
 }
 
+/// T = round_half_up(M / dv) clamped to kPolyOne, for M = (mhi, mlo) and
+/// 0 < dv < 2^63 (polyLineT28's quotient step). Exact: the 64-bit
+/// remainder state s of the shift-subtract below satisfies s < dv at the
+/// start of every step, so s <- 2s + bit never reaches 2^64 and the loop
+/// computes q = floor(M/dv), r = M mod dv. drawPolygon always passes
+/// dv > 0; a direct polyLineT28 call with D == 0 passes dv == 0, which
+/// clamps to kPolyOne exactly as the committed loop did. Kept out of line
+/// so polyLineT28's two call sites (normal and huge edges) share one copy:
+/// on AVR that measured smaller AND faster than one inlined loop with a
+/// runtime-selected divisor (the register allocator spills inside it).
+/// static (like polyTopBit128): it uses the internal-linkage kPolyOne.
+static inline FL_NO_INLINE fl::i32 polyDivRoundT28(
+    fl::u64 mhi, fl::u64 mlo, fl::u64 dv) FL_NO_EXCEPT {
+    fl::u32 m3 = (fl::u32)(mhi >> 32), m2 = (fl::u32)mhi;
+    fl::u32 m1 = (fl::u32)(mlo >> 32), m0 = (fl::u32)mlo;
+    const int top = polyTopBit128(m3, m2, m1, m0);
+    // The committed loop feeds bits 93..0 only; M bits above 93 are
+    // never read, so cap the window top at 93. In-range inputs never
+    // reach it (quotient < 2^29 and dv < 2^63 give M < 2^92).
+    const int t = (top < 94) ? top : 93;
+    // Left-align M by (127 - t) so its highest relevant bit reaches bit
+    // 127 of the window: the loop then feeds numerator bits with the
+    // fixed (w1 >> 63) extraction (constant-width shifts only — no
+    // libgcc __*di3 helpers on AVR).
+    const int k = 127 - t;
+    const int kl = k >> 5;
+    const int kb = k & 31;
+    {
+        fl::u32 n3, n2, n1, n0;
+        if (kl >= 3)      { n3 = m0; n2 = 0; n1 = 0; n0 = 0; }
+        else if (kl == 2) { n3 = m1; n2 = m0; n1 = 0; n0 = 0; }
+        else if (kl == 1) { n3 = m2; n2 = m1; n1 = m0; n0 = 0; }
+        else              { n3 = m3; n2 = m2; n1 = m1; n0 = m0; }
+        if (kb) {
+            const fl::u32 h3 = n2 >> (32 - kb);
+            const fl::u32 h2 = n1 >> (32 - kb);
+            const fl::u32 h1 = n0 >> (32 - kb);
+            n3 = (n3 << kb) | h3;
+            n2 = (n2 << kb) | h2;
+            n1 = (n1 << kb) | h1;
+            n0 = n0 << kb;
+        }
+        m3 = n3; m2 = n2; m1 = n1; m0 = n0;
+    }
+    // The shift-subtract, expressed in 32-bit lanes: each lane op is
+    // the corresponding half of the u64 op it replaces (same carries,
+    // same mod-2^64 wraps of the remainder and quotient states), but
+    // avr-gcc inlines 32-bit shifts, compares and subtracts instead
+    // of emitting __lshrdi3/__ashldi3/__cmpdi2/__subdi3 helper calls
+    // per iteration — the dominant cost of this loop on AVR.
+    const fl::u32 d1 = (fl::u32)(dv >> 32), d0 = (fl::u32)dv;
+    fl::u32 s1 = 0, s0 = 0;  // remainder (high, low), always < dv
+    fl::u32 q1 = 0, q0 = 0;  // (q<<1)|ge each step; keeps the <64 bits
+    for (int i = t; i >= 0; --i) {
+        const fl::u32 bit = m3 >> 31;
+        m3 = (m3 << 1) | (m2 >> 31);
+        m2 = (m2 << 1) | (m1 >> 31);
+        m1 = (m1 << 1) | (m0 >> 31);
+        m0 = m0 << 1;
+        const fl::u32 sh = s1 << 1, sl = s0 << 1;
+        s1 = sh | (s0 >> 31);
+        s0 = sl | bit;
+        const fl::u32 ge = (s1 > d1) || (s1 == d1 && s0 >= d0);
+        if (ge) {
+            const fl::u32 sb = s0 - d0;
+            s1 -= d1 + (fl::u32)(sb > s0);
+            s0 = sb;
+        }
+        const fl::u32 qh = q1 << 1, ql = q0 << 1;
+        q1 = qh | (q0 >> 31);
+        q0 = ql | ge;
+    }
+    // Round half-up: if 2r >= dv, q++ (r = (s1, s0)). The carry into
+    // r1 comes out of s0's MSB; s1's MSB is the 2r overflow bit.
+    const fl::u32 r1 = (s1 << 1) | (s0 >> 31), r0 = s0 << 1;
+    if ((s1 >> 31) != 0 || r1 > d1 || (r1 == d1 && r0 >= d0)) {
+        const fl::u32 qb = q0 + 1;
+        q1 += (fl::u32)(qb < q0);  // carry: q0 wrapped past 0xFFFFFFFF
+        q0 = qb;
+    }
+    fl::u64 q = ((fl::u64)q1 << 32) | q0;
+    if (q > (fl::u64)kPolyOne) q = (fl::u64)kPolyOne;  // physical bound
+    return (fl::i32)q;
+}
+
 /// Exact left-of-line coverage of one pixel for one polygon edge.
 ///
 /// Line: x(tau) = x_q + (B/D) * tau with tau in Q16.16 relative to the row
@@ -423,13 +509,16 @@ static inline int polyTopBit128(fl::u32 m3, fl::u32 m2, fl::u32 m1,
 /// M < 2^98, den = 32*D*S < 2^67; the exact quotient is < 2^31 and the
 /// result is clamped to 2^28 = kPolyOne, the physical full-pixel bound.
 ///
-/// The quotient step is a byte-faithful reproduction of the committed
-/// implementation's 94-iteration shift-subtract (see the den-range
-/// breakdown below the M/den setup). M is left-aligned so its highest
-/// relevant bit sits at the top of the 128-bit window, and the numerator
-/// is fed top-down by left-shifting the window in place — constant-width
-/// shifts only, no FPU, no __int128, and on AVR the whole loop stays in
-/// registers (no libgcc __*di3 helper calls). An M == 0 numerator
+/// The quotient is the exact round-half-up M / den for every den (#5286).
+/// For den < 2^63 (every edge with dx*dy < 2^26 px^2, i.e. all normal
+/// polygons) it is the committed 457b21d1b shift-subtract, which is exact
+/// in that range; huge edges (den >= 2^63) divide M >> 4 by den >> 4
+/// instead, see the comment at the den setup. In polyDivRoundT28 M is
+/// left-aligned so its highest relevant bit sits at the top of the
+/// 128-bit window, and the numerator is fed top-down by left-shifting the
+/// window in place — constant-width shifts only, no FPU, no __int128, and
+/// on AVR the whole loop stays in registers (no libgcc __*di3 helper
+/// calls). An M == 0 numerator
 /// (line does not cross the pixel within [ta, tb]) returns 0 immediately.
 /// Result: [0, kPolyOne].
 inline fl::i32 polyLineT28(fl::i32 B, fl::i32 D, fl::i64 u,
@@ -473,120 +562,38 @@ inline fl::i32 polyLineT28(fl::i32 B, fl::i32 D, fl::i64 u,
     const fl::u64 DS = (fl::u64)S * (fl::u64)D;
     const fl::u64 dhi = DS >> 59;
     const fl::u64 dlo = DS << 5;
-    // The committed implementation's quotient step (94-iteration
-    // shift-subtract of M by den) has a latent 128-bit shift bug: it writes
-    // (rl = (rl<<1) | (rh>>63) | bit; rh = rh<<1;) while treating (rh, rl)
-    // as (high, low) for the compare and subtraction — the carry out of the
-    // LOW word's MSB is dropped and the high word's MSB is folded in
-    // instead. The remainder stays < den, so rh never reaches 2^63 and the
-    // buggy loop degenerates deterministically by den range:
-    //   dhi >= 2 (den >= 2^65): the subtraction condition (rh > dhi ||
-    //     (rh == dhi && rl >= dlo)) with rh == 0 is never true -> q == 0,
-    //     and the round-half-up check (2r vs den with r < 2^64) can never
-    //     pass -> T == 0.
-    //   dhi == 1 (den in [2^64, 2^65)): likewise q == 0; the loop folds M
-    //     into rl = M mod 2^64 and T is just the round-half-up bit:
-    //     T == (mlo >= 2^63) && (2*mlo >= den) ? 1 : 0.
-    //   dhi == 0 (den < 2^64): rh stays 0 (a spurious borrow is impossible:
-    //     subtraction only happens when rl >= dlo) and the loop is a 64-bit
-    //     state machine s <- (2s + bit) mod 2^64 that subtracts den when
-    //     s >= den — a long division that silently drops the carry out of
-    //     the remainder's MSB. That drop is exactly where the committed
-    //     output diverges from the exact quotient, so it is reproduced.
-    if (dhi >= 2) return 0;
-    if (dhi == 1)
-        return ((mlo >> 63) != 0 && (mlo << 1) >= dlo) ? 1 : 0;
-    {
-        // Fast path: for den < 2^63 the committed 94-iteration
-        // shift-subtract is an EXACT long division. Its 64-bit remainder
-        // state s satisfies s < den at the start of every step, so with
-        // den < 2^63 the update s <- 2s + bit never reaches 2^64 — the
-        // latent 128-bit carry drop can't fire, and the loop computes
-        // q = floor(M/den), r = M mod den (M read up to bit 93). If
-        // mhi == 0 the numerator is < 2^64, so the committed q
-        // accumulation (at most 64 steps) cannot wrap its u64 either.
-        // The whole loop then reduces to one exact 64/64 division plus
-        // the same round-half-up and physical clamp. On AVR the division
-        // lowers to __udivdi3 (already linked for the sort keys).
-        // dlo != 0 keeps this total for degenerate direct calls (the
-        // committed loop never divided; drawPolygon always feeds den > 0).
-        if (dlo != 0 && mhi == 0 && dlo < (fl::u64)1 << 63) {
-            fl::u64 q = mlo / dlo;
-            const fl::u64 r = mlo - q * dlo;  // mlo % dlo, one division
-            if ((r >> 63) != 0 || (r << 1) >= dlo) ++q;
-            if (q > (fl::u64)kPolyOne) q = (fl::u64)kPolyOne;
-            return (fl::i32)q;
-        }
-        fl::u32 m3 = (fl::u32)(mhi >> 32), m2 = (fl::u32)mhi;
-        fl::u32 m1 = (fl::u32)(mlo >> 32), m0 = (fl::u32)mlo;
-        const int top = polyTopBit128(m3, m2, m1, m0);
-        // The committed loop feeds bits 93..0 only; M bits above 93 are
-        // never read, so cap the window top at 93 (M can reach ~2^97).
-        const int t = (top < 94) ? top : 93;
-        // Left-align M by (127 - t) so its highest relevant bit reaches bit
-        // 127 of the window: the loop then feeds numerator bits with the
-        // fixed (w1 >> 63) extraction (constant-width shifts only — no
-        // libgcc __*di3 helpers on AVR).
-        const int k = 127 - t;
-        const int kl = k >> 5;
-        const int kb = k & 31;
-        {
-            fl::u32 n3, n2, n1, n0;
-            if (kl >= 3)      { n3 = m0; n2 = 0; n1 = 0; n0 = 0; }
-            else if (kl == 2) { n3 = m1; n2 = m0; n1 = 0; n0 = 0; }
-            else if (kl == 1) { n3 = m2; n2 = m1; n1 = m0; n0 = 0; }
-            else              { n3 = m3; n2 = m2; n1 = m1; n0 = m0; }
-            if (kb) {
-                const fl::u32 h3 = n2 >> (32 - kb);
-                const fl::u32 h2 = n1 >> (32 - kb);
-                const fl::u32 h1 = n0 >> (32 - kb);
-                n3 = (n3 << kb) | h3;
-                n2 = (n2 << kb) | h2;
-                n1 = (n1 << kb) | h1;
-                n0 = n0 << kb;
-            }
-            m3 = n3; m2 = n2; m1 = n1; m0 = n0;
-        }
-        // The committed loop, expressed in 32-bit lanes: each lane op is
-        // the corresponding half of the u64 op it replaces (same carries,
-        // same mod-2^64 wraps of the remainder and quotient states), but
-        // avr-gcc inlines 32-bit shifts, compares and subtracts instead
-        // of emitting __lshrdi3/__ashldi3/__cmpdi2/__subdi3 helper calls
-        // per iteration — the dominant cost of this loop on AVR.
-        const fl::u32 d1 = (fl::u32)(dlo >> 32), d0 = (fl::u32)dlo;
-        fl::u32 s1 = 0, s0 = 0;  // buggy-loop remainder (high, low)
-        fl::u32 q1 = 0, q0 = 0;  // (q<<1)|ge each step; keeps the <64 bits
-        for (int i = t; i >= 0; --i) {
-            const fl::u32 bit = m3 >> 31;
-            m3 = (m3 << 1) | (m2 >> 31);
-            m2 = (m2 << 1) | (m1 >> 31);
-            m1 = (m1 << 1) | (m0 >> 31);
-            m0 = m0 << 1;
-            const fl::u32 sh = s1 << 1, sl = s0 << 1;
-            s1 = sh | (s0 >> 31);
-            s0 = sl | bit;
-            const fl::u32 ge = (s1 > d1) || (s1 == d1 && s0 >= d0);
-            if (ge) {
-                const fl::u32 sb = s0 - d0;
-                s1 -= d1 + (fl::u32)(sb > s0);
-                s0 = sb;
-            }
-            const fl::u32 qh = q1 << 1, ql = q0 << 1;
-            q1 = qh | (q0 >> 31);
-            q0 = ql | ge;
-        }
-        // Round half-up: if 2r >= den, q++ (r = (s1, s0)). The carry into
-        // r1 comes out of s0's MSB; s1's MSB is the 2r overflow bit.
-        const fl::u32 r1 = (s1 << 1) | (s0 >> 31), r0 = s0 << 1;
-        if ((s1 >> 31) != 0 || r1 > d1 || (r1 == d1 && r0 >= d0)) {
-            const fl::u32 qb = q0 + 1;
-            q1 += (fl::u32)(qb < q0);  // carry: q0 wrapped past 0xFFFFFFFF
-            q0 = qb;
-        }
-        fl::u64 q = ((fl::u64)q1 << 32) | q0;
-        if (q > (fl::u64)kPolyOne) q = (fl::u64)kPolyOne;  // physical bound
+    // The loop below is a 64-bit remainder state machine
+    // s <- 2s + bit, s -= dv when s >= dv. It is an exact long division
+    // only while dv < 2^63 (s < dv keeps 2s + bit below 2^64). The
+    // committed implementation always fed den itself, so for den >= 2^63
+    // the carry out of the remainder's MSB was dropped (den in
+    // [2^63, 2^64)) or the quotient collapsed to 0/1 (den >= 2^64), giving
+    // wrong coverage for edges of dx*dy >= 2^26 px^2 (#5286). Those huge
+    // edges instead divide M' = M >> 4 by dv = den >> 4 = 2*DS < 2^63:
+    //   floor(M' / dv) == floor(M / den)   (nested floors collapse), and
+    //   with R = 16*r' + (M mod 16), 2R >= den  <=>  2r' + bit3(M) >= dv
+    //   <=>  2r' >= dv, because 2r' and dv are both even.
+    // So quotient AND round-half-up are exact with the unchanged loop and
+    // rounding in polyDivRoundT28; only the huge-edge setup is new.
+    if (dhi != 0 || (dlo >> 63) != 0) {
+        const fl::u64 nlo = (mlo >> 4) | (mhi << 60);  // M < 2^98, so
+        return polyDivRoundT28(mhi >> 4, nlo, DS << 1);  // M >> 4 < 2^94
+    }
+    // Fast path: if mhi == 0 the numerator is < 2^64, so the loop's q
+    // accumulation (at most 64 steps) cannot wrap its u64 and the whole
+    // loop reduces to one exact 64/64 division plus the same round-half-up
+    // and physical clamp. On AVR the division lowers to __udivdi3 (already
+    // linked for the sort keys). dlo != 0 keeps this total for degenerate
+    // direct calls (the committed loop never divided; drawPolygon always
+    // feeds den > 0).
+    if (dlo != 0 && mhi == 0) {
+        fl::u64 q = mlo / dlo;
+        const fl::u64 r = mlo - q * dlo;  // mlo % dlo, one division
+        if ((r >> 63) != 0 || (r << 1) >= dlo) ++q;
+        if (q > (fl::u64)kPolyOne) q = (fl::u64)kPolyOne;
         return (fl::i32)q;
     }
+    return polyDivRoundT28(mhi, mlo, dlo);
 }
 
 /// Disc context: bundles per-circle constants into a struct passed by reference.

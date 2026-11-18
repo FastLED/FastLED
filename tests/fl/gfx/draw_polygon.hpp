@@ -209,16 +209,42 @@ static const PolyTestShape* polyTestFind(const char* name) {
 // ============================================================================
 // Byte-fidelity reference for the committed kernel quotient (regression gate).
 //
-// The per-pixel kernel fl::gfx::detail::polyLineT28 divides its 128-bit
-// numerator by its 128-bit denominator with the committed (457b21d1b)
-// 94-iteration shift-subtract. That loop has a latent shift-carry bug (it
-// folds the high word's MSB into the low word instead of the low word's own
-// MSB), and the committed pixel output depends on the bug's deterministic
-// degeneracy by den range. The reference below is that committed algorithm
-// verbatim: the differential fuzz and the regime pins compare the live
-// kernel against it, and it must NOT be "fixed" without regenerating every
-// golden value in this file.
+// The per-pixel kernel fl::gfx::detail::polyLineT28 originally divided its
+// 128-bit numerator by its 128-bit denominator with the committed
+// (457b21d1b) 94-iteration shift-subtract. That loop has a latent
+// shift-carry bug (it folds the high word's MSB into the low word instead
+// of the low word's own MSB), which only fires for den >= 2^63 — edges of
+// dx*dy >= 2^26 px^2. Below that it is an exact division, and every golden
+// pixel value in this file comes from that range. The committed algorithm
+// is kept verbatim below to prove the live kernel is byte-identical to it
+// for den < 2^63; polyTestExactT28 is the reference for all den (#5286).
 // ============================================================================
+
+/// Kernel numerator M (128-bit, as a (hi, lo) u64 pair) for B != 0: the
+/// trapezoid/rectangle build shared by both reference kernels below.
+static void polyTestBuildM(fl::i32 B, fl::i32 D, fl::i64 u, fl::i32 ta,
+                           fl::i32 tb, fl::u64& mhi, fl::u64& mlo) {
+    const fl::i64 sa = (fl::i64)B * ta;
+    const fl::i64 sb = (fl::i64)B * tb;
+    const fl::i64 s_lo = (sa < sb) ? sa : sb;
+    const fl::i64 s_hi = (sa < sb) ? sb : sa;
+    const fl::i64 c0 = -u;
+    const fl::i64 c1 = (fl::i64)2 * D * 32768 - u;
+    mhi = 0;
+    mlo = 0;
+    const fl::i64 lo = (s_lo > c0) ? s_lo : c0;
+    const fl::i64 hi = (s_hi < c1) ? s_hi : c1;
+    if (hi > lo)
+        fl::gfx::detail::polyMul128((fl::u64)(hi - lo),
+                                    (fl::u64)((u + lo) + (u + hi)), mhi, mlo);
+    const fl::i64 lo2 = (s_lo > c1) ? s_lo : c1;
+    if (s_hi > lo2) {
+        fl::u64 phi = 0, plo = 0;
+        fl::gfx::detail::polyMul128((fl::u64)(s_hi - lo2),
+                                    (fl::u64)((fl::i64)4 * D * 32768), phi, plo);
+        fl::gfx::detail::polyAdd128(mhi, mlo, phi, plo);
+    }
+}
 
 /// Committed 457b21d1b kernel: trapezoid M build + 94-iteration
 /// shift-subtract quotient (byte-for-byte, latent bug included).
@@ -233,25 +259,8 @@ static fl::i32 polyTestCommittedT28(fl::i32 B, fl::i32 D, fl::i64 u,
         return (fl::i32)(((w * (tb - ta)) + 8) >> 4);
     }
     const fl::i64 S = (B < 0) ? -(fl::i64)B : (fl::i64)B;
-    const fl::i64 sa = (fl::i64)B * ta;
-    const fl::i64 sb = (fl::i64)B * tb;
-    const fl::i64 s_lo = (sa < sb) ? sa : sb;
-    const fl::i64 s_hi = (sa < sb) ? sb : sa;
-    const fl::i64 c0 = -u;
-    const fl::i64 c1 = (fl::i64)2 * D * 32768 - u;
     fl::u64 mhi = 0, mlo = 0;
-    const fl::i64 lo = (s_lo > c0) ? s_lo : c0;
-    const fl::i64 hi = (s_hi < c1) ? s_hi : c1;
-    if (hi > lo)
-        fl::gfx::detail::polyMul128((fl::u64)(hi - lo),
-                                    (fl::u64)((u + lo) + (u + hi)), mhi, mlo);
-    const fl::i64 lo2 = (s_lo > c1) ? s_lo : c1;
-    if (s_hi > lo2) {
-        fl::u64 phi = 0, plo = 0;
-        fl::gfx::detail::polyMul128((fl::u64)(s_hi - lo2),
-                                    (fl::u64)((fl::i64)4 * D * 32768), phi, plo);
-        fl::gfx::detail::polyAdd128(mhi, mlo, phi, plo);
-    }
+    polyTestBuildM(B, D, u, ta, tb, mhi, mlo);
     // den = 32 * D * S as a u64 pair (D*S < 2^62, so den_hi = DS >> 59).
     const fl::u64 DS = (fl::u64)S * (fl::u64)D;
     const fl::u64 dhi = DS >> 59;
@@ -276,6 +285,65 @@ static fl::i32 polyTestCommittedT28(fl::i32 B, fl::i32 D, fl::i64 u,
     if (rh2 > dhi || (rh2 == dhi && rl2 >= dlo)) ++q;
     if (q > (fl::u64)fl::gfx::detail::kPolyOne) q = (fl::u64)fl::gfx::detail::kPolyOne;
     return (fl::i32)q;
+}
+
+/// Exact kernel reference (#5286): the committed algorithm above with its
+/// two quotient defects removed — the shift carries the LOW word's MSB
+/// (rl >> 63) into the high word, and the loop reads the whole 128-bit
+/// numerator instead of bits 93..0 only. That makes it a plain exact
+/// 128/128 long division, so T = round_half_up(M / den) clamped to
+/// kPolyOne, provided the quotient is < 2^64 (only its low 64 bits are
+/// kept) — always true here: in-range ta/tb bound it by 2^29. For
+/// den < 2^63 the committed loop is already exact, so this agrees with
+/// polyTestCommittedT28 there and differs only for huge edges.
+static fl::i32 polyTestExactT28(fl::i32 B, fl::i32 D, fl::i64 u,
+                                fl::i32 ta, fl::i32 tb) {
+    if (B == 0) return polyTestCommittedT28(B, D, u, ta, tb);
+    const fl::i64 S = (B < 0) ? -(fl::i64)B : (fl::i64)B;
+    fl::u64 mhi = 0, mlo = 0;
+    polyTestBuildM(B, D, u, ta, tb, mhi, mlo);
+    const fl::u64 DS = (fl::u64)S * (fl::u64)D;
+    const fl::u64 dhi = DS >> 59;
+    const fl::u64 dlo = DS << 5;
+    fl::u64 q = 0, rh = 0, rl = 0;
+    for (int i = 127; i >= 0; --i) {
+        const fl::u64 bit = (i >= 64) ? ((mhi >> (i - 64)) & 1u)
+                                      : ((mlo >> i) & 1u);
+        rh = (rh << 1) | (rl >> 63);
+        rl = (rl << 1) | bit;
+        if (rh > dhi || (rh == dhi && rl >= dlo)) {
+            if (i < 64) q |= (fl::u64)1 << i;
+            const fl::u64 borrow = (rl < dlo) ? 1u : 0u;
+            rl -= dlo;
+            rh -= dhi + borrow;
+        }
+    }
+    // Round half-up: 2r >= den (r < den < 2^67, so 2r fits in 128 bits).
+    const fl::u64 rh2 = (rh << 1) | (rl >> 63), rl2 = rl << 1;
+    if (rh2 > dhi || (rh2 == dhi && rl2 >= dlo)) ++q;
+    if (q > (fl::u64)fl::gfx::detail::kPolyOne) q = (fl::u64)fl::gfx::detail::kPolyOne;
+    return (fl::i32)q;
+}
+
+/// Floating-point cross-check of polyTestExactT28's integer model: the
+/// same trapezoid/rectangle integral in double precision, unrounded.
+static double polyTestDoubleT28(fl::i32 B, fl::i32 D, fl::i64 u,
+                                fl::i32 ta, fl::i32 tb) {
+    // x(tau) - px_left in pixels = (u + B*tau) / (D * 65536); integrate
+    // clamp(., 0, 1) over tau in [ta, tb] (exactly: piecewise linear).
+    const double a = (double)u / ((double)D * 65536.0);
+    const double k = (double)B / ((double)D * 65536.0);
+    const int N = 4096;  // midpoint rule; exact pieces are linear
+    double acc = 0;
+    const double h = ((double)tb - (double)ta) / N;
+    for (int i = 0; i < N; ++i) {
+        const double tau = (double)ta + (i + 0.5) * h;
+        double v = a + k * tau;
+        if (v < 0) v = 0;
+        else if (v > 1) v = 1;
+        acc += v * h;
+    }
+    return acc / 65536.0 * 268435456.0;
 }
 
 /// Deterministic 64-bit LCG (splitmix-free; same constants as the
@@ -717,12 +785,13 @@ FL_TEST_CASE("drawPolygon coordinate type consistency") {
     FL_CHECK_EQ(polyTestEnergy(bufferI), 30611);
 }
 
-FL_TEST_CASE("drawPolygon kernel: differential vs committed shift-subtract") {
-    // The live kernel (fl::gfx::detail::polyLineT28) must stay byte-identical
-    // to the committed 457b21d1b shift-subtract kernel (see
-    // polyTestCommittedT28) in every den regime. The wide stream below keeps
-    // |B|*D < 2^59, so every case lands in dhi == 0 (the 64-bit remainder
-    // state machine); it can never reach the other regimes, so each is
+FL_TEST_CASE("drawPolygon kernel: differential vs exact and committed") {
+    // The live kernel (fl::gfx::detail::polyLineT28) must equal the exact
+    // quotient (polyTestExactT28) in every den regime, and stay
+    // byte-identical to the committed 457b21d1b shift-subtract kernel
+    // (polyTestCommittedT28) wherever den = 32*D*|B| < 2^63 — the range
+    // every normal-size polygon lives in. The wide stream below keeps
+    // |B|*D < 2^59, so every case lands in dhi == 0; the other regimes are
     // targeted explicitly afterwards. Deterministic LCG (same seed as the
     // standalone kernel differential fuzz).
     fl::u64 state = 0x9E3779B97F4A7C15ull;
@@ -776,8 +845,11 @@ FL_TEST_CASE("drawPolygon kernel: differential vs committed shift-subtract") {
                        polyTestRndSigned(&state, 16); break;
             default: u = polyTestRndSigned(&state, 63); break;
         }
-        FL_CHECK_EQ(fl::gfx::detail::polyLineT28(B, D, u, ta, tb),
-                    polyTestCommittedT28(B, D, u, ta, tb));
+        const fl::i32 got = fl::gfx::detail::polyLineT28(B, D, u, ta, tb);
+        FL_CHECK_EQ(got, polyTestExactT28(B, D, u, ta, tb));
+        const fl::u64 absB = (fl::u64)((B < 0) ? -(fl::i64)B : (fl::i64)B);
+        if (((absB * (fl::u64)D) >> 58) == 0)  // den < 2^63
+            FL_CHECK_EQ(got, polyTestCommittedT28(B, D, u, ta, tb));
     }
     // Regime-targeted: with D = 2^30, dhi = (|B| * D) >> 59 = |B| >> 29, so
     // the buckets are
@@ -785,9 +857,9 @@ FL_TEST_CASE("drawPolygon kernel: differential vs committed shift-subtract") {
     //   dhi == 1: |B| in [2^29, 2^30)
     //   dhi == 2: |B| in [2^30, 3*2^29)  (|B| >= 3*2^29 already gives dhi 3)
     // The per-iteration dhi check guards the bucket math itself: a wrong
-    // span would silently skip an entire regime class, and dhi >= 2 is the
-    // class where the committed loop degenerates (exact quotient up to ~2^26
-    // vs committed result 0 or 1).
+    // span would silently skip an entire regime class, and dhi >= 1 is the
+    // class where the committed loop degenerated (exact quotient up to ~2^26
+    // vs committed result 0 or 1) — the live kernel must be exact there.
     for (int target = 0; target <= 2; ++target) {
         int cnt = 0;
         for (int it = 0; it < 5000; ++it) {
@@ -808,7 +880,7 @@ FL_TEST_CASE("drawPolygon kernel: differential vs committed shift-subtract") {
                                  (fl::u64)D) >> 59;
             FL_CHECK_EQ((int)dhi, target);
             FL_CHECK_EQ(fl::gfx::detail::polyLineT28(B, D, u, ta, tb),
-                        polyTestCommittedT28(B, D, u, ta, tb));
+                        polyTestExactT28(B, D, u, ta, tb));
             ++cnt;
         }
         FL_CHECK_EQ(cnt, 5000);
@@ -817,9 +889,9 @@ FL_TEST_CASE("drawPolygon kernel: differential vs committed shift-subtract") {
 
 FL_TEST_CASE("drawPolygon kernel: division-regime pins") {
     // Hard-coded (B, D, u, ta, tb) -> T pins. dhi = (|B| * D) >> 59 selects
-    // the den regime; the dhi >= 2 pins matter most — there the committed
-    // loop degenerates to T == 0 while the exact quotient is tens of
-    // millions, so any "fix" of the latent division bug breaks them.
+    // the den regime. The dhi >= 1 pins are exact round-half-up quotients
+    // (checked with arbitrary-precision integers); the committed loop
+    // returned 0 or 1 there before #5286.
     struct Pin { fl::i32 B; fl::i32 D; fl::i64 u; fl::i32 ta; fl::i32 tb; fl::i32 want; };
     static const Pin pins[] = {
         // dhi == 0 (den < 2^64): full 64-bit remainder state machine.
@@ -827,15 +899,12 @@ FL_TEST_CASE("drawPolygon kernel: division-regime pins") {
         { 1, 16, 0, 0, 32768, 2097152 },  // exact: M/den = 2^30/512 = 2^21
         { -77777, 999999, -55555555, -32768, 20000, 2497228 },
         { 1000000000, 3, 12345, -1000, 1000, 4096000 },
-        // dhi == 1 (den in [2^64, 2^65)): T collapses to the round-half-up
-        // bit of M mod 2^64; the pair pins both outcomes (exact quotient
-        // of the first is 18684565).
-        { 536870912, 1073741824, 1000000000000LL, 0, 32768, 1 },
-        { -536870912, 1073741824, 1000000000000LL, 0, 32768, 0 },
-        // dhi >= 2 (den >= 2^65): committed T == 0 (exact quotients 35461781
-        // and 69002661 respectively).
-        { 1073741824, 1073741824, 1000000000000LL, 0, 32768, 0 },
-        { 2147483647, 1073741824, 1000000000000LL, 0, 32768, 0 },
+        // dhi == 1 (den in [2^64, 2^65)): committed T was 1 and 0.
+        { 536870912, 1073741824, 1000000000000LL, 0, 32768, 18684565 },
+        { -536870912, 1073741824, 1000000000000LL, 0, 32768, 54210 },
+        // dhi >= 2 (den >= 2^65): committed T was 0 for both.
+        { 1073741824, 1073741824, 1000000000000LL, 0, 32768, 35461781 },
+        { 2147483647, 1073741824, 1000000000000LL, 0, 32768, 69002660 },
         // Vertical line (B == 0) branch: partial and full rows.
         { 0, 1000, 500000, 0, 32768, 1024000 },
         { 0, 1000, 1500000, -32768, 32768, 6144000 },
@@ -844,6 +913,89 @@ FL_TEST_CASE("drawPolygon kernel: division-regime pins") {
         const Pin& p = pins[i];
         FL_CHECK_EQ(fl::gfx::detail::polyLineT28(p.B, p.D, p.u, p.ta, p.tb),
                     p.want);
+    }
+}
+
+FL_TEST_CASE("drawPolygon kernel: huge edges match the exact quotient (#5286)") {
+    // den = 32 * D * |B| >= 2^63 needs D * |B| >= 2^58, i.e. an edge whose
+    // dx * dy >= 2^26 px^2 (about 8192 x 8192 px) — reachable inside the
+    // +/-8191 px vertex clamp. The committed quotient dropped a carry there
+    // (den in [2^63, 2^64)) or collapsed to 0/1 (den >= 2^64); the kernel
+    // must now equal the exact long division in every such case.
+    // kMaxQ16 is the largest edge delta the clamp admits (16382 px).
+    const fl::i64 kMaxQ16 = (fl::i64)16382 * 65536;
+    fl::u64 state = 0x5286C0FFEE5286ull;
+    int bigDen = 0;
+    for (int it = 0; it < 20000; ++it) {
+        // |B|, D in [2^27, kMaxQ16]: covers den from 2^59 to just under 2^65.
+        const fl::i64 lo = (fl::i64)1 << 27;
+        const fl::i32 absB =
+            (fl::i32)(lo + (fl::i64)(polyTestLcg(&state) % (fl::u64)(kMaxQ16 - lo)));
+        const fl::i32 D =
+            (fl::i32)(lo + (fl::i64)(polyTestLcg(&state) % (fl::u64)(kMaxQ16 - lo)));
+        const fl::i32 B = (polyTestLcg(&state) & 1) ? absB : -absB;
+        fl::i32 ta = (fl::i32)polyTestRndSigned(&state, 15) * 2;
+        fl::i32 tb = (fl::i32)polyTestRndSigned(&state, 15) * 2;
+        if (ta > tb) { const fl::i32 t = ta; ta = tb; tb = t; }
+        if ((polyTestLcg(&state) & 3) == 0) { ta = -32768; tb = 32768; }
+        // u: the line's crossing near the pixel (|x - px_left| within a few
+        // px), i.e. u = D * (offset in Q16) — the drawPolygon regime.
+        const fl::i64 off = polyTestRndSigned(&state, 19);
+        const fl::i64 u = (fl::i64)D * off;
+        if ((((fl::u64)absB * (fl::u64)D) >> 58) != 0) ++bigDen;
+        const fl::i32 got = fl::gfx::detail::polyLineT28(B, D, u, ta, tb);
+        const fl::i32 want = polyTestExactT28(B, D, u, ta, tb);
+        FL_CHECK_EQ(got, want);
+        if (got != want) break;  // one mismatch report is enough
+    }
+    FL_CHECK_GT(bigDen, 10000);
+    // The exact reference itself agrees with a double-precision integral.
+    {
+        const fl::i32 B = 1000000000, D = 900000000;
+        for (int k = -3; k <= 3; ++k) {
+            const fl::i64 u = (fl::i64)D * (k * 20000 + 12345);
+            const double ref = polyTestDoubleT28(B, D, u, -32768, 32768);
+            const fl::i32 ex = polyTestExactT28(B, D, u, -32768, 32768);
+            double d = ref - (double)ex;
+            if (d < 0) d = -d;
+            FL_CHECK_LT(d, 268435456.0 * 1e-4);
+            FL_CHECK_EQ(fl::gfx::detail::polyLineT28(B, D, u, -32768, 32768), ex);
+        }
+    }
+}
+
+FL_TEST_CASE("drawPolygon huge edge crossing a small canvas (#5286)") {
+    // Triangles whose long edge spans thousands of px in both axes, with
+    // only a few px of it on the 32x32 canvas. Every pixel must match the
+    // independent subsample reference within the usual 4 u8 tolerance —
+    // before #5286 the edge pixels along the diagonal came out wrong
+    // (den = 32 * dy * |dx| in Q16.16 reached 2^63 and beyond).
+    struct Tri { double x[3]; double y[3]; };
+    static const Tri tris[] = {
+        // ~16000 x 16000 px edge: den in [2^64, 2^65).
+        {{-8000.0, 8000.0, -8000.0}, {-8000.25, 8000.0, 8000.0}},
+        // ~10000 x 10000 px edge: den in [2^63, 2^64).
+        {{-4000.0, 6000.0, -4000.0}, {-4000.5, 6000.0, 6000.0}},
+        // Shallow ~16000 x 9000 px edge through the canvas.
+        {{-8000.0, 8000.0, -8000.0}, {-4500.0, 4500.25, 4500.25}},
+    };
+    for (unsigned t = 0; t < sizeof(tris) / sizeof(tris[0]); ++t) {
+        CRGB buffer[1024];
+        polyTestRender(buffer, tris[t].x, tris[t].y, 3,
+                       fl::DrawMode::DRAW_MODE_OVERWRITE);
+        int maxd = 0, partials = 0;
+        for (int y = 0; y < 32; ++y)
+            for (int x = 0; x < 32; ++x) {
+                const int v = buffer[y * 32 + x].r;
+                if (v > 0 && v < 255) ++partials;
+                int d = v - polyTestSubsampleCov(tris[t].x, tris[t].y, 3, x, y);
+                if (d < 0) d = -d;
+                if (d > maxd) maxd = d;
+            }
+        fl::printf("  huge tri %u: max parity diff %d u8, %d partials\n", t,
+                   maxd, partials);
+        FL_CHECK_LE(maxd, 4);
+        FL_CHECK_GT(partials, 0);
     }
 }
 
