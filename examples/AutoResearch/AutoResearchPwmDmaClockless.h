@@ -55,6 +55,7 @@
 #include "fl/stl/cstring.h"
 #include "fl/stl/noexcept.h"
 #include "fl/stl/singleton.h"
+#include "fl/stl/static_assert.h"
 #include "fl/stl/sstream.h"
 #include "fl/stl/vector.h"
 #include "fl/system/pin.h"
@@ -293,6 +294,9 @@ inline bool corruptSecondChunk() FL_NO_EXCEPT { // ok platform specific - LPC845
 // Channel 7 is clear of the transmitter (0), the capture (1), the USART
 // requests (2..5) and SPI (4/6).
 constexpr fl::u32 kStressCh = 7u;
+FL_STATIC_ASSERT(kStressCh != FASTLED_LPC_PWM_DMA_BASECH &&
+                     kStressCh != FL_LPC_CTIMER_CAPTURE_DMA_CH,
+                 "the #5278 stressor channel must differ from the transmitter's and the capture's");
 
 inline volatile fl::lpc::DmaChannelDescriptor& stressLinkDesc() FL_NO_EXCEPT {
     static volatile fl::lpc::DmaChannelDescriptor d;
@@ -391,13 +395,6 @@ inline fl::string captureFrame(int led_count, fl::u32 rgb, fl::u32 step,
     auto ch = makeChannelData(data_pin, led_count, rgb, step, t);
     if (!engine.canHandle(ch)) {
         cap.end();
-#if !FASTLED_LPC_DMA_ISR
-        // Without the DMA ISR hub the engine refuses frames over two chunks
-        // (#5278); the host expects this refusal in such a build.
-        if (n_bits > 2u * FASTLED_LPC_PWM_DMA_CHUNK_BITS) {
-            return fl::string("0,hub_off_refused");
-        }
-#endif
         return fl::string("0,cannot_handle");
     }
     if (stress_priority >= 0 && stress_paced == 0) {
@@ -419,6 +416,16 @@ inline fl::string captureFrame(int led_count, fl::u32 rgb, fl::u32 step,
     }
     const fl::u32 got = cap.count();
     cap.end();
+    if (!fl::ChannelEngineLpcSctDma::frameFits(ch)) {
+        // A FASTLED_LPC_DMA_ISR=0 build drops frames over its limit in
+        // show() (#5278): nothing may reach the wire.
+        if (got == 0u) {
+            return fl::string("0,hub_off_refused");
+        }
+        fl::sstream s;
+        s << "0,refusal_leaked,bits=" << got;
+        return s.str();
+    }
     if (!sent) {
         fl::sstream s;
         s << "0,tx_stalled,bits=" << got;
@@ -532,6 +539,9 @@ inline fl::string captureStressHandler(int led_count, fl::u32 rgb,
 // on until the hold ends.
 inline fl::string dmaErrorHandler(int led_count, fl::u32 rgb, int data_pin,
                                   int rx_pin, int hold_us) FL_NO_EXCEPT {
+    if (led_count <= 0) {
+        return fl::string("0,bad_args");
+    }
     const fl::u32 n_bits = static_cast<fl::u32>(led_count) * 24u;
     if (n_bits <= FASTLED_LPC_PWM_DMA_CHUNK_BITS || led_count > kMaxCaptureLeds ||
         !usablePin(data_pin) || !usablePin(rx_pin) || rx_pin == data_pin ||

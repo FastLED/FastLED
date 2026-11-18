@@ -804,7 +804,8 @@ inline void autoResearchLowMemorySetup() {
 
     // FastLED #3468: channels-API SCT+DMA clockless AutoResearch
     // harness. Binds pwmDmaClFrameOnce / pwmDmaClFrameBurst /
-    // pwmDmaClCaptureSelf. Header self-gates on
+    // pwmDmaClCaptureSelf / pwmDmaClDmaError / pwmDmaClCaptureStress (the
+    // last two from #5278). Header self-gates on
     // FL_IS_ARM_LPC_845 && FASTLED_LPC_PWM_DMA.
 #if defined(FL_IS_ARM_LPC_845) && defined(FASTLED_LPC_PWM_DMA)
     autoresearch::pwm_dma_cl::bind(remote);

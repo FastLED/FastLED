@@ -206,8 +206,8 @@ def run_dma_error(s: "RpcBench", data_pin: int, rx_pin: int, hold_us: int) -> bo
     if f["hub"] == "1":
         ok = ended and chunk <= bits <= chunk + DMA_ERROR_SLACK_BITS
     elif hold_us == 0:
-        # Without the hub, poll() sees the error after it encodes the next
-        # chunk (~50 us; 118 bits on silicon), still inside that chunk.
+        # Without the hub only poll() sees the error, here in a busy wait;
+        # 114-119 bits on silicon, well inside the next chunk.
         ok = ended and chunk <= bits <= 2 * chunk
     else:
         # Without the hub nothing sees the error during the hold, so stale
@@ -217,7 +217,7 @@ def run_dma_error(s: "RpcBench", data_pin: int, rx_pin: int, hold_us: int) -> bo
     return ok
 
 
-# Contention cases: (label, stress_priority, paced). paced 0 = unpaced
+# Contention cases: (label, stress_priority, paced, must_pass). paced 0 = unpaced
 # (always requesting), n >= 1 = one 2^(n-1)-word burst per bit on the
 # transmitter's own DMA trigger event. `must_pass` cases are asserted; the
 # others are measured and printed, as documented limits.
@@ -258,9 +258,14 @@ def run_contention(s: "RpcBench", data_pin: int, rx_pin: int) -> bool:
                 continue
             f = parse_fields(csv)
             ok = csv.startswith("1,") and f.get("bad") == "0" and f.get("bits") == "408"
-            verdict = "PASS" if ok else ("FAIL" if must_pass else "LIMIT")
+            # A documented limit is a frame that went out wrong or stalled;
+            # no reply, a rejected call or a crash is a failure either way.
+            measured = csv.startswith("1,") or csv.startswith("0,tx_stalled")
+            verdict = (
+                "PASS" if ok else ("LIMIT" if not must_pass and measured else "FAIL")
+            )
             print(f"  [{name}] {label}: {verdict} - {csv}")
-            if must_pass and not ok:
+            if verdict == "FAIL":
                 all_ok = False
     return all_ok
 

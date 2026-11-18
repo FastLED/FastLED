@@ -324,14 +324,6 @@ void LpcSctDmaTransmitter::onChunkEnd() FL_NO_EXCEPT {
     }
     const u32 primask = __get_PRIMASK();
     __disable_irq();
-    // A failed reload errors on its first transfer, one bit after the INTA
-    // that brought us here, i.e. usually during the encode above. Stop the
-    // frame now rather than linking more chunks behind a dead channel.
-    if (fl::lpc::takeDmaChannelError(kTxDmaCh)) {
-        abort();   // leaves mFrameComplete false
-        __set_PRIMASK(primask);
-        return;
-    }
     if ((DMA0->COMMON[0].INTA & (1u << kTxDmaCh)) == 0u &&
         lpcSctTxTransfersLeft() >= kTxRefillMarginBits) {
         lpcSctTxWriteChunkSlot(slots[freed], mChunkBuf[freed], n,
@@ -344,7 +336,10 @@ void LpcSctDmaTransmitter::onChunkEnd() FL_NO_EXCEPT {
 void LpcSctDmaTransmitter::onDmaIsr(void* ctx) FL_NO_EXCEPT {
     LpcSctDmaTransmitter* self = static_cast<LpcSctDmaTransmitter*>(ctx);
     // The hub runs this for the chunk's INTA (already cleared) and, because
-    // init() registered on_error, for a DMA error on the channel.
+    // init() registered on_error, for a DMA error on the channel. A failed
+    // reload errors one bit after its INTA, usually while onChunkEnd()
+    // encodes; that error pends DMA0_IRQn and lands here as soon as this
+    // ISR returns, so this is the one place the ISR build halts on it.
     if (self->mTransmitInProgress && fl::lpc::takeDmaChannelError(kTxDmaCh)) {
         self->abort();   // halts the SCT; leaves mFrameComplete false
         return;
