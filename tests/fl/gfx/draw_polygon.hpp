@@ -5,6 +5,13 @@
 #include "fl/gfx/gfx.h"
 #include "fl/stl/chrono.h"
 #include "fl/math/fixed_point/s16x16.h"
+#include "fl/stl/static_assert.h"
+
+// Several cases below call drawPolygon with the default tier on polygons of
+// more than 8 vertices; the host is a large-memory target, so that default
+// must stay 32 (low-memory targets default to 8, see fl/gfx/canvas.h).
+FL_STATIC_ASSERT(FL_GFX_POLYGON_DEFAULT_MAXN == 32,
+                 "host drawPolygon default MAXN must stay 32");
 
 // ============================================================================
 // drawPolygon test helpers (test-only; the double-precision reference math

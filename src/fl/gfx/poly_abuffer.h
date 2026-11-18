@@ -265,6 +265,10 @@ inline void polyABFillRun(PixelT* pixels, int py, int width,
 /// closes from #MAXN-1 back to #0 — same as the exact kernel). There is
 /// no accumulator to size: the working set is the per-edge state plus
 /// one u32 mask, so the stack stays shallow regardless of canvas size.
+/// It still scales with MAXN: vertices (8*MAXN B) + edges (40-48*MAXN B) +
+/// crossing events (16*MAXN B), too much for an AVR Uno at MAXN = 32, so
+/// the default MAXN is platform-dependent (measured frames at
+/// FL_GFX_POLYGON_DEFAULT_MAXN in fl/gfx/canvas.h).
 template<typename PixelT, typename Coord, bool Overwrite, int MAXN>
 inline void drawPolygonABufferCore(Canvas<PixelT>& canvas, const PixelT& color,
                                    fl::span<const PolyPoint<Coord>> pts) FL_NO_EXCEPT {
