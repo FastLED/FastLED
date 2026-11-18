@@ -90,11 +90,17 @@ class RpcBench:
         self._loop = asyncio.new_event_loop()
         iface = create_serial_interface(port)
         self._client = RpcClient(port, timeout=timeout, serial_interface=iface)
+        connect = self._loop.create_task(
+            self._client.connect(boot_wait=3.0, drain_boot=True)
+        )
         try:
-            self._loop.run_until_complete(
-                self._client.connect(boot_wait=3.0, drain_boot=True)
-            )
+            self._loop.run_until_complete(connect)
         except KeyboardInterrupt as interrupt:
+            # Ctrl-C leaves `connect` pending; finish it before close() so a
+            # late attach cannot grab the port after the client is closed.
+            connect.cancel()
+            with suppress(asyncio.CancelledError, Exception):
+                self._loop.run_until_complete(connect)
             with suppress(Exception):
                 self.close()
             handle_keyboard_interrupt(interrupt)

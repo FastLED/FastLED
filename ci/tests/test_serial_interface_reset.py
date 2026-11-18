@@ -354,16 +354,60 @@ def test_native_adapter_retries_a_session_closed_attach(monkeypatch) -> None:
     assert adapter._monitor is monitors[1]  # and a fresh one attached
 
 
-def test_native_adapter_attach_retry_is_bounded(monkeypatch) -> None:
-    from ci.util.serial_interface import ATTACH_ATTEMPTS
+_DAEMON_ERROR = "failed to connect to daemon WebSocket: connection actively refused"
 
+
+def test_native_adapter_attach_retry_is_bounded(monkeypatch) -> None:
     adapter, monitors = _attach_adapter(
-        monkeypatch,
-        [ConnectionError("session closed") for _ in range(ATTACH_ATTEMPTS + 1)],
+        monkeypatch, [ConnectionError("session closed") for _ in range(4)]
     )
     with pytest.raises(ConnectionError, match="session closed"):
         asyncio.run(adapter.connect())
-    assert sum(m.enters for m in monitors) == ATTACH_ATTEMPTS
+    assert [m.enters for m in monitors] == [1, 1, 1, 0]
+
+
+def test_native_adapter_daemon_recovery_counts_against_attach_limit(
+    monkeypatch,
+) -> None:
+    """Two 'session closed' then a lost daemon: no fourth attach."""
+    from ci.util import serial_interface
+
+    restarts: list[None] = []
+    monkeypatch.setattr(
+        serial_interface, "ensure_fbuild_daemon", lambda: restarts.append(None)
+    )
+    adapter, monitors = _attach_adapter(
+        monkeypatch,
+        [
+            ConnectionError("session closed"),
+            ConnectionError("session closed"),
+            RuntimeError(_DAEMON_ERROR),
+            None,
+        ],
+    )
+    with pytest.raises(RuntimeError, match="daemon WebSocket"):
+        asyncio.run(adapter.connect())
+    assert [m.enters for m in monitors] == [1, 1, 1, 0]
+    assert restarts == []
+
+
+def test_native_adapter_handles_interrupt_during_daemon_recovery(
+    monkeypatch,
+) -> None:
+    from ci.util import serial_interface
+
+    def _interrupt() -> None:
+        raise KeyboardInterrupt
+
+    handled: list[KeyboardInterrupt] = []
+    monkeypatch.setattr(serial_interface, "ensure_fbuild_daemon", _interrupt)
+    monkeypatch.setattr(serial_interface, "handle_keyboard_interrupt", handled.append)
+    adapter, _monitors = _attach_adapter(
+        monkeypatch, [RuntimeError(_DAEMON_ERROR), None]
+    )
+    with pytest.raises(KeyboardInterrupt):
+        asyncio.run(adapter.connect())
+    assert len(handled) == 1
 
 
 def test_native_adapter_does_not_retry_other_attach_errors(monkeypatch) -> None:

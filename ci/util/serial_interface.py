@@ -339,8 +339,11 @@ class FbuildSerialAdapter:
 # fbuild's Python client reports only as "session closed"
 # (FastLED/fbuild#2083, FastLED#5271). A failed attach leaves no session, so
 # trying again is safe; on the LPC845-BRK the next attach succeeded each time.
+# The retry is best effort: fbuild 2.5.51's client also reports a definitive
+# rejection (e.g. another workflow's exclusive lease) as "session closed", so
+# that rejection is repeated too, costing at most ~2 s before it propagates.
 # Bounded to 3 attempts so a really dead port still fails within seconds.
-# Remove once fbuild ships the fix.
+# Remove once fbuild ships the fix and preserves the daemon's reason.
 ATTACH_ATTEMPTS = 3
 ATTACH_RETRY_PAUSE_SECONDS = 1.0
 
@@ -381,19 +384,27 @@ class NativeFbuildSerialAdapter:
 
     async def connect(self) -> None:
         self._pending_lines.clear()
-        # One try block, so a KeyboardInterrupt is handled exactly once.
+        # One handler around the whole attach, daemon recovery included, so a
+        # KeyboardInterrupt anywhere in it is handled exactly once.
+        try:
+            await self._attach()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
+            raise
+
+    async def _attach(self) -> None:
+        # Every `__aenter__` counts against ATTACH_ATTEMPTS, the daemon
+        # recovery attempt included.
         daemon_error: Exception | None = None
-        attach_failures = 0
-        while True:
-            try:
+        for attempt in range(1, ATTACH_ATTEMPTS + 1):
+            try:  # noqa: KBI001 - connect() handles KeyboardInterrupt once for the whole attach
                 await self._monitor.__aenter__()
                 return
-            except KeyboardInterrupt as ki:
-                handle_keyboard_interrupt(ki)
-                raise
             except Exception as error:
+                last = attempt == ATTACH_ATTEMPTS
                 if (
-                    daemon_error is None
+                    not last
+                    and daemon_error is None
                     and FbuildSerialAdapter._is_daemon_connection_error(error)
                 ):
                     # A lost post-deploy daemon: restart it once.
@@ -401,10 +412,7 @@ class NativeFbuildSerialAdapter:
                     await asyncio.to_thread(ensure_fbuild_daemon)
                     self._monitor = self._new_monitor()
                     continue
-                attach_failures += 1
-                if attach_failures >= ATTACH_ATTEMPTS or not is_transient_attach_error(
-                    error
-                ):
+                if last or not is_transient_attach_error(error):
                     if daemon_error is not None:
                         raise error from daemon_error
                     raise
@@ -415,7 +423,7 @@ class NativeFbuildSerialAdapter:
                 port = self._monitor_args["port"]
                 print(
                     f"[serial] attach to {port} failed ({error}); retrying "
-                    f"({attach_failures}/{ATTACH_ATTEMPTS - 1}) in "
+                    f"({attempt}/{ATTACH_ATTEMPTS - 1}) in "
                     f"{ATTACH_RETRY_PAUSE_SECONDS:g}s -- FastLED/fbuild#2083",
                     flush=True,
                 )
