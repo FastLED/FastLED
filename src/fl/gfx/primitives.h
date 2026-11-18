@@ -1293,9 +1293,10 @@ inline void drawStrokeLine(Canvas<PixelT>& canvas, const PixelT& color,
 // shoelace area up to u8 rounding.
 //
 // Vertices beyond MAXN are ignored (the polygon closes from #MAXN-1 back to
-// #0). Stack at MAXN = 32, CHUNK = 64: vertices (256 B) + edges (1792 B) +
-// accb (256 B) + per-row scratch (~680 B) + band prepass bidx/bnc/bfull
-// ((MAXN+1)*(MAXN+5) B = 1221 B) ≈ 4.2 KB; MAXN = 8, CHUNK = 16 ≈ 870 B.
+// #0). Stack scales with the tier: vertices (8*MAXN B) + edges (56*MAXN B)
+// + accb (4*CHUNK B) + per-row scratch + band prepass bidx/bnc/bfull
+// ((MAXN+1)*(MAXN+5) B). Measured frames and the platform-dependent default
+// tier are documented at FL_GFX_POLYGON_DEFAULT_MAXN in fl/gfx/canvas.h.
 // ---------------------------------------------------------------------------
 template<typename PixelT, typename Coord, bool Overwrite, int MAXN, int CHUNK>
 inline void detail::drawPolygonCore(Canvas<PixelT>& canvas, const PixelT& color,
@@ -1559,10 +1560,13 @@ inline void detail::drawPolygonCore(Canvas<PixelT>& canvas, const PixelT& color,
     }
 }
 
-/// MAXN caps the vertex count (32 by default) and CHUNK the per-row
-/// accumulator width in px (64 by default; must be a power of two).
-/// Smaller tiers shrink the stack for low-memory targets — the rendered
-/// pixels are identical.
+/// MAXN caps the vertex count and CHUNK the per-row accumulator width in
+/// px (must be a power of two). The defaults (FL_GFX_POLYGON_DEFAULT_MAXN /
+/// _CHUNK in fl/gfx/canvas.h) are 32 / 64 on FL_PLATFORM_HAS_LARGE_MEMORY
+/// targets and 8 / 16 elsewhere, because the 32 / 64 frame does not fit in
+/// an AVR Uno's 2 KB of SRAM (measured figures at the macro definition).
+/// Smaller tiers shrink the stack -- the rendered pixels are identical for
+/// polygons with at most MAXN vertices.
 ///
 /// Fill selects the backend: PolyFill::Exact (default, exact per-pixel
 /// area) or PolyFill::ABuffer (8x4 A-buffer sampling; CHUNK is ignored).

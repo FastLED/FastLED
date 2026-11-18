@@ -111,14 +111,16 @@ class Canvas {
         mImpl.drawStrokeLine(color, x0, y0, x1, y1, thickness, cap, mode);
     }
 
-    template<typename Coord, int MAXN = 32, int CHUNK = 64,
+    template<typename Coord, int MAXN = FL_GFX_POLYGON_DEFAULT_MAXN,
+             int CHUNK = FL_GFX_POLYGON_DEFAULT_CHUNK,
              gfx::PolyFill Fill = gfx::PolyFill::Exact>
     FASTLED_FORCE_INLINE void drawPolygon(const RGB_T& color, fl::span<const PolyPoint<Coord>> pts,
                                           DrawMode mode = DrawMode::DRAW_MODE_BLEND) FL_NO_EXCEPT {
         mImpl.template drawPolygon<Coord, MAXN, CHUNK, Fill>(color, pts, mode);
     }
 
-    template<typename Coord, int N, int MAXN = 32, int CHUNK = 64,
+    template<typename Coord, int N, int MAXN = FL_GFX_POLYGON_DEFAULT_MAXN,
+             int CHUNK = FL_GFX_POLYGON_DEFAULT_CHUNK,
              gfx::PolyFill Fill = gfx::PolyFill::Exact>
     FASTLED_FORCE_INLINE void drawPolygon(const RGB_T& color, const PolyPoint<Coord> (&pts)[N],
                                           DrawMode mode = DrawMode::DRAW_MODE_BLEND) FL_NO_EXCEPT {

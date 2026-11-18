@@ -11,6 +11,7 @@
 #include "fl/stl/variant.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/noexcept.h"
+#include "fl/system/sketch_macros.h"
 
 namespace fl {
 namespace gfx {
@@ -35,6 +36,33 @@ struct PolyPoint {
 ///    masks, no division in the scan loops, shallow stack). Faster on
 ///    dense fills and low-memory targets; see fl/gfx/poly_abuffer.h.
 enum class PolyFill { Exact, ABuffer };
+
+/// @brief Default drawPolygon tier (MAXN vertex cap, CHUNK accumulator px)
+/// Both kernels keep their whole working set on the stack, sized by MAXN
+/// (and CHUNK for Exact). Kernel frame on AVR (avr-gcc 7.3 -Os,
+/// -fstack-usage; callees add ~0.2 KB):
+///  - Exact:   MAXN = 32, CHUNK = 64: 4272 B;  MAXN = 8, CHUNK = 16: 1032 B
+///  - ABuffer: MAXN = 32:             2139 B;  MAXN = 8:              603 B
+/// A 2 KB-SRAM part (AVR Uno) cannot afford the large tier, so the default
+/// is 8/16 when !FL_PLATFORM_HAS_LARGE_MEMORY and 32/64 elsewhere. Vertices
+/// beyond MAXN are ignored; pass MAXN explicitly for larger polygons. To
+/// change the default, set these build-wide (-D compiler flag) so every
+/// translation unit sees the same Canvas default template arguments.
+#ifndef FL_GFX_POLYGON_DEFAULT_MAXN
+#if FL_PLATFORM_HAS_LARGE_MEMORY
+#define FL_GFX_POLYGON_DEFAULT_MAXN 32
+#else
+#define FL_GFX_POLYGON_DEFAULT_MAXN 8
+#endif
+#endif
+
+#ifndef FL_GFX_POLYGON_DEFAULT_CHUNK
+#if FL_PLATFORM_HAS_LARGE_MEMORY
+#define FL_GFX_POLYGON_DEFAULT_CHUNK 64
+#else
+#define FL_GFX_POLYGON_DEFAULT_CHUNK 16
+#endif
+#endif
 
 // Forward declarations
 template<typename RGB_T> struct Canvas;
@@ -81,7 +109,8 @@ void drawStrokeLine(Canvas<PixelT>& canvas, const PixelT& color, Coord x0, Coord
 /// Fill selects the polygon backend (PolyFill::Exact by default;
 /// PolyFill::ABuffer for the faster 8x4 A-buffer kernel, which ignores
 /// CHUNK).
-template<typename PixelT, typename Coord, int MAXN = 32, int CHUNK = 64,
+template<typename PixelT, typename Coord, int MAXN = FL_GFX_POLYGON_DEFAULT_MAXN,
+         int CHUNK = FL_GFX_POLYGON_DEFAULT_CHUNK,
          PolyFill Fill = PolyFill::Exact>
 void drawPolygon(Canvas<PixelT>& canvas, const PixelT& color,
                  fl::span<const PolyPoint<Coord>> pts,
@@ -89,7 +118,8 @@ void drawPolygon(Canvas<PixelT>& canvas, const PixelT& color,
 
 // Array overload: lets Coord be deduced from a C array (span is a
 // converting constructor, so it cannot participate in deduction).
-template<typename PixelT, typename Coord, int N, int MAXN = 32, int CHUNK = 64,
+template<typename PixelT, typename Coord, int N, int MAXN = FL_GFX_POLYGON_DEFAULT_MAXN,
+         int CHUNK = FL_GFX_POLYGON_DEFAULT_CHUNK,
          PolyFill Fill = PolyFill::Exact>
 void drawPolygon(Canvas<PixelT>& canvas, const PixelT& color,
                  const PolyPoint<Coord> (&pts)[N],
@@ -157,14 +187,16 @@ struct Canvas {
         gfx::drawStrokeLine(*this, color, x0, y0, x1, y1, thickness, cap, mode);
     }
 
-    template<typename Coord, int MAXN = 32, int CHUNK = 64,
+    template<typename Coord, int MAXN = FL_GFX_POLYGON_DEFAULT_MAXN,
+             int CHUNK = FL_GFX_POLYGON_DEFAULT_CHUNK,
              PolyFill Fill = PolyFill::Exact>
     inline void drawPolygon(const RGB_T& color, fl::span<const PolyPoint<Coord>> pts,
                             fl::DrawMode mode = fl::DrawMode::DRAW_MODE_BLEND) FL_NO_EXCEPT {
         gfx::drawPolygon<RGB_T, Coord, MAXN, CHUNK, Fill>(*this, color, pts, mode);
     }
 
-    template<typename Coord, int N, int MAXN = 32, int CHUNK = 64,
+    template<typename Coord, int N, int MAXN = FL_GFX_POLYGON_DEFAULT_MAXN,
+             int CHUNK = FL_GFX_POLYGON_DEFAULT_CHUNK,
              PolyFill Fill = PolyFill::Exact>
     inline void drawPolygon(const RGB_T& color, const PolyPoint<Coord> (&pts)[N],
                             fl::DrawMode mode = fl::DrawMode::DRAW_MODE_BLEND) FL_NO_EXCEPT {

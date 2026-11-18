@@ -125,8 +125,11 @@ fl::PolyPoint<int> tri[3] = {{5, 5}, {20, 8}, {10, 22}};
 canvas.drawPolygon(CRGB::Yellow, tri);
 ```
 
-- **3 to 32 vertices.** Fewer than 3 draws nothing; more than 32 is
-  truncated to the first 32.
+- **3 to MAXN vertices.** Fewer than 3 draws nothing; more than MAXN is
+  truncated to the first MAXN. The default MAXN is 32 on large-memory
+  targets and 8 on `!FL_PLATFORM_HAS_LARGE_MEMORY` targets (AVR, ESP8266,
+  STM32F1, ...), where a 32-vertex tier needs ~4.3 KB of stack. Pass it
+  explicitly for more vertices: `canvas.drawPolygon<int, 12>(color, span)`.
 - **Fill rule** — even-odd: a point is inside if a ray crosses an odd
   number of edges. No holes or subpaths.
 - **Vertex coordinates** clamp to ±8191 px, so out-of-range values can't
