@@ -25,6 +25,14 @@
 // callbacks. INTA bits are W1C; clear BEFORE the callback so a callback
 // that immediately re-arms and completes cannot lose its next edge.
 extern "C" void DMA0_IRQHandler(void) {
+    // ERRINT keeps the DMA0 line asserted until cleared, so clear it here
+    // and latch it for the owning driver (fl::lpc::takeDmaChannelError).
+    const fl::u32 errors =
+        DMA0->COMMON[0].ERRINT & DMA0->COMMON[0].INTENSET;
+    if (errors != 0u) {
+        DMA0->COMMON[0].ERRINT = errors;  // W1C
+        fl::lpc::dmaErrorLatch() |= errors;
+    }
     const fl::u32 pending =
         DMA0->COMMON[0].INTA & DMA0->COMMON[0].INTENSET;
     DMA0->COMMON[0].INTA = pending;  // W1C

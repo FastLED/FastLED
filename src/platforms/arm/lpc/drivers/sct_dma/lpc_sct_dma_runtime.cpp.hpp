@@ -275,7 +275,7 @@ void LpcSctDmaTransmitter::transmit(const u8* bytes, u32 len, bool is_rgbw) FL_N
     SCT0->CTRL = kTxSctCtrlHalt | SCT_CTRL_CLRCTR_L_MASK;
     SCT0->OUT[kTxSctOut].CLR = mChunkBuf[0][0];
     DMA0->COMMON[0].INTA = (1u << kTxDmaCh);
-    DMA0->COMMON[0].ERRINT = (1u << kTxDmaCh);   // W1C a stale error
+    (void)fl::lpc::takeDmaChannelError(kTxDmaCh);   // drop a stale error
     DMA0->CHANNEL[kTxDmaCh].XFERCFG = kTxXferValid | kTxXferReload |
                                       lpcSctTxChunkIntA(n1 == 0u) |
                                       kTxXferWidth32 | kTxXferSrcInc1 |
@@ -340,10 +340,10 @@ bool LpcSctDmaTransmitter::pollAndAdvance() FL_NO_EXCEPT {
     // each INTA.
     const u32 primask = __get_PRIMASK();
     __disable_irq();
-    if (mTransmitInProgress && (DMA0->COMMON[0].ERRINT & (1u << kTxDmaCh)) != 0u) {
+    if (mTransmitInProgress && fl::lpc::takeDmaChannelError(kTxDmaCh)) {
         // The descriptor chain stopped short of the halt step, so the SCT
-        // would never halt: clear the error and end the frame here.
-        DMA0->COMMON[0].ERRINT = (1u << kTxDmaCh);   // W1C
+        // would never halt: end the frame here. With the ISR hub on, the
+        // hub has already cleared ERRINT and latched it for us.
         abort();   // leaves mFrameComplete false
     }
     if (mTransmitInProgress && (DMA0->COMMON[0].INTA & (1u << kTxDmaCh)) != 0u) {

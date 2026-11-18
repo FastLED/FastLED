@@ -124,8 +124,8 @@ inline fl::ChannelDataPtr makeSolidChannelData(
 
 // READY means the engine is idle, not that the frame went out whole: an
 // early halt (a refill missed its deadline) or a DMA error is READY too.
-inline bool lastFrameComplete(fl::ChannelEngineLpcSctDma& engine) FL_NO_EXCEPT {
-    return engine.transmitter().lastFrameComplete();
+inline bool lastFrameComplete(fl::ChannelEngineLpcSctDma& engine) FL_NO_EXCEPT { // ok platform specific - this file tests only the LPC845 SCT+DMA engine; no other driver reports a cut-short frame, so a core API would have one user
+    return engine.transmitter().lastFrameComplete(); // ok platform specific - same reason
 }
 
 // Spin poll() until READY, at most `timeout_us`. False on timeout.

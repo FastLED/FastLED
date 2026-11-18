@@ -57,6 +57,27 @@ inline DmaIsrSlot* dmaIsrTable() FL_NO_EXCEPT {
     return table;
 }
 
+/// Channels whose ERRINT the hub has cleared. ERRINT holds the shared
+/// DMA0 line asserted until written, so the hub must clear it; the bit
+/// is kept here until the owning driver consumes it.
+inline volatile u32& dmaErrorLatch() FL_NO_EXCEPT {
+    static volatile u32 latch = 0;
+    return latch;
+}
+
+/// Whether `channel` raised a DMA error, from the ERRINT register or from
+/// the hub's latch; clears both. Call with interrupts disabled.
+inline bool takeDmaChannelError(u32 channel) FL_NO_EXCEPT {
+    const u32 bit = 1UL << channel;
+    const bool hw = (DMA0->COMMON[0].ERRINT & bit) != 0u;
+    if (hw) {
+        DMA0->COMMON[0].ERRINT = bit;  // W1C
+    }
+    const bool latched = (dmaErrorLatch() & bit) != 0u;
+    dmaErrorLatch() &= ~bit;
+    return hw || latched;
+}
+
 /// Register (or replace) the completion callback for `channel`. Passing
 /// `fn == nullptr` unregisters. Enables the channel's INTA in the DMA
 /// controller and the shared DMA0 IRQ in the NVIC when the ISR build is
