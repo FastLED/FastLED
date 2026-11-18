@@ -64,3 +64,49 @@ def test_timeout_and_unbound_are_reported_differently() -> None:
 
     assert "not bound" in str(run_scan(_Bench(METHOD_NOT_FOUND)))
     assert "did not answer" in str(run_scan(_Bench(None)))
+
+
+def test_free_pins_excludes_wired_stuck_skipped_and_open_drain() -> None:
+    from ci.autoresearch.lpc_pin_scan import free_pins
+
+    # Bench scan: 10/11/13 wired, 4/7/23 stuck, 2/3/5/12/24/25 skipped; the
+    # core maps P0_0..P0_29, so 30 and 31 are out of range anyway.
+    expected = [0, 1, 6, 8, 9, 14, 15, 16, 17, 18, 19, 20, 21, 22, 26, 27, 28, 29]
+    assert free_pins(parse_scan(BENCH_REPLY)) == expected
+
+
+class _PullBench:
+    """Answers the scan, then corePullCheck with a fixed reply."""
+
+    def __init__(self, pull_reply: object) -> None:
+        self.pull_reply = pull_reply
+        self.pull_args: object = None
+
+    def call_flat(self, method: str, args: object = None, **_k: object) -> object:
+        if method == "findConnectedPins":
+            return BENCH_REPLY
+        self.pull_args = args
+        return self.pull_reply
+
+
+def test_core_pull_check_passes_on_correct_core() -> None:
+    from ci.autoresearch.lpc_pin_scan import check_core_pulls
+
+    bench = _PullBench("0:up=1,down=0 1:up=1,down=0 6:up=1,down=0 8:up=1,down=0 ")
+    assert check_core_pulls(bench, "t") is True
+    assert bench.pull_args == [0, 1, 6, 8]
+
+
+def test_core_pull_check_fails_on_wrong_slot_core() -> None:
+    from ci.autoresearch.lpc_pin_scan import check_core_pulls
+
+    # Silicon reply from core 9e8be02 (IOCON indexed by GPIO bit).
+    bench = _PullBench("0:up=0,down=1 1:up=0,down=1 6:up=0,down=1 8:up=0,down=1 ")
+    assert check_core_pulls(bench, "t") is False
+
+
+def test_core_pull_check_skips_when_unbound() -> None:
+    from ci.autoresearch.lpc_pin_scan import check_core_pulls
+    from ci.autoresearch.rpc_bench import METHOD_NOT_FOUND
+
+    assert check_core_pulls(_PullBench(METHOD_NOT_FOUND), "t") is None

@@ -3586,16 +3586,18 @@ def _build_and_deploy_nxplpc(
         )
         return False
 
-    firmware_bin = (
-        build_dir
-        / ".fbuild"
-        / "build"
-        / (environment or "lpc845brk")
-        / "release"
-        / "firmware.bin"
-    )
-    if not firmware_bin.is_file():
-        print(f"{Fore.RED}❌ firmware.bin not found at {firmware_bin}{Style.RESET_ALL}")
+    # Current fbuild writes `.fbuild/build/release/`; older releases nested
+    # the environment name (`.fbuild/build/<env>/release/`). Accept both.
+    fbuild_build = build_dir / ".fbuild" / "build"
+    candidates = [
+        fbuild_build / "release" / "firmware.bin",
+        fbuild_build / (environment or "lpc845brk") / "release" / "firmware.bin",
+    ]
+    if not any(candidate.is_file() for candidate in candidates):
+        searched = ", ".join(str(candidate) for candidate in candidates)
+        print(
+            f"{Fore.RED}❌ firmware.bin not found (searched {searched}){Style.RESET_ALL}"
+        )
         return False
 
     print("\n📡 Deploying firmware via fbuild...")

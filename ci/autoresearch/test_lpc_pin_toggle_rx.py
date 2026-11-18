@@ -41,7 +41,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from ci.autoresearch.lpc_pin_scan import resolve_pins
+from ci.autoresearch.lpc_pin_scan import check_core_pulls, resolve_pins
 from ci.autoresearch.rpc_bench import METHOD_NOT_FOUND, RpcBench  # noqa: E402,F401
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt  # noqa: E402
 
@@ -243,7 +243,9 @@ def main() -> int:
             f"\n[lpc-pin-toggle-rx] summary: {passes} pass / {fails} fail "
             f"out of {len(CASES)} cases"
         )
-        return 0 if fails == 0 else 1
+        # The vendor core's own ::pinMode must pull the requested pad.
+        core_pulls_ok = check_core_pulls(s, "lpc-pin-toggle-rx")
+        return 0 if fails == 0 and core_pulls_ok is not False else 1
 
 
 if __name__ == "__main__":

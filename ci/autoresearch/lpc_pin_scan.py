@@ -90,6 +90,59 @@ def format_scan(scan: LpcPinScan) -> str:
     return "\n".join(lines)
 
 
+# The LPC8xx Arduino core's digital-pin map covers P0_0..P0_29 (its
+# `variant_pin_count`); its ::pinMode ignores higher pins.
+CORE_PIN_COUNT = 30
+
+
+def free_pins(scan: LpcPinScan, pin_count: int = CORE_PIN_COUNT) -> list[int]:
+    """Probed pins with nothing attached: not in a pair, not stuck, not
+    skipped, and not an open-drain pad (those have no pulls)."""
+    busy = {pin for tx, rx, _ in scan.pairs for pin in (tx, rx)}
+    busy.update(int(token.rstrip("HLX")) for token in scan.stuck)
+    busy.update(int(token.partition(":")[0]) for token in scan.skipped)
+    busy.update(scan.open_drain)
+    return [pin for pin in range(pin_count) if pin not in busy]
+
+
+def check_core_pulls(bench: Any, tag: str, timeout: float = 5.0) -> bool | None:
+    """Check the vendor core's ::pinMode pulls on up to four idle pins.
+
+    Calls the firmware's `corePullCheck` (FastLED/framework-arduino-lpc8xx#40:
+    a core that indexes IOCON by GPIO bit puts the pull on another pad).
+    Returns True when every pin reads up=1,down=0, False on a wrong reading,
+    and None when the check cannot run (RPC not bound, no scan, no idle pin).
+    """
+    from ci.autoresearch.rpc_bench import METHOD_NOT_FOUND
+
+    scan = run_scan(bench)
+    if isinstance(scan, str):
+        print(f"[{tag}] core pull check skipped: {scan}")
+        return None
+    pins = free_pins(scan)[:4]
+    if not pins:
+        print(f"[{tag}] core pull check skipped: no idle pin in the scan")
+        return None
+    args = pins + [-1] * (4 - len(pins))
+    reply = bench.call_flat("corePullCheck", args=args, timeout=timeout)
+    if reply is METHOD_NOT_FOUND:
+        print(f"[{tag}] core pull check skipped: corePullCheck is not bound")
+        return None
+    if not isinstance(reply, str):
+        print(f"[{tag}] core pull check FAIL: no answer within {timeout:.0f} s")
+        return False
+    readings = reply.split()
+    bad = [r for r in readings if not r.endswith(":up=1,down=0")]
+    if len(readings) != len(pins) or bad:
+        print(
+            f"[{tag}] core pull check FAIL: {reply.strip()!r} "
+            "(expected up=1,down=0 per pin; see framework-arduino-lpc8xx#40)"
+        )
+        return False
+    print(f"[{tag}] core pull check PASS: {reply.strip()}")
+    return True
+
+
 def run_scan(bench: Any, timeout: float = 15.0) -> LpcPinScan | str:
     """Call `findConnectedPins` on an RpcBench.
 
