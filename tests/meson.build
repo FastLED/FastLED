@@ -280,6 +280,19 @@ test('engine_worker_defaults_runtime', runner_exe,
   depends: [engine_worker_defaults_runtime],
 )
 
+# The PolyKernels example ships a byte-identical copy of the TinyGL
+# reference polygon port next to the sketch (the fbuild AVR build stages
+# only the library's src/ tree plus the sketch, so it cannot reach tests/).
+# Fail if the two copies drift apart.
+test('poly_tinygl_ref example copy in sync',
+  python_exe,
+  args: ['-c',
+    'import sys; sys.exit(0 if open(sys.argv[1], "rb").read() == open(sys.argv[2], "rb").read() else 1)',
+    meson.project_source_root() / 'tests/fl/gfx/poly_tinygl_ref.h',
+    meson.project_source_root() / 'examples/PolyKernels/poly_tinygl_ref.h'],
+  workdir: meson.project_source_root(),
+)
+
 # Build each test as a DLL with shared PCH
 foreach test_name : test_names
   # Get test file path from dynamic map (for subdirectories) or default to test_name.cpp

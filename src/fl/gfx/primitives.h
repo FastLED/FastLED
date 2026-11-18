@@ -1,9 +1,11 @@
 #pragma once
 
 #include "fl/stl/noexcept.h"
+#include "fl/stl/static_assert.h"
 
 #include "fl/gfx/canvas.h"  // IWYU pragma: keep
 #include "fl/gfx/draw_mode.h"
+#include "fl/gfx/poly_abuffer.h"  // IWYU pragma: keep
 #include "fl/math/distance_lut.h"  // IWYU pragma: keep
 #include "fl/math/integer_math.h"  // IWYU pragma: keep
 #include "fl/math/fixed_point/s16x16.h"
@@ -49,7 +51,9 @@ inline fl::u8 coordToU8<int>(int alpha) FL_NO_EXCEPT {
 template<>
 inline fl::u8 coordToU8<fl::s16x16>(fl::s16x16 alpha) FL_NO_EXCEPT {
     constexpr fl::s16x16 c255 = fl::s16x16::from_raw(255 * fl::s16x16::SCALE);
-    constexpr fl::s16x16 half = fl::s16x16::from_raw(1 << 15);
+    // 1L: the shift must be at least as wide as the result (32768 overflows
+    // a 16-bit int; `1 << 15` is UB on AVR, where int is 16-bit).
+    constexpr fl::s16x16 half = fl::s16x16::from_raw(1L << 15);
     return (fl::u8)fl::clamp((alpha * c255 + half).to_int(), (fl::i32)0, (fl::i32)255);
 }
 
@@ -246,6 +250,344 @@ inline fl::i32 toQ16<fl::s16x16>(fl::s16x16 val) FL_NO_EXCEPT {
     return val.raw();
 }
 
+/// Maximum |vertex coordinate| accepted by drawPolygon, in Q16.16 units.
+/// 8191 px keeps all Q16.16 values and edge deltas in i32 with headroom.
+// 8191L: shifting a 16-bit int by its own width is UB (AVR int is 16-bit),
+// where the constant silently collapses to 0 and every vertex clamps to the
+// origin.
+static const fl::i32 kPolyQ16Max = 8191L << 16;
+
+/// Convert any Coord type to Q16.16, clamped to ±8191 px (NaN -> 0).
+/// Shared with the ABuffer kernel (poly_abuffer.h, polyABToQ16) so both
+/// backends clamp identically.
+template<typename Coord>
+inline fl::i32 toQ16Clamped(Coord val) FL_NO_EXCEPT {
+    return polyABToQ16<Coord>(val);
+}
+
+/// Floor-divide a by positive b (rounds toward -inf).
+inline fl::i64 floorDivI64(fl::i64 a, fl::i64 b) FL_NO_EXCEPT {
+    fl::i64 q = a / b;
+    if ((a % b) < 0) --q;
+    return q;
+}
+
+/// Floor(v / 65536) for i32. An arithmetic right shift is floor division by
+/// a power of two on every target this repository builds for (gcc, clang,
+/// MSVC, avr-gcc — all define signed >> as sign-extending); the test suite
+/// pins this against floorDivI64 across the full i32 range.
+inline fl::i32 floorDiv16I32(fl::i32 v) FL_NO_EXCEPT { return v >> 16; }
+
+/// Same for i64 (line crossings can exceed i32 for steep short edges).
+inline fl::i64 floorDiv16I64(fl::i64 v) FL_NO_EXCEPT { return v >> 16; }
+
+/// Per-edge scanline state for drawPolygon (even-odd fill, band model).
+/// x is the crossing at the CURRENT row's center (Q16.16, floored — the
+/// anchor polyLineT28 integrates from) and advances exactly per row via a
+/// Bresenham-style remainder recurrence: x += step; t += rem; if (t >= dy)
+/// { t -= dy; x += 1; } where step = floor(65536 * B / dy) and rem =
+/// 65536 * B - step * dy with rem in [0, dy). Single-row edges (dy < 65536)
+/// keep step = rem = t = 0: their span can still cross a row boundary (two
+/// active rows), and the committed behavior is that x stays at the py0-row
+/// value on the second row — the kernel then integrates the infinite line
+/// through that (stale) center crossing, and the extent below must box THAT
+/// line, not the segment's endpoints.
+/// hw = ceil(32768 * |B| / dy) is the line's x half-span over a full row
+/// (|x(tau) - x| <= hw for |tau| <= 32768), so the per-row extent
+/// lx0 = (x - hw) >> 16, lx1 = (x + hw) >> 16 is division-free (shifts) and
+/// a valid bound for every row the edge is active in: px outside [lx0, lx1]
+/// gets the same full/zero shortcut a polyLineT28 call would compute
+/// exactly. hw is derived from (step, rem) at setup — one i64 division per
+/// edge, none per row. hw < 2^45 for i32 B/dy, so it needs i64.
+/// x is i64: for a steep edge spanning < 1 px, the center crossing
+/// extrapolates off the segment by up to 32768 * |B| / dy, which can exceed
+/// i32 (verified reachable: ~2^45). t + rem < 2*dy < 2^31 (dy < 2^30), so
+/// t/rem are i32-safe. An edge is active in every canvas row it geometrically
+/// occupies (py0..py1, including the partial row containing each endpoint).
+struct PolyEdge {
+    fl::i64 x;      // crossing x at current row center, Q16.16
+    fl::i64 step;   // per-row increment, Q16.16 (0 for single-row edges)
+    fl::i32 rem;    // 65536*B - step*dy, in [0, dy) (0 for single-row)
+    fl::i32 t;      // running remainder accumulator
+    fl::i32 dy;     // span height, Q16.16 (> 0)
+    fl::i32 B;      // dx in the top-to-bottom direction, Q16.16 (signed)
+    fl::i32 ytop;   // top endpoint y, Q16.16
+    fl::i32 ybot;   // bottom endpoint y, Q16.16
+    fl::i64 hw;     // per-row x half-span, ceil(32768*|B|/dy) (see above)
+    int py0;        // first active canvas row (row containing ytop)
+    int py1;        // last active canvas row (row containing ybot - 1)
+};
+
+/// Full-pixel coverage in T units (see polyLineT28).
+// 1L: `1 << 28` is UB with a 16-bit int (AVR); GCC 7.3 evaluates it to 0,
+// which silently collapses all polygon coverage to zero (nothing renders).
+static const fl::i32 kPolyOne = 1L << 28;
+
+/// Multiply two unsigned values < 2^48, returning the 128-bit product as a
+/// (hi, lo) u64 pair. 32-bit lanes — no __int128 (MSVC host portability).
+inline void polyMul128(fl::u64 a, fl::u64 b, fl::u64 &hi, fl::u64 &lo) FL_NO_EXCEPT {
+    const fl::u32 a0 = (fl::u32)a, a1 = (fl::u32)(a >> 32);
+    const fl::u32 b0 = (fl::u32)b, b1 = (fl::u32)(b >> 32);
+    const fl::u64 p0 = (fl::u64)a0 * b0;
+    const fl::u64 p1 = (fl::u64)a0 * b1 + (fl::u64)a1 * b0;
+    const fl::u64 low = p0 + (p1 << 32);
+    hi = (fl::u64)a1 * b1 + (p1 >> 32) + (low < p0 ? 1u : 0u);
+    lo = low;
+}
+
+/// 128-bit add: (hi, lo) += (ahi, alo).
+inline void polyAdd128(fl::u64 &hi, fl::u64 &lo, fl::u64 ahi, fl::u64 alo) FL_NO_EXCEPT {
+    const fl::u64 low = lo + alo;
+    hi += ahi + (low < lo ? 1u : 0u);
+    lo = low;
+}
+
+/// Sort a band's active edges (idx[0..nc)) by the committed
+/// implementation's midpoint key: the FLOORED Q16.16 crossing at the band
+/// midpoint,
+///   key_e = floor((2*dy_e*x_e + B_e*mid) / (2*dy_e)),   mid = a + b
+/// with a stable insertion sort (equal keys keep edge-index order). The key
+/// is computed in i64 exactly as the committed code did, including its wrap
+/// of 2*dy*x for steep single-row edges (|2*dy*x| can exceed 2^63: |x| up
+/// to ~2^47, dy < 2^16 there) — the order that wrap produces is part of the
+/// committed output, so the wrap is reproduced bit-for-bit via unsigned
+/// arithmetic (same bits, no UB). Sorting by the exact rational x instead
+/// would change span pairing whenever two midpoints share a floored key
+/// (or the old key wrapped) and is NOT byte-identical. Cost: one i64 floor
+/// division per active edge per band (the same the committed code paid);
+/// the per-pixel kernel needs no division.
+inline void polySortBand(fl::u8 *idx, fl::i64 *keys,
+                         const PolyEdge *edges, int nc, fl::i32 mid) FL_NO_EXCEPT {
+    for (int e = 0; e < nc; ++e) {
+        const PolyEdge &ed = edges[idx[e]];
+        // (2*dy) fits in i32; (2*dy)*x and the sum wrap mod 2^64 as in the
+        // committed i64 expression. B*mid < 2^47 never wraps.
+        const fl::u64 num = (fl::u64)(2 * (fl::i64)ed.dy) * (fl::u64)ed.x
+                          + (fl::u64)(static_cast<fl::i64>(ed.B) * (fl::i64)mid);
+        keys[e] = detail::floorDivI64(static_cast<fl::i64>(num),
+                                      (fl::i64)2 * ed.dy);
+    }
+    for (int e = 1; e < nc; ++e) {
+        const fl::i64 kv = keys[e];
+        const fl::u8 iv = idx[e];
+        int m = e - 1;
+        while (m >= 0 && keys[m] > kv) {
+            keys[m + 1] = keys[m];
+            idx[m + 1] = idx[m];
+            --m;
+        }
+        keys[m + 1] = kv;
+        idx[m + 1] = iv;
+    }
+}
+
+/// Count leading zeros of a non-zero 32-bit value (branch form: portable to
+/// MSVC where __builtin_clz is unavailable, and branch-free on x86).
+static inline int polyClz32(fl::u32 v) FL_NO_EXCEPT {
+    int n = 0;
+    if ((v & 0xFFFF0000u) == 0) { n = 16; v <<= 16; }
+    if ((v & 0xFF000000u) == 0) { n += 8; v <<= 8; }
+    if ((v & 0xF0000000u) == 0) { n += 4; v <<= 4; }
+    if ((v & 0xC0000000u) == 0) { n += 2; v <<= 2; }
+    if ((v & 0x80000000u) == 0) { n += 1; }
+    return n;
+}
+
+/// Index (0..127) of the highest set bit of a 128-bit value held in four
+/// 32-bit lanes (m3 most significant), or -1 when the value is zero.
+static inline int polyTopBit128(fl::u32 m3, fl::u32 m2, fl::u32 m1,
+                                fl::u32 m0) FL_NO_EXCEPT {
+    if (m3) return 127 - polyClz32(m3);
+    if (m2) return 95 - polyClz32(m2);
+    if (m1) return 63 - polyClz32(m1);
+    if (m0) return 31 - polyClz32(m0);
+    return -1;
+}
+
+/// Exact left-of-line coverage of one pixel for one polygon edge.
+///
+/// Line: x(tau) = x_q + (B/D) * tau with tau in Q16.16 relative to the row
+/// center (the caller's anchor; drawPolygonCore always anchors at the row
+/// center, which is what the floored-Q16.16 edge crossing stores);
+/// u = D * (x_q - px * 65536) at the anchor. Returns T = round(2^28 * cov)
+/// where cov = int_{ta}^{tb} clamp(x(tau) - px_left, 0, 1) dtau/65536, i.e.
+/// the fraction of the pixel lying to the LEFT of the line over the row
+/// sub-interval [ta, tb]. Pixel coverage between span lines L (left) and R
+/// (right) is then T_left(R) - T_left(L).
+///
+/// In s = B * tau space the clamp breakpoints are integers (s = -u and
+/// s = 2*D*32768 - u), so the integral is a sum of at most two
+/// trapezoid/rectangle pieces:
+///   M = (hi-lo) * ((u+lo)+(u+hi)) + (s_hi-lo2) * (4*D*32768)
+///   T = round(M / (32*D*|B|))
+/// M < 2^98, den = 32*D*S < 2^67; the exact quotient is < 2^31 and the
+/// result is clamped to 2^28 = kPolyOne, the physical full-pixel bound.
+///
+/// The quotient step is a byte-faithful reproduction of the committed
+/// implementation's 94-iteration shift-subtract (see the den-range
+/// breakdown below the M/den setup). M is left-aligned so its highest
+/// relevant bit sits at the top of the 128-bit window, and the numerator
+/// is fed top-down by left-shifting the window in place — constant-width
+/// shifts only, no FPU, no __int128, and on AVR the whole loop stays in
+/// registers (no libgcc __*di3 helper calls). An M == 0 numerator
+/// (line does not cross the pixel within [ta, tb]) returns 0 immediately.
+/// Result: [0, kPolyOne].
+inline fl::i32 polyLineT28(fl::i32 B, fl::i32 D, fl::i64 u,
+                           fl::i32 ta, fl::i32 tb) FL_NO_EXCEPT {
+    if (B == 0) {
+        // Vertical line: x is constant, cov = clamp(u0, 0, 1) * (tb-ta)/65536
+        // with u0 = u/D exact (u = D * u0).
+        fl::i64 w = u / D;
+        if (w < 0) w = 0;
+        else if (w > 65536) w = 65536;
+        return (fl::i32)(((w * (tb - ta)) + 8) >> 4);
+    }
+    const fl::i64 S = (B < 0) ? -(fl::i64)B : (fl::i64)B;
+    const fl::i64 sa = (fl::i64)B * ta;
+    const fl::i64 sb = (fl::i64)B * tb;
+    // s = B*tau runs over [sa, sb] as tau runs [ta, tb]; for B < 0 the
+    // interval is reversed — use min/max (the area is orientation-free).
+    const fl::i64 s_lo = (sa < sb) ? sa : sb;
+    const fl::i64 s_hi = (sa < sb) ? sb : sa;
+    const fl::i64 c0 = -u;
+    const fl::i64 c1 = (fl::i64)2 * D * 32768 - u;
+    fl::u64 mhi = 0, mlo = 0;
+    const fl::i64 lo = (s_lo > c0) ? s_lo : c0;
+    const fl::i64 hi = (s_hi < c1) ? s_hi : c1;
+    if (hi > lo) {
+        // (u+lo) and (u+hi) each lie in [0, 2*D*32768] (lo >= c0, hi <= c1),
+        // so both factors are non-negative and < 2^48.
+        polyMul128((fl::u64)(hi - lo),
+                   (fl::u64)((u + lo) + (u + hi)), mhi, mlo);
+    }
+    const fl::i64 lo2 = (s_lo > c1) ? s_lo : c1;
+    if (s_hi > lo2) {
+        fl::u64 phi = 0, plo = 0;
+        polyMul128((fl::u64)(s_hi - lo2),
+                   (fl::u64)((fl::i64)4 * D * 32768), phi, plo);
+        polyAdd128(mhi, mlo, phi, plo);
+    }
+    if (mhi == 0 && mlo == 0) return 0;  // line misses the pixel in [ta, tb]
+    // den = 32 * D * S as a u64 pair (D*S < 2^62, so den_hi = DS >> 59 and
+    // den < 2^67).
+    const fl::u64 DS = (fl::u64)S * (fl::u64)D;
+    const fl::u64 dhi = DS >> 59;
+    const fl::u64 dlo = DS << 5;
+    // The committed implementation's quotient step (94-iteration
+    // shift-subtract of M by den) has a latent 128-bit shift bug: it writes
+    // (rl = (rl<<1) | (rh>>63) | bit; rh = rh<<1;) while treating (rh, rl)
+    // as (high, low) for the compare and subtraction — the carry out of the
+    // LOW word's MSB is dropped and the high word's MSB is folded in
+    // instead. The remainder stays < den, so rh never reaches 2^63 and the
+    // buggy loop degenerates deterministically by den range:
+    //   dhi >= 2 (den >= 2^65): the subtraction condition (rh > dhi ||
+    //     (rh == dhi && rl >= dlo)) with rh == 0 is never true -> q == 0,
+    //     and the round-half-up check (2r vs den with r < 2^64) can never
+    //     pass -> T == 0.
+    //   dhi == 1 (den in [2^64, 2^65)): likewise q == 0; the loop folds M
+    //     into rl = M mod 2^64 and T is just the round-half-up bit:
+    //     T == (mlo >= 2^63) && (2*mlo >= den) ? 1 : 0.
+    //   dhi == 0 (den < 2^64): rh stays 0 (a spurious borrow is impossible:
+    //     subtraction only happens when rl >= dlo) and the loop is a 64-bit
+    //     state machine s <- (2s + bit) mod 2^64 that subtracts den when
+    //     s >= den — a long division that silently drops the carry out of
+    //     the remainder's MSB. That drop is exactly where the committed
+    //     output diverges from the exact quotient, so it is reproduced.
+    if (dhi >= 2) return 0;
+    if (dhi == 1)
+        return ((mlo >> 63) != 0 && (mlo << 1) >= dlo) ? 1 : 0;
+    {
+        // Fast path: for den < 2^63 the committed 94-iteration
+        // shift-subtract is an EXACT long division. Its 64-bit remainder
+        // state s satisfies s < den at the start of every step, so with
+        // den < 2^63 the update s <- 2s + bit never reaches 2^64 — the
+        // latent 128-bit carry drop can't fire, and the loop computes
+        // q = floor(M/den), r = M mod den (M read up to bit 93). If
+        // mhi == 0 the numerator is < 2^64, so the committed q
+        // accumulation (at most 64 steps) cannot wrap its u64 either.
+        // The whole loop then reduces to one exact 64/64 division plus
+        // the same round-half-up and physical clamp. On AVR the division
+        // lowers to __udivdi3 (already linked for the sort keys).
+        // dlo != 0 keeps this total for degenerate direct calls (the
+        // committed loop never divided; drawPolygon always feeds den > 0).
+        if (dlo != 0 && mhi == 0 && dlo < (fl::u64)1 << 63) {
+            fl::u64 q = mlo / dlo;
+            const fl::u64 r = mlo - q * dlo;  // mlo % dlo, one division
+            if ((r >> 63) != 0 || (r << 1) >= dlo) ++q;
+            if (q > (fl::u64)kPolyOne) q = (fl::u64)kPolyOne;
+            return (fl::i32)q;
+        }
+        fl::u32 m3 = (fl::u32)(mhi >> 32), m2 = (fl::u32)mhi;
+        fl::u32 m1 = (fl::u32)(mlo >> 32), m0 = (fl::u32)mlo;
+        const int top = polyTopBit128(m3, m2, m1, m0);
+        // The committed loop feeds bits 93..0 only; M bits above 93 are
+        // never read, so cap the window top at 93 (M can reach ~2^97).
+        const int t = (top < 94) ? top : 93;
+        // Left-align M by (127 - t) so its highest relevant bit reaches bit
+        // 127 of the window: the loop then feeds numerator bits with the
+        // fixed (w1 >> 63) extraction (constant-width shifts only — no
+        // libgcc __*di3 helpers on AVR).
+        const int k = 127 - t;
+        const int kl = k >> 5;
+        const int kb = k & 31;
+        {
+            fl::u32 n3, n2, n1, n0;
+            if (kl >= 3)      { n3 = m0; n2 = 0; n1 = 0; n0 = 0; }
+            else if (kl == 2) { n3 = m1; n2 = m0; n1 = 0; n0 = 0; }
+            else if (kl == 1) { n3 = m2; n2 = m1; n1 = m0; n0 = 0; }
+            else              { n3 = m3; n2 = m2; n1 = m1; n0 = m0; }
+            if (kb) {
+                const fl::u32 h3 = n2 >> (32 - kb);
+                const fl::u32 h2 = n1 >> (32 - kb);
+                const fl::u32 h1 = n0 >> (32 - kb);
+                n3 = (n3 << kb) | h3;
+                n2 = (n2 << kb) | h2;
+                n1 = (n1 << kb) | h1;
+                n0 = n0 << kb;
+            }
+            m3 = n3; m2 = n2; m1 = n1; m0 = n0;
+        }
+        // The committed loop, expressed in 32-bit lanes: each lane op is
+        // the corresponding half of the u64 op it replaces (same carries,
+        // same mod-2^64 wraps of the remainder and quotient states), but
+        // avr-gcc inlines 32-bit shifts, compares and subtracts instead
+        // of emitting __lshrdi3/__ashldi3/__cmpdi2/__subdi3 helper calls
+        // per iteration — the dominant cost of this loop on AVR.
+        const fl::u32 d1 = (fl::u32)(dlo >> 32), d0 = (fl::u32)dlo;
+        fl::u32 s1 = 0, s0 = 0;  // buggy-loop remainder (high, low)
+        fl::u32 q1 = 0, q0 = 0;  // (q<<1)|ge each step; keeps the <64 bits
+        for (int i = t; i >= 0; --i) {
+            const fl::u32 bit = m3 >> 31;
+            m3 = (m3 << 1) | (m2 >> 31);
+            m2 = (m2 << 1) | (m1 >> 31);
+            m1 = (m1 << 1) | (m0 >> 31);
+            m0 = m0 << 1;
+            const fl::u32 sh = s1 << 1, sl = s0 << 1;
+            s1 = sh | (s0 >> 31);
+            s0 = sl | bit;
+            const fl::u32 ge = (s1 > d1) || (s1 == d1 && s0 >= d0);
+            if (ge) {
+                const fl::u32 sb = s0 - d0;
+                s1 -= d1 + (fl::u32)(sb > s0);
+                s0 = sb;
+            }
+            const fl::u32 qh = q1 << 1, ql = q0 << 1;
+            q1 = qh | (q0 >> 31);
+            q0 = ql | ge;
+        }
+        // Round half-up: if 2r >= den, q++ (r = (s1, s0)). The carry into
+        // r1 comes out of s0's MSB; s1's MSB is the 2r overflow bit.
+        const fl::u32 r1 = (s1 << 1) | (s0 >> 31), r0 = s0 << 1;
+        if ((s1 >> 31) != 0 || r1 > d1 || (r1 == d1 && r0 >= d0)) {
+            const fl::u32 qb = q0 + 1;
+            q1 += (fl::u32)(qb < q0);  // carry: q0 wrapped past 0xFFFFFFFF
+            q0 = qb;
+        }
+        fl::u64 q = ((fl::u64)q1 << 32) | q0;
+        if (q > (fl::u64)kPolyOne) q = (fl::u64)kPolyOne;  // physical bound
+        return (fl::i32)q;
+    }
+}
 
 /// Disc context: bundles per-circle constants into a struct passed by reference.
 /// This reduces function-call overhead on register-poor architectures (AVR: 12 params
@@ -514,6 +856,16 @@ void drawStrokeLine(Canvas<PixelT>& canvas, const PixelT& color,
                     Coord x0, Coord y0, Coord x1, Coord y1, Coord thickness,
                     LineCap cap, fl::DrawMode mode) FL_NO_EXCEPT;
 
+template<typename PixelT, typename Coord>
+void drawPolygon(Canvas<PixelT>& canvas, const PixelT& color,
+                 fl::span<const PolyPoint<Coord>> pts,
+                 fl::DrawMode mode) FL_NO_EXCEPT;
+
+template<typename PixelT, typename Coord, int N>
+void drawPolygon(Canvas<PixelT>& canvas, const PixelT& color,
+                 const PolyPoint<Coord> (&pts)[N],
+                 fl::DrawMode mode) FL_NO_EXCEPT;
+
 /// ============================================================================
 /// LEGACY RASTERTARGET API (Deprecated - for backward compatibility)
 /// ============================================================================
@@ -638,6 +990,10 @@ template<typename PixelT, typename Coord, bool Overwrite>
 inline void drawStrokeLineCore(Canvas<PixelT>& canvas, const PixelT& color,
                                Coord x0, Coord y0, Coord x1, Coord y1,
                                Coord thickness, LineCap cap) FL_NO_EXCEPT;
+
+template<typename PixelT, typename Coord, bool Overwrite, int MAXN, int CHUNK>
+inline void drawPolygonCore(Canvas<PixelT>& canvas, const PixelT& color,
+                            fl::span<const PolyPoint<Coord>> pts) FL_NO_EXCEPT;
 
 }  // namespace detail
 
@@ -902,6 +1258,335 @@ inline void drawStrokeLine(Canvas<PixelT>& canvas, const PixelT& color,
         detail::drawStrokeLineCore<PixelT, Coord, true>(canvas, color, x0, y0, x1, y1, thickness, cap);
     else
         detail::drawStrokeLineCore<PixelT, Coord, false>(canvas, color, x0, y0, x1, y1, thickness, cap);
+}
+
+// ---------------------------------------------------------------------------
+// drawPolygonCore: even-odd fill with an exact per-pixel area model,
+// organized as row bands.
+//
+// Each non-horizontal edge is active in every canvas row it geometrically
+// occupies (py0 = the row containing ytop, py1 = the row containing ybot),
+// and each row is split into sub-bands at vertex events (vertices whose y
+// falls strictly inside the row). Within a band the crossing set is
+// constant: an edge participates iff ytop < band_top && ybot > band_bottom
+// (strict — at each vertex one edge ends and the other begins, so the
+// crossing count is the same in every band of a closed polygon). Edges in a
+// band are ordered by their floored Q16.16 x at the band midpoint (the
+// committed implementation's midpoint key, polySortBand — stable on equal
+// keys) and paired (0,1), (2,3),... For simple polygons this is exactly
+// the even-odd rule; self-intersecting polygons follow the same
+// deterministic span-pairing convention.
+//
+// The per-row scan is division-free: the crossing x (anchored at the row
+// center, which polyLineT28 integrates from) advances by the Bresenham
+// step/rem recurrence, and the per-row column extent is (x +/- hw) >> 16 —
+// a shift — where hw = ceil(32768*|B|/dy) was computed once at setup.
+// (MAXN, CHUNK) bound the
+// stack: MAXN caps the vertex count, CHUNK the per-row accumulator width
+// (CHUNK must be a power of two).
+//
+// Pixel coverage is accumulated additively over the row's bands into a
+// CHUNK-px accumulator in T units (kPolyOne = 2^28 = full pixel), then
+// quantized once per pixel: br = (acc*255 + ONE/2) >> 28. Coverage is
+// exact for linear edges (see polyLineT28): for a simple polygon the
+// per-pixel sum equals the true sub-pixel area, so total energy equals the
+// shoelace area up to u8 rounding.
+//
+// Vertices beyond MAXN are ignored (the polygon closes from #MAXN-1 back to
+// #0). Stack at MAXN = 32, CHUNK = 64: vertices (256 B) + edges (1792 B) +
+// accb (256 B) + per-row scratch (~680 B) + band prepass bidx/bnc/bfull
+// ((MAXN+1)*(MAXN+5) B = 1221 B) ≈ 4.2 KB; MAXN = 8, CHUNK = 16 ≈ 870 B.
+// ---------------------------------------------------------------------------
+template<typename PixelT, typename Coord, bool Overwrite, int MAXN, int CHUNK>
+inline void detail::drawPolygonCore(Canvas<PixelT>& canvas, const PixelT& color,
+                                    fl::span<const PolyPoint<Coord>> pts) FL_NO_EXCEPT {
+    FL_STATIC_ASSERT(MAXN >= 3 && MAXN <= 256, "drawPolygon: MAXN must be in [3, 256] (edge indices are u8)");
+    FL_STATIC_ASSERT(CHUNK > 0 && (CHUNK & (CHUNK - 1)) == 0, "drawPolygon: CHUNK must be a power of two");
+    const fl::i32 n = static_cast<fl::i32>(pts.size());
+    if (n < 3) return;
+    PixelT* pixels = canvas.pixels;
+    int width = canvas.width;
+    int height = canvas.height;
+    if (width <= 0 || height <= 0) return;
+
+    const int nv = (n < MAXN) ? n : MAXN;
+
+    // Convert vertices to Q16.16 (clamped to ±8191 px — i32-safe)
+    fl::i32 vx[MAXN];
+    fl::i32 vy[MAXN];
+    for (int i = 0; i < nv; ++i) {
+        vx[i] = detail::toQ16Clamped(pts[i].x);
+        vy[i] = detail::toQ16Clamped(pts[i].y);
+    }
+
+    // Build per-edge scanline state. Two i64 floor divisions per edge
+    // (anchor crossing + step) are the only divisions in this function.
+    PolyEdge edges[MAXN];
+    int nedges = 0;
+    int ymin = height, ymax = -1;
+    for (int i = 0; i < nv; ++i) {
+        const int j = (i + 1 == nv) ? 0 : (i + 1);
+        fl::i32 dy = vy[j] - vy[i];
+        if (dy == 0) continue;  // horizontal edge: ignored (even-odd convention)
+        // Orient edge top-to-bottom: B measured from the top vertex
+        fl::i32 ytop, xtop, B;
+        if (dy > 0) { ytop = vy[i]; xtop = vx[i]; B = vx[j] - vx[i]; }
+        else        { ytop = vy[j]; xtop = vx[j]; B = vx[i] - vx[j]; }
+        const fl::i32 dy2 = (dy > 0) ? dy : -dy;  // span height, > 0
+        const fl::i32 ybot = ytop + dy2;
+
+        // Active pixel rows: the row containing ytop through the row
+        // containing ybot (floor/ceil rule; rows are half-open so a vertex
+        // on a row boundary belongs to exactly one edge's row range).
+        int py0 = ytop >> 16;
+        int py1 = (ybot - 1) >> 16;
+        if (py0 < 0) py0 = 0;
+        if (py1 >= height) py1 = height - 1;
+        if (py0 > py1) continue;  // edge off-canvas vertically
+
+        PolyEdge& ed = edges[nedges++];
+        ed.py0 = py0;
+        ed.py1 = py1;
+        ed.dy = dy2;
+        ed.B = B;
+        ed.ytop = ytop;
+        ed.ybot = ybot;
+
+        // Exact crossing at py0's row center (one i64 floor division):
+        // x = xtop + floor(w0 * B / dy2), w0 = (py0<<16) + 32768 - ytop
+        const fl::i64 w0 = (static_cast<fl::i64>(py0) << 16) + 32768 - ytop;
+        const fl::i64 prod = w0 * B;
+        const fl::i64 q = detail::floorDivI64(prod, dy2);
+        ed.x = xtop + q;
+        // 65536*B = s*dy2 + rem, rem in [0, dy2). s is the per-row x
+        // advance (used by the carry on multi-row edges only) and, with
+        // rem, yields the row's x half-span hw = ceil(32768*|B|/dy2)
+        // without a second division:
+        //   B >= 0: 2*hw*dy2 = s*dy2 + rem ->
+        //           hw = (s>>1) + (s&1) + (s even && rem > 0)
+        //   B <  0: -s = ceil(65536*|B|/dy2) -> hw = ceil(-s/2)
+        const fl::i64 p2 = static_cast<fl::i64>(65536) * B;
+        const fl::i64 s = detail::floorDivI64(p2, dy2);
+        const fl::i32 rem = static_cast<fl::i32>(p2 - s * dy2);
+        ed.hw = (B >= 0)
+            ? ((s >> 1) + (s & 1) + ((s & 1) == 0 && rem > 0 ? 1 : 0))
+            : (((-s) >> 1) + ((-s) & 1));
+        if (dy2 >= 65536) {
+            ed.step = s;
+            ed.rem = rem;
+            ed.t = static_cast<fl::i32>(prod - q * dy2);  // in [0, dy2)
+        } else {
+            // Span < 1 px: may still span two canvas rows (a row-boundary
+            // crossing), but the carry stays a no-op (step = rem = t = 0):
+            // x keeps its py0-row value and the per-row extent (x +/- hw)
+            // boxes the line the kernel integrates — see PolyEdge.
+            ed.step = 0;
+            ed.rem = 0;
+            ed.t = 0;
+        }
+        if (ed.py0 < ymin) ymin = ed.py0;
+        if (ed.py1 > ymax) ymax = ed.py1;
+    }
+    if (nedges == 0) return;
+
+    // Scan rows
+    fl::i32 ev[MAXN + 2];  // band boundaries: row ends + vertex y's in row
+    fl::u8 idx[MAXN];      // a band's active edges, sorted by midpoint key
+    fl::i64 keys[MAXN];    // per-edge midpoint sort keys (see polySortBand)
+    fl::i32 lx0a[MAXN];    // per-row per-edge column extents (left, right)
+    fl::i32 lx1a[MAXN];
+    fl::i32 accb[CHUNK];   // per-row CHUNK-px coverage accumulator (T units)
+
+    for (int py = ymin; py <= ymax; ++py) {
+        const fl::i32 yc = (static_cast<fl::i32>(py) << 16) + 32768;
+
+        // Band boundaries: the row ends plus every vertex strictly inside
+        // the row (a vertex exactly on a row boundary coincides with a band
+        // edge — the floor/ceil row rule already splits the edges there).
+        int nev = 0;
+        ev[nev++] = -32768;
+        ev[nev++] = 32768;
+        for (int i = 0; i < nv; ++i) {
+            if ((vy[i] >> 16) == py && (vy[i] & 0xFFFF) != 0)
+                ev[nev++] = vy[i] - yc;
+        }
+        // Insertion sort (nev <= MAXN + 2)
+        for (int a = 1; a < nev; ++a) {
+            const fl::i32 v = ev[a];
+            int b = a - 1;
+            while (b >= 0 && ev[b] > v) { ev[b + 1] = ev[b]; --b; }
+            ev[b + 1] = v;
+        }
+
+        // Per-row column extents of each active edge (x is at the row
+        // center): the line stays within x +/- hw over the row, so px
+        // outside [lx0, lx1] is a full/zero shortcut for polyLineT28.
+        // floor(v / 65536) == v >> 16 — shifts, not divisions. The loop
+        // also yields the row extent actually touched (xmin/xmax): a span
+        // pair's range is [min(L.lx0, R.lx0), max(L.lx1, R.lx1)] — it
+        // can reach BETWEEN two off-canvas edges (e.g. a polygon covering
+        // the whole canvas), so the bounds are the min lx0 / max lx1 over
+        // ALL row-active edges, clamped once. Pairs partition the edges
+        // (odd count: the unpaired last edge only widens the range), so
+        // this superset can only add no-op chunks that the fill loop
+        // skips; the exact-x ordering of polySortBand only affects span
+        // pairing.
+        fl::i32 minLx0 = 0, maxLx1 = 0;
+        int nactive = 0;
+        for (int e = 0; e < nedges; ++e) {
+            const PolyEdge& ed = edges[e];
+            if (py < ed.py0 || py > ed.py1) continue;
+            lx0a[e] = static_cast<fl::i32>(detail::floorDiv16I64(ed.x - ed.hw));
+            lx1a[e] = static_cast<fl::i32>(detail::floorDiv16I64(ed.x + ed.hw));
+            if (nactive++ == 0) { minLx0 = lx0a[e]; maxLx1 = lx1a[e]; }
+            else {
+                if (lx0a[e] < minLx0) minLx0 = lx0a[e];
+                if (lx1a[e] > maxLx1) maxLx1 = lx1a[e];
+            }
+        }
+        int xmin = minLx0, xmax = maxLx1;
+        if (nactive == 0) { xmin = width; xmax = -1; }
+        else {
+            if (xmin < 0) xmin = 0;
+            if (xmax >= width) xmax = width - 1;
+        }
+
+        // Per-band active-edge list and its midpoint order (polySortBand)
+        // depend only on the row and the band bounds a, b — never on the
+        // column chunk. Compute them once per row (bidx/bnc/bfull) and
+        // reuse for every chunk: the committed code rebuilt and re-sorted
+        // each band for every chunk (one i64 sort key per active edge per
+        // chunk — pure redundancy for CHUNK == 1, where there is one chunk
+        // per pixel column). Rows whose extent is empty (off-canvas
+        // polygon) skip the prepass entirely: nothing would be filled.
+        fl::u8 bidx[MAXN + 1][MAXN];
+        fl::u8 bnc[MAXN + 1];
+        fl::i32 bfull[MAXN + 1];
+        if (xmin <= xmax) {
+            for (int k = 0; k + 1 < nev; ++k) {
+                const fl::i32 a = ev[k], b = ev[k + 1];
+                int nc = 0;
+                if (a < b) {
+                    for (int e = 0; e < nedges; ++e) {
+                        const PolyEdge& ed = edges[e];
+                        if (py >= ed.py0 && py <= ed.py1 &&
+                            ed.ytop < yc + b && ed.ybot > yc + a)
+                            idx[nc++] = (fl::u8)e;
+                    }
+                    if (nc >= 2) polySortBand(idx, keys, edges, nc, a + b);
+                    // Full-pixel coverage over this band: (b - a) *
+                    // kPolyOne >> 16 == (b - a) << 12 exactly (0 < b - a
+                    // < 2^16: both bounds lie inside the row).
+                    bfull[k] = (b - a) << 12;
+                }
+                bnc[k] = (fl::u8)nc;
+                for (int e = 0; e < nc; ++e) bidx[k][e] = idx[e];
+            }
+        }
+
+        // Fill CHUNK-px chunks: accumulate coverage over the bands, then
+        // quantize once per pixel.
+        // An empty row extent (xmin > xmax, e.g. every active edge right of
+        // the canvas) skipped the prepass, so bnc/bidx are uninitialized:
+        // start past xmax so the chunk loop never reads them.
+        const int csFirst = (xmin <= xmax) ? (xmin & ~(CHUNK - 1)) : xmax + 1;
+        for (int cs = csFirst; cs <= xmax; cs += CHUNK) {
+            for (int i = 0; i < CHUNK; ++i) accb[i] = 0;
+            const int ce = (cs + CHUNK <= xmax + 1) ? cs + CHUNK : xmax + 1;
+            for (int k = 0; k + 1 < nev; ++k) {
+                const int nc = bnc[k];
+                if (nc < 2) continue;
+                const fl::i32 a = ev[k], b = ev[k + 1];
+                // Full-pixel coverage over this band (row prepass).
+                const fl::i64 full = (fl::i64)bfull[k];
+                for (int p = 0; p + 1 < nc; p += 2) {
+                    const PolyEdge& L = edges[bidx[k][p]];
+                    const PolyEdge& R = edges[bidx[k][p + 1]];
+                    const fl::i32 Ll0 = lx0a[bidx[k][p]], Ll1 = lx1a[bidx[k][p]];
+                    const fl::i32 Rl0 = lx0a[bidx[k][p + 1]], Rl1 = lx1a[bidx[k][p + 1]];
+                    int pl = (Ll0 < Rl0) ? Ll0 : Rl0;
+                    if (pl < cs) pl = cs;
+                    int ph = (Ll1 > Rl1) ? Ll1 : Rl1;
+                    if (ph >= ce) ph = ce - 1;
+                    if (pl > ph) continue;
+                    fl::i64 uL = (fl::i64)L.dy * (L.x - ((fl::i64)pl << 16));
+                    fl::i64 uR = (fl::i64)R.dy * (R.x - ((fl::i64)pl << 16));
+                    const fl::i64 suL = -((fl::i64)L.dy << 16);
+                    const fl::i64 suR = -((fl::i64)R.dy << 16);
+                    for (int px = pl; px <= ph; ++px) {
+                        fl::i32 TL = (px > Ll1) ? 0
+                            : (px < Ll0) ? (fl::i32)full
+                            : polyLineT28(L.B, L.dy, uL, a, b);
+                        fl::i32 TR = (px > Rl1) ? 0
+                            : (px < Rl0) ? (fl::i32)full
+                            : polyLineT28(R.B, R.dy, uR, a, b);
+                        const fl::i32 d = TR - TL;
+                        if (d > 0) accb[px - cs] += d;
+                        uL += suL;
+                        uR += suR;
+                    }
+                }
+            }
+            PixelT* row = pixels + py * width + cs;
+            for (int i = 0; i < ce - cs; ++i) {
+                const fl::i32 v = accb[i];
+                if (v <= 0) continue;
+                const fl::u8 br = (v >= kPolyOne)
+                    ? 255
+                    : static_cast<fl::u8>(((fl::u64)v * 255u
+                        + (fl::u64)(kPolyOne >> 1)) >> 28);
+                if (br == 0) continue;
+                PixelT c = color;
+                c.nscale8(br);
+                if (Overwrite) row[i] = c;
+                else row[i] += c;
+            }
+        }
+
+        // Carry edge crossings to the next row's center (exact; t + rem
+        // < 2*dy < 2^31, so the signed compare is safe)
+        for (int e = 0; e < nedges; ++e) {
+            PolyEdge& ed = edges[e];
+            if (py >= ed.py0 && py <= ed.py1) {
+                ed.x += ed.step;
+                ed.t += ed.rem;
+                if (ed.t >= ed.dy) {
+                    ed.t -= ed.dy;
+                    ++ed.x;
+                }
+            }
+        }
+    }
+}
+
+/// MAXN caps the vertex count (32 by default) and CHUNK the per-row
+/// accumulator width in px (64 by default; must be a power of two).
+/// Smaller tiers shrink the stack for low-memory targets — the rendered
+/// pixels are identical.
+///
+/// Fill selects the backend: PolyFill::Exact (default, exact per-pixel
+/// area) or PolyFill::ABuffer (8x4 A-buffer sampling; CHUNK is ignored).
+template<typename PixelT, typename Coord, int MAXN, int CHUNK, PolyFill Fill>
+inline void drawPolygon(Canvas<PixelT>& canvas, const PixelT& color,
+                        fl::span<const PolyPoint<Coord>> pts,
+                        fl::DrawMode mode) FL_NO_EXCEPT {
+    if (Fill == PolyFill::ABuffer) {
+        if (mode == fl::DrawMode::DRAW_MODE_OVERWRITE)
+            detail::drawPolygonABufferCore<PixelT, Coord, true, MAXN>(canvas, color, pts);
+        else
+            detail::drawPolygonABufferCore<PixelT, Coord, false, MAXN>(canvas, color, pts);
+    } else if (mode == fl::DrawMode::DRAW_MODE_OVERWRITE)
+        detail::drawPolygonCore<PixelT, Coord, true, MAXN, CHUNK>(canvas, color, pts);
+    else
+        detail::drawPolygonCore<PixelT, Coord, false, MAXN, CHUNK>(canvas, color, pts);
+}
+
+template<typename PixelT, typename Coord, int N, int MAXN, int CHUNK, PolyFill Fill>
+inline void drawPolygon(Canvas<PixelT>& canvas, const PixelT& color,
+                        const PolyPoint<Coord> (&pts)[N],
+                        fl::DrawMode mode) FL_NO_EXCEPT {
+    drawPolygon<PixelT, Coord, MAXN, CHUNK, Fill>(
+        canvas, color, fl::span<const PolyPoint<Coord>>(pts, N), mode);
 }
 
 }  // namespace gfx

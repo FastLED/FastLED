@@ -24,6 +24,11 @@
 ///   canvas.drawStrokeLine(CRGB::Green, 2.0f, 8.0f, 14.0f, 8.0f, 3.0f,
 ///                         fl::LineCap::ROUND);
 ///
+///   // Filled polygon (even-odd rule, antialiased edges)
+///   fl::PolyPoint<float> quad[4] = {{3.0f, 4.0f}, {12.0f, 2.5f},
+///                                    {10.0f, 11.0f}, {2.0f, 9.5f}};
+///   canvas.drawPolygon(CRGB::Cyan, quad);
+///
 /// Coordinates can be float, int, or fixed-point (fl::s16x16, etc.).
 /// Default draw mode is additive (DRAW_MODE_BLEND) — overlapping shapes blend naturally.
 /// Use DRAW_MODE_OVERWRITE to replace pixels instead of blending.
@@ -46,6 +51,10 @@ namespace fl {
 
 /// @brief Line cap style
 using LineCap = gfx::LineCap;
+
+/// @brief Polygon vertex (x, y coordinate pair) for drawPolygon
+template<typename Coord>
+using PolyPoint = gfx::PolyPoint<Coord>;
 
 /// @brief Generic canvas for any pixel type (e.g. Canvas<CRGB16>).
 /// All methods are force-inlined delegates — zero overhead.
@@ -101,6 +110,20 @@ class Canvas {
                                              DrawMode mode = DrawMode::DRAW_MODE_BLEND) FL_NO_EXCEPT {
         mImpl.drawStrokeLine(color, x0, y0, x1, y1, thickness, cap, mode);
     }
+
+    template<typename Coord, int MAXN = 32, int CHUNK = 64,
+             gfx::PolyFill Fill = gfx::PolyFill::Exact>
+    FASTLED_FORCE_INLINE void drawPolygon(const RGB_T& color, fl::span<const PolyPoint<Coord>> pts,
+                                          DrawMode mode = DrawMode::DRAW_MODE_BLEND) FL_NO_EXCEPT {
+        mImpl.template drawPolygon<Coord, MAXN, CHUNK, Fill>(color, pts, mode);
+    }
+
+    template<typename Coord, int N, int MAXN = 32, int CHUNK = 64,
+             gfx::PolyFill Fill = gfx::PolyFill::Exact>
+    FASTLED_FORCE_INLINE void drawPolygon(const RGB_T& color, const PolyPoint<Coord> (&pts)[N],
+                                          DrawMode mode = DrawMode::DRAW_MODE_BLEND) FL_NO_EXCEPT {
+        mImpl.template drawPolygon<Coord, N, MAXN, CHUNK, Fill>(color, pts, mode);
+    }
 };
 
 /// @brief Convenience alias for CRGB canvas — use fl::CanvasRGB for no-template syntax.
@@ -115,6 +138,7 @@ class CanvasRGB : protected Canvas<CRGB> {
     using Canvas<CRGB>::drawDisc;
     using Canvas<CRGB>::drawRing;
     using Canvas<CRGB>::drawStrokeLine;
+    using Canvas<CRGB>::drawPolygon;
 };
 
 }  // namespace fl

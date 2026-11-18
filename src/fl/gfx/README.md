@@ -1,7 +1,7 @@
 # fl/gfx — 2D Graphics for LED Matrices
 
-Antialiased lines, circles, and rings on rectangular pixel buffers.
-One header, four functions, any pixel type.
+Antialiased lines, circles, rings, and polygons on rectangular pixel
+buffers. One header, five functions, any pixel type.
 
 ```cpp
 #include "fl/gfx/gfx.h"
@@ -101,6 +101,38 @@ canvas.drawStrokeLine(CRGB::Green, 2.0f, 8.0f, 14.0f, 8.0f, 3.0f,
 | `FLAT` | Ends exactly at the endpoints (default) |
 | `ROUND` | Semicircle caps extending past each endpoint |
 | `SQUARE` | Rectangle caps extending half-thickness past each endpoint |
+
+### drawPolygon — filled polygon
+
+```cpp
+canvas.drawPolygon(color, points);          // points: PolyPoint<Coord> array
+canvas.drawPolygon(color, points, mode);    // e.g. fl::DrawMode::DRAW_MODE_OVERWRITE
+```
+
+An arbitrary polygon filled with the **even-odd rule** — self-intersecting
+outlines (bowties, stars) work too. Every edge is antialiased with exact
+sub-pixel coverage.
+
+```cpp
+// four float vertices
+fl::PolyPoint<float> quad[4] = {
+    {3.0f, 4.0f}, {12.0f, 2.5f}, {10.0f, 11.0f}, {2.0f, 9.5f}
+};
+canvas.drawPolygon(CRGB::Cyan, quad);
+
+// any coordinate type works, same rules as the other primitives
+fl::PolyPoint<int> tri[3] = {{5, 5}, {20, 8}, {10, 22}};
+canvas.drawPolygon(CRGB::Yellow, tri);
+```
+
+- **3 to 32 vertices.** Fewer than 3 draws nothing; more than 32 is
+  truncated to the first 32.
+- **Fill rule** — even-odd: a point is inside if a ray crosses an odd
+  number of edges. No holes or subpaths.
+- **Vertex coordinates** clamp to ±8191 px, so out-of-range values can't
+  overflow.
+- Degenerate input (duplicate or collinear vertices, fully off-canvas
+  polygons) is safe — it just draws nothing.
 
 ---
 
@@ -420,6 +452,8 @@ out-of-bounds writes:
 |-------|----------|
 | Zero radius or thickness | Draws nothing |
 | Zero-length line | Draws nothing |
+| Fewer than 3 polygon vertices, or all collinear | Draws nothing |
+| More than 32 polygon vertices | Truncated to the first 32 |
 | Center off-screen | Clips to canvas bounds |
 | Shape partially off-screen | Only visible pixels are written |
 | Negative coordinates | Clipped — no wrap-around |
@@ -442,6 +476,10 @@ half-pixel soft zone:
 - `drawRing` — same AA math applied to both inner and outer edges.
 - `drawStrokeLine` — perpendicular distance from centerline, with a
   precomputed 256-entry LUT for sqrt-based falloff.
+- `drawPolygon` — exact even-odd scanline fill: each row's edge crossings
+  are paired into spans and the sub-pixel area of every span is integrated
+  in integer arithmetic, so edges get true per-pixel coverage instead of
+  a distance falloff.
 
 **Performance.** The primitives iterate only the bounding box of each
 shape (not the entire canvas). On a 32x32 canvas, 100 draw calls
