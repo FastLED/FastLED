@@ -277,6 +277,21 @@ def staged_project_dir(tmp_path: Path) -> Path:
 class TestParseArgsAndBuildCommands:
     """Test _parse_args_and_build_commands (pure computation, no mocks needed)."""
 
+    @pytest.mark.parametrize(
+        "field, environment",
+        [
+            ("environment_positional", "lpc804"),
+            ("environment_positional", "lpcxpresso804"),
+            ("environment", "lpc804"),
+        ],
+    )
+    def test_lpc804_is_refused_at_parse_time(
+        self, fake_project_dir: Path, field: str, environment: str
+    ) -> None:
+        """#5267: the sketch cannot fit, so refuse before port, build or link."""
+        args = _make_args(project_dir=fake_project_dir, **{field: environment})
+        assert _parse_args_and_build_commands(args) == 1
+
     def test_parlio_single_driver(self, fake_project_dir: Path) -> None:
         args = _make_args(parlio=True, project_dir=fake_project_dir)
         result = _parse_args_and_build_commands(args)
@@ -1698,7 +1713,7 @@ class TestResolvePortAndEnvironment:
 
     @pytest.mark.parametrize(
         "environment",
-        ("esp32s3", "lpc845brk", "lpc845", "lpcxpresso845max", "lpcxpresso804"),
+        ("esp32s3", "lpc845brk", "lpc845", "lpcxpresso845max"),
     )
     def test_known_environment_defers_port_selection_to_fbuild(
         self, environment: str
