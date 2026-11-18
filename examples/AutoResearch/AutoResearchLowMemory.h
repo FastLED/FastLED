@@ -711,6 +711,10 @@ inline void autoResearchLowMemorySetup() {
                 fl::ChipsetVariant(fl::makeClockless<fl::TIMING_WS2812_800KHZ>(tx_pin)),
                 fl::move(grb));
             if (!frame || !tx.canHandle(frame)) return setupFailed();
+            // The engine has no abort, so a frame left over from a timed-out
+            // case must drain first, or show() would skip this case's frame.
+            constexpr fl::u32 kTxDeadlineMs = 100u;
+            if (!tx.waitForReady(kTxDeadlineMs)) return setupFailed();
             const u8* expected_buf = frame->getData().data();
 
             auto rx = fl::LpcSctRxChannel::create(rx_pin);
@@ -732,15 +736,14 @@ inline void autoResearchLowMemorySetup() {
             // TX gets its own deadline: a 100-LED frame is ~3 ms on the
             // wire, whatever the RX window. A frame that does not finish
             // fails the case.
-            constexpr fl::u32 kTxDeadlineMs = 100u;
             tx.enqueue(frame);
             tx.show();
             const bool tx_done = tx.waitForReady(kTxDeadlineMs);
             rx->wait(capture_ms);
-            // Give the finished TX pad back to GPIO, so a later
-            // findConnectedPins in this boot sees the jumper, not a
-            // USART-held pin.
-            if (tx_done) {
+            // Give the TX pad back to GPIO once the frame is out (re-checked
+            // after the RX wait), so a later findConnectedPins in this boot
+            // sees the jumper, not a USART-held pin.
+            if (tx.poll().state == fl::IChannelDriver::DriverState::READY) {
                 fl::lpc::LpcUartDmaRuntime::releaseTxPin();  // ok platform specific - only the LPC845 UART-DMA TX holds the pad on a movable SWM function between frames
             }
 
