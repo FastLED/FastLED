@@ -27,11 +27,15 @@
 /// so the DMA and the SCT never stop mid-frame. Each chunk's descriptor
 /// raises INTA when it runs out; the handler encodes the chunk after next
 /// into the buffer just freed and points the free descriptor at it (or at
-/// the halt step). That must happen within one chunk time (120 us at the
-/// default 96 bits): it takes ~60 us from the DMA ISR hub
-/// (`FASTLED_LPC_DMA_ISR`, on by default with the UART-DMA driver). Without
-/// the hub the refill happens in `poll()`, and a frame longer than two
-/// chunks is cut short if `poll()` comes later than that. A refill that
+/// the halt step). The deadline counts from the INTA, not from the last
+/// refill: the refill must be written while the playing chunk still has at
+/// least 4 bits (5 us) to go, i.e. latency to the handler plus the encode
+/// (~60 us) must fit in one chunk time less 5 us (115 us at the default
+/// 96 bits). The DMA ISR hub (`FASTLED_LPC_DMA_ISR`, on by default with the
+/// UART-DMA driver) meets that. Without the hub the refill happens in
+/// `poll()`; an INTA can land just after a poll, so the poll interval plus
+/// the encode must fit that budget (polls at most ~55 us apart at 96 bits),
+/// or a frame longer than two chunks is cut short. A refill that
 /// comes too late ends the frame early (every consumed descriptor is reset
 /// to the halt step, and a free one is rewritten only while the playing
 /// chunk has bits to spare); it never replays old data or hangs.
@@ -217,6 +221,12 @@ public:
     /// after chunk 1).
     bool isDone() const FL_NO_EXCEPT;
 
+    /// @brief True when the last frame that ended put every bit on the
+    ///        wire. False when it halted early (a refill missed its
+    ///        deadline), hit a DMA error, or was aborted. Read it once
+    ///        `pollAndAdvance()` has returned true.
+    bool lastFrameComplete() const FL_NO_EXCEPT { return mFrameComplete; }
+
     /// @brief Return the byte stream captured by the most recent
     ///        `transmit()` call.
     ///
@@ -276,6 +286,11 @@ private:
     u32 mTotalBits = 0;
     u32 mBitsEncoded = 0;   // encode cursor: bits encoded so far
     u32 mLastChunk = 0;     // index of the frame's last chunk
+    // Bits armed in descriptors that will play. A slot is armed only with
+    // the refill margin left, so the frame is whole iff this reaches
+    // mTotalBits by the time the SCT halts.
+    u32 mBitsQueued = 0;
+    bool mFrameComplete = false;
     // Shared with the DMA ISR; other contexts touch them with IRQs off.
     volatile u32 mPlayingChunk = 0;   // index of the chunk on the wire
     volatile bool mTransmitInProgress = false;

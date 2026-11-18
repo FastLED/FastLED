@@ -14,7 +14,9 @@
 ///     rise that comes later than that, i.e. the line idling low mid-frame,
 ///     ends the capture, so the frame comes up short.
 /// So each bit leaves one word: its high time. Choose `sample_ticks` after
-/// the longest high time and before the next bit's falling edge.
+/// the longest high time and before the earliest next rising edge (the
+/// shortest bit period): that rise clears the timer, so a later MR0 never
+/// matches and the DMA copies nothing for the bit.
 ///
 /// The pin reaches the timer through the SWM `T0_CAP0` function. Only that
 /// SWM byte is touched, and DMA0 and SWM are never reset (#4676).
@@ -32,9 +34,17 @@
 #include "fl/stl/int.h"
 #include "fl/stl/noexcept.h"
 #include "fl/stl/span.h"
+#include "platforms/arm/lpc/drivers/sct_dma/lpc_sct_dma_runtime.h"  // FASTLED_LPC_PWM_DMA_BASECH
 
+// The capture's DMA channel. The default steps off the transmitter's
+// channel, so a build that moves FASTLED_LPC_PWM_DMA_BASECH to 1 still
+// compiles; 0 and 1 are clear of the UART-DMA request channels (2..5).
 #ifndef FL_LPC_CTIMER_CAPTURE_DMA_CH
+#if FASTLED_LPC_PWM_DMA_BASECH == 1
+#define FL_LPC_CTIMER_CAPTURE_DMA_CH 0u
+#else
 #define FL_LPC_CTIMER_CAPTURE_DMA_CH 1u
+#endif
 #endif
 
 namespace fl {

@@ -124,6 +124,9 @@ void LpcSctDmaTransmitter::init() FL_NO_EXCEPT {
 inline void lpcSctTxApplySetup() FL_NO_EXCEPT {
     SCT0->CONFIG = SCT_CONFIG_UNIFY_MASK;       // one 32-bit counter, bus clock
     SCT0->CTRL = kTxSctCtrlHalt | SCT_CTRL_CLRCTR_L_MASK;
+    // Every slot back to match mode while halted: the SCT RX capture leaves
+    // slots 0 and 1 in capture mode, and EV0/EV1 need them as matches.
+    SCT0->REGMODE = 0u;
     for (u32 ev = 0; ev < 4u; ++ev) {
         SCT0->EV[ev].STATE = 1u;                  // active in state 0
         SCT0->EV[ev].CTRL = ev | kTxEvCtrlMatchOnly;  // MATCHSEL = ev
@@ -215,6 +218,7 @@ void LpcSctDmaTransmitter::abort() FL_NO_EXCEPT {
 #undef OUTPUT
         SCT0->OUTPUT &= ~(1u << kTxSctOut);
 #pragma pop_macro("OUTPUT")
+        mFrameComplete = false;   // cut off before its last bit
     }
     mTransmitInProgress = false;
     mCurrentBytes = nullptr;
@@ -235,6 +239,7 @@ void LpcSctDmaTransmitter::transmit(const u8* bytes, u32 len, bool is_rgbw) FL_N
     mCurrentBytes = bytes;
     mTotalBits = len * 8u;
     mBitsEncoded = 0;
+    mFrameComplete = false;
 
     // Chunk 0 runs from the channel's own descriptor; its first mask goes
     // into OUT0.CLR by hand, and EV2 of each bit makes the DMA load the
@@ -252,6 +257,7 @@ void LpcSctDmaTransmitter::transmit(const u8* bytes, u32 len, bool is_rgbw) FL_N
     d.src_end = lpcSctTxAddr(&mChunkBuf[0][n0 - 1u]);
     d.dst_end = lpcSctTxAddr(&SCT0->OUT[kTxSctOut].CLR);
     d.link = lpcSctTxAddr(n1 > 0u ? &slots[1] : &slots[0]);
+    mBitsQueued = n0 + n1;
     mPlayingChunk = 0;
     mLastChunk = (mTotalBits + FASTLED_LPC_PWM_DMA_CHUNK_BITS - 1u) /
                      FASTLED_LPC_PWM_DMA_CHUNK_BITS - 1u;
@@ -261,6 +267,7 @@ void LpcSctDmaTransmitter::transmit(const u8* bytes, u32 len, bool is_rgbw) FL_N
     SCT0->CTRL = kTxSctCtrlHalt | SCT_CTRL_CLRCTR_L_MASK;
     SCT0->OUT[kTxSctOut].CLR = mChunkBuf[0][0];
     DMA0->COMMON[0].INTA = (1u << kTxDmaCh);
+    DMA0->COMMON[0].ERRINT = (1u << kTxDmaCh);   // W1C a stale error
     DMA0->CHANNEL[kTxDmaCh].XFERCFG = kTxXferValid | kTxXferReload | kTxXferSetIntA |
                                       kTxXferWidth32 | kTxXferSrcInc1 |
                                       kTxXferCount(n0 - 1u);
@@ -308,6 +315,7 @@ void LpcSctDmaTransmitter::onChunkEnd() FL_NO_EXCEPT {
     if ((DMA0->COMMON[0].INTA & (1u << kTxDmaCh)) == 0u &&
         lpcSctTxTransfersLeft() >= kTxRefillMarginBits) {
         lpcSctTxWriteChunkSlot(slots[freed], mChunkBuf[freed], n, slots[freed ^ 1u]);
+        mBitsQueued += n;
     }
     __set_PRIMASK(primask);
 }
@@ -322,6 +330,12 @@ bool LpcSctDmaTransmitter::pollAndAdvance() FL_NO_EXCEPT {
     // each INTA.
     const u32 primask = __get_PRIMASK();
     __disable_irq();
+    if (mTransmitInProgress && (DMA0->COMMON[0].ERRINT & (1u << kTxDmaCh)) != 0u) {
+        // The descriptor chain stopped short of the halt step, so the SCT
+        // would never halt: clear the error and end the frame here.
+        DMA0->COMMON[0].ERRINT = (1u << kTxDmaCh);   // W1C
+        abort();   // leaves mFrameComplete false
+    }
     if (mTransmitInProgress && (DMA0->COMMON[0].INTA & (1u << kTxDmaCh)) != 0u) {
         DMA0->COMMON[0].INTA = (1u << kTxDmaCh);
         onChunkEnd();
@@ -329,6 +343,7 @@ bool LpcSctDmaTransmitter::pollAndAdvance() FL_NO_EXCEPT {
     if (mTransmitInProgress && isStopped()) {
         // The halt step ran: normally after the last chunk, or early if a
         // refill came later than one chunk time (frame cut short).
+        mFrameComplete = (mBitsQueued == mTotalBits);
         mTransmitInProgress = false;
         mCurrentBytes = nullptr;
     }
@@ -381,9 +396,11 @@ void LpcSctDmaTransmitter::transmit(const u8* bytes, u32 len, bool is_rgbw) FL_N
     mTotalBits = 0;
     mBitsEncoded = 0;
     mTransmitInProgress = false;  // host completes synchronously
+    mFrameComplete = false;
     if (bytes == nullptr || len == 0u) {
         return;
     }
+    mFrameComplete = true;
     mTxCapture.reserve(len);
     for (u32 i = 0; i < len; ++i) {
         mTxCapture.push_back(bytes[i]);

@@ -114,6 +114,10 @@ public:
     const LpcSctDmaTransmitter& transmitter() const FL_NO_EXCEPT { return mTransmitter; }
 
 private:
+    /// @brief Clear isInUse() on the transmitting channels, drop them,
+    ///        and mark the engine idle.
+    void releaseTransmitting() FL_NO_EXCEPT;
+
     /// @brief Pending channels (set by enqueue, consumed by show).
     fl::vector<ChannelDataPtr> mEnqueuedChannels;
 

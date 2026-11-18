@@ -1,4 +1,4 @@
-// AutoResearchPwmDmaClockless.h — LPC845 SCT+DMA channels-API engine
+// AutoResearchPwmDmaClockless.h - LPC845 SCT+DMA channels-API engine
 // AutoResearch validation harness (FastLED #3468, #5265).
 //
 // Device-side RPC handlers that exercise the `ChannelEngineLpcSctDma`
@@ -10,13 +10,17 @@
 // Handlers (bound by `autoresearch::pwm_dma_cl::bind(remote)`):
 //
 //   `pwmDmaClFrameOnce(led_count, color_rgb, data_pin)`
-//     Drive one frame; "ok,started_us,done_us,duration_us".
+//     Drive one frame; "ok,started_us,done_us,duration_us". ok is 0 when
+//     the frame halted before its last bit.
 //
 //   `pwmDmaClFrameBurst(led_count, color_rgb, n_frames, data_pin)`
-//     Drive `n_frames` back-to-back; "ok,total_us,fps_x100".
+//     Drive `n_frames` back-to-back, each after the WS2812 reset time;
+//     "ok,total_us,fps_x100".
 //
-//   `pwmDmaClCaptureSelf(led_count, color_rgb, data_pin, rx_pin, hold_us)`
-//     Drive one frame and capture every bit's high time on `rx_pin` with
+//   `pwmDmaClCaptureSelf(led_count, color_rgb, data_pin, rx_pin, hold_us,
+//                        step_rgb)`
+//     LED i is `(color_rgb + i * step_rgb) & 0xFFFFFF`, so a nonzero step
+//     gives every chunk different bytes. Drive one frame and capture every bit's high time on `rx_pin` with
 //     `LpcCtimerPulseCapture` (CTIMER0 + DMA). The SCT RX capture can't be
 //     used: the transmitter owns the chip's only SCT. `hold_us` > 0
 //     busy-waits that long after show() without calling poll(), as
@@ -52,18 +56,18 @@
 #include "fl/stl/sstream.h"
 #include "fl/stl/vector.h"
 #include "fl/system/pin_probe.h"
-#include "platforms/arm/lpc/drivers/sct_dma/channel_engine_lpc_sct_dma.h" // ok platform headers — AutoResearch driver-specific test needs the concrete engine type
+#include "platforms/arm/lpc/drivers/sct_dma/channel_engine_lpc_sct_dma.h" // ok platform headers - AutoResearch driver-specific test needs the concrete engine type
 // The LPC BusTraits<Bus::BIT_BANG> specialization this file names. It used to
 // arrive only via clockless_channel_lpc.h, which is skipped when another
 // ClocklessController was already picked, leaving the type incomplete.
-#include "platforms/arm/lpc/drivers/sct_dma/bus_traits.h" // ok platform headers — same reason
-#include "platforms/arm/lpc/drivers/sct_dma/lpc_ctimer_pulse_capture.h" // ok platform headers — the SCT is the transmitter, so the wire is measured with CTIMER0
+#include "platforms/arm/lpc/drivers/sct_dma/bus_traits.h" // ok platform headers - same reason
+#include "platforms/arm/lpc/drivers/sct_dma/lpc_ctimer_pulse_capture.h" // ok platform headers - the SCT is the transmitter, so the wire is measured with CTIMER0 (no core pulse-capture API exists)
 
 namespace autoresearch {
 namespace pwm_dma_cl {
 
-// Captures are capped at 10 LEDs (240 bits): three chunks of the default
-// 96-bit transmitter chunk, so chunk hand-over is on the wire too.
+// Captures are capped at 20 LEDs (480 bits): five chunks of the default
+// 96-bit transmitter chunk, so both descriptor slots are reused on the wire.
 constexpr int kMaxCaptureLeds = 20;
 
 struct PwmDmaClocklessState {
@@ -81,22 +85,31 @@ inline fl::ChipsetTimingConfig ws2812b_timing() FL_NO_EXCEPT {
                                    /*reset_us=*/50, "WS2812B");
 }
 
-// Build a `ChannelData` filled with N LEDs of a single GRB color.
-// Colors passed from the host as 24-bit RGB; we swap to GRB (WS2812
-// wire order) inside so the LED count matches the raw byte layout.
-inline fl::ChannelDataPtr makeSolidChannelData(
-        int pin, int num_leds, fl::u32 rgb) FL_NO_EXCEPT {
+// Build a `ChannelData` of N LEDs; LED i is `(rgb + i * step) & 0xFFFFFF`
+// (step 0: one solid color). Colors come from the host as 24-bit RGB and
+// are stored GRB (WS2812 wire order).
+inline fl::ChannelDataPtr makeChannelData(
+        int pin, int num_leds, fl::u32 rgb, fl::u32 step) FL_NO_EXCEPT {
     fl::ChipsetTimingConfig t = ws2812b_timing();
     fl::vector_psram<fl::u8> encoded(static_cast<fl::size>(num_leds * 3));
-    const fl::u8 r = static_cast<fl::u8>((rgb >> 16) & 0xFF);
-    const fl::u8 g = static_cast<fl::u8>((rgb >>  8) & 0xFF);
-    const fl::u8 b = static_cast<fl::u8>((rgb >>  0) & 0xFF);
     for (int i = 0; i < num_leds; ++i) {
-        encoded[i * 3 + 0] = g;   // WS2812 GRB
-        encoded[i * 3 + 1] = r;
-        encoded[i * 3 + 2] = b;
+        const fl::u32 c = (rgb + static_cast<fl::u32>(i) * step) & 0xFFFFFFu;
+        encoded[i * 3 + 0] = static_cast<fl::u8>((c >> 8) & 0xFF);    // G
+        encoded[i * 3 + 1] = static_cast<fl::u8>((c >> 16) & 0xFF);   // R
+        encoded[i * 3 + 2] = static_cast<fl::u8>(c & 0xFF);           // B
     }
     return fl::ChannelData::create(pin, t, fl::move(encoded));
+}
+
+inline fl::ChannelDataPtr makeSolidChannelData(
+        int pin, int num_leds, fl::u32 rgb) FL_NO_EXCEPT {
+    return makeChannelData(pin, num_leds, rgb, 0u);
+}
+
+// READY means the engine is idle, not that the frame went out whole: an
+// early halt (a refill missed its deadline) or a DMA error is READY too.
+inline bool lastFrameComplete(fl::ChannelEngineLpcSctDma& engine) FL_NO_EXCEPT {
+    return engine.transmitter().lastFrameComplete();
 }
 
 // Spin poll() until READY, at most `timeout_us`. False on timeout.
@@ -136,7 +149,8 @@ inline fl::string frameOnceHandler(int led_count, fl::u32 rgb, int data_pin) FL_
     const fl::u32 t_start = micros();
     engine.enqueue(ch);
     engine.show();
-    const bool ok = waitReady(engine, frameTimeoutUs(led_count));
+    const bool ok = waitReady(engine, frameTimeoutUs(led_count)) &&
+                    lastFrameComplete(engine);
     const fl::u32 t_end = micros();
 
     fl::sstream s;
@@ -157,13 +171,27 @@ inline fl::string frameBurstHandler(int led_count, fl::u32 rgb,
         return fl::string("0,0,0");
     }
 
+    // The strip latches only after the line idles low for reset_us; a
+    // shorter gap would merge two frames, so each frame (the first too, in
+    // case a previous RPC just drove the line) starts that long after the
+    // last one ended.
+    const fl::u32 reset_us = ws2812b_timing().reset_us;
     const fl::u32 t_start = micros();
+    fl::u32 last_end = t_start - reset_us;
     for (int i = 0; i < n_frames; ++i) {
+        while (micros() - last_end < reset_us) {
+        }
         engine.enqueue(ch);
         engine.show();
         if (!waitReady(engine, frameTimeoutUs(led_count))) {
             fl::sstream s;
             s << "0,stalled_at_frame=" << i;
+            return s.str();
+        }
+        last_end = micros();
+        if (!lastFrameComplete(engine)) {
+            fl::sstream s;
+            s << "0,short_frame=" << i;
             return s.str();
         }
         // Feed the watchdog every N frames so long bursts don't reset us.
@@ -173,7 +201,7 @@ inline fl::string frameBurstHandler(int led_count, fl::u32 rgb,
     }
     const fl::u32 t_end = micros();
     const fl::u32 total_us = t_end - t_start;
-    // fps × 100 to keep two decimals of precision in an integer CSV.
+    // fps x 100 to keep two decimals of precision in an integer CSV.
     const fl::u32 fps_x100 = total_us > 0
         ? (static_cast<fl::u32>(n_frames) * 100u * 1000000u / total_us)
         : 0u;
@@ -198,8 +226,8 @@ constexpr fl::u32 kMaxRiseGapNs = 2000;
 // stops the capture, so a frame that idles mid-way decodes short. Returns
 // "1,<n>,<byte>...,bits=..,t0h=min-max,t1h=min-max,gap_guard=.." (or
 // "0,<reason>").
-inline fl::string captureFrame(int led_count, fl::u32 rgb, int data_pin,
-                               int rx_pin, int hold_us,
+inline fl::string captureFrame(int led_count, fl::u32 rgb, fl::u32 step,
+                               int data_pin, int rx_pin, int hold_us,
                                fl::u32 max_gap_ns) FL_NO_EXCEPT {
     const fl::ChipsetTimingConfig t = ws2812b_timing();
     const fl::u32 t0h = fl::lpc_sct_ticks(t.t1_ns);
@@ -217,7 +245,7 @@ inline fl::string captureFrame(int led_count, fl::u32 rgb, int data_pin,
     }
 
     auto& engine = fl::BusTraits<fl::Bus::BIT_BANG>::instance();
-    auto ch = makeSolidChannelData(data_pin, led_count, rgb);
+    auto ch = makeChannelData(data_pin, led_count, rgb, step);
     if (!engine.canHandle(ch)) {
         cap.end();
         return fl::string("0,cannot_handle");
@@ -234,6 +262,11 @@ inline fl::string captureFrame(int led_count, fl::u32 rgb, int data_pin,
     if (!sent) {
         fl::sstream s;
         s << "0,tx_stalled,bits=" << got;
+        return s.str();
+    }
+    if (!lastFrameComplete(engine)) {
+        fl::sstream s;
+        s << "0,tx_short,bits=" << got;
         return s.str();
     }
 
@@ -266,13 +299,14 @@ inline fl::string captureFrame(int led_count, fl::u32 rgb, int data_pin,
 
 inline fl::string captureSelfHandler(int led_count, fl::u32 rgb,
                                      int data_pin, int rx_pin,
-                                     int hold_us) FL_NO_EXCEPT {
+                                     int hold_us, fl::u32 step) FL_NO_EXCEPT {
     if (led_count <= 0 || led_count > kMaxCaptureLeds || !usablePin(data_pin) ||
         !usablePin(rx_pin) || rx_pin == data_pin || hold_us < 0 ||
         hold_us > 100000) {
         return fl::string("0,bad_args");
     }
-    return captureFrame(led_count, rgb, data_pin, rx_pin, hold_us, kMaxRiseGapNs);
+    return captureFrame(led_count, rgb, step, data_pin, rx_pin, hold_us,
+                        kMaxRiseGapNs);
 }
 
 // Bind the three handlers on the passed-in `Remote`. Call from
@@ -288,9 +322,9 @@ inline void bind(fl::Remote& remote) FL_NO_EXCEPT {
         });
     remote.bind("pwmDmaClCaptureSelf",
         [](int led_count, fl::u32 rgb, int data_pin, int rx_pin,
-           int hold_us) -> fl::string {
+           int hold_us, fl::u32 step_rgb) -> fl::string {
             return captureSelfHandler(led_count, rgb, data_pin, rx_pin,
-                                       hold_us);
+                                       hold_us, step_rgb);
         });
 }
 

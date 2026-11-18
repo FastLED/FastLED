@@ -12,6 +12,7 @@
 
 #include "platforms/arm/lpc/drivers/sct_dma/channel_engine_lpc_sct_dma.h"
 #include "platforms/arm/lpc/drivers/sct_dma/lpc_sct_dma_runtime.h"
+#include "fl/stl/chrono.h"
 #include "fl/stl/noexcept.h"
 
 namespace fl {
@@ -30,6 +31,11 @@ namespace fl {
 // =============================================================================
 static constexpr u32 kLpcSctMinPeriodNs = 1000;
 static constexpr u32 kLpcSctMaxPeriodNs = 2500;
+
+// How long show() waits for the previous frame before cutting it off. A
+// frame always ends on its own (halt step, early halt, or DMA error), so
+// this only guards against a wedged peripheral; 1000 WS2812 LEDs take 30 ms.
+static constexpr u32 kLpcSctShowWaitMs = 100;
 
 ChannelEngineLpcSctDma::ChannelEngineLpcSctDma() FL_NO_EXCEPT = default;
 ChannelEngineLpcSctDma::~ChannelEngineLpcSctDma() = default;
@@ -55,29 +61,47 @@ void ChannelEngineLpcSctDma::enqueue(ChannelDataPtr channelData) FL_NO_EXCEPT {
     mEnqueuedChannels.push_back(channelData);
 }
 
+void ChannelEngineLpcSctDma::releaseTransmitting() FL_NO_EXCEPT {
+    for (fl::size i = 0; i < mTransmittingChannels.size(); ++i) {
+        if (mTransmittingChannels[i]) {
+            mTransmittingChannels[i]->setInUse(false);
+        }
+    }
+    mTransmittingChannels.clear();
+    mTransmissionActive = false;
+}
+
 void ChannelEngineLpcSctDma::show() FL_NO_EXCEPT {
     // Empty queue → nothing to do, state stays READY.
     if (mEnqueuedChannels.empty()) {
         return;
     }
 
-    // A frame still on the wire reads its bytes from mTransmittingChannels,
-    // so stop it before that ChannelData can be released.
-    if (mTransmissionActive) {
-        mTransmitter.abort();
+    // A frame still on the wire reads its bytes from mTransmittingChannels:
+    // let it finish. poll() also does the chunk refill when no DMA ISR
+    // does, so it is called back to back with no yield in between. Bounded
+    // so a wedged peripheral can't hang show().
+    const u32 wait_start = fl::millis();
+    while (poll() != DriverState::READY) {
+        if (fl::millis() - wait_start >= kLpcSctShowWaitMs) {
+            mTransmitter.abort();
+            releaseTransmitting();
+            break;
+        }
     }
-    // Hand the queue to the transmitting slot so poll() can clear it
-    // when the DMA completes.
-    mTransmittingChannels = mEnqueuedChannels;
+    mTransmittingChannels = fl::move(mEnqueuedChannels);
     mEnqueuedChannels.clear();
-    mTransmissionActive = true;
 
     // Single-strip v1: take the first entry. Multi-strip (#2879 Stage 4.4)
     // is a separate engine evolution; the parallel SCT topology needs the
     // shared timebase + per-bit OR'd masks discussed in the
     // clockless_arm_lpc_pwm_dma.h header's MULTI-CHAIN SUPPORT block.
     const ChannelDataPtr& ch = mTransmittingChannels[0];
-    if (!ch) {
+    // The bridge enqueues without canHandle(); timing outside the SCT
+    // event layout would put EV2 past the counter limit, and the frame
+    // would never reach its halt step. Drop such a frame before arming.
+    if (!canHandle(ch)) {
+        releaseTransmitting();
         return;
     }
     const ChipsetTimingConfig& t = ch->getTiming();
@@ -86,12 +110,23 @@ void ChannelEngineLpcSctDma::show() FL_NO_EXCEPT {
         // The pin becomes an SWM PINASSIGN byte for SCT_OUT0; only
         // PIO0_0..PIO0_31 are valid there, and any other value would
         // misroute or unroute the output.
+        releaseTransmitting();
         return;
     }
     const fl::vector_psram<u8>& bytes = ch->getData();
     if (bytes.empty()) {
+        releaseTransmitting();
         return;
     }
+
+    // The DMA reads these bytes until poll() sees the frame end; the bridge
+    // waits on isInUse() before re-encoding into the same ChannelData.
+    for (fl::size i = 0; i < mTransmittingChannels.size(); ++i) {
+        if (mTransmittingChannels[i]) {
+            mTransmittingChannels[i]->setInUse(true);
+        }
+    }
+    mTransmissionActive = true;
 
     // Configure the runtime SCT/DMA helper for this channel's pin +
     // timing, then run the chunk-stream transmit loop. On host this is a
@@ -117,8 +152,7 @@ IChannelDriver::DriverState ChannelEngineLpcSctDma::poll() FL_NO_EXCEPT {
     if (!mTransmitter.pollAndAdvance()) {
         return DriverState::DRAINING;
     }
-    mTransmissionActive = false;
-    mTransmittingChannels.clear();
+    releaseTransmitting();
     return DriverState::READY;
 }
 
