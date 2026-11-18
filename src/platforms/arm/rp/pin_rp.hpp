@@ -111,6 +111,38 @@ inline u16 analogRead(int pin) FL_NO_EXCEPT {
     return static_cast<u16>(adc_read());
 }
 
+namespace {
+    struct Rp2040PwmFreq {
+        int pin;        // -1 = unused
+        u32 freq_hz;
+    };
+    // One entry per GPIO that setPwmFrequencyNative() accepts (48 on RP2350B)
+    constexpr int MAX_RP_PWM_PINS = NUM_BANK0_GPIOS;
+    // Zero-initialized: pin=0 and freq_hz=0 means "not configured"
+    // We use freq_hz==0 to indicate unconfigured rather than pin==-1,
+    // since zero-init gives us pin=0 which is a valid GPIO.
+    inline Rp2040PwmFreq* rp_pwm_freq_table() FL_NO_EXCEPT {
+        static Rp2040PwmFreq g_rp_pwm[MAX_RP_PWM_PINS] = {};
+        return g_rp_pwm;
+    }
+
+    // True if setPwmFrequencyNative() set the period of this pin's slice.
+    // The two pins of a slice are 2n and 2n + 1 and share one wrap value.
+    inline bool rp_pwm_slice_has_frequency(int pin) FL_NO_EXCEPT {
+        if (pin < 0 || pin >= MAX_RP_PWM_PINS) {
+            return false;
+        }
+        Rp2040PwmFreq* table = rp_pwm_freq_table();
+        return table[pin].freq_hz != 0 || table[pin ^ 1].freq_hz != 0;
+    }
+
+    // Scale a duty value of the given bit width to the slice's current period
+    inline u16 rp_pwm_scaled_level(uint slice, u32 val, int bits) FL_NO_EXCEPT {
+        const u32 period = pwm_hw->slice[slice].top + 1u;
+        return static_cast<u16>((val * period) >> bits);
+    }
+}  // anonymous namespace
+
 /// @brief Write an analog (PWM) value to a GPIO pin
 /// @param pin GPIO pin number
 /// @param val PWM duty cycle (0-255, mapped to 0-100% duty cycle)
@@ -130,11 +162,16 @@ inline void analogWrite(int pin, u16 val) FL_NO_EXCEPT {
     // Configure GPIO for PWM function
     gpio_set_function(pin, GPIO_FUNC_PWM);
 
-    // Set PWM wrap value (period) to 255 for 8-bit resolution
-    pwm_set_wrap(slice, 255);
+    if (rp_pwm_slice_has_frequency(pin)) {
+        // Keep the period set by setPwmFrequency() and scale the duty cycle to it
+        pwm_set_chan_level(slice, channel, rp_pwm_scaled_level(slice, val > 256 ? 256 : val, 8));
+    } else {
+        // Set PWM wrap value (period) to 255 for 8-bit resolution
+        pwm_set_wrap(slice, 255);
 
-    // Set duty cycle (0-255)
-    pwm_set_chan_level(slice, channel, val);
+        // Set duty cycle (0-255)
+        pwm_set_chan_level(slice, channel, val);
+    }
 
     // Enable PWM on this slice
     pwm_set_enabled(slice, true);
@@ -161,11 +198,16 @@ inline void setPwm16(int pin, u16 val) FL_NO_EXCEPT {
     // Configure GPIO for PWM function
     gpio_set_function(pin, GPIO_FUNC_PWM);
 
-    // Set PWM wrap value (period) to 65535 for 16-bit resolution
-    pwm_set_wrap(slice, 65535);
+    if (rp_pwm_slice_has_frequency(pin)) {
+        // Keep the period set by setPwmFrequency() and scale the duty cycle to it
+        pwm_set_chan_level(slice, channel, rp_pwm_scaled_level(slice, val, 16));
+    } else {
+        // Set PWM wrap value (period) to 65535 for 16-bit resolution
+        pwm_set_wrap(slice, 65535);
 
-    // Set duty cycle (0-65535)
-    pwm_set_chan_level(slice, channel, val);
+        // Set duty cycle (0-65535)
+        pwm_set_chan_level(slice, channel, val);
+    }
 
     // Enable PWM on this slice
     pwm_set_enabled(slice, true);
@@ -184,20 +226,6 @@ inline void setAdcRange(AdcRange /*range*/) {
 // PWM Frequency Control
 // ============================================================================
 
-namespace {
-    struct Rp2040PwmFreq {
-        int pin;        // -1 = unused
-        u32 freq_hz;
-    };
-    constexpr int MAX_RP_PWM_PINS = 30;  // RP2040 has GPIO 0-29
-    // Zero-initialized: pin=0 and freq_hz=0 means "not configured"
-    // We use freq_hz==0 to indicate unconfigured rather than pin==-1,
-    // since zero-init gives us pin=0 which is a valid GPIO.
-    inline Rp2040PwmFreq* rp_pwm_freq_table() FL_NO_EXCEPT {
-        static Rp2040PwmFreq g_rp_pwm[MAX_RP_PWM_PINS] = {};
-        return g_rp_pwm;
-    }
-}  // anonymous namespace
 
 /// @brief Check if a frequency requires ISR-based fallback
 /// @param pin GPIO pin number (unused — RP2040 PWM capability is uniform)
@@ -255,7 +283,7 @@ inline int setPwmFrequencyNative(int pin, u32 frequency_hz) FL_NO_EXCEPT {
     const u64 max_period16 = static_cast<u64>(frequency_hz) * 65536;
     u32 div16 = static_cast<u32>((clk16 + max_period16 - 1) / max_period16);
     if (div16 < 16) {
-        // Frequency too high for max wrap — use divider = 1 and a smaller wrap
+        // Frequency too high for max wrap - use divider = 1 and a smaller wrap
         div16 = 16;
     } else if (div16 > 4095) {
         // Frequency too low — divider exceeds RP2040 maximum (255.9375)
