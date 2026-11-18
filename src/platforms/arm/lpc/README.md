@@ -42,7 +42,7 @@ Loopback setup:
 What the harness asserts:
 
 - **`bash autoresearch lpc845brk --bring-up`** — `echo` RPC round-trips; FL_WARN literal reaches the host; proves Serial + JSON-RPC + log pipeline intact.
-- **`bash autoresearch lpc845brk --pin-toggle-rx`** — SCT input-capture latches a bit-banged square wave; orchestrator asserts mean ±2 % and σ thresholds across 1/10/100 kHz rates ([#3035](https://github.com/FastLED/FastLED/issues/3035) Phase 1).
+- **`bash autoresearch lpc845brk --pin-toggle-rx`** — SCT input-capture latches a bit-banged square wave; orchestrator asserts mean ±2 % and σ thresholds across 1/5/10 kHz rates (a polled toggle plus polled capture tops out near 13 kHz on the 24 MHz M0+) ([#3035](https://github.com/FastLED/FastLED/issues/3035) Phase 1).
 - **`bash autoresearch lpc845brk --ws2812-loopback`** — WS2812 byte-match: `FastLED.show()` drives 1/3/100 LEDs through the bit-bang clockless path, SCT-RX latches the wire, decoder asserts `mismatched == 0` ([#3035](https://github.com/FastLED/FastLED/issues/3035) Phase 2b).
 - **`bash autoresearch lpc845brk --uart`** — UART DMA WS2812 byte-match: `FastLED.addLeds<WS2812, PIN, GRB>()` drives the default `Bus::UART` path, a jumper bridges TX to the configured USART RX pin, USART RX-DMA captures the encoded bytes, and the host byte-compares decoded GRB data. `--dma-uart` remains the raw async USART transport bench.
 - **Link-symbol check** — `arm-none-eabi-nm -C firmware.elf | grep -E '(aeabi_d|aeabi_f|f2iz|d2iz|__l2f|__floatdisf)'` stays empty after [#3038](https://github.com/FastLED/FastLED/pull/3038). The harness can fold this into its reporting path so the no-soft-FP invariant is asserted on every run.
@@ -162,7 +162,8 @@ worked anti-example.
 - `clockless_channel_lpc_uart_dma.h` — Legacy `addLeds<WS2812, PIN, GRB>()` adapter that selects the UART DMA channel engine by default on LPC845. Slimmed onto `fl::SlimBridgeController` under #4586, parameterized on `BusTraits<Bus::UART>`, alongside `clockless_channel_lpc.h`'s `BusTraits<Bus::BIT_BANG>` bridge — both are now thin `fl::SlimBridgeController` subclasses sharing one enqueue/wait/encode implementation instead of hand-rolled driver plumbing. Hardware validation on LPC845 silicon is still pending.
 - `rx_sct_capture.{h,cpp.hpp}` — LPC845 SCT input-capture RX device used by the AutoResearch loopback harness; drives byte-match assertions for the bit-bang, PWM+DMA, and channels-API TX paths.
 - `led_sysdefs_arm_lpc.h` — System defines (sets `FL_IS_ARM_M0_PLUS`, `F_CPU`, forces `FASTLED_M0_USE_C_IMPLEMENTATION`, includes `<LPC845.h>` / `<LPC804.h>` CMSIS device headers).
-- `fastpin_arm_lpc.h` — see above.
+- `fastpin_arm_lpc.h` — see above. Under `FASTLED_FORCE_SOFTWARE_PINS` (LPC845 / LPC804 only) `_ARMPIN` derives from `NoPinMapPin`, so every pin goes through `fl::pinMode` / `fl::digitalWrite`; the register-level `BitbangPin` policy and `HAS_HARDWARE_PIN_SUPPORT` are off. The cycle-counted `clockless_arm_lpc.h` and PLU `clockless_arm_lpc_plu.h` drivers need `FastPin::port()` and reject forced pins with a static assert; the LPC845 default UART-DMA clockless path is unaffected, and software SPI (e.g. APA102 on any pins) goes through `pin_lpc.hpp`. Other LPC families still reject forced pins with an `#error` in `fl/system/fastpin_base.h` ([#5260](https://github.com/FastLED/FastLED/issues/5260)).
+- `pin_lpc.hpp` — LPC845 / LPC804 runtime pin backend for `fl::pinMode` / `digitalWrite` / `digitalRead` ([#5260](https://github.com/FastLED/FastLED/issues/5260)). Pin N is PIO0_N (same as `FastPin`); direction and level use the vendor `GPIO->DIRSET/DIRCLR/SET/CLR/PIN[0]`, pulls use `IOCON->PIO[IOCON_INDEX_PIO0_N]` (the IOCON array is not in pin order). It does not touch SWM, so a pin routed to a peripheral by the switch matrix is not under GPIO control. Analog and PWM are stubs. LPC11xx / LPC11Uxx / LPC15xx still use `platforms/shared/pin_noop.hpp`.
 - `is_lpc.h` — Detection macros (`FL_IS_ARM_LPC_845`, `FL_IS_ARM_LPC_804`, `FL_IS_ARM_LPC_11`, `FL_IS_ARM_LPC_15`, `FL_IS_ARM_LPC`).
 - `int.h` — Integer type definitions.
 
@@ -193,7 +194,7 @@ fbuild build lpc804 --examples Blink
 
 The fbuild assets (board JSON, linker script, SystemInit, vector table) live in `crates/fbuild-config/assets/boards/json/lpc8{04,45}.json` and `crates/fbuild-build/src/nxplpc/assets/` in the fbuild repo. The board-validation script ([fbuild#421/#422](https://github.com/FastLED/fbuild/issues/421)) explicitly tallies these as fbuild-native (no third-party upstream).
 
-For LPC11xx and LPC15xx, no fbuild board entry exists yet; community contributors targeting those families with their own platform package should expect to wire `led_sysdefs`, `fastpin`, and clockless headers per family before FastLED can compile against them. The hold is documented in `fastled_arm_lpc.h` — attempting to build with only `FL_IS_ARM_LPC_11` or `FL_IS_ARM_LPC_15` set emits a clear `#error` pointing here.
+For LPC11xx and LPC15xx, no fbuild board entry exists yet; community contributors targeting those families with their own platform package should expect to wire `led_sysdefs`, `fastpin`, and clockless headers per family before FastLED can compile against them. Those families also have no runtime pin backend (`fl::pinMode` / `digitalWrite` are no-ops), and `fl/system/fastpin_base.h` rejects `FASTLED_FORCE_SOFTWARE_PINS` for them with an `#error` (tracked in [#5108](https://github.com/FastLED/FastLED/issues/5108) / [#5110](https://github.com/FastLED/FastLED/issues/5110)).
 
 ## Detection scaffolds
 

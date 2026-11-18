@@ -11,12 +11,14 @@
 #include "fl/stl/noexcept.h"
 #include "fl/stl/static_assert.h"
 
-// LPC has no core pin API: fl::pinMode / digitalWrite resolve to
+// LPC845 / LPC804 have a native pin backend (platforms/arm/lpc/pin_lpc.hpp).
+// The other LPC families still resolve fl::pinMode / digitalWrite to
 // platforms/shared/pin_noop.hpp, so forced FastPin = NoPinMapPin would
 // silently do nothing (#5073, #5189). The guard lives here so every fastpin
 // route, including a direct fl/system/fastpin.h include, sees it.
-#if defined(FL_IS_ARM_LPC) && defined(FASTLED_FORCE_SOFTWARE_PINS)
-#error "FASTLED_FORCE_SOFTWARE_PINS is not supported on LPC: there is no LPC core pin API (fl::pinMode/digitalWrite are no-ops), so software pins could not drive anything. Remove the define to use the native GPIO pins."
+#if defined(FL_IS_ARM_LPC) && defined(FASTLED_FORCE_SOFTWARE_PINS) && \
+    !(defined(FL_IS_ARM_LPC_845) || defined(FL_IS_ARM_LPC_804))
+#error "FASTLED_FORCE_SOFTWARE_PINS is not supported on LPC11xx / LPC11Uxx / LPC15xx: these families have no pin backend yet (fl::pinMode/digitalWrite are no-ops; pending #5108 / #5110), so software pins could not drive anything. Remove the define to use the native GPIO pins."
 #endif
 
 #ifdef FASTLED_FORCE_SOFTWARE_PINS
@@ -80,19 +82,20 @@ public:
 /// Note that these classes are all static functions.  So the proper usage is Pin<13>::hi(); or such.  Instantiating objects is not recommended,
 /// as passing Pin objects around will likely -not- have the effect you're expecting.
 // ESP32 and ESP8266 use SDK pin APIs rather than Arduino's register-port
-// mapping macros.
+// mapping macros. LPC defines FASTLED_NO_PINMAP.
 #if defined(FASTLED_FORCE_SOFTWARE_PINS) && \
     (defined(FASTLED_NO_PINMAP) || defined(FL_IS_ESP32) || defined(FL_IS_ESP8266))
 #define FL_FASTPIN_HAS_NO_PINMAP
 /// No register map exists to read, so every access goes through the core's pin API.
-#if defined(FL_IS_ESP32) || defined(FL_IS_ESP8266)
-// The ESP headers supply checked specializations for all supported pins.
-// An unspecified pin must not inherit the permissive portless fallback.
+#if defined(FL_IS_ESP32) || defined(FL_IS_ESP8266) || \
+    defined(FL_IS_ARM_LPC_845) || defined(FL_IS_ARM_LPC_804)
+// The ESP and LPC8xx headers supply checked specializations for all supported
+// pins. An unspecified pin must not inherit the permissive portless fallback.
 template<fl::u8 PIN> class FastPin : public NoPinMapPin<PIN> {
 public:
     static constexpr bool validpin() FL_NO_EXCEPT { return false; }
     static void setOutput() FL_NO_EXCEPT {
-        FL_STATIC_ASSERT(PIN != PIN, "No FastPin specialization for this ESP pin");
+        FL_STATIC_ASSERT(PIN != PIN, "No FastPin specialization for this pin");
     }
 };
 #else

@@ -3586,16 +3586,18 @@ def _build_and_deploy_nxplpc(
         )
         return False
 
-    firmware_bin = (
-        build_dir
-        / ".fbuild"
-        / "build"
-        / (environment or "lpc845brk")
-        / "release"
-        / "firmware.bin"
-    )
-    if not firmware_bin.is_file():
-        print(f"{Fore.RED}❌ firmware.bin not found at {firmware_bin}{Style.RESET_ALL}")
+    # Current fbuild writes `.fbuild/build/release/`; older releases nested
+    # the environment name (`.fbuild/build/<env>/release/`). Accept both.
+    fbuild_build = build_dir / ".fbuild" / "build"
+    candidates = [
+        fbuild_build / "release" / "firmware.bin",
+        fbuild_build / (environment or "lpc845brk") / "release" / "firmware.bin",
+    ]
+    if not any(candidate.is_file() for candidate in candidates):
+        searched = ", ".join(str(candidate) for candidate in candidates)
+        print(
+            f"{Fore.RED}❌ firmware.bin not found (searched {searched}){Style.RESET_ALL}"
+        )
         return False
 
     print("\n📡 Deploying firmware via fbuild...")
@@ -3891,6 +3893,20 @@ async def _release_harness_port(ctx: RunContext) -> None:
     ctx.serial_iface = None
 
 
+def _lpc_scan_pin_args(ctx: RunContext) -> list[str]:
+    """CLI pins for an LPC loopback bench script.
+
+    Explicit --tx-pin/--rx-pin pass through; otherwise none, and the script
+    takes the pair the firmware's findConnectedPins jumper scan discovers.
+    """
+    args: list[str] = []
+    if ctx.args.tx_pin is not None:
+        args += ["--tx-pin", str(ctx.args.tx_pin)]
+    if ctx.args.rx_pin is not None:
+        args += ["--rx-pin", str(ctx.args.rx_pin)]
+    return args
+
+
 async def _run_lpc_pin_toggle_rx_tests(ctx: RunContext) -> int:
     """Run the FastLED #3021 Phase-1 SCT-RX pin-toggle bench.
 
@@ -3902,13 +3918,12 @@ async def _run_lpc_pin_toggle_rx_tests(ctx: RunContext) -> int:
     upload_port = ctx.upload_port
     assert upload_port is not None
 
-    tx_pin = ctx.args.tx_pin if ctx.args.tx_pin is not None else 10
-    rx_pin = ctx.args.rx_pin if ctx.args.rx_pin is not None else 11
+    pin_args = _lpc_scan_pin_args(ctx)
 
     print()
     print("=" * 60)
     print("LPC SCT-RX MODE — pin-toggle TX → SCT-RX loopback (#3021 Phase 1)")
-    print(f"   Wiring required: jumper P0_{tx_pin} ↔ P0_{rx_pin} on LPC845-BRK")
+    print("   Wiring: discovered on the board by the findConnectedPins scan")
     print("=" * 60)
     print()
 
@@ -3921,10 +3936,7 @@ async def _run_lpc_pin_toggle_rx_tests(ctx: RunContext) -> int:
         "ci.autoresearch.test_lpc_pin_toggle_rx",
         "--port",
         upload_port,
-        "--tx-pin",
-        str(tx_pin),
-        "--rx-pin",
-        str(rx_pin),
+        *pin_args,
     ]
     result = RunningProcess.run(cmd)
     return 0 if result.returncode == 0 else 1
@@ -4000,13 +4012,12 @@ async def _run_lpc_pwm_dma_cl_tests(ctx: RunContext) -> int:
     upload_port = ctx.upload_port
     assert upload_port is not None
 
-    tx_pin = ctx.args.tx_pin if ctx.args.tx_pin is not None else 10
-    rx_pin = ctx.args.rx_pin if ctx.args.rx_pin is not None else 11
+    pin_args = _lpc_scan_pin_args(ctx)
 
     print()
     print("=" * 60)
     print("LPC SCT+DMA channels-API MODE — self-loopback (#3468)")
-    print(f"   Wiring required: jumper P0_{tx_pin} ↔ P0_{rx_pin} on LPC845-BRK")
+    print("   Wiring: discovered on the board by the findConnectedPins scan")
     print("   Engine: ChannelEngineLpcSctDma via BusTraits<Bus::BIT_BANG>")
     print("   Build flag: -DFASTLED_LPC_PWM_DMA=1 (see")
     print("   examples/AutoResearch/AutoResearchPwmDmaClockless.h)")
@@ -4022,10 +4033,7 @@ async def _run_lpc_pwm_dma_cl_tests(ctx: RunContext) -> int:
         "ci.autoresearch.test_lpc_pwm_dma_cl",
         "--port",
         upload_port,
-        "--tx-pin",
-        str(tx_pin),
-        "--rx-pin",
-        str(rx_pin),
+        *pin_args,
     ]
     result = RunningProcess.run(cmd)
     return 0 if result.returncode == 0 else 1

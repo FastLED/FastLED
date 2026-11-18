@@ -14,6 +14,7 @@
 //
 // Same JSON-RPC contract as the retired LPC sketch:
 //   echo: [int] -> int
+//   findConnectedPins: [] -> "pairs=..;stuck=..;skip=..;od=.." (LPC)
 //   pinToggleRx: [tx_pin, rx_pin, freq_hz, duration_ms] -> CSV
 //   ws2812SctTest: [test_case, tx_pin, rx_pin, capture_ms] -> CSV
 // See FastLED #3021 for the SCT-RX bring-up flags.
@@ -101,6 +102,9 @@
     !defined(FASTLED_AUTORESEARCH_FAULT_TEST)
 #include "fl/channels/rx_sct_capture.h"
 #include "fl/stl/strstream.h"
+#include "fl/system/pin.h"        // fl::pinMode/digitalWrite/digitalRead
+#include "fl/system/pin_probe.h"  // fl::pinProbeSkipReason
+#include "platforms/arm/lpc/led_sysdefs_arm_lpc.h"  // ok platform headers - vendor CMSIS SysTick for pinToggleRx edge timing
 #endif
 
 #if defined(FASTLED_AUTORESEARCH_LPC_WS2812)
@@ -218,8 +222,10 @@ struct LowMemPinTogglePeriodStats {
 inline LowMemPinTogglePeriodStats computeLowMemPeriodStats(
     const fl::EdgeTime* edges, fl::size edge_count) FL_NO_EXCEPT {
     LowMemPinTogglePeriodStats s{0, 0, 0, 0, 0};
+    // Two passes: sum of squared deviations from the mean. The one-pass
+    // E[x^2] - floor(mean)^2 form lost ~1.4 us of sigma to the floor at a
+    // 1 ms period -- more than the bench's 1 us sigma budget.
     fl::u64 sum    = 0;
-    fl::u64 sum_sq = 0;
     fl::u32 min_ns = 0xFFFFFFFFu;
     fl::u32 max_ns = 0;
     fl::u32 count  = 0;
@@ -228,18 +234,42 @@ inline LowMemPinTogglePeriodStats computeLowMemPeriodStats(
             static_cast<fl::u32>(edges[i].ns) +
             static_cast<fl::u32>(edges[i + 1].ns);
         if (period_ns == 0) continue;
-        sum    += period_ns;
-        sum_sq += static_cast<fl::u64>(period_ns) * static_cast<fl::u64>(period_ns);
+        sum += period_ns;
         if (period_ns < min_ns) min_ns = period_ns;
         if (period_ns > max_ns) max_ns = period_ns;
         ++count;
     }
     if (count == 0) return s;
     const fl::u32 mean = static_cast<fl::u32>(sum / static_cast<fl::u64>(count));
-    const fl::u64 mean64 = static_cast<fl::u64>(mean);
-    const fl::u64 var = (sum_sq / static_cast<fl::u64>(count)) - (mean64 * mean64);
-    fl::u32 sig = 0;
-    while (static_cast<fl::u64>(sig + 1) * static_cast<fl::u64>(sig + 1) <= var) ++sig;
+    fl::u64 dev_sq = 0;
+    for (fl::size i = 0; i + 1 < edge_count; i += 2) {
+        const fl::u32 period_ns =
+            static_cast<fl::u32>(edges[i].ns) +
+            static_cast<fl::u32>(edges[i + 1].ns);
+        if (period_ns == 0) continue;
+        const fl::u64 d = (period_ns > mean) ? (period_ns - mean) : (mean - period_ns);
+        const fl::u64 sq = d * d;  // d < 2^32
+        // Saturate: a few edges clamped to ~2.1 s would wrap the sum and
+        // report a tiny sigma.
+        dev_sq = (dev_sq > ~fl::u64(0) - sq) ? ~fl::u64(0) : dev_sq + sq;
+    }
+    const fl::u64 var = dev_sq / static_cast<fl::u64>(count);
+    // Bitwise integer sqrt: 32 steps whatever `var` is. A linear search ran
+    // for billions of steps on a wide spread and tripped the watchdog.
+    fl::u64 rem = var;
+    fl::u64 root = 0;
+    fl::u64 bit = fl::u64(1) << 62;
+    while (bit > rem) bit >>= 2;
+    while (bit != 0) {
+        if (rem >= root + bit) {
+            rem -= root + bit;
+            root = (root >> 1) + bit;
+        } else {
+            root >>= 1;
+        }
+        bit >>= 2;
+    }
+    const fl::u32 sig = static_cast<fl::u32>(root);
     s.periods  = count;
     s.mean_ns  = mean;
     s.sigma_ns = sig;
@@ -247,6 +277,168 @@ inline LowMemPinTogglePeriodStats computeLowMemPeriodStats(
     s.max_ns   = max_ns;
     return s;
 }
+// Core-clock tick counter for pinToggleRx edge scheduling, built on the
+// SysTick down-counter (reloads every 1 ms). micros() costs ~19 us per call
+// on the 24 MHz M0+ (two software divides), which capped the bench near
+// 7 kHz and added ~10 us of jitter to every edge. Valid while now() is
+// called at least once per SysTick period.
+struct LowMemTickClock {
+    // millis() starts the core's SysTick (core clock, 1 ms reload) if
+    // nothing has yet; a stopped SysTick would never reach a deadline.
+    fl::u32 last = (static_cast<void>(millis()), SysTick->VAL);
+    fl::u32 elapsed = 0;
+    fl::u32 now() FL_NO_EXCEPT {
+        const fl::u32 v = SysTick->VAL;
+        elapsed += (last >= v) ? (last - v) : (last + SysTick->LOAD + 1u - v);
+        last = v;
+        return elapsed;
+    }
+};
+
+// findConnectedPins for the low-memory LPC build: discovers bench jumpers
+// through FastLED's own pin backend (fl::pinMode/digitalWrite/digitalRead,
+// #5260) -- the LPC8xx Arduino core's pinMode puts pulls on the wrong IOCON
+// slot (FastLED/framework-arduino-lpc8xx#40). Every pin is tested against
+// every other pin, and every connected direction is reported.
+//
+// LPC845 PIO0_10/PIO0_11 are true open-drain pads: no pulls, sink only. They
+// are probed as drivers (pulled LOW against the other pin's pull-up) but can
+// never be the observed end, so a jumper between the two of them is invisible
+// without an external pull-up.
+inline bool lowMemOpenDrainPin(int pin) FL_NO_EXCEPT {
+#if defined(FL_IS_ARM_LPC_845)
+    return pin == 10 || pin == 11;
+#else
+    (void)pin;
+    return false;
+#endif
+}
+
+inline bool lowMemSettledHigh(int pin) FL_NO_EXCEPT {
+    delayMicroseconds(100);  // internal pulls are ~50 kOhm; 100 us settles a jumper
+    return fl::digitalRead(pin) == fl::PinValue::High;
+}
+
+// tx drives, rx observes. Connected only if rx follows its own pull while tx
+// is released AND follows tx against that pull, in both directions.
+inline bool lowMemPinPairConnected(int tx, int rx) FL_NO_EXCEPT {
+    bool ok = true;
+    fl::pinMode(tx, fl::PinMode::Input);
+    fl::pinMode(rx, fl::PinMode::InputPullup);
+    ok = ok && lowMemSettledHigh(rx);              // control: released -> pull-up
+    fl::digitalWrite(tx, fl::PinValue::Low);
+    fl::pinMode(tx, fl::PinMode::Output);
+    ok = ok && !lowMemSettledHigh(rx);             // tx sinks the pull-up
+    if (ok && !lowMemOpenDrainPin(tx)) {
+        fl::pinMode(rx, fl::PinMode::InputPulldown);
+        fl::digitalWrite(tx, fl::PinValue::High);
+        ok = lowMemSettledHigh(rx);                // tx sources the pull-down
+        fl::pinMode(tx, fl::PinMode::Input);
+        ok = ok && !lowMemSettledHigh(rx);         // control: released -> pull-down
+    }
+    fl::pinMode(tx, fl::PinMode::Input);
+    fl::pinMode(rx, fl::PinMode::Input);
+    return ok;
+}
+
+// Reply: "pairs=<tx>><rx>[od] ...;stuck=<pin><H|L|X> ...;skip=<pin>:<why> ...;od=<pin> ..."
+inline fl::string lowMemFindConnectedPins() FL_NO_EXCEPT {
+    constexpr int kPinCount = 32;  // PIO0_0..PIO0_31, the runtime pin grid
+    fl::sstream skip;
+    fl::sstream stuck;
+    fl::sstream od;
+    fl::u32 probe = 0;
+    for (int p = 0; p < kPinCount; ++p) {
+        if (const char* why = fl::pinProbeSkipReason(p)) {
+            skip << p << ':' << why << ' ';
+            continue;
+        }
+        probe |= 1u << p;
+        fl::pinMode(p, fl::PinMode::Input);  // no pull: a partner's pull wins
+    }
+    // Per-pin control: with every other pin released, a free pin follows its
+    // own pull. One that does not is externally driven or loaded; it would
+    // fake connections, so it is reported and left out of the pair sweep.
+    fl::u32 usable = 0;
+    for (int p = 0; p < kPinCount; ++p) {
+        if (!(probe & (1u << p))) continue;
+        if (lowMemOpenDrainPin(p)) {
+            od << p << ' ';
+            usable |= 1u << p;
+            continue;
+        }
+        fl::pinMode(p, fl::PinMode::InputPullup);
+        const bool up = lowMemSettledHigh(p);
+        fl::pinMode(p, fl::PinMode::InputPulldown);
+        const bool down = lowMemSettledHigh(p);
+        fl::pinMode(p, fl::PinMode::Input);
+        if (up && !down) {
+            usable |= 1u << p;
+        } else {
+            stuck << p << (up ? 'H' : (down ? 'X' : 'L')) << ' ';
+        }
+    }
+    fl::sstream pairs;
+    for (int tx = 0; tx < kPinCount; ++tx) {
+        if (!(usable & (1u << tx))) continue;
+        fl::Watchdog::instance().feed();
+        for (int rx = 0; rx < kPinCount; ++rx) {
+            if (rx == tx || !(usable & (1u << rx)) || lowMemOpenDrainPin(rx)) continue;
+            if (lowMemPinPairConnected(tx, rx)) {
+                pairs << tx << '>' << rx << (lowMemOpenDrainPin(tx) ? "od" : "") << ' ';
+            }
+        }
+    }
+    // Leave normal pads at their reset state (pull-up), open-drain released.
+    for (int p = 0; p < kPinCount; ++p) {
+        if (!(probe & (1u << p))) continue;
+        fl::pinMode(p, lowMemOpenDrainPin(p) ? fl::PinMode::Input
+                                             : fl::PinMode::InputPullup);
+    }
+    fl::sstream out;
+    out << "pairs=" << pairs.str() << ";stuck=" << stuck.str()
+        << ";skip=" << skip.str() << ";od=" << od.str();
+    return out.str();
+}
+
+#if defined(FL_IS_ARM_LPC_845) && !defined(FASTLED_AUTORESEARCH_LPC_DMA_LOOPBACK)
+// corePullCheck: checks that the vendor Arduino core's ::pinMode puts the
+// pull on the requested pad (FastLED/framework-arduino-lpc8xx#40). Use
+// unconnected pins from findConnectedPins. FastLED's own backend first sets
+// the opposite pull, so a core that writes the wrong IOCON slot reads back
+// the opposite level. Appends "<pin>:up=<0|1>,down=<0|1> " per pin; a
+// correct core gives "up=1,down=0". Pads the core cannot pull (outside its
+// pin map, open-drain, probe-skipped) report "<pin>:skip ".
+//
+// On a core with the #40 bug the probe itself changes some other pad's pull,
+// as any ::pinMode call there would. A core without INPUT_PULLDOWN treats
+// mode 3 as "no pull", so it reports down=1 too.
+inline void lowMemCorePullCheck(int pin, fl::sstream& out) FL_NO_EXCEPT {
+#ifdef INPUT_PULLDOWN
+    constexpr PinMode kCorePulldown = INPUT_PULLDOWN;
+#else
+    constexpr PinMode kCorePulldown = 0x3;  // older cores lack the define
+#endif
+    out << pin << ':';
+    if (pin < 0 || pin >= static_cast<int>(variant_pin_count) ||
+        lowMemOpenDrainPin(pin) || fl::pinProbeSkipReason(pin)) {
+        out << "skip ";
+        return;
+    }
+    const pin_size_t p = static_cast<pin_size_t>(pin);
+    fl::pinMode(pin, fl::PinMode::InputPulldown);
+    ::pinMode(p, INPUT_PULLUP);
+    delayMicroseconds(100);
+    const int up = ::digitalRead(p) == HIGH ? 1 : 0;
+    fl::pinMode(pin, fl::PinMode::InputPullup);
+    ::pinMode(p, kCorePulldown);
+    delayMicroseconds(100);
+    const int down = ::digitalRead(p) == HIGH ? 1 : 0;
+    fl::pinMode(pin, fl::PinMode::InputPullup);  // reset-state pull
+    out << "up=" << up << ",down=" << down << ' ';
+}
+#endif  // FL_IS_ARM_LPC_845 && !FASTLED_AUTORESEARCH_LPC_DMA_LOOPBACK
+
 #endif  // FL_IS_ARM_LPC && !FASTLED_AUTORESEARCH_IEEE754_MODE && !FAULT_TEST
 
 #if defined(FL_IS_ARM_LPC_845) && defined(FASTLED_AUTORESEARCH_FAULT_TEST)
@@ -337,6 +529,13 @@ inline void autoResearchLowMemorySetup() {
 
 #if defined(FL_IS_ARM_LPC) && !defined(FASTLED_AUTORESEARCH_IEEE754_MODE) && \
     !defined(FASTLED_AUTORESEARCH_FAULT_TEST)
+#if defined(FL_IS_ARM_LPC_845)
+    // LPC845 only: it is the LPC with a pin-probe skip table (SWD, RESET,
+    // ISP, console USART). Elsewhere the scan would drive those pads.
+    remote.bind("findConnectedPins",
+                []() -> fl::string { return lowMemFindConnectedPins(); });
+#endif
+
     // pinToggleRx (FastLED #3021 Phase 1) — bit-bang square wave on tx_pin
     // and capture SCT edges on rx_pin. CSV stats out.
 #if !defined(FASTLED_AUTORESEARCH_LPC_DMA_LOOPBACK)
@@ -361,6 +560,13 @@ inline void autoResearchLowMemorySetup() {
             if (cap < 2u) cap = 2u;
             if (cap > kLowMemEdgeBufSize) cap = kLowMemEdgeBufSize;
 
+            // FastLED's own pin backend (#5260), not the Arduino core's:
+            // this bench is the on-silicon check of fl::pinMode/digitalWrite.
+            // TX settles LOW before capture starts, so the first captured
+            // edge is the first square-wave edge, not a pull-up -> LOW step.
+            fl::digitalWrite(tx_pin, fl::PinValue::Low);
+            fl::pinMode(tx_pin, fl::PinMode::Output);
+
             auto rx = fl::LpcSctRxChannel::create(rx_pin);
             if (!rx) return fl::string("0,0,0,0,0,0,0");
 
@@ -369,21 +575,34 @@ inline void autoResearchLowMemorySetup() {
             cfg.start_low   = true;
             if (!rx->begin(cfg)) return fl::string("0,0,0,0,0,0,0");
 
-            pinMode(tx_pin, OUTPUT);
-            digitalWrite(tx_pin, LOW);
-
             const fl::u32 half_us = 500000u / static_cast<fl::u32>(freq_hz);
             const fl::u32 cycles  = static_cast<fl::u32>(freq_hz) *
                                      static_cast<fl::u32>(duration_ms) / 1000u;
 
-            for (fl::u32 i = 0; i < cycles; ++i) {
-                digitalWrite(tx_pin, HIGH);
-                delayMicroseconds(half_us);
+            // Edges are scheduled on absolute SysTick deadlines. Measured on
+            // LPC845-BRK: delayMicroseconds(half_us) after each write and poll
+            // added that overhead to every half period (+20% at 1 kHz).
+            //
+            // The capture is polled once right after every write: the SCT
+            // holds one capture per direction, so a half period without a
+            // poll loses edges. Near the deadline only the clock is read, so
+            // a poll (~3 us) does not delay the next edge.
+            const fl::u32 ticks_per_us = F_CPU / 1000000u;
+            const fl::u32 half_ticks = half_us * ticks_per_us;
+            const fl::i32 poll_guard = static_cast<fl::i32>(6u * ticks_per_us);
+            LowMemTickClock clock;
+            fl::u32 deadline = clock.now();
+            for (fl::u32 i = 0; i < 2u * cycles; ++i) {
+                fl::digitalWrite(tx_pin, (i & 1u) ? fl::PinValue::Low
+                                                  : fl::PinValue::High);
                 rx->pollOnce();
-                digitalWrite(tx_pin, LOW);
-                delayMicroseconds(half_us);
-                rx->pollOnce();
-                if ((i & 0x7Fu) == 0u) {
+                deadline += half_ticks;
+                for (;;) {
+                    const fl::i32 left = static_cast<fl::i32>(deadline - clock.now());
+                    if (left <= 0) break;
+                    if (left > poll_guard) rx->pollOnce();
+                }
+                if ((i & 0xFFu) == 0u) {
                     fl::Watchdog::instance().feed();
                 }
             }
@@ -391,7 +610,9 @@ inline void autoResearchLowMemorySetup() {
 
             // Static storage keeps this off the stack; the small fixed size
             // keeps .bss below the LPC845-BRK early-init failure threshold.
-            fl::EdgeTime* edges_buf = autoresearch::low_memory::pinToggleState().edges;
+            // Size from the array, not a pointer to it: sizeof(pointer) /
+            // sizeof(EdgeTime) is 1, which capped every capture at one edge.
+            auto& edges_buf = autoresearch::low_memory::pinToggleState().edges;
             const fl::size n_read = rx->getRawEdgeTimes(
                 fl::span<fl::EdgeTime>(edges_buf, sizeof(edges_buf) / sizeof(edges_buf[0])));
 
@@ -404,6 +625,23 @@ inline void autoResearchLowMemorySetup() {
               << stats.min_ns << ',' << stats.max_ns;
             return s.str();
         });
+#if defined(FL_IS_ARM_LPC_845)
+    // corePullCheck: [pin_a, pin_b, pin_c, pin_d] -> "<pin>:up=..,down=.. ..."
+    // (pin < 0 = unused slot); `bash autoresearch lpc845 --pin-toggle-rx`
+    // runs it on scan-idle pins. Shares pinToggleRx's binding signature, so
+    // it adds only its own body to the image.
+    remote.bind("corePullCheck",
+        [](int pin_a, int pin_b, int pin_c, int pin_d) -> fl::string {
+            fl::sstream out;
+            const int pins[] = {pin_a, pin_b, pin_c, pin_d};
+            for (int pin : pins) {
+                if (pin >= 0) {
+                    lowMemCorePullCheck(pin, out);
+                }
+            }
+            return out.str();
+        });
+#endif
 #endif  // !FASTLED_AUTORESEARCH_LPC_DMA_LOOPBACK
 
 #if defined(FASTLED_AUTORESEARCH_LPC_WS2812)

@@ -23,7 +23,7 @@ constexpr u64 pinMaskBit(int pin) FL_NO_EXCEPT {
 
 /// Why a probe must not touch `pin` at all (no pinMode, read or write), or
 /// nullptr when it may. Reasons: "not-a-gpio", "reserved-by-FastLED",
-/// "console-link", "flash-or-psram".
+/// "console-link", "flash-or-psram", "debug-swd", "reset", "isp-entry".
 const char* pinProbeSkipReason(int pin) FL_NO_EXCEPT;
 
 /// Why a probe may read `pin` but must not drive it, or nullptr when it may

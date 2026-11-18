@@ -39,7 +39,10 @@
     #include "platforms/arm/nrf52/pin_nrf52.hpp"
 #elif defined(FL_IS_RENESAS)
     #include "platforms/arm/renesas/pin_renesas.hpp"
+#elif defined(FL_IS_ARM_LPC_845) || defined(FL_IS_ARM_LPC_804)
+    #include "platforms/arm/lpc/pin_lpc.hpp"
 #elif defined(FL_IS_ARM_LPC)
+    // LPC11xx / LPC11Uxx / LPC15xx: no verified target or backend (#5108, #5110)
     #include "platforms/shared/pin_noop.hpp"
 #elif defined(FL_IS_SILABS)
     #include "platforms/arm/silabs/pin_silabs.hpp"

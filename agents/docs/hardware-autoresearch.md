@@ -34,6 +34,21 @@ Also check the exit status of hardware commands (use `set -o pipefail`): piping 
 
 Do NOT reason about attachment from memory or from "which board this task is about." Read the scan. Full rule + history (two incidents where boards were wrongly declared absent): `agents/docs/cpp-standards.md` → "Check if the target hardware might already be attached (REQUIRED)".
 
+## 🚨 Discover the jumpers on the board — NEVER ask the user what is wired (REQUIRED)
+
+**Do not ask the user which pins are connected, whether a jumper is fitted, or whether the bench has a pull-up.** The board can answer all of that itself, so asking wastes the user's time. The user has had to correct this more than once.
+
+When a loopback run fails, or before you choose TX/RX pins:
+
+1. **Run the board's pin-pair scan.** Use the `findConnectedPins` RPC (see the RPC table below). It drives each candidate pin and reads every other one, and it skips pads the platform reserves (`fl::pinProbeSkipReason` / `fl::pinProbeDriveSkipReason`).
+2. **Use the internal pulls to tell a real connection from a floating pin.** Most MCUs have internal pull-ups *and* pull-downs. Check each pair both ways: RX `InputPullup` with TX driving Low must read Low, and RX `InputPulldown` with TX driving High must read High. Also take a control read with TX released, to reject floating or stuck pins.
+3. **Pick the TX/RX pins from what the scan found** and pass them with `--tx-pin` / `--rx-pin`. On LPC, `--pin-toggle-rx` and `--pwm-dma-cl` scan and pick the pair themselves when no pins are given. Don't hard-code a default pair and then blame the wiring when it fails.
+4. **If the scan doesn't exist on this platform or build** (for example a low-memory build that compiles it out), add it. A compact version in the platform's AutoResearch harness is enough, and that is part of the task, not a reason to ask. Use FastLED's `fl::pinMode` / `fl::digitalWrite` / `fl::digitalRead`, not the vendor Arduino core's. LPC8xx cores before framework-arduino-lpc8xx `547b5a7` apply the pull to the wrong pad (FastLED/framework-arduino-lpc8xx#40); `--pin-toggle-rx` now checks the pinned core's `pinMode` pulls on idle pins (`corePullCheck`).
+5. **Know which pins have no internal pulls before you blame the bench.** Some pads have neither pull, for example LPC845 `P0_10`/`P0_11`, which are true open-drain I2C pads (UM11029). A loopback on them only works with an external pull-up. Prefer a scanned pair of ordinary pins; only if the scan finds none, report that as a measured fact with the scan output.
+6. **Only a scan that found nothing counts as evidence that nothing is wired.** Even then, report the scan result, not a request for the user to describe their wiring.
+
+History: on 2026-11-17 an LPC845 `--pin-toggle-rx` run failed (`edges=1`) and the agent asked the user to check for a P0_10↔P0_11 jumper and a pull-up, instead of scanning the board. It had made the same mistake before.
+
 ## Live Device Testing (AI Agents)
 
 ### Two Wi-Fi boards: use a peer access point before requesting credentials
@@ -726,7 +741,13 @@ bash autoresearch lpc845 --test-fault-emit --upload-port COM10 --timeout 120s --
 ```
 
 The test intentionally crashes the target twice. A pass means both triggers
-emitted `FAULT:` diagnostics and the harness re-flashed between triggers. If it
+emitted `FAULT:` diagnostics and the harness re-flashed between triggers.
+Since framework-arduino-lpc8xx#41 the line reads
+`FAULT: HardFault PC=... LR=... xPSR=... EXC_RETURN=...`, and PC is the
+faulting instruction: check it against `arm-none-eabi-objdump -d` of
+`.build/fbuild/lpc845/.fbuild/build/release/firmware.elf` (both triggers end
+on the `udf` in `triggerLowMemoryNullFault`). A PC in RAM (`0x1000xxxx`) or
+an LR of `0xFFFFFFFx` means the core is older than that fix. If it
 fails with no `FAULT:` line, treat the LPC safety nets as regressed: consult
 [FastLED #3300](https://github.com/FastLED/FastLED/issues/3300),
 [FastLED #3302](https://github.com/FastLED/FastLED/issues/3302), and
@@ -994,6 +1015,7 @@ Source of truth: `examples/AutoResearch/AutoResearchRemote.cpp` `mRemote->bind("
 | `setPins` | `[txPin, rxPin]` | `{success, txPin, rxPin}` |
 | `testGpioConnection` | `[txPin, rxPin]` | `{success, connected, rxWhenTxLow, rxWhenTxHigh, message}` |
 | `findConnectedPins` | `[]` or `[{startPin, endPin, autoApply}]` (all optional) | `{success, found, txPin, rxPin, autoApplied, testedPairs}` (or `{error, message}` on invalid range) |
+| `findConnectedPins` (LPC low-memory build) | `[]` | String `pairs=<tx>><rx>[od] ...;stuck=<pin><H\|L\|X> ...;skip=<pin>:<reason> ...;od=<pin> ...`. Every pin is tested against every other pin with `fl::pinMode`/`digitalWrite`/`digitalRead`: a released-TX control read, then TX Low against the RX pull-up and TX High against the RX pull-down. `od` marks an LPC845 open-drain driver (P0_10/P0_11, sink only); those pads are never the observed end. `--pin-toggle-rx` and `--pwm-dma-cl` run it and pick the pair (`ci/autoresearch/lpc_pin_scan.py`). |
 
 **Phase 3 — Tests (ASYNC; final response via `sendAsyncResponse`)**
 

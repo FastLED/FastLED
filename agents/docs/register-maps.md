@@ -193,6 +193,17 @@ the LPC build chain now flow vendor PAL through to FastLED:
 The tier-1 path (toolchain provides the canonical NXP CMSIS PAL) is
 now operational across all five FastLED LPC8xx CI workflows.
 
+**Cascading a framework fix today:** step 2 alone no longer reaches
+FastLED builds. fbuild does not read a git-URL platform's `platform.json`
+package pins; it builds against its own compiled-in
+`framework-arduino-lpc8xx` commit unless the env's `platform_packages`
+overrides it. So bump `_NXPLPC_FRAMEWORK_COMMIT` in `ci/boards.py`
+together with `_NXPLPC_PLATFORM`, and keep it equal to the commit the
+platform's `platform.json` pins. To confirm which core a build used, look
+at the `platform_packages` line in `.build/fbuild/<board>/platformio.ini`
+and at the `FastLED-framework-arduino-lpc8xx` entries under fbuild's
+`cache/platforms/` directory.
+
 ## Cross-references
 
 - `agents/docs/peripheral-existence.md` — **read this first** when starting
