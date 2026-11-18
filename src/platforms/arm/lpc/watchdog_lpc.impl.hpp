@@ -32,18 +32,21 @@
 /// warning threshold (WARNINT, 10-bit → nominally ~7.8 ms before reset on
 /// LPC845 and ~4.1 ms on LPC804) and routes the WDT interrupt line to the Cortex-M0+
 /// NMI via `SYSCON->NMISRC`. The ACLPC startup file's `NMI_Handler` is a
-/// STRONG alias of `HardFault_Handler` (not overridable from here — a
-/// weak-alias upstreaming is possible later), and that shared handler
-/// already prints the stacked exception frame and resets. So when
-/// firmware wedges (stops feeding), the warning fires NMI and the core
-/// emits `FAULT: HardFault PC=<addr> LR=<addr> xPSR=<addr>` over USART0.
-/// All three values are the stacked exception frame of the WEDGED context
-/// (ARMv6-M B1.5.4), so PC is the address the firmware was stuck at —
+/// weak alias of `HardFault_Handler` (framework-arduino-lpc8xx#38), and
+/// that shared handler prints the stacked exception frame and resets. So
+/// when firmware wedges (stops feeding), the warning fires NMI and the core
+/// emits `FAULT: NMI PC=<addr> LR=<addr> xPSR=<addr> EXC_RETURN=<addr>`
+/// over USART0. PC, LR and xPSR come from the stacked exception frame of
+/// the WEDGED context, so PC is the address the firmware was stuck at --
 /// symbolicate it against `firmware.map` (the autoresearch build always
-/// emits one). Silicon-validated 2026-07-02: a deliberately wedged RPC
-/// handler produced `FAULT: HardFault PC=0x100018BC ...` at t=+3.0 s,
-/// the PC symbolicated to the exact static object the driver had jumped
-/// into, and the chip reset and answered RPC echo again immediately.
+/// emits one). EXC_RETURN is the LR value at exception entry; it names the
+/// stack the frame was read from. Cores before framework-arduino-lpc8xx#41
+/// printed `FAULT: HardFault ...` and read the frame from the wrong stack
+/// words, so wedge PCs captured with them (the 2026-07-02 bring-up capture
+/// `PC=0x100018BC` included) are not trustworthy. With
+/// `-DARDUINOCORE_LPC8XX_NO_FAULT_EMIT=1` the core aliases `NMI_Handler` to
+/// its silent `Default_Handler` loop instead: no FAULT line, and the chip
+/// hangs until the WWDT reset; set `FL_LPC_WATCHDOG_NMI_BACKTRACE=0` there.
 ///
 /// Two consequences of reusing the core handler: (1) the reboot happens
 /// via SYSRESETREQ inside that handler, so `lastResetCause()` reports
@@ -206,11 +209,9 @@ void Watchdog::begin(fl::u32 timeout_ms) FL_NO_EXCEPT {
     platforms::lpcWwdtFeed();
 
 #if FL_LPC_WATCHDOG_NMI_BACKTRACE
-    // Route the WDT interrupt line to NMI. The chip-level IRQ slots in
-    // the ACLPC vector table are all Default_Handler (no per-IRQ weak
-    // aliases), but the core's NMI_Handler — a strong alias of its
-    // HardFault_Handler — already prints the stacked PC/LR over USART0
-    // and resets. That IS the wedge backtrace (see file header).
+    // Route the WDT interrupt line to NMI. The core's NMI_Handler -- a
+    // weak alias of its HardFault_Handler -- already prints the stacked
+    // PC/LR over USART0 and resets. That IS the wedge backtrace (see file header).
     SYSCON->NMISRC = SYSCON_NMISRC_NMIEN_MASK | SYSCON_NMISRC_IRQN(WDT_IRQn);
 #endif
 

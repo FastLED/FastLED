@@ -401,6 +401,43 @@ inline fl::string lowMemFindConnectedPins() FL_NO_EXCEPT {
     return out.str();
 }
 
+#if defined(FL_IS_ARM_LPC_845) && !defined(FASTLED_AUTORESEARCH_LPC_DMA_LOOPBACK)
+// corePullCheck: checks that the vendor Arduino core's ::pinMode puts the
+// pull on the requested pad (FastLED/framework-arduino-lpc8xx#40). Use
+// unconnected pins from findConnectedPins. FastLED's own backend first sets
+// the opposite pull, so a core that writes the wrong IOCON slot reads back
+// the opposite level. Appends "<pin>:up=<0|1>,down=<0|1> " per pin; a
+// correct core gives "up=1,down=0". Pads the core cannot pull (outside its
+// pin map, open-drain, probe-skipped) report "<pin>:skip ".
+//
+// On a core with the #40 bug the probe itself changes some other pad's pull,
+// as any ::pinMode call there would. A core without INPUT_PULLDOWN treats
+// mode 3 as "no pull", so it reports down=1 too.
+inline void lowMemCorePullCheck(int pin, fl::sstream& out) FL_NO_EXCEPT {
+#ifdef INPUT_PULLDOWN
+    constexpr PinMode kCorePulldown = INPUT_PULLDOWN;
+#else
+    constexpr PinMode kCorePulldown = 0x3;  // older cores lack the define
+#endif
+    out << pin << ':';
+    if (pin < 0 || pin >= static_cast<int>(variant_pin_count) ||
+        lowMemOpenDrainPin(pin) || fl::pinProbeSkipReason(pin)) {
+        out << "skip ";
+        return;
+    }
+    const pin_size_t p = static_cast<pin_size_t>(pin);
+    fl::pinMode(pin, fl::PinMode::InputPulldown);
+    ::pinMode(p, INPUT_PULLUP);
+    delayMicroseconds(100);
+    const int up = ::digitalRead(p) == HIGH ? 1 : 0;
+    fl::pinMode(pin, fl::PinMode::InputPullup);
+    ::pinMode(p, kCorePulldown);
+    delayMicroseconds(100);
+    const int down = ::digitalRead(p) == HIGH ? 1 : 0;
+    fl::pinMode(pin, fl::PinMode::InputPullup);  // reset-state pull
+    out << "up=" << up << ",down=" << down << ' ';
+}
+#endif  // FL_IS_ARM_LPC_845 && !FASTLED_AUTORESEARCH_LPC_DMA_LOOPBACK
 
 #endif  // FL_IS_ARM_LPC && !FASTLED_AUTORESEARCH_IEEE754_MODE && !FAULT_TEST
 
@@ -588,6 +625,23 @@ inline void autoResearchLowMemorySetup() {
               << stats.min_ns << ',' << stats.max_ns;
             return s.str();
         });
+#if defined(FL_IS_ARM_LPC_845)
+    // corePullCheck: [pin_a, pin_b, pin_c, pin_d] -> "<pin>:up=..,down=.. ..."
+    // (pin < 0 = unused slot); `bash autoresearch lpc845 --pin-toggle-rx`
+    // runs it on scan-idle pins. Shares pinToggleRx's binding signature, so
+    // it adds only its own body to the image.
+    remote.bind("corePullCheck",
+        [](int pin_a, int pin_b, int pin_c, int pin_d) -> fl::string {
+            fl::sstream out;
+            const int pins[] = {pin_a, pin_b, pin_c, pin_d};
+            for (int pin : pins) {
+                if (pin >= 0) {
+                    lowMemCorePullCheck(pin, out);
+                }
+            }
+            return out.str();
+        });
+#endif
 #endif  // !FASTLED_AUTORESEARCH_LPC_DMA_LOOPBACK
 
 #if defined(FASTLED_AUTORESEARCH_LPC_WS2812)
