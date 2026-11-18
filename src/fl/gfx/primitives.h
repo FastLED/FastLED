@@ -384,7 +384,7 @@ inline void polySortBand(fl::u8 *idx, fl::i64 *keys,
 
 /// Count leading zeros of a non-zero 32-bit value (branch form: portable to
 /// MSVC where __builtin_clz is unavailable, and branch-free on x86).
-static inline int polyClz32(fl::u32 v) FL_NO_EXCEPT {
+inline int polyClz32(fl::u32 v) FL_NO_EXCEPT {
     int n = 0;
     if ((v & 0xFFFF0000u) == 0) { n = 16; v <<= 16; }
     if ((v & 0xFF000000u) == 0) { n += 8; v <<= 8; }
@@ -396,8 +396,8 @@ static inline int polyClz32(fl::u32 v) FL_NO_EXCEPT {
 
 /// Index (0..127) of the highest set bit of a 128-bit value held in four
 /// 32-bit lanes (m3 most significant), or -1 when the value is zero.
-static inline int polyTopBit128(fl::u32 m3, fl::u32 m2, fl::u32 m1,
-                                fl::u32 m0) FL_NO_EXCEPT {
+inline int polyTopBit128(fl::u32 m3, fl::u32 m2, fl::u32 m1,
+                         fl::u32 m0) FL_NO_EXCEPT {
     if (m3) return 127 - polyClz32(m3);
     if (m2) return 95 - polyClz32(m2);
     if (m1) return 63 - polyClz32(m1);
@@ -409,14 +409,16 @@ static inline int polyTopBit128(fl::u32 m3, fl::u32 m2, fl::u32 m1,
 /// 0 < dv < 2^63 (polyLineT28's quotient step). Exact: the 64-bit
 /// remainder state s of the shift-subtract below satisfies s < dv at the
 /// start of every step, so s <- 2s + bit never reaches 2^64 and the loop
-/// computes q = floor(M/dv), r = M mod dv. drawPolygon always passes
-/// dv > 0; a direct polyLineT28 call with D == 0 passes dv == 0, which
-/// clamps to kPolyOne exactly as the committed loop did. Kept out of line
+/// computes q = floor(M/dv), r = M mod dv. Requires dv > 0: polyLineT28
+/// never passes 0 (D == 0 makes M == 0, which returns before the call).
+/// Kept out of line
 /// so polyLineT28's two call sites (normal and huge edges) share one copy:
 /// on AVR that measured smaller AND faster than one inlined loop with a
 /// runtime-selected divisor (the register allocator spills inside it).
-/// static (like polyTopBit128): it uses the internal-linkage kPolyOne.
-static inline FL_NO_INLINE fl::i32 polyDivRoundT28(
+/// External-linkage inline (not static), like the polyClz32/polyTopBit128
+/// helpers it calls, so the inline polyLineT28 refers to the same entity
+/// in every TU (ODR); kPolyOne is only read as a constant (no odr-use).
+inline FL_NO_INLINE fl::i32 polyDivRoundT28(
     fl::u64 mhi, fl::u64 mlo, fl::u64 dv) FL_NO_EXCEPT {
     fl::u32 m3 = (fl::u32)(mhi >> 32), m2 = (fl::u32)mhi;
     fl::u32 m1 = (fl::u32)(mlo >> 32), m0 = (fl::u32)mlo;
