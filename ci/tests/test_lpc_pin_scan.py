@@ -85,6 +85,15 @@ class _PullBench:
     def call_flat(self, method: str, args: object = None, **_k: object) -> object:
         if method == "findConnectedPins":
             return BENCH_REPLY
+        return self._pull(args)
+
+    def _pull(self, args: object) -> object:
+        # The binding probe (four -1 slots) touches no pad; a bound RPC
+        # answers it with an empty string.
+        from ci.autoresearch.rpc_bench import METHOD_NOT_FOUND
+
+        if args == [-1] * 4:
+            return METHOD_NOT_FOUND if self.pull_reply is METHOD_NOT_FOUND else ""
         self.pull_args = args
         return self.pull_reply
 
@@ -124,8 +133,7 @@ class _IdleBench(_PullBench):
     def call_flat(self, method: str, args: object = None, **_k: object) -> object:
         if method == "findConnectedPins":
             return f"pairs=;stuck={self.stuck} ;skip=;od="
-        self.pull_args = args
-        return self.pull_reply
+        return self._pull(args)
 
 
 def test_core_pull_check_skips_iocon_identity_pins() -> None:
@@ -155,3 +163,23 @@ def test_only_identity_pins_idle_is_skipped() -> None:
     bench = _IdleBench({4, 24}, "unused")
     assert check_core_pulls(bench, "t") is None
     assert bench.pull_args is None
+
+
+def test_unbound_fails_even_when_no_pin_qualifies() -> None:
+    from ci.autoresearch.lpc_pin_scan import check_core_pulls
+    from ci.autoresearch.rpc_bench import METHOD_NOT_FOUND
+
+    # Only identity pins idle would skip the check; a missing binding must
+    # still fail the run.
+    assert check_core_pulls(_IdleBench({4, 24}, METHOD_NOT_FOUND), "t") is False
+
+
+def test_unbound_fails_even_when_the_scan_fails() -> None:
+    from ci.autoresearch.lpc_pin_scan import check_core_pulls
+    from ci.autoresearch.rpc_bench import METHOD_NOT_FOUND
+
+    class _NoScan:
+        def call_flat(self, method: str, **_k: object) -> object:
+            return METHOD_NOT_FOUND
+
+    assert check_core_pulls(_NoScan(), "t") is False

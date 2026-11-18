@@ -434,12 +434,10 @@ inline void lowMemCorePullCheck(int pin, fl::sstream& out) FL_NO_EXCEPT {
     const pin_size_t p = static_cast<pin_size_t>(pin);
     fl::pinMode(pin, fl::PinMode::InputPulldown);
     ::pinMode(p, INPUT_PULLUP);  // ok platform specific - the vendor core call under test
-    delayMicroseconds(100);
-    const int up = ::digitalRead(p) == HIGH ? 1 : 0;  // ok platform specific - read back through the same vendor core
+    const int up = lowMemSettledHigh(pin) ? 1 : 0;
     fl::pinMode(pin, fl::PinMode::InputPullup);
     ::pinMode(p, kCorePulldown);  // ok platform specific - the vendor core call under test
-    delayMicroseconds(100);
-    const int down = ::digitalRead(p) == HIGH ? 1 : 0;  // ok platform specific - read back through the same vendor core
+    const int down = lowMemSettledHigh(pin) ? 1 : 0;
     fl::pinMode(pin, fl::PinMode::InputPullup);  // reset-state pull
     out << "up=" << up << ",down=" << down << ' ';
 }

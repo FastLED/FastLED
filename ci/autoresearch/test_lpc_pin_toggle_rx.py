@@ -28,6 +28,11 @@ JSON-RPC protocol as the bring-up echo test (`phases.py
 positional integer args and returns a CSV-encoded string (smaller
 flash footprint than the JSON-object response shape FlexIO uses).
 
+Requires the `bash autoresearch lpc845 --pin-toggle-rx` firmware: that
+build defines FASTLED_AUTORESEARCH_LPC_CORE_PULL_CHECK, and this script fails
+when the `corePullCheck` RPC it compiles in is not bound. Other LPC845 images
+are not supported here.
+
 Exits 0 on success, 1 on any failed assertion / RPC error.
 """
 

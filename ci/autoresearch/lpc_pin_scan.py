@@ -119,10 +119,21 @@ def check_core_pulls(bench: Any, tag: str, timeout: float = 5.0) -> bool | None:
     Returns True when every pin reads up=1,down=0, False on a wrong reading
     or when the RPC is not bound (the --pin-toggle-rx build always compiles it
     in, so a missing binding means the define did not reach the build), and
-    None when the check cannot run (no scan, no usable idle pin).
+    None when the bound check cannot run (no scan, no usable idle pin).
     """
     from ci.autoresearch.rpc_bench import METHOD_NOT_FOUND
 
+    # Probe the binding first, so a missing RPC fails even when the scan or
+    # the idle-pin choice would skip the check. Four -1 slots touch no pad.
+    if (
+        bench.call_flat("corePullCheck", args=[-1] * 4, timeout=timeout)
+        is METHOD_NOT_FOUND
+    ):
+        print(
+            f"[{tag}] core pull check FAIL: corePullCheck is not bound "
+            "(FASTLED_AUTORESEARCH_LPC_CORE_PULL_CHECK missing from the build)"
+        )
+        return False
     scan = run_scan(bench)
     if isinstance(scan, str):
         print(f"[{tag}] core pull check skipped: {scan}")
@@ -141,12 +152,6 @@ def check_core_pulls(bench: Any, tag: str, timeout: float = 5.0) -> bool | None:
         return None
     args = pins + [-1] * (4 - len(pins))
     reply = bench.call_flat("corePullCheck", args=args, timeout=timeout)
-    if reply is METHOD_NOT_FOUND:
-        print(
-            f"[{tag}] core pull check FAIL: corePullCheck is not bound "
-            "(FASTLED_AUTORESEARCH_LPC_CORE_PULL_CHECK missing from the build)"
-        )
-        return False
     if not isinstance(reply, str):
         print(f"[{tag}] core pull check FAIL: no answer within {timeout:.0f} s")
         return False
