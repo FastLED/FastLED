@@ -466,7 +466,9 @@ def test_fbuild_adapter_close_exits_the_monitor_current_when_it_runs() -> None:
     release = threading.Event()
 
     def _queued_connect() -> None:
-        release.wait(5)
+        # Only swap once close() has queued its exit; a timed-out gate must
+        # fail the test, not let it pass without the race.
+        assert release.wait(5), "close() never queued its exit"
         adapter._monitor = new  # what daemon recovery does
 
     async def _run() -> None:
@@ -474,7 +476,7 @@ def test_fbuild_adapter_close_exits_the_monitor_current_when_it_runs() -> None:
             adapter._executor, _queued_connect
         )
         closing = asyncio.ensure_future(adapter.close())
-        await asyncio.sleep(0)
+        await asyncio.sleep(0)  # close() runs up to its executor submit
         release.set()
         await busy
         await closing
@@ -482,6 +484,7 @@ def test_fbuild_adapter_close_exits_the_monitor_current_when_it_runs() -> None:
     try:
         asyncio.run(_run())
     finally:
+        release.set()  # never strand the worker, even on failure
         adapter._executor.shutdown(wait=True)
     assert (old.exits, new.exits) == (0, 1)
 

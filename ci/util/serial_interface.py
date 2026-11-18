@@ -370,7 +370,12 @@ def _note_earlier_attempts(error: BaseException, retried: list[str]) -> None:
     """
     if not retried:
         return
-    notes = [str(note) for note in getattr(error, "__notes__", ())] + retried
+    notes: list[str] = []
+    existing = getattr(error, "__notes__", None)
+    if existing is not None:
+        for note in existing:
+            notes.append(str(note))
+    notes.extend(retried)
     setattr(error, "__notes__", notes)  # noqa: B010 - also on 3.10, which lacks add_note
 
 

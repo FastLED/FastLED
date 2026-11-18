@@ -287,18 +287,71 @@ def test_the_error_chain_includes_earlier_attach_attempts() -> None:
     attached to the final error rather than read as its cause."""
     from ci.util.serial_interface import _describe_attempt, _note_earlier_attempts
 
-    try:
-        try:
-            raise RuntimeError("failed to connect to daemon WebSocket")
-        except RuntimeError as daemon:
-            raise TimeoutError("handshake timed out") from daemon
-    except TimeoutError as final:
-        _note_earlier_attempts(
-            final, [_describe_attempt(1, ConnectionError("session closed"))]
-        )
-        message = rpc_bench.describe_error_chain(final)
+    final = TimeoutError("handshake timed out")
+    final.__cause__ = RuntimeError("failed to connect to daemon WebSocket")
+    _note_earlier_attempts(
+        final, [_describe_attempt(1, ConnectionError("session closed"))]
+    )
+    message = rpc_bench.describe_error_chain(final)
     assert message == (
         "TimeoutError: handshake timed out "
         "[attach attempt 1 of 3 failed: ConnectionError: session closed]"
         " <- RuntimeError: failed to connect to daemon WebSocket"
     )
+
+
+def test_notes_set_to_none_do_not_mask_the_chain() -> None:
+    """FastLED#5284 review: `__notes__ = None` reads as no notes."""
+    error = ConnectionError("session closed")
+    error.__notes__ = None  # type: ignore[attr-defined]
+    assert rpc_bench.describe_error_chain(error) == "ConnectionError: session closed"
+
+
+class _InterruptedTwiceSerial(_InterruptedAttachSerial):
+    """Ctrl-C inside the attach, and a second Ctrl-C (a signal, landing as a
+    loop callback) while the detach is still in progress."""
+
+    def __init__(self, responder: object) -> None:
+        super().__init__(responder)
+        self.interrupted_detach = False
+
+    async def close(self) -> None:
+        if not self.interrupted_detach:
+            self.interrupted_detach = True
+
+            def _second_ctrl_c() -> None:
+                raise KeyboardInterrupt
+
+            asyncio.get_running_loop().call_soon(_second_ctrl_c)
+            await asyncio.sleep(0.01)  # still detaching when it lands
+        self.closed = True
+
+
+def test_a_second_interrupt_in_the_detach_still_closes_the_loop(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """FastLED#5284 review: the same close task is resumed, so the monitor
+    detaches before the loop closes; the first interrupt is the one raised."""
+    created: list[_InterruptedTwiceSerial] = []
+    benches: list[RpcBench] = []
+    handled: list[KeyboardInterrupt] = []
+    original_init = RpcBench.__init__
+
+    def _factory(port: str, *args: object, **kwargs: object) -> _InterruptedTwiceSerial:
+        iface = _InterruptedTwiceSerial(_ok)
+        created.append(iface)
+        return iface
+
+    def _tracking_init(self: RpcBench, *args: object, **kwargs: object) -> None:
+        benches.append(self)
+        original_init(self, *args, **kwargs)  # type: ignore[arg-type]
+
+    monkeypatch.setattr(rpc_bench, "create_serial_interface", _factory)
+    monkeypatch.setattr(rpc_bench, "handle_keyboard_interrupt", handled.append)
+    monkeypatch.setattr(RpcBench, "__init__", _tracking_init)
+    with pytest.raises(KeyboardInterrupt):
+        RpcBench("FAKE_PORT", timeout=1.0)
+    assert created[0].interrupted_detach is True
+    assert created[0].closed is True
+    assert benches[0]._loop.is_closed()
+    assert len(handled) == 1

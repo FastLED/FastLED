@@ -60,7 +60,11 @@ def describe_error_chain(error: BaseException) -> str:
     while current is not None and id(current) not in seen:
         seen.add(id(current))
         entry = f"{type(current).__name__}: {current}"
-        notes = [str(note) for note in getattr(current, "__notes__", ())]
+        notes: list[str] = []
+        raw_notes = getattr(current, "__notes__", None)
+        if raw_notes is not None:  # traceback also treats None as no notes
+            for note in raw_notes:
+                notes.append(str(note))
         if notes:
             entry += " [" + "; ".join(notes) + "]"
         parts.append(entry)
@@ -126,9 +130,8 @@ class RpcBench:
                         self._loop.run_until_complete(connect)
             finally:
                 # Even a second Ctrl-C during the drain or the close must not
-                # skip this; the first interrupt is the one raised.
-                with suppress(BaseException):
-                    self.close()
+                # skip the detach; the first interrupt is the one raised.
+                self._close_after_interrupt()
                 handle_keyboard_interrupt(interrupt)
             raise
         except Exception as error:
@@ -309,6 +312,22 @@ class RpcBench:
             self._loop.run_until_complete(self._client.close())
         finally:
             self._loop.close()
+
+    def _close_after_interrupt(self) -> None:
+        """close() for the Ctrl-C path: one close task, finished even if
+        another Ctrl-C lands in it, so the monitor really detaches before
+        the loop closes. Errors are dropped; the interrupt is what the
+        caller gets."""
+        closing = self._loop.create_task(self._client.close())
+        for _ in range(3):  # bounded: a further Ctrl-C resumes the same task
+            try:
+                self._loop.run_until_complete(closing)
+                break
+            except KeyboardInterrupt:  # noqa: KBI002 - absorbed: the caller re-raises the first interrupt after this cleanup
+                continue
+            except Exception:  # noqa: BLE001 - best-effort detach on the interrupt path
+                break
+        self._loop.close()
 
     # Context-manager support so runners written as `with s: ...` (a
     # drop-in for `with serial.Serial(...) as s`) work unchanged.
