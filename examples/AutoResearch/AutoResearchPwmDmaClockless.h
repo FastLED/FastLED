@@ -58,12 +58,12 @@
 #include "fl/stl/sstream.h"
 #include "fl/stl/vector.h"
 #include "fl/system/pin_probe.h"
-#include "platforms/arm/lpc/drivers/sct_dma/channel_engine_lpc_sct_dma.h" // ok platform headers - AutoResearch driver-specific test needs the concrete engine type
+#include "platforms/arm/lpc/drivers/sct_dma/channel_engine_lpc_sct_dma.h" // ok platform headers; ok platform specific - this LPC845-only harness tests the concrete SCT+DMA engine type
 // The LPC BusTraits<Bus::BIT_BANG> specialization this file names. It used to
 // arrive only via clockless_channel_lpc.h, which is skipped when another
 // ClocklessController was already picked, leaving the type incomplete.
-#include "platforms/arm/lpc/drivers/sct_dma/bus_traits.h" // ok platform headers - same reason
-#include "platforms/arm/lpc/drivers/sct_dma/lpc_ctimer_pulse_capture.h" // ok platform headers - the SCT is the transmitter, so the wire is measured with CTIMER0 (no core pulse-capture API exists)
+#include "platforms/arm/lpc/drivers/sct_dma/bus_traits.h" // ok platform headers; ok platform specific - binds the BIT_BANG bus to the LPC845 SCT+DMA engine under test
+#include "platforms/arm/lpc/drivers/sct_dma/lpc_ctimer_pulse_capture.h" // ok platform headers; ok platform specific - the SCT is the transmitter, so the wire is measured with LPC845 CTIMER0 (no core pulse-capture API exists)
 
 namespace autoresearch {
 namespace pwm_dma_cl {
@@ -125,7 +125,7 @@ inline fl::ChannelDataPtr makeSolidChannelData(
 // READY means the engine is idle, not that the frame went out whole: an
 // early halt (a refill missed its deadline) or a DMA error is READY too.
 inline bool lastFrameComplete(fl::ChannelEngineLpcSctDma& engine) FL_NO_EXCEPT { // ok platform specific - this file tests only the LPC845 SCT+DMA engine; no other driver reports a cut-short frame, so a core API would have one user
-    return engine.transmitter().lastFrameComplete(); // ok platform specific - same reason
+    return engine.transmitter().lastFrameComplete(); // ok platform specific - reads the LPC845 SCT+DMA transmitter's cut-short flag; no core API reports a cut-short frame
 }
 
 // Spin poll() until READY, at most `timeout_us`. False on timeout.
@@ -193,7 +193,9 @@ inline fl::string frameBurstHandler(int led_count, fl::u32 rgb,
     // last one ended.
     const fl::u32 reset_us = ws2812b_timing().reset_us;
     const fl::u32 t_start = micros();
-    fl::u32 last_end = t_start - reset_us;
+    // An earlier RPC's frame may have ended just before this call, so the
+    // first frame waits the full reset time too.
+    fl::u32 last_end = t_start;
     for (int i = 0; i < n_frames; ++i) {
         while (micros() - last_end < reset_us) {
         }
