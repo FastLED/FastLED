@@ -100,6 +100,19 @@ class LpcUartDmaRuntime {
     static constexpr u32 kUsartCfgLoop = (1UL << 15);
     static constexpr u32 kUsartCfgRxPol = (1UL << 22);
     static constexpr u32 kUsartCfgTxPol = (1UL << 23);
+    // CFG bits init() writes: ENABLE, DATALEN, LOOP, RXPOL, TXPOL.
+    static constexpr u32 kUsartCfgOwnedBits =
+        USART_CFG_ENABLE_MASK | USART_CFG_DATALEN_MASK | kUsartCfgLoop |
+        kUsartCfgRxPol | kUsartCfgTxPol;
+    struct BaudDivisors {
+        u32 baud = 0;
+        u32 osr = 0;
+        u32 brg = 0;
+    };
+    static BaudDivisors& baudDivisors() FL_NO_EXCEPT {
+        static BaudDivisors divisors;
+        return divisors;
+    }
     static constexpr u32 kSwmPinMask = 0xFFu;
     static constexpr u8 kSwmPinUnassigned = 0xFFu;
     // UM11029 Tables 181/182: U1/U2 TXD/RXD movable-function assignments
@@ -138,6 +151,18 @@ public:
 
     static constexpr bool isMovableUartPin(u8 pin) FL_NO_EXCEPT {
         return swmPinAllowed(pin);
+    }
+
+    /// Hand the TX pad back to GPIO. init() routes U1/U2_TXD onto the data
+    /// pin and keeps it there between frames (the USART holds the idle
+    /// level). Call this when the pin is done carrying LED data; the next
+    /// init() routes it again.
+    static void releaseTxPin() FL_NO_EXCEPT {
+#if FASTLED_LPC_UART_DMA_INSTANCE == 2
+        SWM0->PINASSIGN.PINASSIGN2 |= swmMask(16u);  // U2_TXD_O unassigned
+#else
+        SWM0->PINASSIGN.PINASSIGN1 |= swmMask(8u);   // U1_TXD_O unassigned
+#endif
     }
 
 #if defined(FL_LPC_UART_DMA_LOOPBACK_TEST)
@@ -187,42 +212,51 @@ public:
     }
 #endif
 
+    // Runs before every frame. The USART is reprogrammed only when its
+    // baud or CFG changes, and the pin is routed only after the USART drives
+    // its idle level. Disabling a routed USART (CFG=0) clears TXPOL, so the
+    // inverted line idles at the HIGH mark level while it is off. Doing that
+    // on every show put a ~230 us HIGH pulse on the data line right before
+    // each frame, which a WS2812 reads as an extra leading '1' bit (seen on
+    // an LPC845-BRK SCT capture, FastLED #5266).
     static void init(u8 txPin, u32 baud, bool invertTx) FL_NO_EXCEPT {
 #if FASTLED_LPC_UART_DMA_INSTANCE == 2
         SYSCON->SYSAHBCLKCTRL0 |= SYSCON_SYSAHBCLKCTRL0_UART2_MASK |
                                   SYSCON_SYSAHBCLKCTRL0_SWM_MASK;
         SYSCON->PRESETCTRL0 |= SYSCON_PRESETCTRL0_UART2_RST_N_MASK;
         SYSCON->FCLKSEL[2] = SYSCON_FCLKSEL_SEL(0x1u);
-        routeUart2Pins(txPin);
 #else
         SYSCON->SYSAHBCLKCTRL0 |= SYSCON_SYSAHBCLKCTRL0_UART1_MASK |
                                   SYSCON_SYSAHBCLKCTRL0_SWM_MASK;
         SYSCON->PRESETCTRL0 |= SYSCON_PRESETCTRL0_UART1_RST_N_MASK;
         SYSCON->FCLKSEL[1] = SYSCON_FCLKSEL_SEL(0x1u);
-        routeUart1Pins(txPin);
 #endif
 
-        USART_Type* u = uartBlock();
-        u->CFG = 0;
-        u32 bestOsr = 15u;
-        u32 bestBrg = 0u;
-        u32 bestErr = 0xFFFFFFFFu;
-        for (u32 osr = 15u; osr >= 4u; --osr) {
-            const u32 div = (osr + 1u) * baud;
-            u32 brg = (F_CPU + div / 2u) / div;
-            if (brg == 0u) {
-                brg = 1u;
+        // The OSR/BRG search does software divides on the M0+, so it runs
+        // once per baud rate, never while the USART is off.
+        BaudDivisors& div = baudDivisors();
+        if (div.baud != baud) {
+            u32 bestOsr = 15u;
+            u32 bestBrg = 0u;
+            u32 bestErr = 0xFFFFFFFFu;
+            for (u32 osr = 15u; osr >= 4u; --osr) {
+                const u32 d = (osr + 1u) * baud;
+                u32 brg = (F_CPU + d / 2u) / d;
+                if (brg == 0u) {
+                    brg = 1u;
+                }
+                const u32 actual = F_CPU / ((osr + 1u) * brg);
+                const u32 err = actual > baud ? actual - baud : baud - actual;
+                if (err < bestErr) {
+                    bestErr = err;
+                    bestOsr = osr;
+                    bestBrg = brg - 1u;
+                }
             }
-            const u32 actual = F_CPU / ((osr + 1u) * brg);
-            const u32 err = actual > baud ? actual - baud : baud - actual;
-            if (err < bestErr) {
-                bestErr = err;
-                bestOsr = osr;
-                bestBrg = brg - 1u;
-            }
+            div.osr = bestOsr & USART_OSR_OSRVAL_MASK;
+            div.brg = bestBrg & USART_BRG_BRGVAL_MASK;
+            div.baud = baud;
         }
-        u->OSR = bestOsr & USART_OSR_OSRVAL_MASK;
-        u->BRG = bestBrg & USART_BRG_BRGVAL_MASK;
 
         u32 cfg = USART_CFG_ENABLE_MASK | USART_CFG_DATALEN(0x1u);
         if (invertTx) {
@@ -241,7 +275,23 @@ public:
             cfg |= kUsartCfgRxPol;
         }
 #endif
-        u->CFG = cfg;
+        // Compare only the CFG bits this driver writes, so reserved bits
+        // that read back differently cannot force a reprogram every frame.
+        USART_Type* u = uartBlock();
+        if ((u->CFG & kUsartCfgOwnedBits) != cfg ||
+            (u->OSR & USART_OSR_OSRVAL_MASK) != div.osr ||
+            (u->BRG & USART_BRG_BRGVAL_MASK) != div.brg) {
+            u->CFG = cfg & ~USART_CFG_ENABLE_MASK;  // off only for these writes
+            u->OSR = div.osr;
+            u->BRG = div.brg;
+            u->CFG = cfg;
+        }
+
+#if FASTLED_LPC_UART_DMA_INSTANCE == 2
+        routeUart2Pins(txPin);
+#else
+        routeUart1Pins(txPin);
+#endif
 
         SYSCON->SYSAHBCLKCTRL0 |= SYSCON_SYSAHBCLKCTRL0_DMA_MASK;
         DMA0->CTRL = 1UL;

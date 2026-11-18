@@ -1,10 +1,16 @@
 """Phase 2 of FastLED #3021 — bench-validate LPC SCT-RX against the
-WS2812 bit-bang clockless TX driver (`clockless_arm_lpc.h`).
+LPC845 default clockless WS2812 driver.
 
-Drives `FastLED.show()` on the LPC845-BRK's bit-bang `WS2812` driver,
-captures the wire via SCT input-capture (`LpcSctRxChannel`), decodes
-the 4-phase WS2812 timing, and byte-matches the recovered LED data
-against what was sent.
+Sends a WS2812 frame through the platform default clockless driver (the
+one `addLeds<WS2812, PIN>()` selects, fed the way its low-memory direct show
+feeds it, but with the pin chosen at run time), captures the wire via SCT
+input-capture + DMA (`LpcSctRxChannel`), decodes the 4-phase WS2812 timing,
+and byte-matches the recovered LED data against what was sent.
+
+TX/RX come from the firmware's `findConnectedPins` jumper scan unless both
+`--tx-pin` and `--rx-pin` are given. TX is driven from a push-pull pad:
+LPC845 P0_10/P0_11 are true open-drain I2C pads whose rising edge is the
+slow pull-up (~1.7 us), longer than any WS2812 HIGH (FastLED #5266).
 
 Five test patterns, mirroring the FlexIO `flexioObjectFledTest`:
 
@@ -16,19 +22,13 @@ Five test patterns, mirroring the FlexIO `flexioObjectFledTest`:
     |  3   |  1   | All ones (T1H/T1L fidelity)          |
     |  4   |  100 | Alternating R/G/B (watchdog safety)  |
 
-**Hardware status:** the LPC845 SCT capture path used in Phase 1 is
-polling-based — adequate for the ≤100 kHz pin-toggle bench but NOT
-fast enough to capture every edge of an 800 kHz WS2812 stream on a
-30 MHz Cortex-M0+. The SCT→DMA upgrade tracked as a #3021 follow-up
-is required for `mismatched == 0` on real silicon. Until that lands,
-this orchestrator reports raw decode statistics so the polling-vs-DMA
-gap is observable.
+Case 4 sends 100 LEDs (4800 edges), but the 16 KB-SRAM sketch captures at
+most `cap` = 192 edges, so only the first `cap // 16` bytes can be checked.
+The firmware reports `cap`; the case passes when that whole prefix decodes
+and matches (see `checkable_bytes`).
 
 Usage:
-    uv run python ci/autoresearch/test_lpc_ws2812_loopback.py [--port COM10]
-
-The LPC845 low-memory firmware binds the `ws2812SctTest` RPC automatically
-from the platform predicate; no manual WS2812 build flag is required.
+    uv run python -m ci.autoresearch.test_lpc_ws2812_loopback --port <port>
 
 Exits 0 on success, 1 on any failed assertion / RPC error.
 """
@@ -43,6 +43,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from ci.autoresearch.lpc_pin_scan import resolve_pins
 from ci.autoresearch.rpc_bench import METHOD_NOT_FOUND, RpcBench  # noqa: E402,F401
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt  # noqa: E402
 
@@ -90,40 +91,67 @@ CASES: list[TestCase] = [
 ]
 
 
+CSV_FIELDS: tuple[str, ...] = (
+    "success",
+    "test_case",
+    "num_leds",
+    "exp_bytes",
+    "dec_bytes",
+    "matched",
+    "mismatched",
+    "edges",
+    "cap",
+    "tx_done",
+)
+
+# Each WS2812 bit is one HIGH and one LOW interval, so a byte is 16 edges.
+EDGES_PER_BYTE = 16
+
+
 def parse_csv_result(csv: str) -> dict[str, int]:
-    """Parse the AutoResearchLpc ws2812SctTest CSV reply.
+    """Parse the low-memory sketch's ws2812SctTest CSV reply.
 
     Format (must match the sketch handler):
-        success,test_case,num_leds,exp_bytes,dec_bytes,matched,mismatched,edges
+        success,test_case,num_leds,exp_bytes,dec_bytes,matched,mismatched,edges,cap,tx_done
+
+    `mismatched` counts decoded bytes that differ from what was sent;
+    `exp_bytes - dec_bytes` were not decoded at all. `cap` is the edge
+    capacity of the capture. `tx_done` is 1 when the TX frame finished,
+    0 when it timed out, and 2 when setup failed before TX started.
     """
-    fields = (
-        "success",
-        "test_case",
-        "num_leds",
-        "exp_bytes",
-        "dec_bytes",
-        "matched",
-        "mismatched",
-        "edges",
-    )
     parts = csv.split(",")
-    if len(parts) != len(fields):
+    if len(parts) != len(CSV_FIELDS):
         return {}
     try:
-        return {k: int(v) for k, v in zip(fields, parts)}
+        return {k: int(v) for k, v in zip(CSV_FIELDS, parts)}
     except ValueError:
         return {}
 
 
+def checkable_bytes(exp_bytes: int, cap: int) -> int:
+    """Bytes a capture of `cap` edges can hold, at most the frame size."""
+    return min(exp_bytes, cap // EDGES_PER_BYTE)
+
+
 def evaluate(case: TestCase, parsed: dict[str, int]) -> tuple[bool, str]:
-    success = parsed.get("success", 0)
     num_leds = parsed.get("num_leds", 0)
     exp_bytes = parsed.get("exp_bytes", 0)
     dec_bytes = parsed.get("dec_bytes", 0)
     matched = parsed.get("matched", 0)
     mismatched = parsed.get("mismatched", 0)
     edges = parsed.get("edges", 0)
+    cap = parsed.get("cap", 0)
 
+    if num_leds == 0:
+        return False, (
+            "firmware rejected the arguments (TX on an open-drain pad, a "
+            "reserved pad, TX == RX, or a pin out of range)"
+        )
+    if parsed.get("test_case", -1) != case.index:
+        return False, (
+            f"firmware answered test_case={parsed.get('test_case')}, "
+            f"expected {case.index}"
+        )
     if num_leds != case.num_leds:
         return False, (
             f"firmware reported num_leds={num_leds}, expected {case.num_leds} — "
@@ -134,13 +162,30 @@ def evaluate(case: TestCase, parsed: dict[str, int]) -> tuple[bool, str]:
             f"firmware expected_bytes={exp_bytes}, expected {case.num_leds * 3}"
         )
 
+    tx_done = parsed.get("tx_done", 0)
+    if tx_done == 2:
+        return False, (
+            "firmware setup failed before TX (frame, driver or SCT RX could "
+            "not be set up)"
+        )
+    if tx_done != 1:
+        return False, (
+            f"TX frame did not finish before the firmware's deadline "
+            f"(dec_bytes={dec_bytes}, edges={edges})"
+        )
+
+    need = checkable_bytes(exp_bytes, cap)
     msg = (
         f"num_leds={num_leds}, exp_bytes={exp_bytes}, dec_bytes={dec_bytes}, "
-        f"matched={matched}, mismatched={mismatched}, edges={edges}"
+        f"matched={matched}, mismatched={mismatched}, edges={edges}, cap={cap}"
     )
-    if not success or mismatched > 0:
-        return False, msg
-    return True, msg
+    if need < exp_bytes:
+        msg += f" (prefix check: {cap} edges hold {need} of {exp_bytes} bytes)"
+    # The firmware applies the same rule; both must agree.
+    ok = mismatched == 0 and matched >= need and need > 0
+    if ok != bool(parsed.get("success", 0)):
+        return False, msg + " (firmware and host verdicts disagree)"
+    return ok, msg
 
 
 def main() -> int:
@@ -149,16 +194,17 @@ def main() -> int:
     p.add_argument("--baud", default=DEFAULT_BAUD, type=int)
     p.add_argument(
         "--tx-pin",
-        default=10,
+        default=None,
         type=int,
-        help="LPC845 GPIO PIO0_n driven by bit-bang WS2812 TX (default: P0_10, "
-        "must match the compile-time constant in the sketch handler)",
+        help="LPC845 GPIO PIO0_n driven by the WS2812 TX; must be a push-pull "
+        "pad (default: discovered by the findConnectedPins jumper scan)",
     )
     p.add_argument(
         "--rx-pin",
-        default=11,
+        default=None,
         type=int,
-        help="LPC845 GPIO PIO0_n routed to SCT input 0 for capture (default: P0_11)",
+        help="LPC845 GPIO PIO0_n routed to SCT input 0 for capture "
+        "(default: discovered by the jumper scan)",
     )
     p.add_argument(
         "--capture-ms",
@@ -189,6 +235,11 @@ def main() -> int:
             return 2
         print("[lpc-ws2812-loopback] echo ok")
 
+        pins = resolve_pins(s, args.tx_pin, args.rx_pin, "lpc-ws2812-loopback")
+        if pins is None:
+            return 3
+        tx_pin, rx_pin = pins
+
         passes = 0
         fails = 0
         for i, case in enumerate(CASES, start=20):
@@ -196,7 +247,7 @@ def main() -> int:
             resp = send_rpc(
                 s,
                 "ws2812SctTest",
-                args=[case.index, args.tx_pin, args.rx_pin, args.capture_ms],
+                args=[case.index, tx_pin, rx_pin, args.capture_ms],
                 request_id=i,
                 timeout=args.capture_ms / 1000.0 * 4 + 5.0,
             )
@@ -227,13 +278,6 @@ def main() -> int:
             f"\n[lpc-ws2812-loopback] summary: {passes} pass / {fails} fail "
             f"out of {len(CASES)} cases"
         )
-        if fails > 0:
-            print(
-                "\nNote: until the SCT→DMA RX upgrade lands (FastLED #3021 "
-                "follow-up), polling-mode capture cannot keep up with the "
-                "WS2812 800 kHz edge rate on M0+ — `mismatched > 0` is "
-                "expected on real silicon for this orchestrator."
-            )
         return 0 if fails == 0 else 1
 
 

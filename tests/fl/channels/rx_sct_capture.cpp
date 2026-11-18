@@ -124,6 +124,65 @@ FL_TEST_CASE("LPC SCT-capture: injectEdges -> decode round-trips a known WS2812 
     }
 }
 
+// On silicon the frame's last LOW runs into the reset, so the capture holds
+// either no closing edge for it or one reset-length LOW (FastLED #5266: a
+// 1-LED frame decoded 2 of 3 bytes). The last bit is still in its HIGH.
+FL_TEST_CASE("LPC SCT-capture: decode keeps the frame's final bit") {
+    const u8 kPayload[] = {0x00, 0xFF, 0x01};  // final bit 1
+    for (int tail = 0; tail < 2; ++tail) {
+        auto device = RxDevice::create<RxDeviceType::LPC_SCT_CAPTURE>(11);
+        FL_REQUIRE(device != nullptr);
+        RxConfig config;
+        config.buffer_size = 256;
+        FL_REQUIRE(device->begin(config));
+
+        fl::vector<EdgeTime> edges;
+        for (u8 byte : kPayload) {
+            appendByte<0>(edges, byte);
+        }
+        edges.pop_back();  // the final LOW was never closed by an edge
+        if (tail == 1) {
+            edges.push_back(EdgeTime(false, 60u * 1000u));  // ...or is the reset
+        }
+        FL_REQUIRE(device->injectEdges(toSpan(edges)));
+
+        u8 out[sizeof(kPayload)] = {0};
+        auto result = device->decode(ws2812_timing(), fl::span<u8>(out, sizeof(out)));
+        FL_REQUIRE(result.ok());
+        FL_CHECK_EQ(result.value(), sizeof(kPayload));
+        for (size_t i = 0; i < sizeof(kPayload); ++i) {
+            FL_CHECK_EQ(out[i], kPayload[i]);
+        }
+    }
+}
+
+// With overlapping T0H/T1H windows only the LOW tells the bits apart, so a
+// final HIGH inside both windows is not guessed.
+FL_TEST_CASE("LPC SCT-capture: decode does not guess an ambiguous final bit") {
+    auto device = RxDevice::create<RxDeviceType::LPC_SCT_CAPTURE>(11);
+    FL_REQUIRE(device != nullptr);
+    RxConfig config;
+    config.buffer_size = 256;
+    FL_REQUIRE(device->begin(config));
+
+    fl::vector<EdgeTime> edges;
+    appendByte<0>(edges, 0x00);
+    appendByte<0>(edges, 0xFF);
+    for (int bit = 0; bit < 7; ++bit) {  // third byte, all but its last bit
+        edges.push_back(EdgeTime(true, 400u));
+        edges.push_back(EdgeTime(false, 850u));
+    }
+    edges.push_back(EdgeTime(true, 520u));  // fits T0H and T1H; no LOW
+    FL_REQUIRE(device->injectEdges(toSpan(edges)));
+
+    ChipsetTiming4Phase overlapping = ws2812_timing();
+    overlapping.t1h_min_ns = 500;  // T0H is 250..550
+    u8 out[3] = {0};
+    auto result = device->decode(overlapping, fl::span<u8>(out, sizeof(out)));
+    FL_REQUIRE(result.ok());
+    FL_CHECK_EQ(result.value(), 2u);
+}
+
 FL_TEST_CASE("LPC SCT-capture: decoder rejects an empty edge buffer") {
     auto device = RxDevice::create<RxDeviceType::LPC_SCT_CAPTURE>(11);
     FL_REQUIRE(device != nullptr);

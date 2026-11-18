@@ -3960,14 +3960,13 @@ async def _run_lpc_ws2812_loopback_tests(ctx: RunContext) -> int:
     upload_port = ctx.upload_port
     assert upload_port is not None
 
-    tx_pin = ctx.args.tx_pin if ctx.args.tx_pin is not None else 10
-    rx_pin = ctx.args.rx_pin if ctx.args.rx_pin is not None else 11
+    pin_args = _lpc_scan_pin_args(ctx)
 
     print()
     print("=" * 60)
     print("LPC SCT-RX MODE — WS2812 byte-match loopback (#3021 Phase 2)")
-    print(f"   Wiring required: jumper P0_{tx_pin} ↔ P0_{rx_pin} on LPC845-BRK")
-    print("   ws2812SctTest RPC is platform-enabled on LPC845 builds")
+    print("   Wiring: discovered on the board by the findConnectedPins scan")
+    print("   (TX on a push-pull pad; LPC845 P0_10/P0_11 are open-drain)")
     print("=" * 60)
     print()
 
@@ -3980,10 +3979,7 @@ async def _run_lpc_ws2812_loopback_tests(ctx: RunContext) -> int:
         "ci.autoresearch.test_lpc_ws2812_loopback",
         "--port",
         upload_port,
-        "--tx-pin",
-        str(tx_pin),
-        "--rx-pin",
-        str(rx_pin),
+        *pin_args,
     ]
     result = RunningProcess.run(cmd)
     return 0 if result.returncode == 0 else 1

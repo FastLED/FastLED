@@ -3448,7 +3448,12 @@ def test_lpc_subprocess_benches_release_the_harness_port(bench):
 
 
 @pytest.mark.parametrize(
-    "bench", [_run_lpc_pin_toggle_rx_tests, _run_lpc_pwm_dma_cl_tests]
+    "bench",
+    [
+        _run_lpc_pin_toggle_rx_tests,
+        _run_lpc_ws2812_loopback_tests,
+        _run_lpc_pwm_dma_cl_tests,
+    ],
 )
 @pytest.mark.parametrize(
     ("tx_pin", "rx_pin", "expected"),
