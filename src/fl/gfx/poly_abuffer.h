@@ -91,6 +91,7 @@
 /// see the integer model above; a sample exactly on the edge is outside).
 
 #include "fl/stl/noexcept.h"
+#include "fl/stl/static_assert.h"
 #include "fl/stl/int.h"
 #include "fl/math/fixed_point/s16x16.h"
 #include "fl/gfx/canvas.h"
@@ -114,29 +115,33 @@ inline fl::i64 polyABFloorDivI64(fl::i64 a, fl::i64 b) FL_NO_EXCEPT {
 /// exact kernel).
 static const fl::i32 polyABQ16Max = 8191L << 16;
 
-/// Convert any Coord type to Q16.16, clamped to ±8191 px (float/double
-/// inputs saturate instead of overflowing the i32 result).
-/// Convert any Coord type to Q16.16, clamped to ±8191 px (float/double
-/// inputs saturate instead of overflowing the i32 result). Self-contained
-/// mirror of the exact kernel's helpers: this header is included at the
-/// top of primitives.h, before those are declared.
+/// Float -> Q16.16, clamped to ±8191 px. NaN maps to 0 and out-of-range
+/// values saturate, so the float->int cast is always in range (an
+/// out-of-range or NaN cast is UB).
+inline fl::i32 polyABClampPx(float px) FL_NO_EXCEPT {
+    if (!(px == px)) return 0;  // NaN
+    if (px > 8191.0f) return polyABQ16Max;
+    if (px < -8191.0f) return -polyABQ16Max;
+    return static_cast<fl::i32>(px * 65536.0f);
+}
+
+/// Convert any Coord type to Q16.16, clamped to ±8191 px. This is the one
+/// conversion both polygon kernels use: primitives.h forwards its
+/// toQ16Clamped here, because this header is included at the top of
+/// primitives.h, before that header's own helpers are declared.
 template<typename Coord>
 inline fl::i32 polyABToQ16(Coord val) FL_NO_EXCEPT {
-    const fl::i64 q = static_cast<fl::i64>(val.to_float() * 65536.0f);
-    if (q > polyABQ16Max) return polyABQ16Max;
-    if (q < -static_cast<fl::i64>(polyABQ16Max)) return -static_cast<fl::i64>(polyABQ16Max);
-    return static_cast<fl::i32>(q);
+    return polyABClampPx(val.to_float());
 }
 
 template<>
 inline fl::i32 polyABToQ16<float>(float val) FL_NO_EXCEPT {
-    if (val > 8191.0f) return polyABQ16Max;
-    if (val < -8191.0f) return -polyABQ16Max;
-    return static_cast<fl::i32>(val * 65536.0f);
+    return polyABClampPx(val);
 }
 
 template<>
 inline fl::i32 polyABToQ16<double>(double val) FL_NO_EXCEPT {
+    if (!(val == val)) return 0;  // NaN
     if (val > 8191.0) return polyABQ16Max;
     if (val < -8191.0) return -polyABQ16Max;
     return static_cast<fl::i32>(val * 65536.0);
@@ -152,8 +157,13 @@ inline fl::i32 polyABToQ16<int>(int val) FL_NO_EXCEPT {  // fl-lint: int-templat
 }
 
 template<>
+// s16x16 spans ±32767 px, so its raw value must be clamped too: unclamped,
+// edge deltas (vx[j] - vx[i]) overflow i32.
 inline fl::i32 polyABToQ16<fl::s16x16>(fl::s16x16 val) FL_NO_EXCEPT {
-    return val.raw();
+    const fl::i32 r = val.raw();
+    if (r > polyABQ16Max) return polyABQ16Max;
+    if (r < -polyABQ16Max) return -polyABQ16Max;
+    return r;
 }
 
 /// Popcount of a byte. AVR: 256 B PROGMEM LUT (4 lookups per u32); the
@@ -240,7 +250,7 @@ inline void polyABFillRun(PixelT* pixels, int py, int width,
                                  int x0, int x1, const PixelT& color,
                                  fl::u8 br, bool overwrite) FL_NO_EXCEPT {
     if (x1 <= x0) return;
-    PixelT c = (br >= 255u) ? color : color;
+    PixelT c = color;
     if (br < 255u) c.nscale8(br);
     PixelT* row = pixels + py * width + x0;
     if (overwrite) {
@@ -258,6 +268,7 @@ inline void polyABFillRun(PixelT* pixels, int py, int width,
 template<typename PixelT, typename Coord, bool Overwrite, int MAXN>
 inline void drawPolygonABufferCore(Canvas<PixelT>& canvas, const PixelT& color,
                                    fl::span<const PolyPoint<Coord>> pts) FL_NO_EXCEPT {
+    FL_STATIC_ASSERT(MAXN >= 3 && MAXN <= 256, "drawPolygon: MAXN must be in [3, 256]");
     const fl::i32 n = static_cast<fl::i32>(pts.size());
     if (n < 3) return;
     PixelT* pixels = canvas.pixels;
@@ -423,7 +434,7 @@ inline void drawPolygonABufferCore(Canvas<PixelT>& canvas, const PixelT& color,
             mask ^= rowxor;
             if (mask != 0) {
                 const fl::u8 br = polyABAlpha(mask);
-                PixelT c = (br >= 255u) ? color : color;
+                PixelT c = color;
                 if (br < 255u) c.nscale8(br);
                 PixelT& px = pixels[py * width + p];
                 if (Overwrite) px = c; else px += c;

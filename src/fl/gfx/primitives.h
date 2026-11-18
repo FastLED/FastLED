@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fl/stl/noexcept.h"
+#include "fl/stl/static_assert.h"
 
 #include "fl/gfx/canvas.h"  // IWYU pragma: keep
 #include "fl/gfx/draw_mode.h"
@@ -256,43 +257,12 @@ inline fl::i32 toQ16<fl::s16x16>(fl::s16x16 val) FL_NO_EXCEPT {
 // origin.
 static const fl::i32 kPolyQ16Max = 8191L << 16;
 
-/// Convert any Coord type to Q16.16, clamped to ±8191 px.
-/// Out-of-range inputs (e.g. 1e6 px floats) saturate instead of overflowing
-/// the i32 result. s16x16 raw values always fit (±32767 px).
+/// Convert any Coord type to Q16.16, clamped to ±8191 px (NaN -> 0).
+/// Shared with the ABuffer kernel (poly_abuffer.h, polyABToQ16) so both
+/// backends clamp identically.
 template<typename Coord>
 inline fl::i32 toQ16Clamped(Coord val) FL_NO_EXCEPT {
-    fl::i64 q = static_cast<fl::i64>(val.to_float() * 65536.0f);
-    if (q > kPolyQ16Max) return kPolyQ16Max;
-    if (q < -static_cast<fl::i64>(kPolyQ16Max)) return -kPolyQ16Max;
-    return static_cast<fl::i32>(q);
-}
-
-template<>
-inline fl::i32 toQ16Clamped<float>(float val) FL_NO_EXCEPT {
-    if (val > 8191.0f) return kPolyQ16Max;
-    if (val < -8191.0f) return -kPolyQ16Max;
-    return static_cast<fl::i32>(val * 65536.0f);
-}
-
-template<>
-inline fl::i32 toQ16Clamped<double>(double val) FL_NO_EXCEPT {
-    if (val > 8191.0) return kPolyQ16Max;
-    if (val < -8191.0) return -kPolyQ16Max;
-    return static_cast<fl::i32>(val * 65536.0);
-}
-
-template<>
-// 16-bit int coordinate overload: the public API accepts int PolyPoint
-// coords (int on AVR); values clamp to ±8191 px, so the i32 result is exact.
-inline fl::i32 toQ16Clamped<int>(int val) FL_NO_EXCEPT {  // fl-lint: int-template-ok int coord API
-    if (val > 8191) return kPolyQ16Max;
-    if (val < -8191) return -kPolyQ16Max;
-    return static_cast<fl::i32>(val) << 16;
-}
-
-template<>
-inline fl::i32 toQ16Clamped<fl::s16x16>(fl::s16x16 val) FL_NO_EXCEPT {
-    return val.raw();
+    return polyABToQ16<Coord>(val);
 }
 
 /// Floor-divide a by positive b (rounds toward -inf).
@@ -1324,12 +1294,14 @@ inline void drawStrokeLine(Canvas<PixelT>& canvas, const PixelT& color,
 //
 // Vertices beyond MAXN are ignored (the polygon closes from #MAXN-1 back to
 // #0). Stack at MAXN = 32, CHUNK = 64: vertices (256 B) + edges (1792 B) +
-// accb (256 B) + per-row scratch (~680 B) ≈ 3.0 KB; MAXN = 8, CHUNK = 16
-// ≈ 750 B.
+// accb (256 B) + per-row scratch (~680 B) + band prepass bidx/bnc/bfull
+// ((MAXN+1)*(MAXN+5) B = 1221 B) ≈ 4.2 KB; MAXN = 8, CHUNK = 16 ≈ 870 B.
 // ---------------------------------------------------------------------------
 template<typename PixelT, typename Coord, bool Overwrite, int MAXN, int CHUNK>
 inline void detail::drawPolygonCore(Canvas<PixelT>& canvas, const PixelT& color,
                                     fl::span<const PolyPoint<Coord>> pts) FL_NO_EXCEPT {
+    FL_STATIC_ASSERT(MAXN >= 3 && MAXN <= 256, "drawPolygon: MAXN must be in [3, 256] (edge indices are u8)");
+    FL_STATIC_ASSERT(CHUNK > 0 && (CHUNK & (CHUNK - 1)) == 0, "drawPolygon: CHUNK must be a power of two");
     const fl::i32 n = static_cast<fl::i32>(pts.size());
     if (n < 3) return;
     PixelT* pixels = canvas.pixels;
@@ -1514,7 +1486,11 @@ inline void detail::drawPolygonCore(Canvas<PixelT>& canvas, const PixelT& color,
 
         // Fill CHUNK-px chunks: accumulate coverage over the bands, then
         // quantize once per pixel.
-        for (int cs = xmin & ~(CHUNK - 1); cs <= xmax; cs += CHUNK) {
+        // An empty row extent (xmin > xmax, e.g. every active edge right of
+        // the canvas) skipped the prepass, so bnc/bidx are uninitialized:
+        // start past xmax so the chunk loop never reads them.
+        const int csFirst = (xmin <= xmax) ? (xmin & ~(CHUNK - 1)) : xmax + 1;
+        for (int cs = csFirst; cs <= xmax; cs += CHUNK) {
             for (int i = 0; i < CHUNK; ++i) accb[i] = 0;
             const int ce = (cs + CHUNK <= xmax + 1) ? cs + CHUNK : xmax + 1;
             for (int k = 0; k + 1 < nev; ++k) {

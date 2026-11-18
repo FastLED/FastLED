@@ -547,6 +547,60 @@ FL_TEST_CASE("drawPolygon degenerate inputs") {
         polyTestRender(buffer, px, py, 3, fl::DrawMode::DRAW_MODE_OVERWRITE);
         FL_CHECK(polyTestAllZero(buffer));
     }
+
+    FL_SUBCASE("polygon right of the canvas inside its rows: no pixels") {
+        // Every row-active edge lies right of the canvas (xmin > xmax): the
+        // band prepass is skipped and the chunk loop must not run either.
+        CRGB buffer[1024];
+        const double px[3] = {40, 60, 50};
+        const double py[3] = {4, 6, 28};
+        polyTestRender(buffer, px, py, 3, fl::DrawMode::DRAW_MODE_OVERWRITE);
+        FL_CHECK(polyTestAllZero(buffer));
+    }
+
+    FL_SUBCASE("NaN vertex: no crash, finite output") {
+        CRGB buffer[1024];
+        polyTestZero(buffer);
+        fl::CanvasRGB canvas(buffer, 32, 32);
+        const float nan = 0.0f / 0.0f;  // NOLINT: deliberate NaN
+        const fl::PolyPoint<float> pts[3] = {{nan, 4.0f}, {20.0f, 8.0f}, {10.0f, 20.0f}};
+        canvas.drawPolygon(CRGB::Red, pts, fl::DrawMode::DRAW_MODE_OVERWRITE);
+        // NaN converts to 0: same as the vertex at x = 0.
+        CRGB ref[1024];
+        polyTestZero(ref);
+        fl::CanvasRGB refCanvas(ref, 32, 32);
+        const fl::PolyPoint<float> zp[3] = {{0.0f, 4.0f}, {20.0f, 8.0f}, {10.0f, 20.0f}};
+        refCanvas.drawPolygon(CRGB::Red, zp, fl::DrawMode::DRAW_MODE_OVERWRITE);
+        for (int i = 0; i < 1024; ++i) FL_CHECK(buffer[i] == ref[i]);
+    }
+
+    FL_SUBCASE("s16x16 vertices beyond 8191 px clamp like float") {
+        // s16x16 spans +-32767 px; unclamped, the edge deltas overflow i32.
+        const fl::i32 big = 20000L * 65536L;
+        const fl::PolyPoint<fl::s16x16> sp[3] = {
+            {fl::s16x16::from_raw(-big), fl::s16x16::from_raw(0)},
+            {fl::s16x16::from_raw(big), fl::s16x16::from_raw(0)},
+            {fl::s16x16::from_raw(0), fl::s16x16::from_raw(16L * 65536L)}};
+        const fl::PolyPoint<float> fp[3] = {
+            {-8191.0f, 0.0f}, {8191.0f, 0.0f}, {0.0f, 16.0f}};
+        CRGB a[1024], b[1024], c[1024], d[1024];
+        polyTestZero(a); polyTestZero(b); polyTestZero(c); polyTestZero(d);
+        fl::CanvasRGB ca(a, 32, 32), cb(b, 32, 32), cc(c, 32, 32), cd(d, 32, 32);
+        ca.drawPolygon(CRGB::Red, sp, fl::DrawMode::DRAW_MODE_OVERWRITE);
+        cb.drawPolygon(CRGB::Red, fp, fl::DrawMode::DRAW_MODE_OVERWRITE);
+        cc.drawPolygon<fl::s16x16, 16, 64, fl::gfx::PolyFill::ABuffer>(
+            CRGB::Red, fl::span<const fl::PolyPoint<fl::s16x16>>(sp, 3),
+            fl::DrawMode::DRAW_MODE_OVERWRITE);
+        cd.drawPolygon<float, 16, 64, fl::gfx::PolyFill::ABuffer>(
+            CRGB::Red, fl::span<const fl::PolyPoint<float>>(fp, 3),
+            fl::DrawMode::DRAW_MODE_OVERWRITE);
+        FL_CHECK(!polyTestAllZero(a));
+        FL_CHECK(!polyTestAllZero(c));
+        for (int i = 0; i < 1024; ++i) {
+            FL_CHECK(a[i] == b[i]);
+            FL_CHECK(c[i] == d[i]);
+        }
+    }
 }
 
 FL_TEST_CASE("drawPolygon more than 32 vertices truncates to the first 32") {
