@@ -16,7 +16,7 @@
 //   echo: [int] -> int
 //   findConnectedPins: [] -> "pairs=..;stuck=..;skip=..;od=.." (LPC)
 //   pinToggleRx: [tx_pin, rx_pin, freq_hz, duration_ms] -> CSV
-//   ws2812SctTest: [test_case, tx_pin, rx_pin, capture_ms] -> CSV
+//   ws2812SctTest: [test_case, tx_pin, rx_pin, capture_ms] -> CSV (10 fields)
 // See FastLED #3021 for the SCT-RX bring-up flags.
 //
 
@@ -660,7 +660,7 @@ inline void autoResearchLowMemorySetup() {
                 rx_pin < 0 || rx_pin > 31 || tx_pin == rx_pin ||
                 lowMemOpenDrainPin(tx_pin) || fl::pinProbeSkipReason(tx_pin) ||
                 fl::pinProbeSkipReason(rx_pin) || capture_ms <= 0) {
-                return fl::string("0,0,0,0,0,0,0,0,0");
+                return fl::string("0,0,0,0,0,0,0,0,0,0");
             }
             int num_leds = 1;
             switch (test_case) {
@@ -669,11 +669,12 @@ inline void autoResearchLowMemorySetup() {
                 default: num_leds = 1; break;
             }
             const int expected_bytes = num_leds * 3;
-            // Setup failures keep the case fields, with nothing decoded.
+            // Setup failures keep the case fields, with nothing decoded and
+            // tx_done=2 (TX never started; 0 means it started but timed out).
             auto setupFailed = [&]() -> fl::string {
                 fl::sstream f;
                 f << "0," << test_case << ',' << num_leds << ',' << expected_bytes
-                  << ",0,0,0,0,0";
+                  << ",0,0,0,0,0,2";
                 return f.str();
             };
 
@@ -789,7 +790,8 @@ inline void autoResearchLowMemorySetup() {
             s << (success ? 1 : 0) << ',' << test_case << ',' << num_leds << ','
               << expected_bytes << ',' << decoded_bytes << ','
               << matched << ',' << mismatched << ','
-              << static_cast<fl::u32>(edges_captured) << ',' << cap;
+              << static_cast<fl::u32>(edges_captured) << ',' << cap << ','
+              << (tx_done ? 1 : 0);
             return s.str();
         });
 #endif  // FASTLED_AUTORESEARCH_LPC_WS2812

@@ -101,6 +101,7 @@ CSV_FIELDS: tuple[str, ...] = (
     "mismatched",
     "edges",
     "cap",
+    "tx_done",
 )
 
 # Each WS2812 bit is one HIGH and one LOW interval, so a byte is 16 edges.
@@ -111,11 +112,12 @@ def parse_csv_result(csv: str) -> dict[str, int]:
     """Parse the low-memory sketch's ws2812SctTest CSV reply.
 
     Format (must match the sketch handler):
-        success,test_case,num_leds,exp_bytes,dec_bytes,matched,mismatched,edges,cap
+        success,test_case,num_leds,exp_bytes,dec_bytes,matched,mismatched,edges,cap,tx_done
 
     `mismatched` counts decoded bytes that differ from what was sent;
     `exp_bytes - dec_bytes` were not decoded at all. `cap` is the edge
-    capacity of the capture.
+    capacity of the capture. `tx_done` is 1 when the TX frame finished,
+    0 when it timed out, and 2 when setup failed before TX started.
     """
     parts = csv.split(",")
     if len(parts) != len(CSV_FIELDS):
@@ -158,6 +160,18 @@ def evaluate(case: TestCase, parsed: dict[str, int]) -> tuple[bool, str]:
     if exp_bytes != case.num_leds * 3:
         return False, (
             f"firmware expected_bytes={exp_bytes}, expected {case.num_leds * 3}"
+        )
+
+    tx_done = parsed.get("tx_done", 0)
+    if tx_done == 2:
+        return False, (
+            "firmware setup failed before TX (frame, driver or SCT RX could "
+            "not be set up)"
+        )
+    if tx_done != 1:
+        return False, (
+            f"TX frame did not finish before the firmware's deadline "
+            f"(dec_bytes={dec_bytes}, edges={edges})"
         )
 
     need = checkable_bytes(exp_bytes, cap)
