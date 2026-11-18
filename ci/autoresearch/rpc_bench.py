@@ -48,6 +48,23 @@ LIVENESS_PROBE_SECONDS = 5.0
 LIVENESS_PROBE_METHOD = "ping"
 
 
+def describe_error_chain(error: BaseException) -> str:
+    """`Type: message` for `error` and each error it was raised from."""
+    parts: list[str] = []
+    seen: set[int] = set()
+    current: BaseException | None = error
+    while current is not None and id(current) not in seen:
+        seen.add(id(current))
+        parts.append(f"{type(current).__name__}: {current}")
+        if current.__cause__ is not None:
+            current = current.__cause__
+        elif current.__suppress_context__:
+            current = None
+        else:
+            current = current.__context__
+    return " <- ".join(parts)
+
+
 def _is_method_not_found(error: RpcError) -> bool:
     """Classify structured errors, with text fallback for legacy firmware."""
     if error.code == -32601:
@@ -73,9 +90,25 @@ class RpcBench:
         self._loop = asyncio.new_event_loop()
         iface = create_serial_interface(port)
         self._client = RpcClient(port, timeout=timeout, serial_interface=iface)
-        self._loop.run_until_complete(
-            self._client.connect(boot_wait=3.0, drain_boot=True)
-        )
+        try:
+            self._loop.run_until_complete(
+                self._client.connect(boot_wait=3.0, drain_boot=True)
+            )
+        except KeyboardInterrupt as interrupt:
+            with suppress(Exception):
+                self.close()
+            handle_keyboard_interrupt(interrupt)
+            raise
+        except Exception as error:
+            # The caller never gets an object to close, so release the loop
+            # here. Runners print only str(e), so name every error in the
+            # chain: the first one is what tells a #5271 attach failure
+            # apart from a missing device.
+            with suppress(Exception):
+                self.close()
+            raise RpcTransportError(
+                f"attach failed: {describe_error_chain(error)}"
+            ) from error
         self._verify_transport_round_trips(port)
 
     def _verify_transport_round_trips(self, port: str) -> None:

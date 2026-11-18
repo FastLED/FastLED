@@ -305,3 +305,72 @@ def test_fbuild_adapter_propagates_interrupt_during_daemon_recovery(
         adapter._executor.shutdown(wait=True)
 
     assert len(handled) == 1
+
+
+class _AttachMonitor:
+    """One monitor; its `__aenter__` raises `error`, or attaches if None."""
+
+    def __init__(self, error: Exception | None) -> None:
+        self.error = error
+        self.enters = 0
+        self.exits = 0
+
+    async def __aenter__(self):
+        self.enters += 1
+        if self.error is not None:
+            raise self.error
+        return self
+
+    async def __aexit__(self, *_exc: object) -> None:
+        self.exits += 1
+
+
+def _attach_adapter(monkeypatch, errors: list[Exception | None]):
+    """An adapter whose successive monitors fail with `errors` in order."""
+    from collections import deque
+
+    from ci.util import serial_interface
+    from ci.util.serial_interface import NativeFbuildSerialAdapter
+
+    monkeypatch.setattr(serial_interface, "ATTACH_RETRY_PAUSE_SECONDS", 0.0)
+    monitors = [_AttachMonitor(error) for error in errors]
+    fresh = iter(monitors[1:])
+    adapter = object.__new__(NativeFbuildSerialAdapter)
+    adapter._monitor_args = {"port": "FAKE_PORT"}
+    adapter._monitor = monitors[0]
+    adapter._new_monitor = lambda: next(fresh)
+    adapter._pending_lines = deque()
+    return adapter, monitors
+
+
+def test_native_adapter_retries_a_session_closed_attach(monkeypatch) -> None:
+    """FastLED#5271: the daemon's 3 s open cap surfaces as 'session closed'."""
+    adapter, monitors = _attach_adapter(
+        monkeypatch, [ConnectionError("session closed"), None]
+    )
+    asyncio.run(adapter.connect())
+    assert [m.enters for m in monitors] == [1, 1]
+    assert monitors[0].exits == 1  # the failed monitor is released
+    assert adapter._monitor is monitors[1]  # and a fresh one attached
+
+
+def test_native_adapter_attach_retry_is_bounded(monkeypatch) -> None:
+    from ci.util.serial_interface import ATTACH_ATTEMPTS
+
+    adapter, monitors = _attach_adapter(
+        monkeypatch,
+        [ConnectionError("session closed") for _ in range(ATTACH_ATTEMPTS + 1)],
+    )
+    with pytest.raises(ConnectionError, match="session closed"):
+        asyncio.run(adapter.connect())
+    assert sum(m.enters for m in monitors) == ATTACH_ATTEMPTS
+
+
+def test_native_adapter_does_not_retry_other_attach_errors(monkeypatch) -> None:
+    adapter, monitors = _attach_adapter(
+        monkeypatch,
+        [ConnectionError("daemon rejected serial attach: permission denied"), None],
+    )
+    with pytest.raises(ConnectionError, match="permission denied"):
+        asyncio.run(adapter.connect())
+    assert [m.enters for m in monitors] == [1, 0]

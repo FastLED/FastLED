@@ -792,6 +792,8 @@ resp = await client.send("echo", args=[42])    # mandatory JSON-RPC id correlati
 
 The only sanctioned pyserial touch is fbuild's own `PySerialAdapter` fallback inside `ci/util/serial_interface.py` (selected only via `use_pyserial=True`) and the DTR-reset helper there. Application/bench code must go through `create_serial_interface` + `RpcClient`. See also `agents/docs/python-standards.md` → "Device serial".
 
+**`Could not connect to <port>: session closed`** (#5271). The fbuild daemon caps a serial attach's `open_port` at 3 s, and the board-family lookup it does before the open counts against that cap. On a loaded host a healthy port can miss it, and fbuild's Python client then reports the daemon's explanation as just `session closed` (FastLED/fbuild#2083). In the daemon log, `pending serial attach` is followed more than 3 s later by `opening port` and no `port opened` line. `NativeFbuildSerialAdapter.connect()` retries this one error up to 2 more times, 1 s apart, and prints `[serial] attach ... retrying`. `RpcBench` reports the whole error chain on a failed attach. If the retries are exhausted, look at the daemon log before blaming the firmware. Holding the tty with `TIOCEXCL` for 6 s reproduces the error on demand.
+
 ### Synthesised `platformio.ini` (no root dependency)
 
 Since #3281, `bash autoresearch` synthesises its own `.build/fbuild/<board>/platformio.ini` from `ci/boards.py` before launching fbuild — the same pattern `bash compile` already uses. **Root `./platformio.ini` is NOT consulted in the default path.** The staged tree under `.build/fbuild/<board>/` contains:

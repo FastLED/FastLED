@@ -220,3 +220,34 @@ def test_a_failed_write_raises_the_transport_subtype() -> None:
             loop.run_until_complete(_run())
     finally:
         loop.close()
+
+
+class _UnattachableSerial(_ScriptedSerial):
+    """The fbuild attach fails, the way FastLED#5271 / fbuild#2083 do."""
+
+    async def connect(self) -> None:
+        try:
+            raise ConnectionError("open_port(/dev/ttyACM1) exceeded 3s")
+        except ConnectionError as first:
+            raise ConnectionError("session closed") from first
+
+
+def test_a_failed_attach_names_the_whole_error_chain(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Runners print only str(e), so the chained first error must be in it."""
+    created: list[_ScriptedSerial] = []
+
+    def _factory(port: str, *args: object, **kwargs: object) -> _ScriptedSerial:
+        iface = _UnattachableSerial(_ok)
+        created.append(iface)
+        return iface
+
+    monkeypatch.setattr(rpc_bench, "create_serial_interface", _factory)
+    with pytest.raises(RpcTransportError) as raised:
+        RpcBench("FAKE_PORT", timeout=1.0)
+    message = str(raised.value)
+    assert message.startswith("attach failed: ")
+    assert "ConnectionError: session closed" in message
+    assert "exceeded 3s" in message
+    assert len(created) == 1
