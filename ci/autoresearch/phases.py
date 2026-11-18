@@ -639,7 +639,8 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
     final_environment = _canonical_board_environment(
         args.environment_positional or args.environment
     )
-    if (final_environment or "").lower() in LPC804_ENVS:
+    # Firmware runs only: --decode reads a capture file and builds nothing.
+    if args.decode is None and (final_environment or "").lower() in LPC804_ENVS:
         print(f"\u274c {LPC804_DOES_NOT_FIT}")
         return 1
 
@@ -2723,7 +2724,7 @@ async def _run_tests_or_special_mode(ctx: RunContext, qctx: QuietContext) -> int
     use_fbuild = ctx.use_fbuild
 
     # Low-memory ARM bring-up mode short-circuit. LPC845 boards run a
-    # JSON-RPC echo verification (examples/AutoResearchLpc/) instead of the
+    # JSON-RPC echo verification (examples/AutoResearch/AutoResearch.ino) instead of the
     # GPIO + LED-protocol matrix that ESP32/Teensy targets use. Must come
     # BEFORE the gpio_only_mode early-return so the harness actually runs the
     # echo check instead of bailing with a "no tests requested" success.
@@ -3654,7 +3655,7 @@ async def _run_bring_up_tests(ctx: RunContext) -> int:
     """Run minimal LPC845 bring-up validation via JSON-RPC echo.
 
     Verifies the three transport components the bring-up sketch
-    (examples/AutoResearchLpc/) exposes:
+    (examples/AutoResearch/AutoResearch.ino) exposes:
       1. Serial.println — the response body itself ("REMOTE: {...}\\r\\n").
       2. FastLED log pipeline — the FL_DBG line from fl::Remote
          ("src/fl/remote/remote.cpp.hpp(151): Stored request ID for echo")

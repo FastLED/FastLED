@@ -595,7 +595,7 @@ than the chip. Gating the bench RPCs does not change that. Link results on
 
 | Build | Flash needed | RAM needed |
 |---|---:|---:|
-| Default low-memory sketch (echo, `findConnectedPins`, `pinToggleRx`) | 50752 B (155%) | 6272 B (153%) |
+| Default low-memory sketch on the LPC804 (echo, `pinToggleRx`) | 50752 B (155%) | 6272 B (153%) |
 | Echo only (`--defines FASTLED_AUTORESEARCH_FAULT_TEST=1`, which drops the LPC pin RPCs) | 45528 B (139%) | 5992 B (146%) |
 | `Blink`, for comparison | 6872 B | 855 B |
 
@@ -606,9 +606,15 @@ singleton alone is 2784 B, and the RPC registry another 1024 B. `fl::Remote`
 already compiles out its large-memory features on this tier
 (`FL_PLATFORM_HAS_LARGE_MEMORY == 0`).
 
-So the sketch's `@filter` leaves both LPC804 boards out, and
-`bash autoresearch lpc804` refuses while parsing its arguments (`LPC804_ENVS` in
-`ci/autoresearch/phases.py`). On-silicon bring-up of the LPC804 native pin
+`findConnectedPins` is not in the LPC804 build either: it is bound for the
+LPC845 only, the one LPC with a pin-probe skip table, so the LPC804 would also
+need one before the board could find its own jumpers.
+
+So `bash autoresearch lpc804` refuses while parsing its arguments
+(`LPC804_ENVS` in `ci/autoresearch/phases.py`); `--decode`, which only reads a
+capture file, still runs. The sketch's `@filter` still lists `lpcxpresso804`,
+so `bash compile lpcxpresso804 --examples AutoResearch` fails at link with the
+sizes above. On-silicon bring-up of the LPC804 native pin
 backend (#5261) would need an RPC transport that does not use `fl::Remote` and
 `fl::json`: a fixed-format line protocol that the host `RpcClient` can still
 parse. That is new infrastructure, not gating. No LPC804 board has been

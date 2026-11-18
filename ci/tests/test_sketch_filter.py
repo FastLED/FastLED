@@ -858,6 +858,7 @@ class TestAutoResearchFilter:
                 "lpc845",
                 "lpc845brk",
                 "lpcxpresso845max",
+                "lpcxpresso804",
             ]
         }
         assert sketch_filter.exclude == {}
@@ -873,6 +874,7 @@ class TestAutoResearchFilter:
             "lpc845",
             "lpc845brk",
             "lpcxpresso845max",
+            "lpcxpresso804",
         ],
     )
     def test_autoresearch_supported_boards_compile(self, board_name: str) -> None:
@@ -887,10 +889,7 @@ class TestAutoResearchFilter:
             f"{board_name} should pass AutoResearch filter: {reason}"
         )
 
-    # LPC804 boards: the sketch does not fit 32 KB flash / 4 KB RAM (#5267).
-    @pytest.mark.parametrize(
-        "board_name", ["esp32dev", "uno", "teensylc", "lpc804", "lpcxpresso804"]
-    )
+    @pytest.mark.parametrize("board_name", ["esp32dev", "uno", "teensylc"])
     def test_autoresearch_incompatible_boards_stay_filtered(
         self, board_name: str
     ) -> None:

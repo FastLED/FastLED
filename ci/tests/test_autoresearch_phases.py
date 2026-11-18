@@ -290,7 +290,26 @@ class TestParseArgsAndBuildCommands:
     ) -> None:
         """#5267: the sketch cannot fit, so refuse before port, build or link."""
         args = _make_args(project_dir=fake_project_dir, **{field: environment})
-        assert _parse_args_and_build_commands(args) == 1
+        out = io.StringIO()
+        with (
+            patch("ci.autoresearch.staging.synthesise_autoresearch_project") as stage,
+            contextlib.redirect_stdout(out),
+        ):
+            assert _parse_args_and_build_commands(args) == 1
+        assert "AutoResearch does not fit the LPC804" in out.getvalue()
+        stage.assert_not_called()
+
+    def test_lpc804_decode_is_not_refused(self, fake_project_dir: Path) -> None:
+        """#5267: --decode reads a capture file and builds nothing."""
+        args = _make_args(
+            project_dir=fake_project_dir,
+            environment_positional="lpc804",
+            decode="capture.json",
+        )
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            _parse_args_and_build_commands(args)
+        assert "does not fit the LPC804" not in out.getvalue()
 
     def test_parlio_single_driver(self, fake_project_dir: Path) -> None:
         args = _make_args(parlio=True, project_dir=fake_project_dir)
