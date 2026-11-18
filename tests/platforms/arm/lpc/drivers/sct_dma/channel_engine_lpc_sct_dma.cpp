@@ -451,4 +451,53 @@ FL_TEST_CASE("#3459 item 3: show() does not busy-wait; multiple frames drain via
     }
 }
 
+// #5265: the silicon transmitter streams one SCT OUT0 clear mask per bit
+// (EV1|EV2 for '0', EV2 for '1'), MSB first, from any bit offset.
+FL_TEST_CASE("#5265: lpcSctDmaEncodeClrMasks encodes bits MSB-first from an offset") {
+    const fl::u8 bytes[2] = {0xA5, 0x0F};  // 1010 0101  0000 1111
+    fl::u32 out[16] = {};
+    fl::lpcSctDmaEncodeClrMasks(bytes, 0, 16, out);
+    const char* want = "1010010100001111";
+    for (int i = 0; i < 16; ++i) {
+        const fl::u32 expect = want[i] == '1' ? fl::kLpcSctClrMaskBit1
+                                              : fl::kLpcSctClrMaskBit0;
+        FL_CHECK(out[i] == expect);
+    }
+    FL_CHECK(fl::kLpcSctClrMaskBit0 == 0x6u);  // EV1 | EV2
+    FL_CHECK(fl::kLpcSctClrMaskBit1 == 0x4u);  // EV2
+
+    // A chunk that starts mid-byte (bit 5 of 0xA5).
+    fl::u32 tail[5] = {};
+    fl::lpcSctDmaEncodeClrMasks(bytes, 5, 5, tail);
+    const char* want_tail = "10100";
+    for (int i = 0; i < 5; ++i) {
+        FL_CHECK(tail[i] == (want_tail[i] == '1' ? fl::kLpcSctClrMaskBit1
+                                                 : fl::kLpcSctClrMaskBit0));
+    }
+}
+
+// The encoder has a byte-at-a-time path between partial leading and
+// trailing bytes; every (offset, length) must agree with a bit-at-a-time
+// reference, and nothing past `nbits` may be written.
+FL_TEST_CASE("#5265: lpcSctDmaEncodeClrMasks matches a per-bit reference") {
+    const fl::u8 bytes[4] = {0xA5, 0x3C, 0xFF, 0x01};
+    for (fl::u32 first = 0; first < 32; ++first) {
+        for (fl::u32 n = 0; first + n <= 32; ++n) {
+            fl::u32 out[33];
+            for (auto& v : out) {
+                v = 0xDEADBEEFu;
+            }
+            fl::lpcSctDmaEncodeClrMasks(bytes, first, n, out);
+            for (fl::u32 i = 0; i < n; ++i) {
+                const fl::u32 bit = first + i;
+                const bool one = (bytes[bit >> 3] & (0x80u >> (bit & 7u))) != 0;
+                FL_CHECK(out[i] == (one ? fl::kLpcSctClrMaskBit1
+                                        : fl::kLpcSctClrMaskBit0));
+            }
+            FL_CHECK(out[n] == 0xDEADBEEFu);
+        }
+    }
+}
+
+
 }  // FL_TEST_FILE
