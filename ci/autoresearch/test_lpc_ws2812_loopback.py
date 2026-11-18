@@ -145,6 +145,11 @@ def evaluate(case: TestCase, parsed: dict[str, int]) -> tuple[bool, str]:
             "firmware rejected the arguments (TX on an open-drain pad, a "
             "reserved pad, TX == RX, or a pin out of range)"
         )
+    if parsed.get("test_case", -1) != case.index:
+        return False, (
+            f"firmware answered test_case={parsed.get('test_case')}, "
+            f"expected {case.index}"
+        )
     if num_leds != case.num_leds:
         return False, (
             f"firmware reported num_leds={num_leds}, expected {case.num_leds} — "

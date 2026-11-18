@@ -56,5 +56,10 @@ def test_setup_failure_keeps_the_case_fields() -> None:
     assert "rejected" not in msg
 
 
+def test_reply_for_another_case_fails() -> None:
+    # Cases 0 and 2 are both one LED; only test_case tells them apart.
+    assert not _verdict(0, "1,2,1,3,3,3,0,48,72")
+
+
 def test_no_capture_fails() -> None:
     assert not _verdict(0, "0,0,1,3,0,0,0,0,72")

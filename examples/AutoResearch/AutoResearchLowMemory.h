@@ -71,7 +71,7 @@
 #if defined(FL_IS_ARM_LPC_845) && !defined(FASTLED_AUTORESEARCH_IEEE754_MODE) && \
     !defined(FASTLED_AUTORESEARCH_FAULT_TEST) && !defined(FASTLED_LPC_SPI_DMA) && \
     !defined(FASTLED_LPC_PWM_DMA) && !FASTLED_AUTORESEARCH_LPC_UART_DMA && \
-    FASTLED_LPC_UART_DMA
+    FASTLED_LPC_UART_DMA  // ok platform specific - bench exists only for the LPC845 UART-DMA clockless TX captured by the SCT
 #define FASTLED_AUTORESEARCH_LPC_WS2812 1
 #endif
 
@@ -728,13 +728,20 @@ inline void autoResearchLowMemorySetup() {
             cfg.start_low   = true;
             if (!rx->begin(cfg)) return setupFailed();
 
+            // TX gets its own deadline: a 100-LED frame is ~3 ms on the
+            // wire, whatever the RX window. A frame that does not finish
+            // fails the case.
+            constexpr fl::u32 kTxDeadlineMs = 100u;
             tx.enqueue(frame);
             tx.show();
-            tx.waitForReady(static_cast<fl::u32>(capture_ms));
+            const bool tx_done = tx.waitForReady(kTxDeadlineMs);
             rx->wait(capture_ms);
-            // Give the TX pad back to GPIO, so a later findConnectedPins in
-            // this boot sees the jumper and not a USART-held pin.
-            fl::lpc::LpcUartDmaRuntime::releaseTxPin();
+            // Give the finished TX pad back to GPIO, so a later
+            // findConnectedPins in this boot sees the jumper, not a
+            // USART-held pin.
+            if (tx_done) {
+                fl::lpc::LpcUartDmaRuntime::releaseTxPin();  // ok platform specific - only the LPC845 UART-DMA TX holds the pad on a movable SWM function between frames
+            }
 
             uint8_t* decoded_buf = ws_state.decoded;
             for (int i = 0; i < expected_bytes; ++i) decoded_buf[i] = 0;
@@ -775,7 +782,8 @@ inline void autoResearchLowMemorySetup() {
             // smaller frames fit whole. Same rule as the host bench.
             fl::u32 need = cap / 16u;
             if (need > (fl::u32)expected_bytes) need = (fl::u32)expected_bytes;
-            const bool success = (mismatched == 0 && need > 0 && matched >= need);
+            const bool success =
+                tx_done && mismatched == 0 && need > 0 && matched >= need;
 
             fl::sstream s;
             s << (success ? 1 : 0) << ',' << test_case << ',' << num_leds << ','

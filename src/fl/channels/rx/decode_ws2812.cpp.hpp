@@ -17,15 +17,15 @@ namespace {
 
 /// Bit from a HIGH alone, for the frame's last bit: its LOW runs into the
 /// reset, so it is either a reset-length LOW or was never closed by an edge.
-/// -1 when the HIGH fits neither window.
+/// -1 when the HIGH fits neither window, or both (overlapping windows: only
+/// the LOW could tell, and there is none).
 int ws2812BitFromHigh(u32 high_ns, const ChipsetTiming4Phase& timing) FL_NO_EXCEPT {
-    if (high_ns >= timing.t1h_min_ns && high_ns <= timing.t1h_max_ns) {
-        return 1;
+    const bool one = high_ns >= timing.t1h_min_ns && high_ns <= timing.t1h_max_ns;
+    const bool zero = high_ns >= timing.t0h_min_ns && high_ns <= timing.t0h_max_ns;
+    if (one == zero) {
+        return -1;
     }
-    if (high_ns >= timing.t0h_min_ns && high_ns <= timing.t0h_max_ns) {
-        return 0;
-    }
-    return -1;
+    return one ? 1 : 0;
 }
 
 }  // namespace

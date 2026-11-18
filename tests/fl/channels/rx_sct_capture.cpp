@@ -156,6 +156,33 @@ FL_TEST_CASE("LPC SCT-capture: decode keeps the frame's final bit") {
     }
 }
 
+// With overlapping T0H/T1H windows only the LOW tells the bits apart, so a
+// final HIGH inside both windows is not guessed.
+FL_TEST_CASE("LPC SCT-capture: decode does not guess an ambiguous final bit") {
+    auto device = RxDevice::create<RxDeviceType::LPC_SCT_CAPTURE>(11);
+    FL_REQUIRE(device != nullptr);
+    RxConfig config;
+    config.buffer_size = 256;
+    FL_REQUIRE(device->begin(config));
+
+    fl::vector<EdgeTime> edges;
+    appendByte<0>(edges, 0x00);
+    appendByte<0>(edges, 0xFF);
+    for (int bit = 0; bit < 7; ++bit) {  // third byte, all but its last bit
+        edges.push_back(EdgeTime(true, 400u));
+        edges.push_back(EdgeTime(false, 850u));
+    }
+    edges.push_back(EdgeTime(true, 520u));  // fits T0H and T1H; no LOW
+    FL_REQUIRE(device->injectEdges(toSpan(edges)));
+
+    ChipsetTiming4Phase overlapping = ws2812_timing();
+    overlapping.t1h_min_ns = 500;  // T0H is 250..550
+    u8 out[3] = {0};
+    auto result = device->decode(overlapping, fl::span<u8>(out, sizeof(out)));
+    FL_REQUIRE(result.ok());
+    FL_CHECK_EQ(result.value(), 2u);
+}
+
 FL_TEST_CASE("LPC SCT-capture: decoder rejects an empty edge buffer") {
     auto device = RxDevice::create<RxDeviceType::LPC_SCT_CAPTURE>(11);
     FL_REQUIRE(device != nullptr);
