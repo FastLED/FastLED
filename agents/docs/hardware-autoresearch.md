@@ -571,7 +571,7 @@ the lower-level async UART TX DMA bench.
 targets. It uses the reduced bring-up surface when
 `FL_PLATFORM_HAS_LARGE_MEMORY == 0`.
 
-Low-memory boards, such as LPC845/LPC804:
+Low-memory boards, such as the LPC845:
 
 - Keep one bench per build. Flash/RAM budget may not fit SPI DMA, UART DMA,
   SCT/PWM DMA, fault tests, and WS2812 loopback together.
@@ -585,6 +585,40 @@ Low-memory boards, such as LPC845/LPC804:
 - Treat silence as possible crash/reset/USART routing failure. First prove
   board, port, firmware freshness, and wiring; then add or use fault/crash
   diagnostics.
+
+#### LPC804 does not fit (#5267)
+
+The LPC804 (32 KB flash, 4 KB SRAM; boards `lpc804`, `lpcxpresso804`) cannot
+run AutoResearch. The JSON-RPC stack that every bench talks through is larger
+than the chip. Gating the bench RPCs does not change that. Link results on
+2026-11-18 (fbuild 2.5.51, GCC 15.2, LPC8xx core `547b5a7`):
+
+| Build | Flash needed | RAM needed |
+|---|---:|---:|
+| Default low-memory sketch on the LPC804 (echo, `pinToggleRx`) | 50752 B (155%) | 6272 B (153%) |
+| Echo only (`--defines FASTLED_AUTORESEARCH_FAULT_TEST=1`, which drops the LPC pin RPCs) | 45528 B (139%) | 5992 B (146%) |
+| `Blink`, for comparison | 6872 B | 855 B |
+
+The echo-only flash, attributed from the failed link's `firmware.map`:
+`fl::json` parse/build 14.0 KB, `fl::Rpc`/`fl::Remote` 5.3 KB, hash maps and
+vectors 5.2 KB, strings 4.4 KB, soft-float 4.3 KB. In RAM, the `fl::Remote`
+singleton alone is 2784 B, and the RPC registry another 1024 B. `fl::Remote`
+already compiles out its large-memory features on this tier
+(`FL_PLATFORM_HAS_LARGE_MEMORY == 0`).
+
+`findConnectedPins` is not in the LPC804 build either: it is bound for the
+LPC845 only, the one LPC with a pin-probe skip table, so the LPC804 would also
+need one before the board could find its own jumpers.
+
+So `bash autoresearch lpc804` refuses while parsing its arguments
+(`LPC804_ENVS` in `ci/autoresearch/phases.py`); `--decode`, which only reads a
+capture file, still runs. The sketch's `@filter` still lists `lpcxpresso804`,
+so `bash compile lpcxpresso804 --examples AutoResearch` fails at link with the
+sizes above. On-silicon bring-up of the LPC804 native pin
+backend (#5261) would need an RPC transport that does not use `fl::Remote` and
+`fl::json`: a fixed-format line protocol that the host `RpcClient` can still
+parse. That is new infrastructure, not gating. No LPC804 board has been
+attached to measure it.
 
 Full-memory boards, such as ESP32-family and Teensy 4.x:
 

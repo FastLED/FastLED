@@ -498,13 +498,21 @@ LPC_BRING_UP_ENVS = {
     "lpc845brk",
     "lpc845",
     "lpcxpresso845max",
-    "lpcxpresso804",
 }
 # Every board whose AutoResearch build takes the low-memory sketch path
 # (FL_PLATFORM_HAS_LARGE_MEMORY == 0), which binds `echo` instead of the
 # pin-discovery / driver-matrix RPCs.
 LOW_MEMORY_BRING_UP_ENVS = LPC_BRING_UP_ENVS | {"esp8266"}
 LPC_WS2812_ENVS = {"lpc845brk", "lpc845", "lpcxpresso845max"}
+# The AutoResearch sketch does not fit the LPC804 (32 KB flash, 4 KB RAM);
+# measured sizes are in agents/docs/hardware-autoresearch.md (#5267). Refused
+# at argument parsing instead of at link time.
+LPC804_ENVS = {"lpc804", "lpcxpresso804"}
+LPC804_DOES_NOT_FIT = (
+    "AutoResearch does not fit the LPC804 (32 KB flash / 4 KB RAM): even the "
+    "echo-only build overflows both at link time. See "
+    "agents/docs/hardware-autoresearch.md -> 'LPC804 does not fit' (#5267)."
+)
 # SPI+DMA harness (#3456) — LPC845 only. LPC804 has no DMA peripheral
 # (see agents/docs/peripheral-existence.md); the earlier LPC804 widening
 # in #3505 was reverted after empirical evidence surfaced the phantom.
@@ -631,6 +639,10 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
     final_environment = _canonical_board_environment(
         args.environment_positional or args.environment
     )
+    # Firmware runs only: --decode reads a capture file and builds nothing.
+    if args.decode is None and (final_environment or "").lower() in LPC804_ENVS:
+        print(f"\u274c {LPC804_DOES_NOT_FIT}")
+        return 1
 
     if args.lcd and not final_environment:
         final_environment = "esp32s3"
@@ -2711,8 +2723,8 @@ async def _run_tests_or_special_mode(ctx: RunContext, qctx: QuietContext) -> int
     serial_iface = ctx.serial_iface
     use_fbuild = ctx.use_fbuild
 
-    # Low-memory ARM bring-up mode short-circuit. LPC845/LPC804 boards run a
-    # JSON-RPC echo verification (examples/AutoResearchLpc/) instead of the
+    # Low-memory ARM bring-up mode short-circuit. LPC845 boards run a
+    # JSON-RPC echo verification (examples/AutoResearch/AutoResearch.ino) instead of the
     # GPIO + LED-protocol matrix that ESP32/Teensy targets use. Must come
     # BEFORE the gpio_only_mode early-return so the harness actually runs the
     # echo check instead of bailing with a "no tests requested" success.
@@ -3640,10 +3652,10 @@ def _build_and_deploy_nxplpc(
 
 
 async def _run_bring_up_tests(ctx: RunContext) -> int:
-    """Run minimal LPC845/LPC804 bring-up validation via JSON-RPC echo.
+    """Run minimal LPC845 bring-up validation via JSON-RPC echo.
 
     Verifies the three transport components the bring-up sketch
-    (examples/AutoResearchLpc/) exposes:
+    (examples/AutoResearch/AutoResearch.ino) exposes:
       1. Serial.println — the response body itself ("REMOTE: {...}\\r\\n").
       2. FastLED log pipeline — the FL_DBG line from fl::Remote
          ("src/fl/remote/remote.cpp.hpp(151): Stored request ID for echo")
