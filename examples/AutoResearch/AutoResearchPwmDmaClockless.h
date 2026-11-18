@@ -192,9 +192,12 @@ inline fl::string frameBurstHandler(int led_count, fl::u32 rgb,
     // case a previous RPC just drove the line) starts that long after the
     // last one ended.
     const fl::u32 reset_us = ws2812b_timing().reset_us;
+    // A frame left running by an earlier RPC (one that timed out) must end
+    // first; the first frame then waits the full reset time from there.
+    if (!waitReady(engine, frameTimeoutUs(kMaxCaptureLeds))) {
+        return fl::string("0,0,0");
+    }
     const fl::u32 t_start = micros();
-    // An earlier RPC's frame may have ended just before this call, so the
-    // first frame waits the full reset time too.
     fl::u32 last_end = t_start;
     for (int i = 0; i < n_frames; ++i) {
         while (micros() - last_end < reset_us) {
