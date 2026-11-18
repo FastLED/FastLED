@@ -147,10 +147,11 @@ inline fl::i16 polyTGXright(const TgEdge& e, int y) FL_NO_EXCEPT {
 }
 
 /// Popcount of a u32 (Go's bits.OnesCount32; gcc/clang builtin on host and
-/// AVR).
+/// AVR). Must use popcountl: on AVR `unsigned int` is 16-bit, so
+/// __builtin_popcount would truncate v to its low 16 bits before counting.
 inline fl::u8 polyTGPopcount32(fl::u32 v) FL_NO_EXCEPT {
 #if defined(__GNUC__) || defined(__clang__)
-    return (fl::u8)__builtin_popcount(v);
+    return (fl::u8)__builtin_popcountl(v);
 #else
     v = v - ((v >> 1) & 0x55555555u);
     v = (v & 0x33333333u) + ((v >> 2) & 0x33333333u);
