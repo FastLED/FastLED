@@ -19,6 +19,9 @@
 // IWYU pragma: begin_keep
 #include "hardware/pwm.h"
 // IWYU pragma: end_keep
+// IWYU pragma: begin_keep
+#include "hardware/clocks.h"
+// IWYU pragma: end_keep
 #include "platforms/arm/rp/rpcommon/sdk_compat.h"
 #include "fl/system/pin.h"
 #include "fl/stl/noexcept.h"
@@ -208,12 +211,13 @@ inline bool needsPwmIsrFallback(int /*pin*/, u32 frequency_hz) {
     if (frequency_hz == 0) {
         return true;
     }
-    // RP2040 system clock = 125 MHz
-    // Max frequency: 125 MHz / (1 * (1+1)) = 62,500,000 Hz
-    // Min frequency: 125 MHz / (255.9375 * 65536) ≈ 7.5 Hz, so 8 Hz is safe
-    constexpr u32 MIN_NATIVE_FREQ = 8;
-    constexpr u32 MAX_NATIVE_FREQ = 62500000;
-    return (frequency_hz < MIN_NATIVE_FREQ || frequency_hz > MAX_NATIVE_FREQ);
+    // The range follows clk_sys, which is not always 125 MHz (150 MHz on RP2350).
+    // Max frequency: clk_sys / (1 * (1+1))
+    // Min frequency: clk_sys / (255.9375 * 65536), rounded up
+    const u32 sys_clk = clock_get_hz(clk_sys);
+    const u32 min_native_freq = (sys_clk + 16773119u) / 16773120u;  // 255.9375 * 65536
+    const u32 max_native_freq = sys_clk / 2;
+    return (frequency_hz < min_native_freq || frequency_hz > max_native_freq);
 }
 
 /// @brief Set PWM frequency using RP2040 hardware PWM
@@ -237,37 +241,35 @@ inline int setPwmFrequencyNative(int pin, u32 frequency_hz) FL_NO_EXCEPT {
         return -2;
     }
 
-    constexpr u32 SYS_CLK = 125000000u;
+    const u32 SYS_CLK = clock_get_hz(clk_sys);
 
     // Get PWM slice for this pin
     uint slice = pwm_gpio_to_slice_num(pin);
 
     // Calculate divider and wrap
-    // frequency = SYS_CLK / (divider * (wrap + 1))
-    // Strategy: maximize wrap for best duty cycle resolution
-    // Start with wrap = 65535 (16-bit max), calculate divider
-    float divider;
-    u32 wrap;
-
-    // Try maximum wrap first for best resolution
-    divider = (float)SYS_CLK / ((float)frequency_hz * 65536.0f);
-
-    if (divider < 1.0f) {
-        // Frequency too high for max wrap — reduce wrap, use divider = 1
-        divider = 1.0f;
-        wrap = SYS_CLK / frequency_hz - 1;
-        if (wrap < 1) {
-            return -3;  // Frequency too high
-        }
-    } else if (divider > 255.9375f) {
-        // Frequency too low — divider exceeds RP2040 maximum
+    // frequency = SYS_CLK / (divider * (wrap + 1)), divider in 1/16 steps
+    // Strategy: maximize wrap for best duty cycle resolution. Take the smallest
+    // divider that keeps wrap within 16 bits, then compute wrap from that
+    // divider, so rounding the divider to 1/16 does not shift the frequency.
+    const u64 clk16 = static_cast<u64>(SYS_CLK) * 16;
+    const u64 max_period16 = static_cast<u64>(frequency_hz) * 65536;
+    u32 div16 = static_cast<u32>((clk16 + max_period16 - 1) / max_period16);
+    if (div16 < 16) {
+        // Frequency too high for max wrap — use divider = 1 and a smaller wrap
+        div16 = 16;
+    } else if (div16 > 4095) {
+        // Frequency too low — divider exceeds RP2040 maximum (255.9375)
         return -4;
-    } else {
-        wrap = 65535;
     }
+    const u64 count16 = static_cast<u64>(div16) * frequency_hz;
+    const u64 counts = (clk16 + count16 / 2) / count16;  // wrap + 1, rounded
+    if (counts < 2) {
+        return -3;  // Frequency too high
+    }
+    const u32 wrap = static_cast<u32>(counts - 1);
 
     // Configure the PWM slice
-    pwm_set_clkdiv(slice, divider);
+    pwm_set_clkdiv(slice, static_cast<float>(div16) / 16.0f);
     pwm_set_wrap(slice, (u16)wrap);
 
     // Configure GPIO for PWM function
