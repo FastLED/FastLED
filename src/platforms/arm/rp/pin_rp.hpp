@@ -286,7 +286,7 @@ inline int setPwmFrequencyNative(int pin, u32 frequency_hz) FL_NO_EXCEPT {
         // Frequency too high for max wrap - use divider = 1 and a smaller wrap
         div16 = 16;
     } else if (div16 > 4095) {
-        // Frequency too low — divider exceeds RP2040 maximum (255.9375)
+        // Frequency too low - divider exceeds RP2040 maximum (255.9375)
         return -4;
     }
     const u64 count16 = static_cast<u64>(div16) * frequency_hz;
