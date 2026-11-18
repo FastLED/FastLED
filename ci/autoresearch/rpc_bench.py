@@ -52,15 +52,18 @@ def describe_error_chain(error: BaseException) -> str:
     """`Type: message` for `error` and each error it was raised from.
 
     Notes on an error (the attach retry records its earlier attempts there)
-    follow it in the chain.
+    are shown in brackets on that error, so they do not read as causes.
     """
     parts: list[str] = []
     seen: set[int] = set()
     current: BaseException | None = error
     while current is not None and id(current) not in seen:
         seen.add(id(current))
-        parts.append(f"{type(current).__name__}: {current}")
-        parts.extend(str(note) for note in getattr(current, "__notes__", ()))
+        entry = f"{type(current).__name__}: {current}"
+        notes = [str(note) for note in getattr(current, "__notes__", ())]
+        if notes:
+            entry += " [" + "; ".join(notes) + "]"
+        parts.append(entry)
         if current.__cause__ is not None:
             current = current.__cause__
         elif current.__suppress_context__:
@@ -106,8 +109,14 @@ class RpcBench:
                     # The interrupt came from inside `connect` (e.g. during
                     # daemon recovery) and is stored on the task: retrieve
                     # it, since running the task again would re-raise it.
-                    if not connect.cancelled():
-                        connect.exception()
+                    stored = None if connect.cancelled() else connect.exception()
+                    if stored is not None and not isinstance(stored, KeyboardInterrupt):
+                        # The attach had already failed; do not hide why.
+                        print(
+                            f"[rpc] attach failed before Ctrl-C: "
+                            f"{describe_error_chain(stored)}",
+                            flush=True,
+                        )
                 else:
                     # Ctrl-C left `connect` pending; finish it before close()
                     # so a late attach cannot grab the port after the client
@@ -116,8 +125,9 @@ class RpcBench:
                     with suppress(asyncio.CancelledError, Exception):
                         self._loop.run_until_complete(connect)
             finally:
-                # Even a second Ctrl-C during the drain must not skip this.
-                with suppress(Exception):
+                # Even a second Ctrl-C during the drain or the close must not
+                # skip this; the first interrupt is the one raised.
+                with suppress(BaseException):
                     self.close()
                 handle_keyboard_interrupt(interrupt)
             raise

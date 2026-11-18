@@ -283,8 +283,9 @@ def test_an_interrupt_inside_the_attach_still_closes_the_bench(
 
 
 def test_the_error_chain_includes_earlier_attach_attempts() -> None:
-    """FastLED#5281: the retried first failure is the symptom; keep it."""
-    from ci.util.serial_interface import _note_earlier_attempts
+    """FastLED#5281: the retried first failure is the symptom; keep it,
+    attached to the final error rather than read as its cause."""
+    from ci.util.serial_interface import _describe_attempt, _note_earlier_attempts
 
     try:
         try:
@@ -292,10 +293,12 @@ def test_the_error_chain_includes_earlier_attach_attempts() -> None:
         except RuntimeError as daemon:
             raise TimeoutError("handshake timed out") from daemon
     except TimeoutError as final:
-        _note_earlier_attempts(final, [ConnectionError("session closed")])
+        _note_earlier_attempts(
+            final, [_describe_attempt(1, ConnectionError("session closed"))]
+        )
         message = rpc_bench.describe_error_chain(final)
-    assert message.startswith("TimeoutError: handshake timed out <- ")
-    assert (
-        "attach attempt 1 of 3 failed first: ConnectionError: session closed" in message
+    assert message == (
+        "TimeoutError: handshake timed out "
+        "[attach attempt 1 of 3 failed: ConnectionError: session closed]"
+        " <- RuntimeError: failed to connect to daemon WebSocket"
     )
-    assert message.endswith("RuntimeError: failed to connect to daemon WebSocket")

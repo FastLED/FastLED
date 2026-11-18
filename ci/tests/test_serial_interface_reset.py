@@ -440,7 +440,7 @@ def test_native_adapter_final_error_keeps_the_first_attempt(monkeypatch) -> None
         asyncio.run(adapter.connect())
     assert isinstance(raised.value.__cause__, RuntimeError)
     assert raised.value.__notes__ == [
-        "attach attempt 1 of 3 failed first: ConnectionError: session closed"
+        "attach attempt 1 of 3 failed: ConnectionError: session closed"
     ]
 
 
@@ -484,3 +484,25 @@ def test_fbuild_adapter_close_exits_the_monitor_current_when_it_runs() -> None:
     finally:
         adapter._executor.shutdown(wait=True)
     assert (old.exits, new.exits) == (0, 1)
+
+
+def test_native_adapter_notes_number_the_real_attempt(monkeypatch) -> None:
+    """FastLED#5281 review: a daemon recovery uses up attempt 1, so the
+    retried 'session closed' is attempt 2 in the note too."""
+    from ci.util import serial_interface
+
+    monkeypatch.setattr(serial_interface, "ensure_fbuild_daemon", lambda: None)
+    adapter, _monitors = _attach_adapter(
+        monkeypatch,
+        [
+            RuntimeError(_DAEMON_ERROR),
+            ConnectionError("session closed"),
+            TimeoutError("handshake timed out"),
+            None,
+        ],
+    )
+    with pytest.raises(TimeoutError) as raised:
+        asyncio.run(adapter.connect())
+    assert raised.value.__notes__ == [
+        "attach attempt 2 of 3 failed: ConnectionError: session closed"
+    ]
