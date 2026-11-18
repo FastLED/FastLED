@@ -251,3 +251,51 @@ def test_a_failed_attach_names_the_whole_error_chain(
     assert "ConnectionError: session closed" in message
     assert "exceeded 3s" in message
     assert len(created) == 1
+
+
+class _InterruptedAttachSerial(_ScriptedSerial):
+    """Ctrl-C raised inside the attach itself (e.g. during daemon recovery)."""
+
+    async def connect(self) -> None:
+        raise KeyboardInterrupt
+
+
+def test_an_interrupt_inside_the_attach_still_closes_the_bench(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """FastLED#5281: the interrupt is stored on the finished connect task,
+    so draining that task again would re-raise it past close()."""
+    created: list[_ScriptedSerial] = []
+    handled: list[KeyboardInterrupt] = []
+
+    def _factory(port: str, *args: object, **kwargs: object) -> _ScriptedSerial:
+        iface = _InterruptedAttachSerial(_ok)
+        created.append(iface)
+        return iface
+
+    monkeypatch.setattr(rpc_bench, "create_serial_interface", _factory)
+    monkeypatch.setattr(rpc_bench, "handle_keyboard_interrupt", handled.append)
+    with pytest.raises(KeyboardInterrupt):
+        RpcBench("FAKE_PORT", timeout=1.0)
+    assert len(created) == 1
+    assert created[0].closed is True
+    assert len(handled) == 1
+
+
+def test_the_error_chain_includes_earlier_attach_attempts() -> None:
+    """FastLED#5281: the retried first failure is the symptom; keep it."""
+    from ci.util.serial_interface import _note_earlier_attempts
+
+    try:
+        try:
+            raise RuntimeError("failed to connect to daemon WebSocket")
+        except RuntimeError as daemon:
+            raise TimeoutError("handshake timed out") from daemon
+    except TimeoutError as final:
+        _note_earlier_attempts(final, [ConnectionError("session closed")])
+        message = rpc_bench.describe_error_chain(final)
+    assert message.startswith("TimeoutError: handshake timed out <- ")
+    assert (
+        "attach attempt 1 of 3 failed first: ConnectionError: session closed" in message
+    )
+    assert message.endswith("RuntimeError: failed to connect to daemon WebSocket")

@@ -49,13 +49,18 @@ LIVENESS_PROBE_METHOD = "ping"
 
 
 def describe_error_chain(error: BaseException) -> str:
-    """`Type: message` for `error` and each error it was raised from."""
+    """`Type: message` for `error` and each error it was raised from.
+
+    Notes on an error (the attach retry records its earlier attempts there)
+    follow it in the chain.
+    """
     parts: list[str] = []
     seen: set[int] = set()
     current: BaseException | None = error
     while current is not None and id(current) not in seen:
         seen.add(id(current))
         parts.append(f"{type(current).__name__}: {current}")
+        parts.extend(str(note) for note in getattr(current, "__notes__", ()))
         if current.__cause__ is not None:
             current = current.__cause__
         elif current.__suppress_context__:
@@ -96,14 +101,25 @@ class RpcBench:
         try:
             self._loop.run_until_complete(connect)
         except KeyboardInterrupt as interrupt:
-            # Ctrl-C leaves `connect` pending; finish it before close() so a
-            # late attach cannot grab the port after the client is closed.
-            connect.cancel()
-            with suppress(asyncio.CancelledError, Exception):
-                self._loop.run_until_complete(connect)
-            with suppress(Exception):
-                self.close()
-            handle_keyboard_interrupt(interrupt)
+            try:
+                if connect.done():
+                    # The interrupt came from inside `connect` (e.g. during
+                    # daemon recovery) and is stored on the task: retrieve
+                    # it, since running the task again would re-raise it.
+                    if not connect.cancelled():
+                        connect.exception()
+                else:
+                    # Ctrl-C left `connect` pending; finish it before close()
+                    # so a late attach cannot grab the port after the client
+                    # is closed.
+                    connect.cancel()
+                    with suppress(asyncio.CancelledError, Exception):
+                        self._loop.run_until_complete(connect)
+            finally:
+                # Even a second Ctrl-C during the drain must not skip this.
+                with suppress(Exception):
+                    self.close()
+                handle_keyboard_interrupt(interrupt)
             raise
         except Exception as error:
             # The caller never gets an object to close, so release the loop
