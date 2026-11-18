@@ -3398,8 +3398,12 @@ def test_coroutine_exit_code_defaults_trust_older_firmware() -> None:
 
 
 def test_lpc_rx_defines_per_mode():
-    """DMA loopback builds drop pinToggleRx unless it is requested too."""
-    assert _lpc_rx_defines(_make_args(pin_toggle_rx=True)) == ["FASTLED_LPC_RX_SCT=1"]
+    """DMA loopback builds drop pinToggleRx unless it is requested too, and
+    only --pin-toggle-rx compiles in the vendor-core corePullCheck."""
+    assert _lpc_rx_defines(_make_args(pin_toggle_rx=True)) == [
+        "FASTLED_LPC_RX_SCT=1",
+        "FASTLED_AUTORESEARCH_LPC_CORE_PULL_CHECK=1",
+    ]
     assert _lpc_rx_defines(_make_args(ws2812_loopback=True)) == [
         "FASTLED_LPC_RX_SCT_DMA=1",
         "FASTLED_AUTORESEARCH_LPC_DMA_LOOPBACK=1",
@@ -3407,6 +3411,7 @@ def test_lpc_rx_defines_per_mode():
     ]
     assert _lpc_rx_defines(_make_args(ws2812_loopback=True, pin_toggle_rx=True)) == [
         "FASTLED_LPC_RX_SCT=1",
+        "FASTLED_AUTORESEARCH_LPC_CORE_PULL_CHECK=1",
         "FASTLED_LPC_RX_SCT_DMA=1",
         "FL_LPC_RX_SCT_DMA_RING_WORDS=128",
     ]

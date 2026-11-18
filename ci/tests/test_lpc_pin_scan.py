@@ -105,8 +105,53 @@ def test_core_pull_check_fails_on_wrong_slot_core() -> None:
     assert check_core_pulls(bench, "t") is False
 
 
-def test_core_pull_check_skips_when_unbound() -> None:
+def test_core_pull_check_fails_when_unbound() -> None:
+    # Only the --pin-toggle-rx build calls this, and it always compiles the
+    # RPC in; a missing binding means the define never reached the build.
     from ci.autoresearch.lpc_pin_scan import check_core_pulls
     from ci.autoresearch.rpc_bench import METHOD_NOT_FOUND
 
-    assert check_core_pulls(_PullBench(METHOD_NOT_FOUND), "t") is None
+    assert check_core_pulls(_PullBench(METHOD_NOT_FOUND), "t") is False
+
+
+class _IdleBench(_PullBench):
+    """Scan reports exactly `idle` as free; everything else is stuck."""
+
+    def __init__(self, idle: set[int], pull_reply: object) -> None:
+        super().__init__(pull_reply)
+        self.stuck = " ".join(f"{p}H" for p in range(30) if p not in idle)
+
+    def call_flat(self, method: str, args: object = None, **_k: object) -> object:
+        if method == "findConnectedPins":
+            return f"pairs=;stuck={self.stuck} ;skip=;od="
+        self.pull_args = args
+        return self.pull_reply
+
+
+def test_core_pull_check_skips_iocon_identity_pins() -> None:
+    from ci.autoresearch.lpc_pin_scan import check_core_pulls
+
+    # Only P0_4, P0_8, P0_24 are idle. IOCON_INDEX_PIO0_4 == 4 and
+    # IOCON_INDEX_PIO0_24 == 24, so a core indexing IOCON by GPIO bit still
+    # pulls the right pad there; only P0_8 can catch that bug.
+    bench = _IdleBench({4, 8, 24}, "8:up=1,down=0 ")
+    assert check_core_pulls(bench, "t") is True
+    assert bench.pull_args == [8, -1, -1, -1]
+
+
+def test_identity_pins_never_take_a_slot() -> None:
+    from ci.autoresearch.lpc_pin_scan import check_core_pulls
+
+    # More than four idle pins, identity pins among them: they must not use
+    # up any of the four slots.
+    bench = _IdleBench({4, 24, 26, 27, 28, 29}, "26:up=1,down=0 " * 4)
+    check_core_pulls(bench, "t")
+    assert bench.pull_args == [26, 27, 28, 29]
+
+
+def test_only_identity_pins_idle_is_skipped() -> None:
+    from ci.autoresearch.lpc_pin_scan import check_core_pulls
+
+    bench = _IdleBench({4, 24}, "unused")
+    assert check_core_pulls(bench, "t") is None
+    assert bench.pull_args is None

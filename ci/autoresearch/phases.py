@@ -589,6 +589,10 @@ def _lpc_rx_defines(args: Args) -> list[str]:
     the low-memory sketch can leave out the unrelated pinToggleRx RPC: with
     the real RX-DMA capture linked, the 64 KB part has no room for both
     (~1 KB). An explicit --pin-toggle-rx keeps it.
+
+    --pin-toggle-rx also passes FASTLED_AUTORESEARCH_LPC_CORE_PULL_CHECK, which
+    compiles in the `corePullCheck` RPC. It tests the vendor core's ::pinMode,
+    which FastLED never calls, so other builds leave it out (#5270).
     """
     pin_toggle = bool(getattr(args, "pin_toggle_rx", False))
     dma_loopback = bool(getattr(args, "ws2812_loopback", False)) or bool(
@@ -597,6 +601,7 @@ def _lpc_rx_defines(args: Args) -> list[str]:
     defines: list[str] = []
     if pin_toggle:
         defines.append("FASTLED_LPC_RX_SCT=1")
+        defines.append("FASTLED_AUTORESEARCH_LPC_CORE_PULL_CHECK=1")
     if dma_loopback:
         defines.append("FASTLED_LPC_RX_SCT_DMA=1")
         if not pin_toggle:
