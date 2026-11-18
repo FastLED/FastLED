@@ -227,6 +227,10 @@ void releaseChannel(PwmPinState* ch) FL_NO_EXCEPT {
 
     (fl::digitalWrite)(ch->pin, fl::PinValue::Low);
 
+    if (ch->backend == PwmBackend::Native) {
+        platforms::releasePwmFrequencyNative(ch->pin);
+    }
+
     {
         fl::isr::critical_section cs;
         ch->pin = -1;
