@@ -94,6 +94,12 @@ def format_scan(scan: LpcPinScan) -> str:
 # `variant_pin_count`); its ::pinMode ignores higher pins.
 CORE_PIN_COUNT = 30
 
+# Pads whose IOCON slot index equals their GPIO bit on LPC845
+# (IOCON_INDEX_PIO0_4 == 4, IOCON_INDEX_PIO0_24 == 24). A core that indexes
+# IOCON by GPIO bit (framework-arduino-lpc8xx#40) still hits the right slot
+# on these, so they cannot detect that bug; the pull check skips them.
+CORE_PULL_IDENTITY_PINS = frozenset({4, 24})
+
 
 def free_pins(scan: LpcPinScan, pin_count: int = CORE_PIN_COUNT) -> list[int]:
     """Probed pins with nothing attached: not in a pair, not stuck, not
@@ -110,24 +116,47 @@ def check_core_pulls(bench: Any, tag: str, timeout: float = 5.0) -> bool | None:
 
     Calls the firmware's `corePullCheck` (FastLED/framework-arduino-lpc8xx#40:
     a core that indexes IOCON by GPIO bit puts the pull on another pad).
-    Returns True when every pin reads up=1,down=0, False on a wrong reading,
-    and None when the check cannot run (RPC not bound, no scan, no idle pin).
+    Returns True when every pin reads up=1,down=0, False on a wrong reading
+    or when the RPC is not bound (the --pin-toggle-rx build always compiles it
+    in, so a missing binding means the define did not reach the build), and
+    None when the bound check cannot run (no scan, no usable idle pin).
     """
     from ci.autoresearch.rpc_bench import METHOD_NOT_FOUND
 
+    # Probe the binding first, so a missing RPC fails even when the scan or
+    # the idle-pin choice would skip the check. Four -1 slots touch no pad.
+    # A bound RPC acknowledges an all-unused call with an empty string.
+    probe = bench.call_flat("corePullCheck", args=[-1] * 4, timeout=timeout)
+    if probe is METHOD_NOT_FOUND:
+        print(
+            f"[{tag}] core pull check FAIL: corePullCheck is not bound "
+            "(FASTLED_AUTORESEARCH_LPC_CORE_PULL_CHECK missing from the build)"
+        )
+        return False
+    if not isinstance(probe, str):
+        print(
+            f"[{tag}] core pull check FAIL: binding probe got no answer "
+            f"within {timeout:.0f} s"
+        )
+        return False
     scan = run_scan(bench)
     if isinstance(scan, str):
         print(f"[{tag}] core pull check skipped: {scan}")
         return None
-    pins = free_pins(scan)[:4]
+    idle = free_pins(scan)
+    pins = [p for p in idle if p not in CORE_PULL_IDENTITY_PINS][:4]
     if not pins:
-        print(f"[{tag}] core pull check skipped: no idle pin in the scan")
+        why = (
+            "the only idle pins are "
+            + " ".join(f"P0_{p}" for p in idle)
+            + ", whose IOCON slot equals their GPIO bit"
+            if idle
+            else "no idle pin in the scan"
+        )
+        print(f"[{tag}] core pull check skipped: {why}")
         return None
     args = pins + [-1] * (4 - len(pins))
     reply = bench.call_flat("corePullCheck", args=args, timeout=timeout)
-    if reply is METHOD_NOT_FOUND:
-        print(f"[{tag}] core pull check skipped: corePullCheck is not bound")
-        return None
     if not isinstance(reply, str):
         print(f"[{tag}] core pull check FAIL: no answer within {timeout:.0f} s")
         return False

@@ -308,7 +308,7 @@ struct LowMemTickClock {
 // never be the observed end, so a jumper between the two of them is invisible
 // without an external pull-up.
 inline bool lowMemOpenDrainPin(int pin) FL_NO_EXCEPT {
-#if defined(FL_IS_ARM_LPC_845)
+#if defined(FL_IS_ARM_LPC_845)  // ok platform specific - PIO0_10/PIO0_11 are the LPC845's pull-less open-drain pads; no core API reports pad type
     return pin == 10 || pin == 11;
 #else
     (void)pin;
@@ -403,7 +403,11 @@ inline fl::string lowMemFindConnectedPins() FL_NO_EXCEPT {
     return out.str();
 }
 
-#if defined(FL_IS_ARM_LPC_845) && !defined(FASTLED_AUTORESEARCH_LPC_DMA_LOOPBACK)
+// Compiled only into the `--pin-toggle-rx` bench build: phases.py passes
+// FASTLED_AUTORESEARCH_LPC_CORE_PULL_CHECK there. It tests the vendor core's
+// ::pinMode, which FastLED itself never calls (it uses fl::pinMode), so the
+// shared LPC845 image does not carry it.
+#if defined(FL_IS_ARM_LPC_845) && defined(FASTLED_AUTORESEARCH_LPC_CORE_PULL_CHECK)  // ok platform specific - checks the LPC8xx Arduino core's IOCON pull mapping (framework-arduino-lpc8xx#40)
 // corePullCheck: checks that the vendor Arduino core's ::pinMode puts the
 // pull on the requested pad (FastLED/framework-arduino-lpc8xx#40). Use
 // unconnected pins from findConnectedPins. FastLED's own backend first sets
@@ -416,30 +420,28 @@ inline fl::string lowMemFindConnectedPins() FL_NO_EXCEPT {
 // as any ::pinMode call there would. A core without INPUT_PULLDOWN treats
 // mode 3 as "no pull", so it reports down=1 too.
 inline void lowMemCorePullCheck(int pin, fl::sstream& out) FL_NO_EXCEPT {
-#ifdef INPUT_PULLDOWN
-    constexpr PinMode kCorePulldown = INPUT_PULLDOWN;
+#ifdef INPUT_PULLDOWN  // ok platform specific - vendor core constant; the check targets the core itself
+    constexpr PinMode kCorePulldown = INPUT_PULLDOWN;  // ok platform specific - vendor core constant under test
 #else
     constexpr PinMode kCorePulldown = 0x3;  // older cores lack the define
 #endif
     out << pin << ':';
-    if (pin < 0 || pin >= static_cast<int>(variant_pin_count) ||
+    if (pin < 0 || pin >= static_cast<int>(variant_pin_count) ||  // ok platform specific - vendor core's pin-map size bounds the pins it can pull
         lowMemOpenDrainPin(pin) || fl::pinProbeSkipReason(pin)) {
         out << "skip ";
         return;
     }
     const pin_size_t p = static_cast<pin_size_t>(pin);
     fl::pinMode(pin, fl::PinMode::InputPulldown);
-    ::pinMode(p, INPUT_PULLUP);
-    delayMicroseconds(100);
-    const int up = ::digitalRead(p) == HIGH ? 1 : 0;
+    ::pinMode(p, INPUT_PULLUP);  // ok platform specific - the vendor core call under test
+    const int up = lowMemSettledHigh(pin) ? 1 : 0;
     fl::pinMode(pin, fl::PinMode::InputPullup);
-    ::pinMode(p, kCorePulldown);
-    delayMicroseconds(100);
-    const int down = ::digitalRead(p) == HIGH ? 1 : 0;
+    ::pinMode(p, kCorePulldown);  // ok platform specific - the vendor core call under test
+    const int down = lowMemSettledHigh(pin) ? 1 : 0;
     fl::pinMode(pin, fl::PinMode::InputPullup);  // reset-state pull
     out << "up=" << up << ",down=" << down << ' ';
 }
-#endif  // FL_IS_ARM_LPC_845 && !FASTLED_AUTORESEARCH_LPC_DMA_LOOPBACK
+#endif  // FL_IS_ARM_LPC_845 && FASTLED_AUTORESEARCH_LPC_CORE_PULL_CHECK
 
 #endif  // FL_IS_ARM_LPC && !FASTLED_AUTORESEARCH_IEEE754_MODE && !FAULT_TEST
 
@@ -531,7 +533,7 @@ inline void autoResearchLowMemorySetup() {
 
 #if defined(FL_IS_ARM_LPC) && !defined(FASTLED_AUTORESEARCH_IEEE754_MODE) && \
     !defined(FASTLED_AUTORESEARCH_FAULT_TEST)
-#if defined(FL_IS_ARM_LPC_845)
+#if defined(FL_IS_ARM_LPC_845)  // ok platform specific - only the LPC845 has a pin-probe skip table
     // LPC845 only: it is the LPC with a pin-probe skip table (SWD, RESET,
     // ISP, console USART). Elsewhere the scan would drive those pads.
     remote.bind("findConnectedPins",
@@ -627,11 +629,12 @@ inline void autoResearchLowMemorySetup() {
               << stats.min_ns << ',' << stats.max_ns;
             return s.str();
         });
-#if defined(FL_IS_ARM_LPC_845)
+#if defined(FL_IS_ARM_LPC_845) && defined(FASTLED_AUTORESEARCH_LPC_CORE_PULL_CHECK)  // ok platform specific - LPC8xx core pull check, --pin-toggle-rx build only
     // corePullCheck: [pin_a, pin_b, pin_c, pin_d] -> "<pin>:up=..,down=.. ..."
     // (pin < 0 = unused slot); `bash autoresearch lpc845 --pin-toggle-rx`
-    // runs it on scan-idle pins. Shares pinToggleRx's binding signature, so
-    // it adds only its own body to the image.
+    // defines FASTLED_AUTORESEARCH_LPC_CORE_PULL_CHECK and runs it on
+    // scan-idle pins. Other builds leave it unbound; only --pin-toggle-rx
+    // calls it, and there a missing binding fails the run.
     remote.bind("corePullCheck",
         [](int pin_a, int pin_b, int pin_c, int pin_d) -> fl::string {
             fl::sstream out;

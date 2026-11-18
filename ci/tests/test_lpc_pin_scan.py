@@ -85,6 +85,15 @@ class _PullBench:
     def call_flat(self, method: str, args: object = None, **_k: object) -> object:
         if method == "findConnectedPins":
             return BENCH_REPLY
+        return self._pull(args)
+
+    def _pull(self, args: object) -> object:
+        # The binding probe (four -1 slots) touches no pad; a bound RPC
+        # answers it with an empty string.
+        from ci.autoresearch.rpc_bench import METHOD_NOT_FOUND
+
+        if args == [-1] * 4:
+            return METHOD_NOT_FOUND if self.pull_reply is METHOD_NOT_FOUND else ""
         self.pull_args = args
         return self.pull_reply
 
@@ -105,8 +114,84 @@ def test_core_pull_check_fails_on_wrong_slot_core() -> None:
     assert check_core_pulls(bench, "t") is False
 
 
-def test_core_pull_check_skips_when_unbound() -> None:
+def test_core_pull_check_fails_when_unbound() -> None:
+    # Only the --pin-toggle-rx build calls this, and it always compiles the
+    # RPC in; a missing binding means the define never reached the build.
     from ci.autoresearch.lpc_pin_scan import check_core_pulls
     from ci.autoresearch.rpc_bench import METHOD_NOT_FOUND
 
-    assert check_core_pulls(_PullBench(METHOD_NOT_FOUND), "t") is None
+    assert check_core_pulls(_PullBench(METHOD_NOT_FOUND), "t") is False
+
+
+class _IdleBench(_PullBench):
+    """Scan reports exactly `idle` as free; everything else is stuck."""
+
+    def __init__(self, idle: set[int], pull_reply: object) -> None:
+        super().__init__(pull_reply)
+        self.stuck = " ".join(f"{p}H" for p in range(30) if p not in idle)
+
+    def call_flat(self, method: str, args: object = None, **_k: object) -> object:
+        if method == "findConnectedPins":
+            return f"pairs=;stuck={self.stuck} ;skip=;od="
+        return self._pull(args)
+
+
+def test_core_pull_check_skips_iocon_identity_pins() -> None:
+    from ci.autoresearch.lpc_pin_scan import check_core_pulls
+
+    # Only P0_4, P0_8, P0_24 are idle. IOCON_INDEX_PIO0_4 == 4 and
+    # IOCON_INDEX_PIO0_24 == 24, so a core indexing IOCON by GPIO bit still
+    # pulls the right pad there; only P0_8 can catch that bug.
+    bench = _IdleBench({4, 8, 24}, "8:up=1,down=0 ")
+    assert check_core_pulls(bench, "t") is True
+    assert bench.pull_args == [8, -1, -1, -1]
+
+
+def test_identity_pins_never_take_a_slot() -> None:
+    from ci.autoresearch.lpc_pin_scan import check_core_pulls
+
+    # More than four idle pins, identity pins among them: they must not use
+    # up any of the four slots.
+    bench = _IdleBench({4, 24, 26, 27, 28, 29}, "26:up=1,down=0 " * 4)
+    check_core_pulls(bench, "t")
+    assert bench.pull_args == [26, 27, 28, 29]
+
+
+def test_only_identity_pins_idle_is_skipped() -> None:
+    from ci.autoresearch.lpc_pin_scan import check_core_pulls
+
+    bench = _IdleBench({4, 24}, "unused")
+    assert check_core_pulls(bench, "t") is None
+    assert bench.pull_args is None
+
+
+def test_unbound_fails_even_when_no_pin_qualifies() -> None:
+    from ci.autoresearch.lpc_pin_scan import check_core_pulls
+    from ci.autoresearch.rpc_bench import METHOD_NOT_FOUND
+
+    # Only identity pins idle would skip the check; a missing binding must
+    # still fail the run.
+    assert check_core_pulls(_IdleBench({4, 24}, METHOD_NOT_FOUND), "t") is False
+
+
+def test_unbound_fails_even_when_the_scan_fails() -> None:
+    from ci.autoresearch.lpc_pin_scan import check_core_pulls
+    from ci.autoresearch.rpc_bench import METHOD_NOT_FOUND
+
+    class _NoScan:
+        def call_flat(self, method: str, **_k: object) -> object:
+            return METHOD_NOT_FOUND
+
+    assert check_core_pulls(_NoScan(), "t") is False
+
+
+def test_unanswered_binding_probe_fails() -> None:
+    # A timed-out probe (None) has not confirmed the binding, so the run must
+    # not fall through to a skip.
+    from ci.autoresearch.lpc_pin_scan import check_core_pulls
+
+    class _Silent:
+        def call_flat(self, method: str, **_k: object) -> object:
+            return None
+
+    assert check_core_pulls(_Silent(), "t") is False
