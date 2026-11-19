@@ -607,7 +607,13 @@ namespace make_unsigned_detail {
 template <fl::size Size> struct unsigned_by_size;
 template <> struct unsigned_by_size<1> { using type = unsigned char; };
 template <> struct unsigned_by_size<2> { using type = unsigned short; };
-template <> struct unsigned_by_size<4> { using type = unsigned int; };
+// `unsigned int` is 16-bit on AVR, where the 4-byte unsigned type is
+// `unsigned long`.
+template <> struct unsigned_by_size<4> {
+    using type = typename conditional<sizeof(unsigned int) == 4, unsigned int,
+                                      unsigned long>::type;
+    FL_STATIC_ASSERT(sizeof(type) == 4, "no 4-byte unsigned type");
+};
 template <> struct unsigned_by_size<8> { using type = unsigned long long; };
 
 } // namespace make_unsigned_detail
@@ -627,6 +633,16 @@ struct make_unsigned<T, typename enable_if<
 >::type> {
     using type = typename make_unsigned_detail::unsigned_by_size<sizeof(T)>::type;
 };
+
+// Checked on every target: a wrong width silently truncates (AVR, 16-bit int).
+FL_STATIC_ASSERT(sizeof(make_unsigned<long>::type) == sizeof(long),
+                 "make_unsigned<long> must keep the width of long");
+FL_STATIC_ASSERT(sizeof(make_unsigned<short>::type) == sizeof(short),
+                 "make_unsigned<short> must keep the width of short");
+FL_STATIC_ASSERT(sizeof(make_unsigned<int>::type) == sizeof(int),
+                 "make_unsigned<int> must keep the width of int");
+FL_STATIC_ASSERT(sizeof(make_unsigned<long long>::type) == sizeof(long long),
+                 "make_unsigned<long long> must keep the width of long long");
 
 //-------------------------------------------------------------------------------
 // Type size ranking for promotion rules
