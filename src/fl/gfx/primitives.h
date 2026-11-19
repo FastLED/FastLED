@@ -282,6 +282,21 @@ inline fl::i32 floorDiv16I32(fl::i32 v) FL_NO_EXCEPT { return v >> 16; }
 /// Same for i64 (line crossings can exceed i32 for steep short edges).
 inline fl::i64 floorDiv16I64(fl::i64 v) FL_NO_EXCEPT { return v >> 16; }
 
+/// Pixel column floor(v / 65536) of a row-extent bound v = x +/- hw,
+/// clamped to [-1, width]. A near-horizontal edge puts v ~2^45 Q16 off the
+/// canvas even for a small on-canvas polygon, so the column must be clamped
+/// before it is narrowed to int (16-bit on AVR, where the unclamped value
+/// wrapped and blanked whole rows). The clamp is lossless for the kernel:
+/// every use compares the bound against a column in [0, width).
+inline int polyColClamped(fl::i64 v, int width) FL_NO_EXCEPT {
+    // |x| < 2^45 + kPolyQ16Max and hw < 2^45 (see PolyEdge), so |v| < 2^47
+    // and v >> 16 fits i32 under the vertex clamp.
+    const fl::i32 c = static_cast<fl::i32>(floorDiv16I64(v));
+    if (c < -1) return -1;
+    if (c > width) return width;
+    return static_cast<int>(c);  // fl-lint: int-template-ok clamped to [-1, width] first
+}
+
 /// Per-edge scanline state for drawPolygon (even-odd fill, band model).
 /// x is the crossing at the CURRENT row's center (Q16.16, floored — the
 /// anchor polyLineT28 integrates from) and advances exactly per row via a
@@ -1403,8 +1418,8 @@ inline void detail::drawPolygonCore(Canvas<PixelT>& canvas, const PixelT& color,
     fl::i32 ev[MAXN + 2];  // band boundaries: row ends + vertex y's in row
     fl::u8 idx[MAXN];      // a band's active edges, sorted by midpoint key
     fl::i64 keys[MAXN];    // per-edge midpoint sort keys (see polySortBand)
-    fl::i32 lx0a[MAXN];    // per-row per-edge column extents (left, right)
-    fl::i32 lx1a[MAXN];
+    int lx0a[MAXN];        // per-row per-edge column extents (left, right),
+    int lx1a[MAXN];        // clamped to [-1, width] (see polyColClamped)
     fl::i32 accb[CHUNK];   // per-row CHUNK-px coverage accumulator (T units)
 
     for (int py = ymin; py <= ymax; ++py) {
@@ -1441,13 +1456,13 @@ inline void detail::drawPolygonCore(Canvas<PixelT>& canvas, const PixelT& color,
         // this superset can only add no-op chunks that the fill loop
         // skips; the exact-x ordering of polySortBand only affects span
         // pairing.
-        fl::i32 minLx0 = 0, maxLx1 = 0;
+        int minLx0 = 0, maxLx1 = 0;
         int nactive = 0;
         for (int e = 0; e < nedges; ++e) {
             const PolyEdge& ed = edges[e];
             if (py < ed.py0 || py > ed.py1) continue;
-            lx0a[e] = static_cast<fl::i32>(detail::floorDiv16I64(ed.x - ed.hw));
-            lx1a[e] = static_cast<fl::i32>(detail::floorDiv16I64(ed.x + ed.hw));
+            lx0a[e] = detail::polyColClamped(ed.x - ed.hw, width);
+            lx1a[e] = detail::polyColClamped(ed.x + ed.hw, width);
             if (nactive++ == 0) { minLx0 = lx0a[e]; maxLx1 = lx1a[e]; }
             else {
                 if (lx0a[e] < minLx0) minLx0 = lx0a[e];
@@ -1512,8 +1527,8 @@ inline void detail::drawPolygonCore(Canvas<PixelT>& canvas, const PixelT& color,
                 for (int p = 0; p + 1 < nc; p += 2) {
                     const PolyEdge& L = edges[bidx[k][p]];
                     const PolyEdge& R = edges[bidx[k][p + 1]];
-                    const fl::i32 Ll0 = lx0a[bidx[k][p]], Ll1 = lx1a[bidx[k][p]];
-                    const fl::i32 Rl0 = lx0a[bidx[k][p + 1]], Rl1 = lx1a[bidx[k][p + 1]];
+                    const int Ll0 = lx0a[bidx[k][p]], Ll1 = lx1a[bidx[k][p]];
+                    const int Rl0 = lx0a[bidx[k][p + 1]], Rl1 = lx1a[bidx[k][p + 1]];
                     int pl = (Ll0 < Rl0) ? Ll0 : Rl0;
                     if (pl < cs) pl = cs;
                     int ph = (Ll1 > Rl1) ? Ll1 : Rl1;

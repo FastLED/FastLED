@@ -1040,6 +1040,24 @@ FL_TEST_CASE("drawPolygon row extents: floor-div-by-16 shift pins") {
                     fl::gfx::detail::floorDivI64(samples[i], 65536));
 }
 
+FL_TEST_CASE("drawPolygon row extents: column bounds clamp to [-1, width]") {
+    // polyColClamped narrows (x +/- hw) >> 16 to int (16-bit on AVR). A
+    // near-horizontal edge puts that ~2^29 px off the canvas; unclamped,
+    // the AVR int wrapped and blanked whole rows of on-canvas polygons.
+    using fl::gfx::detail::polyColClamped;
+    const fl::i64 far = (fl::i64)1 << 46;
+    FL_CHECK_EQ(polyColClamped(far, 16), 16);
+    FL_CHECK_EQ(polyColClamped(-far, 16), -1);
+    FL_CHECK_EQ(polyColClamped((fl::i64)40000 << 16, 16), 16);   // past 16-bit int
+    FL_CHECK_EQ(polyColClamped(-((fl::i64)40000 << 16), 16), -1);
+    FL_CHECK_EQ(polyColClamped(-1, 16), -1);                    // floor, not trunc
+    FL_CHECK_EQ(polyColClamped(0, 16), 0);
+    FL_CHECK_EQ(polyColClamped(((fl::i64)15 << 16) + 65535, 16), 15);
+    FL_CHECK_EQ(polyColClamped((fl::i64)16 << 16, 16), 16);
+    FL_CHECK_EQ(polyColClamped((fl::i64)17 << 16, 16), 16);
+    FL_CHECK_EQ(polyColClamped(-((fl::i64)2 << 16), 16), -1);
+}
+
 FL_TEST_CASE("drawPolygon steep sub-pixel edge crossing a row boundary") {
     // Regression for the per-row extent of single-row edges (dy < 65536).
     // The 16-vertex shape below has a steep edge (dy = 63904) spanning rows

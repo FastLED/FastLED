@@ -5,6 +5,7 @@
 #include "fl/gfx/gfx.h"
 #include "fl/stl/chrono.h"
 #include "fl/math/fixed_point/s16x16.h"
+#include "fl/stl/bitset.h"
 #include "tests/fl/gfx/poly_tinygl_ref.h"
 
 // ============================================================================
@@ -411,6 +412,16 @@ FL_TEST_CASE("drawPolygon ABuffer: 32-bit coverage popcounts count the high word
         FL_CHECK_EQ((int)fl::gfx::detail::polyTGPopcount32(masks[i]), expected[i]);
         FL_CHECK_EQ((int)fl::gfx::detail::polyABPopcount32(masks[i]), expected[i]);
     }
+}
+
+FL_TEST_CASE("drawPolygon ABuffer: AVR byte-popcount table is exact") {
+    // polyABPop8 reads this table on AVR only (the host uses the builtin),
+    // so check every entry here. A hand-typed copy had bytes 0x58..0x5F and
+    // 0x98..0x9F one low, which dropped a subpixel on AVR (Polygon's knot
+    // scene rendered differently than on the host).
+    const fl::u8* table = fl::gfx::detail::polyABPop8Table();
+    for (int v = 0; v < 256; ++v)
+        FL_CHECK_EQ((int)FL_PGM_READ_BYTE_NEAR(&table[v]), (int)fl::popcount((fl::u8)v));
 }
 
 // ----------------------------------------------------------------------------
