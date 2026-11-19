@@ -51,3 +51,13 @@
 #ifndef FL_PIN_SPI_CLOCK_1
 #define FL_PIN_SPI_CLOCK_1 2
 #endif
+
+/// @brief Data pin for a second clocked/SPI strip, distinct from the `_1` pair.
+#ifndef FL_PIN_SPI_DATA_2
+#define FL_PIN_SPI_DATA_2 3
+#endif
+
+/// @brief Clock pin for a second clocked/SPI strip, distinct from the `_1` pair.
+#ifndef FL_PIN_SPI_CLOCK_2
+#define FL_PIN_SPI_CLOCK_2 4
+#endif

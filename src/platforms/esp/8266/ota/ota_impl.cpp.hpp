@@ -14,14 +14,11 @@
 #include "fl/stl/noexcept.h"
 #include "platforms/is_platform.h"
 
-#if defined(FL_IS_ESP8266)
+#include "platforms/esp/8266/ota/ota_support.h"
 
-#include "fl/stl/has_include.h"
-
-// Verified-header gate: only build the backend when the core actually ships
-// ArduinoOTA (never guess). WiFi.h ships with the same core.
-#if FL_HAS_INCLUDE(<ArduinoOTA.h>) && FL_HAS_INCLUDE(<WiFi.h>)
-#define FL_ESP8266_OTA_SUPPORTED
+// Verified-header gate, shared with platforms/ota.cpp.hpp: only build the
+// backend when the core actually ships ArduinoOTA and ESP8266WiFi (never guess).
+#if FL_ESP8266_OTA_SUPPORTED
 
 #include "fl/log/log.h"
 #include "fl/net/ota/ota.h"  // fl::net::ota::Service
@@ -34,13 +31,13 @@
 
 // IWYU pragma: begin_keep
 #include <ArduinoOTA.h>
-#include <WiFi.h>
+#include <ESP8266WiFi.h>
 // IWYU pragma: end_keep
 
 namespace fl {
 namespace platforms {
 
-/// ESP8266 OTA via the Arduino core's ArduinoOTA (Arduino-IDE OTA on port 3232).
+/// ESP8266 OTA via the Arduino core's ArduinoOTA (Arduino-IDE OTA on the core default, port 8266).
 ///
 /// The ESP8266 core has no HTTP web-OTA server in FastLED's stack, so
 /// `getFailedServices()` reports `HTTP_FAILED` (Web OTA unavailable) while
@@ -194,5 +191,4 @@ fl::shared_ptr<IOTA> IOTA::create() FL_NO_EXCEPT {
 }  // namespace platforms
 }  // namespace fl
 
-#endif  // FL_HAS_INCLUDE(<ArduinoOTA.h>) && FL_HAS_INCLUDE(<WiFi.h>)
-#endif  // FL_IS_ESP8266
+#endif  // FL_ESP8266_OTA_SUPPORTED
