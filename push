@@ -1,0 +1,94 @@
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.11"
+# dependencies = []
+# ///
+"""Push a branch the way this repo expects: run the platform gates, then push.
+
+`src/platforms/**` changes are compiled into firmware that hosted CI only builds
+on `master`, so a broken platform driver reaches review and is found late. This
+script turns the diff into the emulator runs it implies (`ci/emu_gate.py
+--run`) before anything leaves the machine, then pushes and opens the PR.
+
+    ./push                      # gate, push, open (or reuse) the PR
+    ./push --no-gate            # skip the emulator runs (docs-only work)
+    EMU_GATE=enforce ./push     # refuse to push when the gate cannot run
+
+Exit codes: 0 pushed, 1 a gate or git step failed, 2 usage, 3 refused (dirty
+tree, or the gate is required and could not run).
+"""
+
+from __future__ import annotations
+
+import os
+import subprocess
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent
+GATE = ROOT / "ci" / "emu_gate.py"
+ENFORCE = os.environ.get("EMU_GATE", "warn") == "enforce"
+
+
+def run(args: list[str], *, capture: bool = False, check: bool = True) -> subprocess.CompletedProcess[str]:
+    print(f"+ {' '.join(args)}", flush=True)
+    return subprocess.run(args, cwd=ROOT, text=True, capture_output=capture, check=check)
+
+
+def git(*args: str, capture: bool = False) -> subprocess.CompletedProcess[str]:
+    return run(["git", *args], capture=capture)
+
+
+def main(argv: list[str]) -> int:
+    want_gate = "--no-gate" not in argv
+    branch = git("rev-parse", "--abbrev-ref", "HEAD", capture=True).stdout.strip()
+    if branch in {"master", "HEAD"}:
+        print(f"./push: refusing to push from {branch}; make a branch first", file=sys.stderr)
+        return 3
+    if git("status", "--porcelain", capture=True).stdout.strip():
+        print("./push: working tree is dirty; commit or stash before pushing", file=sys.stderr)
+        return 3
+
+    if want_gate and GATE.is_file():
+        # --check first: it is pure git + toml, so a diff with no platform
+        # changes costs milliseconds and runs nothing.
+        probe = run(
+            [sys.executable, "-P", str(GATE), "--check", "--base", "origin/master", "--head", "HEAD"],
+            capture=True,
+            check=False,
+        )
+        if probe.returncode == 3:
+            print("./push: no platform paths changed; skipping the emulator gate")
+        elif probe.returncode != 0:
+            print(f"./push: emu gate --check failed ({probe.returncode}); see its output", file=sys.stderr)
+            if ENFORCE:
+                return 3
+        else:
+            ran = run(
+                [sys.executable, "-P", str(GATE), "--run", "--base", "origin/master", "--head", "HEAD"],
+                check=False,
+            )
+            if ran.returncode != 0:
+                print("./push: the emulator gate failed; fix it before pushing", file=sys.stderr)
+                if ENFORCE:
+                    return 1
+                print("./push: EMU_GATE=warn (default): pushing anyway")
+    elif want_gate:
+        print("./push: ci/emu_gate.py is missing; no platform gate ran")
+
+    run(["git", "push", "-u", "origin", branch])
+
+    pr = subprocess.run(
+        ["gh", "pr", "view", "--json", "number", "--jq", ".number"],
+        cwd=ROOT, text=True, capture_output=True,
+    )
+    if pr.returncode != 0 or not pr.stdout.strip():
+        title = git("log", "-1", "--format=%s", capture=True).stdout.strip()
+        run(["gh", "pr", "create", "--fill", "--title", title, "--head", branch])
+    else:
+        print(f"./push: PR #{pr.stdout.strip()} already exists for {branch}")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main(sys.argv[1:]))
