@@ -1,12 +1,45 @@
 FastLED 3.10.10
 =============================
-  * **Channels: engine worker defaults at compile time**
-    * `FL_ENGINE_WORKER_CORE` and `FL_ENGINE_WORKER_PRIORITY` set defaults for engines that honor them, currently the ESP32 LCD/I2S clockless driver. Define them the same way in every translation unit. Unset, `Priority::Auto` stays `High` on that worker.
+  * **New: `drawPolygon` in `fl::gfx` (Exact + ABuffer)** (#5269)
+    * A new polygon fill primitive runs through the existing Exact and ABuffer pipelines. The AVR TinyGL reference path was fixed at its root, so the same call works on 8-bit targets.
+    * The default `MAXN`/`CHUNK` follow the target's stack size instead of its flash tier, so small-stack parts such as STM32F101x6/F102x6 no longer overflow on first use (#5288, #5296, #5298).
+    * Exact 28-bit edge division stays correct for very large edges (#5289), and 32-bit population counts stay 32-bit on 16-bit-int platforms (#5291).
+  * **Channels: lazy driver bindings and engine worker defaults**
+    * `FastLED.enable<Bus>()` binds drivers lazily, so `add(cfg)` no longer links every driver into the sketch (#5207).
+    * `addLeds` falls back to the enabled driver when its own driver is disabled, and warns once per second instead of failing silently (#5213).
+    * `FL_ENGINE_WORKER_CORE` and `FL_ENGINE_WORKER_PRIORITY` set defaults for engines that honor them, currently the ESP32 LCD/I2S clockless driver. Define them the same way in every translation unit. Unset, `Priority::Auto` stays `High` on that worker (#5054).
+    * Named worker priorities no longer cost memory (#5018).
+  * **Software SPI: faster on every platform that streams GPIO** (#5083-#5128)
+    * Data writes are branch-free and atomic where the hardware has set/clear registers: AVR (#5083), Teensy 4 (#5084), Teensy 3.x K20/K66 (#5097, #5099), Teensy LC (#5102), ESP32 (#5090), ESP8266 (#5021), SAMD21/SAMD51 (#5094, #5095), RP2040 (#5098), RP2350 (#5101), Apollo3 (#5093), nRF52 (#5121), SAM3X (#5118), STM32 (#5115), LPC11/LPC8xx (#5109, #5111), Renesas RA (#5103), MGM240 (#5105).
+    * The shared bit-bang writer hoists lane and mask resolution out of the bit loop (#5128), so every platform with a full-port policy benefits.
+    * ESP8266 generic bit-bang SPI on ordinary GPIO: the 512-byte bulk path improves from about 3.10 to 5.36 Mbit/s at 80 MHz and 4.42 to 6.66 Mbit/s at 160 MHz. Pairs using GPIO16 remain limited by its slower RTC register.
   * **AVR: native SPI `writeBit` fixes (SM16716)**
     * `writeBit<BIT>` tests the selected bit on USART and SPI0 parts instead of treating any nonzero byte as high.
     * All five native implementations now finish the pending byte and hand the pins to GPIO, so the bit reaches the wire on USART and SPI0 parts (Nano Every) and a pending byte is no longer cut off on classic parts (Uno). These changes were checked against datasheets and in host tests but **not on hardware**; please report SM16716 results.
   * **ESP8266: faster generic bit-bang SPI on ordinary GPIO**
     * The 512-byte bulk path improves from about 3.10 to 5.36 Mbit/s at 80 MHz and 4.42 to 6.66 Mbit/s at 160 MHz. Pairs using GPIO16 remain limited by its slower RTC register.
+  * **LPC845 / LPC804: native pin backend and SCT+DMA clockless engine**
+    * A native LPC845/LPC804 pin backend replaces the fallback, and forced software pins are honoured (#5261).
+    * The LPC845 SCT+DMA clockless engine now drives the wire: the `--pwm-dma-cl` hang is gone and WS2812 loopback decodes on silicon (#5272, #5275).
+    * The DMA hub clears and latches every pending `ERRINT`, waits for a leftover frame, and halts SCT+DMA together on a DMA error (#5277, #5283).
+  * **ESP32: DMA and PSRAM fixes**
+    * RMT5 skips the DMA channel automatically for short strips (#5228), and `FL_RMT5_USE_DMA=0` keeps ESP32-S3 RMT off the 4 KB DMA block (#5166).
+    * PARLIO sizes its DMA ring and TX descriptors to the frame instead of a fixed worst case (#5232).
+    * RMT5 reclaims callback contexts on channel deletion (#5019) and sets `intr_priority` from IDF 5.1.2 in TX and RX (#5219).
+    * PSRAM pins are masked by installed PSRAM size, not free size (#5221). Native SPI streams in chunks and links only the drivers a sketch uses (#5002, #5014).
+  * **Power management: the budget is a strict upper bound** (#5139)
+    * `set_max_power_in_volts_and_milliamps` and the per-strip budget are now strict upper bounds with a per-MCU baseline and MCU/dark overrides (#5180).
+    * Dimming no longer increases as the budget rises past the baseline (#5159), and the strip stays lit when the budget is under the dark-current baseline (#5153).
+  * **nRF51: compiles and links again** (#5119, #5154)
+    * FastPin `toggle()` is race-free through `OUTSET`/`OUTCLR` (#5158), and `FASTLED_FORCE_SOFTWARE_PINS` works without breaking clockless or SPI0 (#5156).
+  * **Fixes**
+    * `fl::sort` is an introsort with three-way partitioning, so equal keys no longer degrade (#5005).
+    * ESP32 static-initialisation guards are safe under LTO (#4994, #5007).
+    * `FASTLED_FORCE_SOFTWARE_PINS` is honoured or rejected at compile time on STM32, SAMD, Teensy 3.x, nRF52, MGM240, Giga and LPC instead of silently ignored or crashing (#5149, #5150, #5151, #5152, #5169, #5170, #5171, #5203, #5204).
+    * `writeBit` hands pins to GPIO and finishes pending bytes on AVR, SAM3X, SAMD, STM32, Teensy 4 and Teensy LC (#5075, #5080, #5131, #5142, #5143, #5147, #5174, #5175).
+    * Pin maps: RP2350 GPIO32-47 via `GPIO_HI` (#5172), MGM240 per-variant maps (#5173), SAMD variant pins at or above `PINS_COUNT` (#5206), and nRF52 P1 short-form pins (#5149).
+  * **CI**
+    * `master` merges through a merge queue with a CI summary (#5077); untrusted issue and PR text is sanitised before automation reads it (#4938).
 
 FastLED 3.10.9
 =============================
