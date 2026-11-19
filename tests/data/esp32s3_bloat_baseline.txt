@@ -409,4 +409,20 @@
 # the CI Blink report contains no ResponseLutsQ16 symbol. The local fbuild
 # symbol total remains ~4 KB higher for the same source (FastLED/fbuild#1456),
 # so this ratchet uses the CI measurement from PR #4511.
-320359
+#
+# +20 B (320359 -> 320379), PR #5300 (unify the ESP8266 OTA support gate):
+# platforms/ota.cpp.hpp and the ESP8266 backend each carried their own copy of
+# the "is OTA supported" check, and they had drifted -- the ESP8266 backend
+# required <WiFi.h>, which the ESP8266 core does not ship, so the null
+# IOTA::create() was dropped and the backend's own copy was never compiled,
+# leaving the OTA example unlinkable. Both now read one gate in
+# platforms/esp/8266/ota/ota_support.h. platforms/ota.cpp.hpp compiles into
+# every platform's image, ESP32-S3 included, so the unified gate changes the
+# null-stub branch that Blink links. Measured by the hosted bloat regression
+# job on this PR's head 6257b1c64: image_flash 320379 B, attributed RAM 23000 B
+# unchanged. Layout drift of this size is normal for a changed unity TU (the
+# file's own history records +19 B and +3 B for comparable edits), but the
+# change is intentional and is recorded as a decision rather than left as
+# headroom. Neither the 320503 B flash ceiling nor the 40016 B RAM ceiling
+# moves.
+320379
