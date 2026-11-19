@@ -326,6 +326,8 @@ int setPwmFrequency(int pin, u32 frequency_hz) FL_NO_EXCEPT {
         ch = pwm_state::allocate();
         if (!ch) {
             FL_WARN("setPwmFrequency: All " << (static_cast<int>(pwm_state::MAX_PWM_CHANNELS)) << " channels in use");
+            // Nothing tracks this pin, so do not let the platform keep the frequency either
+            platforms::releasePwmFrequencyNative(pin);
             return -2;
         }
 
