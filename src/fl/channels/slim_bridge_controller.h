@@ -12,6 +12,7 @@
 
 #pragma once
 
+#include "fl/stl/compiler_control.h"
 #include "fl/stl/static_assert.h"
 #include "fl/stl/noexcept.h"
 #include "fl/stl/vector.h"
@@ -208,6 +209,7 @@ protected:
         if (!Policy::enabled(DriverTraits::instance())) {
             fallback = Policy::fallback(mData);
             IChannelDriver& wanted = DriverTraits::instance();
+            FL_UNUSED(wanted);  // FL_WARN_EVERY compiles out on low-memory targets
             if (!fallback) {
                 FL_WARN_EVERY(1000, "addLeds: driver '" << wanted.getName().c_str()
                               << "' is not enabled and no enabled driver can take this strip - dropping frame. "

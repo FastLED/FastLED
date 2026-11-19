@@ -343,52 +343,84 @@ def _attach_adapter(monkeypatch, errors: list[Exception | None]):
     return adapter, monitors
 
 
-def test_native_adapter_retries_a_session_closed_attach(monkeypatch) -> None:
-    """FastLED#5271: the daemon's 3 s open cap surfaces as 'session closed'."""
-    adapter, monitors = _attach_adapter(
-        monkeypatch, [ConnectionError("session closed"), None]
-    )
-    asyncio.run(adapter.connect())
-    assert [m.enters for m in monitors] == [1, 1]
-    assert monitors[0].exits == 1  # the failed monitor is released
-    assert adapter._monitor is monitors[1]  # and a fresh one attached
-
-
+_HANDSHAKE_TIMEOUT = "daemon WebSocket attach/handshake timed out"
 _DAEMON_ERROR = "failed to connect to daemon WebSocket: connection actively refused"
 
 
-def test_native_adapter_attach_retry_is_bounded(monkeypatch) -> None:
-    adapter, monitors = _attach_adapter(
-        monkeypatch, [ConnectionError("session closed") for _ in range(4)]
-    )
-    with pytest.raises(ConnectionError, match="session closed"):
-        asyncio.run(adapter.connect())
-    assert [m.enters for m in monitors] == [1, 1, 1, 0]
-
-
-def test_native_adapter_daemon_recovery_counts_against_attach_limit(
-    monkeypatch,
-) -> None:
-    """Two 'session closed' then a lost daemon: no fourth attach."""
+def _count_restarts(monkeypatch) -> list[None]:
     from ci.util import serial_interface
 
     restarts: list[None] = []
     monkeypatch.setattr(
         serial_interface, "ensure_fbuild_daemon", lambda: restarts.append(None)
     )
+    return restarts
+
+
+def test_native_adapter_retries_a_handshake_timeout(monkeypatch) -> None:
+    """fbuild 2.5.52's client times out the WebSocket handshake after 5 s on a
+    CPU-starved host; the daemon is alive, so retry without restarting it."""
+    restarts = _count_restarts(monkeypatch)
+    adapter, monitors = _attach_adapter(
+        monkeypatch, [ConnectionError(_HANDSHAKE_TIMEOUT), None]
+    )
+    asyncio.run(adapter.connect())
+    assert [m.enters for m in monitors] == [1, 1]
+    assert monitors[0].exits == 1  # the failed monitor is released
+    assert adapter._monitor is monitors[1]  # and a fresh one attached
+    assert restarts == []
+
+
+def test_native_adapter_attach_retry_is_bounded(monkeypatch) -> None:
+    """One handshake-timeout retry; a second timeout is not a lost daemon."""
+    restarts = _count_restarts(monkeypatch)
+    adapter, monitors = _attach_adapter(
+        monkeypatch, [ConnectionError(_HANDSHAKE_TIMEOUT) for _ in range(3)]
+    )
+    with pytest.raises(ConnectionError, match="handshake timed out") as raised:
+        asyncio.run(adapter.connect())
+    assert [m.enters for m in monitors] == [1, 1, 0]
+    assert raised.value.__notes__ == [
+        f"attach attempt 1 failed: ConnectionError: {_HANDSHAKE_TIMEOUT}"
+    ]
+    assert restarts == []
+
+
+def test_native_adapter_timeout_then_lost_daemon_gets_both_recoveries(
+    monkeypatch,
+) -> None:
+    """The handshake retry and the daemon restart are separate allowances."""
+    restarts = _count_restarts(monkeypatch)
+    adapter, monitors = _attach_adapter(
+        monkeypatch,
+        [ConnectionError(_HANDSHAKE_TIMEOUT), RuntimeError(_DAEMON_ERROR), None],
+    )
+    asyncio.run(adapter.connect())
+    assert [m.enters for m in monitors] == [1, 1, 1]
+    assert restarts == [None]
+    assert adapter._monitor is monitors[2]
+
+
+def test_native_adapter_attach_makes_at_most_three_attempts(monkeypatch) -> None:
+    """Timeout, lost daemon, then any failure: the third error is raised."""
+    restarts = _count_restarts(monkeypatch)
     adapter, monitors = _attach_adapter(
         monkeypatch,
         [
-            ConnectionError("session closed"),
-            ConnectionError("session closed"),
+            ConnectionError(_HANDSHAKE_TIMEOUT),
+            RuntimeError(_DAEMON_ERROR),
             RuntimeError(_DAEMON_ERROR),
             None,
         ],
     )
-    with pytest.raises(RuntimeError, match="daemon WebSocket"):
+    with pytest.raises(RuntimeError, match="actively refused") as raised:
         asyncio.run(adapter.connect())
     assert [m.enters for m in monitors] == [1, 1, 1, 0]
-    assert restarts == []
+    assert restarts == [None]
+    assert isinstance(raised.value.__cause__, RuntimeError)
+    assert raised.value.__notes__ == [
+        f"attach attempt 1 failed: ConnectionError: {_HANDSHAKE_TIMEOUT}"
+    ]
 
 
 def test_native_adapter_handles_interrupt_during_daemon_recovery(
@@ -410,37 +442,90 @@ def test_native_adapter_handles_interrupt_during_daemon_recovery(
     assert len(handled) == 1
 
 
-def test_native_adapter_does_not_retry_other_attach_errors(monkeypatch) -> None:
-    adapter, monitors = _attach_adapter(
+def test_native_adapter_failed_daemon_recovery_keeps_the_first_attempt(
+    monkeypatch,
+) -> None:
+    """PR #5293 review: a timeout, a lost daemon, then a failed restart: the
+    restart error still carries the retried timeout as a note."""
+    from ci.util import serial_interface
+
+    def _restart_fails() -> None:
+        raise RuntimeError("daemon restart failed")
+
+    monkeypatch.setattr(serial_interface, "ensure_fbuild_daemon", _restart_fails)
+    adapter, _monitors = _attach_adapter(
         monkeypatch,
-        [ConnectionError("daemon rejected serial attach: permission denied"), None],
+        [ConnectionError(_HANDSHAKE_TIMEOUT), RuntimeError(_DAEMON_ERROR), None],
     )
-    with pytest.raises(ConnectionError, match="permission denied"):
+    with pytest.raises(RuntimeError, match="restart failed") as raised:
+        asyncio.run(adapter.connect())
+    assert isinstance(raised.value.__context__, RuntimeError)
+    assert raised.value.__notes__ == [
+        f"attach attempt 1 failed: ConnectionError: {_HANDSHAKE_TIMEOUT}"
+    ]
+
+
+@pytest.mark.parametrize(
+    "message",
+    [
+        # fbuild 2.5.52 reports the daemon's reason; a rejection is definitive.
+        "daemon rejected serial attach: port is leased by another workflow",
+        # fbuild#2083's old text no longer marks a retryable attach.
+        "session closed",
+    ],
+)
+def test_native_adapter_does_not_retry_other_attach_errors(
+    monkeypatch, message: str
+) -> None:
+    restarts = _count_restarts(monkeypatch)
+    adapter, monitors = _attach_adapter(monkeypatch, [ConnectionError(message), None])
+    with pytest.raises(ConnectionError, match=message):
         asyncio.run(adapter.connect())
     assert [m.enters for m in monitors] == [1, 0]
+    assert restarts == []
 
 
 def test_native_adapter_final_error_keeps_the_first_attempt(monkeypatch) -> None:
-    """FastLED#5281: 'session closed', a lost daemon, then a timeout after
-    recovery: the raised error is the timeout, caused by the daemon error,
-    with the first 'session closed' attempt kept as a note."""
-    from ci.util import serial_interface
-
-    monkeypatch.setattr(serial_interface, "ensure_fbuild_daemon", lambda: None)
+    """FastLED#5281: a handshake timeout, then a rejection: the raised error is
+    the rejection, with the retried timeout kept as a note."""
     adapter, _monitors = _attach_adapter(
         monkeypatch,
         [
-            ConnectionError("session closed"),
-            RuntimeError(_DAEMON_ERROR),
-            TimeoutError("handshake timed out"),
+            ConnectionError(_HANDSHAKE_TIMEOUT),
+            ConnectionError("daemon rejected serial attach: port busy"),
             None,
         ],
     )
-    with pytest.raises(TimeoutError) as raised:
+    with pytest.raises(ConnectionError, match="port busy") as raised:
         asyncio.run(adapter.connect())
+    assert raised.value.__notes__ == [
+        f"attach attempt 1 failed: ConnectionError: {_HANDSHAKE_TIMEOUT}"
+    ]
+
+
+def test_native_adapter_restarted_daemon_still_gets_the_timeout_retry(
+    monkeypatch,
+) -> None:
+    """Review of this change: the first attach to a freshly restarted daemon
+    is the likeliest to time out, so the restart must not use up its retry.
+    The note numbers the real attempt (FastLED#5281)."""
+    restarts = _count_restarts(monkeypatch)
+    adapter, monitors = _attach_adapter(
+        monkeypatch,
+        [
+            RuntimeError(_DAEMON_ERROR),
+            ConnectionError(_HANDSHAKE_TIMEOUT),
+            ConnectionError(_HANDSHAKE_TIMEOUT),
+            None,
+        ],
+    )
+    with pytest.raises(ConnectionError, match="handshake timed out") as raised:
+        asyncio.run(adapter.connect())
+    assert [m.enters for m in monitors] == [1, 1, 1, 0]
+    assert restarts == [None]
     assert isinstance(raised.value.__cause__, RuntimeError)
     assert raised.value.__notes__ == [
-        "attach attempt 1 of 3 failed: ConnectionError: session closed"
+        f"attach attempt 2 failed: ConnectionError: {_HANDSHAKE_TIMEOUT}"
     ]
 
 
@@ -487,25 +572,3 @@ def test_fbuild_adapter_close_exits_the_monitor_current_when_it_runs() -> None:
         release.set()  # never strand the worker, even on failure
         adapter._executor.shutdown(wait=True)
     assert (old.exits, new.exits) == (0, 1)
-
-
-def test_native_adapter_notes_number_the_real_attempt(monkeypatch) -> None:
-    """FastLED#5281 review: a daemon recovery uses up attempt 1, so the
-    retried 'session closed' is attempt 2 in the note too."""
-    from ci.util import serial_interface
-
-    monkeypatch.setattr(serial_interface, "ensure_fbuild_daemon", lambda: None)
-    adapter, _monitors = _attach_adapter(
-        monkeypatch,
-        [
-            RuntimeError(_DAEMON_ERROR),
-            ConnectionError("session closed"),
-            TimeoutError("handshake timed out"),
-            None,
-        ],
-    )
-    with pytest.raises(TimeoutError) as raised:
-        asyncio.run(adapter.connect())
-    assert raised.value.__notes__ == [
-        "attach attempt 2 of 3 failed: ConnectionError: session closed"
-    ]

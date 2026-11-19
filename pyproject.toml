@@ -317,7 +317,7 @@ dependencies = [
     # archives across LTO mode changes (FastLED/fbuild#1862/#1863).
     # 2.5.51 uses C assembly flags for extra libraries and honors archive
     # policy, including cache invalidation (FastLED/fbuild#1886/#1887).
-    "fbuild>=2.5.51",
+    "fbuild>=2.5.52",
     # Decodes the FastLED/boards `usb-vids.proto.zstd` registry artifact in
     # ci/util/audit_usb_registry.py. Declared explicitly rather than relied on
     # transitively (clang-tool-chain-bins pulls it in today) so the documented
