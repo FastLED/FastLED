@@ -462,7 +462,7 @@ class NativeFbuildSerialAdapter:
                 ):
                     # A lost post-deploy daemon: restart it once.
                     daemon_error = error
-                    try:
+                    try:  # noqa: KBI001 - connect() handles KeyboardInterrupt once for the whole attach
                         await asyncio.to_thread(ensure_fbuild_daemon)
                     except Exception as recovery_error:
                         _note_earlier_attempts(recovery_error, retried)
