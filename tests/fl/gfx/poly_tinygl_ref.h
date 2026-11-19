@@ -37,15 +37,17 @@
 ///    non-horizontal edges.
 /// 2. **Edge order.** The reference line shapes use a fixed edge order
 ///    that is sorted left-to-right; the blog's general polygon requires a
-///    static edge order, so this port sorts edges by xstart once at setup
-///    (stable). Two edges that leave a shared top vertex (same xstart and
-///    ytop) are ordered by xinc: the one with the smaller xinc is the left
-///    one on every row below it, and ordering them the other way round
+///    static edge order, so this port sorts edges once at setup by
+///    (xstart, ytop, xinc). Two edges that leave a shared top vertex (same
+///    xstart and ytop) are therefore adjacent and ordered by xinc: the one
+///    with the smaller xinc is the left one on every row below it, and
+///    ordering them the other way round
 ///    (input order) left convex polygons half filled (diamond, wide
 ///    triangles; see the scene tests in poly_abuffer.hpp). The monotonic
 ///    edgeStart/edgeEnd pointer walk is kept verbatim, including its
 ///    limitation for self-intersecting polygons (the x-order flips at the
-///    crossing and the far side mis-renders).
+///    crossing and the far side mis-renders) and for concave outlines whose
+///    edges' x-order on a row differs from the static order.
 /// 3. **Left of the canvas.** The reference starts the x-walk at the
 ///    unclamped xleft of the first edge (possibly negative) and
 ///    bounds-checks every write (blendPixel/drawLine). This port does the
@@ -164,6 +166,14 @@ inline fl::u8 polyTGPopcount32(fl::u32 v) FL_NO_EXCEPT {
 #endif
 }
 
+/// Static edge order for the port (deviation 2): lexicographic
+/// (xstart, ytop, xinc), a strict total order on distinct edge keys.
+inline bool polyTGEdgeLess(const TgEdge& a, const TgEdge& b) FL_NO_EXCEPT {
+    if (a.xstart != b.xstart) return a.xstart < b.xstart;
+    if (a.ytop != b.ytop) return a.ytop < b.ytop;
+    return a.xinc < b.xinc;
+}
+
 /// Faithful port of polygon.go drawPolygon (see file header).
 /// MAXN caps the vertex count like the other backends.
 template<typename PixelT, typename Coord, bool Overwrite, int MAXN>
@@ -211,15 +221,14 @@ inline void drawPolygonTinyGLRef(Canvas<PixelT>& canvas, const PixelT& color,
     }
     if (ne == 0) return;
 
-    // Static edge order (deviation 2): stable sort by xstart; of two edges
-    // leaving a shared top vertex (same xstart and ytop), the one heading
-    // further left goes first.
+    // Static edge order (deviation 2): sort by the total order (xstart,
+    // ytop, xinc). Edges leaving a shared top vertex become adjacent and
+    // the one heading further left goes first, even when other edges with
+    // the same xstart but a different ytop are interleaved in input order.
     for (int a = 1; a < ne; ++a) {
         const TgEdge v = edges[a];
         int b = a - 1;
-        while (b >= 0 && (edges[b].xstart > v.xstart ||
-                          (edges[b].xstart == v.xstart && edges[b].ytop == v.ytop &&
-                           edges[b].xinc > v.xinc))) {
+        while (b >= 0 && polyTGEdgeLess(v, edges[b])) {
             edges[b + 1] = edges[b];
             --b;
         }

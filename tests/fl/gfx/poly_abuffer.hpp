@@ -893,6 +893,35 @@ FL_TEST_CASE("drawPolygon scenes: TinyGL reference agrees where its assumptions 
     }
 }
 
+FL_TEST_CASE("drawPolygon scenes: TinyGL reference orders shared-top edges across equal-x edges") {
+    // Arrowhead (5,0) (8,8) (5,3) (2,8): the two edges leaving (5,3) share
+    // xstart with the two leaving (5,0). The pair from (5,0) must still be
+    // ordered left-then-right, or row 1 starts at the right edge and skips
+    // the covered pixel (4,1).
+    const PolyScPt arrow[4] = {
+        {PolyScFix::from_raw(5 * 65536), PolyScFix::from_raw(0)},
+        {PolyScFix::from_raw(8 * 65536), PolyScFix::from_raw(8 * 65536)},
+        {PolyScFix::from_raw(5 * 65536), PolyScFix::from_raw(3 * 65536)},
+        {PolyScFix::from_raw(2 * 65536), PolyScFix::from_raw(8 * 65536)}};
+    CRGB r[10 * 10], a[10 * 10];
+    for (int i = 0; i < 100; ++i) r[i] = a[i] = CRGB(0, 0, 0);
+    fl::gfx::Canvas<CRGB> cr(fl::span<CRGB>(r, 100), 10, 10);
+    fl::gfx::Canvas<CRGB> ca(fl::span<CRGB>(a, 100), 10, 10);
+    const fl::DrawMode ow = fl::DrawMode::DRAW_MODE_OVERWRITE;
+    polyScDraw<4, 1>(cr, kPolyScRef, CRGB(255, 255, 255), arrow, 4, ow);
+    polyScDraw<4, 1>(ca, kPolyScABuffer, CRGB(255, 255, 255), arrow, 4, ow);
+    FL_CHECK_GT((int)a[1 * 10 + 4].r, 0);
+    FL_CHECK_GT((int)r[1 * 10 + 4].r, 0);
+    // Rows 0..2 (above the notch) have only the two edges from (5,0)
+    // active, so the reference must agree with ABuffer there. Below row 3
+    // the four edges' x-order differs from their static order, the
+    // reference's documented limitation for concave outlines.
+    const long er = polyScEnergy(r, 30), ea = polyScEnergy(a, 30);
+    const long d = er > ea ? er - ea : ea - er;
+    fl::printf("  arrowhead rows 0..2: energy ref %ld abuffer %ld\n", er, ea);
+    FL_CHECK_LE(d * 10, ea);  // within 10%
+}
+
 FL_TEST_CASE("drawPolygon scenes: degenerate polygons leave the canvas untouched") {
     for (int k = 0; k < 3; ++k)
         for (int ti = 0; ti < kPolyScNumTimes; ++ti) {
@@ -922,7 +951,7 @@ FL_TEST_CASE("drawPolygon scenes: kernel scene hashes are pinned") {
         {0x551419c6u, 0x997a15bbu, 0x240953d6u},  // bowtie
         {0x22b823b1u, 0xb3e4e3f5u, 0x76946385u},  // subpixel
         {0xfe2e97cdu, 0x55c89912u, 0x55c89912u},  // clamp
-        {0x1bfa3bf9u, 0xb01f1885u, 0x657addb5u},  // sliver
+        {0x1bfa3bf9u, 0xb01f1885u, 0xaf87cc55u},  // sliver
         {0x2f20a585u, 0x2f20a585u, 0x2f20a585u},  // degenerate
         {0x31dbaa45u, 0x3a1656ddu, 0x5eddeb45u},  // diamond
     };
