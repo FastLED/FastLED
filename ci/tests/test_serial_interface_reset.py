@@ -442,6 +442,29 @@ def test_native_adapter_handles_interrupt_during_daemon_recovery(
     assert len(handled) == 1
 
 
+def test_native_adapter_failed_daemon_recovery_keeps_the_first_attempt(
+    monkeypatch,
+) -> None:
+    """PR #5293 review: a timeout, a lost daemon, then a failed restart: the
+    restart error still carries the retried timeout as a note."""
+    from ci.util import serial_interface
+
+    def _restart_fails() -> None:
+        raise RuntimeError("daemon restart failed")
+
+    monkeypatch.setattr(serial_interface, "ensure_fbuild_daemon", _restart_fails)
+    adapter, _monitors = _attach_adapter(
+        monkeypatch,
+        [ConnectionError(_HANDSHAKE_TIMEOUT), RuntimeError(_DAEMON_ERROR), None],
+    )
+    with pytest.raises(RuntimeError, match="restart failed") as raised:
+        asyncio.run(adapter.connect())
+    assert isinstance(raised.value.__context__, RuntimeError)
+    assert raised.value.__notes__ == [
+        f"attach attempt 1 failed: ConnectionError: {_HANDSHAKE_TIMEOUT}"
+    ]
+
+
 @pytest.mark.parametrize(
     "message",
     [

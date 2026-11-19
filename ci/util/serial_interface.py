@@ -462,7 +462,11 @@ class NativeFbuildSerialAdapter:
                 ):
                     # A lost post-deploy daemon: restart it once.
                     daemon_error = error
-                    await asyncio.to_thread(ensure_fbuild_daemon)
+                    try:
+                        await asyncio.to_thread(ensure_fbuild_daemon)
+                    except Exception as recovery_error:
+                        _note_earlier_attempts(recovery_error, retried)
+                        raise
                     self._monitor = self._new_monitor()
                     continue
                 _note_earlier_attempts(error, retried)
