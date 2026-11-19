@@ -165,8 +165,9 @@
 //   - ESP8266: 80 KB SRAM, but the Arduino loop() runs on a fixed 4 KB
 //     cont stack
 //   - nRF51: 16-32 KB, of which a SoftDevice takes 8-16 KB
-//   - STM32G030/G031: 8 KB; STM32F103x4/x6: 6/10 KB;
-//     STM32F100 low/medium density (STM32F100xB): 4-8 KB
+//   - STM32G030/G031: 8 KB
+//   - STM32F1 low density (CMSIS STM32F101x6/F102x6: 4-6 KB, STM32F103x6:
+//     6-10 KB) and STM32F100 low/medium density (STM32F100xB: 4-8 KB)
 // Override with -DFL_PLATFORM_HAS_SMALL_STACK=0 or =1.
 #if defined(FL_PLATFORM_HAS_SMALL_STACK)
   #define FL_PLATFORM_HAS_SMALL_STACK_OVERRIDDEN 1
@@ -179,8 +180,8 @@
     || defined(FL_IS_ESP8266) \
     || defined(FL_IS_NRF51) \
     || defined(STM32G030xx) || defined(STM32G031xx) \
-    || defined(STM32F103x4) || defined(STM32F103x6) \
-    || defined(STM32F100xB)
+    || defined(STM32F101x6) || defined(STM32F102x6) \
+    || defined(STM32F103x6) || defined(STM32F100xB)
     #define FL_PLATFORM_HAS_SMALL_STACK 1
   #else
     #define FL_PLATFORM_HAS_SMALL_STACK 0
