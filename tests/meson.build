@@ -354,7 +354,7 @@ foreach test_name : test_names
   test_runner = custom_target(test_name + '_runner',
     input: runner_exe,
     output: test_name + '.exe',
-    command: [host_python, '-c', 'import shutil, sys; shutil.copyfile(sys.argv[1], sys.argv[2])', '@INPUT@', '@OUTPUT@'],
+    command: ['cp', '@INPUT@', '@OUTPUT@'],
     depends: [test_dll],  # Ensure DLL is built first
     build_by_default: false
   )

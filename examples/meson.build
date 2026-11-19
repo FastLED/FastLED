@@ -329,7 +329,7 @@ foreach example_name : example_paths.keys()
         'example-' + example_name + '_runner',
         input: example_runner_exe,
         output: 'example-' + example_name + '.exe',
-        command: [host_python, '-c', 'import shutil, sys; shutil.copyfile(sys.argv[1], sys.argv[2])', '@INPUT@', '@OUTPUT@'],
+        command: ['cp', '@INPUT@', '@OUTPUT@'],
         depends: [example_dll],  # Ensure DLL is built first
         build_by_default: false
     )
