@@ -150,6 +150,42 @@
 #endif
 
 // =============================================================================
+// Small stack — `FL_PLATFORM_HAS_SMALL_STACK`
+// =============================================================================
+//
+// Orthogonal to the flash tiers above: 1 where the stack a sketch's loop()
+// runs on is roughly 8 KB or less, so a single multi-KB frame is unsafe.
+// Code that sizes large stack frames (e.g. the drawPolygon default tier in
+// fl/gfx/canvas.h) keys on this, not on FL_PLATFORM_HAS_LARGE_MEMORY:
+// several Low-tier parts (STM32F103C8 20 KB, Teensy 3.x 16-64 KB, Uno R4
+// 32 KB, LPC845 16 KB) have plenty of stack.
+//   - AVR (all): 0.5-16 KB SRAM (Uno 2 KB, Mega 8 KB)
+//   - LPC804 4 KB, LPC11xx 4-10 KB
+//   - Teensy LC (MKL26Z64): 8 KB
+//   - ESP8266: 80 KB SRAM, but the Arduino loop() runs on a fixed 4 KB
+//     cont stack
+//   - nRF51: 16-32 KB, of which a SoftDevice takes 8-16 KB
+//   - STM32G030/G031: 8 KB; STM32F103x4/x6: 6/10 KB
+// Override with -DFL_PLATFORM_HAS_SMALL_STACK=0 or =1.
+#if defined(FL_PLATFORM_HAS_SMALL_STACK)
+  #define FL_PLATFORM_HAS_SMALL_STACK_OVERRIDDEN 1
+#else
+  #if FL_PLATFORM_HAS_TINY_MEMORY \
+    || defined(FL_IS_AVR) \
+    || defined(FL_IS_ARM_LPC_804) \
+    || defined(FL_IS_ARM_LPC_11) \
+    || defined(FL_IS_TEENSY_LC) \
+    || defined(FL_IS_ESP8266) \
+    || defined(FL_IS_NRF51) \
+    || defined(STM32G030xx) || defined(STM32G031xx) \
+    || defined(STM32F103x4) || defined(STM32F103x6)
+    #define FL_PLATFORM_HAS_SMALL_STACK 1
+  #else
+    #define FL_PLATFORM_HAS_SMALL_STACK 0
+  #endif
+#endif
+
+// =============================================================================
 // AutoResearch tier — `FL_AUTORESEARCH_LITE_RPC`
 // =============================================================================
 //

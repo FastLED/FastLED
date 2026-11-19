@@ -43,24 +43,28 @@ enum class PolyFill { Exact, ABuffer };
 /// -fstack-usage; callees add ~0.2 KB):
 ///  - Exact:   MAXN = 32, CHUNK = 64: 4272 B;  MAXN = 8, CHUNK = 16: 1032 B
 ///  - ABuffer: MAXN = 32:             2139 B;  MAXN = 8:              603 B
-/// A 2 KB-SRAM part (AVR Uno) cannot afford the large tier, so the default
-/// is 8/16 when !FL_PLATFORM_HAS_LARGE_MEMORY and 32/64 elsewhere. Vertices
-/// beyond MAXN are ignored; pass MAXN explicitly for larger polygons. To
-/// change the default, set these build-wide (-D compiler flag) so every
-/// translation unit sees the same Canvas default template arguments.
+/// The large tier needs ~4.5 KB of stack, so the default is 8/16 where
+/// FL_PLATFORM_HAS_SMALL_STACK (fl/system/sketch_macros.h: AVR, ESP8266's
+/// 4 KB loop() stack, Teensy LC, LPC804, ...) and 32/64 elsewhere. That is a
+/// stack-size predicate, not the flash-size FL_PLATFORM_HAS_LARGE_MEMORY
+/// tier: STM32F103C8, Teensy 3.x, Uno R4 and LPC845 sit on the low flash
+/// tier yet have the stack for 32/64. Vertices beyond MAXN are ignored;
+/// pass MAXN explicitly for larger polygons. To change the default, set
+/// these build-wide (-D compiler flag) so every translation unit sees the
+/// same Canvas default template arguments.
 #ifndef FL_GFX_POLYGON_DEFAULT_MAXN
-#if FL_PLATFORM_HAS_LARGE_MEMORY
-#define FL_GFX_POLYGON_DEFAULT_MAXN 32
-#else
+#if FL_PLATFORM_HAS_SMALL_STACK
 #define FL_GFX_POLYGON_DEFAULT_MAXN 8
+#else
+#define FL_GFX_POLYGON_DEFAULT_MAXN 32
 #endif
 #endif
 
 #ifndef FL_GFX_POLYGON_DEFAULT_CHUNK
-#if FL_PLATFORM_HAS_LARGE_MEMORY
-#define FL_GFX_POLYGON_DEFAULT_CHUNK 64
-#else
+#if FL_PLATFORM_HAS_SMALL_STACK
 #define FL_GFX_POLYGON_DEFAULT_CHUNK 16
+#else
+#define FL_GFX_POLYGON_DEFAULT_CHUNK 64
 #endif
 #endif
 

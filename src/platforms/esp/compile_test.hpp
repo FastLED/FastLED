@@ -42,6 +42,11 @@ void esp8266_compile_tests() FL_NO_EXCEPT {
 #endif
 #endif
 
+// The Arduino loop() runs on a fixed 4 KB cont stack despite 80 KB of SRAM.
+#if !defined(FL_PLATFORM_HAS_SMALL_STACK_OVERRIDDEN) && FL_PLATFORM_HAS_SMALL_STACK != 1
+#error "FL_PLATFORM_HAS_SMALL_STACK should be 1 for ESP8266"
+#endif
+
 #if FASTLED_ALLOW_INTERRUPTS != 1
 #error "FASTLED_ALLOW_INTERRUPTS should be 1 for ESP8266"
 #endif
@@ -140,6 +145,10 @@ void esp32_compile_tests() FL_NO_EXCEPT {
 #if SKETCH_HAS_HUGE_MEMORY != 1
 #error "SKETCH_HAS_HUGE_MEMORY should be 1 for ESP32 platforms"
 #endif
+#endif
+
+#if !defined(FL_PLATFORM_HAS_SMALL_STACK_OVERRIDDEN) && FL_PLATFORM_HAS_SMALL_STACK != 0
+#error "FL_PLATFORM_HAS_SMALL_STACK should be 0 for ESP32 platforms"
 #endif
 
 #if FASTLED_ALLOW_INTERRUPTS != 1
