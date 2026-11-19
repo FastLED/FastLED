@@ -63,15 +63,16 @@ void TimeWarp::applyExact(fl::u32 timeNow) FL_NO_EXCEPT {
     // Calculate scaled time difference with bounds checking
     float scaledTime = elapsedRealTime * mTimeScale;
 
-    // Check for overflow/underflow before casting to int32_t
-    // int32_t range is [-2147483648, 2147483647]
-    if (scaledTime > 2147483647.0f) {
-        scaledTime = 2147483647.0f;
-    } else if (scaledTime < -2147483648.0f) {
-        scaledTime = -2147483648.0f;
+    // Saturate before casting to int32_t. 2147483647.0f rounds to 2^31, which
+    // does not fit, so compare against 2^31 instead of clamping the float.
+    i32 diff;
+    if (scaledTime >= 2147483648.0f) {
+        diff = 2147483647;
+    } else if (scaledTime <= -2147483648.0f) {
+        diff = -2147483647 - 1;
+    } else {
+        diff = static_cast<i32>(scaledTime);
     }
-
-    i32 diff = static_cast<i32>(scaledTime);
     if (diff == 0) {
         return;
     }
@@ -81,7 +82,7 @@ void TimeWarp::applyExact(fl::u32 timeNow) FL_NO_EXCEPT {
     }
 
     // diff < 0
-    fl::u32 abs_diff = -diff;
+    fl::u32 abs_diff = 0u - static_cast<fl::u32>(diff); // -diff overflows for INT32_MIN
     if (abs_diff > mRelativeTime) {
         // Protection against rollover.
         mRelativeTime = 0;
