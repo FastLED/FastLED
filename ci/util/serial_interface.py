@@ -336,27 +336,29 @@ class FbuildSerialAdapter:
             return False
 
 
-# fbuild's daemon caps a WebSocket serial attach's `open_port` at 3 s and
-# counts its board-family lookup against that cap, so on a loaded host a
-# healthy port can miss it. The daemon then sends an error frame that
-# fbuild's Python client reports only as "session closed"
-# (FastLED/fbuild#2083, FastLED#5271). A failed attach leaves no session, so
-# trying again is safe; on the LPC845-BRK the next attach succeeded each time.
-# The retry is best effort: fbuild 2.5.51's client also reports a definitive
-# rejection (e.g. another workflow's exclusive lease) as "session closed", so
-# that rejection is repeated too, costing at most ~2 s before it propagates.
-# Bounded to 3 attempts so a really dead port still fails within seconds.
-# Remove once fbuild ships the fix and preserves the daemon's reason.
+# fbuild 2.5.52 fixed the attach failure of FastLED#5271: the daemon's
+# board-family lookup no longer counts against its 3 s open cap
+# (FastLED/fbuild#2089), and the client reports the daemon's own reason,
+# "daemon rejected serial attach: ...", instead of "session closed"
+# (FastLED/fbuild#2083, #2084). A rejection is definitive (e.g. another
+# workflow's exclusive lease), so it is not retried.
+# What remains is the client's 5 s WebSocket handshake timeout on a
+# CPU-starved host (FastLED/fbuild#2095): on the LPC845-BRK, 0 of 133 attaches
+# failed at the host's own load (18-97), but with CPU hogs added 11 of 16
+# failed at load 73-106 and 54 of 56 at 106-148. A
+# timed-out handshake leaves no session, so one more attempt is safe. It
+# rescues an attach that only just missed the deadline; a host starved for
+# longer than that fails both attempts.
+# The handshake retry and the lost-daemon restart are each allowed once, so a
+# restarted daemon still gets its timeout retry: at most 3 attaches in all.
 ATTACH_ATTEMPTS = 3
 ATTACH_RETRY_PAUSE_SECONDS = 1.0
+_HANDSHAKE_TIMEOUT = "daemon websocket attach/handshake timed out"
 
 
 def _describe_attempt(attempt: int, error: BaseException) -> str:
     """One retried attach attempt, as recorded on the final error."""
-    return (
-        f"attach attempt {attempt} of {ATTACH_ATTEMPTS} failed: "
-        f"{type(error).__name__}: {error}"
-    )
+    return f"attach attempt {attempt} failed: {type(error).__name__}: {error}"
 
 
 def _note_earlier_attempts(error: BaseException, retried: list[str]) -> None:
@@ -380,12 +382,12 @@ def _note_earlier_attempts(error: BaseException, retried: list[str]) -> None:
 
 
 def is_transient_attach_error(exc: Exception) -> bool:
-    """True for the attach failure FastLED/fbuild#2083 produces.
+    """True for fbuild's client-side handshake timeout (FastLED/fbuild#2095).
 
-    A client-side handshake timeout mentions the daemon WebSocket and already
-    goes through the lost-daemon recovery, so it is not counted here.
+    It is checked before the lost-daemon recovery: its text also names the
+    daemon WebSocket, but the daemon is alive, only slow to answer.
     """
-    return "session closed" in str(exc).lower()
+    return _HANDSHAKE_TIMEOUT in str(exc).lower()
 
 
 class NativeFbuildSerialAdapter:
@@ -424,18 +426,37 @@ class NativeFbuildSerialAdapter:
             raise
 
     async def _attach(self) -> None:
-        # Every `__aenter__` counts against ATTACH_ATTEMPTS, the daemon
-        # recovery attempt included.
+        # One handshake-timeout retry and one lost-daemon restart, each at
+        # most once, bound the attach to ATTACH_ATTEMPTS `__aenter__` calls.
         daemon_error: Exception | None = None
-        retried: list[str] = []  # earlier "session closed" attempts
+        retried: list[str] = []  # the retried handshake timeout, if any
         for attempt in range(1, ATTACH_ATTEMPTS + 1):
             try:  # noqa: KBI001 - connect() handles KeyboardInterrupt once for the whole attach
                 await self._monitor.__aenter__()
                 return
             except Exception as error:
-                last = attempt == ATTACH_ATTEMPTS
+                timed_out = is_transient_attach_error(error)
+                if timed_out and not retried:
+                    retried.append(_describe_attempt(attempt, error))
+                    # The failed monitor holds no daemon session, but release
+                    # whatever client-side state it may hold before replacing it.
+                    with suppress(Exception):
+                        await self._monitor.__aexit__(None, None, None)
+                    port = self._monitor_args["port"]
+                    print(
+                        f"[serial] attach attempt {attempt} to {port} failed "
+                        f"({error}); retrying in {ATTACH_RETRY_PAUSE_SECONDS:g}s "
+                        "-- FastLED/fbuild#2095",
+                        flush=True,
+                    )
+                    # Replace the exited monitor before the pause: a cancel that
+                    # lands in the sleep must leave close() a fresh monitor, not
+                    # exit the failed one a second time.
+                    self._monitor = self._new_monitor()
+                    await asyncio.sleep(ATTACH_RETRY_PAUSE_SECONDS)
+                    continue
                 if (
-                    not last
+                    not timed_out
                     and daemon_error is None
                     and FbuildSerialAdapter._is_daemon_connection_error(error)
                 ):
@@ -444,28 +465,10 @@ class NativeFbuildSerialAdapter:
                     await asyncio.to_thread(ensure_fbuild_daemon)
                     self._monitor = self._new_monitor()
                     continue
-                if last or not is_transient_attach_error(error):
-                    _note_earlier_attempts(error, retried)
-                    if daemon_error is not None:
-                        raise error from daemon_error
-                    raise
-                retried.append(_describe_attempt(attempt, error))
-                # The failed monitor holds no daemon session, but release
-                # whatever client-side state it may hold before replacing it.
-                with suppress(Exception):
-                    await self._monitor.__aexit__(None, None, None)
-                port = self._monitor_args["port"]
-                print(
-                    f"[serial] attach to {port} failed ({error}); retrying "
-                    f"({attempt}/{ATTACH_ATTEMPTS - 1}) in "
-                    f"{ATTACH_RETRY_PAUSE_SECONDS:g}s -- FastLED/fbuild#2083",
-                    flush=True,
-                )
-                # Replace the exited monitor before the pause: a cancel that
-                # lands in the sleep must leave close() a fresh monitor, not
-                # exit the failed one a second time.
-                self._monitor = self._new_monitor()
-                await asyncio.sleep(ATTACH_RETRY_PAUSE_SECONDS)
+                _note_earlier_attempts(error, retried)
+                if daemon_error is not None:
+                    raise error from daemon_error
+                raise
 
     async def close(self) -> None:
         try:

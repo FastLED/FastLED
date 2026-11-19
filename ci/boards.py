@@ -1301,18 +1301,9 @@ RPI_PICO2_W = Board(
 # Once fbuild 2.3.16 ships with #900 the `nxplpc@` prefix becomes
 # redundant but stays valid project-ini syntax (name @ source URI).
 _NXPLPC_PLATFORM = "nxplpc@https://github.com/FastLED/platform-nxp-lpc8xx.git#4804de671a3a43e204b0b742b8984380c5a1fe2b"
-
-# fbuild does not read a git-URL platform's platform.json package pins; it
-# builds against its own compiled-in framework-arduino-lpc8xx commit unless
-# platform_packages overrides it. Pin the framework here, at the same commit
-# platform-nxp-lpc8xx's platform.json pins, so the build gets the core fixes
-# (IOCON slot lookup in pinMode, framework-arduino-lpc8xx#40; HardFault frame
-# trampoline, #41) whichever backend resolves the packages.
-_NXPLPC_FRAMEWORK_COMMIT = "547b5a7053f60c59bbd86e9c6796bebae07c8241"
-_NXPLPC_FRAMEWORK_PACKAGE = (
-    "framework-arduino-lpc8xx@https://github.com/FastLED/framework-arduino-lpc8xx/"
-    f"archive/{_NXPLPC_FRAMEWORK_COMMIT}.tar.gz#{_NXPLPC_FRAMEWORK_COMMIT}"
-)
+# The LPC8xx Arduino core comes from fbuild's built-in pin, framework-arduino-
+# lpc8xx 547b5a7 since fbuild 2.5.52 (FastLED/fbuild#2078), which is the floor
+# in pyproject.toml. A new fbuild that moves that pin moves the core with it.
 
 # Preferred name for the LPC845 canary board target (FastLED #3220).
 # `LPC845` is the canonical entry — `bash compile lpc845 …` and
@@ -1325,7 +1316,6 @@ LPC845 = Board(
     board_name="lpc845",
     platform=_NXPLPC_PLATFORM,
     framework="arduino",
-    platform_packages=_NXPLPC_FRAMEWORK_PACKAGE,
 )
 
 # Deprecated alias — prefer `LPC845` above. Same platform + framework;
@@ -1336,28 +1326,24 @@ LPC845BRK = Board(
     board_name="lpc845brk",
     platform=_NXPLPC_PLATFORM,
     framework="arduino",
-    platform_packages=_NXPLPC_FRAMEWORK_PACKAGE,
 )
 
 LPC804 = Board(
     board_name="lpc804",
     platform=_NXPLPC_PLATFORM,
     framework="arduino",
-    platform_packages=_NXPLPC_FRAMEWORK_PACKAGE,
 )
 
 LPCXPRESSO845MAX = Board(
     board_name="lpcxpresso845max",
     platform=_NXPLPC_PLATFORM,
     framework="arduino",
-    platform_packages=_NXPLPC_FRAMEWORK_PACKAGE,
 )
 
 LPCXPRESSO804 = Board(
     board_name="lpcxpresso804",
     platform=_NXPLPC_PLATFORM,
     framework="arduino",
-    platform_packages=_NXPLPC_FRAMEWORK_PACKAGE,
 )
 
 STM32F103C8_BLUEPILL = Board(

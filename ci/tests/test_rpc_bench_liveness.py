@@ -223,13 +223,16 @@ def test_a_failed_write_raises_the_transport_subtype() -> None:
 
 
 class _UnattachableSerial(_ScriptedSerial):
-    """The fbuild attach fails, the way FastLED#5271 / fbuild#2083 do."""
+    """A lost daemon, then a handshake timeout after its restart: the error
+    NativeFbuildSerialAdapter raises carries the restart's cause."""
 
     async def connect(self) -> None:
         try:
-            raise ConnectionError("open_port(/dev/ttyACM1) exceeded 3s")
-        except ConnectionError as first:
-            raise ConnectionError("session closed") from first
+            raise RuntimeError("failed to connect to daemon WebSocket: refused")
+        except RuntimeError as first:
+            raise ConnectionError(
+                "daemon WebSocket attach/handshake timed out"
+            ) from first
 
 
 def test_a_failed_attach_names_the_whole_error_chain(
@@ -248,8 +251,8 @@ def test_a_failed_attach_names_the_whole_error_chain(
         RpcBench("FAKE_PORT", timeout=1.0)
     message = str(raised.value)
     assert message.startswith("attach failed: ")
-    assert "ConnectionError: session closed" in message
-    assert "exceeded 3s" in message
+    assert "ConnectionError: daemon WebSocket attach/handshake timed out" in message
+    assert "RuntimeError: failed to connect to daemon WebSocket: refused" in message
     assert len(created) == 1
 
 
@@ -287,15 +290,15 @@ def test_the_error_chain_includes_earlier_attach_attempts() -> None:
     attached to the final error rather than read as its cause."""
     from ci.util.serial_interface import _describe_attempt, _note_earlier_attempts
 
-    final = TimeoutError("handshake timed out")
+    final = ConnectionError("daemon rejected serial attach: port busy")
     final.__cause__ = RuntimeError("failed to connect to daemon WebSocket")
-    _note_earlier_attempts(
-        final, [_describe_attempt(1, ConnectionError("session closed"))]
-    )
+    timeout = ConnectionError("daemon WebSocket attach/handshake timed out")
+    _note_earlier_attempts(final, [_describe_attempt(1, timeout)])
     message = rpc_bench.describe_error_chain(final)
     assert message == (
-        "TimeoutError: handshake timed out "
-        "[attach attempt 1 of 3 failed: ConnectionError: session closed]"
+        "ConnectionError: daemon rejected serial attach: port busy "
+        "[attach attempt 1 failed: ConnectionError: "
+        "daemon WebSocket attach/handshake timed out]"
         " <- RuntimeError: failed to connect to daemon WebSocket"
     )
 
