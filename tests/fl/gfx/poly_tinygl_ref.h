@@ -38,9 +38,14 @@
 /// 2. **Edge order.** The reference line shapes use a fixed edge order
 ///    that is sorted left-to-right; the blog's general polygon requires a
 ///    static edge order, so this port sorts edges by xstart once at setup
-///    (stable). The monotonic edgeStart/edgeEnd pointer walk is kept
-///    verbatim, including its limitation for self-intersecting polygons
-///    (the x-order flips at the crossing and the far side mis-renders).
+///    (stable). Two edges that leave a shared top vertex (same xstart and
+///    ytop) are ordered by xinc: the one with the smaller xinc is the left
+///    one on every row below it, and ordering them the other way round
+///    (input order) left convex polygons half filled (diamond, wide
+///    triangles; see the scene tests in poly_abuffer.hpp). The monotonic
+///    edgeStart/edgeEnd pointer walk is kept verbatim, including its
+///    limitation for self-intersecting polygons (the x-order flips at the
+///    crossing and the far side mis-renders).
 /// 3. **Left of the canvas.** The reference starts the x-walk at the
 ///    unclamped xleft of the first edge (possibly negative) and
 ///    bounds-checks every write (blendPixel/drawLine). This port does the
@@ -206,11 +211,18 @@ inline void drawPolygonTinyGLRef(Canvas<PixelT>& canvas, const PixelT& color,
     }
     if (ne == 0) return;
 
-    // Static edge order (deviation 2): stable sort by xstart.
+    // Static edge order (deviation 2): stable sort by xstart; of two edges
+    // leaving a shared top vertex (same xstart and ytop), the one heading
+    // further left goes first.
     for (int a = 1; a < ne; ++a) {
         const TgEdge v = edges[a];
         int b = a - 1;
-        while (b >= 0 && edges[b].xstart > v.xstart) { edges[b + 1] = edges[b]; --b; }
+        while (b >= 0 && (edges[b].xstart > v.xstart ||
+                          (edges[b].xstart == v.xstart && edges[b].ytop == v.ytop &&
+                           edges[b].xinc > v.xinc))) {
+            edges[b + 1] = edges[b];
+            --b;
+        }
         edges[b + 1] = v;
     }
 

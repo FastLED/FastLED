@@ -136,6 +136,15 @@ canvas.drawPolygon(CRGB::Yellow, tri);
   overflow.
 - Degenerate input (duplicate or collinear vertices, fully off-canvas
   polygons) is safe — it just draws nothing.
+- **Fill backend** — the fourth template argument picks it:
+  `fl::gfx::PolyFill::Exact` (the default; exact per-pixel area, 256
+  levels) or `fl::gfx::PolyFill::ABuffer` (8x4 subpixel samples, 32
+  levels; faster on dense fills, shallower stack, ignores CHUNK):
+  `canvas.drawPolygon<fl::s16x16, 8, 16, fl::gfx::PolyFill::ABuffer>(color, span)`.
+
+See `examples/Polygon/Polygon.ino` for both backends, float and `s16x16`
+vertices, even-odd self-intersection, additive vs overwrite drawing and an
+explicit MAXN.
 
 ---
 
@@ -456,7 +465,7 @@ out-of-bounds writes:
 | Zero radius or thickness | Draws nothing |
 | Zero-length line | Draws nothing |
 | Fewer than 3 polygon vertices, or all collinear | Draws nothing |
-| More than 32 polygon vertices | Truncated to the first 32 |
+| More than MAXN polygon vertices | Truncated to the first MAXN (default 32, or 8 on small-memory targets) |
 | Center off-screen | Clips to canvas bounds |
 | Shape partially off-screen | Only visible pixels are written |
 | Negative coordinates | Clipped — no wrap-around |
