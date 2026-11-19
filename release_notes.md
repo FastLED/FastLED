@@ -1,4 +1,4 @@
-FastLED 3.10.10 (Next Release)
+FastLED 3.10.10
 =============================
   * **Channels: engine worker defaults at compile time**
     * `FL_ENGINE_WORKER_CORE` and `FL_ENGINE_WORKER_PRIORITY` set defaults for engines that honor them, currently the ESP32 LCD/I2S clockless driver. Define them the same way in every translation unit. Unset, `Priority::Auto` stays `High` on that worker.
