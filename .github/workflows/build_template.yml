@@ -14,7 +14,11 @@ on:
       runs-on:
         type: string
         required: false
-        default: "ubuntu-latest"
+        # ubuntu-26.04 (what ubuntu-latest now resolves to) no longer ships
+        # libxml2.so.2, which clang-tool-chain's bundled ld.lld links against,
+        # so every board build died in the host meson step. Pin 24.04 like the
+        # native lanes in #5224.
+        default: "ubuntu-24.04"
       timeout-minutes:
         description: 'Board-specific job timeout; only long all-example sweeps override 45.'
         type: number
