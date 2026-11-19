@@ -29,7 +29,7 @@ FastLED 3.10.10
     * PSRAM pins are masked by installed PSRAM size, not free size (#5221). Native SPI streams in chunks and links only the drivers a sketch uses (#5002, #5014).
   * **Power management: the budget is a strict upper bound** (#5139)
     * `set_max_power_in_volts_and_milliamps` and the per-strip budget are now strict upper bounds with a per-MCU baseline and MCU/dark overrides (#5180).
-    * Dimming no longer increases as the budget rises past the baseline (#5159), and the strip stays lit when the budget is under the dark-current baseline (#5153).
+    * Dimming no longer increases as the budget rises past the baseline (#5159), and the strip stays lit when the budget is under the dark-current baseline (#5153). A budget at or below the MCU plus LED dark-current baseline cannot be met: brightness cannot reduce that draw, so the strip stays lit at baseline draw and the budget is exceeded.
   * **nRF51: compiles and links again** (#5119, #5154)
     * FastPin `toggle()` is race-free through `OUTSET`/`OUTCLR` (#5158), and `FASTLED_FORCE_SOFTWARE_PINS` works without breaking clockless or SPI0 (#5156).
   * **Fixes**
