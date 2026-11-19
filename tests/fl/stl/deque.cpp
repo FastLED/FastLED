@@ -532,6 +532,12 @@ FL_TEST_CASE("fl::deque - iterator arithmetic") {
         FL_CHECK_EQ(*it, 10);  // Original unchanged
     }
 
+    FL_SUBCASE("iterator symmetric operator+") {
+        auto it = dq.begin();
+        auto it2 = 2 + it;
+        FL_CHECK_EQ(*it2, 30);
+    }
+
     FL_SUBCASE("iterator operator+=") {
         auto it = dq.begin();
         it += 2;
@@ -552,6 +558,18 @@ FL_TEST_CASE("fl::deque - iterator arithmetic") {
         FL_CHECK_EQ(*it, 30);
     }
 
+    FL_SUBCASE("iterator negative offset arithmetic") {
+        auto it = dq.begin() + 3;  // points to 40
+        FL_CHECK_EQ(*(it + (-2)), 20);
+        FL_CHECK_EQ(*(it - (-1)), 50);
+        it += -1;
+        FL_CHECK_EQ(*it, 30);
+        it -= -1;
+        FL_CHECK_EQ(*it, 40);
+        FL_CHECK_EQ(it[-1], 30);
+        FL_CHECK_EQ(it[-2], 20);
+    }
+
     FL_SUBCASE("iterator operator[]") {
         auto it = dq.begin();
         FL_CHECK_EQ(it[0], 10);
@@ -562,7 +580,8 @@ FL_TEST_CASE("fl::deque - iterator arithmetic") {
     FL_SUBCASE("iterator difference operator") {
         auto it1 = dq.begin();
         auto it2 = dq.begin() + 3;
-        FL_CHECK_EQ(it2 - it1, 3u);
+        FL_CHECK_EQ(it2 - it1, 3);
+        FL_CHECK_EQ(it1 - it2, -3);
     }
 
     FL_SUBCASE("iterator comparison operators") {
@@ -588,11 +607,92 @@ FL_TEST_CASE("fl::deque - const_iterator arithmetic") {
         FL_CHECK_EQ(*it2, 30);
     }
 
+    FL_SUBCASE("const_iterator symmetric operator+") {
+        auto it = dq.begin();
+        auto it2 = 2 + it;
+        FL_CHECK_EQ(*it2, 30);
+    }
+
+    FL_SUBCASE("const_iterator operator-") {
+        auto it = dq.end();
+        --it;
+        auto it2 = it - 2;
+        FL_CHECK_EQ(*it2, 30);
+    }
+
+    FL_SUBCASE("const_iterator negative offset arithmetic") {
+        auto it = dq.begin() + 3;
+        FL_CHECK_EQ(*(it + (-2)), 20);
+        FL_CHECK_EQ(*(it - (-1)), 50);
+        it += -1;
+        FL_CHECK_EQ(*it, 30);
+        it -= -1;
+        FL_CHECK_EQ(*it, 40);
+        FL_CHECK_EQ(it[-1], 30);
+        FL_CHECK_EQ(it[-2], 20);
+    }
+
+    FL_SUBCASE("const_iterator difference operator") {
+        auto it1 = dq.begin();
+        auto it2 = dq.begin() + 3;
+        FL_CHECK_EQ(it2 - it1, 3);
+        FL_CHECK_EQ(it1 - it2, -3);
+    }
+
+    FL_SUBCASE("const_iterator comparison operators") {
+        auto it1 = dq.begin();
+        auto it2 = dq.begin() + 2;
+        auto it3 = dq.begin() + 2;
+
+        FL_CHECK(it1 < it2);
+        FL_CHECK(it1 <= it2);
+        FL_CHECK(it2 > it1);
+        FL_CHECK(it2 >= it1);
+        FL_CHECK(it2 == it3);
+        FL_CHECK(it1 != it2);
+    }
+
     FL_SUBCASE("const_iterator operator[]") {
         auto it = dq.begin();
         FL_CHECK_EQ(it[0], 10);
         FL_CHECK_EQ(it[2], 30);
+        FL_CHECK_EQ(it[4], 50);
     }
+}
+
+FL_TEST_CASE("fl::deque - mixed iterator and const_iterator operations") {
+    deque<int> dq = {10, 20, 30, 40, 50};
+    deque<int>::iterator it = dq.begin() + 1;
+    deque<int>::const_iterator cit = dq.begin() + 3;
+
+    FL_CHECK(it < cit);
+    FL_CHECK(it <= cit);
+    FL_CHECK(cit > it);
+    FL_CHECK(cit >= it);
+    FL_CHECK(it != cit);
+    FL_CHECK_FALSE(it == cit);
+
+    FL_CHECK_EQ(cit - it, 2);
+    FL_CHECK_EQ(it - cit, -2);
+
+    deque<int>::const_iterator cit2 = dq.begin() + 1;
+    FL_CHECK(it == cit2);
+    FL_CHECK(cit2 == it);
+    FL_CHECK(it <= cit2);
+    FL_CHECK(cit2 >= it);
+}
+
+FL_TEST_CASE("fl::deque - member typedefs") {
+    FL_STATIC_ASSERT((fl::is_same<deque<int>::value_type, int>::value), "value_type should be int");
+    FL_STATIC_ASSERT((fl::is_same<deque<int>::size_type, fl::size>::value), "size_type should be fl::size");
+    FL_STATIC_ASSERT((fl::is_same<deque<int>::difference_type, fl::ptrdiff_t>::value), "difference_type should be fl::ptrdiff_t");
+    FL_STATIC_ASSERT((fl::is_same<deque<int>::reference, int&>::value), "reference should be int&");
+    FL_STATIC_ASSERT((fl::is_same<deque<int>::const_reference, const int&>::value), "const_reference should be const int&");
+    FL_STATIC_ASSERT((fl::is_same<deque<int>::pointer, int*>::value), "pointer should be int*");
+    FL_STATIC_ASSERT((fl::is_same<deque<int>::const_pointer, const int*>::value), "const_pointer should be const int*");
+
+    FL_STATIC_ASSERT((fl::is_same<deque<int>::iterator::difference_type, fl::ptrdiff_t>::value), "iterator difference_type should be fl::ptrdiff_t");
+    FL_STATIC_ASSERT((fl::is_same<deque<int>::const_iterator::difference_type, fl::ptrdiff_t>::value), "const_iterator difference_type should be fl::ptrdiff_t");
 }
 
 FL_TEST_CASE("fl::deque - cbegin/cend/crbegin/crend") {
