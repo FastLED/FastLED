@@ -41,8 +41,11 @@ enum class PolyFill { Exact, ABuffer };
 /// Both kernels keep their whole working set on the stack, sized by MAXN
 /// (and CHUNK for Exact). Kernel frame on AVR (avr-gcc 7.3 -Os,
 /// -fstack-usage; callees add ~0.2 KB):
-///  - Exact:   MAXN = 32, CHUNK = 64: 4272 B;  MAXN = 8, CHUNK = 16: 1032 B
-///  - ABuffer: MAXN = 32:             2139 B;  MAXN = 8:              603 B
+///  - Exact:   MAXN = 32, CHUNK = 64: 4134 B;  MAXN = 8, CHUNK = 16:  989 B
+///  - ABuffer: MAXN = 32:             2142 B;  MAXN = 8:              605 B
+/// On an Uno (2 KB SRAM), a 16x16 CRGB canvas (768 B) plus FastLED and
+/// Serial leaves ~950 B of stack: enough for ABuffer, not for Exact's
+/// ~1.2 KB call chain (use ABuffer there, or a 16x8 canvas for Exact).
 /// The large tier needs ~4.5 KB of stack, so the default is 8/16 where
 /// FL_PLATFORM_HAS_SMALL_STACK (fl/system/sketch_macros.h: AVR, ESP8266's
 /// 4 KB loop() stack, Teensy LC, LPC804, ...) and 32/64 elsewhere. That is a
