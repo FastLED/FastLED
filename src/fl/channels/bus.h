@@ -9,6 +9,10 @@
 #include "fl/stl/stdint.h"
 #include "platforms/is_platform.h"
 
+#if defined(FL_IS_ESP32)
+#include "platforms/esp/32/feature_flags/enabled.h"  // ok platform headers // IWYU pragma: keep
+#endif
+
 // Platform CMSIS/Arduino headers may define peripheral pointer macros that
 // collide with Bus enumerators and qualified names such as Bus::SPI.
 #pragma push_macro("UART")
@@ -55,11 +59,15 @@ template<> struct DefaultBus<SpiChipsetConfig> {
 template<> struct DefaultBus<ClocklessChipset> {
     static constexpr Bus value = Bus::FLEX_IO;
 };
-#else
+#elif FASTLED_ESP32_HAS_RMT
 template<> struct DefaultBus<ClocklessChipset> {
     static constexpr Bus value = Bus::RMT;
 };
 #endif
+// No RMT (ESP32-C2) or no soc_caps.h (IDF 3.x): there is no BusTraits<Bus::RMT>
+// (see rmt_4/rmt_5 bus_traits.h, gated on the same flag), so
+// DefaultBus<ClocklessChipset> stays unspecialized and the add(cfg) fallback
+// binds nothing instead of naming a missing driver.
 
 #if defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32DEV) || \
     defined(FL_IS_ESP_32P4) || defined(FL_IS_ESP_32C6) || \

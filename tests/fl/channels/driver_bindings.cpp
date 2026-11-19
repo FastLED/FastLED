@@ -73,4 +73,17 @@ FL_TEST_CASE("DriverBindings - platforms without a DefaultBus bind nothing") {
     FL_CHECK_FALSE(fl::detail::bindDefaultDriver<NoDefaultBusChipset>());
 }
 
+// Regression: enable<Bus::AUTO>() used to instantiate BusBinding<AUTO>, whose
+// kBus names DefaultBus<Chipset>::value, so it failed to compile on every
+// platform without a DefaultBus<ClocklessChipset> (teensy 3.x, nRF52, RP2040,
+// SAM3X, STM32, ...). It must compile and link nothing there.
+FL_TEST_CASE("DriverBindings - enable<Bus::AUTO>() without a DefaultBus binds nothing") {
+    FL_STATIC_ASSERT(!fl::detail::CanBindBus<fl::Bus::AUTO, NoDefaultBusChipset>::value,
+                  "AUTO with no platform default must not bind");
+    FL_STATIC_ASSERT(fl::detail::CanBindBus<fl::Bus::BIT_BANG, NoDefaultBusChipset>::value,
+                  "an explicit bus always binds");
+    CFastLED& chained = FastLED.enable<fl::Bus::AUTO, NoDefaultBusChipset>();
+    FL_CHECK(&chained == &FastLED);
+}
+
 }  // FL_TEST_FILE
