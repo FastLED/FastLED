@@ -16,6 +16,14 @@ FL_TEST_CASE("fl::popcount") {
     FL_CHECK_EQ(popcount(7u), 3);
     FL_CHECK_EQ(popcount(15u), 4);
     FL_CHECK_EQ(popcount(255u), 8);
+    // High-word bits must count. (The AVR truncation these pin, a 16-bit
+    // `unsigned int` popcount, only reproduces on 16-bit-int targets.)
+    FL_CHECK_EQ(popcount(fl::u32(0x011fffffu)), 22);
+    FL_CHECK_EQ(popcount(fl::u32(0xffffffffu)), 32);
+    FL_CHECK_EQ(popcount(fl::u64(0xffffffff00000001ull)), 33);
+    // Negative signed values count only their own width.
+    FL_CHECK_EQ(popcount(fl::i8(-1)), 8);
+    FL_CHECK_EQ(popcount(fl::i16(-1)), 16);
 }
 
 FL_TEST_CASE("fl::countr_zero") {
@@ -24,6 +32,8 @@ FL_TEST_CASE("fl::countr_zero") {
     FL_CHECK_EQ(countr_zero(4u), 2);
     FL_CHECK_EQ(countr_zero(8u), 3);
     FL_CHECK_EQ(countr_zero(16u), 4);
+    FL_CHECK_EQ(countr_zero(fl::u32(0x00010000u)), 16);
+    FL_CHECK_EQ(countr_zero(fl::u64(0x0000000100000000ull)), 32);
 }
 
 // Test bitset_fixed class

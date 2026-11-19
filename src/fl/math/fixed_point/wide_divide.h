@@ -86,7 +86,12 @@ namespace detail {
 FL_FIXED_POINT_DIVIDE_INLINE int fixedPointLeadingZeros(u32 value) FL_NO_EXCEPT {
 #if defined(__GNUC__) || defined(__clang__)
     // One CLZ instruction on every core this file's fast path is enabled for.
-    return value == 0 ? 32 : __builtin_clz(value);
+    // __builtin_clz takes `unsigned int`, which is 16-bit on AVR; there the
+    // 32-bit `unsigned long` builtin is the one that sees every bit.
+    return value == 0 ? 32
+           : sizeof(unsigned) >= sizeof(u32)
+               ? __builtin_clz(static_cast<unsigned>(value))
+               : __builtin_clzl(static_cast<unsigned long>(value));
 #else
     int count = 0;
     while (count < 32 && (value & 0x80000000u) == 0u) {
