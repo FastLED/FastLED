@@ -396,6 +396,19 @@ FL_TEST_CASE("drawPolygon ABuffer: TinyGL-ref reference parity") {
     }
 }
 
+FL_TEST_CASE("drawPolygon ABuffer: 32-bit coverage popcounts count the high word") {
+    // Per-pixel coverage masks with high-word bits. On AVR a 16-bit
+    // `unsigned int` popcount dropped them (22 -> 16, 24 -> 16); host ints
+    // are 32-bit, so this pins the values rather than reproducing that.
+    const fl::u32 masks[] = {0x011fffffu, 0x033fffffu, 0x80f8ffffu,
+                             0xffff0000u, 0xffffffffu, 0u};
+    const int expected[] = {22, 24, 22, 16, 32, 0};
+    for (int i = 0; i < 6; ++i) {
+        FL_CHECK_EQ((int)fl::gfx::detail::polyTGPopcount32(masks[i]), expected[i]);
+        FL_CHECK_EQ((int)fl::gfx::detail::polyABPopcount32(masks[i]), expected[i]);
+    }
+}
+
 // ----------------------------------------------------------------------------
 // Performance (host; the AVR cycle counts come from the cycleprof runs)
 // ----------------------------------------------------------------------------

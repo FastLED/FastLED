@@ -4,6 +4,7 @@
 #include "fl/stl/bitset_dynamic.h"
 #include "fl/stl/int.h"
 #include "fl/stl/static_assert.h"
+#include "fl/stl/type_traits.h"
 
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/move.h"
@@ -29,14 +30,30 @@ using bitset = bitset_inlined<N>; // inlined but can go bigger.
 
 
 // TODO: move this to fl/math.h
+// The unsuffixed builtins take `unsigned int`, which is 16-bit on AVR, so a
+// wider argument is routed to the `l`/`ll` variant to keep its high bits.
+// The value is first converted to the same-width unsigned type, so a negative
+// signed value counts only its own bits, not sign-extension bits.
 template<typename IntType>
 inline fl::u8 popcount(IntType value) FL_NO_EXCEPT {
-    return static_cast<fl::u8>(__builtin_popcount(value));
+    typedef typename fl::make_unsigned<IntType>::type U;
+    const U u = static_cast<U>(value);
+    return static_cast<fl::u8>(
+        sizeof(U) <= sizeof(unsigned) ? __builtin_popcount(static_cast<unsigned>(u))
+        : sizeof(U) <= sizeof(unsigned long) ? __builtin_popcountl(static_cast<unsigned long>(u))
+        : __builtin_popcountll(static_cast<unsigned long long>(u)));
 }
 
+/// Trailing zero bits of a non-zero value. Zero is undefined, as for the
+/// builtins; callers must check first.
 template<typename IntType>
 inline fl::u8 countr_zero(IntType value) FL_NO_EXCEPT {
-    return static_cast<fl::u8>(__builtin_ctz(value));
+    typedef typename fl::make_unsigned<IntType>::type U;
+    const U u = static_cast<U>(value);
+    return static_cast<fl::u8>(
+        sizeof(U) <= sizeof(unsigned) ? __builtin_ctz(static_cast<unsigned>(u))
+        : sizeof(U) <= sizeof(unsigned long) ? __builtin_ctzl(static_cast<unsigned long>(u))
+        : __builtin_ctzll(static_cast<unsigned long long>(u)));
 }
 
 /// A simple fixed-size Bitset implementation similar to std::Bitset.
@@ -148,7 +165,7 @@ template <fl::u32 N> class bitset_fixed {
     fl::u32 count() const FL_NO_EXCEPT {
         fl::u32 cnt = 0;
         // Count bits in all complete blocks
-        for (fl::u32 i = 0; i < block_count - 1; ++i) {
+        for (fl::u32 i = 0; i + 1 < block_count; ++i) {
             cnt += fl::popcount(_blocks[i]);
         }
 
