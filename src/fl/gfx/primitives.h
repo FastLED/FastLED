@@ -1571,9 +1571,10 @@ inline void detail::drawPolygonCore(Canvas<PixelT>& canvas, const PixelT& color,
 
 /// MAXN caps the vertex count and CHUNK the per-row accumulator width in
 /// px (must be a power of two). The defaults (FL_GFX_POLYGON_DEFAULT_MAXN /
-/// _CHUNK in fl/gfx/canvas.h) are 32 / 64 on FL_PLATFORM_HAS_LARGE_MEMORY
-/// targets and 8 / 16 elsewhere, because the 32 / 64 frame does not fit in
-/// an AVR Uno's 2 KB of SRAM (measured figures at the macro definition).
+/// _CHUNK in fl/gfx/canvas.h) are 8 / 16 on FL_PLATFORM_HAS_SMALL_STACK
+/// targets (AVR, ESP8266, ...) and 32 / 64 elsewhere, because the 32 / 64 frame does
+/// not fit in an AVR Uno's 2 KB of SRAM (measured figures at the macro
+/// definition).
 /// Smaller tiers shrink the stack -- the rendered pixels are identical for
 /// polygons with at most MAXN vertices.
 ///

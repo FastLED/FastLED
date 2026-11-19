@@ -15,7 +15,7 @@
 //   3. Layers   - DRAW_MODE_OVERWRITE: three rotating squares drawn back
 //                 to front, each hiding the ones below
 //   4. Knot     - two 14-vertex self-intersecting Lissajous curves, more
-//                 vertices than the small-target default MAXN of 8
+//                 vertices than the small-stack default MAXN of 8
 //
 // The API in brief:
 //
@@ -34,7 +34,7 @@
 //
 // MAXN is a compile-time vertex cap that sizes the kernel's stack frame;
 // vertices past MAXN are ignored. The default (FL_GFX_POLYGON_DEFAULT_MAXN)
-// is 8 on small-memory targets (AVR, ESP8266, ...) and 32 elsewhere, so a
+// is 8 on small-stack targets (AVR, ESP8266, ...) and 32 elsewhere, so a
 // polygon with more vertices must ask for a bigger MAXN, and a known small
 // polygon can ask for a smaller one to save stack. CHUNK (Exact only) is a
 // power-of-two column-chunk width; the default is fine.
@@ -179,7 +179,7 @@ static void sceneLayers(unsigned long t) {
 // ---- 4. Knot: more vertices than the default MAXN ----------------------------
 // A closed 2:3 Lissajous curve sampled at 14 points crosses itself several
 // times; even-odd fills alternate lobes. 14 vertices exceed the 8-vertex
-// default on small targets, so MAXN is given explicitly (sized exactly, to
+// default on small-stack targets, so MAXN is given explicitly (sized exactly, to
 // keep the stack frame small). The ABuffer backend has the shallower stack.
 static const int kKnotN = 14;
 

@@ -126,9 +126,11 @@ canvas.drawPolygon(CRGB::Yellow, tri);
 ```
 
 - **3 to MAXN vertices.** Fewer than 3 draws nothing; more than MAXN is
-  truncated to the first MAXN. The default MAXN is 32 on large-memory
-  targets and 8 on `!FL_PLATFORM_HAS_LARGE_MEMORY` targets (AVR, ESP8266,
-  STM32F1, ...), where a 32-vertex tier needs ~4.3 KB of stack. Pass it
+  truncated to the first MAXN. The default MAXN is 8 on
+  `FL_PLATFORM_HAS_SMALL_STACK` targets (~8 KB of stack or less: AVR,
+  ESP8266, Teensy LC, LPC804, ...), where a 32-vertex tier needs ~4.3 KB
+  of stack, and 32 everywhere else (including STM32F103C8, Teensy 3.x and
+  Uno R4). Pass it
   explicitly for more vertices: `canvas.drawPolygon<int, 12>(color, span)`.
 - **Fill rule** — even-odd: a point is inside if a ray crosses an odd
   number of edges. No holes or subpaths.
@@ -465,7 +467,7 @@ out-of-bounds writes:
 | Zero radius or thickness | Draws nothing |
 | Zero-length line | Draws nothing |
 | Fewer than 3 polygon vertices, or all collinear | Draws nothing |
-| More than MAXN polygon vertices | Truncated to the first MAXN (default 32, or 8 on small-memory targets) |
+| More than MAXN polygon vertices | Truncated to the first MAXN (default 32, or 8 on small-stack targets) |
 | Center off-screen | Clips to canvas bounds |
 | Shape partially off-screen | Only visible pixels are written |
 | Negative coordinates | Clipped — no wrap-around |

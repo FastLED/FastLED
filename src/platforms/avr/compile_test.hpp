@@ -20,6 +20,10 @@ void avr_compile_tests() {
 #endif
 #endif
 
+#if !defined(FL_PLATFORM_HAS_SMALL_STACK_OVERRIDDEN) && FL_PLATFORM_HAS_SMALL_STACK != 1
+#error "FL_PLATFORM_HAS_SMALL_STACK should be 1 for AVR"
+#endif
+
 #if FASTLED_ALLOW_INTERRUPTS != 0
 #error "FASTLED_ALLOW_INTERRUPTS should be 0 for AVR (default)"
 #endif
