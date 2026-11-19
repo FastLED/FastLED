@@ -63,3 +63,15 @@
     // Non-Arduino builds (host tests, native builds)
     #include "platforms/shared/pin_noop.hpp"
 #endif
+
+#include "fl/stl/noexcept.h"
+
+namespace fl {
+namespace platforms {
+// Called when a native PWM channel is released. Platforms that keep track of
+// the native frequency define a non-template releasePwmFrequencyNative(int),
+// which overload resolution prefers over this no-op.
+template <typename T = void>
+inline void releasePwmFrequencyNative(int /*pin*/) FL_NO_EXCEPT {}
+}  // namespace platforms
+}  // namespace fl

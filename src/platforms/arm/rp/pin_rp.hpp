@@ -19,6 +19,9 @@
 // IWYU pragma: begin_keep
 #include "hardware/pwm.h"
 // IWYU pragma: end_keep
+// IWYU pragma: begin_keep
+#include "hardware/clocks.h"
+// IWYU pragma: end_keep
 #include "platforms/arm/rp/rpcommon/sdk_compat.h"
 #include "fl/system/pin.h"
 #include "fl/stl/noexcept.h"
@@ -26,10 +29,56 @@
 namespace fl {
 namespace platforms {
 
+namespace {
+    struct Rp2040PwmFreq {
+        int pin;        // -1 = unused
+        u32 freq_hz;
+    };
+    // One entry per GPIO that setPwmFrequencyNative() accepts (48 on RP2350B)
+    constexpr int MAX_RP_PWM_PINS = NUM_BANK0_GPIOS;
+    // Zero-initialized: pin=0 and freq_hz=0 means "not configured"
+    // We use freq_hz==0 to indicate unconfigured rather than pin==-1,
+    // since zero-init gives us pin=0 which is a valid GPIO.
+    inline Rp2040PwmFreq* rp_pwm_freq_table() FL_NO_EXCEPT {
+        static Rp2040PwmFreq g_rp_pwm[MAX_RP_PWM_PINS] = {};
+        return g_rp_pwm;
+    }
+
+    // Forget the frequency of a pin once it no longer runs PWM
+    inline void rp_pwm_clear_frequency(int pin) FL_NO_EXCEPT {
+        if (pin >= 0 && pin < MAX_RP_PWM_PINS) {
+            rp_pwm_freq_table()[pin].freq_hz = 0;
+        }
+    }
+
+    // True if setPwmFrequencyNative() set the period of this pin's slice.
+    // Every GPIO that maps to the slice shares its wrap value, on RP2040
+    // GPIO 4 and GPIO 21 for example.
+    inline bool rp_pwm_slice_has_frequency(uint slice) FL_NO_EXCEPT {
+        Rp2040PwmFreq* table = rp_pwm_freq_table();
+        for (int p = 0; p < MAX_RP_PWM_PINS; ++p) {
+            if (table[p].freq_hz != 0 && pwm_gpio_to_slice_num(p) == slice) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // Scale a duty value of the given bit width to the slice's current
+    // period, rounded so that the maximum still reaches full duty on short
+    // periods. A level of top + 1 is full duty but does not fit in 16 bits.
+    inline u16 rp_pwm_scaled_level(uint slice, u32 val, int bits) FL_NO_EXCEPT {
+        const u32 period = pwm_hw->slice[slice].top + 1u;
+        const u32 level = (val * period + (1u << (bits - 1))) >> bits;
+        return static_cast<u16>(level > 0xFFFFu ? 0xFFFFu : level);
+    }
+}  // anonymous namespace
+
 /// @brief Configure a GPIO pin mode
 /// @param pin GPIO pin number (0-29 for RP2040, 0-47 for RP2350)
 /// @param mode Pin mode: Input, Output, InputPullup, or InputPulldown
 inline void pinMode(int pin, PinMode mode) FL_NO_EXCEPT {
+    rp_pwm_clear_frequency(pin);
     rp_sdk::gpioInit(pin);
 
     switch (mode) {
@@ -127,11 +176,16 @@ inline void analogWrite(int pin, u16 val) FL_NO_EXCEPT {
     // Configure GPIO for PWM function
     gpio_set_function(pin, GPIO_FUNC_PWM);
 
-    // Set PWM wrap value (period) to 255 for 8-bit resolution
-    pwm_set_wrap(slice, 255);
+    if (rp_pwm_slice_has_frequency(slice)) {
+        // Keep the period set by setPwmFrequency() and scale the duty cycle to it
+        pwm_set_chan_level(slice, channel, rp_pwm_scaled_level(slice, val > 256 ? 256 : val, 8));
+    } else {
+        // Set PWM wrap value (period) to 255 for 8-bit resolution
+        pwm_set_wrap(slice, 255);
 
-    // Set duty cycle (0-255)
-    pwm_set_chan_level(slice, channel, val);
+        // Set duty cycle (0-255)
+        pwm_set_chan_level(slice, channel, val);
+    }
 
     // Enable PWM on this slice
     pwm_set_enabled(slice, true);
@@ -158,11 +212,16 @@ inline void setPwm16(int pin, u16 val) FL_NO_EXCEPT {
     // Configure GPIO for PWM function
     gpio_set_function(pin, GPIO_FUNC_PWM);
 
-    // Set PWM wrap value (period) to 65535 for 16-bit resolution
-    pwm_set_wrap(slice, 65535);
+    if (rp_pwm_slice_has_frequency(slice)) {
+        // Keep the period set by setPwmFrequency() and scale the duty cycle to it
+        pwm_set_chan_level(slice, channel, rp_pwm_scaled_level(slice, val, 16));
+    } else {
+        // Set PWM wrap value (period) to 65535 for 16-bit resolution
+        pwm_set_wrap(slice, 65535);
 
-    // Set duty cycle (0-65535)
-    pwm_set_chan_level(slice, channel, val);
+        // Set duty cycle (0-65535)
+        pwm_set_chan_level(slice, channel, val);
+    }
 
     // Enable PWM on this slice
     pwm_set_enabled(slice, true);
@@ -181,20 +240,6 @@ inline void setAdcRange(AdcRange /*range*/) {
 // PWM Frequency Control
 // ============================================================================
 
-namespace {
-    struct Rp2040PwmFreq {
-        int pin;        // -1 = unused
-        u32 freq_hz;
-    };
-    constexpr int MAX_RP_PWM_PINS = 30;  // RP2040 has GPIO 0-29
-    // Zero-initialized: pin=0 and freq_hz=0 means "not configured"
-    // We use freq_hz==0 to indicate unconfigured rather than pin==-1,
-    // since zero-init gives us pin=0 which is a valid GPIO.
-    inline Rp2040PwmFreq* rp_pwm_freq_table() FL_NO_EXCEPT {
-        static Rp2040PwmFreq g_rp_pwm[MAX_RP_PWM_PINS] = {};
-        return g_rp_pwm;
-    }
-}  // anonymous namespace
 
 /// @brief Check if a frequency requires ISR-based fallback
 /// @param pin GPIO pin number (unused — RP2040 PWM capability is uniform)
@@ -208,12 +253,13 @@ inline bool needsPwmIsrFallback(int /*pin*/, u32 frequency_hz) {
     if (frequency_hz == 0) {
         return true;
     }
-    // RP2040 system clock = 125 MHz
-    // Max frequency: 125 MHz / (1 * (1+1)) = 62,500,000 Hz
-    // Min frequency: 125 MHz / (255.9375 * 65536) ≈ 7.5 Hz, so 8 Hz is safe
-    constexpr u32 MIN_NATIVE_FREQ = 8;
-    constexpr u32 MAX_NATIVE_FREQ = 62500000;
-    return (frequency_hz < MIN_NATIVE_FREQ || frequency_hz > MAX_NATIVE_FREQ);
+    // The range follows clk_sys, which is not always 125 MHz (150 MHz on RP2350).
+    // Max frequency: clk_sys / (1 * (1+1))
+    // Min frequency: clk_sys / (255.9375 * 65536), rounded up
+    const u32 sys_clk = clock_get_hz(clk_sys);
+    const u32 min_native_freq = (sys_clk + 16773119u) / 16773120u;  // 255.9375 * 65536
+    const u32 max_native_freq = sys_clk / 2;
+    return (frequency_hz < min_native_freq || frequency_hz > max_native_freq);
 }
 
 /// @brief Set PWM frequency using RP2040 hardware PWM
@@ -237,37 +283,35 @@ inline int setPwmFrequencyNative(int pin, u32 frequency_hz) FL_NO_EXCEPT {
         return -2;
     }
 
-    constexpr u32 SYS_CLK = 125000000u;
+    const u32 SYS_CLK = clock_get_hz(clk_sys);
 
     // Get PWM slice for this pin
     uint slice = pwm_gpio_to_slice_num(pin);
 
     // Calculate divider and wrap
-    // frequency = SYS_CLK / (divider * (wrap + 1))
-    // Strategy: maximize wrap for best duty cycle resolution
-    // Start with wrap = 65535 (16-bit max), calculate divider
-    float divider;
-    u32 wrap;
-
-    // Try maximum wrap first for best resolution
-    divider = (float)SYS_CLK / ((float)frequency_hz * 65536.0f);
-
-    if (divider < 1.0f) {
-        // Frequency too high for max wrap — reduce wrap, use divider = 1
-        divider = 1.0f;
-        wrap = SYS_CLK / frequency_hz - 1;
-        if (wrap < 1) {
-            return -3;  // Frequency too high
-        }
-    } else if (divider > 255.9375f) {
-        // Frequency too low — divider exceeds RP2040 maximum
+    // frequency = SYS_CLK / (divider * (wrap + 1)), divider in 1/16 steps
+    // Strategy: maximize wrap for best duty cycle resolution. Take the smallest
+    // divider that keeps wrap within 16 bits, then compute wrap from that
+    // divider, so rounding the divider to 1/16 does not shift the frequency.
+    const u64 clk16 = static_cast<u64>(SYS_CLK) * 16;
+    const u64 max_period16 = static_cast<u64>(frequency_hz) * 65536;
+    u32 div16 = static_cast<u32>((clk16 + max_period16 - 1) / max_period16);
+    if (div16 < 16) {
+        // Frequency too high for max wrap - use divider = 1 and a smaller wrap
+        div16 = 16;
+    } else if (div16 > 4095) {
+        // Frequency too low - divider exceeds RP2040 maximum (255.9375)
         return -4;
-    } else {
-        wrap = 65535;
     }
+    const u64 count16 = static_cast<u64>(div16) * frequency_hz;
+    const u64 counts = (clk16 + count16 / 2) / count16;  // wrap + 1, rounded
+    if (counts < 2) {
+        return -3;  // Frequency too high
+    }
+    const u32 wrap = static_cast<u32>(counts - 1);
 
     // Configure the PWM slice
-    pwm_set_clkdiv(slice, divider);
+    pwm_set_clkdiv(slice, static_cast<float>(div16) / 16.0f);
     pwm_set_wrap(slice, (u16)wrap);
 
     // Configure GPIO for PWM function
@@ -279,6 +323,12 @@ inline int setPwmFrequencyNative(int pin, u32 frequency_hz) FL_NO_EXCEPT {
     table[pin].freq_hz = frequency_hz;
 
     return 0;
+}
+
+/// @brief Forget the frequency set by setPwmFrequencyNative() once the PWM
+/// channel of a pin is released, so duty updates use the default period again
+inline void releasePwmFrequencyNative(int pin) FL_NO_EXCEPT {
+    rp_pwm_clear_frequency(pin);
 }
 
 /// @brief Get the configured PWM frequency for a pin
