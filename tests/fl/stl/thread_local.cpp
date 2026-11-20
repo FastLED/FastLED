@@ -1,5 +1,6 @@
 #include "fl/stl/thread_local.h"
 #include "fl/stl/string.h"
+#include "fl/stl/vector.h"
 #include "test.h"
 
 #if FASTLED_USE_THREAD_LOCAL
@@ -362,10 +363,11 @@ struct BigTlsPayload {
 } // namespace
 
 FL_TEST_CASE("ThreadLocal - no default does not store an inline T") {
-    // The container holds a key plus bookkeeping, never a full T.
+    // The container holds a key plus bookkeeping (validity flag, default
+    // pointer, fallback-slot pointer from #5310), never a full T.
     FL_CHECK_LT(sizeof(fl::ThreadLocal<BigTlsPayload>), sizeof(BigTlsPayload));
     FL_CHECK_LE(sizeof(fl::ThreadLocal<BigTlsPayload>),
-                sizeof(pthread_key_t) + 2 * sizeof(void *));
+                sizeof(pthread_key_t) + 3 * sizeof(void *));
 }
 
 FL_TEST_CASE("ThreadLocal - no default value-initializes every thread") {
@@ -426,6 +428,52 @@ FL_TEST_CASE("ThreadLocal - converting default and copies keep it") {
     fl::thread t([&]() { from_thread = tls.access(); });
     t.join();
     FL_CHECK_EQ(from_thread, fl::string("seed"));
+}
+
+// Regression test for #5310: when pthread_key_create fails, access() must use
+// a shared fallback slot instead of dereferencing null. Failure is injected
+// for real by exhausting the process's pthread keys (PTHREAD_KEYS_MAX) only
+// while the ThreadLocal is constructed.
+FL_TEST_CASE("ThreadLocal - key creation failure falls back to a shared slot") {
+    fl::vector<pthread_key_t> hoard;
+    bool exhausted = false;
+    for (int i = 0; i < (1 << 16); ++i) {
+        pthread_key_t k;
+        if (pthread_key_create(&k, nullptr) != 0) {
+            exhausted = true;
+            break;
+        }
+        hoard.push_back(k);
+    }
+    // Constructed with no keys left: key creation fails inside the ctor.
+    fl::ThreadLocal<int> with_default(5);
+    fl::ThreadLocal<int> no_default;
+    for (pthread_key_t k : hoard) {
+        pthread_key_delete(k);
+    }
+    if (!exhausted) {
+        FL_MESSAGE("pthread keys could not be exhausted; skipping");
+        return;
+    }
+
+    FL_CHECK_EQ(with_default.access(), 5);
+    FL_CHECK_EQ(no_default.access(), 0);
+    with_default.set(7);
+    no_default = 8;
+
+    // Every thread shares the one fallback slot (ThreadLocalFake semantics).
+    int seen_default = 0;
+    int seen_plain = 0;
+    fl::thread t([&]() {
+        seen_default = with_default.access();
+        seen_plain = no_default.access();
+        with_default.set(9);
+    });
+    t.join();
+    FL_CHECK_EQ(seen_default, 7);
+    FL_CHECK_EQ(seen_plain, 8);
+    FL_CHECK_EQ(with_default.access(), 9);
+    // Destructors free the fallback slots (LSAN in --debug checks this).
 }
 
 #endif  // FASTLED_USE_THREAD_LOCAL

@@ -4,6 +4,8 @@
 #if FASTLED_USE_THREAD_LOCAL
 // IWYU pragma: begin_keep
 #include <pthread.h>  // ok include
+#include "fl/stl/atomic.h"
+#include "fl/stl/compiler_control.h"  // FL_NO_INLINE
 #include "fl/stl/noexcept.h"
 // IWYU pragma: end_keep
 #endif
@@ -21,6 +23,13 @@
 namespace fl {
 
 #if FASTLED_USE_THREAD_LOCAL
+namespace detail {
+// Logs (once per process) that a ThreadLocal fell back to its shared slot
+// because pthread_key_create / pthread_setspecific failed. Out of line so the
+// header need not pull in the logging stack.
+void thread_local_fallback_warn() FL_NO_EXCEPT;
+} // namespace detail
+
 template <typename T> class ThreadLocalReal;
 template <typename T> using ThreadLocal = ThreadLocalReal<T>;
 #else
@@ -38,6 +47,11 @@ template <typename T> using ThreadLocal = ThreadLocalFake<T>;
 // default each thread's copy is value-initialized (T()). Storing an inline
 // default T unconditionally doubled the cost of SingletonThreadLocal<Big>
 // (see #5304).
+//
+// Failure handling (#5310): if pthread_key_create fails, or a thread's
+// pthread_setspecific fails, access() degrades to one lazily created
+// per-object fallback slot shared by every affected thread (the
+// ThreadLocalFake semantics) and warns once, instead of dereferencing null.
 template <typename T> class ThreadLocalReal {
   public:
     // Default: each thread's object is value-initialized
@@ -63,6 +77,7 @@ template <typename T> class ThreadLocalReal {
             }
             pthread_key_delete(mKey);
         }
+        delete mFallback.load();  // ok bare allocation
         delete mDefault;  // ok bare allocation
     }
 
@@ -73,7 +88,8 @@ template <typename T> class ThreadLocalReal {
     }
 
     // Assignment operator: copies the default (key remains this instance's).
-    // Threads that already accessed this instance keep their current values.
+    // Threads that already accessed this instance (or the fallback slot, see
+    // above) keep their current values.
     // Not thread-safe: like construction, it must not race with another
     // thread's first access() (which reads the default).
     ThreadLocalReal& operator=(const ThreadLocalReal& other) FL_NO_EXCEPT {
@@ -149,6 +165,10 @@ template <typename T> class ThreadLocalReal {
     // A private, deep-copied owner (raw rather than fl::unique_ptr, whose
     // stored deleter would add a word to every instance).
     ThreadStorage *mDefault = nullptr;
+    // Shared slot used only when the key could not be created or a thread's
+    // pthread_setspecific failed; created on first such failure, owned here,
+    // never copied. Atomic so racing first failures agree on one slot.
+    fl::atomic<ThreadStorage *> mFallback;
 
     // Initialize the pthread key
     void initializeKey() FL_NO_EXCEPT {
@@ -163,20 +183,45 @@ template <typename T> class ThreadLocalReal {
         return static_cast<ThreadStorage*>(pthread_getspecific(mKey));
     }
 
-    // Create this thread's storage, copy-constructed from the default if one
-    // was supplied, otherwise value-initialized.
+    // New storage copy-constructed from the default if one was supplied,
+    // otherwise value-initialized.
+    ThreadStorage *newStorage() const FL_NO_EXCEPT {
+        return mDefault ? new ThreadStorage(*mDefault)  // ok bare allocation
+                        : new ThreadStorage();  // ok bare allocation
+    }
+
+    // First access on this thread: register new storage under the key. Never
+    // returns null; on any failure returns the shared fallback slot.
     ThreadStorage* createStorage() FL_NO_EXCEPT {
-        if (!mKeyInitialized) {
-            return nullptr;
+        if (mKeyInitialized) {
+            ThreadStorage *storage = newStorage();
+            if (storage) {
+                if (pthread_setspecific(mKey, storage) == 0) {
+                    return storage;
+                }
+                delete storage;  // ok bare allocation
+            }
         }
-        ThreadStorage *storage = mDefault
-                                     ? new ThreadStorage(*mDefault)  // ok bare allocation
-                                     : new ThreadStorage();  // ok bare allocation
-        if (pthread_setspecific(mKey, storage) != 0) {
-            delete storage;  // ok bare allocation
-            return nullptr;
+        return fallbackStorage();
+    }
+
+    // Cold path: the per-object shared slot, created on first use. If two
+    // threads race to create it, the CAS loser frees its copy and uses the
+    // winner's. The null check in createStorage() is defensive; plain new
+    // throws or aborts rather than returning null, so this slot is valid.
+    FL_NO_INLINE ThreadStorage *fallbackStorage() FL_NO_EXCEPT {
+        ThreadStorage *slot = mFallback.load();
+        if (slot) {
+            return slot;
         }
-        return storage;
+        detail::thread_local_fallback_warn();
+        ThreadStorage *created = newStorage();
+        ThreadStorage *expected = nullptr;
+        if (mFallback.compare_exchange_strong(expected, created)) {
+            return created;
+        }
+        delete created;  // ok bare allocation
+        return expected;
     }
 
     // Cleanup function called when thread exits
