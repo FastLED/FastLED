@@ -293,6 +293,15 @@
     #ifndef FL_PIN_SPI_CLOCK_1
     #define FL_PIN_SPI_CLOCK_1 26
     #endif
+    // Second clocked strip: the generic fallback pair (3/4) lands on D4, which
+    // is PIN_LED2 (blue) on the Sense, so both pins move. D6/D9 are broken out
+    // and are not UART or an onboard LED.
+    #ifndef FL_PIN_SPI_DATA_2
+    #define FL_PIN_SPI_DATA_2 6
+    #endif
+    #ifndef FL_PIN_SPI_CLOCK_2
+    #define FL_PIN_SPI_CLOCK_2 9
+    #endif
 #endif // defined (ARDUINO_NRF52840_FEATHER)
 
 
@@ -357,6 +366,15 @@
     #endif
     #ifndef FL_PIN_SPI_CLOCK_1
     #define FL_PIN_SPI_CLOCK_1 26
+    #endif
+    // Second clocked strip: the generic fallback pair (3/4) lands on D4, which
+    // is PIN_LED2 (blue) on the Sense, so both pins move. D6/D9 are broken out
+    // and are not UART or an onboard LED.
+    #ifndef FL_PIN_SPI_DATA_2
+    #define FL_PIN_SPI_DATA_2 6
+    #endif
+    #ifndef FL_PIN_SPI_CLOCK_2
+    #define FL_PIN_SPI_CLOCK_2 9
     #endif
 #endif // defined (ARDUINO_NRF52840_FEATHER_SENSE)
 
@@ -1322,6 +1340,15 @@
     #endif
     #ifndef FL_PIN_SPI_CLOCK_1
     #define FL_PIN_SPI_CLOCK_1 26
+    #endif
+    // Second clocked strip: the generic fallback pair (3/4) lands on D4, which
+    // is PIN_LED2 (blue) on the Sense, so both pins move. D6/D9 are broken out
+    // and are not UART or an onboard LED.
+    #ifndef FL_PIN_SPI_DATA_2
+    #define FL_PIN_SPI_DATA_2 6
+    #endif
+    #ifndef FL_PIN_SPI_CLOCK_2
+    #define FL_PIN_SPI_CLOCK_2 9
     #endif
 #endif // defined (NRF52840_XXAA)
 
