@@ -443,8 +443,8 @@ fn mask_raw_strings(code: &str) -> String {
                 cursor = end;
             }
             b'"' => cursor = scan_quoted(bytes, cursor + 1, b'"'),
-            // A `'` after a digit is a separator (`1'000`), not a char literal.
-            b'\'' if cursor == 0 || !bytes[cursor - 1].is_ascii_alphanumeric() => {
+            // `1'000` is a digit separator; `L'!'` is still a char literal.
+            b'\'' if !is_digit_separator_quote(bytes, cursor) => {
                 cursor = scan_quoted(bytes, cursor + 1, b'\'')
             }
             _ => cursor += 1,

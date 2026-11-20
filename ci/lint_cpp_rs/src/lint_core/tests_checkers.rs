@@ -918,6 +918,8 @@ u32 i = v2 << 16;
 /* 1 << 24 in a block */
 const char* s = \"1 << 24\";
 u32 j = 1 << 24; // fl-lint: int-shift-ok 32-bit-only helper
+const auto ch = L'!'; const char* r = R\"(\"1 << 24\")\";
+u32 sep = 1'000 + (x << 16);
 ";
         let v = int_shift_violations(src);
         assert!(v.is_empty(), "{v:?}");
