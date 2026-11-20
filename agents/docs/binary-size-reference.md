@@ -75,23 +75,31 @@ files, so the probe calls the avr-g++ that fbuild cached directly. Write the
 outputs to a scratch directory and do not commit them.
 
 ```bash
-# The avr-gcc and Arduino AVR core that fbuild cached for `bash compile uno`:
-# If several versions are cached, pick the pair `bash compile uno` logs on its
-# "AVR resolved: avr-gcc@... arduino-avr-core@..." line, and quote it with the numbers.
-AVR=$(dirname "$(ls ~/.fbuild/*/cache/toolchains/*/*/*/bin/avr-g++ | head -1)")
-CORE=$(ls -d ~/.fbuild/*/cache/platforms/dl-framework-arduino-avr-[0-9]*/*/* | head -1)
-echo "toolchain: $AVR"; echo "core: $CORE"
+# The avr-gcc and Arduino AVR core that fbuild cached for `bash compile uno`.
+# It stops rather than guess when several versions are cached: then set AVR
+# and CORE by hand to the pair `bash compile uno` logs ("AVR resolved: ...").
+ok=1
+if [ -z "$AVR" ] || [ -z "$CORE" ]; then
+  AVRS=$(ls ~/.fbuild/*/cache/toolchains/*/*/*/bin/avr-g++)
+  CORES=$(ls -d ~/.fbuild/*/cache/platforms/dl-framework-arduino-avr-[0-9]*/*/*)
+  [ "$(for g in $AVRS; do "$g" -dumpversion; done | sort -u | wc -l)" = 1 ] &&
+  [ "$(for c in $CORES; do basename "$c"; done | sort -u | wc -l)" = 1 ] ||
+    { echo "several avr-gcc/core versions cached: set AVR and CORE"; ok=0; }
+  AVR=$(dirname "$(echo "$AVRS" | head -1)"); CORE=$(echo "$CORES" | head -1)
+fi
+echo "avr-gcc $("$AVR/avr-g++" -dumpversion) at $AVR; core $CORE"   # quote with results
 SRC=$PWD/src   # FastLED checkout
 OUT=$(mktemp -d)   # or a session scratch directory
 for f in "$SRC"/fl/build/*.cpp; do
+  [ "$ok" = 1 ] || break
   "$AVR/avr-g++" -mmcu=atmega328p -Os -std=gnu++11 \
     -fno-threadsafe-statics -fno-exceptions -ffunction-sections -fdata-sections -w \
     -DF_CPU=16000000L -DARDUINO=10808 -DARDUINO_ARCH_AVR -DARDUINO_AVR_UNO \
     -I"$CORE/cores/arduino" -I"$CORE/variants/standard" -I"$SRC" \
     -fstack-usage -c "$f" -o "$OUT/$(basename "$f" .cpp).o" \
-    || { echo "FAILED: $f"; ok=0; break; }   # a partial inventory misleads
+    || { echo "FAILED: $f"; ok=0; }   # a partial inventory misleads
 done
-[ "${ok:-1}" = 1 ] && sort -t$'\t' -k2 -n -r "$OUT"/*.su | head -40   # largest first
+[ "$ok" = 1 ] && sort -t$'\t' -k2 -n -r "$OUT"/*.su | head -40   # largest first
 ```
 
 Each `.su` line is `file:line:col:function<TAB>bytes<TAB>qualifiers`. `static`
