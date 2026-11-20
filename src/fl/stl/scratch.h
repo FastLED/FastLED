@@ -120,9 +120,12 @@ FASTLED_FORCE_INLINE void* side_stack_push(side_stack_state& st, u8* base, fl::s
 
 /// Release a block from side_stack_push(): the top returns to saved_top.
 /// Returns false if `block` was not the most recent live block (a non-LIFO
-/// release). The top is then left alone: lowering it would hand the still
-/// live younger blocks out again, so the released bytes stay reserved until
-/// everything above them is released (a bounded leak, never an overlap).
+/// release, a contract violation fl::scratch asserts on in debug builds).
+/// The top is then left alone, because lowering it would hand still-live
+/// younger blocks out again. The cost is a leak instead of an overlap: the
+/// released bytes, and anything below them released later, can stay
+/// reserved for the life of the arena (later releases of blocks under the
+/// leaked range also report false).
 FASTLED_FORCE_INLINE bool side_stack_pop(side_stack_state& st, const u8* base,
                            fl::size saved_top, const void* block,
                            fl::size bytes) FL_NO_EXCEPT {
@@ -216,24 +219,17 @@ class arena_scratch {
     fl::size mSavedTop;
 };
 
-} // namespace detail
-
-#if FL_SCRATCH_STACK_BYTES == 0
-
-/// Peak side-stack usage in bytes since start-up (or the last reset).
-/// Always 0 when FL_SCRATCH_STACK_BYTES is 0.
-inline fl::size scratch_high_water() FL_NO_EXCEPT { return 0; }
-inline void scratch_reset_high_water() FL_NO_EXCEPT {}
-
+/// fl::scratch's implementation when FL_SCRATCH_STACK_BYTES == 0: the T is
+/// a plain member, so a local scratch is exactly a local T.
 template <typename T>
-class scratch {
+class inline_scratch {
     FL_STATIC_ASSERT(fl::is_trivially_destructible<T>::value,
                   "fl::scratch<T> requires a trivially destructible T");
 
   public:
-    scratch() FL_NO_EXCEPT {}
-    scratch(const scratch&) FL_NO_EXCEPT = delete;
-    scratch& operator=(const scratch&) FL_NO_EXCEPT = delete;
+    inline_scratch() FL_NO_EXCEPT {}
+    inline_scratch(const inline_scratch&) FL_NO_EXCEPT = delete;
+    inline_scratch& operator=(const inline_scratch&) FL_NO_EXCEPT = delete;
 
     explicit operator bool() const FL_NO_EXCEPT { return true; }
     T* get() FL_NO_EXCEPT { return &mValue; }
@@ -246,6 +242,18 @@ class scratch {
   private:
     T mValue;
 };
+
+} // namespace detail
+
+#if FL_SCRATCH_STACK_BYTES == 0
+
+/// Peak side-stack usage in bytes since start-up (or the last reset).
+/// Always 0 when FL_SCRATCH_STACK_BYTES is 0.
+inline fl::size scratch_high_water() FL_NO_EXCEPT { return 0; }
+inline void scratch_reset_high_water() FL_NO_EXCEPT {}
+
+template <typename T>
+class scratch : public detail::inline_scratch<T> {};
 
 #else  // FL_SCRATCH_STACK_BYTES > 0
 

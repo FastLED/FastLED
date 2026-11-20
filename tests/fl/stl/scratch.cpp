@@ -4,8 +4,17 @@
 /// (fl::detail::side_stack). Host builds default FL_SCRATCH_STACK_BYTES to 0,
 /// so the side-stack logic is exercised directly on small test arenas.
 
+// This TU runs fl::scratch on its production FL_SCRATCH_STACK_BYTES > 0
+// backend (global arena) with a 256 B capacity. The host library is built
+// with the default 0 and so defines no arena; this TU links the library's
+// own arena definitions from fl/stl/detail/scratch_arena.hpp. (Real builds must set the capacity build-wide
+// with -D; a test binary is the one place a per-TU value is safe.)
+#define FL_SCRATCH_STACK_BYTES 256
+#define FL_SCRATCH_ALLOW_MULTITHREADED 1  // the tests below are single-threaded
+
 #include "test.h"
 #include "fl/stl/scratch.h"
+#include "fl/stl/detail/scratch_arena.hpp"
 #include "fl/stl/int.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/bit_cast.h"
@@ -210,7 +219,7 @@ FL_TEST_CASE("side_stack - pop reports a non-LIFO release") {
     FL_CHECK_EQ(addr(c), addr(b) + 8);
     FL_CHECK(ss.pop(sc, c, 8));
     // Releasing `b` (now the top) unwinds to its saved top; `a`'s 8 bytes
-    // stay reserved (a bounded leak).
+    // stay reserved (leaked for the arena's life, never overlapped).
     FL_CHECK(ss.pop(sb, b, 8));
     FL_CHECK_EQ(ss.used(), fl::size(8));
 }
@@ -293,25 +302,66 @@ FL_TEST_CASE("arena_scratch - out-of-order release is detected") {
     TestArena::sStack = nullptr;
 }
 
-FL_TEST_CASE("scratch - capacity-0 backend is a plain member") {
-#if FL_SCRATCH_STACK_BYTES == 0
+FL_TEST_CASE("inline_scratch - capacity-0 backend is a plain member") {
+    // fl::scratch<T> is detail::inline_scratch<T> when the capacity is 0.
     struct Frame { int values[32]; };
-    fl::scratch<Frame> s;
+    detail::inline_scratch<Frame> s;
     FL_CHECK(static_cast<bool>(s));
     FL_REQUIRE(s.get() != nullptr);
     for (int i = 0; i < 32; ++i) s->values[i] = i;
     FL_CHECK_EQ((*s).values[31], 31);
     FL_CHECK_EQ(s.get()->values[7], 7);
     // The value lives inside the object: no side stack involved.
-    FL_CHECK_EQ(sizeof(fl::scratch<Frame>), sizeof(Frame));
-    FL_CHECK_EQ(fl::scratch_high_water(), fl::size(0));
+    FL_CHECK_EQ(sizeof(detail::inline_scratch<Frame>), sizeof(Frame));
 
-    // Arrays work too.
-    fl::scratch<u8[100]> arr;
+    detail::inline_scratch<u8[100]> arr;
     FL_CHECK(static_cast<bool>(arr));
     (*arr)[99] = 7;
     FL_CHECK_EQ((*arr)[99], 7);
-#endif
+}
+
+FL_TEST_CASE("scratch - global side stack (production path)") {
+    FL_STATIC_ASSERT(FL_SCRATCH_STACK_BYTES == 256,
+                     "this TU must see the per-test capacity");
+    FL_CHECK_EQ(detail::scratch_state.top, fl::size(0));
+    fl::scratch_reset_high_water();
+    FL_CHECK_EQ(fl::scratch_high_water(), fl::size(0));
+
+    struct Frame { u32 words[16]; };  // 64 B
+    {
+        fl::scratch<Frame> outer;
+        FL_REQUIRE(static_cast<bool>(outer));
+        FL_CHECK(static_cast<void*>(outer.get()) >= static_cast<void*>(detail::scratch_arena));
+        FL_CHECK_EQ(fl::ptr_to_int(outer.get()) % alignof(Frame), fl::uptr(0));
+        outer->words[15] = 0xA5A5A5A5u;
+        {
+            fl::scratch<u8[128]> inner;
+            FL_REQUIRE(static_cast<bool>(inner));
+            (*inner)[127] = 9;
+            // 64 + 128 + up to 3 B padding used; 100 B more does not fit.
+            fl::scratch<u8[100]> tooBig;
+            FL_CHECK_FALSE(static_cast<bool>(tooBig));
+            FL_CHECK(tooBig.get() == nullptr);
+        }
+        FL_CHECK_EQ((*outer).words[15], u32(0xA5A5A5A5u));
+        // The inner lease was returned: 128 B fit again.
+        fl::scratch<u8[128]> again;
+        FL_CHECK(static_cast<bool>(again));
+    }
+    FL_CHECK_EQ(detail::scratch_state.top, fl::size(0));
+    FL_CHECK(fl::scratch_high_water() >= fl::size(64 + 128));
+    FL_CHECK(fl::scratch_high_water() <= fl::size(256));
+
+    fl::scratch_reset_high_water();
+    FL_CHECK_EQ(fl::scratch_high_water(), fl::size(0));
+    // The largest T the static_assert admits (sizeof + alignof - 1 <= 256)
+    // always fits in the empty arena.
+    {
+        fl::scratch<u8[256]> whole;
+        FL_CHECK(static_cast<bool>(whole));
+    }
+    FL_CHECK_EQ(fl::scratch_high_water(), fl::size(256));
+    FL_CHECK_EQ(detail::scratch_state.top, fl::size(0));
 }
 
 FL_TEST_CASE("scratch - is_trivially_destructible gate") {
