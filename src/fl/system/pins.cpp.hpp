@@ -1,5 +1,5 @@
 /// @file fl/pins.cpp.hpp
-/// Implementation of DigitalMultiWrite8 (nibble LUT bulk pin writes).
+/// Implementation of DigitalMultiWrite8/16 (bulk pin writes).
 
 #include "fl/system/pins.h"
 #include "fl/system/fastpin.h"
@@ -207,20 +207,28 @@ void keepMajorityPort(int (&pins)[N], const char* who) FL_NO_EXCEPT {
     }
 }
 
-// Drive one 4-pin group from a nibble without a LUT: every HIGH first, then
-// every LOW, each in ascending bit order. That is exactly the digitalWrite
-// sequence the classes' nibble LUTs replay.
-inline void writeNibbleDirect(fl::span<const int, 4> pins4, u8 nib) FL_NO_EXCEPT {
-    for (u8 b = 0; b < 4; ++b) {
-        if (pins4[b] >= 0 && (nib & (1 << b))) {
-            (fl::digitalWrite)(pins4[b], PinValue::High);
-        }
-    }
-    for (u8 b = 0; b < 4; ++b) {
-        if (pins4[b] >= 0 && !(nib & (1 << b))) {
-            (fl::digitalWrite)(pins4[b], PinValue::Low);
-        }
-    }
+// Unrolled on purpose. On AVR (avr-gcc 7.3 -Os in simavr, digitalWrite
+// replaced by a minimal out-of-line stand-in) writeByte takes 298 cycles with
+// all 8 pins active and 58 with none, against 476-484 and 124 for the nibble
+// LUTs this replaced, and the cost no longer depends on the data
+// (FastLED#5314). Each test is one skip-if-bit instruction on a register.
+void writeEight(const int (&pins)[8], u8 high, u8 low) FL_NO_EXCEPT {
+    if (high & 0x01) (fl::digitalWrite)(pins[0], PinValue::High);
+    if (high & 0x02) (fl::digitalWrite)(pins[1], PinValue::High);
+    if (high & 0x04) (fl::digitalWrite)(pins[2], PinValue::High);
+    if (high & 0x08) (fl::digitalWrite)(pins[3], PinValue::High);
+    if (low & 0x01) (fl::digitalWrite)(pins[0], PinValue::Low);
+    if (low & 0x02) (fl::digitalWrite)(pins[1], PinValue::Low);
+    if (low & 0x04) (fl::digitalWrite)(pins[2], PinValue::Low);
+    if (low & 0x08) (fl::digitalWrite)(pins[3], PinValue::Low);
+    if (high & 0x10) (fl::digitalWrite)(pins[4], PinValue::High);
+    if (high & 0x20) (fl::digitalWrite)(pins[5], PinValue::High);
+    if (high & 0x40) (fl::digitalWrite)(pins[6], PinValue::High);
+    if (high & 0x80) (fl::digitalWrite)(pins[7], PinValue::High);
+    if (low & 0x10) (fl::digitalWrite)(pins[4], PinValue::Low);
+    if (low & 0x20) (fl::digitalWrite)(pins[5], PinValue::Low);
+    if (low & 0x40) (fl::digitalWrite)(pins[6], PinValue::Low);
+    if (low & 0x80) (fl::digitalWrite)(pins[7], PinValue::Low);
 }
 
 } // namespace pins_detail
@@ -231,17 +239,17 @@ void DigitalMultiWrite8::init(const Pins8& pins) FL_NO_EXCEPT {
     }
     pins_detail::keepMajorityPort<8, 32>(mPins, "digitalMultiWrite8");
 
-    buildNibbleLut(0, mSetLo, mClrLo); // bits 0-3
-    buildNibbleLut(4, mSetHi, mClrHi); // bits 4-7
+    mActive = 0;
+    for (u8 i = 0; i < 8; ++i) {
+        if (mPins[i] >= 0) {
+            mActive = static_cast<u8>(mActive | (1u << i));
+        }
+    }
 }
 
 void DigitalMultiWrite8::write(fl::span<const u8> pin_data) const FL_NO_EXCEPT {
     for (fl::size i = 0; i < pin_data.size(); ++i) {
-        const u8 byte = pin_data[i];
-        const u8 lo_nib = byte & 0x0F;
-        const u8 hi_nib = (byte >> 4) & 0x0F;
-        applyNibble(mSetLo[lo_nib], mClrLo[lo_nib]);
-        applyNibble(mSetHi[hi_nib], mClrHi[hi_nib]);
+        writeByte(pin_data[i]);
     }
 }
 
@@ -261,51 +269,12 @@ bool DigitalMultiWrite8::allSamePort() const FL_NO_EXCEPT {
     return true;
 }
 
-void DigitalMultiWrite8::buildNibbleLut(u8 bit_offset, PinList (&set_lut)[16],
-                                        PinList (&clr_lut)[16]) FL_NO_EXCEPT {
-    for (u16 nib = 0; nib < 16; ++nib) {
-        PinList &s = set_lut[nib];
-        PinList &c = clr_lut[nib];
-        s.count = 0;
-        c.count = 0;
-        for (u8 b = 0; b < 4; ++b) {
-            int pin = mPins[bit_offset + b];
-            if (pin < 0) {
-                continue;
-            }
-            if (nib & (1 << b)) {
-                s.pins[s.count++] = pin;
-            } else {
-                c.pins[c.count++] = pin;
-            }
-        }
-    }
-}
-
-void DigitalMultiWrite8::applyNibble(const PinList &set, const PinList &clr) FL_NO_EXCEPT {
-    for (u8 i = 0; i < set.count; ++i) {
-        (fl::digitalWrite)(set.pins[i], PinValue::High);
-    }
-    for (u8 i = 0; i < clr.count; ++i) {
-        (fl::digitalWrite)(clr.pins[i], PinValue::Low);
-    }
-}
-
-// The one-shot free functions drive the pins directly instead of building a
-// DigitalMultiWrite8/16 on the stack: the classes' nibble LUTs (592 / 1184 B
-// on AVR) only pay off across repeated writes. Same pins disabled, same
-// digitalWrite sequence (FastLED#5307).
+// Without LUTs the writer is 17 B on AVR (36 B on 32-bit), so the one-shot
+// function can build one on the stack again (FastLED#5307, #5314).
 void digitalMultiWrite8(const Pins8& pins, fl::span<const u8> pin_data) FL_NO_EXCEPT {
-    int active[8];
-    for (u8 i = 0; i < 8; ++i) {
-        active[i] = pins.pins[i];
-    }
-    pins_detail::keepMajorityPort<8, 32>(active, "digitalMultiWrite8");
-    for (fl::size i = 0; i < pin_data.size(); ++i) {
-        const u8 byte = pin_data[i];
-        pins_detail::writeNibbleDirect(fl::span<const int, 4>(active, 4), byte & 0x0F);
-        pins_detail::writeNibbleDirect(fl::span<const int, 4>(active + 4, 4), (byte >> 4) & 0x0F);
-    }
+    DigitalMultiWrite8 writer;
+    writer.init(pins);
+    writer.write(pin_data);
 }
 
 // ============================================================================
@@ -313,33 +282,43 @@ void digitalMultiWrite8(const Pins8& pins, fl::span<const u8> pin_data) FL_NO_EX
 // ============================================================================
 
 void DigitalMultiWrite16::init(const Pins16& pins) FL_NO_EXCEPT {
+    int all[16];
     for (u8 i = 0; i < 16; ++i) {
-        mPins[i] = pins.pins[i];
+        all[i] = pins.pins[i];
     }
-    pins_detail::keepMajorityPort<16, 64>(mPins, "digitalMultiWrite16");
+    pins_detail::keepMajorityPort<16, 64>(all, "digitalMultiWrite16");
 
-    for (u8 n = 0; n < 4; ++n) {
-        buildNibbleLut(n * 4, mSetNib[n], mClrNib[n]);
+    mActive = 0;
+    for (u8 i = 0; i < 16; ++i) {
+        mPins[i / 8][i % 8] = all[i];
+        if (all[i] >= 0) {
+            mActive = static_cast<u16>(mActive | (1u << i));
+        }
     }
 }
 
 void DigitalMultiWrite16::write(fl::span<const u16> pin_data) const FL_NO_EXCEPT {
+    const u8 active_lo = static_cast<u8>(mActive & 0xFF);
+    const u8 active_hi = static_cast<u8>(mActive >> 8);
     for (fl::size i = 0; i < pin_data.size(); ++i) {
         const u16 word = pin_data[i];
-        for (u8 n = 0; n < 4; ++n) {
-            const u8 nib = (word >> (n * 4)) & 0x0F;
-            applyNibble(mSetNib[n][nib], mClrNib[n][nib]);
-        }
+        const u8 lo = static_cast<u8>(word & 0xFF);
+        const u8 hi = static_cast<u8>(word >> 8);
+        pins_detail::writeEight(mPins[0], static_cast<u8>(lo & active_lo),
+                                static_cast<u8>(~lo & active_lo));
+        pins_detail::writeEight(mPins[1], static_cast<u8>(hi & active_hi),
+                                static_cast<u8>(~hi & active_hi));
     }
 }
 
 bool DigitalMultiWrite16::allSamePort() const FL_NO_EXCEPT {
     int first_port = -1;
     for (u8 i = 0; i < 16; ++i) {
-        if (mPins[i] < 0) {
+        const int pin = mPins[i / 8][i % 8];
+        if (pin < 0) {
             continue;
         }
-        int port = fl::pinToPort(mPins[i]);
+        int port = fl::pinToPort(pin);
         if (first_port < 0) {
             first_port = port;
         } else if (port != first_port) {
@@ -349,50 +328,10 @@ bool DigitalMultiWrite16::allSamePort() const FL_NO_EXCEPT {
     return true;
 }
 
-void DigitalMultiWrite16::buildNibbleLut(u8 bit_offset,
-                                          PinList (&set_lut)[16],
-                                          PinList (&clr_lut)[16]) FL_NO_EXCEPT {
-    for (u16 nib = 0; nib < 16; ++nib) {
-        PinList &s = set_lut[nib];
-        PinList &c = clr_lut[nib];
-        s.count = 0;
-        c.count = 0;
-        for (u8 b = 0; b < 4; ++b) {
-            int pin = mPins[bit_offset + b];
-            if (pin < 0) {
-                continue;
-            }
-            if (nib & (1 << b)) {
-                s.pins[s.count++] = pin;
-            } else {
-                c.pins[c.count++] = pin;
-            }
-        }
-    }
-}
-
-void DigitalMultiWrite16::applyNibble(const PinList &set, const PinList &clr) FL_NO_EXCEPT {
-    for (u8 i = 0; i < set.count; ++i) {
-        (fl::digitalWrite)(set.pins[i], PinValue::High);
-    }
-    for (u8 i = 0; i < clr.count; ++i) {
-        (fl::digitalWrite)(clr.pins[i], PinValue::Low);
-    }
-}
-
 void digitalMultiWrite16(const Pins16& pins, fl::span<const u16> pin_data) FL_NO_EXCEPT {
-    int active[16];
-    for (u8 i = 0; i < 16; ++i) {
-        active[i] = pins.pins[i];
-    }
-    pins_detail::keepMajorityPort<16, 64>(active, "digitalMultiWrite16");
-    for (fl::size i = 0; i < pin_data.size(); ++i) {
-        const u16 word = pin_data[i];
-        for (u8 n = 0; n < 4; ++n) {
-            pins_detail::writeNibbleDirect(fl::span<const int, 4>(active + n * 4, 4),
-                                           (word >> (n * 4)) & 0x0F);
-        }
-    }
+    DigitalMultiWrite16 writer;
+    writer.init(pins);
+    writer.write(pin_data);
 }
 
 // ============================================================================

@@ -6,7 +6,8 @@
 #include "fl/system/pin.h"
 #include "test.h"
 #include "fl/system/pins.h"
-#include "test.h"
+#include "fl/stl/vector.h"
+#include "platforms/stub/stub_gpio.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
 
@@ -837,6 +838,153 @@ FL_TEST_CASE("digitalMultiWrite16_free_matches_class") {
             FL_REQUIRE_EQ(via_free[i], via_class[i]);
         }
     }
+}
+
+// ============================================================================
+// Write order and object size (FastLED#5314)
+// ============================================================================
+// The classes keep no per-nibble LUT. Every write must still issue the same
+// digitalWrite sequence the LUTs replayed: per 4-pin group in ascending
+// group order, each active pin with a 1 bit goes HIGH, then each active pin
+// with a 0 bit goes LOW, both in ascending bit order.
+
+namespace {
+
+struct PinWrite {
+    int pin;
+    bool high;
+    bool operator==(const PinWrite& o) const { return pin == o.pin && high == o.high; }
+};
+
+// Records every digitalWrite on the given pins, in call order.
+struct WriteLog {
+    fl::vector<PinWrite> writes;
+    fl::vector<int> pins;
+    WriteLog(const int* p, int n) {
+        for (int i = 0; i < n; ++i) {
+            if (p[i] < 0) {
+                continue;
+            }
+            const int pin = p[i];
+            pins.push_back(pin);
+            fl::stub::setPinEdgeCallback(pin, [this, pin](bool high, fl::u32) FL_NO_EXCEPT {
+                writes.push_back(PinWrite{pin, high});
+            });
+        }
+    }
+    ~WriteLog() {
+        for (fl::size i = 0; i < pins.size(); ++i) {
+            fl::stub::clearPinEdgeCallback(pins[i]);
+        }
+    }
+};
+
+// Reference sequence for writing `value` to `active` (n bits, -1 = skipped).
+fl::vector<PinWrite> expectedWrites(const int* active, int n, fl::u32 value) {
+    fl::vector<PinWrite> out;
+    for (int g = 0; g < n; g += 4) {
+        for (int b = g; b < g + 4; ++b) {
+            if (active[b] >= 0 && ((value >> b) & 1u)) {
+                out.push_back(PinWrite{active[b], true});
+            }
+        }
+        for (int b = g; b < g + 4; ++b) {
+            if (active[b] >= 0 && !((value >> b) & 1u)) {
+                out.push_back(PinWrite{active[b], false});
+            }
+        }
+    }
+    return out;
+}
+
+void requireSameWrites(const fl::vector<PinWrite>& got,
+                       const fl::vector<PinWrite>& want, fl::u32 value) {
+    FL_REQUIRE_MESSAGE(got.size() == want.size(),
+                       "value=" << value << " writes=" << got.size()
+                                << " expected=" << want.size());
+    for (fl::size i = 0; i < got.size(); ++i) {
+        FL_REQUIRE_MESSAGE(got[i] == want[i],
+                           "value=" << value << " write#" << i << " pin="
+                                    << got[i].pin << "/" << got[i].high
+                                    << " expected " << want[i].pin << "/"
+                                    << want[i].high);
+    }
+}
+
+} // namespace
+
+FL_TEST_CASE("digitalMultiWrite8_write_order_every_byte") {
+    // Pin 33 is the lone port-1 pin, so init() disables it (one warning).
+    const fl::Pins8 pins = {{3, -1, 5, 6, 33, 9, -1, 11}};
+    // The same pins after that filter. The free function gets these in the
+    // loop so it does not warn 256 times; one call below covers the filter.
+    const fl::Pins8 active = {{3, -1, 5, 6, -1, 9, -1, 11}};
+    fl::DigitalMultiWrite8 writer;
+    writer.init(pins);
+    WriteLog log(pins.pins, 8);
+    for (fl::u32 v = 0; v < 256; ++v) {
+        const fl::vector<PinWrite> want = expectedWrites(active.pins, 8, v);
+        const fl::u8 data[] = {static_cast<fl::u8>(v)};
+
+        log.writes.clear();
+        writer.writeByte(static_cast<fl::u8>(v));
+        requireSameWrites(log.writes, want, v);
+
+        log.writes.clear();
+        writer.write(fl::span<const fl::u8>(data, 1));
+        requireSameWrites(log.writes, want, v);
+
+        log.writes.clear();
+        fl::digitalMultiWrite8(active, fl::span<const fl::u8>(data, 1));
+        requireSameWrites(log.writes, want, v);
+    }
+
+    const fl::u8 data[] = {0xA5};
+    log.writes.clear();
+    fl::digitalMultiWrite8(pins, fl::span<const fl::u8>(data, 1));
+    requireSameWrites(log.writes, expectedWrites(active.pins, 8, 0xA5), 0xA5);
+}
+
+FL_TEST_CASE("digitalMultiWrite16_write_order") {
+    // Pins 0 and 1 are the minority port, so init() disables them.
+    const fl::Pins16 pins = {{40, 41, -1, 43, 44, 45, 46, 47,
+                              0, 49, 50, 51, -1, 53, 54, 1}};
+    const fl::Pins16 active = {{40, 41, -1, 43, 44, 45, 46, 47,
+                                -1, 49, 50, 51, -1, 53, 54, -1}};
+    fl::DigitalMultiWrite16 writer;
+    writer.init(pins);
+    WriteLog log(pins.pins, 16);
+    auto check = [&](fl::u32 word) {
+        const fl::vector<PinWrite> want = expectedWrites(active.pins, 16, word);
+        const fl::u16 data[] = {static_cast<fl::u16>(word)};
+
+        log.writes.clear();
+        writer.write(fl::span<const fl::u16>(data, 1));
+        requireSameWrites(log.writes, want, word);
+
+        log.writes.clear();
+        fl::digitalMultiWrite16(active, fl::span<const fl::u16>(data, 1));
+        requireSameWrites(log.writes, want, word);
+    };
+    // A stride of 7 is coprime with 16, so every nibble position sees all 16
+    // values. The stride stops at 0xFFFE, so 0xFFFF is checked on its own.
+    for (fl::u32 v = 0; v <= 0xFFFF; v += 7) {
+        check(v);
+    }
+    check(0xFFFF);
+
+    const fl::u16 data[] = {0xC3A5};
+    log.writes.clear();
+    fl::digitalMultiWrite16(pins, fl::span<const fl::u16>(data, 1));
+    requireSameWrites(log.writes, expectedWrites(active.pins, 16, 0xC3A5), 0xC3A5);
+}
+
+FL_TEST_CASE("digitalMultiWrite_object_size") {
+    // The nibble LUTs made these 592 / 1184 B on AVR and ~1.3 / 2.6 KB on
+    // 32-bit targets, paid by every retained writer such as the bit-bang
+    // driver's. Only the pin numbers and an active-pin mask remain.
+    FL_CHECK_LE(sizeof(fl::DigitalMultiWrite8), 9 * sizeof(int));
+    FL_CHECK_LE(sizeof(fl::DigitalMultiWrite16), 17 * sizeof(int));
 }
 
 FL_TEST_CASE("pinToPort_same_port_group") {
