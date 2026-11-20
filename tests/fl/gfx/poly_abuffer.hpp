@@ -1174,11 +1174,13 @@ int polyScCheckArenaMatches(PolyScGuardedArena& arena, const PolyScPt* p, int n,
 
 }  // namespace
 
-// Without an arena (host: FL_SCRATCH_STACK_BYTES == 0) the default lease is
-// the plain stack local.
+// Without an arena (the default host build) the default lease is the plain
+// stack local.
+#if FL_SCRATCH_STACK_BYTES == 0
 FL_STATIC_ASSERT((fl::is_same<fl::gfx::detail::PolyScratchLease<fl::gfx::detail::PolyScratch<32, 64> >,
                               fl::detail::inline_scratch<fl::gfx::detail::PolyScratch<32, 64> > >::value),
                  "host drawPolygon working set must stay a stack local");
+#endif
 
 FL_TEST_CASE("drawPolygon scenes: side-stack scratch renders identically to the stack") {
     PolyScGuardedArena arena;

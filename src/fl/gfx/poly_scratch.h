@@ -16,7 +16,6 @@
 /// fl/gfx/canvas.h) is chosen from where that scratch can live.
 
 #include "fl/stl/int.h"
-#include "fl/stl/noexcept.h"
 #include "fl/stl/scratch.h"
 #include "fl/stl/static_assert.h"
 #include "fl/stl/type_traits.h"
@@ -125,9 +124,9 @@ struct AbScratch {
 /// worst-case alignment padding within FL_SCRATCH_STACK_BYTES (fl::scratch's
 /// own compile-time admission rule). Always false without an arena.
 template <typename T>
-constexpr bool polyScratchFitsArena() FL_NO_EXCEPT {
-    return sizeof(T) + alignof(T) - 1 <= static_cast<fl::size>(FL_SCRATCH_STACK_BYTES);
-}
+struct PolyScratchFitsArena
+    : fl::integral_constant<bool, (sizeof(T) + alignof(T) - 1 <=
+                                   static_cast<fl::size>(FL_SCRATCH_STACK_BYTES))> {};
 
 /// Where a kernel's working set T lives: fl::scratch (the side-stack arena)
 /// when it fits the arena, else a plain stack local (fl::scratch's
@@ -137,7 +136,7 @@ constexpr bool polyScratchFitsArena() FL_NO_EXCEPT {
 /// kernels then draw nothing. The stack form never is.
 template <typename T>
 using PolyScratchLease =
-    typename fl::conditional<polyScratchFitsArena<T>(), fl::scratch<T>,
+    typename fl::conditional<PolyScratchFitsArena<T>::value, fl::scratch<T>,
                              fl::detail::inline_scratch<T> >::type;
 
 // FL_GFX_POLYGON_LARGE_TIER_ARENA_BYTES (fl/gfx/canvas.h) is the arena size
