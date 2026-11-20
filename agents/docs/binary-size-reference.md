@@ -65,6 +65,60 @@ Slim disables field-debug logs and coredumps, so it is opt-in only. The ordinary
 
 The wrapper recognizes fbuild's artifact layout, `.build/fbuild/<board>/.fbuild/build/release/firmware.elf`, and lets fbuild resolve the toolchain there.
 
+## Stack inventory (AVR `-fstack-usage`)
+
+`bash bloat` reports flash and static RAM, not stack frames. To find large
+stack frames on a small-RAM target, compile the unity TUs with avr-gcc's
+`-fstack-usage` and sort the `.su` files (each lands next to its `-o` object).
+This is a measurement probe, not a build: `bash compile uno` cannot emit `.su`
+files, so the probe calls the avr-g++ that fbuild cached directly. Write the
+outputs to a scratch directory and do not commit them.
+
+```bash
+# Point AVR and CORE at the avr-gcc and arduino-avr core that `bash compile
+# uno` resolves (its "AVR resolved: avr-gcc@... arduino-avr-core@..." log
+# line) and quote that pair with the results. Candidates in fbuild's cache:
+#   ls -d ~/.fbuild/*/cache/toolchains/*/*/*/bin
+#   ls -d ~/.fbuild/*/cache/platforms/dl-framework-arduino-avr-[0-9]*/*/*
+AVR=/path/to/toolchain/bin        # directory holding avr-g++
+CORE=/path/to/arduino-avr/5.4.0   # directory holding cores/ and variants/
+ok=1
+[ -x "$AVR/avr-g++" ] && [ -d "$CORE/cores/arduino" ] || { echo "set AVR and CORE"; ok=0; }
+SRC=$PWD/src   # FastLED checkout
+OUT=$(mktemp -d)   # or a session scratch directory
+for f in "$SRC"/fl/build/*.cpp; do
+  [ "$ok" = 1 ] || break
+  "$AVR/avr-g++" -mmcu=atmega328p -Os -std=gnu++11 \
+    -fno-threadsafe-statics -fno-exceptions -ffunction-sections -fdata-sections -w \
+    -DF_CPU=16000000L -DARDUINO=10808 -DARDUINO_ARCH_AVR -DARDUINO_AVR_UNO \
+    -I"$CORE/cores/arduino" -I"$CORE/variants/standard" -I"$SRC" \
+    -fstack-usage -c "$f" -o "$OUT/$(basename "$f" .cpp).o" \
+    || { echo "FAILED: $f"; ok=0; }   # a partial inventory misleads
+done
+[ "$ok" = 1 ] && sort -t$'\t' -k2 -n -r "$OUT"/*.su | head -40   # largest first
+```
+
+Each `.su` line is `file:line:col:function<TAB>bytes<TAB>qualifiers`. `static`
+is exact. `dynamic,bounded` is an upper bound on the whole frame. Plain
+`dynamic` (a VLA/`alloca`, or other unbounded adjustments) means the number is
+only the fixed part. Templates that are only instantiated by user code (e.g.
+`SerialPort::printf`) do not appear; compile a two-line probe `.cpp` that calls
+them. `ci/codec_memory/audit.py` does the same for the MP3 codecs on the host
+compiler, with a call graph; it is not set up for AVR.
+
+FastLED#5307 (ATmega328P, avr-gcc 7.3 `-Os`) used this inventory:
+
+| Function | Before | After | Fix |
+|---|---|---|---|
+| `fl::readLine` | 654 B | 96 B | Platforms write the line into the caller's `fl::string` instead of a 512 B `char` buffer; the `sstream` fallback moved out of line. |
+| `SerialPort::printf` caller | ~359 B each | ~52 B each | Formatting stays in the template (an `sstream`); clipping/printing moved out of line (`printFormatted`, 51 B). The 256 B buffer is gone. |
+| `digitalMultiWrite16` / `8` | 1196 / 604 B | 46 / 27 B (+52 / 36 B callee) | The frame was a whole `DigitalMultiWrite16/8` (its nibble LUTs). The one-shot functions now drive the pins directly; the port histogram became a pairwise count. |
+| `fill_2dnoise8/16`, `fill_noise8/16` | 2*W*H B dynamic (1-D: 2*min(N,255)) | unchanged | Kept `FASTLED_STACK_ARRAY`. Both planes are needed at once (hue is read 180-degree rotated), so the buffer cannot be chunked by rows without changing the octave math, and a runtime-sized `fl::scratch` would not help AVR (`FL_SCRATCH_STACK_BYTES` is 0 there). Callers on small-RAM targets should keep the grid small or use the `fill_raw_*` functions with their own buffer. |
+
+`fl::scratch<T>` was not used for these: on AVR its arena is 0 bytes by
+default, so it would not have moved anything, and the ESP8266 arena is mostly
+reserved for `drawPolygon`.
+
 ## Artifacts
 
 Every run writes BOTH files side by side under `.build/symbols/<board>/`, or

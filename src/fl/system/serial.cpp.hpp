@@ -6,6 +6,8 @@
 #include "fl/stl/cstdio.h"
 #include "fl/stl/charconv.h"
 #include "fl/stl/cstring.h"
+#include "fl/stl/stdio.h"
+#include "fl/stl/string.h"
 #include "fl/stl/chrono.h"
 #include "fl/stl/noexcept.h"
 
@@ -49,6 +51,24 @@ size_t SerialPort::print(const char* str) FL_NO_EXCEPT {
 
     fl::print(str);
     return fl::strlen(str);
+}
+
+size_t SerialPort::printf(const char* format) FL_NO_EXCEPT {  // ok snprintf - streams via print_no_args()
+    if (!format) {
+        return 0;
+    }
+    return printf_detail::print_no_args(format, kPrintfMaxLen);
+}
+
+size_t SerialPort::printFormatted(const sstream& stream) FL_NO_EXCEPT {
+    // Same output as the former 256-byte snprintf() buffer: the text up to
+    // the first NUL, clipped to kPrintfMaxLen characters.
+    const char* text = stream.c_str();
+    if (fl::strlen(text) <= kPrintfMaxLen) {
+        return print(text);
+    }
+    fl::string clipped(text, kPrintfMaxLen);
+    return print(clipped.c_str());
 }
 
 size_t SerialPort::print(int value) FL_NO_EXCEPT {

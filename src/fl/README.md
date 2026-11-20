@@ -372,6 +372,7 @@ void render() {
 - `FL_SCRATCH_STACK_BYTES == N`: `T` comes from one fixed N-byte static "side stack" (LIFO bump allocator). Peak RAM is the deepest nesting of live scratches, not one buffer per template instantiation as with function `static`s. It never grows; when full, `f` is false. `fl::scratch_high_water()` reports the peak. ESP8266 defaults to 4608 B (its `loop()` stack is a fixed 4 KB); other small-stack targets opt in with `-DFL_SCRATCH_STACK_BYTES=N`. When nothing uses `fl::scratch`, `--gc-sections` drops the arena. The `drawPolygon` kernels lease their working sets this way when they fit the arena (`fl/gfx/poly_scratch.h`), and a large enough arena raises their default tier to 32/64 on small-stack targets.
 - Measured on AVR (avr-gcc 7.3 `-Os`, gc-sections), 989 B scratch: +46 B flash and the arena in `.bss`, and the function frame drops from 993 B to 2 B of stack. Unused, the arena costs nothing.
 - Scoped use only (not copyable/movable, LIFO release). `T` must be trivially destructible. Not ISR-safe or thread-safe: never use it from an interrupt. A non-zero capacity is a compile error on `FASTLED_MULTITHREADED` builds unless `FL_SCRATCH_ALLOW_MULTITHREADED=1`. Set the capacity build-wide with `-D`, never with a `#define` in one file.
+- Shrink or restructure before reaching for `fl::scratch`: on AVR the arena is 0 B by default, so it moves nothing there. To find large frames, run the AVR `-fstack-usage` inventory in `agents/docs/binary-size-reference.md` ("Stack inventory").
 
 ### Functional Utilities
 

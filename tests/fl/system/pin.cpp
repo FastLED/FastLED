@@ -721,6 +721,124 @@ FL_TEST_CASE("digitalMultiWrite16_minority_port_disabled") {
     }
 }
 
+// ============================================================================
+// One-shot free functions vs. the LUT classes
+// ============================================================================
+// digitalMultiWrite8/16 drive the pins directly instead of building a
+// DigitalMultiWrite8/16 (FastLED#5307). They must disable the same pins and
+// leave the same pin states as the classes.
+
+namespace {
+
+void setPinsLow(const int* pins, int n) {
+    for (int i = 0; i < n; ++i) {
+        if (pins[i] >= 0) {
+            fl::digitalWrite(pins[i], fl::PinValue::Low);
+        }
+    }
+}
+
+void readPins(const int* pins, int n, fl::PinValue* out) {
+    for (int i = 0; i < n; ++i) {
+        out[i] = pins[i] >= 0 ? fl::digitalRead(pins[i]) : fl::PinValue::Low;
+    }
+}
+
+} // namespace
+
+FL_TEST_CASE("digitalMultiWrite8_free_minority_port_disabled") {
+    // 5 pins on port 0 (0-4), 3 pins on port 1 (32-34)
+    fl::Pins8 pins = {{0, 1, 2, 3, 4, 32, 33, 34}};
+    setPinsLow(pins.pins, 8);
+    fl::u8 data[] = {0xFF};
+    fl::digitalMultiWrite8(pins, fl::span<const fl::u8>(data, 1));
+    for (int i = 0; i < 5; ++i) {
+        FL_REQUIRE_EQ(fl::digitalRead(i), fl::PinValue::High);
+    }
+    for (int i = 32; i < 35; ++i) {
+        FL_REQUIRE_EQ(fl::digitalRead(i), fl::PinValue::Low);
+    }
+}
+
+FL_TEST_CASE("digitalMultiWrite8_free_tie_goes_to_lowest_port") {
+    // 4 pins on port 1 listed first, 4 on port 0: port 0 still wins.
+    fl::Pins8 pins = {{32, 33, 34, 35, 0, 1, 2, 3}};
+    setPinsLow(pins.pins, 8);
+    fl::u8 data[] = {0xFF};
+    fl::digitalMultiWrite8(pins, fl::span<const fl::u8>(data, 1));
+    for (int i = 32; i < 36; ++i) {
+        FL_REQUIRE_EQ(fl::digitalRead(i), fl::PinValue::Low);
+    }
+    for (int i = 0; i < 4; ++i) {
+        FL_REQUIRE_EQ(fl::digitalRead(i), fl::PinValue::High);
+    }
+}
+
+FL_TEST_CASE("digitalMultiWrite16_free_minority_port_disabled") {
+    // 10 pins on port 0 (0-9), 6 pins on port 1 (32-37)
+    fl::Pins16 pins = {{0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+                         32, 33, 34, 35, 36, 37}};
+    setPinsLow(pins.pins, 16);
+    fl::u16 data[] = {0xFFFF};
+    fl::digitalMultiWrite16(pins, fl::span<const fl::u16>(data, 1));
+    for (int i = 0; i < 10; ++i) {
+        FL_REQUIRE_EQ(fl::digitalRead(i), fl::PinValue::High);
+    }
+    for (int i = 32; i < 38; ++i) {
+        FL_REQUIRE_EQ(fl::digitalRead(i), fl::PinValue::Low);
+    }
+}
+
+FL_TEST_CASE("digitalMultiWrite8_free_matches_class_every_byte") {
+    // Mixed ports and skipped positions exercise the disable path too.
+    fl::Pins8 pins = {{0, -1, 2, 3, 32, 5, -1, 7}};
+    fl::DigitalMultiWrite8 writer;
+    writer.init(pins);
+    for (int v = 0; v < 256; ++v) {
+        const fl::u8 data[] = {static_cast<fl::u8>(v)};
+        fl::PinValue via_class[8];
+        fl::PinValue via_free[8];
+
+        setPinsLow(pins.pins, 8);
+        writer.write(fl::span<const fl::u8>(data, 1));
+        readPins(pins.pins, 8, via_class);
+
+        setPinsLow(pins.pins, 8);
+        fl::digitalMultiWrite8(pins, fl::span<const fl::u8>(data, 1));
+        readPins(pins.pins, 8, via_free);
+
+        for (int i = 0; i < 8; ++i) {
+            FL_REQUIRE_EQ(via_free[i], via_class[i]);
+        }
+    }
+}
+
+FL_TEST_CASE("digitalMultiWrite16_free_matches_class") {
+    fl::Pins16 pins = {{40, 41, -1, 43, 44, 45, 46, 47,
+                         0, 49, 50, 51, -1, 53, 54, 55}};
+    fl::DigitalMultiWrite16 writer;
+    writer.init(pins);
+    const fl::u16 words[] = {0x0000, 0xFFFF, 0xAAAA, 0x5555, 0x1234,
+                             0x8001, 0xF00F, 0x0FF0, 0xC3A5, 0x7E81};
+    for (fl::u16 word : words) {
+        const fl::u16 data[] = {word};
+        fl::PinValue via_class[16];
+        fl::PinValue via_free[16];
+
+        setPinsLow(pins.pins, 16);
+        writer.write(fl::span<const fl::u16>(data, 1));
+        readPins(pins.pins, 16, via_class);
+
+        setPinsLow(pins.pins, 16);
+        fl::digitalMultiWrite16(pins, fl::span<const fl::u16>(data, 1));
+        readPins(pins.pins, 16, via_free);
+
+        for (int i = 0; i < 16; ++i) {
+            FL_REQUIRE_EQ(via_free[i], via_class[i]);
+        }
+    }
+}
+
 FL_TEST_CASE("pinToPort_same_port_group") {
     // On stub, pins 0-31 should all return the same port ID
     int port0 = fl::pinToPort(0);
