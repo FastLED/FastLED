@@ -339,3 +339,107 @@ const INT_TEMPLATE_ARG_BASELINE: &[(&str, usize)] = &[
     ("src/platforms/win/socket_win.cpp.hpp", 11),
     ("src/power_mgt.cpp.hpp", 2),
 ];
+
+// FastLED#5303: a bare decimal literal shifted left by 16 or more.
+//
+// An unsuffixed decimal literal is `int`, which is 16 bits on AVR, so
+// `4 << 16` is undefined there: avr-gcc rejects it in a constant expression
+// and folds it to 0 elsewhere. Host tests cannot see it because host `int` is
+// 32 bits. Widen the literal first (`fl::i32(4) << 16`, `1UL << 24`).
+//
+// Scoped to `src/` code that can be compiled for AVR: third-party code and the
+// platform directories that only target 32-bit-int cores are skipped, so a
+// CMSIS-style `(1 << 24)` register bit in `src/platforms/arm/` is fine.
+
+const INT_LITERAL_WIDE_SHIFT_SUPPRESSION: &str = "fl-lint: int-shift-ok";
+
+/// Platform directories whose every target has a 32-bit (or wider) `int`.
+const INT_LITERAL_WIDE_SHIFT_32BIT_PLATFORMS: &[&str] = &[
+    "apollo3", "apple", "arm", "ci13xx", "esp", "posix", "stub", "teensy", "wasm", "win",
+];
+
+fn int_literal_wide_shift_regex() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| {
+        // The literal must not be part of an identifier, a hex/float literal
+        // or a suffixed literal (`\d+` is followed directly by `<<`), and not
+        // the operand of a C-style cast such as `(u32)1 << 30`.
+        Regex::new(r"(?:^|[^\w.')])(\d+)\s*<<\s*(\d+)\b").unwrap()
+    })
+}
+
+struct IntLiteralWideShiftChecker;
+
+impl FileContentChecker for IntLiteralWideShiftChecker {
+    fn name(&self) -> &'static str {
+        "IntLiteralWideShiftChecker"
+    }
+
+    fn should_process_file(&self, file_path: &str, project_root: &Path) -> bool {
+        let normalized = normalize_path(file_path);
+        if !is_under_project_subpath(&normalized, project_root, "src")
+            || !ends_with_any(&normalized, &[".cpp", ".h", ".hpp", ".cpp.hpp", ".c"])
+            || normalized.contains("/third_party/")
+        {
+            return false;
+        }
+        !INT_LITERAL_WIDE_SHIFT_32BIT_PLATFORMS
+            .iter()
+            .any(|dir| normalized.contains(&format!("/platforms/{dir}/")))
+    }
+
+    fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
+        if !file_content.content.contains("<<") {
+            return Vec::new();
+        }
+        let mut violations = Vec::new();
+        let mut in_multiline_comment = false;
+        for (index, line) in file_content.lines.iter().enumerate() {
+            let mut code = split_line_comment(line).to_string();
+            if in_multiline_comment {
+                match code.find("*/") {
+                    Some(end) => {
+                        code.replace_range(..end + 2, " ");
+                        in_multiline_comment = false;
+                    }
+                    None => continue,
+                }
+            }
+            while let Some(open) = code.find("/*") {
+                match code[open + 2..].find("*/") {
+                    Some(rel) => code.replace_range(open..open + 2 + rel + 2, " "),
+                    None => {
+                        code.truncate(open);
+                        in_multiline_comment = true;
+                        break;
+                    }
+                }
+            }
+            if !code.contains("<<") || line.contains(INT_LITERAL_WIDE_SHIFT_SUPPRESSION) {
+                continue;
+            }
+            let code = strip_string_literals(&code);
+            for caps in int_literal_wide_shift_regex().captures_iter(&code) {
+                let shift: u32 = caps[2].parse().unwrap_or(0);
+                if shift >= 16 {
+                    violations.push((
+                        index + 1,
+                        format!(
+                            "'{} << {}' shifts a 16-bit int on AVR (UB / folds to 0); widen the \
+                             literal first, e.g. fl::i32({}) << {} or {}UL << {}, or add \
+                             `// {INT_LITERAL_WIDE_SHIFT_SUPPRESSION} <reason>` (FastLED#5303): {}",
+                            &caps[1],
+                            shift,
+                            &caps[1],
+                            shift,
+                            &caps[1],
+                            shift,
+                            line.trim()
+                        ),
+                    ));
+                }
+            }
+        }
+        violations
+    }
+}

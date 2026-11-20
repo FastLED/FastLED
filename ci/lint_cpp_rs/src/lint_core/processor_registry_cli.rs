@@ -399,6 +399,7 @@ pub fn supported_python_checker_names() -> &'static [&'static str] {
         "StdNamespaceChecker",
         "StdintTypeChecker",
         "IntTemplateArgChecker",
+        "IntLiteralWideShiftChecker",
         "SubdirNamespaceChecker",
         "TestAggregationChecker",
         "TestMainChecker",
@@ -569,6 +570,7 @@ pub fn create_checkers(
         ("std_namespace", Box::new(StdNamespaceChecker)),
         ("stdint_type", Box::new(StdintTypeChecker)),
         ("int_template_arg", Box::new(IntTemplateArgChecker)),
+        ("int_literal_wide_shift", Box::new(IntLiteralWideShiftChecker)),
         (
             "subdir_namespace",
             Box::new(SubdirNamespaceChecker { subdir: "net" }),

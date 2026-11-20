@@ -2,6 +2,7 @@
 
 #include "fl/stl/type_traits.h"
 #include "fl/stl/noexcept.h"
+#include "fl/stl/stdint.h"
 
 namespace fl {
 namespace detail {
@@ -23,7 +24,7 @@ class LeakyIntegratorImpl {
   private:
     template <typename U = T>
     static typename fl::enable_if<fl::is_floating_point<U>::value, U>::type
-    shift_right(U val) { return val / static_cast<U>(1 << K); }
+    shift_right(U val) { return val / static_cast<U>(fl::u32(1) << K); }  // u32: K >= 16 overflows 16-bit int (AVR)
 
     template <typename U = T>
     static typename fl::enable_if<!fl::is_floating_point<U>::value, U>::type
