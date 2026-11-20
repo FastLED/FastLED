@@ -4,23 +4,8 @@
 /// (fl::detail::side_stack). Host builds default FL_SCRATCH_STACK_BYTES to 0,
 /// so the side-stack logic is exercised directly on small test arenas.
 
-// This TU runs fl::scratch on its production FL_SCRATCH_STACK_BYTES > 0
-// backend (global arena) with a 256 B capacity, while the host library is
-// built with the default 0 and defines no arena; the arena comes from the
-// library's own fl/stl/detail/scratch_arena.hpp. Real builds must set the
-// capacity build-wide with -D. This per-TU value is a deliberate test-only
-// exception: fl::scratch's class template therefore differs from the
-// library's view. A per-target -D would differ from fastled_lib in exactly
-// the same way; avoiding it entirely needs a whole second library build.
-// To keep it inert, this TU instantiates fl::scratch only with types local
-// to this file, so no fl::scratch instantiation or symbol can be shared
-// with the library.
-#define FL_SCRATCH_STACK_BYTES 256
-#define FL_SCRATCH_ALLOW_MULTITHREADED 1  // the tests below are single-threaded
-
 #include "test.h"
 #include "fl/stl/scratch.h"
-#include "fl/stl/detail/scratch_arena.hpp"
 #include "fl/stl/int.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/bit_cast.h"
@@ -71,6 +56,13 @@ int TestArena::sNonLifoReleases = 0;
 
 template <typename T>
 using test_scratch = detail::arena_scratch<T, TestArena>;
+
+// The production global arena policy at a test-sized capacity:
+// fl::scratch<T> is arena_scratch<T, global_scratch_arena<FL_SCRATCH_STACK_BYTES>>
+// when the capacity is non-zero (host builds default to 0).
+using Global256 = detail::global_scratch_arena<256>;
+template <typename T>
+using global_scratch = detail::arena_scratch<T, Global256>;
 
 } // anonymous namespace
 
@@ -326,51 +318,58 @@ FL_TEST_CASE("inline_scratch - capacity-0 backend is a plain member") {
     FL_CHECK_EQ((*arr)[99], 7);
 }
 
-FL_TEST_CASE("scratch - global side stack (production path)") {
-    FL_STATIC_ASSERT(FL_SCRATCH_STACK_BYTES == 256,
-                     "this TU must see the per-test capacity");
-    FL_CHECK_EQ(detail::scratch_state.top, fl::size(0));
-    fl::scratch_reset_high_water();
-    FL_CHECK_EQ(fl::scratch_high_water(), fl::size(0));
+FL_TEST_CASE("global_scratch_arena - production arena policy") {
+    FL_CHECK_EQ(Global256::used(), fl::size(0));
+    Global256::reset_high_water();
+    FL_CHECK_EQ(Global256::high_water(), fl::size(0));
 
     struct Frame { u32 words[16]; };  // 64 B
-    struct Bytes128 { u8 b[128]; };
-    struct Bytes100 { u8 b[100]; };
-    struct Bytes256 { u8 b[256]; };
     {
-        fl::scratch<Frame> outer;
+        global_scratch<Frame> outer;
         FL_REQUIRE(static_cast<bool>(outer));
-        FL_CHECK(static_cast<void*>(outer.get()) >= static_cast<void*>(detail::scratch_arena));
+        FL_CHECK(static_cast<void*>(outer.get()) == static_cast<void*>(Global256::data()));
         FL_CHECK_EQ(fl::ptr_to_int(outer.get()) % alignof(Frame), fl::uptr(0));
         outer->words[15] = 0xA5A5A5A5u;
         {
-            fl::scratch<Bytes128> inner;
+            global_scratch<u8[128]> inner;
             FL_REQUIRE(static_cast<bool>(inner));
-            inner->b[127] = 9;
-            // 64 + 128 + up to 3 B padding used; 100 B more does not fit.
-            fl::scratch<Bytes100> tooBig;
+            (*inner)[127] = 9;
+            FL_CHECK_EQ(Global256::used(), fl::size(64 + 128));
+            // 100 B more does not fit; the exhaustion hook warns once.
+            global_scratch<u8[100]> tooBig;
             FL_CHECK_FALSE(static_cast<bool>(tooBig));
             FL_CHECK(tooBig.get() == nullptr);
         }
         FL_CHECK_EQ((*outer).words[15], u32(0xA5A5A5A5u));
         // The inner lease was returned: 128 B fit again.
-        fl::scratch<Bytes128> again;
+        global_scratch<u8[128]> again;
         FL_CHECK(static_cast<bool>(again));
     }
-    FL_CHECK_EQ(detail::scratch_state.top, fl::size(0));
-    FL_CHECK(fl::scratch_high_water() >= fl::size(64 + 128));
-    FL_CHECK(fl::scratch_high_water() <= fl::size(256));
+    FL_CHECK_EQ(Global256::used(), fl::size(0));
+    FL_CHECK_EQ(Global256::high_water(), fl::size(64 + 128));
 
-    fl::scratch_reset_high_water();
-    FL_CHECK_EQ(fl::scratch_high_water(), fl::size(0));
-    // The largest T the static_assert admits (sizeof + alignof - 1 <= 256)
-    // always fits in the empty arena.
+    Global256::reset_high_water();
+    FL_CHECK_EQ(Global256::high_water(), fl::size(0));
     {
-        fl::scratch<Bytes256> whole;
+        global_scratch<u8[256]> whole;
         FL_CHECK(static_cast<bool>(whole));
     }
-    FL_CHECK_EQ(fl::scratch_high_water(), fl::size(256));
-    FL_CHECK_EQ(detail::scratch_state.top, fl::size(0));
+    FL_CHECK_EQ(Global256::high_water(), fl::size(256));
+    FL_CHECK_EQ(Global256::used(), fl::size(0));
+}
+
+FL_TEST_CASE("scratch - public API at the build's capacity") {
+    struct Frame { int values[8]; };
+    fl::scratch<Frame> s;
+    FL_REQUIRE(static_cast<bool>(s));
+    s->values[7] = 3;
+    FL_CHECK_EQ((*s).values[7], 3);
+#if FL_SCRATCH_STACK_BYTES == 0
+    FL_CHECK_EQ(sizeof(fl::scratch<Frame>), sizeof(Frame));
+    FL_CHECK_EQ(fl::scratch_high_water(), fl::size(0));
+#else
+    FL_CHECK(fl::scratch_high_water() >= sizeof(Frame));
+#endif
 }
 
 FL_TEST_CASE("scratch - is_trivially_destructible gate") {

@@ -40,9 +40,8 @@
 ///    (`FASTLED_MULTITHREADED`) unless `FL_SCRATCH_ALLOW_MULTITHREADED=1`
 ///    asserts that only one thread ever touches fl::scratch.
 ///  - Set `FL_SCRATCH_STACK_BYTES` build-wide (a -D compiler flag), never
-///    with a `#define` in one source file: the arena is sized and defined
-///    once, inside the library. A sketch-only `#define` shows up as an
-///    undefined reference to `fl::detail::scratch_arena` at link time.
+///    with a `#define` in one source file, so every translation unit agrees
+///    on what fl::scratch is.
 ///
 /// Platform defaults:
 ///  - ESP8266: 4608 B. Arduino's loop() runs on a fixed 4 KB "cont" stack,
@@ -62,6 +61,7 @@
 #include "fl/stl/noexcept.h"
 #include "fl/stl/type_traits.h"
 #include "fl/stl/static_assert.h"
+#include "fl/stl/align.h"
 #include "fl/stl/assert.h"
 #include "fl/stl/compiler_control.h"
 
@@ -166,14 +166,51 @@ class side_stack {
     side_stack_state mState;
 };
 
-#if FL_SCRATCH_STACK_BYTES > 0
-// The global arena (defined in scratch.cpp.hpp; dropped by --gc-sections
-// when nothing uses fl::scratch).
-extern u8 scratch_arena[FL_SCRATCH_STACK_BYTES];
-extern side_stack_state scratch_state;
-/// Cold path: reports exhaustion via FL_WARN where warnings are compiled in.
+/// Cold path of an exhausted global side stack: FL_WARN_ONCE where warnings
+/// are compiled in. Defined in scratch.cpp.hpp; independent of
+/// FL_SCRATCH_STACK_BYTES.
 void scratch_exhausted(fl::size bytes) FL_NO_EXCEPT;
-#endif
+
+/// Arena policy for fl::scratch: one global, N-byte side stack.
+/// fl::scratch uses global_scratch_arena<FL_SCRATCH_STACK_BYTES>. The
+/// storage is a template static, so it is only emitted where some
+/// fl::scratch actually uses it (and --gc-sections drops it otherwise); the
+/// library carries no capacity-specific definitions, and tests can run the
+/// production arena at their own N without redefining the macro.
+template <fl::size N>
+struct global_scratch_arena {
+    struct FL_ALIGN_MAX storage {
+        u8 bytes[N];
+        side_stack_state state;  // zero-initialised: the whole object is .bss
+    };
+    static storage sStorage;
+
+    FASTLED_FORCE_INLINE static void* acquire(fl::size bytes, fl::size align,
+                                              fl::size* saved_top) FL_NO_EXCEPT {
+        void* p = side_stack_push(sStorage.state, sStorage.bytes, N, bytes,
+                                  align, saved_top);
+        if (!p) {
+            scratch_exhausted(bytes);
+        }
+        return p;
+    }
+    FASTLED_FORCE_INLINE static void release(fl::size saved_top, const void* block,
+                                             fl::size bytes) FL_NO_EXCEPT {
+        const bool lifo = side_stack_pop(sStorage.state, sStorage.bytes,
+                                         saved_top, block, bytes);
+        FL_UNUSED(lifo);  // FL_ASSERT compiles to nothing in release builds
+        FL_ASSERT(lifo, "fl::scratch released out of LIFO order");
+    }
+    static fl::size used() FL_NO_EXCEPT { return sStorage.state.top; }
+    static fl::size high_water() FL_NO_EXCEPT { return sStorage.state.high_water; }
+    static void reset_high_water() FL_NO_EXCEPT {
+        sStorage.state.high_water = sStorage.state.top;
+    }
+    static u8* data() FL_NO_EXCEPT { return sStorage.bytes; }
+};
+
+template <fl::size N>
+typename global_scratch_arena<N>::storage global_scratch_arena<N>::sStorage;
 
 template <typename T>
 struct scratch_holder {
@@ -258,35 +295,18 @@ class scratch : public detail::inline_scratch<T> {};
 #else  // FL_SCRATCH_STACK_BYTES > 0
 
 /// Peak side-stack usage in bytes since start-up (or the last reset).
-fl::size scratch_high_water() FL_NO_EXCEPT;
+inline fl::size scratch_high_water() FL_NO_EXCEPT {
+    return detail::global_scratch_arena<FL_SCRATCH_STACK_BYTES>::high_water();
+}
 /// Lower the high-water mark to the current usage (for measurements/tests).
-void scratch_reset_high_water() FL_NO_EXCEPT;
-
-namespace detail {
-/// Arena policy for fl::scratch: the one global side stack.
-struct global_scratch_arena {
-    FASTLED_FORCE_INLINE static void* acquire(fl::size bytes, fl::size align,
-                         fl::size* saved_top) FL_NO_EXCEPT {
-        void* p = side_stack_push(scratch_state, scratch_arena,
-                                  FL_SCRATCH_STACK_BYTES, bytes, align,
-                                  saved_top);
-        if (!p) {
-            scratch_exhausted(bytes);
-        }
-        return p;
-    }
-    FASTLED_FORCE_INLINE static void release(fl::size saved_top, const void* block,
-                        fl::size bytes) FL_NO_EXCEPT {
-        const bool lifo = side_stack_pop(scratch_state, scratch_arena,
-                                         saved_top, block, bytes);
-        FL_UNUSED(lifo);  // FL_ASSERT compiles to nothing in release builds
-        FL_ASSERT(lifo, "fl::scratch released out of LIFO order");
-    }
-};
-} // namespace detail
+inline void scratch_reset_high_water() FL_NO_EXCEPT {
+    detail::global_scratch_arena<FL_SCRATCH_STACK_BYTES>::reset_high_water();
+}
 
 template <typename T>
-class scratch : public detail::arena_scratch<T, detail::global_scratch_arena> {
+class scratch
+    : public detail::arena_scratch<
+          T, detail::global_scratch_arena<FL_SCRATCH_STACK_BYTES>> {
     // Worst-case alignment padding included, so a T that passes can always
     // be leased from an empty side stack.
     FL_STATIC_ASSERT(sizeof(T) + alignof(T) - 1 <= FL_SCRATCH_STACK_BYTES,
