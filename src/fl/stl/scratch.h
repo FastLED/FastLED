@@ -64,6 +64,7 @@
 #include "fl/stl/align.h"
 #include "fl/stl/assert.h"
 #include "fl/stl/compiler_control.h"
+#include "fl/log/log.h"
 
 #ifndef FL_SCRATCH_STACK_BYTES
 #if defined(FL_IS_ESP8266) && !FASTLED_MULTITHREADED
@@ -167,9 +168,14 @@ class side_stack {
 };
 
 /// Cold path of an exhausted global side stack: FL_WARN_ONCE where warnings
-/// are compiled in. Defined in scratch.cpp.hpp; independent of
-/// FL_SCRATCH_STACK_BYTES.
-void scratch_exhausted(fl::size bytes) FL_NO_EXCEPT;
+/// are compiled in (an exhausted render path would otherwise warn every
+/// frame). Kept out of line so the hot path stays small; empty on builds
+/// without warnings.
+FL_NO_INLINE inline void scratch_exhausted(fl::size bytes) FL_NO_EXCEPT {
+    FL_UNUSED(bytes);
+    FL_WARN_ONCE("fl::scratch: side stack exhausted (" << bytes
+                 << " B requested); raise FL_SCRATCH_STACK_BYTES");
+}
 
 /// Arena policy for fl::scratch: one global, N-byte side stack.
 /// fl::scratch uses global_scratch_arena<FL_SCRATCH_STACK_BYTES>. The
