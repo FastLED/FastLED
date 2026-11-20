@@ -17,6 +17,8 @@
 #include "platforms/esp/8266/hspi_bus_traits.h"  // ok platform headers
 #include "platforms/esp/8266/i2s_bus_traits.h"   // ok platform headers
 #include "platforms/esp/8266/uart_bus_traits.h"  // ok platform headers
+#include "fl/gfx/poly_scratch.h"
+#include "fl/stl/static_assert.h"
 #endif
 
 namespace fl {
@@ -45,6 +47,14 @@ void esp8266_compile_tests() FL_NO_EXCEPT {
 // The Arduino loop() runs on a fixed 4 KB cont stack despite 80 KB of SRAM.
 #if !defined(FL_PLATFORM_HAS_SMALL_STACK_OVERRIDDEN) && FL_PLATFORM_HAS_SMALL_STACK != 1
 #error "FL_PLATFORM_HAS_SMALL_STACK should be 1 for ESP8266"
+#endif
+
+// #5306: the default fl::scratch side stack (4608 B) holds both drawPolygon
+// kernels' 32/64 working sets, so 32/64 is ESP8266's default polygon tier
+// even though its loop() stack is small.
+#if FL_SCRATCH_STACK_BYTES == 4608
+FL_STATIC_ASSERT(fl::gfx::detail::kPolyDefaultLargeTier,
+                 "ESP8266's default fl::scratch arena must hold the 32/64 drawPolygon tier");
 #endif
 
 #if FASTLED_ALLOW_INTERRUPTS != 1

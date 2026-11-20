@@ -6,6 +6,7 @@
 #include "fl/math/alpha.h"
 #include "fl/math/xymap.h"
 #include "fl/gfx/draw_mode.h"
+#include "fl/gfx/poly_scratch.h"
 #include "fl/stl/int.h"
 #include "fl/stl/span.h"
 #include "fl/stl/variant.h"
@@ -38,37 +39,46 @@ struct PolyPoint {
 enum class PolyFill { Exact, ABuffer };
 
 /// @brief Default drawPolygon tier (MAXN vertex cap, CHUNK accumulator px)
-/// Both kernels keep their whole working set on the stack, sized by MAXN
-/// (and CHUNK for Exact). Kernel frame on AVR (avr-gcc 7.3 -Os,
+/// Both kernels lease their whole working set (fl/gfx/poly_scratch.h:
+/// PolyScratch / AbScratch, sized by MAXN, and CHUNK for Exact) through
+/// fl::scratch (fl/stl/scratch.h): a plain stack local when
+/// FL_SCRATCH_STACK_BYTES == 0, a block of the fixed side-stack arena when it
+/// is > 0. Kernel frame on AVR with the stack local (avr-gcc 7.3 -Os,
 /// -fstack-usage; callees add ~0.2 KB):
-///  - Exact:   MAXN = 32, CHUNK = 64: 4134 B;  MAXN = 8, CHUNK = 16:  989 B
-///  - ABuffer: MAXN = 32:             2142 B;  MAXN = 8:              605 B
+///  - Exact:   MAXN = 32, CHUNK = 64: 4133 B;  MAXN = 8, CHUNK = 16:  989 B
+///  - ABuffer: MAXN = 32:             2141 B;  MAXN = 8:              605 B
 /// On an Uno (2 KB SRAM), a 16x16 CRGB canvas (768 B) plus FastLED and
 /// Serial leaves ~950 B of stack: enough for ABuffer, not for Exact's
 /// ~1.2 KB call chain (use ABuffer there, or a 16x8 canvas for Exact).
-/// The large tier needs ~4.5 KB of stack, so the default is 8/16 where
-/// FL_PLATFORM_HAS_SMALL_STACK (fl/system/sketch_macros.h: AVR, ESP8266's
-/// 4 KB loop() stack, Teensy LC, LPC804, ...) and 32/64 elsewhere. That is a
-/// stack-size predicate, not the flash-size FL_PLATFORM_HAS_LARGE_MEMORY
-/// tier: STM32F103C8, Teensy 3.x, Uno R4 and LPC845 sit on the low flash
-/// tier yet have the stack for 32/64. Vertices beyond MAXN are ignored;
-/// pass MAXN explicitly for larger polygons. To change the default, set
-/// these build-wide (-D compiler flag) so every translation unit sees the
-/// same Canvas default template arguments.
+/// The default is 32/64 when the 32/64 working set has a home, else 8/16
+/// (fl::gfx::detail::kPolyDefaultLargeTier):
+///  - FL_SCRATCH_STACK_BYTES == 0: 32/64 unless FL_PLATFORM_HAS_SMALL_STACK
+///    (fl/system/sketch_macros.h: AVR, Teensy LC, LPC804, ...). That is a
+///    stack-size predicate, not the flash-size FL_PLATFORM_HAS_LARGE_MEMORY
+///    tier: STM32F103C8, Teensy 3.x, Uno R4 and LPC845 sit on the low flash
+///    tier yet have the stack for 32/64.
+///  - FL_SCRATCH_STACK_BYTES > 0: 32/64 exactly when both 32/64 working sets
+///    (Exact ~4.2 KB on 32-bit targets) fit the arena. ESP8266 defaults to a
+///    4608 B arena, so it gets 32/64 while its 4 KB loop() stack only holds
+///    the kernels' small locals.
+/// The defaults are constant expressions, not preprocessor numbers (do not
+/// test them with #if). Vertices beyond MAXN are ignored; pass MAXN
+/// explicitly for larger polygons (with an arena, a tier whose working set
+/// does not fit it fails to compile). To change the default, set these
+/// build-wide (-D compiler flag) so every translation unit sees the same
+/// Canvas default template arguments.
 #ifndef FL_GFX_POLYGON_DEFAULT_MAXN
-#if FL_PLATFORM_HAS_SMALL_STACK
-#define FL_GFX_POLYGON_DEFAULT_MAXN 8
-#else
-#define FL_GFX_POLYGON_DEFAULT_MAXN 32
-#endif
+#define FL_GFX_POLYGON_DEFAULT_MAXN                                            \
+    (::fl::gfx::detail::kPolyDefaultLargeTier                                  \
+         ? ::fl::gfx::detail::kPolyLargeMaxN                                   \
+         : ::fl::gfx::detail::kPolySmallMaxN)
 #endif
 
 #ifndef FL_GFX_POLYGON_DEFAULT_CHUNK
-#if FL_PLATFORM_HAS_SMALL_STACK
-#define FL_GFX_POLYGON_DEFAULT_CHUNK 16
-#else
-#define FL_GFX_POLYGON_DEFAULT_CHUNK 64
-#endif
+#define FL_GFX_POLYGON_DEFAULT_CHUNK                                           \
+    (::fl::gfx::detail::kPolyDefaultLargeTier                                  \
+         ? ::fl::gfx::detail::kPolyLargeChunk                                  \
+         : ::fl::gfx::detail::kPolySmallChunk)
 #endif
 
 // Forward declarations

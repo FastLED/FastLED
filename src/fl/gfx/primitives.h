@@ -7,6 +7,8 @@
 #include "fl/gfx/canvas.h"  // IWYU pragma: keep
 #include "fl/gfx/draw_mode.h"
 #include "fl/gfx/poly_abuffer.h"  // IWYU pragma: keep
+#include "fl/gfx/poly_scratch.h"
+#include "fl/stl/scratch.h"
 #include "fl/math/distance_lut.h"  // IWYU pragma: keep
 #include "fl/math/integer_math.h"  // IWYU pragma: keep
 #include "fl/math/fixed_point/s16x16.h"
@@ -296,43 +298,6 @@ inline int polyColClamped(fl::i64 v, int width) FL_NO_EXCEPT {
     if (c > width) return width;
     return static_cast<int>(c);  // fl-lint: int-template-ok clamped to [-1, width] first
 }
-
-/// Per-edge scanline state for drawPolygon (even-odd fill, band model).
-/// x is the crossing at the CURRENT row's center (Q16.16, floored — the
-/// anchor polyLineT28 integrates from) and advances exactly per row via a
-/// Bresenham-style remainder recurrence: x += step; t += rem; if (t >= dy)
-/// { t -= dy; x += 1; } where step = floor(65536 * B / dy) and rem =
-/// 65536 * B - step * dy with rem in [0, dy). Single-row edges (dy < 65536)
-/// keep step = rem = t = 0: their span can still cross a row boundary (two
-/// active rows), and the committed behavior is that x stays at the py0-row
-/// value on the second row — the kernel then integrates the infinite line
-/// through that (stale) center crossing, and the extent below must box THAT
-/// line, not the segment's endpoints.
-/// hw = ceil(32768 * |B| / dy) is the line's x half-span over a full row
-/// (|x(tau) - x| <= hw for |tau| <= 32768), so the per-row extent
-/// lx0 = (x - hw) >> 16, lx1 = (x + hw) >> 16 is division-free (shifts) and
-/// a valid bound for every row the edge is active in: px outside [lx0, lx1]
-/// gets the same full/zero shortcut a polyLineT28 call would compute
-/// exactly. hw is derived from (step, rem) at setup — one i64 division per
-/// edge, none per row. hw < 2^45 for i32 B/dy, so it needs i64.
-/// x is i64: for a steep edge spanning < 1 px, the center crossing
-/// extrapolates off the segment by up to 32768 * |B| / dy, which can exceed
-/// i32 (verified reachable: ~2^45). t + rem < 2*dy < 2^31 (dy < 2^30), so
-/// t/rem are i32-safe. An edge is active in every canvas row it geometrically
-/// occupies (py0..py1, including the partial row containing each endpoint).
-struct PolyEdge {
-    fl::i64 x;      // crossing x at current row center, Q16.16
-    fl::i64 step;   // per-row increment, Q16.16 (0 for single-row edges)
-    fl::i32 rem;    // 65536*B - step*dy, in [0, dy) (0 for single-row)
-    fl::i32 t;      // running remainder accumulator
-    fl::i32 dy;     // span height, Q16.16 (> 0)
-    fl::i32 B;      // dx in the top-to-bottom direction, Q16.16 (signed)
-    fl::i32 ytop;   // top endpoint y, Q16.16
-    fl::i32 ybot;   // bottom endpoint y, Q16.16
-    fl::i64 hw;     // per-row x half-span, ceil(32768*|B|/dy) (see above)
-    int py0;        // first active canvas row (row containing ytop)
-    int py1;        // last active canvas row (row containing ybot - 1)
-};
 
 /// Full-pixel coverage in T units (see polyLineT28).
 // 1L: `1 << 28` is UB with a 16-bit int (AVR); GCC 7.3 evaluates it to 0,
@@ -1015,7 +980,11 @@ inline void drawStrokeLineCore(Canvas<PixelT>& canvas, const PixelT& color,
                                Coord x0, Coord y0, Coord x1, Coord y1,
                                Coord thickness, LineCap cap) FL_NO_EXCEPT;
 
-template<typename PixelT, typename Coord, bool Overwrite, int MAXN, int CHUNK>
+/// Scratch is the working-set provider: fl::scratch (stack local or
+/// side-stack arena, per FL_SCRATCH_STACK_BYTES); tests substitute their own
+/// arena. Any class template with fl::scratch's interface works.
+template<typename PixelT, typename Coord, bool Overwrite, int MAXN, int CHUNK,
+         template<typename> class Scratch = fl::scratch>
 inline void drawPolygonCore(Canvas<PixelT>& canvas, const PixelT& color,
                             fl::span<const PolyPoint<Coord>> pts) FL_NO_EXCEPT;
 
@@ -1317,12 +1286,14 @@ inline void drawStrokeLine(Canvas<PixelT>& canvas, const PixelT& color,
 // shoelace area up to u8 rounding.
 //
 // Vertices beyond MAXN are ignored (the polygon closes from #MAXN-1 back to
-// #0). Stack scales with the tier: vertices (8*MAXN B) + edges (56*MAXN B)
-// + accb (4*CHUNK B) + per-row scratch + band prepass bidx/bnc/bfull
-// ((MAXN+1)*(MAXN+5) B). Measured frames and the platform-dependent default
-// tier are documented at FL_GFX_POLYGON_DEFAULT_MAXN in fl/gfx/canvas.h.
+// #0). The working set (detail::PolyScratch, leased through fl::scratch)
+// scales with the tier: vertices (8*MAXN B) + edges (52-56*MAXN B) + accb
+// (4*CHUNK B) + per-row scratch + band prepass bidx/bnc/bfull
+// ((MAXN+1)*(MAXN+5) B). Measured frames and the default tier are
+// documented at FL_GFX_POLYGON_DEFAULT_MAXN in fl/gfx/canvas.h.
 // ---------------------------------------------------------------------------
-template<typename PixelT, typename Coord, bool Overwrite, int MAXN, int CHUNK>
+template<typename PixelT, typename Coord, bool Overwrite, int MAXN, int CHUNK,
+         template<typename> class Scratch>
 inline void detail::drawPolygonCore(Canvas<PixelT>& canvas, const PixelT& color,
                                     fl::span<const PolyPoint<Coord>> pts) FL_NO_EXCEPT {
     FL_STATIC_ASSERT(MAXN >= 3 && MAXN <= 256, "drawPolygon: MAXN must be in [3, 256] (edge indices are u8)");
@@ -1336,9 +1307,24 @@ inline void detail::drawPolygonCore(Canvas<PixelT>& canvas, const PixelT& color,
 
     const int nv = (n < MAXN) ? n : MAXN;
 
+    // Working set (detail::PolyScratch): a stack local, or a side-stack
+    // lease that is empty when the arena is exhausted -- then draw nothing.
+    Scratch<detail::PolyScratch<MAXN, CHUNK>> scratch;
+    if (!scratch) return;
+    auto& vx = scratch->mVx;
+    auto& vy = scratch->mVy;
+    auto& edges = scratch->mEdges;
+    auto& ev = scratch->mEv;      // band boundaries: row ends + vertex y's in row
+    auto& idx = scratch->mIdx;    // a band's active edges, sorted by midpoint key
+    auto& keys = scratch->mKeys;  // per-edge midpoint sort keys (see polySortBand)
+    auto& lx0a = scratch->mLx0a;  // per-row per-edge column extents (left, right),
+    auto& lx1a = scratch->mLx1a;  // clamped to [-1, width] (see polyColClamped)
+    auto& accb = scratch->mAccb;  // per-row CHUNK-px coverage accumulator (T units)
+    auto& bidx = scratch->mBidx;  // per-band active edges (row prepass)
+    auto& bnc = scratch->mBnc;
+    auto& bfull = scratch->mBfull;
+
     // Convert vertices to Q16.16 (clamped to ±8191 px — i32-safe)
-    fl::i32 vx[MAXN];
-    fl::i32 vy[MAXN];
     for (int i = 0; i < nv; ++i) {
         vx[i] = detail::toQ16Clamped(pts[i].x);
         vy[i] = detail::toQ16Clamped(pts[i].y);
@@ -1346,7 +1332,6 @@ inline void detail::drawPolygonCore(Canvas<PixelT>& canvas, const PixelT& color,
 
     // Build per-edge scanline state. Two i64 floor divisions per edge
     // (anchor crossing + step) are the only divisions in this function.
-    PolyEdge edges[MAXN];
     int nedges = 0;
     int ymin = height, ymax = -1;
     for (int i = 0; i < nv; ++i) {
@@ -1415,13 +1400,6 @@ inline void detail::drawPolygonCore(Canvas<PixelT>& canvas, const PixelT& color,
     if (nedges == 0) return;
 
     // Scan rows
-    fl::i32 ev[MAXN + 2];  // band boundaries: row ends + vertex y's in row
-    fl::u8 idx[MAXN];      // a band's active edges, sorted by midpoint key
-    fl::i64 keys[MAXN];    // per-edge midpoint sort keys (see polySortBand)
-    int lx0a[MAXN];        // per-row per-edge column extents (left, right),
-    int lx1a[MAXN];        // clamped to [-1, width] (see polyColClamped)
-    fl::i32 accb[CHUNK];   // per-row CHUNK-px coverage accumulator (T units)
-
     for (int py = ymin; py <= ymax; ++py) {
         const fl::i32 yc = (static_cast<fl::i32>(py) << 16) + 32768;
 
@@ -1484,9 +1462,6 @@ inline void detail::drawPolygonCore(Canvas<PixelT>& canvas, const PixelT& color,
         // chunk — pure redundancy for CHUNK == 1, where there is one chunk
         // per pixel column). Rows whose extent is empty (off-canvas
         // polygon) skip the prepass entirely: nothing would be filled.
-        fl::u8 bidx[MAXN + 1][MAXN];
-        fl::u8 bnc[MAXN + 1];
-        fl::i32 bfull[MAXN + 1];
         if (xmin <= xmax) {
             for (int k = 0; k + 1 < nev; ++k) {
                 const fl::i32 a = ev[k], b = ev[k + 1];
@@ -1586,12 +1561,14 @@ inline void detail::drawPolygonCore(Canvas<PixelT>& canvas, const PixelT& color,
 
 /// MAXN caps the vertex count and CHUNK the per-row accumulator width in
 /// px (must be a power of two). The defaults (FL_GFX_POLYGON_DEFAULT_MAXN /
-/// _CHUNK in fl/gfx/canvas.h) are 8 / 16 on FL_PLATFORM_HAS_SMALL_STACK
-/// targets (AVR, ESP8266, ...) and 32 / 64 elsewhere, because the 32 / 64 frame does
-/// not fit in an AVR Uno's 2 KB of SRAM (measured figures at the macro
-/// definition).
-/// Smaller tiers shrink the stack -- the rendered pixels are identical for
-/// polygons with at most MAXN vertices.
+/// _CHUNK in fl/gfx/canvas.h) are 32 / 64 where that working set has a
+/// home -- a big stack, or an fl::scratch side-stack arena large enough
+/// (ESP8266) -- and 8 / 16 otherwise (AVR, Teensy LC, ...): the 32 / 64
+/// working set does not fit in an AVR Uno's 2 KB of SRAM (measured figures
+/// at the macro definition).
+/// Smaller tiers shrink the working set -- the rendered pixels are
+/// identical for polygons with at most MAXN vertices. If the side-stack
+/// arena is exhausted at run time the call draws nothing.
 ///
 /// Fill selects the backend: PolyFill::Exact (default, exact per-pixel
 /// area) or PolyFill::ABuffer (8x4 A-buffer sampling; CHUNK is ignored).

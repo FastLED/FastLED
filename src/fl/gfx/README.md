@@ -126,12 +126,17 @@ canvas.drawPolygon(CRGB::Yellow, tri);
 ```
 
 - **3 to MAXN vertices.** Fewer than 3 draws nothing; more than MAXN is
-  truncated to the first MAXN. The default MAXN is 8 on
-  `FL_PLATFORM_HAS_SMALL_STACK` targets (~8 KB of stack or less: AVR,
-  ESP8266, Teensy LC, LPC804, ...), where a 32-vertex tier needs ~4.3 KB
-  of stack, and 32 everywhere else (including STM32F103C8, Teensy 3.x and
-  Uno R4). Pass it
-  explicitly for more vertices: `canvas.drawPolygon<int, 12>(color, span)`.
+  truncated to the first MAXN. The default MAXN is 32 wherever the
+  32-vertex working set (~4.2 KB) has a home, and 8 elsewhere. The
+  working set is leased through `fl::scratch` (see `fl/stl/scratch.h`):
+  a stack local by default, so `FL_PLATFORM_HAS_SMALL_STACK` targets (AVR,
+  Teensy LC, LPC804, ...) get 8 while STM32F103C8, Teensy 3.x and Uno R4
+  get 32; with a side-stack arena (`FL_SCRATCH_STACK_BYTES > 0`) the
+  default is 32 exactly when it fits the arena. ESP8266 ships a 4608 B
+  arena, so it gets 32 even though its `loop()` stack is only 4 KB. If the
+  arena is exhausted at run time (another `fl::scratch` holds it), the
+  draw is skipped. Pass MAXN explicitly for more vertices:
+  `canvas.drawPolygon<int, 12>(color, span)`.
 - **Fill rule** — even-odd: a point is inside if a ray crosses an odd
   number of edges. No holes or subpaths.
 - **Vertex coordinates** clamp to ±8191 px, so out-of-range values can't
@@ -467,7 +472,7 @@ out-of-bounds writes:
 | Zero radius or thickness | Draws nothing |
 | Zero-length line | Draws nothing |
 | Fewer than 3 polygon vertices, or all collinear | Draws nothing |
-| More than MAXN polygon vertices | Truncated to the first MAXN (default 32, or 8 on small-stack targets) |
+| More than MAXN polygon vertices | Truncated to the first MAXN (default 32, or 8 on small-stack targets without a large enough `fl::scratch` arena) |
 | Center off-screen | Clips to canvas bounds |
 | Shape partially off-screen | Only visible pixels are written |
 | Negative coordinates | Clipped — no wrap-around |

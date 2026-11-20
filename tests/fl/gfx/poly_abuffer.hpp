@@ -6,6 +6,7 @@
 #include "fl/stl/chrono.h"
 #include "fl/math/fixed_point/s16x16.h"
 #include "fl/stl/bitset.h"
+#include "fl/stl/scratch.h"
 #include "tests/fl/gfx/poly_tinygl_ref.h"
 
 // ============================================================================
@@ -1067,6 +1068,195 @@ FL_TEST_CASE("drawPolygon scenes: float pentagram leaves its center empty (even-
     FL_CHECK_EQ((int)buf[8 * 16 + 8].r, 0);    // center pentagon: even crossings
     FL_CHECK_EQ((int)buf[4 * 16 + 8].r, 255);  // top arm, fully covered
     FL_CHECK_EQ((int)buf[15 * 16 + 1].r, 0);   // outside, between the lower arms
+}
+
+// ---- fl::scratch side-stack backend (#5306) ---------------------------------
+// Host builds have FL_SCRATCH_STACK_BYTES == 0, so drawPolygon's working set
+// is a stack local. These cases run the production kernels with the
+// side-stack backend instead: detail::arena_scratch (the class fl::scratch
+// is when FL_SCRATCH_STACK_BYTES > 0) over a guarded test arena, passed
+// through the kernels' Scratch template parameter.
+
+namespace {
+
+struct PolyScGuardedArena;
+PolyScGuardedArena* gPolyScArena = nullptr;  // the arena installed for a test
+
+// Arena policy for detail::arena_scratch: leases from gPolyScArena.
+struct PolyScArena {
+    static void* acquire(fl::size bytes, fl::size align, fl::size* saved);
+    static void release(fl::size saved, const void* block, fl::size bytes);
+};
+
+template <typename T>
+using PolyScArenaScratch = fl::detail::arena_scratch<T, PolyScArena>;
+
+// 8 KB arena with guard bytes on both sides, installed for the test's scope.
+struct PolyScGuardedArena {
+    enum : fl::size { kGuard = 16, kCap = 8192 };
+    FL_ALIGNAS(16) fl::u8 mBytes[kGuard + kCap + kGuard];
+    fl::detail::side_stack mStack;
+    int mNonLifo;  // releases that were not LIFO (must stay 0)
+    explicit PolyScGuardedArena(fl::size cap = kCap) : mStack(mBytes + kGuard, cap), mNonLifo(0) {
+        for (fl::size i = 0; i < sizeof(mBytes); ++i) mBytes[i] = 0xA5;
+        gPolyScArena = this;
+    }
+    ~PolyScGuardedArena() { gPolyScArena = nullptr; }
+    bool guardsIntact() const {
+        for (fl::size i = 0; i < kGuard; ++i)
+            if (mBytes[i] != 0xA5 || mBytes[kGuard + kCap + i] != 0xA5) return false;
+        return true;
+    }
+};
+
+void* PolyScArena::acquire(fl::size bytes, fl::size align, fl::size* saved) {
+    return gPolyScArena->mStack.push(bytes, align, saved);
+}
+void PolyScArena::release(fl::size saved, const void* block, fl::size bytes) {
+    if (!gPolyScArena->mStack.pop(saved, block, bytes)) ++gPolyScArena->mNonLifo;
+}
+
+/// polyScDraw (Exact / ABuffer) through the side-stack backend.
+template <int MAXN, int CHUNK>
+void polyScDrawArena(fl::gfx::Canvas<CRGB>& c, int kernel, const CRGB& color,
+                     const PolyScPt* pts, int n, fl::DrawMode mode) {
+    namespace d = fl::gfx::detail;
+    const fl::span<const PolyScPt> sp(pts, (fl::size)n);
+    const bool ow = (mode == fl::DrawMode::DRAW_MODE_OVERWRITE);
+    if (kernel == kPolyScExact) {
+        if (ow) d::drawPolygonCore<CRGB, PolyScFix, true, MAXN, CHUNK, PolyScArenaScratch>(c, color, sp);
+        else d::drawPolygonCore<CRGB, PolyScFix, false, MAXN, CHUNK, PolyScArenaScratch>(c, color, sp);
+    } else {
+        if (ow) d::drawPolygonABufferCore<CRGB, PolyScFix, true, MAXN, PolyScArenaScratch>(c, color, sp);
+        else d::drawPolygonABufferCore<CRGB, PolyScFix, false, MAXN, PolyScArenaScratch>(c, color, sp);
+    }
+}
+
+/// A 24-point star (self-intersecting under even-odd), centred on a 20x20
+/// canvas, rotated by step: exercises the 32/64 tier with many edges.
+int polyScStar(PolyScPt* p, int step) {
+    const int n = 24;
+    for (int i = 0; i < n; ++i) {
+        const fl::i32 r = (i & 1) ? 3 * 65536L : 9 * 65536L + 32768L;
+        const fl::i32 a = (fl::i32)((i * 7 + step) % n) * (kPolyScTwoPi / n);
+        p[i] = polyScPolar(kPolyScC, kPolyScC, r, a);
+    }
+    return n;
+}
+
+/// Render one polygon with the stack backend (polyScDraw) and the arena
+/// backend into identical canvases (base pixel `base`, so blend mode is
+/// exercised too) and require byte-identical output. Returns the number of
+/// pixels the draw changed.
+template <int MAXN, int CHUNK>
+int polyScCheckArenaMatches(PolyScGuardedArena& arena, const PolyScPt* p, int n,
+                             int kernel, fl::DrawMode mode, const CRGB& color,
+                             const CRGB& base) {
+    CRGB a[20 * 20], b[20 * 20];
+    for (int i = 0; i < 400; ++i) a[i] = b[i] = base;
+    fl::gfx::Canvas<CRGB> ca(fl::span<CRGB>(a, 400), 20, 20);
+    fl::gfx::Canvas<CRGB> cb(fl::span<CRGB>(b, 400), 20, 20);
+    polyScDraw<MAXN, CHUNK>(ca, kernel, color, p, n, mode);
+    polyScDrawArena<MAXN, CHUNK>(cb, kernel, color, p, n, mode);
+    FL_CHECK_EQ(polyScHash(a, 400), polyScHash(b, 400));
+    FL_CHECK_EQ(arena.mStack.used(), fl::size(0));  // the lease was released
+    int changed = 0;
+    for (int i = 0; i < 400; ++i)
+        if (!(b[i] == base)) ++changed;
+    return changed;
+}
+
+}  // namespace
+
+FL_TEST_CASE("drawPolygon scenes: side-stack scratch renders identically to the stack") {
+    PolyScGuardedArena arena;
+    const CRGB base(3, 40, 7);
+    const fl::DrawMode modes[2] = {fl::DrawMode::DRAW_MODE_OVERWRITE,
+                                   fl::DrawMode::DRAW_MODE_BLEND};
+    for (int k = 0; k < 2; ++k)
+        for (int m = 0; m < 2; ++m) {
+            // Kernel scenes (<= 4 vertices) at the 8/16 and 32/64 tiers.
+            for (int s = 0; s < kPolyScNumKernelScenes; ++s)
+                for (int ti = 0; ti < kPolyScNumTimes; ++ti) {
+                    PolyScPt p[4];
+                    const int n = polyScKernelFrame(s, kPolyScTimes[ti], p);
+                    const CRGB& color = kPolyScKernelScenes[s].color;
+                    polyScCheckArenaMatches<8, 16>(arena, p, n, k, modes[m], color, base);
+                    polyScCheckArenaMatches<32, 64>(arena, p, n, k, modes[m], color, base);
+                }
+            // A 24-point star: within the 32/64 tier, truncated at 8/16.
+            for (int step = 0; step < 6; ++step) {
+                PolyScPt p[24];
+                const int n = polyScStar(p, step);
+                FL_CHECK_GT((polyScCheckArenaMatches<8, 16>(arena, p, n, k, modes[m],
+                                                             CRGB(200, 90, 255), base)), 0);
+                FL_CHECK_GT((polyScCheckArenaMatches<32, 64>(arena, p, n, k, modes[m],
+                                                              CRGB(200, 90, 255), base)), 0);
+            }
+        }
+    // The working sets really came from the arena (the 32/64 Exact set is
+    // the largest), every lease was released LIFO, and nothing was written
+    // outside the arena.
+    FL_CHECK_GE(arena.mStack.high_water(),
+                (sizeof(fl::gfx::detail::PolyScratch<32, 64>)));
+    FL_CHECK_EQ(arena.mNonLifo, 0);
+    FL_CHECK(arena.guardsIntact());
+}
+
+FL_TEST_CASE("drawPolygon scenes: exhausted side-stack scratch makes the draw a no-op") {
+    PolyScPt p[24];
+    const int n = polyScStar(p, 1);
+    const CRGB base(1, 2, 3);
+    for (int k = 0; k < 2; ++k) {
+        // An arena too small for the working set: nothing is drawn and the
+        // arena is untouched.
+        {
+            PolyScGuardedArena arena(64);
+            CRGB buf[20 * 20];
+            for (int i = 0; i < 400; ++i) buf[i] = base;
+            fl::gfx::Canvas<CRGB> c(fl::span<CRGB>(buf, 400), 20, 20);
+            polyScDrawArena<32, 64>(c, k, CRGB(255, 255, 255), p, n,
+                                    fl::DrawMode::DRAW_MODE_OVERWRITE);
+            int changed = 0;
+            for (int i = 0; i < 400; ++i)
+                if (!(buf[i] == base)) ++changed;
+            FL_CHECK_EQ(changed, 0);
+            FL_CHECK_EQ(arena.mStack.used(), fl::size(0));
+            FL_CHECK_EQ(arena.mStack.high_water(), fl::size(0));
+            FL_CHECK(arena.guardsIntact());
+        }
+        // A large-enough arena already held by an outer lease: the draw is
+        // skipped, the outer block keeps its contents, and once the outer
+        // lease is released the same draw renders normally.
+        {
+            PolyScGuardedArena arena;
+            CRGB buf[20 * 20];
+            for (int i = 0; i < 400; ++i) buf[i] = base;
+            fl::gfx::Canvas<CRGB> c(fl::span<CRGB>(buf, 400), 20, 20);
+            const fl::size outerBytes = PolyScGuardedArena::kCap - 512;
+            fl::size saved = 0;
+            fl::u8* outer = static_cast<fl::u8*>(arena.mStack.push(outerBytes, 1, &saved));
+            FL_REQUIRE(outer != nullptr);
+            for (fl::size i = 0; i < outerBytes; ++i) outer[i] = (fl::u8)(i * 31u);
+            polyScDrawArena<32, 64>(c, k, CRGB(255, 255, 255), p, n,
+                                    fl::DrawMode::DRAW_MODE_OVERWRITE);
+            int changed = 0;
+            for (int i = 0; i < 400; ++i)
+                if (!(buf[i] == base)) ++changed;
+            FL_CHECK_EQ(changed, 0);
+            FL_CHECK_EQ(arena.mStack.used(), outerBytes);
+            bool outerIntact = true;
+            for (fl::size i = 0; i < outerBytes; ++i)
+                if (outer[i] != (fl::u8)(i * 31u)) outerIntact = false;
+            FL_CHECK(outerIntact);
+            FL_CHECK(arena.mStack.pop(saved, outer, outerBytes));
+
+            FL_CHECK_GT((polyScCheckArenaMatches<32, 64>(arena, p, n, k,
+                                                          fl::DrawMode::DRAW_MODE_OVERWRITE,
+                                                          CRGB(255, 255, 255), base)), 0);
+            FL_CHECK(arena.guardsIntact());
+        }
+    }
 }
 
 }  // FL_TEST_FILE

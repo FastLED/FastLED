@@ -46,9 +46,10 @@
 /// Platform defaults:
 ///  - ESP8266: 4608 B. Arduino's loop() runs on a fixed 4 KB "cont" stack,
 ///    while ~80 KB of DRAM leaves room in .bss. 4.5 KB holds drawPolygon's
-///    32/64 Exact working set (4134 B kernel frame measured on AVR) plus a
-///    small nested user. The arena is only linked in when something uses
-///    fl::scratch (`--gc-sections`).
+///    32/64 Exact working set (fl::gfx::detail::PolyScratch<32, 64>: 4208 B,
+///    8-aligned, on ESP8266), which makes 32/64 its default polygon tier,
+///    plus ~400 B for a small nested user. The arena is only linked in when
+///    something uses fl::scratch (`--gc-sections`).
 ///  - Everything else: 0. That includes the other small-stack tiers (AVR,
 ///    LPC804, Teensy LC, nRF51, STM32G03x, low-density STM32F1): their RAM
 ///    is too small to reserve a fixed arena by default, so they opt in with

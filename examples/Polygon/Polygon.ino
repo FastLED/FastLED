@@ -32,12 +32,13 @@
 //   ABuffer - 8x4 subpixel sampling (32 levels): faster on dense fills and
 //             a shallower stack. It ignores CHUNK.
 //
-// MAXN is a compile-time vertex cap that sizes the kernel's stack frame;
+// MAXN is a compile-time vertex cap that sizes the kernel's working set;
 // vertices past MAXN are ignored. The default (FL_GFX_POLYGON_DEFAULT_MAXN)
-// is 8 on small-stack targets (AVR, ESP8266, ...) and 32 elsewhere, so a
-// polygon with more vertices must ask for a bigger MAXN, and a known small
-// polygon can ask for a smaller one to save stack. CHUNK (Exact only) is a
-// power-of-two column-chunk width; the default is fine.
+// is 8 on small-stack targets (AVR, Teensy LC, ...) and 32 elsewhere,
+// including ESP8266, whose fl::scratch side stack holds the 32-vertex
+// working set. A polygon with more vertices must ask for a bigger MAXN, and
+// a known small polygon can ask for a smaller one to save memory. CHUNK
+// (Exact only) is a power-of-two column-chunk width; the default is fine.
 
 // @filter
 // require:
