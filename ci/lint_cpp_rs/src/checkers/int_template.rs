@@ -361,11 +361,31 @@ const INT_LITERAL_WIDE_SHIFT_32BIT_PLATFORMS: &[&str] = &[
 fn int_literal_wide_shift_regex() -> &'static Regex {
     static VALUE: OnceLock<Regex> = OnceLock::new();
     VALUE.get_or_init(|| {
-        // The literal must not be part of an identifier, a hex/float literal
-        // or a suffixed literal (`\d+` is followed directly by `<<`), and not
-        // the operand of a C-style cast such as `(u32)1 << 30`.
-        Regex::new(r"(?:^|[^\w.')])(\d+)\s*<<\s*(\d+)\b").unwrap()
+        // `\d+` followed directly by `<<` rules out suffixed and hex left
+        // operands; the shift count may carry a suffix (`1 << 16U`).
+        Regex::new(r"(\d+)\s*<<\s*(\d+)[uUlL]*\b").unwrap()
     })
+}
+
+/// Largest value an unsuffixed decimal literal can have and still be `int`
+/// on AVR; anything larger is already `long`.
+const AVR_INT_MAX: u64 = 32767;
+
+/// True when the match at `start` is a whole, uncast literal: it is not the
+/// tail of an identifier or number, and not the operand of a C-style cast
+/// such as `(u32)1 << 30` or `(u32) 1 << 30`.
+fn is_bare_literal_operand(code: &str, start: usize) -> bool {
+    let before = &code.as_bytes()[..start];
+    if let Some(&prev) = before.last() {
+        if prev.is_ascii_alphanumeric() || prev == b'_' || prev == b'.' || prev == b'\'' {
+            return false;
+        }
+    }
+    before
+        .iter()
+        .rev()
+        .find(|b| !b.is_ascii_whitespace())
+        .map_or(true, |&b| b != b')')
 }
 
 struct IntLiteralWideShiftChecker;
@@ -393,51 +413,35 @@ impl FileContentChecker for IntLiteralWideShiftChecker {
             return Vec::new();
         }
         let mut violations = Vec::new();
-        let mut in_multiline_comment = false;
+        let mut comment_state = CommentScanState::default();
         for (index, line) in file_content.lines.iter().enumerate() {
-            let mut code = split_line_comment(line).to_string();
-            if in_multiline_comment {
-                match code.find("*/") {
-                    Some(end) => {
-                        code.replace_range(..end + 2, " ");
-                        in_multiline_comment = false;
-                    }
-                    None => continue,
-                }
-            }
-            while let Some(open) = code.find("/*") {
-                match code[open + 2..].find("*/") {
-                    Some(rel) => code.replace_range(open..open + 2 + rel + 2, " "),
-                    None => {
-                        code.truncate(open);
-                        in_multiline_comment = true;
-                        break;
-                    }
-                }
-            }
+            let visible = strip_block_comments_from_line(line, &mut comment_state);
+            let code = split_line_comment(&visible);
             if !code.contains("<<") || line.contains(INT_LITERAL_WIDE_SHIFT_SUPPRESSION) {
                 continue;
             }
-            let code = strip_string_literals(&code);
+            let code = strip_string_literals(code);
             for caps in int_literal_wide_shift_regex().captures_iter(&code) {
+                let literal = caps.get(1).unwrap();
+                let value: u64 = literal.as_str().parse().unwrap_or(u64::MAX);
                 let shift: u32 = caps[2].parse().unwrap_or(0);
-                if shift >= 16 {
-                    violations.push((
-                        index + 1,
-                        format!(
-                            "'{} << {}' shifts a 16-bit int on AVR (UB / folds to 0); widen the \
-                             literal first, e.g. fl::i32({}) << {} or {}UL << {}, or add \
-                             `// {INT_LITERAL_WIDE_SHIFT_SUPPRESSION} <reason>` (FastLED#5303): {}",
-                            &caps[1],
-                            shift,
-                            &caps[1],
-                            shift,
-                            &caps[1],
-                            shift,
-                            line.trim()
-                        ),
-                    ));
+                if shift < 16
+                    || value > AVR_INT_MAX
+                    || !is_bare_literal_operand(&code, literal.start())
+                {
+                    continue;
                 }
+                let lit = literal.as_str();
+                violations.push((
+                    index + 1,
+                    format!(
+                        "'{lit} << {shift}' shifts a 16-bit int on AVR (UB / folds to 0); widen \
+                         the literal first, e.g. fl::i32({lit}) << {shift} or {lit}UL << {shift}, \
+                         or add `// {INT_LITERAL_WIDE_SHIFT_SUPPRESSION} <reason>` \
+                         (FastLED#5303): {}",
+                        line.trim()
+                    ),
+                ));
             }
         }
         violations

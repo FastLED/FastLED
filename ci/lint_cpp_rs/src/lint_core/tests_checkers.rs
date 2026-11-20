@@ -880,8 +880,13 @@ fl::vector<int> pins; // fl-lint: int-template-ok GPIO numbers are int in the pu
 #define BIT24 (1<<24)
 u32 m = x | (1 << 31);
 f(0 << 16);
+u32 k = 1 << 16U;
+return 2 << 20;
+const char* marker = \"/*\";
+u32 l = 4 << 16;
 ";
-        assert_eq!(int_shift_violations(src), vec![1, 2, 3, 4]);
+        // Line 7's `/*` is string data, so line 8 is still scanned.
+        assert_eq!(int_shift_violations(src), vec![1, 2, 3, 4, 5, 6, 8]);
     }
 
     #[test]
@@ -890,6 +895,9 @@ f(0 << 16);
 u32 b = 1UL << 24;
 u32 c = 1u << 20;
 u32 d = (u32)1 << 30;
+u32 d2 = (u32) 1 << 30;
+i64 big = 4294967296 << 16;
+long wide = 40000 << 16;
 u32 e = 0xFF << 8;
 int f = 1 << 15;
 u32 g = x << 16;
