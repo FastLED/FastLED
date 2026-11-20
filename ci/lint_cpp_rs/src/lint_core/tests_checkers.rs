@@ -888,13 +888,16 @@ u32 l = 4 << 16;
 const char* raw = R\"(
 1 << 24
 )\"; u32 m = 1 << 20;
+const char* s = R\"(\"1 << 24\")\"; u32 n = 1 << 20;
 ";
         // Line 7's `/*` is string data, so line 8 is still scanned. Line 11
         // is raw-string data; the code after its delimiter on line 12 is not.
-        assert_eq!(
-            int_shift_violations(src),
-            vec![1, 2, 3, 4, 5, 6, 8, 9, 12]
-        );
+        // Line 13's hit is the `1 << 20` after the one-line raw string.
+        let hits = IntLiteralWideShiftChecker
+            .check_file_content(&file("src/fl/new_file.cpp.hpp", src));
+        let lines: Vec<usize> = hits.iter().map(|(l, _)| *l).collect();
+        assert_eq!(lines, vec![1, 2, 3, 4, 5, 6, 8, 9, 12, 13]);
+        assert!(hits.last().unwrap().1.starts_with("'1 << 20'"), "{hits:?}");
     }
 
     #[test]

@@ -420,6 +420,39 @@ fn continued_literal_len(line: &str, state: &CommentScanState) -> Option<usize> 
     Some(0)
 }
 
+/// Blanks every raw string literal that opens on this line (to its closing
+/// delimiter, or to the end of the line when it runs on), so text such as
+/// `R"("1 << 24")"` is not split at its inner quotes by
+/// `strip_string_literals`.
+fn mask_raw_strings(code: &str) -> String {
+    let bytes = code.as_bytes();
+    let mut out = bytes.to_vec();
+    let mut cursor = 0;
+    while cursor < bytes.len() {
+        match bytes[cursor] {
+            b'"' if is_raw_string_open(bytes, cursor) => {
+                // A malformed delimiter falls through as an ordinary string.
+                let Some((delim, body)) = raw_string_delimiter(bytes, cursor) else {
+                    cursor = scan_quoted(bytes, cursor + 1, b'"');
+                    continue;
+                };
+                let close = format!("){delim}\"");
+                let end = find_subslice(&bytes[body..], close.as_bytes())
+                    .map_or(bytes.len(), |pos| body + pos + close.len());
+                out[cursor..end].fill(b' ');
+                cursor = end;
+            }
+            b'"' => cursor = scan_quoted(bytes, cursor + 1, b'"'),
+            // A `'` after a digit is a separator (`1'000`), not a char literal.
+            b'\'' if cursor == 0 || !bytes[cursor - 1].is_ascii_alphanumeric() => {
+                cursor = scan_quoted(bytes, cursor + 1, b'\'')
+            }
+            _ => cursor += 1,
+        }
+    }
+    String::from_utf8_lossy(&out).into_owned()
+}
+
 struct IntLiteralWideShiftChecker;
 
 impl FileContentChecker for IntLiteralWideShiftChecker {
@@ -459,7 +492,7 @@ impl FileContentChecker for IntLiteralWideShiftChecker {
             if !code.contains("<<") || line.contains(INT_LITERAL_WIDE_SHIFT_SUPPRESSION) {
                 continue;
             }
-            let code = strip_string_literals(code);
+            let code = strip_string_literals(&mask_raw_strings(code));
             for caps in int_literal_wide_shift_regex().captures_iter(&code) {
                 let literal = caps.get(1).unwrap();
                 let value: u64 = literal.as_str().parse().unwrap_or(u64::MAX);
