@@ -88,9 +88,10 @@ for f in "$SRC"/fl/build/*.cpp; do
     -fno-threadsafe-statics -fno-exceptions -ffunction-sections -fdata-sections -w \
     -DF_CPU=16000000L -DARDUINO=10808 -DARDUINO_ARCH_AVR -DARDUINO_AVR_UNO \
     -I"$CORE/cores/arduino" -I"$CORE/variants/standard" -I"$SRC" \
-    -fstack-usage -c "$f" -o "$OUT/$(basename "$f" .cpp).o"
+    -fstack-usage -c "$f" -o "$OUT/$(basename "$f" .cpp).o" \
+    || { echo "FAILED: $f"; ok=0; break; }   # a partial inventory misleads
 done
-sort -t$'\t' -k2 -n -r "$OUT"/*.su | head -40   # largest frames first
+[ "${ok:-1}" = 1 ] && sort -t$'\t' -k2 -n -r "$OUT"/*.su | head -40   # largest first
 ```
 
 Each `.su` line is `file:line:col:function<TAB>bytes<TAB>qualifiers`. `static`

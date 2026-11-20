@@ -210,7 +210,7 @@ void keepMajorityPort(int (&pins)[N], const char* who) FL_NO_EXCEPT {
 // Drive one 4-pin group from a nibble without a LUT: every HIGH first, then
 // every LOW, each in ascending bit order. That is exactly the digitalWrite
 // sequence the classes' nibble LUTs replay.
-inline void writeNibbleDirect(const int* pins4, u8 nib) FL_NO_EXCEPT {
+inline void writeNibbleDirect(fl::span<const int, 4> pins4, u8 nib) FL_NO_EXCEPT {
     for (u8 b = 0; b < 4; ++b) {
         if (pins4[b] >= 0 && (nib & (1 << b))) {
             (fl::digitalWrite)(pins4[b], PinValue::High);
@@ -303,8 +303,8 @@ void digitalMultiWrite8(const Pins8& pins, fl::span<const u8> pin_data) FL_NO_EX
     pins_detail::keepMajorityPort<8, 32>(active, "digitalMultiWrite8");
     for (fl::size i = 0; i < pin_data.size(); ++i) {
         const u8 byte = pin_data[i];
-        pins_detail::writeNibbleDirect(active, byte & 0x0F);
-        pins_detail::writeNibbleDirect(active + 4, (byte >> 4) & 0x0F);
+        pins_detail::writeNibbleDirect(fl::span<const int, 4>(active, 4), byte & 0x0F);
+        pins_detail::writeNibbleDirect(fl::span<const int, 4>(active + 4, 4), (byte >> 4) & 0x0F);
     }
 }
 
@@ -389,7 +389,8 @@ void digitalMultiWrite16(const Pins16& pins, fl::span<const u16> pin_data) FL_NO
     for (fl::size i = 0; i < pin_data.size(); ++i) {
         const u16 word = pin_data[i];
         for (u8 n = 0; n < 4; ++n) {
-            pins_detail::writeNibbleDirect(active + n * 4, (word >> (n * 4)) & 0x0F);
+            pins_detail::writeNibbleDirect(fl::span<const int, 4>(active + n * 4, 4),
+                                           (word >> (n * 4)) & 0x0F);
         }
     }
 }
