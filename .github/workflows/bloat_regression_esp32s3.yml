@@ -60,7 +60,7 @@ jobs:
         contains(github.event.pull_request.labels.*.name, 'ci-test:bloat') ||
         contains(github.event.pull_request.labels.*.name, 'ci-platform:esp32s3') ||
         contains(github.event.pull_request.labels.*.name, 'ci-platform:esp*')))
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     # Hard-block external-fork pull requests (mirrors build_esp32s3.yml policy
     # — see #2757).
     steps:

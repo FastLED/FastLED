@@ -356,6 +356,8 @@ Examples must not hardcode pin numbers. A literal in a sketch is a guess about h
 | `FL_PIN_CLOCKLESS_1` | `3` | data pin, single-wire chipsets (WS2812 etc.) |
 | `FL_PIN_SPI_DATA_1` | `1` | data pin, clocked chipsets (APA102 etc.) |
 | `FL_PIN_SPI_CLOCK_1` | `2` | clock pin, clocked chipsets |
+| `FL_PIN_SPI_DATA_2` | `3` | data pin, a second clocked strip |
+| `FL_PIN_SPI_CLOCK_2` | `4` | clock pin, a second clocked strip |
 
 **The contract, both halves:**
 

@@ -25,7 +25,7 @@ permissions:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     # The ``FASTLED_FAIL_ON_ROOT_MERGE`` tripwire from #3278 was retired
     # in #3279 Phase 4 along with the legacy merge code path it guarded.
     # There is no longer any code path that can silently inject root

@@ -174,6 +174,14 @@ _FL_DEFPIN(24, 14, 0); _FL_DEFPIN(25,  13, 0); _FL_DEFPIN(26,  12, 0);
 // needs moving. See platforms/default_pins.h.
 #define FL_PIN_CLOCKLESS_1 5
 #define FL_PIN_SPI_CLOCK_1 4
+// The second SPI pair's fallback of 3/4 would land on a missing pin or on
+// FL_PIN_SPI_CLOCK_1, so it moves too.
+#ifndef FL_PIN_SPI_DATA_2
+#define FL_PIN_SPI_DATA_2 10
+#endif
+#ifndef FL_PIN_SPI_CLOCK_2
+#define FL_PIN_SPI_CLOCK_2 11
+#endif
 // D0-D13, including D8 (neopixel)  no pins 2 3
 _FL_DEFPIN( 0, 17, 1); _FL_DEFPIN( 1, 16, 1);
 _FL_DEFPIN( 4, 14, 0); _FL_DEFPIN( 5, 16, 0); _FL_DEFPIN( 6,  18, 0);
@@ -202,6 +210,14 @@ _FL_DEFPIN(23, 22, 1); _FL_DEFPIN(24,  23, 1); _FL_DEFPIN(25,  17, 0);
 // needs moving. See platforms/default_pins.h.
 #define FL_PIN_CLOCKLESS_1 5
 #define FL_PIN_SPI_CLOCK_1 4
+// The second SPI pair's fallback of 3/4 would land on a missing pin or on
+// FL_PIN_SPI_CLOCK_1, so it moves too.
+#ifndef FL_PIN_SPI_DATA_2
+#define FL_PIN_SPI_DATA_2 10
+#endif
+#ifndef FL_PIN_SPI_CLOCK_2
+#define FL_PIN_SPI_CLOCK_2 11
+#endif
 // D0-D13, including D8 (neopixel)  no pins 2 3
 _FL_DEFPIN( 0, 17, 1); _FL_DEFPIN( 1, 16, 1);
 _FL_DEFPIN( 4, 14, 0); _FL_DEFPIN( 5, 16, 0); _FL_DEFPIN( 6,  18, 0);
