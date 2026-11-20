@@ -352,6 +352,27 @@ void ownership_example() {
 }
 ```
 
+#### Large scratch buffers: `fl::scratch<T>` (`fl/stl/scratch.h`)
+
+Use `fl::scratch<T>` instead of a plain local for a multi-hundred-byte working set (edge tables, accumulators) in code that can run on a small-stack target (`FL_PLATFORM_HAS_SMALL_STACK`). Keep small locals as plain locals.
+
+```cpp
+#include "fl/stl/scratch.h"
+
+struct Frame { fl::i32 acc[64]; fl::u8 edges[32]; };  // trivially destructible
+
+void render() {
+    fl::scratch<Frame> f;
+    if (!f) return;   // side stack exhausted: skip the work
+    f->acc[0] = 0;
+}
+```
+
+- `FL_SCRATCH_STACK_BYTES == 0` (default except ESP8266): `T` is an ordinary member, so this is a stack local with zero overhead and `f` is always true.
+- `FL_SCRATCH_STACK_BYTES == N`: `T` comes from one fixed N-byte static "side stack" (LIFO bump allocator). Peak RAM is the deepest nesting of live scratches, not one buffer per template instantiation as with function `static`s. It never grows; when full, `f` is false. `fl::scratch_high_water()` reports the peak. ESP8266 defaults to 4608 B (its `loop()` stack is a fixed 4 KB); other small-stack targets opt in with `-DFL_SCRATCH_STACK_BYTES=N`. When nothing uses `fl::scratch`, `--gc-sections` drops the arena.
+- Measured on AVR (avr-gcc 7.3 `-Os`, gc-sections), 989 B scratch: +50 B flash and the arena in `.bss`, and the function frame drops from 993 B to 2 B of stack. Unused, the arena costs nothing.
+- Scoped use only (not copyable/movable, LIFO release). `T` must be trivially destructible. Not ISR-safe or thread-safe: never use it from an interrupt. A non-zero capacity is a compile error on `FASTLED_MULTITHREADED` builds unless `FL_SCRATCH_ALLOW_MULTITHREADED=1`. Set the capacity build-wide with `-D`, never with a `#define` in one file.
+
 ### Functional Utilities
 
 - Callables and lists: `fl/stl/function.h`, `functional.h`
