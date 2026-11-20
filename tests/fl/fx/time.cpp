@@ -54,6 +54,22 @@ FL_TEST_CASE("TimeWarp basic functionality") {
         FL_CHECK_EQ(tw.time(), 0);
     }
 
+    FL_SUBCASE("Scaled steps beyond the int32 range saturate") {
+        TimeWarp tw(0, 1.0f);
+        tw.update(3000000000u);
+        FL_CHECK_EQ(tw.time(), 2147483647u);
+
+        TimeWarp fast(0, 1000.0f);
+        fast.update(3000000u);
+        FL_CHECK_EQ(fast.time(), 2147483647u);
+
+        TimeWarp back(0, 1.0f);
+        back.update(100);
+        back.setSpeed(-1.0f);
+        back.update(100 + 3000000000u);
+        FL_CHECK_EQ(back.time(), 0u);
+    }
+
 }
 
 } // FL_TEST_FILE
