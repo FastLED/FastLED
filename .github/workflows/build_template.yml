@@ -46,7 +46,19 @@ permissions:
 
 jobs:
   build:
-    runs-on: ${{ inputs.runs-on }}
+    # Self-hosted forge pool (forge-ci/gh-runner docs/pool.md): when the repo
+    # variable FORGE_POOL_LABELS holds a JSON label array, trusted events
+    # (push to master, merge_group, workflow_dispatch, schedule) run on the
+    # pool's Ubuntu 24.04 image. Pull requests always stay hosted (fork safety
+    # and volume). Unset the variable to fall back to hosted at once.
+    runs-on: >-
+      ${{ (vars.FORGE_POOL_LABELS != ''
+           && (github.event_name == 'merge_group'
+               || github.event_name == 'workflow_dispatch'
+               || github.event_name == 'schedule'
+               || (github.event_name == 'push'
+                   && github.ref == format('refs/heads/{0}', github.event.repository.default_branch))))
+          && fromJSON(vars.FORGE_POOL_LABELS) || inputs.runs-on }}
     # Bound the job so a hang fails loudly instead of silently.
     #
     # Without this, GitHub's 360-minute default applies: a wedged compile sits
