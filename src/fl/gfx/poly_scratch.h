@@ -28,14 +28,14 @@ namespace gfx {
 namespace detail {
 
 /// Per-edge scanline state for drawPolygon (even-odd fill, band model).
-/// x is the crossing at the CURRENT row's center (Q16.16, floored — the
+/// x is the crossing at the CURRENT row's center (Q16.16, floored -- the
 /// anchor polyLineT28 integrates from) and advances exactly per row via a
 /// Bresenham-style remainder recurrence: x += step; t += rem; if (t >= dy)
 /// { t -= dy; x += 1; } where step = floor(65536 * B / dy) and rem =
 /// 65536 * B - step * dy with rem in [0, dy). Single-row edges (dy < 65536)
 /// keep step = rem = t = 0: their span can still cross a row boundary (two
 /// active rows), and the committed behavior is that x stays at the py0-row
-/// value on the second row — the kernel then integrates the infinite line
+/// value on the second row -- the kernel then integrates the infinite line
 /// through that (stale) center crossing, and the extent below must box THAT
 /// line, not the segment's endpoints.
 /// hw = ceil(32768 * |B| / dy) is the line's x half-span over a full row
@@ -43,7 +43,7 @@ namespace detail {
 /// lx0 = (x - hw) >> 16, lx1 = (x + hw) >> 16 is division-free (shifts) and
 /// a valid bound for every row the edge is active in: px outside [lx0, lx1]
 /// gets the same full/zero shortcut a polyLineT28 call would compute
-/// exactly. hw is derived from (step, rem) at setup — one i64 division per
+/// exactly. hw is derived from (step, rem) at setup -- one i64 division per
 /// edge, none per row. hw < 2^45 for i32 B/dy, so it needs i64.
 /// x is i64: for a steep edge spanning < 1 px, the center crossing
 /// extrapolates off the segment by up to 32768 * |B| / dy, which can exceed
