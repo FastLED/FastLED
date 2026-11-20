@@ -884,9 +884,17 @@ u32 k = 1 << 16U;
 return 2 << 20;
 const char* marker = \"/*\";
 u32 l = 4 << 16;
+#define MASK(n) 1 << 24
+const char* raw = R\"(
+1 << 24
+)\"; u32 m = 1 << 20;
 ";
-        // Line 7's `/*` is string data, so line 8 is still scanned.
-        assert_eq!(int_shift_violations(src), vec![1, 2, 3, 4, 5, 6, 8]);
+        // Line 7's `/*` is string data, so line 8 is still scanned. Line 11
+        // is raw-string data; the code after its delimiter on line 12 is not.
+        assert_eq!(
+            int_shift_violations(src),
+            vec![1, 2, 3, 4, 5, 6, 8, 9, 12]
+        );
     }
 
     #[test]

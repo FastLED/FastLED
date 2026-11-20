@@ -371,6 +371,19 @@ fn int_literal_wide_shift_regex() -> &'static Regex {
 /// on AVR; anything larger is already `long`.
 const AVR_INT_MAX: u64 = 32767;
 
+/// Byte index of the `)` that closes a function-like macro's parameter list
+/// (`#define MASK(n) ...`), so the replacement list after it is not mistaken
+/// for the operand of a cast.
+fn macro_params_close(code: &str) -> Option<usize> {
+    let caps = macro_params_open_regex().find(code)?;
+    code[caps.end()..].find(')').map(|rel| caps.end() + rel)
+}
+
+fn macro_params_open_regex() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| Regex::new(r"^\s*#\s*define\s+\w+\(").unwrap())
+}
+
 /// True when the match at `start` is a whole, uncast literal: it is not the
 /// tail of an identifier or number, and not the operand of a C-style cast
 /// such as `(u32)1 << 30` or `(u32) 1 << 30`.
@@ -381,11 +394,30 @@ fn is_bare_literal_operand(code: &str, start: usize) -> bool {
             return false;
         }
     }
-    before
-        .iter()
-        .rev()
-        .find(|b| !b.is_ascii_whitespace())
-        .map_or(true, |&b| b != b')')
+    match before.iter().rposition(|b| !b.is_ascii_whitespace()) {
+        Some(pos) if before[pos] == b')' => macro_params_close(code) == Some(pos),
+        _ => true,
+    }
+}
+
+/// Length of the head of `line` that is still inside a string literal
+/// opened on an earlier physical line (`state` as it was before this line
+/// was scanned): 0 when there is none, `None` when the whole line is literal
+/// data.
+fn continued_literal_len(line: &str, state: &CommentScanState) -> Option<usize> {
+    let bytes = line.as_bytes();
+    if let Some(delim) = &state.in_raw_string {
+        let close = format!("){delim}\"");
+        return find_subslice(bytes, close.as_bytes()).map(|pos| pos + close.len());
+    }
+    if let Some(quote) = state.in_quoted {
+        let end = scan_quoted(bytes, 0, quote);
+        if end == bytes.len() && bytes.last() == Some(&b'\\') {
+            return None;
+        }
+        return Some(end);
+    }
+    Some(0)
 }
 
 struct IntLiteralWideShiftChecker;
@@ -415,7 +447,14 @@ impl FileContentChecker for IntLiteralWideShiftChecker {
         let mut violations = Vec::new();
         let mut comment_state = CommentScanState::default();
         for (index, line) in file_content.lines.iter().enumerate() {
-            let visible = strip_block_comments_from_line(line, &mut comment_state);
+            let literal_head = continued_literal_len(line, &comment_state);
+            let mut visible = strip_block_comments_from_line(line, &mut comment_state);
+            let Some(literal_head) = literal_head else {
+                continue;
+            };
+            // `visible` keeps the continued literal's text; blank it so only
+            // code after the closing delimiter is matched.
+            visible.replace_range(..literal_head, &" ".repeat(literal_head));
             let code = split_line_comment(&visible);
             if !code.contains("<<") || line.contains(INT_LITERAL_WIDE_SHIFT_SUPPRESSION) {
                 continue;
