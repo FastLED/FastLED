@@ -8,7 +8,8 @@
 #include "fl/stl/stdint.h"
 #include "fl/stl/cstddef.h"
 #include "fl/stl/cstdio.h"  // for fl::serial_begin
-#include "fl/stl/stdio.h"  // for fl::snprintf
+#include "fl/stl/stdio.h"  // for fl::printf_detail::format_impl
+#include "fl/stl/strstream.h"  // for fl::sstream
 #include "fl/stl/type_traits.h"  // for enable_if and is_multi_byte_integer
 #include "fl/stl/noexcept.h"
 
@@ -179,10 +180,14 @@ public:
      * fl::Serial.printf("Value: %d, Hex: 0x%X\n", 42, 255);
      * @endcode
      *
-     * Note: Maximum formatted string length is 256 characters.
+     * Note: Output is truncated to kPrintfMaxLen (255) characters.
      */
     template<typename... Args>
-    size_t printf(const char* format, Args... args) FL_NO_EXCEPT;  // ok snprintf — method routes through fl::snprintf at line 284
+    size_t printf(const char* format, Args... args) FL_NO_EXCEPT;  // ok snprintf - formats with fl::printf_detail, writes via printFormatted()
+
+    /// Longest string printf() writes; longer output is truncated. An enum
+    /// so it needs no out-of-line definition when odr-used under C++11.
+    enum : fl::size { kPrintfMaxLen = 255 };
 
     /**
      * @brief Wait for serial output to complete
@@ -269,6 +274,11 @@ public:
     float parseFloat() FL_NO_EXCEPT;
 
 private:
+    // Out-of-line tail of printf(): clips to kPrintfMaxLen and prints. Kept
+    // out of the template so no fixed-size buffer is inlined into every
+    // printf() caller (FastLED#5307).
+    size_t printFormatted(const sstream& stream) FL_NO_EXCEPT;
+
     u32 mTimeoutMs = 1000;  // Default 1 second timeout
 };
 
@@ -284,16 +294,9 @@ inline size_t SerialPort::printf(const char* format, Args... args) FL_NO_EXCEPT 
         return 0;
     }
 
-    // Format into a fixed-size buffer using fl::snprintf
-    char buffer[256];  // Maximum formatted string length
-    int len = fl::snprintf(buffer, sizeof(buffer), format, args...);
-
-    if (len < 0) {
-        return 0;  // Formatting error
-    }
-
-    // Delegate to print() method
-    return print(buffer);
+    sstream stream;
+    printf_detail::format_impl(stream, format, args...);
+    return printFormatted(stream);
 }
 
 // Global Serial object (Arduino-compatible)

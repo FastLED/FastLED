@@ -90,6 +90,51 @@ image is **not** the documented release config; `bash bloat <board> --profile
 slim` is. All levers, their measured savings and the `--profile slim` recipe:
 [binary-size-reference.md](binary-size-reference.md#release-build-flash-savers).
 
+## Stack inventory (AVR `-fstack-usage`)
+
+`bash bloat` reports flash and static RAM, not stack frames. To find large
+stack frames on a small-RAM target, compile the unity TUs with avr-gcc's
+`-fstack-usage` and sort the `.su` files (each lands next to its `-o` object).
+This is a measurement probe, not a build: `bash compile uno` cannot emit `.su`
+files, so the probe calls the avr-g++ that fbuild cached directly. Write the
+outputs to a scratch directory and do not commit them.
+
+```bash
+# The avr-gcc and Arduino AVR core that fbuild cached for `bash compile uno`:
+AVR=$(dirname "$(ls ~/.fbuild/*/cache/toolchains/*/*/*/bin/avr-g++ | head -1)")
+CORE=$(ls -d ~/.fbuild/*/cache/platforms/dl-framework-arduino-avr-[0-9]*/*/* | head -1)
+SRC=$PWD/src   # FastLED checkout
+OUT=$(mktemp -d)   # or a session scratch directory
+for f in "$SRC"/fl/build/*.cpp; do
+  "$AVR/avr-g++" -mmcu=atmega328p -Os -std=gnu++11 \
+    -fno-threadsafe-statics -fno-exceptions -ffunction-sections -fdata-sections -w \
+    -DF_CPU=16000000L -DARDUINO=10808 -DARDUINO_ARCH_AVR -DARDUINO_AVR_UNO \
+    -I"$CORE/cores/arduino" -I"$CORE/variants/standard" -I"$SRC" \
+    -fstack-usage -c "$f" -o "$OUT/$(basename "$f" .cpp).o"
+done
+sort -t$'\t' -k2 -n -r "$OUT"/*.su | head -40   # largest frames first
+```
+
+Each `.su` line is `file:line:col:function<TAB>bytes<TAB>static|dynamic`.
+`dynamic` frames hold a VLA/`alloca`, so the number shown is only the fixed
+part. Templates that are only instantiated by user code (e.g.
+`SerialPort::printf`) do not appear; compile a two-line probe `.cpp` that calls
+them. `ci/codec_memory/audit.py` does the same for the MP3 codecs on the host
+compiler, with a call graph; it is not set up for AVR.
+
+FastLED#5307 (ATmega328P, avr-gcc 7.3 `-Os`) used this inventory:
+
+| Function | Before | After | Fix |
+|---|---|---|---|
+| `fl::readLine` | 654 B | 96 B | Platforms write the line into the caller's `fl::string` instead of a 512 B `char` buffer; the `sstream` fallback moved out of line. |
+| `SerialPort::printf` caller | ~359 B each | ~52 B each | Formatting stays in the template (an `sstream`); clipping/printing moved out of line (`printFormatted`, 51 B). The 256 B buffer is gone. |
+| `digitalMultiWrite16` / `8` | 1196 / 604 B | 46 / 27 B (+52 / 36 B callee) | The frame was a whole `DigitalMultiWrite16/8` (its nibble LUTs). The one-shot functions now drive the pins directly; the port histogram became a pairwise count. |
+| `fill_2dnoise8/16`, `fill_noise8/16` | 2*W*H B dynamic (1-D: 2*min(N,255)) | unchanged | Kept `FASTLED_STACK_ARRAY`. Both planes are needed at once (hue is read 180-degree rotated), so the buffer cannot be chunked by rows without changing the octave math, and a runtime-sized `fl::scratch` would not help AVR (`FL_SCRATCH_STACK_BYTES` is 0 there). Callers on small-RAM targets should keep the grid small or use the `fill_raw_*` functions with their own buffer. |
+
+`fl::scratch<T>` was not used for these: on AVR its arena is 0 bytes by
+default, so it would not have moved anything, and the ESP8266 arena is mostly
+reserved for `drawPolygon`.
+
 ## Don'ts
 
 - **Don't run `xtensa-esp32s3-elf-nm` or `xtensa-esp32s3-elf-size` directly.** The wrapper subsumes both. Direct toolchain invocations have caused every prior bloat audit to wire up nm/c++filt/map by hand and miss the map-derived synthesis pass.

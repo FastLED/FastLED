@@ -10,6 +10,7 @@
 #include "fl/stl/noexcept.h"
 #include "fl/stl/static_assert.h"
 #include "fl/stl/stdint.h"
+#include "fl/stl/string.h"
 #include "platforms/arm/is_arm.h"
 #include "platforms/io.h"
 
@@ -203,13 +204,10 @@ int read() FL_NO_EXCEPT {
 
 // LPC's HardwareSerial lacks readStringUntil(), so read the line manually.
 // Goes through read() above, not Serial, so it shares the receive ring.
-int readLineNative(char delimiter, char* out, int outLen) FL_NO_EXCEPT {
-    if (outLen <= 0) {
-        return 0;
-    }
+int readLineNative(char delimiter, fl::string& out) FL_NO_EXCEPT {
+    out.clear();
     const unsigned long timeoutMs = 1000UL;
     unsigned long start = fl::millis();
-    int len = 0;
     while (true) {
         const int value = read();
         if (value < 0) {
@@ -223,13 +221,12 @@ int readLineNative(char delimiter, char* out, int outLen) FL_NO_EXCEPT {
         if (c == delimiter) {
             break;
         }
-        if (len < outLen - 1) {
-            out[len++] = c;
+        if (out.size() < static_cast<fl::size>(kReadLineNativeMaxLen)) {
+            out.push_back(c);
         }
         start = fl::millis();
     }
-    out[len] = '\0';
-    return len;
+    return static_cast<int>(out.size());  // fl-lint: int-template-ok API returns int; size <= kReadLineNativeMaxLen
 }
 
 bool flush(u32 timeoutMs) FL_NO_EXCEPT {
@@ -278,10 +275,9 @@ int read() FL_NO_EXCEPT {
     return -1;
 }
 
-int readLineNative(char delimiter, char* out, int outLen) FL_NO_EXCEPT {
+int readLineNative(char delimiter, fl::string& out) FL_NO_EXCEPT {
     (void)delimiter;
     (void)out;
-    (void)outLen;
     return -1;
 }
 

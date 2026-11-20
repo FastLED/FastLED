@@ -7,7 +7,13 @@
 #include "fl/stl/noexcept.h"
 
 namespace fl {
+
+class string;  // fl/stl/string.h; only bound by reference here
+
 namespace platforms {
+
+// Longest line readLineNative() stores; longer input is consumed but dropped.
+constexpr int kReadLineNativeMaxLen = 511;
 
 // Serial initialization
 void begin(u32 baudRate) FL_NO_EXCEPT;
@@ -24,12 +30,15 @@ int read() FL_NO_EXCEPT;
 // High-level line reading using platform's native Serial.readStringUntil()
 // On Arduino, this delegates to Serial.readStringUntil() which handles
 // USB CDC multi-packet transfers correctly via Stream::timedRead().
-// On non-Arduino platforms, returns false (caller should use fl::readStringUntil fallback).
-// @param delimiter Character to read until
-// @param out Buffer to write the line into (allocated by caller)
-// @param outLen Max buffer size
-// @return Number of characters read, or -1 if not supported on this platform
-int readLineNative(char delimiter, char* out, int outLen) FL_NO_EXCEPT;
+// On non-Arduino platforms, returns -1 (caller should use fl::readStringUntil fallback).
+// The line is written straight into the caller's string, so no fixed-size
+// line buffer lives on the caller's stack (FastLED#5307).
+// @param delimiter Character to read until (not stored)
+// @param out Receives the line, truncated to kReadLineNativeMaxLen characters
+// @return Number of characters stored (out.size(); fewer than were read if the
+//         line is longer than the cap or the string could not grow), or -1 if
+//         not supported on this platform
+int readLineNative(char delimiter, fl::string& out) FL_NO_EXCEPT;
 
 // Utility functions
 bool flush(u32 timeoutMs = 1000) FL_NO_EXCEPT;

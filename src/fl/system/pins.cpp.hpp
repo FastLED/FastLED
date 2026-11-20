@@ -155,50 +155,81 @@ int pinToPort(int pin) FL_NO_EXCEPT {
 
 #endif // FASTLED_ALL_PINS_VALID
 
-void DigitalMultiWrite8::init(const Pins8& pins) FL_NO_EXCEPT {
-    for (u8 i = 0; i < 8; ++i) {
-        mPins[i] = pins.pins[i];
-    }
+namespace pins_detail {
 
-    // Find the majority port and disable pins on other ports.
-    int port_counts[32] = {};
-    int port_ids[8] = {};
+// Disable (set to -1) every active pin that is not on the port most active
+// pins share, warning for each. Ports outside [0, kPortLimit) never win, and
+// ties go to the lowest port id. Counting pairwise over the N <= 16 pins
+// gives the same answer as a per-port histogram without the kPortLimit-entry
+// counter array in the frame (FastLED#5307).
+template <u8 N, int kPortLimit>
+void keepMajorityPort(int (&pins)[N], const char* who) FL_NO_EXCEPT {
+    int port_ids[N];
     int num_active = 0;
-    for (u8 i = 0; i < 8; ++i) {
-        if (mPins[i] < 0) {
+    for (u8 i = 0; i < N; ++i) {
+        if (pins[i] < 0) {
             port_ids[i] = -1;
             continue;
         }
-        int p = fl::pinToPort(mPins[i]);
-        port_ids[i] = p;
-        if (p >= 0 && p < 32) {
-            port_counts[p]++;
-        }
+        port_ids[i] = fl::pinToPort(pins[i]);
         num_active++;
     }
 
-    // Find the port with the highest pin count.
     int best_port = -1;
     int best_count = 0;
-    for (int p = 0; p < 32; ++p) {
-        if (port_counts[p] > best_count) {
-            best_count = port_counts[p];
+    for (u8 i = 0; i < N; ++i) {
+        const int p = port_ids[i];
+        if (pins[i] < 0 || p < 0 || p >= kPortLimit) {
+            continue;
+        }
+        int count = 0;
+        for (u8 j = 0; j < N; ++j) {
+            if (pins[j] >= 0 && port_ids[j] == p) {
+                count++;
+            }
+        }
+        if (count > best_count || (count == best_count && p < best_port)) {
+            best_count = count;
             best_port = p;
         }
     }
 
-    // Disable pins that aren't on the majority port and warn.
     if (best_port >= 0 && best_count < num_active) {
-        for (u8 i = 0; i < 8; ++i) {
-            if (mPins[i] < 0) {
+        for (u8 i = 0; i < N; ++i) {
+            if (pins[i] < 0) {
                 continue;
             }
             if (port_ids[i] != best_port) {
-                FL_WARN("digitalMultiWrite8: pin " << mPins[i] << " (port " << port_ids[i] << ") disabled — not on majority port " << best_port);
-                mPins[i] = -1;
+                FL_WARN(who << ": pin " << pins[i] << " (port " << port_ids[i] << ") disabled - not on majority port " << best_port);
+                pins[i] = -1;
             }
         }
     }
+}
+
+// Drive one 4-pin group from a nibble without a LUT: every HIGH first, then
+// every LOW, each in ascending bit order. That is exactly the digitalWrite
+// sequence the classes' nibble LUTs replay.
+inline void writeNibbleDirect(const int* pins4, u8 nib) FL_NO_EXCEPT {
+    for (u8 b = 0; b < 4; ++b) {
+        if (pins4[b] >= 0 && (nib & (1 << b))) {
+            (fl::digitalWrite)(pins4[b], PinValue::High);
+        }
+    }
+    for (u8 b = 0; b < 4; ++b) {
+        if (pins4[b] >= 0 && !(nib & (1 << b))) {
+            (fl::digitalWrite)(pins4[b], PinValue::Low);
+        }
+    }
+}
+
+} // namespace pins_detail
+
+void DigitalMultiWrite8::init(const Pins8& pins) FL_NO_EXCEPT {
+    for (u8 i = 0; i < 8; ++i) {
+        mPins[i] = pins.pins[i];
+    }
+    pins_detail::keepMajorityPort<8, 32>(mPins, "digitalMultiWrite8");
 
     buildNibbleLut(0, mSetLo, mClrLo); // bits 0-3
     buildNibbleLut(4, mSetHi, mClrHi); // bits 4-7
@@ -260,10 +291,21 @@ void DigitalMultiWrite8::applyNibble(const PinList &set, const PinList &clr) FL_
     }
 }
 
+// The one-shot free functions drive the pins directly instead of building a
+// DigitalMultiWrite8/16 on the stack: the classes' nibble LUTs (592 / 1184 B
+// on AVR) only pay off across repeated writes. Same pins disabled, same
+// digitalWrite sequence (FastLED#5307).
 void digitalMultiWrite8(const Pins8& pins, fl::span<const u8> pin_data) FL_NO_EXCEPT {
-    DigitalMultiWrite8 writer;
-    writer.init(pins);
-    writer.write(pin_data);
+    int active[8];
+    for (u8 i = 0; i < 8; ++i) {
+        active[i] = pins.pins[i];
+    }
+    pins_detail::keepMajorityPort<8, 32>(active, "digitalMultiWrite8");
+    for (fl::size i = 0; i < pin_data.size(); ++i) {
+        const u8 byte = pin_data[i];
+        pins_detail::writeNibbleDirect(active, byte & 0x0F);
+        pins_detail::writeNibbleDirect(active + 4, (byte >> 4) & 0x0F);
+    }
 }
 
 // ============================================================================
@@ -274,46 +316,7 @@ void DigitalMultiWrite16::init(const Pins16& pins) FL_NO_EXCEPT {
     for (u8 i = 0; i < 16; ++i) {
         mPins[i] = pins.pins[i];
     }
-
-    // Find the majority port and disable pins on other ports.
-    int port_counts[64] = {};
-    int port_ids[16] = {};
-    int num_active = 0;
-    for (u8 i = 0; i < 16; ++i) {
-        if (mPins[i] < 0) {
-            port_ids[i] = -1;
-            continue;
-        }
-        int p = fl::pinToPort(mPins[i]);
-        port_ids[i] = p;
-        if (p >= 0 && p < 64) {
-            port_counts[p]++;
-        }
-        num_active++;
-    }
-
-    // Find the port with the highest pin count.
-    int best_port = -1;
-    int best_count = 0;
-    for (int p = 0; p < 64; ++p) {
-        if (port_counts[p] > best_count) {
-            best_count = port_counts[p];
-            best_port = p;
-        }
-    }
-
-    // Disable pins that aren't on the majority port and warn.
-    if (best_port >= 0 && best_count < num_active) {
-        for (u8 i = 0; i < 16; ++i) {
-            if (mPins[i] < 0) {
-                continue;
-            }
-            if (port_ids[i] != best_port) {
-                FL_WARN("digitalMultiWrite16: pin " << mPins[i] << " (port " << port_ids[i] << ") disabled — not on majority port " << best_port);
-                mPins[i] = -1;
-            }
-        }
-    }
+    pins_detail::keepMajorityPort<16, 64>(mPins, "digitalMultiWrite16");
 
     for (u8 n = 0; n < 4; ++n) {
         buildNibbleLut(n * 4, mSetNib[n], mClrNib[n]);
@@ -378,9 +381,17 @@ void DigitalMultiWrite16::applyNibble(const PinList &set, const PinList &clr) FL
 }
 
 void digitalMultiWrite16(const Pins16& pins, fl::span<const u16> pin_data) FL_NO_EXCEPT {
-    DigitalMultiWrite16 writer;
-    writer.init(pins);
-    writer.write(pin_data);
+    int active[16];
+    for (u8 i = 0; i < 16; ++i) {
+        active[i] = pins.pins[i];
+    }
+    pins_detail::keepMajorityPort<16, 64>(active, "digitalMultiWrite16");
+    for (fl::size i = 0; i < pin_data.size(); ++i) {
+        const u16 word = pin_data[i];
+        for (u8 n = 0; n < 4; ++n) {
+            pins_detail::writeNibbleDirect(active + n * 4, (word >> (n * 4)) & 0x0F);
+        }
+    }
 }
 
 // ============================================================================

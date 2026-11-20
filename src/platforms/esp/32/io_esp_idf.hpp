@@ -11,6 +11,7 @@
 #include "freertos/FreeRTOS.h"  // IWYU pragma: keep
 #include "freertos/task.h"  // IWYU pragma: keep
 #include "fl/stl/noexcept.h"
+#include "platforms/io.h"  // IWYU pragma: keep
 
 namespace fl {
 namespace platforms {
@@ -158,8 +159,8 @@ bool serial_is_buffered() FL_NO_EXCEPT {
     return nativeConsole().isBufferedMode();
 }
 
-int readLineNative(char delimiter, char* out, int outLen) FL_NO_EXCEPT {
-    (void)delimiter; (void)out; (void)outLen;
+int readLineNative(char delimiter, fl::string& out) FL_NO_EXCEPT {
+    (void)delimiter; (void)out;
     return -1;  // Not supported on ESP-IDF (non-Arduino) builds
 }
 
