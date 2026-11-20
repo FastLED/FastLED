@@ -218,8 +218,8 @@ void AutoResearchRemoteControl::bindBenchmarkMethods(fl::Remote& remote) {
     //                ESP32 an esp_clk_cpu_freq() query on every call
     //   delayNsHz  - same with the clock frequency hoisted out; the gap
     //                against delayNs is exactly the per-call clock query
-    //   writeByte  - DigitalMultiWrite8::writeByte(): nibble LUT lookups plus
-    //                two out-of-line applyNibble() calls
+    //   writeByte  - DigitalMultiWrite8::writeByte(): two mask ANDs plus one
+    //                out-of-line pins_detail::writeEight() call
     // A bit costs 3x delay + 3x writeByte, so these numbers reconstruct the
     // measured per-bit overhead directly.
     remote.bind("perfProbeBitBangCost", [](const fl::json& args) -> fl::json {
@@ -325,8 +325,8 @@ void AutoResearchRemoteControl::bindBenchmarkMethods(fl::Remote& remote) {
         }
         const fl::u32 delay_cyc_us = fl::micros() - delay_cyc_t0;
 
-        // pin < 0 leaves every slot inactive, so applyNibble performs no GPIO
-        // write at all — that isolates the LUT and call overhead from the
+        // pin < 0 leaves every slot inactive, so writeEight performs no GPIO
+        // write at all. That isolates the mask and call overhead from the
         // cost of the pin write itself.
         fl::Pins8 pins8;
         for (int i = 0; i < 8; ++i) {

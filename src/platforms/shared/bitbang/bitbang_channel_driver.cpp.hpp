@@ -101,7 +101,7 @@ void BitBangChannelDriver::rebuildPinConfig(
         }
     }
 
-    // Build DigitalMultiWrite8 LUT
+    // Configure the DigitalMultiWrite8 for the active slots
     Pins8 pins8;
     for (int i = 0; i < 8; ++i) {
         pins8.pins[i] = mPinForSlot[i];

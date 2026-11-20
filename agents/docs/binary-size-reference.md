@@ -112,7 +112,7 @@ FastLED#5307 (ATmega328P, avr-gcc 7.3 `-Os`) used this inventory:
 |---|---|---|---|
 | `fl::readLine` | 654 B | 96 B | Platforms write the line into the caller's `fl::string` instead of a 512 B `char` buffer; the `sstream` fallback moved out of line. |
 | `SerialPort::printf` caller | ~359 B each | ~52 B each | Formatting stays in the template (an `sstream`); clipping/printing moved out of line (`printFormatted`, 51 B). The 256 B buffer is gone. |
-| `digitalMultiWrite16` / `8` | 1196 / 604 B | 46 / 27 B (+52 / 36 B callee) | The frame was a whole `DigitalMultiWrite16/8` (its nibble LUTs). The one-shot functions now drive the pins directly; the port histogram became a pairwise count. |
+| `digitalMultiWrite16` / `8` | 1196 / 604 B | 44 / 27 B (+ `init` 40 / 6 B + `keepMajorityPort` 52 / 36 B) | The frame was a whole `DigitalMultiWrite16/8` (its nibble LUTs). The port histogram became a pairwise count (#5307). #5314 then dropped the LUTs: the classes are 34 / 17 B on AVR and the one-shot functions build one on the stack again. `DigitalMultiWrite16::init` copies the 16 pins into a flat local for the port filter, hence its 40 B. |
 | `fill_2dnoise8/16`, `fill_noise8/16` | 2*W*H B dynamic (1-D: 2*min(N,255)) | unchanged | Kept `FASTLED_STACK_ARRAY`. Both planes are needed at once (hue is read 180-degree rotated), so the buffer cannot be chunked by rows without changing the octave math, and a runtime-sized `fl::scratch` would not help AVR (`FL_SCRATCH_STACK_BYTES` is 0 there). Callers on small-RAM targets should keep the grid small or use the `fill_raw_*` functions with their own buffer. |
 
 `fl::scratch<T>` was not used for these: on AVR its arena is 0 bytes by
