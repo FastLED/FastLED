@@ -185,6 +185,10 @@ public:
     template<typename... Args>
     size_t printf(const char* format, Args... args) FL_NO_EXCEPT;  // ok snprintf - formats with fl::printf_detail, writes via printFormatted()
 
+    /// No-argument overload: streams the expanded format in small chunks
+    /// instead of building it in memory first. Same output and limit.
+    size_t printf(const char* format) FL_NO_EXCEPT;  // ok snprintf - streams via fl::printf_detail::print_no_args()
+
     /// Longest string printf() writes; longer output is truncated. An enum
     /// so it needs no out-of-line definition when odr-used under C++11.
     enum : fl::size { kPrintfMaxLen = 255 };

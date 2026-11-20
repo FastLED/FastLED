@@ -15,6 +15,14 @@ namespace fl {
 void printf(const char* format) FL_NO_EXCEPT;
 int snprintf(char* buffer, fl::size size, const char* format) FL_NO_EXCEPT;
 
+namespace printf_detail {
+// Expands a format that has no arguments straight to fl::print in 64-byte
+// chunks (no heap, no full-size buffer), stopping after max_chars characters.
+// Returns the number of characters printed. Backs fl::printf(const char*)
+// and fl::SerialPort::printf(const char*).
+fl::size print_no_args(const char* format, fl::size max_chars) FL_NO_EXCEPT;
+}  // namespace printf_detail
+
 /// @brief Printf-like formatting function that prints directly to the platform output
 /// @param format Format string with placeholders like "%d", "%s", "%f" etc.
 /// @param args Arguments to format

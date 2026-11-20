@@ -928,7 +928,7 @@ void fill_2dnoise8(CRGB *leds, int width, int height, bool serpentine,
   // both planes are needed at once and H is read 180-degree rotated, so the
   // work cannot be split into row chunks without changing the octave math.
   // On small-RAM targets keep the grid small, or call fill_raw_2dnoise8 with
-  // caller-owned buffers. See agents/docs/binary-size-analysis.md.
+  // caller-owned buffers. See agents/docs/binary-size-reference.md.
   FASTLED_STACK_ARRAY(fl::u8, V, array_size);
   FASTLED_STACK_ARRAY(fl::u8, H, array_size);
 

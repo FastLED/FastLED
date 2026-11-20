@@ -3,6 +3,7 @@
 #include "platforms/stub/Arduino.h"
 #include "test.h"
 #include "fl/stl/cstdio.h"
+#include "fl/stl/stdio.h"
 #include "fl/stl/string.h"
 #include "fl/system/serial.h"
 
@@ -95,6 +96,19 @@ FL_TEST_CASE("Serial.printf captured output") {
         FL_CHECK_EQ(captured.size(), kMax);
         FL_CHECK_EQ(n, kMax);
         FL_CHECK_EQ(captured.substr(0, 3), fl::string("aby"));
+    }
+
+    FL_SUBCASE("no-argument output is clipped too") {
+        const fl::string format(300, 'z');
+        const size_t n = fl::fl_serial.printf(format.c_str());
+        FL_CHECK_EQ(captured, fl::string(kMax, 'z'));
+        FL_CHECK_EQ(n, kMax);
+    }
+
+    FL_SUBCASE("fl::printf without arguments is not clipped") {
+        const fl::string format(300, 'w');
+        fl::printf(format.c_str());
+        FL_CHECK_EQ(captured, format);
     }
 
     FL_SUBCASE("null format prints nothing") {

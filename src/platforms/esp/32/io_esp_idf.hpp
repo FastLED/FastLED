@@ -11,9 +11,11 @@
 #include "freertos/FreeRTOS.h"  // IWYU pragma: keep
 #include "freertos/task.h"  // IWYU pragma: keep
 #include "fl/stl/noexcept.h"
-#include "platforms/io.h"  // IWYU pragma: keep
 
 namespace fl {
+
+class string;  // fl/stl/string.h; only bound by reference here
+
 namespace platforms {
 
 namespace {
