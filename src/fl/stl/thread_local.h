@@ -42,7 +42,8 @@ template <typename T> using ThreadLocal = ThreadLocalFake<T>;
 #if FASTLED_USE_THREAD_LOCAL
 // Each thread lazily gets its own heap-allocated T on first access().
 //
-// RAM: the container itself is only a pthread key plus one pointer. An
+// RAM: the container itself is only a pthread key, a flag and two pointers
+// (default, fallback slot). An
 // explicit default is kept on the heap and only when one was supplied; with no
 // default each thread's copy is value-initialized (T()). Storing an inline
 // default T unconditionally doubled the cost of SingletonThreadLocal<Big>
@@ -52,6 +53,10 @@ template <typename T> using ThreadLocal = ThreadLocalFake<T>;
 // pthread_setspecific fails, access() degrades to one lazily created
 // per-object fallback slot shared by every affected thread (the
 // ThreadLocalFake semantics) and warns once, instead of dereferencing null.
+// Once an object has fallen back, threads without storage stay on the slot
+// (no retry), so a thread's value is never silently reset. The slot is NOT
+// synchronized: like ThreadLocalFake, concurrent users of a degraded object
+// share one T, which is the price of not crashing on key/ENOMEM exhaustion.
 template <typename T> class ThreadLocalReal {
   public:
     // Default: each thread's object is value-initialized
@@ -167,7 +172,10 @@ template <typename T> class ThreadLocalReal {
     ThreadStorage *mDefault = nullptr;
     // Shared slot used only when the key could not be created or a thread's
     // pthread_setspecific failed; created on first such failure, owned here,
-    // never copied. Atomic so racing first failures agree on one slot.
+    // never copied. Atomic so racing first failures agree on one slot. A raw
+    // owner like mDefault: its lifetime is exactly this object's, the same as
+    // the per-thread storage it stands in for (using a ThreadLocal while it
+    // is destroyed is already a bug), and shared_ptr would add a control block.
     fl::atomic<ThreadStorage *> mFallback;
 
     // Initialize the pthread key
@@ -193,7 +201,9 @@ template <typename T> class ThreadLocalReal {
     // First access on this thread: register new storage under the key. Never
     // returns null; on any failure returns the shared fallback slot.
     ThreadStorage* createStorage() FL_NO_EXCEPT {
-        if (mKeyInitialized) {
+        // Already degraded: stay on the slot so a thread that fell back keeps
+        // its value and does not allocate/free on every access().
+        if (mKeyInitialized && !mFallback.load()) {
             ThreadStorage *storage = newStorage();
             if (storage) {
                 if (pthread_setspecific(mKey, storage) == 0) {
@@ -214,10 +224,10 @@ template <typename T> class ThreadLocalReal {
         if (slot) {
             return slot;
         }
-        detail::thread_local_fallback_warn();
         ThreadStorage *created = newStorage();
         ThreadStorage *expected = nullptr;
         if (mFallback.compare_exchange_strong(expected, created)) {
+            detail::thread_local_fallback_warn();  // CAS winner only
             return created;
         }
         delete created;  // ok bare allocation
