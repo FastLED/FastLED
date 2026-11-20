@@ -425,4 +425,14 @@
 # change is intentional and is recorded as a decision rather than left as
 # headroom. Neither the 320503 B flash ceiling nor the 40016 B RAM ceiling
 # moves.
-320379
+#
+# +8 B (320379 -> 320387), PR #5316 / #5310: ThreadLocalReal no longer
+# dereferences null when pthread_key_create or pthread_setspecific fails; it
+# falls back to a lazily created per-object shared slot (cold FL_NO_INLINE
+# path, CAS-published) and warns once (defined in singleton.cpp.hpp).
+# ESP32-S3 is multithreaded, so the fallback branch is
+# compiled in. Measured by the hosted bloat regression job (run 44749737093) on
+# this PR's head: image_flash 320387 B, attributed flash 301375 B, attributed
+# RAM 22499 B. The crash fix is intentional and is recorded as a decision.
+# Neither the 320503 B flash ceiling nor the 40016 B RAM ceiling moves.
+320387
