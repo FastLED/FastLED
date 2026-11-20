@@ -865,6 +865,79 @@ fl::vector<int> pins; // fl-lint: int-template-ok GPIO numbers are int in the pu
         assert_eq!(int_template_violations(path, &over).len(), allowed + 1);
     }
 
+    fn int_shift_violations(src: &str) -> Vec<usize> {
+        IntLiteralWideShiftChecker
+            .check_file_content(&file("src/fl/new_file.cpp.hpp", src))
+            .iter()
+            .map(|(l, _)| *l)
+            .collect()
+    }
+
+    #[test]
+    fn int_literal_wide_shift_flags_bare_literal_shifted_16_or_more() {
+        // FastLED#5303: `4 << 16` is 0 / UB with AVR's 16-bit int.
+        let src = "constexpr i32 kCeiling = 4 << 16;
+#define BIT24 (1<<24)
+u32 m = x | (1 << 31);
+f(0 << 16);
+u32 k = 1 << 16U;
+return 2 << 20;
+const char* marker = \"/*\";
+u32 l = 4 << 16;
+#define MASK(n) 1 << 24
+const char* raw = R\"(
+1 << 24
+)\"; u32 m = 1 << 20;
+const char* s = R\"(\"1 << 24\")\"; u32 n = 1 << 20;
+";
+        // Line 7's `/*` is string data, so line 8 is still scanned. Line 11
+        // is raw-string data; the code after its delimiter on line 12 is not.
+        // Line 13's hit is the `1 << 20` after the one-line raw string.
+        let hits = IntLiteralWideShiftChecker
+            .check_file_content(&file("src/fl/new_file.cpp.hpp", src));
+        let lines: Vec<usize> = hits.iter().map(|(l, _)| *l).collect();
+        assert_eq!(lines, vec![1, 2, 3, 4, 5, 6, 8, 9, 12, 13]);
+        assert!(hits.last().unwrap().1.starts_with("'1 << 20'"), "{hits:?}");
+    }
+
+    #[test]
+    fn int_literal_wide_shift_ignores_typed_small_comments_and_suppressions() {
+        let src = "constexpr i32 a = i32(4) << 16;
+u32 b = 1UL << 24;
+u32 c = 1u << 20;
+u32 d = (u32)1 << 30;
+u32 d2 = (u32) 1 << 30;
+i64 big = 4294967296 << 16;
+long wide = 40000 << 16;
+u32 e = 0xFF << 8;
+int f = 1 << 15;
+u32 g = x << 16;
+u32 h = arr[1] << 16;
+u32 i = v2 << 16;
+// 4 << 16 in a comment
+/* 1 << 24 in a block */
+const char* s = \"1 << 24\";
+u32 j = 1 << 24; // fl-lint: int-shift-ok 32-bit-only helper
+const auto ch = L'!'; const char* r = R\"(\"1 << 24\")\";
+u32 sep = 1'000 + (x << 16);
+";
+        let v = int_shift_violations(src);
+        assert!(v.is_empty(), "{v:?}");
+    }
+
+    #[test]
+    fn int_literal_wide_shift_skips_32bit_only_platforms_and_third_party() {
+        let root = Path::new(".");
+        let c = IntLiteralWideShiftChecker;
+        assert!(c.should_process_file("src/fl/gfx/gamut_map.cpp.hpp", root));
+        assert!(c.should_process_file("src/platforms/avr/fastspi_avr.h", root));
+        assert!(c.should_process_file("src/platforms/shared/math8.h", root));
+        assert!(!c.should_process_file("src/platforms/arm/d51/clockless_arm_d51.h", root));
+        assert!(!c.should_process_file("src/platforms/esp/32/foo.h", root));
+        assert!(!c.should_process_file("src/third_party/x/y.h", root));
+        assert!(!c.should_process_file("tests/fl/foo.cpp", root));
+    }
+
     #[test]
     fn pragma_once_covers_platform_h_headers_but_not_unity_hpp() {
         let checker = PragmaOnceChecker;

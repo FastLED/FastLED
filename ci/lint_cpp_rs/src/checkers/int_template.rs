@@ -339,3 +339,183 @@ const INT_TEMPLATE_ARG_BASELINE: &[(&str, usize)] = &[
     ("src/platforms/win/socket_win.cpp.hpp", 11),
     ("src/power_mgt.cpp.hpp", 2),
 ];
+
+// FastLED#5303: a bare decimal literal shifted left by 16 or more.
+//
+// An unsuffixed decimal literal is `int`, which is 16 bits on AVR, so
+// `4 << 16` is undefined there: avr-gcc rejects it in a constant expression
+// and folds it to 0 elsewhere. Host tests cannot see it because host `int` is
+// 32 bits. Widen the literal first (`fl::i32(4) << 16`, `1UL << 24`).
+//
+// Scoped to `src/` code that can be compiled for AVR: third-party code and the
+// platform directories that only target 32-bit-int cores are skipped, so a
+// CMSIS-style `(1 << 24)` register bit in `src/platforms/arm/` is fine.
+
+const INT_LITERAL_WIDE_SHIFT_SUPPRESSION: &str = "fl-lint: int-shift-ok";
+
+/// Platform directories whose every target has a 32-bit (or wider) `int`.
+const INT_LITERAL_WIDE_SHIFT_32BIT_PLATFORMS: &[&str] = &[
+    "apollo3", "apple", "arm", "ci13xx", "esp", "posix", "stub", "teensy", "wasm", "win",
+];
+
+fn int_literal_wide_shift_regex() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| {
+        // `\d+` followed directly by `<<` rules out suffixed and hex left
+        // operands; the shift count may carry a suffix (`1 << 16U`).
+        Regex::new(r"(\d+)\s*<<\s*(\d+)[uUlL]*\b").unwrap()
+    })
+}
+
+/// Largest value an unsuffixed decimal literal can have and still be `int`
+/// on AVR; anything larger is already `long`.
+const AVR_INT_MAX: u64 = 32767;
+
+/// Byte index of the `)` that closes a function-like macro's parameter list
+/// (`#define MASK(n) ...`), so the replacement list after it is not mistaken
+/// for the operand of a cast.
+fn macro_params_close(code: &str) -> Option<usize> {
+    let caps = macro_params_open_regex().find(code)?;
+    code[caps.end()..].find(')').map(|rel| caps.end() + rel)
+}
+
+fn macro_params_open_regex() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| Regex::new(r"^\s*#\s*define\s+\w+\(").unwrap())
+}
+
+/// True when the match at `start` is a whole, uncast literal: it is not the
+/// tail of an identifier or number, and not the operand of a C-style cast
+/// such as `(u32)1 << 30` or `(u32) 1 << 30`.
+fn is_bare_literal_operand(code: &str, start: usize) -> bool {
+    let before = &code.as_bytes()[..start];
+    if let Some(&prev) = before.last() {
+        if prev.is_ascii_alphanumeric() || prev == b'_' || prev == b'.' || prev == b'\'' {
+            return false;
+        }
+    }
+    match before.iter().rposition(|b| !b.is_ascii_whitespace()) {
+        Some(pos) if before[pos] == b')' => macro_params_close(code) == Some(pos),
+        _ => true,
+    }
+}
+
+/// Length of the head of `line` that is still inside a string literal
+/// opened on an earlier physical line (`state` as it was before this line
+/// was scanned): 0 when there is none, `None` when the whole line is literal
+/// data.
+fn continued_literal_len(line: &str, state: &CommentScanState) -> Option<usize> {
+    let bytes = line.as_bytes();
+    if let Some(delim) = &state.in_raw_string {
+        let close = format!("){delim}\"");
+        return find_subslice(bytes, close.as_bytes()).map(|pos| pos + close.len());
+    }
+    if let Some(quote) = state.in_quoted {
+        let end = scan_quoted(bytes, 0, quote);
+        if end == bytes.len() && bytes.last() == Some(&b'\\') {
+            return None;
+        }
+        return Some(end);
+    }
+    Some(0)
+}
+
+/// Blanks every raw string literal that opens on this line (to its closing
+/// delimiter, or to the end of the line when it runs on), so text such as
+/// `R"("1 << 24")"` is not split at its inner quotes by
+/// `strip_string_literals`.
+fn mask_raw_strings(code: &str) -> String {
+    let bytes = code.as_bytes();
+    let mut out = bytes.to_vec();
+    let mut cursor = 0;
+    while cursor < bytes.len() {
+        match bytes[cursor] {
+            b'"' if is_raw_string_open(bytes, cursor) => {
+                // A malformed delimiter falls through as an ordinary string.
+                let Some((delim, body)) = raw_string_delimiter(bytes, cursor) else {
+                    cursor = scan_quoted(bytes, cursor + 1, b'"');
+                    continue;
+                };
+                let close = format!("){delim}\"");
+                let end = find_subslice(&bytes[body..], close.as_bytes())
+                    .map_or(bytes.len(), |pos| body + pos + close.len());
+                out[cursor..end].fill(b' ');
+                cursor = end;
+            }
+            b'"' => cursor = scan_quoted(bytes, cursor + 1, b'"'),
+            // `1'000` is a digit separator; `L'!'` is still a char literal.
+            b'\'' if !is_digit_separator_quote(bytes, cursor) => {
+                cursor = scan_quoted(bytes, cursor + 1, b'\'')
+            }
+            _ => cursor += 1,
+        }
+    }
+    String::from_utf8_lossy(&out).into_owned()
+}
+
+struct IntLiteralWideShiftChecker;
+
+impl FileContentChecker for IntLiteralWideShiftChecker {
+    fn name(&self) -> &'static str {
+        "IntLiteralWideShiftChecker"
+    }
+
+    fn should_process_file(&self, file_path: &str, project_root: &Path) -> bool {
+        let normalized = normalize_path(file_path);
+        if !is_under_project_subpath(&normalized, project_root, "src")
+            || !ends_with_any(&normalized, &[".cpp", ".h", ".hpp", ".cpp.hpp", ".c"])
+            || normalized.contains("/third_party/")
+        {
+            return false;
+        }
+        !INT_LITERAL_WIDE_SHIFT_32BIT_PLATFORMS
+            .iter()
+            .any(|dir| normalized.contains(&format!("/platforms/{dir}/")))
+    }
+
+    fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
+        if !file_content.content.contains("<<") {
+            return Vec::new();
+        }
+        let mut violations = Vec::new();
+        let mut comment_state = CommentScanState::default();
+        for (index, line) in file_content.lines.iter().enumerate() {
+            let literal_head = continued_literal_len(line, &comment_state);
+            let mut visible = strip_block_comments_from_line(line, &mut comment_state);
+            let Some(literal_head) = literal_head else {
+                continue;
+            };
+            // `visible` keeps the continued literal's text; blank it so only
+            // code after the closing delimiter is matched.
+            visible.replace_range(..literal_head, &" ".repeat(literal_head));
+            let code = split_line_comment(&visible);
+            if !code.contains("<<") || line.contains(INT_LITERAL_WIDE_SHIFT_SUPPRESSION) {
+                continue;
+            }
+            let code = strip_string_literals(&mask_raw_strings(code));
+            for caps in int_literal_wide_shift_regex().captures_iter(&code) {
+                let literal = caps.get(1).unwrap();
+                let value: u64 = literal.as_str().parse().unwrap_or(u64::MAX);
+                let shift: u32 = caps[2].parse().unwrap_or(0);
+                if shift < 16
+                    || value > AVR_INT_MAX
+                    || !is_bare_literal_operand(&code, literal.start())
+                {
+                    continue;
+                }
+                let lit = literal.as_str();
+                violations.push((
+                    index + 1,
+                    format!(
+                        "'{lit} << {shift}' shifts a 16-bit int on AVR (UB / folds to 0); widen \
+                         the literal first, e.g. fl::i32({lit}) << {shift} or {lit}UL << {shift}, \
+                         or add `// {INT_LITERAL_WIDE_SHIFT_SUPPRESSION} <reason>` \
+                         (FastLED#5303): {}",
+                        line.trim()
+                    ),
+                ));
+            }
+        }
+        violations
+    }
+}

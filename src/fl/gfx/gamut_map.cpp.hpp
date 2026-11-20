@@ -35,7 +35,7 @@ constexpr int kGamutMapProbes = 8;
 /// this is for. Four is a factor of the request rather than an absolute
 /// chroma, which keeps a near-neutral request near-neutral instead of
 /// answering it with a saturated colour.
-constexpr i32 kGamutProbeCeilingQ16 = 4 << 16;
+constexpr i32 kGamutProbeCeilingQ16 = i32(4) << 16;  // i32: `4 << 16` overflows 16-bit int (AVR)
 
 /// D65 in s16.16, the white the working domain is normalized to.
 constexpr i32 kGamutD65Q16[3] = {62289, 65536, 71372};
