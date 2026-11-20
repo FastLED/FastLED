@@ -75,19 +75,15 @@ files, so the probe calls the avr-g++ that fbuild cached directly. Write the
 outputs to a scratch directory and do not commit them.
 
 ```bash
-# The avr-gcc and Arduino AVR core that fbuild cached for `bash compile uno`.
-# It stops rather than guess when several versions are cached: then set AVR
-# and CORE by hand to the pair `bash compile uno` logs ("AVR resolved: ...").
+# Point AVR and CORE at the avr-gcc and arduino-avr core that `bash compile
+# uno` resolves (its "AVR resolved: avr-gcc@... arduino-avr-core@..." log
+# line) and quote that pair with the results. Candidates in fbuild's cache:
+#   ls -d ~/.fbuild/*/cache/toolchains/*/*/*/bin
+#   ls -d ~/.fbuild/*/cache/platforms/dl-framework-arduino-avr-[0-9]*/*/*
+AVR=/path/to/toolchain/bin        # directory holding avr-g++
+CORE=/path/to/arduino-avr/5.4.0   # directory holding cores/ and variants/
 ok=1
-if [ -z "$AVR" ] || [ -z "$CORE" ]; then
-  AVRS=$(ls ~/.fbuild/*/cache/toolchains/*/*/*/bin/avr-g++)
-  CORES=$(ls -d ~/.fbuild/*/cache/platforms/dl-framework-arduino-avr-[0-9]*/*/*)
-  [ "$(for g in $AVRS; do "$g" -dumpversion; done | sort -u | wc -l)" = 1 ] &&
-  [ "$(for c in $CORES; do basename "$c"; done | sort -u | wc -l)" = 1 ] ||
-    { echo "several avr-gcc/core versions cached: set AVR and CORE"; ok=0; }
-  AVR=$(dirname "$(echo "$AVRS" | head -1)"); CORE=$(echo "$CORES" | head -1)
-fi
-echo "avr-gcc $("$AVR/avr-g++" -dumpversion) at $AVR; core $CORE"   # quote with results
+[ -x "$AVR/avr-g++" ] && [ -d "$CORE/cores/arduino" ] || { echo "set AVR and CORE"; ok=0; }
 SRC=$PWD/src   # FastLED checkout
 OUT=$(mktemp -d)   # or a session scratch directory
 for f in "$SRC"/fl/build/*.cpp; do
