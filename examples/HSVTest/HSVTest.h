@@ -13,12 +13,14 @@
 
 #define NUM_LEDS 5
 
+// The board declares its default clocked-chipset pins; a literal 1/2 is not
+// routable everywhere (the Adafruit Feather nRF52840 Sense marks D1 invalid).
 #ifndef PIN_DATA
-#define PIN_DATA 1  // Universally available pin
+#define PIN_DATA FL_PIN_SPI_DATA_1
 #endif
 
 #ifndef PIN_CLOCK
-#define PIN_CLOCK 2  // Universally available pin
+#define PIN_CLOCK FL_PIN_SPI_CLOCK_1
 #endif
 
 CRGB leds[NUM_LEDS];

@@ -10,10 +10,23 @@
 #define NUM_LEDS  20
 // uint8_t DATA_PIN, uint8_t CLOCK_PIN,
 
-#define STRIP_0_DATA_PIN 1
-#define STRIP_0_CLOCK_PIN 2
-#define STRIP_1_DATA_PIN 3
-#define STRIP_1_CLOCK_PIN 4
+// Both strips use the board's default clocked-chipset pin pairs
+// (platforms/default_pins.h). Literals are guesses about hardware this sketch
+// cannot see: the Adafruit Feather nRF52840 boards exclude D1 (UART RX), and
+// Feather M4 has no pins 2 or 3. A sketch or build flag defining these first
+// still wins.
+#ifndef STRIP_0_DATA_PIN
+#define STRIP_0_DATA_PIN FL_PIN_SPI_DATA_1
+#endif
+#ifndef STRIP_0_CLOCK_PIN
+#define STRIP_0_CLOCK_PIN FL_PIN_SPI_CLOCK_1
+#endif
+#ifndef STRIP_1_DATA_PIN
+#define STRIP_1_DATA_PIN FL_PIN_SPI_DATA_2
+#endif
+#ifndef STRIP_1_CLOCK_PIN
+#define STRIP_1_CLOCK_PIN FL_PIN_SPI_CLOCK_2
+#endif
 
 
 CRGB leds_hd[NUM_LEDS] = {0};  // HD mode implies gamma.
