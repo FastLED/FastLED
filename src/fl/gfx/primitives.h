@@ -980,11 +980,12 @@ inline void drawStrokeLineCore(Canvas<PixelT>& canvas, const PixelT& color,
                                Coord x0, Coord y0, Coord x1, Coord y1,
                                Coord thickness, LineCap cap) FL_NO_EXCEPT;
 
-/// Scratch is the working-set provider: fl::scratch (stack local or
-/// side-stack arena, per FL_SCRATCH_STACK_BYTES); tests substitute their own
-/// arena. Any class template with fl::scratch's interface works.
+/// Scratch provides the working set: PolyScratchLease (fl::scratch's
+/// side-stack arena when it fits, else a stack local; fl/gfx/poly_scratch.h).
+/// Tests substitute their own arena. Any class template with fl::scratch's
+/// interface works.
 template<typename PixelT, typename Coord, bool Overwrite, int MAXN, int CHUNK,
-         template<typename> class Scratch = fl::scratch>
+         template<typename> class Scratch = PolyScratchLease>
 inline void drawPolygonCore(Canvas<PixelT>& canvas, const PixelT& color,
                             fl::span<const PolyPoint<Coord>> pts) FL_NO_EXCEPT;
 

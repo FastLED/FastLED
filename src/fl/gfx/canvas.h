@@ -6,12 +6,12 @@
 #include "fl/math/alpha.h"
 #include "fl/math/xymap.h"
 #include "fl/gfx/draw_mode.h"
-#include "fl/gfx/poly_scratch.h"
 #include "fl/stl/int.h"
 #include "fl/stl/span.h"
 #include "fl/stl/variant.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/noexcept.h"
+#include "fl/stl/scratch_config.h"
 #include "fl/system/sketch_macros.h"
 
 namespace fl {
@@ -34,51 +34,60 @@ struct PolyPoint {
 ///  - Exact: exact per-pixel sub-pixel area integration (256 alpha
 ///    levels). The default; byte-stable across builds.
 ///  - ABuffer: 8x4 subpixel A-buffer sampling (32 alpha levels, 32-bit
-///    masks, no division in the scan loops, shallow stack). Faster on
+///    masks, no division in the scan loops, small working set). Faster on
 ///    dense fills and low-memory targets; see fl/gfx/poly_abuffer.h.
 enum class PolyFill { Exact, ABuffer };
 
 /// @brief Default drawPolygon tier (MAXN vertex cap, CHUNK accumulator px)
-/// Both kernels lease their whole working set (fl/gfx/poly_scratch.h:
-/// PolyScratch / AbScratch, sized by MAXN, and CHUNK for Exact) through
-/// fl::scratch (fl/stl/scratch.h): a plain stack local when
-/// FL_SCRATCH_STACK_BYTES == 0, a block of the fixed side-stack arena when it
-/// is > 0. Kernel frame on AVR with the stack local (avr-gcc 7.3 -Os,
+/// Both kernels keep their whole working set (fl/gfx/poly_scratch.h:
+/// PolyScratch / AbScratch, sized by MAXN, and CHUNK for Exact) in one
+/// struct, leased from fl::scratch's side-stack arena (fl/stl/scratch.h)
+/// when FL_SCRATCH_STACK_BYTES > 0 and it fits there, else kept on the call
+/// stack. Kernel frame on AVR with the stack local (avr-gcc 7.3 -Os,
 /// -fstack-usage; callees add ~0.2 KB):
-///  - Exact:   MAXN = 32, CHUNK = 64: 4133 B;  MAXN = 8, CHUNK = 16:  989 B
-///  - ABuffer: MAXN = 32:             2141 B;  MAXN = 8:              605 B
+///  - Exact:   MAXN = 32, CHUNK = 64: 4134 B;  MAXN = 8, CHUNK = 16:  992 B
+///  - ABuffer: MAXN = 32:             2139 B;  MAXN = 8:              603 B
 /// On an Uno (2 KB SRAM), a 16x16 CRGB canvas (768 B) plus FastLED and
 /// Serial leaves ~950 B of stack: enough for ABuffer, not for Exact's
 /// ~1.2 KB call chain (use ABuffer there, or a 16x8 canvas for Exact).
-/// The default is 32/64 when the 32/64 working set has a home, else 8/16
-/// (fl::gfx::detail::kPolyDefaultLargeTier):
-///  - FL_SCRATCH_STACK_BYTES == 0: 32/64 unless FL_PLATFORM_HAS_SMALL_STACK
-///    (fl/system/sketch_macros.h: AVR, Teensy LC, LPC804, ...). That is a
-///    stack-size predicate, not the flash-size FL_PLATFORM_HAS_LARGE_MEMORY
-///    tier: STM32F103C8, Teensy 3.x, Uno R4 and LPC845 sit on the low flash
-///    tier yet have the stack for 32/64.
-///  - FL_SCRATCH_STACK_BYTES > 0: 32/64 exactly when both 32/64 working sets
-///    (Exact ~4.2 KB on 32-bit targets) fit the arena. ESP8266 defaults to a
-///    4608 B arena, so it gets 32/64 while its 4 KB loop() stack only holds
-///    the kernels' small locals.
-/// The defaults are constant expressions, not preprocessor numbers (do not
-/// test them with #if). Vertices beyond MAXN are ignored; pass MAXN
-/// explicitly for larger polygons (with an arena, a tier whose working set
-/// does not fit it fails to compile). To change the default, set these
-/// build-wide (-D compiler flag) so every translation unit sees the same
-/// Canvas default template arguments.
+/// The default is 32/64 when that working set has a home, else 8/16:
+///  - a big stack: !FL_PLATFORM_HAS_SMALL_STACK (fl/system/sketch_macros.h
+///    marks AVR, ESP8266's 4 KB loop() stack, Teensy LC, LPC804, ... as
+///    small). That is a stack-size predicate, not the flash-size
+///    FL_PLATFORM_HAS_LARGE_MEMORY tier: STM32F103C8, Teensy 3.x, Uno R4 and
+///    LPC845 sit on the low flash tier yet have the stack for 32/64; or
+///  - an fl::scratch arena of at least FL_GFX_POLYGON_LARGE_TIER_ARENA_BYTES
+///    (both 32/64 working sets plus alignment padding; fl/gfx/poly_scratch.h
+///    static-asserts the bound on every target). ESP8266's default arena is
+///    4608 B, so it gets 32/64 while its loop() stack only holds the
+///    kernels' small locals.
+/// Vertices beyond MAXN are ignored; pass MAXN explicitly for larger
+/// polygons. To change the default, set these build-wide (-D compiler flag)
+/// so every translation unit sees the same Canvas default template
+/// arguments.
+#define FL_GFX_POLYGON_LARGE_TIER_ARENA_BYTES 4215
+
+#if !FL_PLATFORM_HAS_SMALL_STACK || \
+    (FL_SCRATCH_STACK_BYTES >= FL_GFX_POLYGON_LARGE_TIER_ARENA_BYTES)
+#define FL_GFX_POLYGON_LARGE_TIER_DEFAULT 1
+#else
+#define FL_GFX_POLYGON_LARGE_TIER_DEFAULT 0
+#endif
+
 #ifndef FL_GFX_POLYGON_DEFAULT_MAXN
-#define FL_GFX_POLYGON_DEFAULT_MAXN                                            \
-    (::fl::gfx::detail::kPolyDefaultLargeTier                                  \
-         ? ::fl::gfx::detail::kPolyLargeMaxN                                   \
-         : ::fl::gfx::detail::kPolySmallMaxN)
+#if FL_GFX_POLYGON_LARGE_TIER_DEFAULT
+#define FL_GFX_POLYGON_DEFAULT_MAXN 32
+#else
+#define FL_GFX_POLYGON_DEFAULT_MAXN 8
+#endif
 #endif
 
 #ifndef FL_GFX_POLYGON_DEFAULT_CHUNK
-#define FL_GFX_POLYGON_DEFAULT_CHUNK                                           \
-    (::fl::gfx::detail::kPolyDefaultLargeTier                                  \
-         ? ::fl::gfx::detail::kPolyLargeChunk                                  \
-         : ::fl::gfx::detail::kPolySmallChunk)
+#if FL_GFX_POLYGON_LARGE_TIER_DEFAULT
+#define FL_GFX_POLYGON_DEFAULT_CHUNK 64
+#else
+#define FL_GFX_POLYGON_DEFAULT_CHUNK 16
+#endif
 #endif
 
 // Forward declarations

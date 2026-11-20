@@ -5,19 +5,22 @@
 ///
 /// Both drawPolygon kernels (Exact: drawPolygonCore in fl/gfx/primitives.h;
 /// ABuffer: drawPolygonABufferCore in fl/gfx/poly_abuffer.h) keep their
-/// large locals in one struct leased through fl::scratch (fl/stl/scratch.h):
-/// with FL_SCRATCH_STACK_BYTES == 0 it is a plain local on the call stack,
-/// with N > 0 it comes from the fixed side-stack arena. The structs depend
+/// large locals in one struct, leased through PolyScratchLease below: from
+/// fl::scratch's fixed side-stack arena (fl/stl/scratch.h) when
+/// FL_SCRATCH_STACK_BYTES > 0 and the struct fits it, else as a plain local
+/// on the call stack. The structs depend
 /// only on the tier (MAXN, CHUNK), never on the pixel or coordinate type,
 /// so every drawPolygon instantiation of a tier shares one scratch type.
 ///
 /// The default tier (FL_GFX_POLYGON_DEFAULT_MAXN / _CHUNK in
-/// fl/gfx/canvas.h) is chosen from where that scratch lives; see
-/// kPolyDefaultLargeTier below.
+/// fl/gfx/canvas.h) is chosen from where that scratch can live.
 
 #include "fl/stl/int.h"
 #include "fl/stl/noexcept.h"
 #include "fl/stl/scratch.h"
+#include "fl/stl/static_assert.h"
+#include "fl/stl/type_traits.h"
+#include "fl/gfx/canvas.h"  // FL_GFX_POLYGON_LARGE_TIER_ARENA_BYTES
 #include "fl/system/sketch_macros.h"
 
 namespace fl {
@@ -118,35 +121,36 @@ struct AbScratch {
     fl::i32 mCp[4 * MAXN];   // per-row crossing events
 };
 
-/// The two drawPolygon tiers: (MAXN, CHUNK) = 32/64 ("large") or 8/16.
-constexpr int kPolyLargeMaxN = 32;
-constexpr int kPolyLargeChunk = 64;
-constexpr int kPolySmallMaxN = 8;
-constexpr int kPolySmallChunk = 16;
-
-/// True when fl::scratch can hold a T: sizeof(T) plus worst-case alignment
-/// padding within FL_SCRATCH_STACK_BYTES (fl::scratch's own compile-time
-/// admission rule, so a tier chosen here always compiles).
+/// True when fl::scratch's side-stack arena can hold a T: sizeof(T) plus
+/// worst-case alignment padding within FL_SCRATCH_STACK_BYTES (fl::scratch's
+/// own compile-time admission rule). Always false without an arena.
 template <typename T>
-constexpr bool polyScratchFits() FL_NO_EXCEPT {
+constexpr bool polyScratchFitsArena() FL_NO_EXCEPT {
     return sizeof(T) + alignof(T) - 1 <= static_cast<fl::size>(FL_SCRATCH_STACK_BYTES);
 }
 
-/// Default drawPolygon tier selector (see FL_GFX_POLYGON_DEFAULT_MAXN).
-///  - FL_SCRATCH_STACK_BYTES == 0: the scratch is a stack local, so the
-///    large tier needs a big stack: !FL_PLATFORM_HAS_SMALL_STACK.
-///  - FL_SCRATCH_STACK_BYTES > 0: the scratch lives in the side-stack
-///    arena, so the large tier is the default exactly when both kernels'
-///    32/64 working sets fit it, whatever the call stack. ESP8266 (4608 B
-///    arena by default) gets 32/64 this way; an arena too small for 32/64
-///    falls back to 8/16.
-#if FL_SCRATCH_STACK_BYTES > 0
-constexpr bool kPolyDefaultLargeTier =
-    polyScratchFits<PolyScratch<kPolyLargeMaxN, kPolyLargeChunk> >() &&
-    polyScratchFits<AbScratch<kPolyLargeMaxN> >();
-#else
-constexpr bool kPolyDefaultLargeTier = !FL_PLATFORM_HAS_SMALL_STACK;
-#endif
+/// Where a kernel's working set T lives: fl::scratch (the side-stack arena)
+/// when it fits the arena, else a plain stack local (fl::scratch's
+/// capacity-0 form) -- the pre-arena behaviour, so an explicit tier larger
+/// than the arena, or an arena too small for any tier, still compiles and
+/// draws. An arena lease can be empty at run time (arena exhausted); the
+/// kernels then draw nothing. The stack form never is.
+template <typename T>
+using PolyScratchLease =
+    typename fl::conditional<polyScratchFitsArena<T>(), fl::scratch<T>,
+                             fl::detail::inline_scratch<T> >::type;
+
+// FL_GFX_POLYGON_LARGE_TIER_ARENA_BYTES (fl/gfx/canvas.h) is the arena size
+// from which the 32/64 tier becomes the default on small-stack targets. It
+// is a number so the default-tier macros stay preprocessor numbers; these
+// checks keep it from ever being smaller than what 32/64 really needs on
+// this target, which would put 32/64 on a small stack.
+FL_STATIC_ASSERT(sizeof(PolyScratch<32, 64>) + alignof(PolyScratch<32, 64>) - 1 <=
+                     FL_GFX_POLYGON_LARGE_TIER_ARENA_BYTES,
+                 "FL_GFX_POLYGON_LARGE_TIER_ARENA_BYTES is below the 32/64 Exact working set");
+FL_STATIC_ASSERT(sizeof(AbScratch<32>) + alignof(AbScratch<32>) - 1 <=
+                     FL_GFX_POLYGON_LARGE_TIER_ARENA_BYTES,
+                 "FL_GFX_POLYGON_LARGE_TIER_ARENA_BYTES is below the 32/64 ABuffer working set");
 
 }  // namespace detail
 }  // namespace gfx

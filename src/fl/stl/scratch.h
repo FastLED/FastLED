@@ -55,7 +55,7 @@
 ///    is too small to reserve a fixed arena by default, so they opt in with
 ///    -DFL_SCRATCH_STACK_BYTES=N.
 
-#include "fl/system/sketch_macros.h"  // platform detection (FL_IS_*)
+#include "fl/stl/scratch_config.h"  // FL_SCRATCH_STACK_BYTES default
 #include "fl/stl/thread_config.h"
 #include "fl/stl/int.h"
 #include "fl/stl/new.h"
@@ -66,18 +66,6 @@
 #include "fl/stl/assert.h"
 #include "fl/stl/compiler_control.h"
 #include "fl/log/log.h"
-
-#ifndef FL_SCRATCH_STACK_BYTES
-#if defined(FL_IS_ESP8266) && !FASTLED_MULTITHREADED
-#define FL_SCRATCH_STACK_BYTES 4608
-#else
-#define FL_SCRATCH_STACK_BYTES 0
-#endif
-#endif
-
-#ifndef FL_SCRATCH_ALLOW_MULTITHREADED
-#define FL_SCRATCH_ALLOW_MULTITHREADED 0
-#endif
 
 #if FL_SCRATCH_STACK_BYTES > 0 && FASTLED_MULTITHREADED && !FL_SCRATCH_ALLOW_MULTITHREADED
 #error "FL_SCRATCH_STACK_BYTES > 0 needs a single-threaded build: the side stack is one shared, unlocked arena. Set FL_SCRATCH_ALLOW_MULTITHREADED=1 only if a single thread uses fl::scratch."

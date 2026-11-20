@@ -243,10 +243,10 @@ inline void polyABFillRun(PixelT* pixels, int py, int width,
 /// crossing events (16*MAXN B), too much for an AVR Uno at MAXN = 32, so
 /// the default MAXN is platform-dependent (measured frames at
 /// FL_GFX_POLYGON_DEFAULT_MAXN in fl/gfx/canvas.h). The working set
-/// (AbScratch) is leased through Scratch (fl::scratch by default; see
+/// (AbScratch) is leased through Scratch (PolyScratchLease by default; see
 /// drawPolygonCore): an exhausted side-stack arena makes the call a no-op.
 template<typename PixelT, typename Coord, bool Overwrite, int MAXN,
-         template<typename> class Scratch = fl::scratch>
+         template<typename> class Scratch = PolyScratchLease>
 inline void drawPolygonABufferCore(Canvas<PixelT>& canvas, const PixelT& color,
                                    fl::span<const PolyPoint<Coord>> pts) FL_NO_EXCEPT {
     FL_STATIC_ASSERT(MAXN >= 3 && MAXN <= 256, "drawPolygon: MAXN must be in [3, 256]");

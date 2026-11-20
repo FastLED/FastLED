@@ -30,7 +30,7 @@
 //
 //   Exact   - exact per-pixel area coverage (256 levels). The default.
 //   ABuffer - 8x4 subpixel sampling (32 levels): faster on dense fills and
-//             a shallower stack. It ignores CHUNK.
+//             a smaller working set. It ignores CHUNK.
 //
 // MAXN is a compile-time vertex cap that sizes the kernel's working set;
 // vertices past MAXN are ignored. The default (FL_GFX_POLYGON_DEFAULT_MAXN)
@@ -181,7 +181,7 @@ static void sceneLayers(unsigned long t) {
 // A closed 2:3 Lissajous curve sampled at 14 points crosses itself several
 // times; even-odd fills alternate lobes. 14 vertices exceed the 8-vertex
 // default on small-stack targets, so MAXN is given explicitly (sized exactly, to
-// keep the stack frame small). The ABuffer backend has the shallower stack.
+// keep the stack frame small). The ABuffer backend has the smaller working set.
 static const int kKnotN = 14;
 
 static void sceneKnot(unsigned long t) {

@@ -1096,15 +1096,21 @@ struct PolyScGuardedArena {
     enum : fl::size { kGuard = 16, kCap = 8192 };
     FL_ALIGNAS(16) fl::u8 mBytes[kGuard + kCap + kGuard];
     fl::detail::side_stack mStack;
+    fl::size mCap;
     int mNonLifo;  // releases that were not LIFO (must stay 0)
-    explicit PolyScGuardedArena(fl::size cap = kCap) : mStack(mBytes + kGuard, cap), mNonLifo(0) {
+    explicit PolyScGuardedArena(fl::size cap = kCap)
+        : mStack(mBytes + kGuard, cap), mCap(cap), mNonLifo(0) {
         for (fl::size i = 0; i < sizeof(mBytes); ++i) mBytes[i] = 0xA5;
         gPolyScArena = this;
     }
     ~PolyScGuardedArena() { gPolyScArena = nullptr; }
+    // The leading guard and everything past the arena's capacity (the
+    // trailing guard, plus the unused tail of mBytes for a smaller arena).
     bool guardsIntact() const {
         for (fl::size i = 0; i < kGuard; ++i)
-            if (mBytes[i] != 0xA5 || mBytes[kGuard + kCap + i] != 0xA5) return false;
+            if (mBytes[i] != 0xA5) return false;
+        for (fl::size i = kGuard + mCap; i < sizeof(mBytes); ++i)
+            if (mBytes[i] != 0xA5) return false;
         return true;
     }
 };
@@ -1167,6 +1173,12 @@ int polyScCheckArenaMatches(PolyScGuardedArena& arena, const PolyScPt* p, int n,
 }
 
 }  // namespace
+
+// Without an arena (host: FL_SCRATCH_STACK_BYTES == 0) the default lease is
+// the plain stack local.
+FL_STATIC_ASSERT((fl::is_same<fl::gfx::detail::PolyScratchLease<fl::gfx::detail::PolyScratch<32, 64> >,
+                              fl::detail::inline_scratch<fl::gfx::detail::PolyScratch<32, 64> > >::value),
+                 "host drawPolygon working set must stay a stack local");
 
 FL_TEST_CASE("drawPolygon scenes: side-stack scratch renders identically to the stack") {
     PolyScGuardedArena arena;
