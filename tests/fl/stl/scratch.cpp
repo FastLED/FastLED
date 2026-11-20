@@ -5,10 +5,16 @@
 /// so the side-stack logic is exercised directly on small test arenas.
 
 // This TU runs fl::scratch on its production FL_SCRATCH_STACK_BYTES > 0
-// backend (global arena) with a 256 B capacity. The host library is built
-// with the default 0 and so defines no arena; this TU links the library's
-// own arena definitions from fl/stl/detail/scratch_arena.hpp. (Real builds must set the capacity build-wide
-// with -D; a test binary is the one place a per-TU value is safe.)
+// backend (global arena) with a 256 B capacity, while the host library is
+// built with the default 0 and defines no arena; the arena comes from the
+// library's own fl/stl/detail/scratch_arena.hpp. Real builds must set the
+// capacity build-wide with -D. This per-TU value is a deliberate test-only
+// exception: fl::scratch's class template therefore differs from the
+// library's view. A per-target -D would differ from fastled_lib in exactly
+// the same way; avoiding it entirely needs a whole second library build.
+// To keep it inert, this TU instantiates fl::scratch only with types local
+// to this file, so no fl::scratch instantiation or symbol can be shared
+// with the library.
 #define FL_SCRATCH_STACK_BYTES 256
 #define FL_SCRATCH_ALLOW_MULTITHREADED 1  // the tests below are single-threaded
 
@@ -328,6 +334,9 @@ FL_TEST_CASE("scratch - global side stack (production path)") {
     FL_CHECK_EQ(fl::scratch_high_water(), fl::size(0));
 
     struct Frame { u32 words[16]; };  // 64 B
+    struct Bytes128 { u8 b[128]; };
+    struct Bytes100 { u8 b[100]; };
+    struct Bytes256 { u8 b[256]; };
     {
         fl::scratch<Frame> outer;
         FL_REQUIRE(static_cast<bool>(outer));
@@ -335,17 +344,17 @@ FL_TEST_CASE("scratch - global side stack (production path)") {
         FL_CHECK_EQ(fl::ptr_to_int(outer.get()) % alignof(Frame), fl::uptr(0));
         outer->words[15] = 0xA5A5A5A5u;
         {
-            fl::scratch<u8[128]> inner;
+            fl::scratch<Bytes128> inner;
             FL_REQUIRE(static_cast<bool>(inner));
-            (*inner)[127] = 9;
+            inner->b[127] = 9;
             // 64 + 128 + up to 3 B padding used; 100 B more does not fit.
-            fl::scratch<u8[100]> tooBig;
+            fl::scratch<Bytes100> tooBig;
             FL_CHECK_FALSE(static_cast<bool>(tooBig));
             FL_CHECK(tooBig.get() == nullptr);
         }
         FL_CHECK_EQ((*outer).words[15], u32(0xA5A5A5A5u));
         // The inner lease was returned: 128 B fit again.
-        fl::scratch<u8[128]> again;
+        fl::scratch<Bytes128> again;
         FL_CHECK(static_cast<bool>(again));
     }
     FL_CHECK_EQ(detail::scratch_state.top, fl::size(0));
@@ -357,7 +366,7 @@ FL_TEST_CASE("scratch - global side stack (production path)") {
     // The largest T the static_assert admits (sizeof + alignof - 1 <= 256)
     // always fits in the empty arena.
     {
-        fl::scratch<u8[256]> whole;
+        fl::scratch<Bytes256> whole;
         FL_CHECK(static_cast<bool>(whole));
     }
     FL_CHECK_EQ(fl::scratch_high_water(), fl::size(256));
