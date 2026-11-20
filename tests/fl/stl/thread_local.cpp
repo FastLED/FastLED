@@ -1,14 +1,13 @@
 #include "fl/stl/thread_local.h"
 #include "fl/stl/string.h"
+#include "test.h"
 
 #if FASTLED_USE_THREAD_LOCAL
 #include "fl/stl/thread.h"
 #include <unistd.h>  // for usleep
-#include "test.h"
-#include "fl/stl/thread.h"
+#endif
 
 FL_TEST_FILE(FL_FILEPATH) {
-#endif
 
 
 FL_TEST_CASE("ThreadLocal - basic functionality") {
@@ -353,6 +352,95 @@ FL_TEST_CASE("ThreadLocal - RAII behavior") {
 }
 
 
+// Regression tests for #5304: ThreadLocalReal must not keep an inline copy of
+// T as its default when none was supplied (that doubled the RAM cost of
+// SingletonThreadLocal<Big> on ESP32/host).
+namespace {
+struct BigTlsPayload {
+    int words[256];  // 1 KiB on 32-bit int targets
+};
+} // namespace
+
+FL_TEST_CASE("ThreadLocal - no default does not store an inline T") {
+    // The container holds a key plus bookkeeping, never a full T.
+    FL_CHECK_LT(sizeof(fl::ThreadLocal<BigTlsPayload>), sizeof(BigTlsPayload));
+    FL_CHECK_LE(sizeof(fl::ThreadLocal<BigTlsPayload>),
+                sizeof(pthread_key_t) + 2 * sizeof(void *));
+}
+
+FL_TEST_CASE("ThreadLocal - no default value-initializes every thread") {
+    fl::ThreadLocal<BigTlsPayload> tls;
+    bool main_zero = true;
+    for (int w : tls.access().words) {
+        main_zero = main_zero && (w == 0);
+    }
+    FL_CHECK_TRUE(main_zero);
+    tls.access().words[0] = 7;
+
+    bool thread_zero = false;
+    fl::thread t([&]() {
+        bool all = true;
+        for (int w : tls.access().words) {
+            all = all && (w == 0);
+        }
+        tls.access().words[0] = 99;
+        thread_zero = all;
+    });
+    t.join();
+    FL_CHECK_TRUE(thread_zero);
+    FL_CHECK_EQ(tls.access().words[0], 7);
+}
+
+FL_TEST_CASE("ThreadLocal - each thread starts at the provided default") {
+    fl::ThreadLocal<int> tls(42);
+    FL_CHECK_EQ(tls.access(), 42);
+    tls.set(1);
+
+    int seen[3] = {0, 0, 0};
+    int after[3] = {0, 0, 0};
+    for (int i = 0; i < 3; ++i) {
+        fl::thread t([&tls, &seen, &after, i]() {
+            seen[i] = tls.access();
+            tls.set(100 + i);
+            after[i] = tls.access();
+        });
+        t.join();
+    }
+    for (int i = 0; i < 3; ++i) {
+        FL_CHECK_EQ(seen[i], 42);
+        FL_CHECK_EQ(after[i], 100 + i);
+    }
+    FL_CHECK_EQ(tls.access(), 1);
+}
+
+FL_TEST_CASE("ThreadLocal - converting default and copies keep it") {
+    fl::ThreadLocal<fl::string> tls("seed");
+    fl::ThreadLocal<fl::string> copy(tls);
+    fl::ThreadLocal<fl::string> assigned;
+    assigned = tls;
+    tls.set("changed");
+    FL_CHECK_EQ(copy.access(), fl::string("seed"));
+    FL_CHECK_EQ(assigned.access(), fl::string("seed"));
+
+    fl::string from_thread;
+    fl::thread t([&]() { from_thread = tls.access(); });
+    t.join();
+    FL_CHECK_EQ(from_thread, fl::string("seed"));
+}
+
 #endif  // FASTLED_USE_THREAD_LOCAL
+
+// ThreadLocalFake (single-threaded targets) is always available; its
+// behaviour is a single shared value and must stay unchanged.
+FL_TEST_CASE("ThreadLocalFake - default and shared value semantics") {
+    fl::ThreadLocalFake<int> zero;
+    FL_CHECK_EQ(zero.access(), 0);
+    fl::ThreadLocalFake<int> tls(5);
+    FL_CHECK_EQ(tls.access(), 5);
+    tls = 9;
+    FL_CHECK_EQ(static_cast<int &>(tls), 9);
+    tls.set(11);
+    FL_CHECK_EQ(tls.access(), 11);
+}
 
 } // FL_TEST_FILE
