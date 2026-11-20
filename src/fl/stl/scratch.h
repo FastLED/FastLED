@@ -46,15 +46,16 @@
 /// Platform defaults:
 ///  - ESP8266: 4608 B. Arduino's loop() runs on a fixed 4 KB "cont" stack,
 ///    while ~80 KB of DRAM leaves room in .bss. 4.5 KB holds drawPolygon's
-///    32/64 Exact working set (4134 B kernel frame measured on AVR) plus a
-///    small nested user. The arena is only linked in when something uses
-///    fl::scratch (`--gc-sections`).
+///    32/64 Exact working set (fl::gfx::detail::PolyScratch<32, 64>: 4208 B,
+///    8-aligned, on ESP8266), which makes 32/64 its default polygon tier,
+///    plus ~400 B for a small nested user. The arena is only linked in when
+///    something uses fl::scratch (`--gc-sections`).
 ///  - Everything else: 0. That includes the other small-stack tiers (AVR,
 ///    LPC804, Teensy LC, nRF51, STM32G03x, low-density STM32F1): their RAM
 ///    is too small to reserve a fixed arena by default, so they opt in with
 ///    -DFL_SCRATCH_STACK_BYTES=N.
 
-#include "fl/system/sketch_macros.h"  // platform detection (FL_IS_*)
+#include "fl/stl/scratch_config.h"  // FL_SCRATCH_STACK_BYTES default
 #include "fl/stl/thread_config.h"
 #include "fl/stl/int.h"
 #include "fl/stl/new.h"
@@ -65,18 +66,6 @@
 #include "fl/stl/assert.h"
 #include "fl/stl/compiler_control.h"
 #include "fl/log/log.h"
-
-#ifndef FL_SCRATCH_STACK_BYTES
-#if defined(FL_IS_ESP8266) && !FASTLED_MULTITHREADED
-#define FL_SCRATCH_STACK_BYTES 4608
-#else
-#define FL_SCRATCH_STACK_BYTES 0
-#endif
-#endif
-
-#ifndef FL_SCRATCH_ALLOW_MULTITHREADED
-#define FL_SCRATCH_ALLOW_MULTITHREADED 0
-#endif
 
 #if FL_SCRATCH_STACK_BYTES > 0 && FASTLED_MULTITHREADED && !FL_SCRATCH_ALLOW_MULTITHREADED
 #error "FL_SCRATCH_STACK_BYTES > 0 needs a single-threaded build: the side stack is one shared, unlocked arena. Set FL_SCRATCH_ALLOW_MULTITHREADED=1 only if a single thread uses fl::scratch."

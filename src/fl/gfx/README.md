@@ -126,12 +126,19 @@ canvas.drawPolygon(CRGB::Yellow, tri);
 ```
 
 - **3 to MAXN vertices.** Fewer than 3 draws nothing; more than MAXN is
-  truncated to the first MAXN. The default MAXN is 8 on
-  `FL_PLATFORM_HAS_SMALL_STACK` targets (~8 KB of stack or less: AVR,
-  ESP8266, Teensy LC, LPC804, ...), where a 32-vertex tier needs ~4.3 KB
-  of stack, and 32 everywhere else (including STM32F103C8, Teensy 3.x and
-  Uno R4). Pass it
-  explicitly for more vertices: `canvas.drawPolygon<int, 12>(color, span)`.
+  truncated to the first MAXN. The default MAXN is 32 wherever the
+  32-vertex working set (~4.2 KB) has a home, and 8 elsewhere. It has a
+  home on any target without `FL_PLATFORM_HAS_SMALL_STACK` (AVR, Teensy
+  LC, LPC804, ... have small stacks; STM32F103C8, Teensy 3.x and Uno R4
+  do not), or in an `fl::scratch` side-stack arena
+  (`FL_SCRATCH_STACK_BYTES`, see `fl/stl/scratch.h`) of at least
+  `FL_GFX_POLYGON_LARGE_TIER_ARENA_BYTES` (4215 B). ESP8266 ships a
+  4608 B arena, so it gets 32 even though its `loop()` stack is only
+  4 KB. A working set that fits the arena is leased from it; if the arena
+  is exhausted at run time (other `fl::scratch` users hold it), the draw
+  is skipped. A working set that does not fit stays on the stack. Pass
+  MAXN explicitly for more vertices:
+  `canvas.drawPolygon<int, 12>(color, span)`.
 - **Fill rule** — even-odd: a point is inside if a ray crosses an odd
   number of edges. No holes or subpaths.
 - **Vertex coordinates** clamp to ±8191 px, so out-of-range values can't
@@ -141,7 +148,7 @@ canvas.drawPolygon(CRGB::Yellow, tri);
 - **Fill backend** — the fourth template argument picks it:
   `fl::gfx::PolyFill::Exact` (the default; exact per-pixel area, 256
   levels) or `fl::gfx::PolyFill::ABuffer` (8x4 subpixel samples, 32
-  levels; faster on dense fills, shallower stack, ignores CHUNK):
+  levels; faster on dense fills, smaller working set, ignores CHUNK):
   `canvas.drawPolygon<fl::s16x16, 8, 16, fl::gfx::PolyFill::ABuffer>(color, span)`.
 
 See `examples/Polygon/Polygon.ino` for both backends, float and `s16x16`
@@ -467,7 +474,7 @@ out-of-bounds writes:
 | Zero radius or thickness | Draws nothing |
 | Zero-length line | Draws nothing |
 | Fewer than 3 polygon vertices, or all collinear | Draws nothing |
-| More than MAXN polygon vertices | Truncated to the first MAXN (default 32, or 8 on small-stack targets) |
+| More than MAXN polygon vertices | Truncated to the first MAXN (default 32, or 8 on small-stack targets without a large enough `fl::scratch` arena) |
 | Center off-screen | Clips to canvas bounds |
 | Shape partially off-screen | Only visible pixels are written |
 | Negative coordinates | Clipped — no wrap-around |
