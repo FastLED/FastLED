@@ -26,7 +26,7 @@ namespace fl {
 namespace detail {
 // Logs (once per process) that a ThreadLocal fell back to its shared slot
 // because pthread_key_create / pthread_setspecific failed. Out of line so the
-// header need not pull in the logging stack.
+// header need not pull in the logging stack (defined in singleton.cpp.hpp).
 void thread_local_fallback_warn() FL_NO_EXCEPT;
 } // namespace detail
 
