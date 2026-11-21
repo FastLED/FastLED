@@ -313,9 +313,10 @@ void loop() {
     // Both are dt-scaled, so the visual speed is frame-rate independent; the
     // dye interval is wall-clock too, so a 20 fps part gets the same injection
     // cadence as a 60 fps one.
+    const float kDyeInterval = 0.2f;
     static float dyeAccumulator = 0.0f;
     dyeAccumulator += dt;
-    const bool injectDye = dyeAccumulator >= 0.2f;
+    const bool injectDye = dyeAccumulator >= kDyeInterval;
     if (injectDye) {
         dyeAccumulator = 0.0f;
     }
@@ -330,7 +331,10 @@ void loop() {
         solver.addForce(dt, cx, cy, fl::cosf(angle) * mag, fl::sinf(angle) * mag,
                         splatRadius.as<float>());
         if (injectDye) {
-            solver.addDensity(dt, cx, cy, 0.9f, splatRadius.as<float>());
+            // Pass the injection interval rather than the frame dt: the dye is
+            // emitted once per 0.2 s window, so the mass per injection must be
+            // constant, not proportional to the frame time.
+            solver.addDensity(kDyeInterval, cx, cy, 0.9f, splatRadius.as<float>());
         }
     }
 
