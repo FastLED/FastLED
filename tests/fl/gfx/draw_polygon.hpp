@@ -6,6 +6,7 @@
 #include "fl/stl/chrono.h"
 #include "fl/math/fixed_point/s16x16.h"
 #include "fl/stl/static_assert.h"
+#include "examples/Test/PolygonHashes.h"
 
 // Several cases below call drawPolygon with the default tier on polygons of
 // more than 8 vertices; the host is not an FL_PLATFORM_HAS_SMALL_STACK
@@ -1119,6 +1120,23 @@ FL_TEST_CASE("drawPolygon steep sub-pixel edge crossing a row boundary") {
         if (buf[i].r != kExpected[i] || buf[i].g != 0 || buf[i].b != 0)
             ++mismatches;
     FL_CHECK_EQ(mismatches, 0);
+}
+
+FL_TEST_CASE("drawPolygon AVR scene hashes match the host golden table (#5324)") {
+    // Host half of the AVR 16-bit-int regression check. examples/Test renders
+    // the same scenes on the avr8js Uno (`bash test --run uno Test`) and
+    // compares them to the same golden table, so both must match it.
+    CRGB buf[polygon_hashes::kWidth * polygon_hashes::kHeight];
+    for (int scene = 0; scene < polygon_hashes::kSceneCount; ++scene) {
+        for (int k = 0; k < 2; ++k) {
+            const bool abuffer = k == 1;
+            const fl::u32 h = polygon_hashes::renderHash(scene, abuffer, buf);
+            fl::printf("  scene %d %s: 0x%08lXUL\n", scene,
+                       abuffer ? "abuffer" : "exact",
+                       static_cast<unsigned long>(h));
+            FL_CHECK_EQ(h, polygon_hashes::goldenHash(scene, abuffer));
+        }
+    }
 }
 
 FL_TEST_CASE("Graphics performance - drawPolygon") {
