@@ -143,3 +143,94 @@ def test_missing_summary_metric_fails_closed() -> None:
     del current[("minimp3-float", "working-ram")]
     with pytest.raises(RuntimeError, match="missing current metric"):
         AUDIT.check_ledger(current, dict(values.tables))
+
+
+# --- AVR stack ratchet (FastLED#5332) ---------------------------------------
+
+
+def test_avr_stack_frames_keep_largest_copy_and_drop_small_frames() -> None:
+    floor = AUDIT.AVR_STACK_FLOOR
+    rows = [
+        ("fl::readLine(fl::string&)", floor, "static"),
+        ("inline_helper()", floor + 4, "static"),
+        ("inline_helper()", floor + 40, "dynamic,bounded"),
+        ("tiny()", floor - 1, "static"),
+    ]
+    assert AUDIT.avr_stack_frames(rows) == {
+        "fl::readLine(fl::string&)": floor,
+        "inline_helper()": floor + 40,
+    }
+
+
+def test_avr_stack_ratchet_fails_only_on_growth() -> None:
+    ledger = {"grows()": 100, "shrinks()": 200, "gone()": 300, "same()": 80}
+    current = {"grows()": 101, "shrinks()": 150, "same()": 80, "new()": 90}
+    errors, notes = AUDIT.check_avr_stack(current, ledger)
+    assert len(errors) == 2
+    assert any("grows()" in error and "101 > 100" in error for error in errors)
+    assert any("new()" in error for error in errors)
+    assert any("shrinks()" in note for note in notes)
+    assert any("gone()" in note for note in notes)
+    assert not any("same()" in line for line in errors + notes)
+
+
+def test_avr_stack_ratchet_passes_when_nothing_grows() -> None:
+    ledger = {"a()": 100}
+    errors, notes = AUDIT.check_avr_stack({"a()": 64}, ledger)
+    assert errors == []
+    assert notes
+
+
+def test_avr_toolchain_comes_from_the_uno_compile_database(tmp_path: Path) -> None:
+    tools = tmp_path / "7.3.0" / "avr"
+    (tools / "bin").mkdir(parents=True)
+    (tools / "include").mkdir()
+    cxx = tools / "bin" / "avr-g++"
+    cxx.touch(mode=0o755)
+    core = tmp_path / "5.4.0" / "cores" / "arduino"
+    variant = tmp_path / "5.4.0" / "variants" / "standard"
+    core.mkdir(parents=True)
+    variant.mkdir(parents=True)
+    entries = [
+        {
+            "arguments": [
+                "clang++",
+                "-mmcu=atmega328p",
+                f"-I{core}",
+                f"-I{variant}",
+                f"-I{tools / 'include'}",
+                "-c",
+                "x.cpp",
+            ]
+        }
+    ]
+    toolchain = AUDIT.avr_toolchain_from_compiledb(entries)
+    assert toolchain.cxx == cxx
+    assert toolchain.core == core
+    assert toolchain.variant == variant
+
+
+def test_avr_toolchain_missing_from_compile_database_fails_closed() -> None:
+    with pytest.raises(RuntimeError, match="bash compile uno"):
+        AUDIT.avr_toolchain_from_compiledb([{"arguments": ["clang++", "-c"]}])
+
+
+def test_checked_in_avr_stack_ledger_is_well_formed() -> None:
+    ledger = AUDIT.avr_stack_ledger()
+    assert ledger
+    assert all(size >= AUDIT.AVR_STACK_FLOOR for size in ledger.values())
+
+
+def test_avr_stack_usage_keys_on_file_and_survives_truncated_names(
+    tmp_path: Path,
+) -> None:
+    stack_usage = tmp_path / "fl.stl+.su"
+    stack_usage.write_text(
+        "function.h:440:9:)>, int) [with Args = {float}]\t152\tstatic\n"
+        "C:\\repo\\readline.cpp.hpp:17:9:fl::readLine(fl::string&)\t96\tstatic\n",
+        encoding="utf-8",
+    )
+    assert AUDIT.parse_avr_stack_usage(stack_usage) == [
+        ("function.h:)>, int) [with Args = {float}]", 152, "static"),
+        ("readline.cpp.hpp:fl::readLine(fl::string&)", 96, "static"),
+    ]

@@ -9,6 +9,7 @@ import os
 import re
 import shutil
 import sys
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -532,16 +533,245 @@ def check_ledger(
     print("LEDGER:PASS:all metrics within budgets and 2% regression allowance")
 
 
+# --- AVR stack ratchet (FastLED#5332) ---------------------------------------
+# Automates the manual "Stack inventory" recipe in
+# agents/docs/binary-size-reference.md: compile every unity TU under
+# src/fl/build/ for the ATmega328P with avr-gcc `-fstack-usage` and compare each
+# frame against avr_stack_ledger.json. The ratchet is one-sided: a tracked frame
+# that grows, or a new frame at or above AVR_STACK_FLOOR, fails; frames that
+# shrink or disappear only print a note (run --avr-stack-update to tighten).
+# Each unity TU emits every inline/template body it instantiates, so this is a
+# per-TU compile inventory, not a link-time call graph.
+AVR_STACK_LEDGER = Path(__file__).with_name("avr_stack_ledger.json")
+# 128 B keeps the ledger to a few hundred frames and still covers every frame
+# FastLED#5307 fixed (readLine 654 B, printf callers ~359 B, digitalMultiWrite).
+AVR_STACK_FLOOR = 128
+AVR_BUILD = BUILD / "avr-stack"
+AVR_COMPILEDB_CANDIDATES = (
+    ROOT / ".build" / "fbuild" / "uno" / ".fbuild" / "build" / "release",
+    ROOT / ".build" / "fbuild" / "uno",
+)
+
+
+@typechecked
+@dataclass(frozen=True)
+class AvrToolchain:
+    cxx: Path
+    core: Path
+    variant: Path
+
+
+def avr_toolchain_from_compiledb(entries: list[dict[str, object]]) -> AvrToolchain:
+    """Find the avr-g++ and arduino-avr core that `bash compile uno` used."""
+    core: Path | None = None
+    variant: Path | None = None
+    cxx: Path | None = None
+    for entry in entries:
+        arguments = entry.get("arguments")
+        if not isinstance(arguments, list):
+            continue
+        for argument in arguments:
+            if not isinstance(argument, str) or not argument.startswith("-I"):
+                continue
+            include = Path(argument[2:])
+            if include.parts[-2:] == ("cores", "arduino"):
+                core = include
+            elif include.parts[-2:] == ("variants", "standard"):
+                variant = include
+            elif include.parts[-2:] == ("avr", "include"):
+                for exe in ("avr-g++", "avr-g++.exe"):
+                    candidate = include.parent / "bin" / exe
+                    if candidate.is_file():
+                        cxx = candidate
+                        break
+        if core and variant and cxx:
+            return AvrToolchain(cxx, core, variant)
+    raise RuntimeError(
+        "uno compile database has no avr-g++/arduino-avr core; "
+        "run `bash compile uno --examples Blink` first"
+    )
+
+
+def load_avr_toolchain() -> AvrToolchain:
+    for directory in AVR_COMPILEDB_CANDIDATES:
+        database = directory / "compile_commands.json"
+        if database.is_file():
+            entries = json.loads(database.read_text(encoding="utf-8"))
+            return avr_toolchain_from_compiledb(entries)
+    raise RuntimeError(
+        "no uno compile_commands.json; run `bash compile uno --examples Blink` first"
+    )
+
+
+def parse_avr_stack_usage(path: Path) -> list[tuple[str, int, str]]:
+    """Parse avr-gcc `.su` rows, keyed `<file basename>:<function>`.
+
+    avr-gcc 7.3 drops everything up to the last '.' of a function name, so
+    `fl::function_list<void(Args ...)>::compact()` prints as `)>::compact()`.
+    Keeping the declaring file (but not the line, which moves on every edit)
+    stops those truncated names from colliding across headers.
+    """
+    rows: list[tuple[str, int, str]] = []
+    for line in path.read_text(encoding="utf-8").splitlines():
+        parts = line.rsplit("\t", 2)
+        if len(parts) != 3:
+            continue
+        location = re.match(r"^(.*?):\d+:\d+:(.*)$", parts[0])
+        if not location:
+            continue
+        source = re.split(r"[\\/]", location.group(1))[-1]
+        name = f"{source}:{location.group(2)}"
+        rows.append((name, int(parts[1]), parts[2]))
+    return rows
+
+
+def avr_stack_frames(rows: list[tuple[str, int, str]]) -> dict[str, int]:
+    """Largest frame per function name, dropping frames below the floor.
+
+    Inline and template bodies are emitted by every TU that uses them, so the
+    same name can appear more than once; the largest copy is the one that
+    counts.
+    """
+    frames: dict[str, int] = {}
+    for name, size, _kind in rows:
+        if size >= AVR_STACK_FLOOR and size > frames.get(name, -1):
+            frames[name] = size
+    return frames
+
+
+def compile_avr_stack(toolchain: AvrToolchain) -> dict[str, int]:
+    if AVR_BUILD.exists():
+        shutil.rmtree(AVR_BUILD)
+    AVR_BUILD.mkdir(parents=True)
+    source_root = ROOT / "src"
+    common = [
+        str(toolchain.cxx),
+        "-mmcu=atmega328p",
+        "-Os",
+        "-std=gnu++11",
+        "-fno-threadsafe-statics",
+        "-fno-exceptions",
+        "-ffunction-sections",
+        "-fdata-sections",
+        "-w",
+        "-DF_CPU=16000000L",
+        "-DARDUINO=10808",
+        "-DARDUINO_ARCH_AVR",
+        "-DARDUINO_AVR_UNO",
+        f"-I{toolchain.core}",
+        f"-I{toolchain.variant}",
+        f"-I{source_root}",
+        "-fstack-usage",
+        "-c",
+    ]
+    sources = sorted((source_root / "fl" / "build").glob("*.cpp"))
+    if not sources:
+        raise RuntimeError("no unity TUs under src/fl/build")
+
+    def compile_one(source: Path) -> list[tuple[str, int, str]]:
+        output = AVR_BUILD / f"{source.stem}.o"
+        # A partial inventory would silently pass, so any failure is fatal.
+        RunningProcess.run(common + [str(source), "-o", str(output)], check=True)
+        return parse_avr_stack_usage(output.with_suffix(".su"))
+
+    rows: list[tuple[str, int, str]] = []
+    with ThreadPoolExecutor(max_workers=os.cpu_count() or 1) as pool:
+        for source_rows in pool.map(compile_one, sources):
+            rows.extend(source_rows)
+    return avr_stack_frames(rows)
+
+
+def avr_stack_ledger() -> dict[str, int]:
+    data = json.loads(AVR_STACK_LEDGER.read_text(encoding="utf-8"))
+    frames = data["frames"]
+    if not isinstance(frames, dict) or not frames:
+        raise RuntimeError(f"{AVR_STACK_LEDGER.name} has no frames")
+    return {str(name): int(size) for name, size in frames.items()}
+
+
+def check_avr_stack(
+    current: dict[str, int], ledger: dict[str, int]
+) -> tuple[list[str], list[str]]:
+    """Return (errors, notes). Only growth is an error."""
+    errors: list[str] = []
+    notes: list[str] = []
+    for name, size in sorted(current.items()):
+        baseline = ledger.get(name)
+        if baseline is None:
+            errors.append(f"new AVR frame {name} = {size} B (floor {AVR_STACK_FLOOR})")
+        elif size > baseline:
+            errors.append(f"AVR frame grew: {name} {size} > {baseline}")
+        elif size < baseline:
+            notes.append(f"AVR frame shrank: {name} {size} < {baseline}")
+    for name in sorted(ledger.keys() - current.keys()):
+        notes.append(f"AVR frame gone or below floor: {name} (ledger {ledger[name]})")
+    return errors, notes
+
+
+def write_avr_stack_ledger(current: dict[str, int], toolchain: AvrToolchain) -> None:
+    data = {
+        "_comment": (
+            "AVR (ATmega328P) stack-frame ratchet, FastLED#5332. Regenerate with "
+            "`uv run python ci/codec_memory/audit.py --avr-stack-update` after "
+            "`bash compile uno --examples Blink`."
+        ),
+        "toolchain": toolchain.cxx.parents[2].name,
+        "floor": AVR_STACK_FLOOR,
+        "frames": dict(sorted(current.items())),
+    }
+    AVR_STACK_LEDGER.write_text(
+        json.dumps(data, indent=2, sort_keys=False) + "\n", encoding="utf-8"
+    )
+
+
+def run_avr_stack(update: bool) -> None:
+    toolchain = load_avr_toolchain()
+    print(f"AVR_STACK:toolchain={toolchain.cxx}")
+    current = compile_avr_stack(toolchain)
+    for name, size in sorted(current.items(), key=lambda item: -item[1])[:20]:
+        print(f"AVR_STACK:frame {size:6d} {name}")
+    if update:
+        write_avr_stack_ledger(current, toolchain)
+        print(f"AVR_STACK:wrote {len(current)} frames to {AVR_STACK_LEDGER.name}")
+        return
+    errors, notes = check_avr_stack(current, avr_stack_ledger())
+    for note in notes:
+        print(f"AVR_STACK:NOTE:{note} (--avr-stack-update tightens the ratchet)")
+    if errors:
+        raise RuntimeError(
+            "; ".join(errors) + "; shrink the frame, or if the growth is "
+            "intended rerun with --avr-stack-update and commit the ledger"
+        )
+    print(f"AVR_STACK:PASS:{len(current)} frames within the ratchet")
+
+
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--compile-only", action="store_true")
     parser.add_argument("--check", action="store_true")
     parser.add_argument("--profile-binary", type=Path)
+    parser.add_argument(
+        "--avr-stack",
+        action="store_true",
+        help="check ATmega328P stack frames against avr_stack_ledger.json",
+    )
+    parser.add_argument(
+        "--avr-stack-update",
+        action="store_true",
+        help="rewrite avr_stack_ledger.json from the current AVR frames",
+    )
     return parser.parse_args(argv)
 
 
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
+    if args.avr_stack or args.avr_stack_update:
+        try:
+            run_avr_stack(update=args.avr_stack_update)
+        except (OSError, RuntimeError, CalledProcessError, ValueError) as exc:
+            print(f"AVR stack audit failed: {exc}", file=sys.stderr)
+            return 1
+        return 0
     try:
         objects = compile_objects()
         if not args.compile_only:
