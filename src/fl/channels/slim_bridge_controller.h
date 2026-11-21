@@ -60,6 +60,36 @@ void show_batched_legacy(...) FL_NO_EXCEPT {
     driver.show();
     driver.waitForReady();
 }
+
+/// Plain-RGB WS2812 encode straight from the concrete PixelController into a
+/// pre-sized buffer (FastLED#5357). The generic PixelIterator path costs four
+/// type-erased calls per pixel plus a capacity check per byte (~115 us for 35
+/// LEDs on an ESP32-C6); this one inlines all of it. Byte-identical to
+/// PixelIterator::writeWS2812 for RGB: the same loadAndScaleRGB (wire order),
+/// stepDithering, advanceData sequence as ScaledPixelIteratorRGB::advance().
+template <typename PixelControllerT, typename Buffer>
+void encode_ws2812_rgb_direct(PixelControllerT& pixels, Buffer& encoded,
+                              fl::size expectedSize) FL_NO_EXCEPT {
+    // The caller sizes expectedSize as pixels.size() * 3. fl::vector::resize()
+    // leaves the size unchanged when it cannot grow, so never write past what
+    // was actually allocated: an empty buffer makes the caller drop the frame.
+    // size() is the original length; has() bounds the loop by the pixels that
+    // remain, so an already-advanced controller is never read past its end.
+    encoded.resize(expectedSize);
+    if (encoded.size() != expectedSize ||
+        expectedSize != static_cast<fl::size>(pixels.size()) * 3u ||
+        !pixels.has(pixels.size())) {
+        encoded.clear();
+        return;
+    }
+    u8* out = encoded.data();
+    u8* const end = out + expectedSize;
+    for (; out != end; out += 3) {
+        pixels.loadAndScaleRGB(out, out + 1, out + 2);
+        pixels.stepDithering();
+        pixels.advanceData();
+    }
+}
 } // namespace detail
 
 /// How a SlimBridgeController reaches its driver. Specialized (not an
@@ -271,8 +301,12 @@ protected:
         // (A3) Re-encode into the same buffer every frame -- clear() keeps
         // capacity, so steady-state operation is allocation-free.
         encoded.clear();
-        fl::PixelIterator iterator(&pixels, this->getRgbw(), this->getRgbww());
-        iterator.writeWS2812(&encoded);
+        if (mData->getPixelFormat() == ChannelPixelFormat::RGB) {
+            detail::encode_ws2812_rgb_direct(pixels, encoded, expectedSize);
+        } else {
+            fl::PixelIterator iterator(&pixels, this->getRgbw(), this->getRgbww());
+            iterator.writeWS2812WhiteChannel(&encoded);
+        }
         if (encoded.size() != expectedSize) {
             encoded.clear();
             detail::reject_legacy_frame<DriverTraits>(0);

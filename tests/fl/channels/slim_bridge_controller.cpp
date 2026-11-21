@@ -14,6 +14,7 @@
 #include "FastLED.h"
 #include "fl/channels/driver.h"
 #include "fl/channels/data.h"
+#include "fl/channels/dither_frame.h"
 #include "fl/channels/manager.h"
 #include "fl/channels/slim_bridge_controller.h"
 #include "fl/chipsets/chipset_timing_config.h"
@@ -812,6 +813,59 @@ FL_TEST_CASE("Direct-show bridge respects legacy controller enable state") {
     FastLED.show();
     FL_CHECK_EQ(driver.enqueueCount, 1);
     FL_CHECK_EQ(driver.showCount, 1);
+}
+
+// FastLED#5357: the plain-RGB fast path must stay byte-identical to the
+// generic PixelIterator::writeWS2812 encode it replaced, including temporal
+// dithering, colour correction / brightness scaling and colour order.
+FL_TEST_CASE("Direct RGB encode matches PixelIterator::writeWS2812 byte for byte #5357") {
+    CRGB leds[37];
+    for (int i = 0; i < 37; ++i) {
+        leds[i] = CRGB(static_cast<u8>(i * 7 + 1), static_cast<u8>(255 - i * 5),
+                       static_cast<u8>(i * 13 + 3));
+    }
+    ColorAdjustment adjustment = ColorAdjustment::noAdjustment();
+    adjustment.premixed = CRGB(200, 97, 31);
+
+    // advanceDitherFrame() mutates a process-wide phase; restore it so later
+    // tests see the same phase whether or not this one ran.
+    const fl::u8 savedDitherFrame = fl::detail::gDitherFrame;
+    auto restoreDither = fl::make_scope_exit(
+        [&]() { fl::detail::gDitherFrame = savedDitherFrame; });
+
+    const fl::u8 ditherModes[] = {DISABLE_DITHER, BINARY_DITHER};
+    for (fl::u8 dither : ditherModes) {
+        for (int frame = 0; frame < 4; ++frame) {
+            fl::detail::advanceDitherFrame();
+            PixelController<GRB> base(leds, 37, adjustment, static_cast<EDitherMode>(dither));
+            PixelController<GRB> viaIterator(base);
+            PixelController<GRB> viaDirect(base);
+
+            fl::vector<u8> expected;
+            fl::PixelIterator iterator(&viaIterator, RgbwInvalid(), RgbwwInvalid());
+            iterator.writeWS2812(&expected);
+
+            fl::vector<u8> actual;
+            actual.push_back(0xEE);  // stale bytes must be overwritten
+            fl::detail::encode_ws2812_rgb_direct(viaDirect, actual, 37 * 3);
+
+            FL_REQUIRE_EQ(expected.size(), 37u * 3u);
+            FL_CHECK_EQ(actual, expected);
+        }
+    }
+}
+
+// The direct encode sizes its loop from expectedSize; a controller that has
+// already advanced has fewer pixels left than size() reports, so encoding it
+// would read past the end. It must drop the frame instead.
+FL_TEST_CASE("Direct RGB encode rejects an already-advanced controller #5357") {
+    CRGB leds[4] = {CRGB::Red, CRGB::Green, CRGB::Blue, CRGB::White};
+    PixelController<RGB> pixels(leds, 4, ColorAdjustment::noAdjustment(), DISABLE_DITHER);
+    pixels.advanceData();
+
+    fl::vector<u8> encoded;
+    fl::detail::encode_ws2812_rgb_direct(pixels, encoded, 4 * 3);
+    FL_CHECK(encoded.empty());
 }
 
 }  // FL_TEST_FILE

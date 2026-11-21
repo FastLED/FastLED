@@ -473,18 +473,30 @@ class PixelIterator {
 
     template <typename CONTAINER_UIN8_T>
     void writeWS2812(CONTAINER_UIN8_T* out) FL_NO_EXCEPT {
-        auto back_ins = fl::back_inserter(*out);
         // (#2558) Dispatch order: RGBWW > RGBW > RGB. The variant migration
         // makes these mutually exclusive — at most one alternative is active.
+        if (mRgbww.active() || mRgbw.active()) {
+            writeWS2812WhiteChannel(out);
+        } else {
+            auto back_ins = fl::back_inserter(*out);
+            auto range = makeScaledPixelRangeRGB(this);
+            encodeWS2812_RGB(range.first, range.second, back_ins);
+        }
+    }
+
+    /// @brief The RGBWW / RGBW half of writeWS2812().
+    /// For callers that encode plain RGB themselves (SlimBridgeController,
+    /// FastLED#5357) so the generic RGB encode is not linked in as dead code.
+    /// Writes nothing when neither RGBWW nor RGBW is active.
+    template <typename CONTAINER_UIN8_T>
+    void writeWS2812WhiteChannel(CONTAINER_UIN8_T* out) FL_NO_EXCEPT {
+        auto back_ins = fl::back_inserter(*out);
         if (mRgbww.active()) {
             auto range = makeScaledPixelRangeRGBWW(this);
             encodeWS2812_RGBWW(range.first, range.second, back_ins);
         } else if (mRgbw.active()) {
             auto range = makeScaledPixelRangeRGBW(this);
             encodeWS2812_RGBW(range.first, range.second, back_ins);
-        } else {
-            auto range = makeScaledPixelRangeRGB(this);
-            encodeWS2812_RGB(range.first, range.second, back_ins);
         }
     }
 
