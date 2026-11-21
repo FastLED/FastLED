@@ -345,6 +345,30 @@ FL_TEST_CASE("ParlioEngine mock - multi-lane initialization") {
     FL_CHECK(config.gpio_pins[4] == -1);
 }
 
+// #5351: an unchanged pin set reuses the TX unit, but a changed pin set under
+// the same width and timing must still reconfigure the peripheral.
+FL_TEST_CASE("ParlioEngine mock - re-initialize applies new pins, keeps same pins") {
+    resetMockFull();
+
+    auto& driver = ParlioEngine::getInstance();
+    auto& mock = ParlioPeripheralMock::instance();
+    ChipsetTimingConfig timing = getWS2812Timing();
+
+    fl::vector<int> three_lanes = {1, 2, 4, -1};
+    FL_REQUIRE(driver.initialize(4, three_lanes, timing, 100));
+    FL_CHECK(mock.getConfig().gpio_pins[3] == -1);
+
+    fl::vector<int> four_lanes = {1, 2, 4, 8};
+    FL_REQUIRE(driver.initialize(4, four_lanes, timing, 100));
+    FL_CHECK(mock.isInitialized());
+    FL_CHECK(mock.getConfig().gpio_pins[3] == 8);
+
+    FL_REQUIRE(driver.initialize(4, four_lanes, timing, 100));
+    FL_CHECK(mock.isInitialized());
+    FL_CHECK(mock.getConfig().gpio_pins[2] == 4);
+    FL_CHECK(mock.getConfig().gpio_pins[3] == 8);
+}
+
 //=============================================================================
 // Basic Transmission
 //=============================================================================
