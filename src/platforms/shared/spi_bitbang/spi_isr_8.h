@@ -5,9 +5,11 @@
 
 #include "fl/stl/stdint.h"
 #include "fl/stl/static_assert.h"
+#include "fl/stl/compiler_control.h"
 #include "fl/stl/cstddef.h"
 #include "fl/stl/bit_cast.h"
 #include "platforms/shared/spi_bitbang/spi_isr_engine.h"
+#include "platforms/shared/spi_bitbang/spi_pin_mapping.h"
 #include "fl/stl/noexcept.h"
 
 #ifdef FL_SPI_ISR_VALIDATE
@@ -60,8 +62,8 @@ namespace fl {
  *
  * Usage:
  *   SpiIsr8 spi;
- *   spi.setClockMask(1 << 8);  // Clock on GPIO8
- *   spi.loadLUT(setMasks, clearMasks);  // Pin mapping
+ *   if (!spi.setClockMask(u32(1) << 8)) return;  // Clock on GPIO8
+ *   if (!spi.loadLUT(setMasks, clearMasks)) return;  // Pin mapping
  *   spi.setupISR(1600000);  // 1.6MHz timer (800kHz SPI)
  *   spi.loadBuffer(data, len);
  *   spi.arm();  // Start transfer
@@ -79,10 +81,17 @@ public:
 
     /**
      * Configure GPIO clock mask (single bit for clock pin)
-     * Example: setClockMask(1 << 8) for GPIO8
+     * Example: setClockMask(u32(1) << 8) for GPIO8
+     * @return false, changing nothing, if the mask is empty, names more than
+     *         one pin, or names a pin the loaded table sets or clears. To move
+     *         the clock onto such a pin, first load a table that leaves it alone.
      */
-    void setClockMask(u32 mask) FL_NO_EXCEPT {
+    FL_NO_DISCARD bool setClockMask(u32 mask) FL_NO_EXCEPT {
+        if (!spiClockMaskValid(mask, fl_spi_get_lut_array(), 256)) {
+            return false;
+        }
         fl_spi_set_clock_mask(mask);
+        return true;
     }
 
     /**
@@ -105,9 +114,15 @@ public:
      * @param value Byte value (0-255)
      * @param setMask GPIO bits to set high
      * @param clearMask GPIO bits to set low
+     * @return false, changing nothing, if the masks share a pin or touch the
+     *         clock mask.
      */
-    void setLUTEntry(u8 value, u32 setMask, u32 clearMask) FL_NO_EXCEPT {
+    FL_NO_DISCARD bool setLUTEntry(u8 value, u32 setMask, u32 clearMask) FL_NO_EXCEPT {
+        if (!spiLutEntryValid(setMask, clearMask, fl_spi_state()->clock_pin_mask)) {
+            return false;
+        }
         fl_spi_set_lut_entry(value, setMask, clearMask);
+        return true;
     }
 
     /**
@@ -129,13 +144,23 @@ public:
      * @param setMasks Array of 256 set masks
      * @param clearMasks Array of 256 clear masks
      * @param count Number of entries to load (default 256)
+     * @return false, loading nothing, if either array is null or any entry
+     *         fails setLUTEntry()'s rules.
      */
-    void loadLUT(const u32* setMasks, const u32* clearMasks, size_t count = 256) FL_NO_EXCEPT {
-        if (!setMasks || !clearMasks) return;
+    FL_NO_DISCARD bool loadLUT(const u32* setMasks, const u32* clearMasks, size_t count = 256) FL_NO_EXCEPT {
+        if (!setMasks || !clearMasks) return false;
         if (count > 256) count = 256;
+        // Check every entry first, so a rejected table leaves the old one whole.
+        const u32 clockMask = fl_spi_state()->clock_pin_mask;
+        for (size_t v = 0; v < count; ++v) {
+            if (!spiLutEntryValid(setMasks[v], clearMasks[v], clockMask)) {
+                return false;
+            }
+        }
         for (size_t v = 0; v < count; ++v) {
             fl_spi_set_lut_entry(static_cast<u8>(v), setMasks[v], clearMasks[v]);
         }
+        return true;
     }
 
     /**
