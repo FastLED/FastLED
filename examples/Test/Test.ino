@@ -79,7 +79,8 @@ static void checkPolygonHashes() {
 
 #if TEST_NOISE_HASHES
 // Prints "noise hash mismatch" on any difference from the host golden table
-// or from the buffered reference; the avr8js runner treats it as failure.
+// or from the buffered reference, then halts so the sketch never reaches its
+// loop() marker; the avr8js runner already fails a Test run without it.
 // Not inlined into setup(): its frame must not stay live while the polygon
 // check runs, which already uses most of an Uno's 2 KB SRAM.
 FL_NO_INLINE static void checkNoiseHashes() {
@@ -111,9 +112,13 @@ FL_NO_INLINE static void checkNoiseHashes() {
         }
         Serial.println();
     }
-    if (ok) {
-        Serial.println(F("noise hashes match host"));
+    if (!ok) {
+        Serial.println(F("noise hashes FAILED; halting"));
+        Serial.flush();
+        for (;;) {
+        }
     }
+    Serial.println(F("noise hashes match host"));
 }
 #endif
 
