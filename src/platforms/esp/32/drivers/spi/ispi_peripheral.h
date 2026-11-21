@@ -18,6 +18,20 @@ namespace fl {
 namespace detail {
 
 //=============================================================================
+// ESP-IDF flag values
+//=============================================================================
+// SpiDeviceConfig::flags and SpiTransaction::flags carry ESP-IDF flag bits.
+// These name the ones ChannelEngineSpi sets so it builds without the SDK.
+// spi_peripheral_esp.cpp.hpp static_asserts that they match the SDK values.
+
+constexpr u32 kSpiDeviceHalfDuplex = 1u << 4;  ///< SPI_DEVICE_HALFDUPLEX
+constexpr u32 kSpiTransModeDio = 1u << 0;      ///< SPI_TRANS_MODE_DIO
+constexpr u32 kSpiTransModeQio = 1u << 1;      ///< SPI_TRANS_MODE_QIO
+
+/// Timeout value meaning "block until done" (portMAX_DELAY)
+constexpr u32 kSpiWaitForeverMs = 0xFFFFFFFFu;
+
+//=============================================================================
 // Configuration Structures
 //=============================================================================
 
@@ -261,6 +275,8 @@ public:
 
     /// @brief Poll for transaction completion
     /// @param timeout_ms Timeout in milliseconds (0 = non-blocking poll)
+    /// @param out_user If not null, receives the completed transaction's
+    ///        SpiTransaction::user, so the caller can tell which one finished
     /// @return true if transaction completed, false on timeout or error
     ///
     /// Maps to ESP-IDF: spi_device_get_trans_result()
@@ -271,7 +287,28 @@ public:
     ///
     /// Returns true if transaction completes successfully.
     /// Returns false on timeout or hardware error.
-    virtual bool pollTransaction(u32 timeout_ms) FL_NO_EXCEPT = 0;
+    virtual bool pollTransaction(u32 timeout_ms, void** out_user) FL_NO_EXCEPT = 0;
+
+    /// @brief Start a transaction in split-polling mode (non-blocking start)
+    /// @return true on success, false on error
+    ///
+    /// Maps to ESP-IDF: spi_device_polling_start(..., portMAX_DELAY)
+    ///
+    /// Only one polling transaction can be in flight. Finish it with
+    /// pollingEnd() before starting another.
+    virtual bool pollingStart(const SpiTransaction& trans) FL_NO_EXCEPT = 0;
+
+    /// @brief Finish the in-flight polling transaction
+    /// @param timeout_ms 0 = check and return, kSpiWaitForeverMs = block
+    /// @return true if it completed, false on timeout or error
+    ///
+    /// Maps to ESP-IDF: spi_device_polling_end()
+    virtual bool pollingEnd(u32 timeout_ms) FL_NO_EXCEPT = 0;
+
+    /// @brief Actual clock of the attached device in kHz (0 if no device)
+    ///
+    /// Maps to ESP-IDF: spi_device_get_actual_freq()
+    virtual int getActualFrequencyKhz() const FL_NO_EXCEPT = 0;
 
     /// @brief Register post-transaction callback
     /// @param callback Function pointer (cast to void*)
@@ -324,6 +361,39 @@ public:
     ///
     /// Safe to call with nullptr (no-op).
     virtual void freeDma(u8* buffer) FL_NO_EXCEPT = 0;
+
+    /// @brief Allocate a byte buffer in internal SRAM (never PSRAM)
+    /// @return Pointer to allocated buffer, or nullptr on error
+    ///
+    /// Maps to ESP-IDF: heap_caps_malloc(size, MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT)
+    ///
+    /// Must be freed via freeInternal().
+    virtual u8* allocateInternal(size_t size) FL_NO_EXCEPT = 0;
+
+    /// @brief Free a buffer allocated via allocateInternal()
+    ///
+    /// Maps to ESP-IDF: heap_caps_free(). Safe to call with nullptr (no-op).
+    virtual void freeInternal(u8* buffer) FL_NO_EXCEPT = 0;
+
+    //=========================================================================
+    // Pin Routing
+    //=========================================================================
+
+    /// @brief Return @p pin to its default GPIO state
+    ///
+    /// Maps to ESP-IDF: gpio_reset_pin()
+    virtual void resetPin(int pin) FL_NO_EXCEPT = 0;
+
+    /// @brief Snapshot of how @p pin is routed: output signal, output
+    /// enable and IOMUX function, or kPinRoutingUnknown when it cannot be read
+    ///
+    /// Another peripheral (or pinMode()) can take the pin of an idle channel.
+    /// Comparing snapshots detects that without knowing the SPI signal.
+    ///
+    /// Maps to ESP-IDF: gpio_get_io_config() (IDF 5.5+)
+    virtual u32 getPinRouting(int pin) FL_NO_EXCEPT = 0;
+
+    static constexpr u32 kPinRoutingUnknown = 0xFFFFFFFFu;
 
     //=========================================================================
     // Platform Utilities

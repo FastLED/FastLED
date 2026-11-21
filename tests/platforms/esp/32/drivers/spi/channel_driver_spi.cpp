@@ -1,11 +1,14 @@
-/// @file test_channel_engine_spi_routing.cpp
-/// @brief Tests for ChannelEngineSpi chipset routing logic
+/// @file channel_driver_spi.cpp
+/// @brief Tests for ChannelEngineSpi on the host, using SpiPeripheralMock
 ///
 /// Tests the canHandle() predicate in ChannelEngineSpi to ensure correct routing:
 /// - Accept clockless chipsets (WS2812, SK6812, etc.)
 /// - Reject true SPI chipsets (APA102, SK9822, etc.)
 ///
 /// This is critical for preventing routing conflicts with SpiChannelEngineAdapter.
+///
+/// Also covers the FastLED#4907 rebuild: an idle channel whose pin was
+/// rerouted must release its device and host and re-initialize the bus.
 
 #include "test.h"
 #include "FastLED.h"
@@ -14,9 +17,8 @@
 #include "fl/chipsets/spi.h"
 #include "fl/chipsets/led_timing.h"
 #include "fl/stl/vector.h"
-
-#ifdef ESP32
 #include "platforms/esp/32/drivers/spi/channel_driver_spi.h"
+#include "platforms/shared/mock/esp/32/drivers/spi_peripheral_mock.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
 
@@ -39,7 +41,53 @@ ChannelDataPtr createClocklessChannelData(int pin = 5) {
     return ChannelData::create(pin, timing, fl::move(data));
 }
 
+/// @brief Transmit one frame and drive the mock until the driver is READY
+void showFrame(ChannelEngineSpi& driver, detail::SpiPeripheralMock& mock, int pin) {
+    driver.enqueue(createClocklessChannelData(pin));
+    driver.show();
+    for (int i = 0; i < 100 && driver.poll() != IChannelDriver::DriverState::READY; ++i) {
+        mock.simulateTransactionComplete();
+    }
+    FL_REQUIRE(driver.poll() == IChannelDriver::DriverState::READY);
+}
+
 } // anonymous namespace
+
+FL_TEST_CASE("ChannelEngineSpi - idle channel rebuilds its bus after a pin reroute (#4907)") {
+    auto& mock = detail::SpiPeripheralMock::instance();
+    mock.reset();
+    {
+        ChannelEngineSpi driver(mock);
+
+        // Frame 1 creates the channel: one bus on pin 5, with a device.
+        showFrame(driver, mock, 5);
+        FL_CHECK_EQ(mock.getBusInitializeCount(), 1u);
+        FL_CHECK_EQ(mock.getBusConfig().mosi_pin, 5);
+        FL_CHECK_EQ(mock.getTransactionCount(), 1u);
+
+        // Frame 2, routing unchanged: the idle channel reuses its bus.
+        showFrame(driver, mock, 5);
+        FL_CHECK_EQ(mock.getBusInitializeCount(), 1u);
+        FL_CHECK_EQ(mock.getDeviceRemoveCount(), 0u);
+        FL_CHECK_EQ(mock.getBusFreeCount(), 0u);
+
+        // Another driver takes pin 5 while the channel is idle.
+        mock.simulatePinReroute(5);
+
+        // Frame 3: release the old device and host, then re-initialize.
+        showFrame(driver, mock, 5);
+        FL_CHECK_EQ(mock.getDeviceRemoveCount(), 1u);
+        FL_CHECK_EQ(mock.getBusFreeCount(), 1u);
+        FL_CHECK_EQ(mock.getBusInitializeCount(), 2u);
+        FL_CHECK_EQ(mock.getBusConfig().mosi_pin, 5);
+        FL_CHECK_TRUE(mock.hasDevice());
+        FL_CHECK_EQ(mock.getTransactionCount(), 3u);
+    }
+    // The destructor releases the device and the bus.
+    FL_CHECK_FALSE(mock.hasDevice());
+    FL_CHECK_FALSE(mock.isInitialized());
+    mock.reset();
+}
 
 FL_TEST_CASE("ChannelEngineSpi - canHandle accepts WS2812 (clockless)") {
     ChannelEngineSpi driver;
@@ -115,5 +163,3 @@ FL_TEST_CASE("ChannelEngineSpi - Routing architecture validation") {
 }
 
 } // FL_TEST_FILE
-
-#endif // ESP32

@@ -33,11 +33,16 @@
 #include "fl/stl/compiler_control.h"
 #include "platforms/is_platform.h"
 
+// Allow compilation on both ESP32 hardware and stub platforms (for testing)
+#if defined(FL_IS_ESP32) || defined(FASTLED_STUB_IMPL)
+
 #ifdef FL_IS_ESP32
-
 #include "platforms/esp/32/feature_flags/enabled.h"
+#endif
 
-#if FASTLED_ESP32_HAS_CLOCKLESS_SPI
+// On ESP32: Check FASTLED_ESP32_HAS_CLOCKLESS_SPI
+// On stub platforms: Always allow compilation (host tests use the mock peripheral)
+#if !defined(FL_IS_ESP32) || FASTLED_ESP32_HAS_CLOCKLESS_SPI
 
 #include "fl/channels/driver.h"
 #include "fl/channels/data.h"
@@ -50,19 +55,8 @@
 #include "fl/stl/flat_map.h"
 #include "fl/stl/chrono.h"
 #include "fl/stl/noexcept.h"
+#include "platforms/esp/32/drivers/spi/ispi_peripheral.h"
 
-// EXCEPTION: Platform headers in .h file (technical debt)
-// Normally platform-specific headers (driver/*.h, soc/*.h) should only be in .cpp files
-// to improve IDE support and cross-platform compatibility. However, this driver's public
-// interface requires ESP-IDF types (spi_device_handle_t, spi_host_device_t, gpio_num_t).
-// TODO: Consider refactoring to use forward declarations + opaque handles in future.
-// IWYU pragma: begin_keep
-#include "driver/spi_master.h"
-// IWYU pragma: end_keep
-// IWYU pragma: begin_keep
-#include "driver/gpio.h"
-
-// IWYU pragma: end_keep
 namespace fl {
 
 /// @brief Multi-lane SPI pin configuration
@@ -77,38 +71,38 @@ namespace fl {
 /// - ESP32 classic, S2, S3: Supports 1, 2, or 4 lanes
 /// - ESP32-C6, C3, H2: Supports 1 or 2 lanes only (no quad)
 struct MultiLanePinConfig {
-    gpio_num_t data0_pin;  ///< Data0/MOSI pin (always required)
-    gpio_num_t data1_pin;  ///< Data1/MISO pin for dual/quad mode (-1 if unused)
-    gpio_num_t data2_pin;  ///< Data2/WP pin for quad mode (-1 if unused, ESP32/S2/S3 only)
-    gpio_num_t data3_pin;  ///< Data3/HD pin for quad mode (-1 if unused, ESP32/S2/S3 only)
+    int data0_pin;  ///< Data0/MOSI pin (always required)
+    int data1_pin;  ///< Data1/MISO pin for dual/quad mode (-1 if unused)
+    int data2_pin;  ///< Data2/WP pin for quad mode (-1 if unused, ESP32/S2/S3 only)
+    int data3_pin;  ///< Data3/HD pin for quad mode (-1 if unused, ESP32/S2/S3 only)
 
     /// @brief Default constructor (single-lane mode)
     constexpr MultiLanePinConfig() FL_NO_EXCEPT
-        : data0_pin(static_cast<gpio_num_t>(-1))
-        , data1_pin(static_cast<gpio_num_t>(-1))
-        , data2_pin(static_cast<gpio_num_t>(-1))
-        , data3_pin(static_cast<gpio_num_t>(-1))
+        : data0_pin(-1)
+        , data1_pin(-1)
+        , data2_pin(-1)
+        , data3_pin(-1)
     {}
 
     /// @brief Single-lane constructor
-    constexpr explicit MultiLanePinConfig(gpio_num_t data0) FL_NO_EXCEPT
+    constexpr explicit MultiLanePinConfig(int data0) FL_NO_EXCEPT
         : data0_pin(data0)
-        , data1_pin(static_cast<gpio_num_t>(-1))
-        , data2_pin(static_cast<gpio_num_t>(-1))
-        , data3_pin(static_cast<gpio_num_t>(-1))
+        , data1_pin(-1)
+        , data2_pin(-1)
+        , data3_pin(-1)
     {}
 
     /// @brief Dual-lane constructor
-    constexpr MultiLanePinConfig(gpio_num_t data0, gpio_num_t data1) FL_NO_EXCEPT
+    constexpr MultiLanePinConfig(int data0, int data1) FL_NO_EXCEPT
         : data0_pin(data0)
         , data1_pin(data1)
-        , data2_pin(static_cast<gpio_num_t>(-1))
-        , data3_pin(static_cast<gpio_num_t>(-1))
+        , data2_pin(-1)
+        , data3_pin(-1)
     {}
 
     /// @brief Quad-lane constructor (ESP32/S2/S3 only)
-    constexpr MultiLanePinConfig(gpio_num_t data0, gpio_num_t data1,
-                                  gpio_num_t data2, gpio_num_t data3) FL_NO_EXCEPT
+    constexpr MultiLanePinConfig(int data0, int data1,
+                                  int data2, int data3) FL_NO_EXCEPT
         : data0_pin(data0)
         , data1_pin(data1)
         , data2_pin(data2)
@@ -153,9 +147,9 @@ struct SpiTimingConfig {
         cfg.clock_hz = 6400000;
         cfg.bits_per_led_bit = 8;
         cfg.reset_time_us = reset_us;
-        cfg.bit0_pattern = 0b11000000;
+        cfg.bit0_pattern = 0xC0;  // 0b11000000
         cfg.bit0_count = 8;
-        cfg.bit1_pattern = 0b11111100;
+        cfg.bit1_pattern = 0xFC;  // 0b11111100
         cfg.bit1_count = 8;
         cfg.achieved_t0h_ns = 312;
         cfg.achieved_t0l_ns = 938;
@@ -188,7 +182,13 @@ struct SpiTimingConfig {
 /// Managed by ChannelManager which handles frame lifecycle events.
 class ChannelEngineSpi : public IChannelDriver {
 public:
+    /// @brief Construct with the platform's default SPI peripheral
+    /// (SpiPeripheralESP on ESP32, SpiPeripheralMock on stub builds)
     ChannelEngineSpi() FL_NO_EXCEPT;
+
+    /// @brief Construct with an explicit peripheral (mock injection for tests)
+    explicit ChannelEngineSpi(detail::ISpiPeripheral& peripheral) FL_NO_EXCEPT;
+
     ~ChannelEngineSpi() override;
 
     /// @brief Configure multi-lane SPI pins for a specific data pin
@@ -247,9 +247,9 @@ private:
     u8 determineLaneCapacity(fl::span<const ChannelDataPtr> channels) FL_NO_EXCEPT;
     /// @brief SPI channel state (per-pin tracking)
     struct SpiChannelState {
-        spi_host_device_t spi_host;        ///< SPI peripheral (SPI2_HOST, SPI3_HOST, etc.)
-        spi_device_handle_t spi_device;    ///< Device handle from spi_bus_add_device
-        gpio_num_t pin;                    ///< Output GPIO pin (data0/MOSI)
+        int spi_host;                      ///< Acquired SPI host (kSpiHost), or kNoSpiHost
+        bool hasDevice;                    ///< Device attached via ISpiPeripheral::addDevice()
+        int pin;                           ///< Output GPIO pin (data0/MOSI)
         ChipsetTimingConfig timing;        ///< Clockless timing configuration
         volatile bool transmissionComplete; ///< Set when all encoding/transmission complete
         bool inUse;                        ///< Channel active flag
@@ -257,9 +257,9 @@ private:
 
         // Multi-lane SPI support (dual/quad modes)
         u8 numLanes;                       ///< Number of active data lanes
-        gpio_num_t data1_pin;              ///< Data1/MISO pin for dual/quad mode (-1, unused)
-        gpio_num_t data2_pin;              ///< Data2/WP pin for quad mode (-1, unused)
-        gpio_num_t data3_pin;              ///< Data3/HD pin for quad mode (-1, unused)
+        int data1_pin;                     ///< Data1/MISO pin for dual/quad mode (-1, unused)
+        int data2_pin;                     ///< Data2/WP pin for quad mode (-1, unused)
+        int data3_pin;                     ///< Data3/HD pin for quad mode (-1, unused)
 
         // Cache coherence control (ESP32-S3/C6 workaround)
         bool cacheSyncDisabled;            ///< Set when esp_cache_msync() returns ESP_ERR_INVALID_ARG
@@ -279,9 +279,10 @@ private:
         size_t ledBytesRemaining;          ///< LED bytes left to encode
         ChannelDataPtr sourceData;         ///< Reference to source ChannelData for cleanup
 
-        // Transactions (double-buffered)
-        spi_transaction_t transA;          ///< Transaction struct for buffer A
-        spi_transaction_t transB;          ///< Transaction struct for buffer B
+        // Transactions (double-buffered). Each one's user field points at
+        // itself, so a completion identifies which buffer finished.
+        detail::SpiTransaction transA;     ///< Transaction for buffer A
+        detail::SpiTransaction transB;     ///< Transaction for buffer B
         volatile bool transAInFlight;      ///< Transaction A in progress flag
         volatile bool transBInFlight;      ///< Transaction B in progress flag
 
@@ -353,12 +354,6 @@ private:
     /// @brief Start the first DMA transaction for the active channel
     void startFirstDma() FL_NO_EXCEPT;
 
-    /// @brief SPI post-transaction callback (ISR context)
-    static void IRAM_ATTR spiPostTransactionCallback(spi_transaction_t *trans) FL_NO_EXCEPT;
-
-    /// @brief Timer encoding ISR callback
-    static void IRAM_ATTR timerEncodingISR(void *user_data) FL_NO_EXCEPT;
-
     /// @brief Poll channel states for cleanup
     DriverState pollChannels() FL_NO_EXCEPT;
 
@@ -409,7 +404,7 @@ private:
     /// @brief Acquire a channel for given pin and timing
     /// @param dataSize Size of LED data in bytes
     /// @return Pointer to channel state, or nullptr if no hardware available
-    SpiChannelState* acquireChannel(gpio_num_t pin, const ChipsetTimingConfig& timing, size_t dataSize) FL_NO_EXCEPT;
+    SpiChannelState* acquireChannel(int pin, const ChipsetTimingConfig& timing, size_t dataSize) FL_NO_EXCEPT;
 
     /// @brief Release a channel (marks as available for reuse)
     void releaseChannel(SpiChannelState* channel) FL_NO_EXCEPT;
@@ -420,11 +415,11 @@ private:
     /// @param timing Clockless timing configuration (T1/T2/T3)
     /// @param dataSize Size of LED data in bytes
     /// @return true if channel created successfully
-    bool createChannel(SpiChannelState* state, gpio_num_t pin, const ChipsetTimingConfig& timing, size_t dataSize) FL_NO_EXCEPT;
+    bool createChannel(SpiChannelState* state, int pin, const ChipsetTimingConfig& timing, size_t dataSize) FL_NO_EXCEPT;
 
     /// @brief Lightweight SPI bus + device re-initialization for reused channels.
     /// Only sets up SPI bus and device; staging buffers and timer ISR are kept.
-    bool reinitSpiHardware(SpiChannelState* state, gpio_num_t pin, size_t dataSize) FL_NO_EXCEPT;
+    bool reinitSpiHardware(SpiChannelState* state, int pin, size_t dataSize) FL_NO_EXCEPT;
 
     /// @brief Encode one chunk of LED data into a staging buffer
     /// @param channel Channel state with LED data to encode
@@ -480,15 +475,25 @@ private:
     /// @return SPI timing configuration
     static SpiTimingConfig getSpiTimingFromChannel(const ChannelDataPtr& data) FL_NO_EXCEPT;
 
-    /// @brief Acquire SPI host for new channel
-    /// @return SPI host, or SPI_HOST_MAX on failure
-    spi_host_device_t acquireSpiHost() FL_NO_EXCEPT;
+    /// @brief The only SPI host this driver uses (SPI2_HOST); the peripheral
+    /// owns the actual host selection
+    static constexpr int kSpiHost = 1;
 
-    /// @brief Release SPI host when channel is destroyed
-    void releaseSpiHost(spi_host_device_t host) FL_NO_EXCEPT;
+    /// @brief "No host held" marker for SpiChannelState::spi_host
+    static constexpr int kNoSpiHost = -1;
+
+    /// @brief Acquire SPI host for new channel
+    /// @return kSpiHost, or kNoSpiHost when it is in use
+    int acquireSpiHost() FL_NO_EXCEPT;
+
+    /// @brief Release SPI host when channel is destroyed (frees the bus on last release)
+    void releaseSpiHost(int host) FL_NO_EXCEPT;
 
     /// @brief Process pending channels that couldn't be started earlier
     void processPendingChannels() FL_NO_EXCEPT;
+
+    /// @brief SPI peripheral (real hardware or mock)
+    detail::ISpiPeripheral& mPeripheral;
 
     /// @brief All SPI channels (active and idle)
     fl::vector_inlined<SpiChannelState, 16> mChannels;
@@ -497,7 +502,7 @@ private:
     fl::vector_inlined<PendingChannel, 16> mPendingChannels;
 
     /// @brief SPI host usage tracking (static for global coordination)
-    static fl::array<SpiHostTracking, SPI_HOST_MAX> sSpiHostUsage;
+    static SpiHostTracking sSpiHostUsage;
 
     /// @brief Track allocation failures to avoid hammering the driver
     bool mAllocationFailed;
@@ -506,7 +511,7 @@ private:
     u32 mLastRetryFrame;
 
     /// @brief Multi-lane pin configurations (keyed by data0_pin)
-    fl::flat_map<gpio_num_t, MultiLanePinConfig> mMultiLaneConfigs;
+    fl::flat_map<int, MultiLanePinConfig> mMultiLaneConfigs;  // fl-lint: int-template-ok ESP-IDF GPIO pin numbers are int (ESP32-only)
 
     // IChannelDriver state management
     /// @brief Channels enqueued via enqueue(), waiting for show()
@@ -521,6 +526,6 @@ private:
 
 } // namespace fl
 
-#endif // FASTLED_ESP32_HAS_CLOCKLESS_SPI
+#endif // FASTLED_ESP32_HAS_CLOCKLESS_SPI or FASTLED_STUB_IMPL
 
-#endif // FL_IS_ESP32
+#endif // FL_IS_ESP32 or FASTLED_STUB_IMPL

@@ -86,8 +86,8 @@ FL_TEST_CASE("SpiPeripheralMock - initialize bus with invalid config") {
     SpiPeripheralFixture fixture;
     auto& mock = fixture.mock;
 
-    // Invalid: missing SCLK pin
-    SpiBusConfig config(/*mosi=*/23, /*sclk=*/-1);
+    // Invalid: no data pin (SCLK alone; the clockless driver uses SCLK=-1)
+    SpiBusConfig config(/*mosi=*/-1, /*sclk=*/18);
     FL_CHECK_FALSE(mock.initializeBus(config));
     FL_CHECK_FALSE(mock.isInitialized());
 }
