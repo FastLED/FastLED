@@ -54,10 +54,13 @@
 // s16x16, ABuffer at two MAXN tiers) plus soft-float math: ~50 KB of AVR
 // flash, more than the 16-48 KB parts above have. Mega 2560 fits (50.9 KB
 // flash, 940 B static RAM plus a ~1.2 KB worst-case polygon stack frame).
-// RAM is the limit on a 2 KB part (Uno, Nano) even for a single scene: a
-// 16x16 canvas leaves ~950 B of stack, enough for ABuffer but not for the
-// Exact fill, which overflows the stack. Use ABuffer, or at most 16x8 for
-// Exact (see fl/gfx/canvas.h).
+// RAM is the limit on a 2 KB part (Uno, Nano) even for a single scene. In
+// the reference build (a 16x16 CRGB canvas, FastLED, Serial, no other
+// globals) ~950 B of stack remains: enough for ABuffer (~0.8 KB with
+// callees), not for the Exact fill (~1.2 KB), which overflows the stack.
+// Every extra global shrinks that margin, so ABuffer, or a 16x8 canvas for
+// Exact, can overflow too. Check your sketch's free stack before choosing a
+// backend (see fl/gfx/canvas.h).
 
 #include <Arduino.h>
 #include <FastLED.h>

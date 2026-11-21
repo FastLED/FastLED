@@ -47,10 +47,12 @@ enum class PolyFill { Exact, ABuffer };
 /// -fstack-usage; callees add ~0.2 KB):
 ///  - Exact:   MAXN = 32, CHUNK = 64: 4134 B;  MAXN = 8, CHUNK = 16:  992 B
 ///  - ABuffer: MAXN = 32:             2139 B;  MAXN = 8:              603 B
-/// On an Uno (2 KB SRAM), a 16x16 CRGB canvas (768 B) plus FastLED and
-/// Serial leaves ~950 B of stack: enough for ABuffer, not for Exact's
-/// ~1.2 KB call chain, which overflows the stack (verified in simavr).
-/// Use PolyFill::ABuffer there, or a 16x8 canvas for Exact. fl::scratch
+/// On an Uno (2 KB SRAM), the reference build (a 16x16 CRGB canvas (768 B),
+/// FastLED, Serial, no other globals) leaves ~950 B of stack: enough for
+/// ABuffer (~0.8 KB with callees), not for Exact's ~1.2 KB call chain,
+/// which overflows the stack (verified in simavr). Use PolyFill::ABuffer
+/// there, or a 16x8 canvas for Exact. Every extra global shrinks that
+/// margin, so check the sketch's free stack before choosing. fl::scratch
 /// does not help: the arena and the stack share the same SRAM. This is a
 /// documented limit, not handled automatically (#5328): about half the
 /// Exact 8/16 set is its 8 per-edge records, so trimming CHUNK or the band
