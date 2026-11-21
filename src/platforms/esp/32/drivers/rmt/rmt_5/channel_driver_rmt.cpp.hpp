@@ -386,7 +386,8 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
 
                 // Release channel back to pool
                 FL_LOG_RMT("Releasing channel " << ch.pin);
-                releaseChannel(&ch);
+                // The transmit-done ISR set the flag: the hardware is done.
+                releaseChannel(&ch, /*hardwareDone=*/true);
 
                 // Decrement activeCount since we just released this channel
                 activeCount--;
@@ -594,7 +595,10 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
                                  fl::size dataSize = 0) FL_NO_EXCEPT;
 
     /// @brief Release a channel (marks as available for reuse)
-    void releaseChannel(ChannelState *channel) FL_NO_EXCEPT;
+    /// @param hardwareDone true when the transmit-done ISR already reported
+    ///        completion, so rmt_tx_wait_all_done() would only repeat it.
+    void releaseChannel(ChannelState *channel,
+                        bool hardwareDone = false) FL_NO_EXCEPT;
 
     /// @brief Out-of-line diagnostic emitters (#2773 item 2.2).
     /// Both messages are ~15 lines of multi-line literal + integer
@@ -1699,17 +1703,21 @@ ChannelEngineRMTImpl::ChannelState *ChannelEngineRMTImpl::acquireChannel(
     return nullptr;
 }
 
-void ChannelEngineRMTImpl::releaseChannel(ChannelState *channel) FL_NO_EXCEPT {
+void ChannelEngineRMTImpl::releaseChannel(ChannelState *channel,
+                                          bool hardwareDone) FL_NO_EXCEPT {
     FL_ASSERT(channel != nullptr, "releaseChannel called with nullptr");
 
-    // CRITICAL: Wait for RMT hardware to fully complete transmission
-    // The ISR callback (transmitDoneCallback) may fire slightly before the last
-    // bits have fully propagated out of the RMT peripheral. We must ensure
-    // hardware is truly done before allowing buffer reuse to prevent race
-    // conditions.
-    bool wait_success = mPeripheral.waitAllDone(channel->channel, 100);
-    FL_ASSERT(wait_success,
-              "RMT transmission wait timeout - hardware may be stalled");
+    // ESP-IDF invokes the transmit-done callback from the TX-end interrupt,
+    // after the RMT has sent the last symbol, so the pooled buffer is free.
+    // rmt_tx_wait_all_done() only moves the finished transaction descriptor
+    // from the complete queue back to the ready queue, which rmt_transmit()
+    // also does on demand; repeating it cost ~2.1k instructions per frame
+    // (#5356). Failure paths have no completion event and still wait.
+    if (!hardwareDone) {
+        bool wait_success = mPeripheral.waitAllDone(channel->channel, 100);
+        FL_ASSERT(wait_success,
+                  "RMT transmission wait timeout - hardware may be stalled");
+    }
 
     // Release pooled buffer if one was acquired
     if (!channel->pooledBuffer.empty()) {
@@ -1834,41 +1842,25 @@ void ChannelEngineRMTImpl::destroyLeastUsedChannels(size_t count) FL_NO_EXCEPT {
 
 /// @brief ISR callback fired when RMT transmission completes
 ///
-/// CRITICAL TIMING CONTRACT:
-/// This callback is invoked by ESP-IDF when the RMT peripheral signals that
-/// the transmission queue is empty. However, there is a small timing window
-/// where the callback may fire BEFORE the last bits have fully propagated
-/// out of the RMT shift register and onto the GPIO pin.
-///
-/// RACE CONDITION PREVENTION:
-/// To prevent buffer corruption, releaseChannel() MUST call
-/// rmt_tx_wait_all_done() with a timeout BEFORE marking the channel as
-/// available for reuse. This ensures the RMT hardware has fully completed
-/// transmission before:
-///   1. The channel's pooled buffer is released back to the buffer pool
-///   2. The ChannelData's mInUse flag is cleared (allowing new pixel data
-///   writes)
-///   3. The channel is marked as available for acquisition by other
-///   transmissions
-///
-/// Without this hardware wait, the following race condition can occur:
-///   - Frame N transmission starts (RMT hardware reading buffer A)
-///   - ISR fires (callback sets transmissionComplete = true)
-///   - Main thread calls releaseChannel() -> clears mInUse flag
-///   - User calls FastLED.show() for Frame N+1
-///   - ClocklessRMT::showPixels() sees mInUse == false -> proceeds to encode
-///   - NEW pixel data overwrites buffer A while RMT is still shifting it out
-///   - LEDs display corrupted mix of Frame N and Frame N+1 data
+/// TIMING CONTRACT:
+/// ESP-IDF invokes this callback from the RMT TX-end interrupt, after the
+/// peripheral has sent the final symbol, so the transmission (and any DMA or
+/// encoder read of the pooled buffer) is complete when the flag is set.
 ///
 /// SYNCHRONIZATION STRATEGY:
 /// - ISR: Sets transmissionComplete flag (lightweight, non-blocking)
-/// - Main thread poll(): Calls releaseChannel() when transmissionComplete is
-/// true
-/// - releaseChannel(): Calls rmt_tx_wait_all_done() to ensure hardware is done
-/// - ClocklessRMT::showPixels(): Asserts !mInUse before writing new pixel data
-///
-/// This multi-layered approach provides both correctness (hardware wait) and
-/// fail-fast debugging (assertions catch any timing bugs).
+/// - Main thread poll(): Calls releaseChannel(hardwareDone=true) when
+///   transmissionComplete is true; the buffer and channel are reused from
+///   there. It does not call rmt_tx_wait_all_done(): that only recycles the
+///   transaction descriptor, which rmt_transmit() does itself (#5364).
+/// - Dual-core: poll() may call rmt_transmit() on another core while this
+///   ISR is still finishing. ESP-IDF arbitrates that race itself: the ISR
+///   queues the finished descriptor before invoking this callback, and both
+///   the ISR and rmt_transmit() start the next transaction only through an
+///   atomic compare-exchange on the channel FSM, so whichever side sees the
+///   channel idle starts it.
+/// - ChannelData::isInUse() stays set until releaseChannel() runs, which
+///   keeps a controller from re-encoding into data still being sent.
 bool IRAM_ATTR ChannelEngineRMTImpl::transmitDoneCallback(
     void* channel, const void* edata,
     void* user_data) FL_NO_EXCEPT {
@@ -1880,7 +1872,7 @@ bool IRAM_ATTR ChannelEngineRMTImpl::transmitDoneCallback(
     }
 
     // Mark transmission as complete (polled by main thread)
-    // NOTE: This flag triggers releaseChannel(), which performs hardware wait
+    // NOTE: This flag triggers releaseChannel() from the main thread.
     state->transmissionComplete.store(true, fl::memory_order_release);
     if (state->owner != nullptr) {
         state->owner->mPollNeededCallback.invoke();
