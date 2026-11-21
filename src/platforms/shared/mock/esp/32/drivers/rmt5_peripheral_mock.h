@@ -227,6 +227,9 @@ public:
     /// @param channel_handle Channel handle from createTxChannel()
     virtual bool isChannelEnabled(void* channel_handle) const FL_NO_EXCEPT = 0;
 
+    /// @brief Total number of successful enableChannel() calls
+    virtual size_t getEnableCount() const FL_NO_EXCEPT = 0;
+
     /// @brief Reset mock to initial state (for testing)
     ///
     /// This method:

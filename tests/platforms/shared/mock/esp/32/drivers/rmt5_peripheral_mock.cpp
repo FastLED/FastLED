@@ -112,13 +112,19 @@ FL_TEST_CASE("RMT5 mock - enable and disable channel") {
     FL_CHECK(success);
     FL_CHECK(mock.isChannelEnabled(channel));
 
+    // Like ESP-IDF: no double enable, no delete while enabled
+    FL_CHECK_FALSE(mock.enableChannel(channel));
+    FL_CHECK_FALSE(mock.deleteChannel(channel));
+    FL_CHECK(mock.getEnableCount() == 1);
+
     // Disable
     success = mock.disableChannel(channel);
     FL_CHECK(success);
     FL_CHECK_FALSE(mock.isChannelEnabled(channel));
 
     // Cleanup
-    mock.deleteChannel(channel);
+    mock.disableChannel(channel);
+    FL_CHECK(mock.deleteChannel(channel));
 }
 
 FL_TEST_CASE("RMT5 mock - invalid channel handle") {
@@ -259,7 +265,8 @@ FL_TEST_CASE("RMT5 mock - capture transmission data") {
 
     // Cleanup
     mock.deleteEncoder(encoder);
-    mock.deleteChannel(channel);
+    mock.disableChannel(channel);
+    FL_CHECK(mock.deleteChannel(channel));
 }
 
 FL_TEST_CASE("RMT5 mock - multiple transmissions") {
@@ -293,7 +300,8 @@ FL_TEST_CASE("RMT5 mock - multiple transmissions") {
 
     // Cleanup
     mock.deleteEncoder(encoder);
-    mock.deleteChannel(channel);
+    mock.disableChannel(channel);
+    FL_CHECK(mock.deleteChannel(channel));
 }
 
 FL_TEST_CASE("RMT5 mock - clear transmission history") {
@@ -319,7 +327,8 @@ FL_TEST_CASE("RMT5 mock - clear transmission history") {
 
     // Cleanup
     mock.deleteEncoder(encoder);
-    mock.deleteChannel(channel);
+    mock.disableChannel(channel);
+    FL_CHECK(mock.deleteChannel(channel));
 }
 
 FL_TEST_CASE("RMT5 mock - get last transmission data") {
@@ -350,7 +359,8 @@ FL_TEST_CASE("RMT5 mock - get last transmission data") {
 
     // Cleanup
     mock.deleteEncoder(encoder);
-    mock.deleteChannel(channel);
+    mock.disableChannel(channel);
+    FL_CHECK(mock.deleteChannel(channel));
 }
 
 //=============================================================================
@@ -387,7 +397,8 @@ FL_TEST_CASE("RMT5 mock - inject transmission failure") {
 
     // Cleanup
     mock.deleteEncoder(encoder);
-    mock.deleteChannel(channel);
+    mock.disableChannel(channel);
+    FL_CHECK(mock.deleteChannel(channel));
 }
 
 FL_TEST_CASE("RMT5 mock - transmit without enabling channel") {
@@ -408,7 +419,8 @@ FL_TEST_CASE("RMT5 mock - transmit without enabling channel") {
 
     // Cleanup
     mock.deleteEncoder(encoder);
-    mock.deleteChannel(channel);
+    mock.disableChannel(channel);
+    FL_CHECK(mock.deleteChannel(channel));
 }
 
 //=============================================================================
@@ -441,7 +453,8 @@ FL_TEST_CASE("RMT5 mock - transmission counter") {
 
     // Cleanup
     mock.deleteEncoder(encoder);
-    mock.deleteChannel(channel);
+    mock.disableChannel(channel);
+    FL_CHECK(mock.deleteChannel(channel));
 }
 
 FL_TEST_CASE("RMT5 mock - reset state") {
