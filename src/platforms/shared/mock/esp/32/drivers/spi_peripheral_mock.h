@@ -114,10 +114,17 @@ public:
     bool freeBus() FL_NO_EXCEPT override = 0;
     bool isInitialized() const FL_NO_EXCEPT override = 0;
     bool queueTransaction(const SpiTransaction& trans) FL_NO_EXCEPT override = 0;
-    bool pollTransaction(u32 timeout_ms) FL_NO_EXCEPT override = 0;
+    bool pollTransaction(u32 timeout_ms, void** out_user) FL_NO_EXCEPT override = 0;
+    bool pollingStart(const SpiTransaction& trans) FL_NO_EXCEPT override = 0;
+    bool pollingEnd(u32 timeout_ms) FL_NO_EXCEPT override = 0;
+    int getActualFrequencyKhz() const FL_NO_EXCEPT override = 0;
     bool registerCallback(void* callback, void* user_ctx) FL_NO_EXCEPT override = 0;
     u8* allocateDma(size_t size) FL_NO_EXCEPT override = 0;
     void freeDma(u8* buffer) FL_NO_EXCEPT override = 0;
+    u8* allocateInternal(size_t size) FL_NO_EXCEPT override = 0;
+    void freeInternal(u8* buffer) FL_NO_EXCEPT override = 0;
+    void resetPin(int pin) FL_NO_EXCEPT override = 0;
+    u32 getPinRouting(int pin) FL_NO_EXCEPT override = 0;
     void delay(u32 ms) FL_NO_EXCEPT override = 0;
     u64 getMicroseconds() FL_NO_EXCEPT override = 0;
 
@@ -146,8 +153,10 @@ public:
 
     /// @brief Manually trigger transaction completion (fire callback)
     ///
-    /// Simulates the hardware "transaction done" interrupt. Calls the
-    /// registered post-transaction callback if one is set.
+    /// Simulates the hardware "transaction done" interrupt. Moves the oldest
+    /// queued transaction to the completed list, where the next
+    /// pollTransaction() returns it, and calls the registered
+    /// post-transaction callback if one is set.
     ///
     /// Use in tests to advance the simulation:
     /// ```cpp
@@ -210,6 +219,26 @@ public:
 
     /// @brief Get current device configuration
     virtual const SpiDeviceConfig& getDeviceConfig() const FL_NO_EXCEPT = 0;
+
+    //-------------------------------------------------------------------------
+    // Bus Lifecycle Counters and Pin Routing
+    //-------------------------------------------------------------------------
+
+    /// @brief Number of successful initializeBus() calls since reset()
+    virtual size_t getBusInitializeCount() const FL_NO_EXCEPT = 0;
+
+    /// @brief Number of successful freeBus() calls since reset()
+    virtual size_t getBusFreeCount() const FL_NO_EXCEPT = 0;
+
+    /// @brief Number of successful removeDevice() calls since reset()
+    virtual size_t getDeviceRemoveCount() const FL_NO_EXCEPT = 0;
+
+    /// @brief Hand @p pin to another peripheral (FastLED#4907)
+    ///
+    /// Models pinMode() or another driver routing the MOSI pin of an idle
+    /// channel elsewhere; getPinRouting() reports the change until the next
+    /// initializeBus() on that pin.
+    virtual void simulatePinReroute(int pin) FL_NO_EXCEPT = 0;
 
     /// @brief Reset mock to uninitialized state (for testing)
     virtual void reset() FL_NO_EXCEPT = 0;

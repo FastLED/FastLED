@@ -14,6 +14,8 @@
 #include "fl/log/log.h"
 #include "fl/stl/allocator.h"
 #include "fl/stl/cstring.h"
+#include "fl/stl/flat_map.h"
+#include "fl/stl/malloc.h"
 #include "fl/stl/singleton.h"
 
 #ifdef FL_IS_WIN
@@ -66,10 +68,17 @@ public:
     bool freeBus() FL_NO_EXCEPT override;
     bool isInitialized() const FL_NO_EXCEPT override;
     bool queueTransaction(const SpiTransaction& trans) FL_NO_EXCEPT override;
-    bool pollTransaction(u32 timeout_ms) FL_NO_EXCEPT override;
+    bool pollTransaction(u32 timeout_ms, void** out_user) FL_NO_EXCEPT override;
+    bool pollingStart(const SpiTransaction& trans) FL_NO_EXCEPT override;
+    bool pollingEnd(u32 timeout_ms) FL_NO_EXCEPT override;
+    int getActualFrequencyKhz() const FL_NO_EXCEPT override;
     bool registerCallback(void* callback, void* user_ctx) FL_NO_EXCEPT override;
     u8* allocateDma(size_t size) FL_NO_EXCEPT override;
     void freeDma(u8* buffer) FL_NO_EXCEPT override;
+    u8* allocateInternal(size_t size) FL_NO_EXCEPT override;
+    void freeInternal(u8* buffer) FL_NO_EXCEPT override;
+    void resetPin(int pin) FL_NO_EXCEPT override;
+    u32 getPinRouting(int pin) FL_NO_EXCEPT override;
     void delay(u32 ms) FL_NO_EXCEPT override;
     u64 getMicroseconds() FL_NO_EXCEPT override;
 
@@ -89,6 +98,10 @@ public:
     size_t getTransactionCount() const FL_NO_EXCEPT override;
     const SpiBusConfig& getBusConfig() const FL_NO_EXCEPT override;
     const SpiDeviceConfig& getDeviceConfig() const FL_NO_EXCEPT override;
+    size_t getBusInitializeCount() const FL_NO_EXCEPT override;
+    size_t getBusFreeCount() const FL_NO_EXCEPT override;
+    size_t getDeviceRemoveCount() const FL_NO_EXCEPT override;
+    void simulatePinReroute(int pin) FL_NO_EXCEPT override;
     void reset() FL_NO_EXCEPT override;
 
 private:
@@ -102,8 +115,10 @@ private:
     SpiBusConfig mBusConfig;
     SpiDeviceConfig mDeviceConfig;
 
-    // Transaction queue
+    // Transaction queue (in flight) and completed transactions not yet
+    // returned by pollTransaction()
     fl::vector<SpiTransaction> mQueuedTransactions;
+    fl::vector<SpiTransaction> mCompletedTransactions;
     size_t mMaxQueueSize;
     size_t mTransactionCount;
 
@@ -120,6 +135,16 @@ private:
 
     // Pending transaction state
     size_t mPendingTransactions;
+
+    // Bus lifecycle counters
+    size_t mBusInitializeCount;
+    size_t mBusFreeCount;
+    size_t mDeviceRemoveCount;
+
+    // Pin routing (pin -> routing snapshot)
+    fl::flat_map<int, u32> mPinRouting;  // fl-lint: int-template-ok mirrors ESP-IDF int GPIO pin numbers
+    static constexpr u32 kSpiRouting = 0x100u;
+    static constexpr u32 kOtherPeripheral = 0x8000u;
 };
 
 //=============================================================================
@@ -140,6 +165,7 @@ SpiPeripheralMockImpl::SpiPeripheralMockImpl()
       mBusConfig(),
       mDeviceConfig(),
       mQueuedTransactions(),
+      mCompletedTransactions(),
       mMaxQueueSize(0),
       mTransactionCount(0),
       mCallback(nullptr),
@@ -147,7 +173,11 @@ SpiPeripheralMockImpl::SpiPeripheralMockImpl()
       mTransactionDelayUs(0),
       mShouldFailTransaction(false),
       mHistory(),
-      mPendingTransactions(0) {
+      mPendingTransactions(0),
+      mBusInitializeCount(0),
+      mBusFreeCount(0),
+      mDeviceRemoveCount(0),
+      mPinRouting() {
     // No background thread - fully synchronous mock
 }
 
@@ -161,15 +191,20 @@ bool SpiPeripheralMockImpl::initializeBus(const SpiBusConfig& config) FL_NO_EXCE
         return false;
     }
 
-    // Validate config
-    if (config.sclk_pin < 0) {
-        FL_WARN("SpiPeripheralMock: Invalid SCLK pin: " << config.sclk_pin);
+    // Validate config: a bus needs a data line. SCLK may be -1 (the clockless
+    // driver keeps the clock internal, like Espressif's led_strip).
+    if (config.mosi_pin < 0 && config.miso_pin < 0) {
+        FL_WARN("SpiPeripheralMock: No data pin (MOSI and MISO both unset)");
         return false;
     }
 
     // Store configuration
     mBusConfig = config;
     mInitialized = true;
+    mBusInitializeCount++;
+    if (config.mosi_pin >= 0) {
+        mPinRouting[config.mosi_pin] = kSpiRouting;
+    }
 
     return true;
 }
@@ -212,6 +247,8 @@ bool SpiPeripheralMockImpl::removeDevice() FL_NO_EXCEPT {
 
     mDeviceAdded = false;
     mQueuedTransactions.clear();
+    mCompletedTransactions.clear();
+    mDeviceRemoveCount++;
     return true;
 }
 
@@ -227,6 +264,7 @@ bool SpiPeripheralMockImpl::freeBus() FL_NO_EXCEPT {
     }
 
     mInitialized = false;
+    mBusFreeCount++;
     return true;
 }
 
@@ -289,7 +327,7 @@ bool SpiPeripheralMockImpl::queueTransaction(const SpiTransaction& trans) FL_NO_
     return true;
 }
 
-bool SpiPeripheralMockImpl::pollTransaction(u32 timeout_ms) FL_NO_EXCEPT {
+bool SpiPeripheralMockImpl::pollTransaction(u32 timeout_ms, void** out_user) FL_NO_EXCEPT {
     (void)timeout_ms;  // Unused in synchronous mock
 
     if (!mInitialized) {
@@ -302,19 +340,29 @@ bool SpiPeripheralMockImpl::pollTransaction(u32 timeout_ms) FL_NO_EXCEPT {
         return false;
     }
 
-    // In synchronous mock, poll just checks if there are completed transactions
-    // (i.e., transactions that have been processed via simulateTransactionComplete)
-    if (mQueuedTransactions.empty()) {
+    // In synchronous mock, poll returns the oldest transaction completed via
+    // simulateTransactionComplete()
+    if (mCompletedTransactions.empty()) {
         return false;
     }
 
-    // If there are no pending transactions, the queued ones are "complete"
-    if (mPendingTransactions == 0) {
-        mQueuedTransactions.erase(mQueuedTransactions.begin());
-        return true;
+    if (out_user != nullptr) {
+        *out_user = mCompletedTransactions.front().user;
     }
+    mCompletedTransactions.erase(mCompletedTransactions.begin());
+    return true;
+}
 
-    return false;
+bool SpiPeripheralMockImpl::pollingStart(const SpiTransaction& trans) FL_NO_EXCEPT {
+    return queueTransaction(trans);
+}
+
+bool SpiPeripheralMockImpl::pollingEnd(u32 timeout_ms) FL_NO_EXCEPT {
+    return pollTransaction(timeout_ms, nullptr);
+}
+
+int SpiPeripheralMockImpl::getActualFrequencyKhz() const FL_NO_EXCEPT {
+    return mDeviceAdded ? mDeviceConfig.clock_speed_hz / 1000 : 0;
 }
 
 //=============================================================================
@@ -376,6 +424,27 @@ void SpiPeripheralMockImpl::freeDma(u8* buffer) FL_NO_EXCEPT {
     }
 }
 
+u8* SpiPeripheralMockImpl::allocateInternal(size_t size) FL_NO_EXCEPT {
+    return static_cast<u8*>(fl::malloc(size));
+}
+
+void SpiPeripheralMockImpl::freeInternal(u8* buffer) FL_NO_EXCEPT {
+    fl::free(buffer);
+}
+
+//=============================================================================
+// Pin Routing
+//=============================================================================
+
+void SpiPeripheralMockImpl::resetPin(int pin) FL_NO_EXCEPT {
+    mPinRouting.erase(pin);
+}
+
+u32 SpiPeripheralMockImpl::getPinRouting(int pin) FL_NO_EXCEPT {
+    auto it = mPinRouting.find(pin);
+    return it == mPinRouting.end() ? kPinRoutingUnknown : it->second;
+}
+
 //=============================================================================
 // Platform Utilities
 //=============================================================================
@@ -409,8 +478,9 @@ void SpiPeripheralMockImpl::simulateTransactionComplete() FL_NO_EXCEPT {
     // Decrement pending count
     mPendingTransactions--;
 
-    // Remove oldest transaction from queue (FIFO)
+    // Move oldest transaction from the queue to the completed list (FIFO)
     if (!mQueuedTransactions.empty()) {
+        mCompletedTransactions.push_back(mQueuedTransactions.front());
         mQueuedTransactions.erase(mQueuedTransactions.begin());
     }
 
@@ -441,6 +511,7 @@ void SpiPeripheralMockImpl::clearTransactionHistory() FL_NO_EXCEPT {
     mTransactionCount = 0;
     mPendingTransactions = 0;
     mQueuedTransactions.clear();
+    mCompletedTransactions.clear();
 }
 
 fl::span<const u8> SpiPeripheralMockImpl::getLastTransactionData() const FL_NO_EXCEPT {
@@ -480,6 +551,22 @@ const SpiDeviceConfig& SpiPeripheralMockImpl::getDeviceConfig() const FL_NO_EXCE
     return mDeviceConfig;
 }
 
+size_t SpiPeripheralMockImpl::getBusInitializeCount() const FL_NO_EXCEPT {
+    return mBusInitializeCount;
+}
+
+size_t SpiPeripheralMockImpl::getBusFreeCount() const FL_NO_EXCEPT {
+    return mBusFreeCount;
+}
+
+size_t SpiPeripheralMockImpl::getDeviceRemoveCount() const FL_NO_EXCEPT {
+    return mDeviceRemoveCount;
+}
+
+void SpiPeripheralMockImpl::simulatePinReroute(int pin) FL_NO_EXCEPT {
+    mPinRouting[pin] = kOtherPeripheral;
+}
+
 void SpiPeripheralMockImpl::reset() FL_NO_EXCEPT {
     mInitialized = false;
     mDeviceAdded = false;
@@ -494,6 +581,11 @@ void SpiPeripheralMockImpl::reset() FL_NO_EXCEPT {
     mShouldFailTransaction = false;
     mHistory.clear();
     mPendingTransactions = 0;
+    mCompletedTransactions.clear();
+    mBusInitializeCount = 0;
+    mBusFreeCount = 0;
+    mDeviceRemoveCount = 0;
+    mPinRouting.clear();
 }
 
 } // namespace detail

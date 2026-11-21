@@ -14,8 +14,11 @@
 #if FASTLED_ESP32_HAS_CLOCKLESS_SPI
 
 #include "platforms/esp/32/drivers/spi/spi_peripheral_esp.h"
+#include "platforms/esp/esp_version.h"
 #include "fl/log/log.h"
+#include "fl/stl/array.h"
 #include "fl/stl/noexcept.h"
+#include "fl/stl/static_assert.h"
 
 // Include ESP-IDF headers ONLY in .cpp file
 FL_EXTERN_C_BEGIN
@@ -41,6 +44,13 @@ FL_EXTERN_C_END
 namespace fl {
 namespace detail {
 
+FL_STATIC_ASSERT(kSpiDeviceHalfDuplex == SPI_DEVICE_HALFDUPLEX,
+                 "kSpiDeviceHalfDuplex must match ESP-IDF");
+FL_STATIC_ASSERT(kSpiTransModeDio == SPI_TRANS_MODE_DIO,
+                 "kSpiTransModeDio must match ESP-IDF");
+FL_STATIC_ASSERT(kSpiTransModeQio == SPI_TRANS_MODE_QIO,
+                 "kSpiTransModeQio must match ESP-IDF");
+
 //=============================================================================
 // Implementation Class (internal)
 //=============================================================================
@@ -60,14 +70,33 @@ public:
     bool freeBus() FL_NO_EXCEPT override;
     bool isInitialized() const FL_NO_EXCEPT override;
     bool queueTransaction(const SpiTransaction& trans) FL_NO_EXCEPT override;
-    bool pollTransaction(u32 timeout_ms) FL_NO_EXCEPT override;
+    bool pollTransaction(u32 timeout_ms, void** out_user) FL_NO_EXCEPT override;
+    bool pollingStart(const SpiTransaction& trans) FL_NO_EXCEPT override;
+    bool pollingEnd(u32 timeout_ms) FL_NO_EXCEPT override;
+    int getActualFrequencyKhz() const FL_NO_EXCEPT override;
     bool registerCallback(void* callback, void* user_ctx) FL_NO_EXCEPT override;
     u8* allocateDma(size_t size) FL_NO_EXCEPT override;
     void freeDma(u8* buffer) FL_NO_EXCEPT override;
+    u8* allocateInternal(size_t size) FL_NO_EXCEPT override;
+    void freeInternal(u8* buffer) FL_NO_EXCEPT override;
+    void resetPin(int pin) FL_NO_EXCEPT override;
+    u32 getPinRouting(int pin) FL_NO_EXCEPT override;
     void delay(u32 ms) FL_NO_EXCEPT override;
     u64 getMicroseconds() FL_NO_EXCEPT override;
 
 private:
+    /// @brief Copy @p trans into the next persistent ESP-IDF descriptor
+    ///
+    /// ESP-IDF keeps the spi_transaction_t pointer until the transaction
+    /// completes, so the descriptor cannot live on the caller's stack.
+    ::spi_transaction_t* fillTransactionSlot(const SpiTransaction& trans) FL_NO_EXCEPT;
+
+    /// Descriptor ring. Sized to the device queue depth ChannelEngineSpi
+    /// uses (4); it keeps at most two transactions in flight.
+    static constexpr size_t kTransactionSlots = 4;
+    fl::array<::spi_transaction_t, kTransactionSlots> mTransactions;
+    size_t mNextTransaction;
+
     ::spi_host_device_t mHost;           ///< SPI host (SPI2_HOST or SPI3_HOST)
     ::spi_device_handle_t mDeviceHandle; ///< ESP-IDF device handle
     bool mBusInitialized;                ///< Track bus initialization state
@@ -102,7 +131,9 @@ SpiPeripheralESPImpl::SpiPeripheralESPImpl() FL_NO_EXCEPT
     , mBusInitialized(false)
     , mDeviceAdded(false)
     , mCallback(nullptr)
-    , mUserContext(nullptr) {
+    , mUserContext(nullptr)
+    , mTransactions()
+    , mNextTransaction(0) {
 }
 
 SpiPeripheralESPImpl::~SpiPeripheralESPImpl() {
@@ -168,6 +199,7 @@ bool SpiPeripheralESPImpl::addDevice(const SpiDeviceConfig& config) FL_NO_EXCEPT
 
     // Configure SPI device (maps directly to ESP-IDF structure)
     ::spi_device_interface_config_t dev_config = {};
+    dev_config.clock_source = SPI_CLK_SRC_DEFAULT;
     dev_config.mode = config.mode;
     dev_config.clock_speed_hz = config.clock_speed_hz;
     dev_config.queue_size = config.queue_size;
@@ -260,16 +292,9 @@ bool SpiPeripheralESPImpl::queueTransaction(const SpiTransaction& trans) FL_NO_E
         return false;
     }
 
-    // Map to ESP-IDF transaction structure
-    ::spi_transaction_t esp_trans = {};
-    esp_trans.tx_buffer = trans.tx_buffer;
-    esp_trans.length = trans.length_bits;
-    esp_trans.flags = trans.flags;
-    esp_trans.user = trans.user;
-
     // Queue transaction (delegate to ESP-IDF)
     // portMAX_DELAY = block until queue has space
-    esp_err_t err = ::spi_device_queue_trans(mDeviceHandle, &esp_trans, portMAX_DELAY);
+    esp_err_t err = ::spi_device_queue_trans(mDeviceHandle, fillTransactionSlot(trans), portMAX_DELAY);
     if (err != ESP_OK) {
         FL_WARN("SpiPeripheralESP: Failed to queue transaction: " << err);
         return false;
@@ -278,7 +303,7 @@ bool SpiPeripheralESPImpl::queueTransaction(const SpiTransaction& trans) FL_NO_E
     return true;
 }
 
-bool SpiPeripheralESPImpl::pollTransaction(u32 timeout_ms) FL_NO_EXCEPT {
+bool SpiPeripheralESPImpl::pollTransaction(u32 timeout_ms, void** out_user) FL_NO_EXCEPT {
     if (!mDeviceAdded) {
         FL_WARN("SpiPeripheralESP: Cannot poll transaction - device not added");
         return false;
@@ -299,7 +324,58 @@ bool SpiPeripheralESPImpl::pollTransaction(u32 timeout_ms) FL_NO_EXCEPT {
         return false;
     }
 
+    if (out_user != nullptr) {
+        *out_user = (result != nullptr) ? result->user : nullptr;
+    }
     return true;
+}
+
+bool SpiPeripheralESPImpl::pollingStart(const SpiTransaction& trans) FL_NO_EXCEPT {
+    if (!mDeviceAdded) {
+        FL_WARN("SpiPeripheralESP: Cannot start polling transaction - device not added");
+        return false;
+    }
+
+    esp_err_t err = ::spi_device_polling_start(mDeviceHandle, fillTransactionSlot(trans), portMAX_DELAY);
+    if (err != ESP_OK) {
+        FL_WARN("SpiPeripheralESP: Failed to start polling transaction: " << err);
+        return false;
+    }
+    return true;
+}
+
+bool SpiPeripheralESPImpl::pollingEnd(u32 timeout_ms) FL_NO_EXCEPT {
+    if (!mDeviceAdded) {
+        return false;
+    }
+    TickType_t timeout_ticks = 0;
+    if (timeout_ms == kSpiWaitForeverMs) {
+        timeout_ticks = portMAX_DELAY;
+    } else if (timeout_ms != 0) {
+        timeout_ticks = pdMS_TO_TICKS(timeout_ms);
+    }
+    // ESP_ERR_TIMEOUT means still in flight; the caller polls again.
+    return ::spi_device_polling_end(mDeviceHandle, timeout_ticks) == ESP_OK;
+}
+
+int SpiPeripheralESPImpl::getActualFrequencyKhz() const FL_NO_EXCEPT {
+    int freq_khz = 0;
+    if (mDeviceHandle != nullptr) {
+        ::spi_device_get_actual_freq(mDeviceHandle, &freq_khz);
+    }
+    return freq_khz;
+}
+
+::spi_transaction_t* SpiPeripheralESPImpl::fillTransactionSlot(const SpiTransaction& trans) FL_NO_EXCEPT {
+    // fl-lint: container-data-ptr-ok ESP-IDF C API holds this slot pointer until the transaction completes
+    ::spi_transaction_t* esp_trans = &mTransactions[mNextTransaction];
+    mNextTransaction = (mNextTransaction + 1) % kTransactionSlots;
+    *esp_trans = {};
+    esp_trans->tx_buffer = trans.tx_buffer;
+    esp_trans->length = trans.length_bits;
+    esp_trans->flags = trans.flags;
+    esp_trans->user = trans.user;
+    return esp_trans;
 }
 
 bool SpiPeripheralESPImpl::registerCallback(void* callback, void* user_ctx) FL_NO_EXCEPT {
@@ -338,6 +414,41 @@ void SpiPeripheralESPImpl::freeDma(u8* buffer) FL_NO_EXCEPT {
     if (buffer != nullptr) {
         ::heap_caps_free(buffer);
     }
+}
+
+u8* SpiPeripheralESPImpl::allocateInternal(size_t size) FL_NO_EXCEPT {
+    return static_cast<u8*>(
+        ::heap_caps_malloc(size, MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT));
+}
+
+void SpiPeripheralESPImpl::freeInternal(u8* buffer) FL_NO_EXCEPT {
+    if (buffer != nullptr) {
+        ::heap_caps_free(buffer);
+    }
+}
+
+//=============================================================================
+// Pin Routing
+//=============================================================================
+
+void SpiPeripheralESPImpl::resetPin(int pin) FL_NO_EXCEPT {
+    ::gpio_reset_pin(static_cast<gpio_num_t>(pin));
+}
+
+u32 SpiPeripheralESPImpl::getPinRouting(int pin) FL_NO_EXCEPT {
+    // FastLED#4907: needs gpio_get_io_config() (IDF 5.5); older cores report
+    // unknown and keep the previous behaviour.
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 5, 0)
+    gpio_io_config_t io = {};
+    if (::gpio_get_io_config(static_cast<gpio_num_t>(pin), &io) != ESP_OK) {
+        return kPinRoutingUnknown;
+    }
+    return (io.sig_out & 0xFFFFu) | (io.oe ? (1u << 16) : 0u) |
+           ((io.fun_sel & 0xFFu) << 20);
+#else
+    (void)pin;
+    return kPinRoutingUnknown;
+#endif
 }
 
 //=============================================================================
