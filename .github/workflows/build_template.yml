@@ -45,20 +45,44 @@ permissions:
   pull-requests: read
 
 jobs:
+  # Self-hosted forge pool (forge-ci/gh-runner docs/pool.md): when the repo
+  # variable FORGE_POOL_LABELS holds a JSON label array, trusted events (push
+  # to master, merge_group, workflow_dispatch, schedule) ask pool-select right
+  # before the build whether the pool's Ubuntu 24.04 runners have an idle
+  # slot, and run there only if so; otherwise, or on any error, the build runs
+  # hosted. It reads https://signal.forge-ci.com/v1/pool with no token. Pull
+  # requests never run the selector and stay hosted (fork safety and volume).
+  # Unset FORGE_POOL_LABELS to stop routing at once; unset the org variable
+  # FORGE_QUICK_LABELS to run the selector itself on hosted runners (RUN-004).
+  pool:
+    name: Select runner
+    if: >-
+      vars.FORGE_POOL_LABELS != ''
+      && (github.event_name == 'merge_group'
+          || github.event_name == 'workflow_dispatch'
+          || github.event_name == 'schedule'
+          || (github.event_name == 'push'
+              && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)))
+    runs-on: ${{ vars.FORGE_QUICK_LABELS != '' && fromJSON(vars.FORGE_QUICK_LABELS) || 'ubuntu-latest' }}
+    timeout-minutes: 2
+    permissions: {}
+    outputs:
+      runs-on: ${{ steps.select.outputs.runs-on || toJSON(inputs.runs-on) }}
+    steps:
+      - name: Select pool or hosted
+        id: select
+        continue-on-error: true
+        uses: forge-ci/ci.yml/actions/pool-select@a36bc81ad6ada5fb17398e3e7ba38435cc67a951
+        with:
+          labels: ${{ vars.FORGE_POOL_LABELS }}
+          fallback: ${{ inputs.runs-on }}
+
   build:
-    # Self-hosted forge pool (forge-ci/gh-runner docs/pool.md): when the repo
-    # variable FORGE_POOL_LABELS holds a JSON label array, trusted events
-    # (push to master, merge_group, workflow_dispatch, schedule) run on the
-    # pool's Ubuntu 24.04 image. Pull requests always stay hosted (fork safety
-    # and volume). Unset the variable to fall back to hosted at once.
-    runs-on: >-
-      ${{ (vars.FORGE_POOL_LABELS != ''
-           && (github.event_name == 'merge_group'
-               || github.event_name == 'workflow_dispatch'
-               || github.event_name == 'schedule'
-               || (github.event_name == 'push'
-                   && github.ref == format('refs/heads/{0}', github.event.repository.default_branch))))
-          && fromJSON(vars.FORGE_POOL_LABELS) || inputs.runs-on }}
+    needs: pool
+    # Runs when the selector was skipped (pull requests, routing off) or
+    # failed, too: the hosted inputs.runs-on is then the runner.
+    if: ${{ !cancelled() }}
+    runs-on: ${{ fromJSON(needs.pool.outputs.runs-on || toJSON(inputs.runs-on)) }}
     # Bound the job so a hang fails loudly instead of silently.
     #
     # Without this, GitHub's 360-minute default applies: a wedged compile sits
