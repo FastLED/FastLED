@@ -113,6 +113,7 @@ public:
     size_t getTransmissionCount() const FL_NO_EXCEPT override;
     bool isChannelEnabled(void* channel_handle) const FL_NO_EXCEPT override;
     size_t getEnableCount() const FL_NO_EXCEPT override;
+    size_t getWaitAllDoneCount() const FL_NO_EXCEPT override;
     void reset() FL_NO_EXCEPT override;
 
 private:
@@ -134,6 +135,7 @@ private:
     fl::flat_map<fl::i32, u32> mPinRouting;
     size_t mPinRebindCount;
     size_t mEnableCount;
+    size_t mWaitAllDoneCount;
     static constexpr u32 kOtherPeripheral = 0x8000u;
 
     // Waveform capture
@@ -169,6 +171,7 @@ Rmt5PeripheralMockImpl::Rmt5PeripheralMockImpl()
       mPinRouting(),
       mPinRebindCount(0),
       mEnableCount(0),
+      mWaitAllDoneCount(0),
       mHistory(),
       mTransmissionCount(0) {
 }
@@ -391,6 +394,7 @@ bool Rmt5PeripheralMockImpl::transmit(void* channel_handle, void* encoder_handle
 
 bool Rmt5PeripheralMockImpl::waitAllDone(void* channel_handle, u32 timeout_ms) FL_NO_EXCEPT {
     (void)timeout_ms;  // Mock always returns immediately
+    mWaitAllDoneCount++;
 
     MockChannel* channel = findChannel(channel_handle);
     if (channel == nullptr) {
@@ -586,6 +590,10 @@ size_t Rmt5PeripheralMockImpl::getEnableCount() const FL_NO_EXCEPT {
     return mEnableCount;
 }
 
+size_t Rmt5PeripheralMockImpl::getWaitAllDoneCount() const FL_NO_EXCEPT {
+    return mWaitAllDoneCount;
+}
+
 const fl::vector<Rmt5PeripheralMock::TransmissionRecord>&
 Rmt5PeripheralMockImpl::getTransmissionHistory() const FL_NO_EXCEPT {
     return mHistory;
@@ -645,6 +653,7 @@ void Rmt5PeripheralMockImpl::reset() FL_NO_EXCEPT {
     mPinRouting.clear();
     mPinRebindCount = 0;
     mEnableCount = 0;
+    mWaitAllDoneCount = 0;
     mTransmissionCount = 0;
 
     FL_DBG("RMT5_MOCK: Reset to initial state");

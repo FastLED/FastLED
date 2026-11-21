@@ -230,6 +230,9 @@ public:
     /// @brief Total number of successful enableChannel() calls
     virtual size_t getEnableCount() const FL_NO_EXCEPT = 0;
 
+    /// @brief Total number of waitAllDone() calls
+    virtual size_t getWaitAllDoneCount() const FL_NO_EXCEPT = 0;
+
     /// @brief Reset mock to initial state (for testing)
     ///
     /// This method:
