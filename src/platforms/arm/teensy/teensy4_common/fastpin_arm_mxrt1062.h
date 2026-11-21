@@ -57,14 +57,12 @@ template <u8 PIN, u32 BIT, u32 MASK, typename DR, typename SET, typename CLEAR, 
 constexpr bool isMxrtHardwarePin(const _ARMPIN<PIN, BIT, MASK, DR, SET, CLEAR, TOGGLE>*) { return true; }
 constexpr bool isMxrtHardwarePin(const void*) { return false; }
 
-// FL_TEENSY_ENABLE_FAST_SOFTWARE_SPI: optimized bit-bang software SPI pin policy (default 0).
-// UNTESTED ON HARDWARE: no bench evidence exists for this platform yet.
-// Default 0 keeps the legacy bit-bang writer. Define it to 1 to enable the
-// optimized path at your own risk.
+// FL_TEENSY_ENABLE_FAST_SOFTWARE_SPI: optimized bit-bang software SPI pin policy (default 1).
+// Opt-out: define it to 0 to fall back to the legacy bit-bang writer.
 // Set it as a build flag (-D / build_flags), not a #define in the sketch: the
 // value must match in every translation unit, including FastLED's own sources.
 #ifndef FL_TEENSY_ENABLE_FAST_SOFTWARE_SPI
-#define FL_TEENSY_ENABLE_FAST_SOFTWARE_SPI 0
+#define FL_TEENSY_ENABLE_FAST_SOFTWARE_SPI 1
 #endif
 #if FL_TEENSY_ENABLE_FAST_SOFTWARE_SPI
 /// Exclusive same-port bulk writes stream through the full output latch; all

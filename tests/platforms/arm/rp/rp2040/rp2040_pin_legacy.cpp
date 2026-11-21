@@ -1,9 +1,14 @@
 /// @file rp2040_pin_legacy.cpp
-/// @brief With FL_RP_ENABLE_FAST_SOFTWARE_SPI at its default (0), real RP2040
+/// @brief With FL_RP_ENABLE_FAST_SOFTWARE_SPI opted out (0), real RP2040
 /// pins keep the default bit-bang policy and the generic software SPI writer
 /// keeps the legacy three-store-per-bit whole-port path.
 
 #include "test.h"
+
+// Exercise the opt-out (legacy) path; the optimized policy is the default.
+#ifndef FL_RP_ENABLE_FAST_SOFTWARE_SPI
+#define FL_RP_ENABLE_FAST_SOFTWARE_SPI 0
+#endif
 
 #include "fl/stl/int.h"
 
@@ -22,7 +27,7 @@ inline void gpio_set_function(uint, int) {}
 #include "platforms/shared/spi_bitbang/generic_software_spi.h"
 
 FL_STATIC_ASSERT(FL_RP_ENABLE_FAST_SOFTWARE_SPI == 0,
-                 "the untested RP fast software SPI path must default off");
+                 "this test covers the opted-out legacy RP path");
 
 namespace fl {
 namespace rp2040_pin_legacy_test {

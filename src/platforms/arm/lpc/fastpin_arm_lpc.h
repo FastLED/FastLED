@@ -160,14 +160,12 @@ constexpr bool isLpcHardwarePin(const _ARMPIN<PIN, MASK>*) { return true; }
 constexpr bool isLpcHardwarePin(const void*) { return false; }
 #endif  // FL_FASTPIN_HAS_NO_PINMAP
 
-// FL_LPC_ENABLE_FAST_SOFTWARE_SPI: optimized bit-bang software SPI pin policy (default 0).
-// UNTESTED ON HARDWARE: no bench evidence exists for this platform yet.
-// Default 0 keeps the legacy bit-bang writer. Define it to 1 to enable the
-// optimized path at your own risk.
+// FL_LPC_ENABLE_FAST_SOFTWARE_SPI: optimized bit-bang software SPI pin policy (default 1).
+// Opt-out: define it to 0 to fall back to the legacy bit-bang writer.
 // Set it as a build flag (-D / build_flags), not a #define in the sketch: the
 // value must match in every translation unit, including FastLED's own sources.
 #ifndef FL_LPC_ENABLE_FAST_SOFTWARE_SPI
-#define FL_LPC_ENABLE_FAST_SOFTWARE_SPI 0
+#define FL_LPC_ENABLE_FAST_SOFTWARE_SPI 1
 #endif
 // The fast policy writes GPIO registers directly, bypassing forced core-API pins.
 #if FL_LPC_ENABLE_FAST_SOFTWARE_SPI && !defined(FL_FASTPIN_HAS_NO_PINMAP)

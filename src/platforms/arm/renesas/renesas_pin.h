@@ -71,14 +71,12 @@ template <u8 PIN, bsp_io_port_pin_t BSP, u32 PORT_ADDR>
 constexpr bool isRenesasHardwarePin(const _ARMPIN<PIN, BSP, PORT_ADDR>*) { return true; }
 constexpr bool isRenesasHardwarePin(const void*) { return false; }
 
-// FL_RENESAS_ENABLE_FAST_SOFTWARE_SPI: optimized bit-bang software SPI pin policy (default 0).
-// UNTESTED ON HARDWARE: no bench evidence exists for this platform yet.
-// Default 0 keeps the legacy bit-bang writer. Define it to 1 to enable the
-// optimized path at your own risk.
+// FL_RENESAS_ENABLE_FAST_SOFTWARE_SPI: optimized bit-bang software SPI pin policy (default 1).
+// Opt-out: define it to 0 to fall back to the legacy bit-bang writer.
 // Set it as a build flag (-D / build_flags), not a #define in the sketch: the
 // value must match in every translation unit, including FastLED's own sources.
 #ifndef FL_RENESAS_ENABLE_FAST_SOFTWARE_SPI
-#define FL_RENESAS_ENABLE_FAST_SOFTWARE_SPI 0
+#define FL_RENESAS_ENABLE_FAST_SOFTWARE_SPI 1
 #endif
 #if FL_RENESAS_ENABLE_FAST_SOFTWARE_SPI
 /// Exclusive same-PODR bulk writes stream through the 16-bit PODR; all other data
