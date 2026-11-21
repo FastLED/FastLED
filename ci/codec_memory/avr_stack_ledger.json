@@ -98,7 +98,7 @@
     "jpeg.cpp.hpp:static bool fl::Jpeg::decodeStream(const fl::JpegConfig&, fl::filebuf_ptr, fl::Frame*, fl::u32, fl::function<bool(float)>)": 171,
     "jpeg.cpp.hpp:static bool fl::Jpeg::decodeWithTimeout(const fl::JpegConfig&, fl::span<const unsigned char, 65535>, fl::Frame*, fl::u32, float*, fl::string*)": 173,
     "json.cpp.hpp:static fl::shared_ptr<fl::json_value> fl::json_value::parse2(const fl::string&)": 197,
-    "json.cpp.hpp:virtual fl::{anonymous}::ParseState fl::{anonymous}::JsonBuilder::on_token(fl::{anonymous}::JsonToken, const fl::span<const char>&)": 181,
+    "json.cpp.hpp:virtual fl::{anonymous}::ParseState fl::{anonymous}::JsonBuilder::on_token(fl::{anonymous}::JsonToken, const fl::span<const char>&)": 175,
     "json_dispatch.cpp.hpp:fl::TypeConversionResult fl::detail::json_convert_to_bool_core(const fl::json_value&, bool*)": 238,
     "json_dispatch.cpp.hpp:fl::TypeConversionResult fl::detail::json_convert_to_i64_core(const fl::json_value&, fl::i64*)": 239,
     "json_dispatch.cpp.hpp:fl::TypeConversionResult fl::detail::json_convert_to_string_core(const fl::json_value&, fl::string*)": 147,

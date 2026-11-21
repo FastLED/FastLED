@@ -885,6 +885,21 @@ private:
     // documents without one never build (or carry) the interner's hash map.
     fl::unique_ptr<fl::StringInterner> mInterner;
 
+    // Pushes a container frame. Frames past the inline buffer spill to the
+    // heap, and vector::push_back silently drops the element when that
+    // allocation fails; continuing would let closing tokens pop the wrong
+    // frames, so report the failure and abort the parse instead.
+    bool push_frame(StackFrame::Type type,
+                    const fl::shared_ptr<json_value>& value) FL_NO_EXCEPT {
+        const fl::size before = mStack.size();
+        mStack.push_back({type, value, ""});
+        if (mStack.size() != before + 1) {
+            return false;
+        }
+        mDepth++;
+        return true;
+    }
+
     template <typename Str>
     fl::string intern(const Str& str) FL_NO_EXCEPT {
         // Mirrors StringInterner::intern: SSO-sized strings are never interned.
@@ -1058,8 +1073,9 @@ public:
             case JsonToken::LBRACE: {
                 auto obj_val = fl::make_shared<json_value>(json_object{});
                 // Don't push to parent yet - will push in RBRACE
-                mStack.push_back({StackFrame::OBJECT, obj_val, ""});
-                mDepth++;
+                if (!push_frame(StackFrame::OBJECT, obj_val)) {
+                    return ParseState::ERROR;
+                }
                 return ParseState::KEEP_GOING;
             }
 
@@ -1077,8 +1093,9 @@ public:
             case JsonToken::LBRACKET: {
                 auto arr_val = fl::make_shared<json_value>(json_array{});
                 // Don't push to parent yet - will push in RBRACKET after optimization
-                mStack.push_back({StackFrame::ARRAY, arr_val, ""});
-                mDepth++;
+                if (!push_frame(StackFrame::ARRAY, arr_val)) {
+                    return ParseState::ERROR;
+                }
                 return ParseState::KEEP_GOING;
             }
 
