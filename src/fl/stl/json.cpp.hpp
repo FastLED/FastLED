@@ -21,6 +21,7 @@
 #include "fl/stl/cstring.h"
 #include "fl/stl/limits.h"
 #include "fl/stl/move.h"
+#include "fl/stl/unique_ptr.h"
 #include "fl/stl/strstream.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/string_interner.h"
@@ -868,7 +869,15 @@ private:
         fl::string pending_key;  // For objects: key waiting for value
     };
 
-    fl::vector_inlined<StackFrame, 8> mStack;  // Inline first 8 frames (most JSON is shallow)
+    // Inline the first frames (most JSON is shallow); deeper nesting spills
+    // to the heap. Each frame holds an fl::string, so small-RAM targets keep
+    // only 2 inline to bound the builder's stack frame (#5329).
+#if FL_PLATFORM_HAS_LARGE_MEMORY
+    static constexpr fl::size kInlineFrames = 8;
+#else
+    static constexpr fl::size kInlineFrames = 2;
+#endif
+    fl::vector_inlined<StackFrame, kInlineFrames> mStack;
     fl::shared_ptr<json_value> mRoot;
     int mDepth;
     // String interning enabled for large strings (> 64 bytes) that overflow SSO
@@ -1168,25 +1177,35 @@ public:
     }
 };
 
+// Each phase runs in its own out-of-line frame, so the validator and the
+// builder (with its inline frame stack) are never on the stack together. As
+// one function this was an ~830 B frame on AVR (#5329).
+FL_NO_INLINE bool json_parse2_validate(const fl::string& txt) FL_NO_EXCEPT {
+    JsonTokenizer tokenizer;
+    JsonValidator validator;
+    return tokenizer.parse(txt, validator) && validator.is_valid();
+}
+
+// The builder (frame stack plus string interner) lives on the heap: it is
+// transient, and the DOM it builds is heap-allocated anyway.
+FL_NO_INLINE fl::shared_ptr<json_value> json_parse2_build(const fl::string& txt) FL_NO_EXCEPT {
+    JsonTokenizer tokenizer;
+    fl::unique_ptr<JsonBuilder> builder = fl::make_unique<JsonBuilder>();
+    if (!builder || !tokenizer.parse(txt, *builder)) {
+        return fl::make_shared<json_value>(nullptr);
+    }
+    return builder->get_result();
+}
+
 }  // namespace
 
 // PARSE2 IMPLEMENTATION - Milestone 8: Two-phase parser with validation
 fl::shared_ptr<json_value> json_value::parse2(const fl::string& txt) FL_NO_EXCEPT {
-    JsonTokenizer tokenizer;
-
-    // Phase 1: Validate
-    JsonValidator validator;
-    if (!tokenizer.parse(txt, validator) || !validator.is_valid()) {
+    // Phase 1: Validate. Phase 2: Build.
+    if (!json_parse2_validate(txt)) {
         return fl::make_shared<json_value>(nullptr);
     }
-
-    // Phase 2: Build
-    JsonBuilder builder;
-    if (!tokenizer.parse(txt, builder)) {
-        return fl::make_shared<json_value>(nullptr);
-    }
-
-    return builder.get_result();
+    return json_parse2_build(txt);
 }
 
 // Phase 1 validation only (for testing - MUST allocate zero heap memory)

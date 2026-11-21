@@ -148,3 +148,14 @@ FL_TEST_CASE("StackTrace - dump output") {
     FL_CHECK(ScopedTrace::depth() == 3);
     FL_TRACE_DUMP();  // Should print stack trace via FL_DBG
 }
+
+FL_TEST_CASE("StackTrace - dump exact format") {
+    ScopedTrace::clear();
+    FL_CHECK(ScopedTrace::dump() == fl::string("Stack trace (depth 0):\n  <empty>\n"));
+
+    ScopedTrace::push("alpha", 12);
+    ScopedTrace::push("beta", 0);  // line 0 omits the "(line)" suffix
+    FL_CHECK(ScopedTrace::dump() ==
+             fl::string("Stack trace (depth 2):\n  [0] alpha(12)\n  [1] beta\n"));
+    ScopedTrace::clear();
+}

@@ -268,4 +268,43 @@ FL_TEST_CASE("aligned_alloc_via_malloc honours alignment (#4817)") {
     // size + alignment overhead would wrap: must fail, not under-allocate
     FL_CHECK(fl::detail::aligned_alloc_via_malloc(64, static_cast<fl::size_t>(-1) - 8) == nullptr);
 }
+namespace {
+struct QsortBigElem {
+    int key;
+    char pad[96];  // larger than the 64 B insertion-sort buffer
+};
+int compare_big_elems(const void* a, const void* b) {
+    const int ka = static_cast<const QsortBigElem*>(a)->key;
+    const int kb = static_cast<const QsortBigElem*>(b)->key;
+    return (ka > kb) - (ka < kb);
+}
+}  // namespace
+
+FL_TEST_CASE("fl::qsort - elements larger than the insertion buffer") {
+    QsortBigElem arr[40];
+    for (int i = 0; i < 40; ++i) {
+        arr[i].key = (i * 17) % 40;
+        for (int j = 0; j < 96; ++j) {
+            arr[i].pad[j] = static_cast<char>(arr[i].key + j);
+        }
+    }
+    fl::qsort(arr, 40, sizeof(QsortBigElem), compare_big_elems);
+    for (int i = 0; i < 40; ++i) {
+        FL_CHECK(arr[i].key == i);
+        // Payload must travel with its key.
+        FL_CHECK(arr[i].pad[0] == static_cast<char>(i));
+        FL_CHECK(arr[i].pad[95] == static_cast<char>(i + 95));
+    }
+}
+
+FL_TEST_CASE("fl::qsort - presorted and reversed inputs") {
+    static int arr[2000];
+    for (int i = 0; i < 2000; ++i) arr[i] = i;
+    fl::qsort(arr, 2000, sizeof(int), compare_ints);
+    for (int i = 0; i < 2000; ++i) FL_CHECK_EQ(arr[i], i);
+    for (int i = 0; i < 2000; ++i) arr[i] = 2000 - i;
+    fl::qsort(arr, 2000, sizeof(int), compare_ints);
+    for (int i = 0; i < 2000; ++i) FL_CHECK_EQ(arr[i], i + 1);
+}
+
 } // FL_TEST_FILE
