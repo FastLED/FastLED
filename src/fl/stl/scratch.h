@@ -33,13 +33,15 @@
 ///  - Scoped use only. The type is neither copyable nor movable, and
 ///    releases must be LIFO (debug builds assert on a non-LIFO release,
 ///    which only happens if a scratch is heap-allocated or otherwise
-///    outlives a younger one). Release builds do not assert: a non-LIFO
-///    release leaves the side stack's top in place, so the released bytes
-///    (and any older frame released beneath them) stay reserved for the
-///    arena's lifetime. Deliberate (#5327): it never hands live memory out
-///    twice, and recovery would need bookkeeping in the inlined release path
-///    on the small-stack targets this exists for. A leaked arena shows up as
-///    later leases coming back empty.
+///    outlives a younger one). Release builds do not assert, except on
+///    Emscripten, whose FL_ASSERT is always active (it logs and breaks into
+///    the debugger). Either way a non-LIFO release leaves the side stack's
+///    top in place, so the released bytes (and any older frame released
+///    beneath them) stay reserved for the arena's lifetime. Deliberate
+///    (#5327): it never hands live memory out twice, and recovery would need
+///    bookkeeping in the inlined release path on the small-stack targets this
+///    exists for. A leak shrinks the capacity left for later leases, so a
+///    lease larger than what remains comes back empty.
 ///  - `T` must be trivially destructible (no destructor is ever run).
 ///  - Not ISR-safe and not thread-safe: never use it from an interrupt
 ///    handler. A non-zero capacity is rejected on multithreaded builds
@@ -200,7 +202,7 @@ struct global_scratch_arena {
                                              fl::size bytes) FL_NO_EXCEPT {
         const bool lifo = side_stack_pop(sStorage.state, sStorage.bytes,
                                          saved_top, block, bytes);
-        FL_UNUSED(lifo);  // FL_ASSERT compiles to nothing in release builds
+        FL_UNUSED(lifo);  // FL_ASSERT compiles to nothing in release builds (not on Emscripten)
         FL_ASSERT(lifo, "fl::scratch released out of LIFO order");
     }
     static fl::size used() FL_NO_EXCEPT { return sStorage.state.top; }
