@@ -68,7 +68,7 @@
 ///
 /// Renesas Platforms (ARM-based):
 /// - FL_IS_RENESAS: General Renesas platform (any Renesas variant)
-/// - FL_IS_RENESAS_RA4M1: Renesas RA4M1 (Cortex-M4, 48 MHz) - Arduino UNO R4 Minima/WiFi
+/// - FL_IS_RENESAS_RA4M1: Renesas RA4M1 (Cortex-M4, 48 MHz) - Arduino UNO R4 Minima/WiFi, Nano R4
 ///
 /// AVR Platforms:
 /// - FL_IS_AVR: General AVR platform
