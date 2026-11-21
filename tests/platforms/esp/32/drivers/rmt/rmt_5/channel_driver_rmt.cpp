@@ -4,7 +4,7 @@
 /// Tests the ChannelEngineRMT business logic using the mock peripheral:
 /// - Single channel transmission
 /// - Multi-channel time-multiplexing
-/// - State machine progression (READY → BUSY → READY)
+/// - State machine progression (READY → BUSY/DRAINING → READY)
 /// - Buffer management and completion callbacks
 ///
 /// These tests run ONLY on stub platforms (host-based testing).
@@ -130,8 +130,9 @@ FL_TEST_CASE("RMT5 driver - single channel transmission") {
     FL_CHECK(mock.getTransmissionCount() >= 1);
     FL_CHECK(ch->isInUse() == true);
 
-    // Engine should be BUSY
-    FL_CHECK(driver->poll() == DriverState::BUSY);
+    // Every strip is on the wire and its bytes live in the driver's pool
+    // buffer, so the engine reports DRAINING (#2994).
+    FL_CHECK(driver->poll() == DriverState::DRAINING);
 
     // Simulate transmission completion
     const auto& history = mock.getTransmissionHistory();
@@ -298,7 +299,7 @@ FL_TEST_CASE("RMT5 driver - reused channel reclaims a rerouted pin") {
 // Test Suite: State Machine
 //=============================================================================
 
-FL_TEST_CASE("RMT5 driver - state progression READY → BUSY → READY") {
+FL_TEST_CASE("RMT5 driver - state progression READY → DRAINING → READY") {
     resetMock();
     auto& mock = Rmt5PeripheralMock::instance();
     auto driver = ChannelEngineRMT::create();
@@ -311,8 +312,11 @@ FL_TEST_CASE("RMT5 driver - state progression READY → BUSY → READY") {
     driver->enqueue(ch);
     driver->show();
 
-    // State should be BUSY after show()
-    FL_CHECK(driver->poll() == DriverState::BUSY);
+    // Nothing is pending once show() has submitted the only strip, so the
+    // driver is DRAINING, not BUSY. ChannelManager::onEndFrame() returns on
+    // DRAINING; reporting BUSY made FastLED.show() block for the whole wire
+    // time and the reset latch on every frame (#2994).
+    FL_CHECK(driver->poll() == DriverState::DRAINING);
 
     // Simulate completion
     if (mock.getChannelCount() > 0) {
@@ -321,7 +325,7 @@ FL_TEST_CASE("RMT5 driver - state progression READY → BUSY → READY") {
     }
 
     // Poll multiple times to process completion
-    DriverState state = DriverState::BUSY;
+    DriverState state = DriverState::DRAINING;
     for (int i = 0; i < 10 && state != DriverState::READY; i++) {
         state = driver->poll();
     }
@@ -412,7 +416,8 @@ FL_TEST_CASE("RMT5 driver - strips beyond channel limit wait for a free channel"
     FL_CHECK(driver->poll() == DriverState::BUSY);
 
     mock.simulateTransmitDone(reinterpret_cast<void*>(1));
-    driver->poll();
+    // The second strip is now on the wire and nothing is pending.
+    FL_CHECK(driver->poll() == DriverState::DRAINING);
     FL_CHECK_EQ(mock.getTransmissionCount(), 2u);
 
     for (int i = 0; i < 10 && second->isInUse(); i++) {

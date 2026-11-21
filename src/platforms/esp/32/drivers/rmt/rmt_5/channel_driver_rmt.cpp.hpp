@@ -392,8 +392,10 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
         }
 
         // Check if any pending channels remain
+        bool anyPending = false;
         if (!mPendingChannels.empty()) {
             anyActive = true;
+            anyPending = true;
             FL_LOG_RMT("Pending channels: " << mPendingChannels.size());
         } else if (activeCount > 0 || hasChannelInUse()) {
             // hasChannelInUse(): a release above may have started a pending
@@ -405,9 +407,9 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
             anyActive = false;
         }
 
-        // When transmission completes (READY or ERROR), clear the "in use"
-        // flags and release the transmitted channels
-        DriverState state = anyActive ? DriverState::BUSY : DriverState::READY;
+        // When transmission completes (READY), clear the "in use" flags and
+        // release the transmitted channels.
+        DriverState state = transmissionState(anyActive, anyPending);
         if (state == DriverState::READY) {
             for (auto &channel : mTransmittingChannels) {
                 channel->setInUse(false);
@@ -423,6 +425,24 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
     }
 
   private:
+    /// @brief Map transmission progress to a driver state.
+    ///
+    /// BUSY only while strips still wait for a hardware channel. Once every
+    /// strip is on the wire its bytes live in our pool buffer, so the state is
+    /// DRAINING: ChannelManager::onEndFrame() returns on DRAINING, which lets
+    /// FastLED.show() return while RMT finishes the frame in the background.
+    /// Reporting BUSY here made every show() block for the full wire time
+    /// plus the reset latch (#2994).
+    static DriverState::Value transmissionState(bool anyActive, bool anyPending) FL_NO_EXCEPT {
+        if (!anyActive) {
+            return DriverState::READY;
+        }
+        if (anyPending) {
+            return DriverState::BUSY;
+        }
+        return DriverState::DRAINING;
+    }
+
     /// @brief RMT channel state (replaces RmtWorkerSimple)
     struct ChannelState {
         ChannelState() FL_NO_EXCEPT
