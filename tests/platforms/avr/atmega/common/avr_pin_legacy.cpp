@@ -1,8 +1,13 @@
 /// @file avr_pin_legacy.cpp
-/// @brief With FL_AVR_ENABLE_FAST_SOFTWARE_SPI at its default (0), the generic
+/// @brief With FL_AVR_ENABLE_FAST_SOFTWARE_SPI opted out (0), the generic
 /// software SPI writer keeps the legacy three-store-per-bit whole-port path.
 
 #include "test.h"
+
+// Exercise the opt-out (legacy) path; the optimized policy is the default.
+#ifndef FL_AVR_ENABLE_FAST_SOFTWARE_SPI
+#define FL_AVR_ENABLE_FAST_SOFTWARE_SPI 0
+#endif
 
 #include "platforms/avr/atmega/common/avr_pin.h"
 
@@ -13,7 +18,7 @@
 #include "platforms/shared/spi_bitbang/generic_software_spi.h"
 
 FL_STATIC_ASSERT(FL_AVR_ENABLE_FAST_SOFTWARE_SPI == 0,
-                 "the untested AVR fast software SPI path must default off");
+                 "this test covers the opted-out legacy AVR path");
 
 namespace fl {
 namespace avr_pin_legacy_test {

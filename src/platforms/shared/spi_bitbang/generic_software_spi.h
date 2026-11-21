@@ -225,8 +225,8 @@ public:
 	/// @tparam BIT the bit index in the byte
 	/// @param b the byte to read the bit from
 	template <u8 BIT> __attribute__((always_inline, hot)) inline static void writeBit(u8 b) FL_NO_EXCEPT {
-		// The fast pin policy is untested on ESP32 hardware; fastpin_esp32.h
-		// selects the 3.10.9 output unless FL_ESP32_ENABLE_FAST_SOFTWARE_SPI is 1.
+		// fastpin_esp32.h selects the 3.10.9 output when
+		// FL_ESP32_ENABLE_FAST_SOFTWARE_SPI is 0 (opt-out; default 1).
 		// Tag dispatch: only the selected writer is instantiated, so pins
 		// without toggle() never reach writeBitEsp32Legacy.
 		writeBitSelect<BIT>(b, fl::integral_constant<bool,

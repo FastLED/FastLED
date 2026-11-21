@@ -318,17 +318,15 @@ FASTLED_FORCE_INLINE void gpioStoreBarrier() FL_NO_EXCEPT {
 #endif
 }
 
-// FL_ESP32_ENABLE_FAST_SOFTWARE_SPI: optimized bit-bang software SPI pin policy (default 0).
-// UNTESTED ON HARDWARE: no bench evidence exists for this platform yet.
-// Default 0 keeps the legacy bit-bang writer. Define it to 1 to enable the
-// optimized path at your own risk.
+// FL_ESP32_ENABLE_FAST_SOFTWARE_SPI: optimized bit-bang software SPI pin policy (default 1).
+// Opt-out: define it to 0 to fall back to the legacy bit-bang writer.
 // Set it as a build flag (-D / build_flags), not a #define in the sketch: the
 // value must match in every translation unit, including FastLED's own sources.
 #ifndef FL_ESP32_ENABLE_FAST_SOFTWARE_SPI
-#define FL_ESP32_ENABLE_FAST_SOFTWARE_SPI 0
+#define FL_ESP32_ENABLE_FAST_SOFTWARE_SPI 1
 #endif
 #if !FL_ESP32_ENABLE_FAST_SOFTWARE_SPI
-/// Default: GenericSoftwareSPIOutput keeps the FastLED 3.10.9 ESP32 writeBit()
+/// Opt-out (flag 0): GenericSoftwareSPIOutput keeps the FastLED 3.10.9 ESP32 writeBit()
 /// pin sequence and delays (writeBitEsp32Legacy), for mapped and no-pin-map pins.
 template <u8 PIN> struct BitbangPin<FastPin<PIN>> : BitbangPinDefaults<FastPin<PIN>> {
     static constexpr bool kEsp32LegacyWriteBit = true;

@@ -7,7 +7,7 @@
 
 #include "test.h"
 
-// Exercise the opt-in optimized bit-bang policy; it defaults off.
+// Exercise the optimized bit-bang policy (the default; the flag is opt-out).
 #ifndef FL_RP_ENABLE_FAST_SOFTWARE_SPI
 #define FL_RP_ENABLE_FAST_SOFTWARE_SPI 1
 #endif
