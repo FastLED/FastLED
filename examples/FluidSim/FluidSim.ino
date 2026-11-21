@@ -47,13 +47,14 @@ fl::UIDescription description(
     "Concept by Stefan Petrick, solver implementation for FastLED.");
 fl::UISlider viscosity("Viscosity", 0.0001f, 0.0f, 0.001f, 0.00001f);
 fl::UISlider diffusion("Diffusion", 0.0001f, 0.0f, 0.001f, 0.00001f);
-fl::UISlider dissipation("Density Dissipation", 0.99f, 0.90f, 1.0f, 0.001f);
+fl::UISlider dissipation("Density Dissipation", 0.995f, 0.90f, 1.0f, 0.001f);
 fl::UISlider forceStrength("Force Strength", 12.0f, 0.5f, 40.0f, 0.1f);
-fl::UISlider splatRadius("Splat Radius", 2.5f, 1.0f, 12.0f, 0.1f);
-fl::UISlider jetSpeed("Jet Angle Speed", 0.35f, 0.0f, 2.0f, 0.01f);
+fl::UISlider splatRadius("Splat Radius", 2.5f, 0.5f, 12.0f, 0.1f);
+fl::UISlider jetSpeed("Jet Angle Speed", 0.35f, 0.0f, 1.0f, 0.01f);
+fl::UISlider dyeEnergy("Dye Energy (per second)", 0.9f, 0.0f, 5.0f, 0.05f);
 fl::UISlider iterations("Solver Iterations", 12, 4, 40, 1);
 fl::UIGroup solverGroup("Solver", viscosity, diffusion, dissipation, iterations);
-fl::UIGroup injectorGroup("Injectors", forceStrength, splatRadius, jetSpeed);
+fl::UIGroup injectorGroup("Injectors", forceStrength, splatRadius, jetSpeed, dyeEnergy);
 fl::UIDropdown colorMode("Color Mode", {"Heat", "Ink", "Aurora"});
 fl::UIGroup appearanceGroup("Appearance", colorMode);
 
@@ -307,19 +308,11 @@ void loop() {
     const float jet = jetSpeed.as<float>();
 
     // Three Gaussian splat injectors whose angles are noise-modulated.
-    // Force is applied every frame so the solver keeps moving; dye is injected
-    // only every 0.2 s, otherwise fresh blobs swamp the advected structure and
-    // the image reads as a static heat map instead of a fluid.
-    // Both are dt-scaled, so the visual speed is frame-rate independent; the
-    // dye interval is wall-clock too, so a 20 fps part gets the same injection
-    // cadence as a 60 fps one.
-    const float kDyeInterval = 0.2f;
-    static float dyeAccumulator = 0.0f;
-    dyeAccumulator += dt;
-    const bool injectDye = dyeAccumulator >= kDyeInterval;
-    if (injectDye) {
-        dyeAccumulator = 0.0f;
-    }
+    // Delta channel: force AND dye are transferred onto the fluid plane every
+    // frame, as a dt-scaled increment. Gating the dye to a slower cadence made
+    // the plate read as a series of blobs rather than a continuous energy
+    // transfer, and it broke frame-rate parity between the two channels.
+    const float dyeRate = dyeEnergy.as<float>(); // density units per second
     for (int k = 0; k < 3; ++k) {
         const float phase = t * jet + static_cast<float>(k) * 2.094f;
         const float angle = fl::sinf(phase) * 1.7f + fl::cosf(phase * 0.7f);
@@ -330,22 +323,22 @@ void loop() {
         const float mag = forceStrength.as<float>();
         solver.addForce(dt, cx, cy, fl::cosf(angle) * mag, fl::sinf(angle) * mag,
                         splatRadius.as<float>());
-        if (injectDye) {
-            // Pass the injection interval rather than the frame dt: the dye is
-            // emitted once per 0.2 s window, so the mass per injection must be
-            // constant, not proportional to the frame time.
-            solver.addDensity(kDyeInterval, cx, cy, 0.9f, splatRadius.as<float>());
-        }
+        // Same delta semantics as the force: energy per second, scaled by dt.
+        solver.addDensity(dt, cx, cy, dyeRate, splatRadius.as<float>());
     }
 
     solver.step(dt, viscosity.as<float>(), diffusion.as<float>(),
                 dissipation.as<float>(), iterations.as<int>());
 
-    // Render density to the matrix. Exposure follows the peak with a slow
-    // decay (2 s time constant) instead of renormalising every frame: a
-    // per-frame 1/peak would strobe the whole matrix whenever the brightest
-    // cell changes, and it hides whether density is actually bounded.
+    // Render density to the matrix. This is a *delta* transfer curve, not a
+    // per-frame normalisation: brightness is a fixed, monotonic function of the
+    // energy actually present on the fluid plane, so a cell
+    // that has received twice the energy reads brighter and dims as dissipation
+    // drains it. Normalising by the frame's peak made every frame read 0..100%
+    // and threw away the energy history.
     const int mode = colorMode.as_int();
+    const float dBlack = 0.020f; // black level: ambient haze maps to 0
+    const float dRange = 0.300f; // energy above black level that reaches full scale
     float peak = 0.0f;
     for (int y = 0; y < HEIGHT; ++y) {
         for (int x = 0; x < WIDTH; ++x) {
@@ -355,25 +348,12 @@ void loop() {
             }
         }
     }
-    static float smoothPeak = 0.0f;
-    if (peak > smoothPeak) {
-        smoothPeak = peak; // rise immediately so nothing clips
-    } else {
-        const float k = 1.0f - fl::expf(-dt / 2.0f);
-        smoothPeak += (peak - smoothPeak) * k;
-    }
-    if (smoothPeak < 0.001f) {
-        smoothPeak = 0.001f;
-    }
-    const float exposure = 1.0f / smoothPeak;
     for (int y = 0; y < HEIGHT; ++y) {
         for (int x = 0; x < WIDTH; ++x) {
-            // Quadratic tone map: pushes the diffuse haze down so the advected
-            // filaments and vortex cores read against a dark background. A
-            // sqrt map leaves the whole frame mid-tone, which hides structure.
-            const float n = fl::clamp(solver.density(x + 1, y + 1) * exposure, 0.0f, 1.0f);
-            const float d = n * n;
-            const uint8_t v = static_cast<uint8_t>(d * 255.0f);
+            const float d = solver.density(x + 1, y + 1);
+            float v01 = (d > dBlack) ? (d - dBlack) / dRange : 0.0f;
+            if (v01 > 1.0f) v01 = 1.0f;
+            const uint8_t v = static_cast<uint8_t>(v01 * 255.0f);
             CRGB c;
             if (mode == 0) {
                 c = HeatColor(v);
