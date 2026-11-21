@@ -453,6 +453,6 @@
 # is no longer linked (writeWS2812 -243 B, ScaledPixelIteratorRGB::advance
 # -96 B); the inlined RGB loop in showPixels (+226 B) and the RGBW/RGBWW-only
 # writeWS2812WhiteChannel (+179 B) replace it. Local fresh builds: master
-# 320383 B, PR 320443 B; the hosted job runs ~8 B above local. Neither the
+# 320383 B, PR 320447 B (with the has() bound); hosted measured 320443 B before it. Neither the
 # 320503 B flash ceiling nor the 40016 B RAM ceiling moves.
 320451

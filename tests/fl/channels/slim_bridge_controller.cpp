@@ -855,4 +855,17 @@ FL_TEST_CASE("Direct RGB encode matches PixelIterator::writeWS2812 byte for byte
     }
 }
 
+// The direct encode sizes its loop from expectedSize; a controller that has
+// already advanced has fewer pixels left than size() reports, so encoding it
+// would read past the end. It must drop the frame instead.
+FL_TEST_CASE("Direct RGB encode rejects an already-advanced controller #5357") {
+    CRGB leds[4] = {CRGB::Red, CRGB::Green, CRGB::Blue, CRGB::White};
+    PixelController<RGB> pixels(leds, 4, ColorAdjustment::noAdjustment(), DISABLE_DITHER);
+    pixels.advanceData();
+
+    fl::vector<u8> encoded;
+    fl::detail::encode_ws2812_rgb_direct(pixels, encoded, 4 * 3);
+    FL_CHECK(encoded.empty());
+}
+
 }  // FL_TEST_FILE

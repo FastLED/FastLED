@@ -73,9 +73,12 @@ void encode_ws2812_rgb_direct(PixelControllerT& pixels, Buffer& encoded,
     // The caller sizes expectedSize as pixels.size() * 3. fl::vector::resize()
     // leaves the size unchanged when it cannot grow, so never write past what
     // was actually allocated: an empty buffer makes the caller drop the frame.
+    // size() is the original length; has() bounds the loop by the pixels that
+    // remain, so an already-advanced controller is never read past its end.
     encoded.resize(expectedSize);
     if (encoded.size() != expectedSize ||
-        expectedSize != static_cast<fl::size>(pixels.size()) * 3u) {
+        expectedSize != static_cast<fl::size>(pixels.size()) * 3u ||
+        !pixels.has(pixels.size())) {
         encoded.clear();
         return;
     }
