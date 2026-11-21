@@ -64,6 +64,14 @@ jobs:
           FL_REQUIRE_TINY_ELF: '1'
         run: uv run python -m pytest ci/tests/test_tiny_links_no_float.py -v
 
+      # FastLED#5332: the uno build above left avr-gcc and the arduino-avr core
+      # in fbuild's cache (and their paths in its compile database). Recompile
+      # the unity TUs with -fstack-usage and fail if any ATmega328P stack frame
+      # grew past ci/codec_memory/avr_stack_ledger.json. One-sided ratchet.
+      - name: AVR stack-frame ratchet (FastLED#5332)
+        if: inputs.board == 'uno' && inputs.extra_args == ''
+        run: uv run python ci/codec_memory/audit.py --avr-stack
+
       - name: Inspect Binary
         if: always()
         continue-on-error: true

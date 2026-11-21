@@ -103,8 +103,20 @@ is exact. `dynamic,bounded` is an upper bound on the whole frame. Plain
 `dynamic` (a VLA/`alloca`, or other unbounded adjustments) means the number is
 only the fixed part. Templates that are only instantiated by user code (e.g.
 `SerialPort::printf`) do not appear; compile a two-line probe `.cpp` that calls
-them. `ci/codec_memory/audit.py` does the same for the MP3 codecs on the host
-compiler, with a call graph; it is not set up for AVR.
+them.
+
+The recipe is automated as a ratchet (FastLED#5332): after `bash compile uno
+--examples Blink`, `uv run python ci/codec_memory/audit.py --avr-stack` reads
+the avr-gcc and core paths from the uno compile database, compiles every unity
+TU with the flags above, and compares each frame of 128 B or more against
+`ci/codec_memory/avr_stack_ledger.json` (keyed `<file>:<function>`; avr-gcc 7.3
+truncates names containing `...`). A tracked frame that grows, or a new frame
+at or above the floor, fails; frames that shrink or vanish only print a note.
+`--avr-stack-update` rewrites the ledger (commit it to accept growth or tighten
+the ratchet). CI runs it in `check_uno_size.yml` (the `ci-platform:uno` label,
+`ci-full`, or a push to `master`). It is a per-TU inventory of every emitted
+body, not a link-time call graph; the MP3 codec audit in the same script has a
+call graph on the host compiler.
 
 FastLED#5307 (ATmega328P, avr-gcc 7.3 `-Os`) used this inventory:
 
