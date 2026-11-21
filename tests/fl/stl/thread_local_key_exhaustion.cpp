@@ -26,8 +26,9 @@ FL_TEST_FILE(FL_FILEPATH) {
 // deliberately not injected (#5322). Its only extra code is freeing the
 // storage it just allocated and falling through to fallbackStorage(), the
 // same function this test exercises. With a valid key, setspecific fails only
-// on ENOMEM, which cannot be forced portably without interposing libc
-// symbols (blocked by macOS two-level namespaces, and absent on Windows).
+// on ENOMEM, which cannot be forced portably: it needs a per-platform libc
+// symbol interposition mechanism (LD_PRELOAD or --wrap on Linux,
+// __DATA,__interpose on macOS, import-table patching on Windows).
 // A test-only key-policy template parameter would widen ThreadLocalReal's
 // type for every user and is not worth it for two lines of code.
 FL_TEST_CASE("ThreadLocal - key creation failure falls back to a shared slot") {
