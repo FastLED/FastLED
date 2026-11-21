@@ -38,6 +38,13 @@ void delay(fl::u32 ms) FL_NO_EXCEPT {
 }
 
 void delayMicroseconds(fl::u32 us) FL_NO_EXCEPT {
+#if !defined(ARDUINO) || defined(FASTLED_USE_STUB_ARDUINO)
+    // Report the requested wait to the same observer as delayNanoseconds so
+    // wire-timing tests see microsecond idle/reset waits too (#5066).
+    // Saturate: us * 1000 overflows u32 above ~4.29 s.
+    const fl::u32 kMaxUs = 0xFFFFFFFFu / 1000u;
+    fl::stub::recordNanosecondDelay(us > kMaxUs ? 0xFFFFFFFFu : us * 1000u);
+#endif
     // Fast-exit example runs (delay override installed) skip the sleep too:
     // bit-bang reset pulses would otherwise sleep once per show() (#4709).
     if (FL_STUB_SKIP_TIMING()) {

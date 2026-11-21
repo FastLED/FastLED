@@ -53,14 +53,32 @@ class MY9221Controller : public CPixelLEDController<RGB_ORDER> {
 	/// Datasheet latch: hold DCKI low for >220 us after last data, then pulse DI 4x.
 	static constexpr fl::u32 kLatchDelayUs = 230;
 
+	// Minimum wire intervals from the MY-Semi MY9221 datasheet v1.0 (pp 6-7,
+	// 15), enforced by explicit waits instead of incidental GPIO latency
+	// (#5066). Each wait is a floor; slow MCUs round up to whole cycles.
+	/// DI setup before a DCKI edge (datasheet >= 10 ns).
+	static constexpr fl::u32 kDataSetupNs = 10;
+	/// DCKI pulse duration, each phase (datasheet >= 50 ns). DI changes only
+	/// after this wait, so it also covers the >= 10 ns DI hold.
+	static constexpr fl::u32 kClockPhaseNs = 50;
+	/// Latch DI pulse high (datasheet > 70 ns).
+	static constexpr fl::u32 kLatchHighNs = 80;
+	/// Latch DI pulse low (datasheet > 230 ns).
+	static constexpr fl::u32 kLatchLowNs = 240;
+	/// Cascade stop interval after the latch (datasheet > 200 ns + N * 10 ns).
+	static constexpr fl::u32 kStopBaseNs = 210;
+	static constexpr fl::u32 kStopPerChipNs = 10;
+
 	FASTLED_FORCE_INLINE void writeBit(fl::u8 bit) FL_NO_EXCEPT {
 		if (bit) {
 			DataPin::hi();
 		} else {
 			DataPin::lo();
 		}
+		fl::delayNanoseconds<kDataSetupNs>();
 		// Dual-edge: one toggle clocks one bit.
 		ClockPin::toggle();
+		fl::delayNanoseconds<kClockPhaseNs>();
 	}
 
 	/// Shift out one 16-bit word MSB-first, one clock edge per bit.
@@ -77,7 +95,8 @@ class MY9221Controller : public CPixelLEDController<RGB_ORDER> {
 		sendWord(c2);
 	}
 
-	void latch() FL_NO_EXCEPT {
+	/// @param chips number of cascaded chips that were just shifted (N).
+	void latch(fl::u32 chips) FL_NO_EXCEPT {
 		ClockPin::lo();
 		DataPin::lo();
 		fl::delayMicroseconds(kLatchDelayUs);
@@ -85,8 +104,14 @@ class MY9221Controller : public CPixelLEDController<RGB_ORDER> {
 		// Four DI pulses while DCKI is held low.
 		for (int i = 0; i < 4; ++i) {
 			DataPin::hi();
+			fl::delayNanoseconds<kLatchHighNs>();
 			DataPin::lo();
+			fl::delayNanoseconds<kLatchLowNs>();
 		}
+
+		// Cascade stop: no new DI/DCKI activity until every chip has latched.
+		// chips is bounded by the LED count, far below the u32 overflow point.
+		fl::delayNanoseconds(kStopBaseNs + kStopPerChipNs * chips);
 	}
 
 public:
@@ -107,7 +132,9 @@ protected:
 		DataPin::lo();
 		ClockPin::lo();
 
+		fl::u32 chips = 0;
 		while (pixels.has(1)) {
+			++chips;
 			fl::u8 ch[4][3] = {
 				{0, 0, 0},
 				{0, 0, 0},
@@ -132,6 +159,6 @@ protected:
 			}
 		}
 
-		latch();
+		latch(chips);
 	}
 };
