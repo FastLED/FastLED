@@ -9366,7 +9366,63 @@ FL_TEST_CASE("colorimetric strategy harness: scores frozen fixture drift") {
     FL_CHECK(stats.peak_lsb >= stats.p95_lsb);
 }
 
+// The production-path checks the comparison table makes, extracted so they run
+// on every build. The table below sweeps every research strategy, builds all
+// the LUT grids and runs 256-pass micro-benchmarks, which costs seconds of CPU.
+FL_TEST_CASE("colorimetric production path: dispatch parity and monotonicity") {
+    DiodeProfile p = kRgbwDefaultProfile;
+    set_input_gamut(p, InputGamut::Native);
+    static constexpr int kCubeSteps = 17;
+    static constexpr int kCubeSamples = kCubeSteps * kCubeSteps * kCubeSteps;
+
+    // The public RGBW_MODE dispatch must reproduce the harness solvers exactly.
+    const ErrorStats dispatch_fixture = evaluate_public_dispatch_fixture_parity(
+        kStrategies[kClosedFormIndex], RGBW_MODE::kRGBWColorimetric, p,
+        RowFilter::All);
+    const ErrorStats dispatch_cube = evaluate_public_dispatch_cube_parity(
+        kStrategies[kClosedFormIndex], RGBW_MODE::kRGBWColorimetric, p,
+        kCubeSteps);
+    const ErrorStats boosted_fixture = evaluate_public_dispatch_fixture_parity(
+        kStrategies[kWxOverdriveIndex], RGBW_MODE::kRGBWColorimetricBoosted, p,
+        RowFilter::All);
+    const ErrorStats boosted_cube = evaluate_public_dispatch_cube_parity(
+        kStrategies[kWxOverdriveIndex], RGBW_MODE::kRGBWColorimetricBoosted, p,
+        kCubeSteps);
+    FL_CHECK(dispatch_fixture.sample_count == kVerifierRowCount);
+    FL_CHECK(dispatch_cube.sample_count == kCubeSamples);
+    FL_CHECK(boosted_fixture.sample_count == kVerifierRowCount);
+    FL_CHECK(boosted_cube.sample_count == kCubeSamples);
+    FL_CHECK(dispatch_fixture.peak_lsb == 0);
+    FL_CHECK(dispatch_cube.peak_lsb == 0);
+    FL_CHECK(boosted_fixture.peak_lsb == 0);
+    FL_CHECK(boosted_cube.peak_lsb == 0);
+
+    // The shipped solvers are deterministic across the cube and never dim a
+    // channel when the input is scaled up.
+    const int shipped[] = {kClosedFormIndex, kRgbwwLayeredIndex};
+    for (int idx : shipped) {
+        const ErrorStats cube = evaluate_strategy_cube_lsb(
+            kStrategies[idx], kStrategies[idx], p, kCubeSteps);
+        FL_CHECK(cube.sample_count == kCubeSamples);
+        FL_CHECK(cube.peak_lsb == 0);
+        const MonotonicStats mono =
+            evaluate_strategy_scale_monotonicity(kStrategies[idx], p, 16, 17);
+        FL_CHECK(mono.comparison_count > 0);
+        FL_CHECK(mono.violation_count == 0);
+    }
+}
+
+// Research table for #3422. Opt in with FASTLED_COLORIMETRIC_TABLE=1, e.g.
+//   FASTLED_COLORIMETRIC_TABLE=1 bash test colorimetric_strategy_table
+// It is skipped by default because it costs ~7.5 s of CPU and, on a loaded
+// host, ran into the 20 s runner watchdog.
 FL_TEST_CASE("colorimetric strategy comparison table") {
+    const char* opt_in = fl::getenv("FASTLED_COLORIMETRIC_TABLE");
+    if (opt_in == nullptr || opt_in[0] == '\0' || opt_in[0] == '0') {
+        FL_MESSAGE("colorimetric comparison table skipped; set "
+                   "FASTLED_COLORIMETRIC_TABLE=1 to run it");
+        return;
+    }
     DiodeProfile p = kRgbwDefaultProfile;
     set_input_gamut(p, InputGamut::Native);
 

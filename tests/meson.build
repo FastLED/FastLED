@@ -399,7 +399,6 @@ foreach test_name : test_names
     'fl_stl_asio_http_test_utils_mock_http', # HTTP mock test utilities
     'fl_stl_json_cross_thread',   # Threaded JSON stress takes ~35s under core ASan
     'fl_codec',                   # MP3 golden corpus + SIMD-vs-scalar timing (11s+ under load)
-    'colorimetric_strategy_table', # Exhaustive colorimetric strategy sweep
     'power_mgt',                  # Power-model sweeps; hit 20s at host load ~130
   ]
 
