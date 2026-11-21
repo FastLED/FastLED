@@ -43,7 +43,7 @@ namespace fl {
 /// auto driver = ChannelEngineRMT::create();
 /// driver->enqueue(channelData);
 /// driver->show();
-/// while (driver->poll() == DriverState::BUSY) {
+/// while (driver->poll() != DriverState::READY) {  // BUSY, then DRAINING
 ///     // wait
 /// }
 /// @endcode

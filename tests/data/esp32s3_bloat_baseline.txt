@@ -435,4 +435,14 @@
 # this PR's head: image_flash 320387 B, attributed flash 301375 B, attributed
 # RAM 22499 B. The crash fix is intentional and is recorded as a decision.
 # Neither the 320503 B flash ceiling nor the 40016 B RAM ceiling moves.
-320387
+#
+# +4 B (320387 -> 320391), PR #5350 / #2994: the RMT5 driver's poll() now
+# reports DRAINING once every strip is on the wire instead of BUSY for the
+# whole transmission, so FastLED.show() returns while RMT finishes the frame
+# (ESP32-C6 forced-RMT legacy path: show() 1687 -> 369 us, the reporter's
+# sketch back to a steady 2495 ms sequence). The 4 B is the third state in
+# ChannelEngineRMTImpl::poll(). Measured by the hosted bloat regression job
+# (run 44889084601) on head 3c04f6b: image_flash 320391 B, attributed flash
+# 301379 B, attributed RAM 22499 B. Neither the 320503 B flash ceiling nor the
+# 40016 B RAM ceiling moves.
+320391
