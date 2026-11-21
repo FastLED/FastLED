@@ -25,7 +25,7 @@
 // -- Matrix config --
 // 64x64 needs ~136 KiB of solver state, so this example is filtered for
 // memory-large boards. Override the grid at compile time for smaller parts:
-//   -DFLUID_GRID=32   (34 KiB) or -DFLUID_GRID=48 (76 KiB)
+//   -DFLUID_GRID=32   (36.1 KiB) and -DFLUID_GRID=48 (78.1 KiB)
 #ifndef FLUID_GRID
 #define FLUID_GRID 64
 #endif
@@ -163,10 +163,13 @@ class Solver {
     void densStep(float dt, float diff, float dissipate, int iter) {
         diffuse(0, mD0, mD, diff, dt, iter);
         advect(0, mD, mD0, mU, mV, dt);
-        // Dissipation is applied as a per-frame multiply, matching the
-        // "smoke fades out" behaviour of the reference implementation.
+        // `dissipate` is documented as the fraction of density surviving one
+        // 60 fps frame. Applying it raw would make the smoke lifetime scale
+        // with frame rate (1.7 s at 60 fps, 5 s at 20 fps), so raise it to
+        // dt*60 to get the same decay per second at any frame rate.
+        const float diss = fl::powf(dissipate, dt * 60.0f);
         for (int i = 0; i < mCells; ++i) {
-            mD[i] *= dissipate;
+            mD[i] *= diss;
         }
     }
 
@@ -304,9 +307,9 @@ void loop() {
     const float jet = jetSpeed.as<float>();
 
     // Three Gaussian splat injectors whose angles are noise-modulated.
-    // Force is applied every frame so the field keeps moving; dye is injected
-    // only every 12th frame, otherwise fresh blobs swamp the advected
-    // structure and the image reads as a static heat map instead of a fluid.
+    // Force is applied every frame so the solver keeps moving; dye is injected
+    // only every 0.2 s, otherwise fresh blobs swamp the advected structure and
+    // the image reads as a static heat map instead of a fluid.
     // Both are dt-scaled, so the visual speed is frame-rate independent; the
     // dye interval is wall-clock too, so a 20 fps part gets the same injection
     // cadence as a 60 fps one.
