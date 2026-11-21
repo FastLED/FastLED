@@ -137,9 +137,11 @@ canvas.drawPolygon(CRGB::Yellow, tri);
   4 KB. A working set that fits the arena is leased from it; if the arena
   is exhausted at run time (other `fl::scratch` users hold it), the draw
   is skipped. On ESP8266 all leases live during a draw share 393 B; see
-  the budget in `fl/stl/scratch.h`. A working set that does not fit stays
-  on the stack. Pass
-  MAXN explicitly for more vertices:
+  the budget in `fl/stl/scratch.h`. Other small-stack targets have no
+  arena by default (their stack and `.bss` share one SRAM, so an arena
+  frees nothing); a sketch opts in with `-DFL_SCRATCH_STACK_BYTES=N`, see
+  `fl/stl/scratch.h` for sizing. A working set that does not fit stays
+  on the stack. Pass MAXN explicitly for more vertices:
   `canvas.drawPolygon<int, 12>(color, span)`.
 - **Fill rule** — even-odd: a point is inside if a ray crosses an odd
   number of edges. No holes or subpaths.
