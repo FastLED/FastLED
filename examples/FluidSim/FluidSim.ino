@@ -13,8 +13,18 @@
 /// This sketch is fully compatible with the FastLED web compiler:
 ///   fastled examples/FluidSim --test --test-screenshot frame.png
 ///
-/// Grid is 64x64 by default. Memory is (W+2)*(H+2)*4 bytes per field and the
-/// solver keeps 8 fields, so ~136 KB at 64x64 — PSRAM-class parts only.
+/// Memory is (W+2)*(H+2)*4 bytes per field and the solver keeps 8 float
+/// fields (a fixed-point tier is not implemented yet):
+///
+///   | Grid  | Solver state |
+///   |-------|--------------|
+///   | 32x32 | 36.1 KiB     |
+///   | 48x32 | 53.1 KiB     |
+///   | 48x48 | 78.1 KiB     |
+///   | 64x64 | 136.1 KiB    |
+///
+/// The default is 64x64 on the web compiler, host builds and PSRAM boards,
+/// and 48x32 everywhere else.
 
 #include <FastLED.h>
 
@@ -23,14 +33,27 @@
 #include "fl/ui/ui.h"
 
 // -- Matrix config --
-// 64x64 needs ~136 KiB of solver state, so this example is filtered for
-// memory-large boards. Override the grid at compile time for smaller parts:
-//   -DFLUID_GRID=32   (36.1 KiB) and -DFLUID_GRID=48 (78.1 KiB)
-#ifndef FLUID_GRID
-#define FLUID_GRID 64
+// Override the grid at compile time: -DFLUID_W=.. -DFLUID_H=.., or
+// -DFLUID_GRID=N for an NxN square (e.g. -DFLUID_GRID=32 for 36.1 KiB).
+#if defined(FLUID_GRID)
+#define FLUID_DEFAULT_W FLUID_GRID
+#define FLUID_DEFAULT_H FLUID_GRID
+#elif defined(FL_IS_WASM) || defined(FL_IS_STUB) || defined(CONFIG_SPIRAM) || \
+    defined(BOARD_HAS_PSRAM)
+#define FLUID_DEFAULT_W 64  // 136.1 KiB of solver state
+#define FLUID_DEFAULT_H 64
+#else
+#define FLUID_DEFAULT_W 48  // 53.1 KiB: fits internal RAM on ESP32-class parts
+#define FLUID_DEFAULT_H 32
 #endif
-#define WIDTH FLUID_GRID
-#define HEIGHT FLUID_GRID
+#ifndef FLUID_W
+#define FLUID_W FLUID_DEFAULT_W
+#endif
+#ifndef FLUID_H
+#define FLUID_H FLUID_DEFAULT_H
+#endif
+#define WIDTH FLUID_W
+#define HEIGHT FLUID_H
 #define NUM_LEDS (WIDTH * HEIGHT)
 // Use the platform's clockless data pin rather than a hardcoded pin number, and
 // keep the #ifndef guard so a build can override it with -DDATA_PIN=...
