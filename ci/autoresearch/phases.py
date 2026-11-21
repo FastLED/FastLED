@@ -37,7 +37,7 @@ from ci.autoresearch.gpio import (
     run_pin_discovery_segmented,
 )
 from ci.autoresearch.power_check import check_power_frames, display_power_frames
-from ci.autoresearch.show_latency import run_show_latency_gate
+from ci.autoresearch.show_latency import resolve_gate, run_show_latency_gate
 from ci.autoresearch.usb_power import absent_port_error, warn_selective_suspend
 from ci.debug_attached import run_cpp_lint
 from ci.rpc_client import (
@@ -5306,12 +5306,16 @@ async def _run_rpc_tests(ctx: RunContext, qctx: QuietContext) -> int:
 
         # FastLED#5356: fail the run when show() latency regresses on a
         # board/driver pair that has a budget.
-        if not test_failed and stop_word_found == "OK":
+        latency_gate = (
+            resolve_gate(ctx) if not test_failed and stop_word_found == "OK" else None
+        )
+        if latency_gate is not None:
             # The gate has its own RPC budget; keep the watchdog armed but
-            # give it the runway (same pattern as the cleanup phase).
+            # give it the runway (same pattern as the cleanup phase). Only
+            # runs that actually time show() get the extension.
             extend_autoresearch_watchdog_deadline(ctx, 40.0)
             try:
-                gate_ok = await run_show_latency_gate(ctx, client, qctx)
+                gate_ok = await run_show_latency_gate(ctx, client, qctx, latency_gate)
             except RpcCrashError:
                 print(
                     f"{Fore.RED}\u274c Device crashed during timingDriftTest(){Style.RESET_ALL}"

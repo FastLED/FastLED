@@ -123,14 +123,23 @@ def budget_for(key: tuple[str, str] | None) -> int | None:
     return budgets.get(key)
 
 
-async def run_show_latency_gate(
-    ctx: "RunContext", client: "RpcClient", qctx: "QuietContext"
-) -> bool:
-    """Run the gate when a budget exists for this board/driver. True = pass."""
+def resolve_gate(ctx: "RunContext") -> tuple[tuple[str, str], int] | None:
+    """The (key, budget) the gate applies to this run, or None to skip."""
     key = gate_key(ctx.final_environment, ctx.drivers, bool(ctx.args.legacy))
     budget = budget_for(key)
     if key is None or budget is None:
-        return True
+        return None
+    return key, budget
+
+
+async def run_show_latency_gate(
+    ctx: "RunContext",
+    client: "RpcClient",
+    qctx: "QuietContext",
+    gate: tuple[tuple[str, str], int],
+) -> bool:
+    """Run the gate for a resolved (key, budget). True = pass."""
+    key, budget = gate
     pin = ctx.effective_tx_pin if ctx.effective_tx_pin is not None else DEFAULT_PIN
 
     print(f"\n⏱  show() latency gate: {key[0]} {key[1]} (budget {budget} us)")

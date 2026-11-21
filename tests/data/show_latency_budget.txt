@@ -4,7 +4,7 @@
 # Format: <environment> <DRIVER> <max_mean_us>
 #
 # The gate runs timingDriftTest (the #2994 reproducer: 35 WS2812 on the
-# legacy addLeds path) after a passing `bash autoresearch <env> --<driver>`
+# legacy addLeds path) after a passing `bash autoresearch <env> --legacy --<driver>`
 # run and fails when the mean FastLED.show() exceeds the budget, or reaches
 # half the 1050 us wire time (show() blocking on the transfer, #2994).
 #
