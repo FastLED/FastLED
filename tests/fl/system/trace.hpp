@@ -162,13 +162,13 @@ FL_TEST_CASE("StackTrace - dump format") {
     ScopedTrace::clear();
 
     for (int i = 0; i < 33; ++i) {
-        ScopedTrace::push("f", i);
+        ScopedTrace::push("f", i + 1);  // line 0 prints no "(line)"
     }
     fl::string overflowed = ScopedTrace::dump();
     FL_CHECK(overflowed.starts_with(
         "Stack trace (depth 33):\n"
-        "  <WARNING: Stack overflow - showing last 32 of 33 entries>\n"
-        "  [0] f(0)\n"));
-    FL_CHECK(overflowed.ends_with("  [31] f(31)\n"));
+        "  <WARNING: Stack overflow - showing first 32 of 33 entries>\n"
+        "  [0] f(1)\n"));
+    FL_CHECK(overflowed.ends_with("  [31] f(32)\n"));
     ScopedTrace::clear();
 }

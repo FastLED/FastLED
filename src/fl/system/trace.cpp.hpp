@@ -108,7 +108,8 @@ fl::string ScopedTrace::dump() FL_NO_EXCEPT {
 
     // Show overflow warning if depth exceeds capacity
     if (depth > FL_STACK_TRACE_MAX_DEPTH) {
-        result += "  <WARNING: Stack overflow - showing last ";
+        // push() keeps the outermost entries and drops deeper ones.
+        result += "  <WARNING: Stack overflow - showing first ";
         result += static_cast<fl::size>(FL_STACK_TRACE_MAX_DEPTH);
         result += " of ";
         result += depth;
