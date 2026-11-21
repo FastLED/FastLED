@@ -1,7 +1,11 @@
 // fill_noise8 / fill_noise16 must match the buffered reference formulation
 // (two scratch planes filled by fill_raw_noise8 / fill_raw_noise16into8,
 // then combined per pixel). FastLED#5330 removed the scratch planes; these
-// tests pin the output so the bufferless path stays bit-identical.
+// tests pin the output so the bufferless path matches it on every target.
+// The same change widened the fill_raw_noise16into8 accumulator, so AVR
+// output for octaves >= 2 differs from pre-#5341 AVR builds (the old value
+// came from 16-bit int overflow); examples/Test/NoiseHashes.h checks the
+// AVR side on the avr8js Uno.
 
 #include "noise.h"
 #include "crgb.h"
@@ -10,6 +14,7 @@
 #include "fl/stl/cstring.h"
 #include "fl/stl/vector.h"
 #include "test.h"
+#include "examples/Test/NoiseHashes.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
 
@@ -91,6 +96,24 @@ FL_TEST_CASE("fill_noise16 matches buffered reference") {
         for (int i = 0; i < p.num_leds; ++i) {
             FL_CHECK_EQ(got[i], want[i]);
         }
+    }
+}
+
+FL_TEST_CASE("fill_noise16 AVR hash cases match the host golden table") {
+    // Host half of the AVR 16-bit-int regression check. examples/Test runs
+    // the same cases on the avr8js Uno (`bash test --run uno Test`) and
+    // compares them to the same golden table, so both must match it.
+    CRGB leds[noise_hashes::kLeds];
+    for (int c = 0; c < noise_hashes::kHostCaseCount; ++c) {
+        const fl::u32 h = noise_hashes::hostCaseHash(c, leds);
+        fl::printf("  noise case %d: 0x%08lXUL\n", c,
+                   static_cast<unsigned long>(h));
+        FL_CHECK_EQ(h, noise_hashes::goldenHash(c));
+    }
+    // The wrap cases only narrow on 16-bit int; on the host they still must
+    // match the buffered reference.
+    for (int c = 0; c < noise_hashes::kWrapCaseCount; ++c) {
+        FL_CHECK_EQ(noise_hashes::wrapCaseMismatches(c, leds), 0);
     }
 }
 

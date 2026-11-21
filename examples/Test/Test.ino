@@ -19,6 +19,15 @@
 #define TEST_POLYGON_HASHES 0
 #endif
 
+// fill_noise16 AVR-vs-host check (#5330): 16-bit int on AVR only. Same gate
+// as the polygon check.
+#if TEST_POLYGON_HASHES
+#define TEST_NOISE_HASHES 1
+#include "NoiseHashes.h"
+#else
+#define TEST_NOISE_HASHES 0
+#endif
+
 
 // Test configuration
 
@@ -68,12 +77,55 @@ static void checkPolygonHashes() {
 }
 #endif
 
+#if TEST_NOISE_HASHES
+// Prints "noise hash mismatch" on any difference from the host golden table
+// or from the buffered reference; the avr8js runner treats it as failure.
+// Not inlined into setup(): its frame must not stay live while the polygon
+// check runs, which already uses most of an Uno's 2 KB SRAM.
+FL_NO_INLINE static void checkNoiseHashes() {
+    CRGB leds[noise_hashes::kLeds];
+    bool ok = true;
+    for (int c = 0; c < noise_hashes::kHostCaseCount; ++c) {
+        const fl::u32 got = noise_hashes::hostCaseHash(c, leds);
+        const fl::u32 want = noise_hashes::goldenHash(c);
+        Serial.print(F("noise case "));
+        Serial.print(c);
+        Serial.print(F(" 0x"));
+        Serial.print(static_cast<unsigned long>(got), HEX);
+        if (got != want) {
+            Serial.print(F(" noise hash mismatch, host 0x"));
+            Serial.print(static_cast<unsigned long>(want), HEX);
+            ok = false;
+        }
+        Serial.println();
+    }
+    for (int c = 0; c < noise_hashes::kWrapCaseCount; ++c) {
+        const int bad = noise_hashes::wrapCaseMismatches(c, leds);
+        Serial.print(F("noise wrap case "));
+        Serial.print(c);
+        Serial.print(F(" mismatches "));
+        Serial.print(bad);
+        if (bad != 0) {
+            Serial.print(F(" noise hash mismatch vs buffered reference"));
+            ok = false;
+        }
+        Serial.println();
+    }
+    if (ok) {
+        Serial.println(F("noise hashes match host"));
+    }
+}
+#endif
+
 void setup() {
     Serial.begin(115200);  // Fast baud for avr8js
     Serial.println("Test setup starting");
     legacyLibcOnCrgb();
 #if TEST_POLYGON_HASHES
     checkPolygonHashes();
+#endif
+#if TEST_NOISE_HASHES
+    checkNoiseHashes();
 #endif
 
 

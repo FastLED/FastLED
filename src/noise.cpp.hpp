@@ -870,8 +870,10 @@ void fill_raw_2dnoise16into8(fl::u8 *pData, int width, int height, fl::u8 octave
 
 // Per-pixel octave folds for the 1-D fill_noise8/16. Each point of
 // fill_raw_noise8 / fill_raw_noise16into8 depends only on its own index, so
-// folding the octaves per pixel gives bit-identical values with no scratch
-// planes (FastLED#5330). Same inoise calls, same accumulation order.
+// folding the octaves per pixel gives the same values as the buffered
+// functions with no scratch planes (FastLED#5330). Same inoise calls, same
+// accumulation order. Both use the widened 16into8 accumulator, so AVR output
+// for octaves >= 2 changed where the old int shift overflowed.
 namespace noise_detail {
 
 static fl::u8 raw_noise8_at(int i, fl::u8 octaves, fl::u16 x, int scale, fl::u16 time) FL_NO_EXCEPT {
