@@ -119,6 +119,7 @@ GROUPS: dict[str, tuple[str, ...]] = {
         "AudioUrl",
         "BlurBenchmark",
         "ColorProfile",
+        "FluidSim",
         "Json",
         "NoisePlayground",
         "Overclock",
