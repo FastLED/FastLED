@@ -387,7 +387,9 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
                 // Release channel back to pool
                 FL_LOG_RMT("Releasing channel " << ch.pin);
                 // The transmit-done ISR set the flag: the hardware is done.
-                releaseChannel(&ch, /*hardwareDone=*/true);
+                // On a single core the ISR has also finished its hand-off by
+                // the time this task runs, so the queue wait is redundant.
+                releaseChannel(&ch, /*hardwareDone=*/kIsrHandoffComplete);
 
                 // Decrement activeCount since we just released this channel
                 activeCount--;
@@ -593,6 +595,18 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
     /// @return Pointer to channel state, or nullptr if no HW available
     ChannelState *acquireChannel(int pin, const ChipsetTiming &timing,
                                  fl::size dataSize = 0) FL_NO_EXCEPT;
+
+    /// @brief True when an observed transmit-done flag implies the RMT ISR
+    /// has finished its post-completion hand-off (#5364). On one core the
+    /// task cannot run until the ISR returns. On two cores poll() may run
+    /// while the ISR is still deciding whether to start a queued transaction;
+    /// an rmt_transmit() in that window can leave a frame queued but never
+    /// started (ESP-IDF 5.5), so dual-core chips keep rmt_tx_wait_all_done().
+#if defined(FL_CPU_CORES) && FL_CPU_CORES > 1
+    static constexpr bool kIsrHandoffComplete = false;
+#else
+    static constexpr bool kIsrHandoffComplete = true;  // single core / host mock
+#endif
 
     /// @brief Release a channel (marks as available for reuse)
     /// @param hardwareDone true when the transmit-done ISR already reported
@@ -1712,7 +1726,9 @@ void ChannelEngineRMTImpl::releaseChannel(ChannelState *channel,
     // rmt_tx_wait_all_done() only moves the finished transaction descriptor
     // from the complete queue back to the ready queue, which rmt_transmit()
     // also does on demand; repeating it cost ~2.1k instructions per frame
-    // (#5356). Failure paths have no completion event and still wait.
+    // (#5364). The caller passes hardwareDone only where that is safe
+    // (kIsrHandoffComplete); failure paths have no completion event and
+    // still wait.
     if (!hardwareDone) {
         bool wait_success = mPeripheral.waitAllDone(channel->channel, 100);
         FL_ASSERT(wait_success,
@@ -1849,16 +1865,15 @@ void ChannelEngineRMTImpl::destroyLeastUsedChannels(size_t count) FL_NO_EXCEPT {
 ///
 /// SYNCHRONIZATION STRATEGY:
 /// - ISR: Sets transmissionComplete flag (lightweight, non-blocking)
-/// - Main thread poll(): Calls releaseChannel(hardwareDone=true) when
-///   transmissionComplete is true; the buffer and channel are reused from
-///   there. It does not call rmt_tx_wait_all_done(): that only recycles the
-///   transaction descriptor, which rmt_transmit() does itself (#5364).
-/// - Dual-core: poll() may call rmt_transmit() on another core while this
-///   ISR is still finishing. ESP-IDF arbitrates that race itself: the ISR
-///   queues the finished descriptor before invoking this callback, and both
-///   the ISR and rmt_transmit() start the next transaction only through an
-///   atomic compare-exchange on the channel FSM, so whichever side sees the
-///   channel idle starts it.
+/// - Main thread poll(): Calls releaseChannel() when transmissionComplete is
+///   true; the buffer and channel are reused from there. On single-core
+///   chips it skips rmt_tx_wait_all_done(): the ISR has returned before the
+///   task runs, and the wait only recycles the transaction descriptor, which
+///   rmt_transmit() does itself (#5364).
+/// - Dual-core: poll() may run while this ISR is still deciding whether to
+///   start a queued transaction, and an rmt_transmit() in that window can
+///   leave the frame queued but unstarted, so those chips keep the wait
+///   (kIsrHandoffComplete).
 /// - ChannelData::isInUse() stays set until releaseChannel() runs, which
 ///   keeps a controller from re-encoding into data still being sent.
 bool IRAM_ATTR ChannelEngineRMTImpl::transmitDoneCallback(
