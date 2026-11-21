@@ -1,0 +1,18 @@
+# On-device FastLED.show() latency budgets for the AutoResearch gate
+# (ci/autoresearch/show_latency.py, FastLED#5356).
+#
+# Format: <environment> <DRIVER> <max_mean_us>
+#
+# The gate runs timingDriftTest (the #2994 reproducer: 35 WS2812 on the
+# legacy addLeds path) after a passing `bash autoresearch <env> --<driver>`
+# run and fails when the mean FastLED.show() exceeds the budget, or reaches
+# half the 1050 us wire time (show() blocking on the transfer, #2994).
+#
+# Each budget is the measured mean plus headroom for code-layout noise:
+# builds that differ only in unrelated code have moved the mean by 10-20 us
+# on the same board. Raising a budget needs the reason written here.
+#
+# esp32c6 RMT: measured 205-225 us mean across builds on master after #5358,
+# #5360 and #5364 (ESP32-C6 @ 160 MHz). Before #5358 it was 357 us, before
+# #5350 1687 us; both would fail this budget.
+esp32c6 RMT 280

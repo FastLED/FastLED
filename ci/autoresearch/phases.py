@@ -37,6 +37,7 @@ from ci.autoresearch.gpio import (
     run_pin_discovery_segmented,
 )
 from ci.autoresearch.power_check import check_power_frames, display_power_frames
+from ci.autoresearch.show_latency import run_show_latency_gate
 from ci.autoresearch.usb_power import absent_port_error, warn_selective_suspend
 from ci.debug_attached import run_cpp_lint
 from ci.rpc_client import (
@@ -5302,6 +5303,30 @@ async def _run_rpc_tests(ctx: RunContext, qctx: QuietContext) -> int:
                 test_failed = True
                 stop_word_found = "ERROR"
                 break
+
+        # FastLED#5356: fail the run when show() latency regresses on a
+        # board/driver pair that has a budget.
+        if not test_failed and stop_word_found == "OK":
+            # The gate has its own RPC budget; keep the watchdog armed but
+            # give it the runway (same pattern as the cleanup phase).
+            extend_autoresearch_watchdog_deadline(ctx, 40.0)
+            try:
+                gate_ok = await run_show_latency_gate(ctx, client, qctx)
+            except RpcCrashError:
+                print(
+                    f"{Fore.RED}\u274c Device crashed during timingDriftTest(){Style.RESET_ALL}"
+                )
+                qctx.emit("FAILURE class=crash method=timingDriftTest")
+                gate_ok = False
+            except RpcTimeoutError:
+                print(
+                    f"{Fore.RED}\u274c RPC timeout in show() latency gate{Style.RESET_ALL}"
+                )
+                qctx.emit("FAILURE class=timeout method=timingDriftTest")
+                gate_ok = False
+            if not gate_ok:
+                test_failed = True
+                stop_word_found = "ERROR"
 
     except KeyboardInterrupt as ki:
         print("\n\n\u26a0\ufe0f  Interrupted by user")
