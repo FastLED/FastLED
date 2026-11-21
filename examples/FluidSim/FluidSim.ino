@@ -32,7 +32,11 @@
 #define WIDTH FLUID_GRID
 #define HEIGHT FLUID_GRID
 #define NUM_LEDS (WIDTH * HEIGHT)
-#define DATA_PIN 2
+// Use the platform's clockless data pin rather than a hardcoded pin number, and
+// keep the #ifndef guard so a build can override it with -DDATA_PIN=...
+#ifndef DATA_PIN
+#define DATA_PIN FL_PIN_CLOCKLESS_1
+#endif
 #define BRIGHTNESS 255
 #define SERPENTINE true
 
@@ -300,35 +304,48 @@ void loop() {
     const uint32_t now = fl::millis();
     float dt = (last == 0) ? 0.016f : static_cast<float>(now - last) * 0.001f;
     last = now;
-    if (dt > 0.05f) {
-        dt = 0.05f; // clamp long frames so the solver stays stable
-    }
 
     const float t = static_cast<float>(now) * 0.001f;
     const float jet = jetSpeed.as<float>();
 
-    // Three Gaussian splat injectors whose angles are noise-modulated.
-    // Delta channel: force AND dye are transferred onto the fluid plane every
-    // frame, as a dt-scaled increment. Gating the dye to a slower cadence made
-    // the plate read as a series of blobs rather than a continuous energy
-    // transfer, and it broke frame-rate parity between the two channels.
-    const float dyeRate = dyeEnergy.as<float>(); // density units per second
-    for (int k = 0; k < 3; ++k) {
-        const float phase = t * jet + static_cast<float>(k) * 2.094f;
-        const float angle = fl::sinf(phase) * 1.7f + fl::cosf(phase * 0.7f);
-        const float cx = (0.5f + 0.35f * fl::sinf(phase * 0.83f)) *
-                         static_cast<float>(WIDTH);
-        const float cy = (0.5f + 0.35f * fl::cosf(phase * 0.61f)) *
-                         static_cast<float>(HEIGHT);
-        const float mag = forceStrength.as<float>();
-        solver.addForce(dt, cx, cy, fl::cosf(angle) * mag, fl::sinf(angle) * mag,
-                        splatRadius.as<float>());
-        // Same delta semantics as the force: energy per second, scaled by dt.
-        solver.addDensity(dt, cx, cy, dyeRate, splatRadius.as<float>());
-    }
+    // Advance the simulation over the FULL elapsed wall-clock time, in substeps
+    // of at most 50 ms so each step stays stable. Clamping the frame time
+    // instead of substepping silently discarded elapsed time on long frames
+    // (below 20 fps), so injection and dissipation lagged the injector
+    // positions — which are driven by wall clock — making the simulation
+    // frame-rate dependent. The substep cap also bounds the worst case at four
+    // solver steps per frame.
+    const float kMaxStep = 0.05f;
+    const int kMaxSubsteps = 4;
+    float remaining = dt;
+    for (int sub = 0; sub < kMaxSubsteps && remaining > 0.0f; ++sub) {
+        const float h = (remaining > kMaxStep) ? kMaxStep : remaining;
+        remaining -= h;
 
-    solver.step(dt, viscosity.as<float>(), diffusion.as<float>(),
-                dissipation.as<float>(), iterations.as<int>());
+        // Three Gaussian splat injectors whose angles are noise-modulated.
+        // Delta channel: force AND dye are transferred onto the fluid plane
+        // every substep, as an h-scaled increment. Gating the dye to a slower
+        // cadence made the plate read as a series of blobs rather than a
+        // continuous energy transfer, and it broke frame-rate parity between
+        // the two channels.
+        const float dyeRate = dyeEnergy.as<float>(); // density units per second
+        for (int k = 0; k < 3; ++k) {
+            const float phase = t * jet + static_cast<float>(k) * 2.094f;
+            const float angle = fl::sinf(phase) * 1.7f + fl::cosf(phase * 0.7f);
+            const float cx = (0.5f + 0.35f * fl::sinf(phase * 0.83f)) *
+                             static_cast<float>(WIDTH);
+            const float cy = (0.5f + 0.35f * fl::cosf(phase * 0.61f)) *
+                             static_cast<float>(HEIGHT);
+            const float mag = forceStrength.as<float>();
+            solver.addForce(h, cx, cy, fl::cosf(angle) * mag, fl::sinf(angle) * mag,
+                            splatRadius.as<float>());
+            // Same delta semantics as the force: energy per second, scaled by h.
+            solver.addDensity(h, cx, cy, dyeRate, splatRadius.as<float>());
+        }
+
+        solver.step(h, viscosity.as<float>(), diffusion.as<float>(),
+                    dissipation.as<float>(), iterations.as<int>());
+    }
 
     // Render density to the matrix. This is a *delta* transfer curve, not a
     // per-frame normalisation: brightness is a fixed, monotonic function of the
@@ -355,12 +372,19 @@ void loop() {
             if (v01 > 1.0f) v01 = 1.0f;
             const uint8_t v = static_cast<uint8_t>(v01 * 255.0f);
             CRGB c;
+            // Every mode must reach the documented black level at v01 == 0.
+            // The coloured modes carry a non-zero base channel, so scale those
+            // offsets by v01 as well — otherwise empty cells stay blue/indigo
+            // instead of going dark, and a zero dyeEnergy frame would still
+            // light the whole plate.
             if (mode == 0) {
                 c = HeatColor(v);
             } else if (mode == 1) {
-                c = CRGB(v, static_cast<uint8_t>(v / 3), static_cast<uint8_t>(255 - v));
+                c = CRGB(v, static_cast<uint8_t>(v / 3),
+                         static_cast<uint8_t>((255 - v) * v01));
             } else {
-                c = CRGB(static_cast<uint8_t>(v / 2), v, static_cast<uint8_t>(v / 4 + 40));
+                c = CRGB(static_cast<uint8_t>(v / 2), v,
+                         static_cast<uint8_t>(v / 4 + 40.0f * v01));
             }
             leds[xyMap.mapToIndex(x, y)] = c;
         }
