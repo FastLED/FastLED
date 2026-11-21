@@ -445,4 +445,14 @@
 # (run 44889084601) on head 3c04f6b: image_flash 320391 B, attributed flash
 # 301379 B, attributed RAM 22499 B. Neither the 320503 B flash ceiling nor the
 # 40016 B RAM ceiling moves.
-320391
+#
+# +60 B (320391 -> 320451), PR #5358 / #5357: SlimBridgeController encodes
+# plain-RGB WS2812 frames straight from the concrete PixelController instead of
+# through PixelIterator's four type-erased calls per pixel (ESP32-C6 forced-RMT
+# legacy path: show() 357 -> 219 us mean for 35 LEDs). The generic RGB encode
+# is no longer linked (writeWS2812 -243 B, ScaledPixelIteratorRGB::advance
+# -96 B); the inlined RGB loop in showPixels (+226 B) and the RGBW/RGBWW-only
+# writeWS2812WhiteChannel (+179 B) replace it. Local fresh builds: master
+# 320383 B, PR 320443 B; the hosted job runs ~8 B above local. Neither the
+# 320503 B flash ceiling nor the 40016 B RAM ceiling moves.
+320451

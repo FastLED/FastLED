@@ -70,18 +70,22 @@ void show_batched_legacy(...) FL_NO_EXCEPT {
 template <typename PixelControllerT, typename Buffer>
 void encode_ws2812_rgb_direct(PixelControllerT& pixels, Buffer& encoded,
                               fl::size expectedSize) FL_NO_EXCEPT {
+    // The caller sizes expectedSize as pixels.size() * 3. fl::vector::resize()
+    // leaves the size unchanged when it cannot grow, so never write past what
+    // was actually allocated: an empty buffer makes the caller drop the frame.
     encoded.resize(expectedSize);
-    // fl::vector::resize() leaves the size unchanged when it cannot grow, so
-    // bound the writes by what was actually allocated, never by the request.
+    if (encoded.size() != expectedSize ||
+        expectedSize != static_cast<fl::size>(pixels.size()) * 3u) {
+        encoded.clear();
+        return;
+    }
     u8* out = encoded.data();
-    u8* const end = out + encoded.size();
-    while (out != end && pixels.has(1)) {
+    u8* const end = out + expectedSize;
+    for (; out != end; out += 3) {
         pixels.loadAndScaleRGB(out, out + 1, out + 2);
-        out += 3;
         pixels.stepDithering();
         pixels.advanceData();
     }
-    encoded.resize(static_cast<fl::size>(out - encoded.data()));
 }
 } // namespace detail
 
@@ -298,7 +302,7 @@ protected:
             detail::encode_ws2812_rgb_direct(pixels, encoded, expectedSize);
         } else {
             fl::PixelIterator iterator(&pixels, this->getRgbw(), this->getRgbww());
-            iterator.writeWS2812(&encoded);
+            iterator.writeWS2812WhiteChannel(&encoded);
         }
         if (encoded.size() != expectedSize) {
             encoded.clear();
