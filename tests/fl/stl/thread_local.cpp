@@ -430,54 +430,7 @@ FL_TEST_CASE("ThreadLocal - converting default and copies keep it") {
     FL_CHECK_EQ(from_thread, fl::string("seed"));
 }
 
-// Regression test for #5310: when pthread_key_create fails, access() must use
-// a shared fallback slot instead of dereferencing null. Failure is injected
-// for real by exhausting the process's pthread keys (PTHREAD_KEYS_MAX) only
-// while the ThreadLocal is constructed. The window is a few microseconds on
-// this thread with no allocation inside the loop (capacity reserved first).
-FL_TEST_CASE("ThreadLocal - key creation failure falls back to a shared slot") {
-    const int kMaxKeys = 1 << 16;
-    fl::vector<pthread_key_t> hoard;
-    hoard.reserve(kMaxKeys);
-    bool exhausted = false;
-    for (int i = 0; i < kMaxKeys; ++i) {
-        pthread_key_t k;
-        if (pthread_key_create(&k, nullptr) != 0) {
-            exhausted = true;
-            break;
-        }
-        hoard.push_back(k);
-    }
-    // Constructed with no keys left: key creation fails inside the ctor.
-    fl::ThreadLocal<int> with_default(5);
-    fl::ThreadLocal<int> no_default;
-    for (pthread_key_t k : hoard) {
-        pthread_key_delete(k);
-    }
-    if (!exhausted) {
-        FL_MESSAGE("pthread keys could not be exhausted; skipping");
-        return;
-    }
-
-    FL_CHECK_EQ(with_default.access(), 5);
-    FL_CHECK_EQ(no_default.access(), 0);
-    with_default.set(7);
-    no_default = 8;
-
-    // Every thread shares the one fallback slot (ThreadLocalFake semantics).
-    int seen_default = 0;
-    int seen_plain = 0;
-    fl::thread t([&]() {
-        seen_default = with_default.access();
-        seen_plain = no_default.access();
-        with_default.set(9);
-    });
-    t.join();
-    FL_CHECK_EQ(seen_default, 7);
-    FL_CHECK_EQ(seen_plain, 8);
-    FL_CHECK_EQ(with_default.access(), 9);
-    // Destructors free the fallback slots (LSAN in --debug checks this).
-}
+// The pthread key-exhaustion fallback test lives in thread_local_key_exhaustion.cpp (own process, #5323).
 
 #endif  // FASTLED_USE_THREAD_LOCAL
 
