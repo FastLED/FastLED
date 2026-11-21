@@ -146,6 +146,11 @@ canvas.drawPolygon(CRGB::Yellow, tri);
   `fl/stl/scratch.h` for sizing. A working set that does not fit stays
   on the stack. Pass MAXN explicitly for more vertices:
   `canvas.drawPolygon<int, 12>(color, span)`.
+- **2 KB AVR parts (Uno, Nano).** Exact at the default 8/16 tier needs
+  ~1.2 KB of stack; a 16x16 CRGB canvas leaves ~950 B, so the draw
+  overflows the stack. Use `PolyFill::ABuffer` (~0.6 KB) or a canvas of
+  at most 16x8 for Exact. `fl::scratch` does not help there (same SRAM).
+  See the tier notes in `fl/gfx/canvas.h`.
 - **Fill rule** — even-odd: a point is inside if a ray crosses an odd
   number of edges. No holes or subpaths.
 - **Vertex coordinates** clamp to ±8191 px, so out-of-range values can't
