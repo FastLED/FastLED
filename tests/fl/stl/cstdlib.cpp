@@ -217,6 +217,36 @@ FL_TEST_CASE("fl::qsort - larger arrays") {
     }
 }
 
+// Elements wider than qsort_swap's 64 B buffer take the byte-swap path.
+struct WideRecord {
+    int key;
+    char payload[96];
+};
+
+static int compare_wide_records(const void* a, const void* b) {
+    int ka = static_cast<const WideRecord*>(a)->key;
+    int kb = static_cast<const WideRecord*>(b)->key;
+    return (ka > kb) - (ka < kb);
+}
+
+FL_TEST_CASE("fl::qsort - elements wider than the swap buffer") {
+    // 40 elements: partitions once, then insertion-sorts each side.
+    WideRecord arr[40];
+    for (int i = 0; i < 40; i++) {
+        arr[i].key = (i * 17) % 40;  // permutation of 0..39
+        fl::memset(arr[i].payload, arr[i].key, sizeof(arr[i].payload));
+    }
+
+    fl::qsort(arr, 40, sizeof(WideRecord), compare_wide_records);
+
+    for (int i = 0; i < 40; i++) {
+        FL_CHECK_EQ(arr[i].key, i);
+        // The payload must travel with its key.
+        FL_CHECK_EQ(static_cast<int>(arr[i].payload[0]), i);
+        FL_CHECK_EQ(static_cast<int>(arr[i].payload[95]), i);
+    }
+}
+
 FL_TEST_CASE("fl::qsort - edge cases") {
     FL_SUBCASE("nullptr base") {
         fl::qsort(nullptr, 10, sizeof(int), compare_ints);
