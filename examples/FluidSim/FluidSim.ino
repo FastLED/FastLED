@@ -23,8 +23,14 @@
 #include "fl/ui/ui.h"
 
 // -- Matrix config --
-#define WIDTH 64
-#define HEIGHT 64
+// 64x64 needs ~136 KiB of solver state, so this example is filtered for
+// memory-large boards. Override the grid at compile time for smaller parts:
+//   -DFLUID_GRID=32   (34 KiB) or -DFLUID_GRID=48 (76 KiB)
+#ifndef FLUID_GRID
+#define FLUID_GRID 64
+#endif
+#define WIDTH FLUID_GRID
+#define HEIGHT FLUID_GRID
 #define NUM_LEDS (WIDTH * HEIGHT)
 #define DATA_PIN 2
 #define BRIGHTNESS 255
@@ -87,34 +93,53 @@ class Solver {
     }
 
     /// Gaussian splat of force (fx, fy) centered at (x, y) in grid space.
-    void addForce(float x, float y, float fx, float fy, float radius) {
+    ///
+    /// `fx`/`fy` are accelerations, so the impulse is scaled by `dt` exactly as
+    /// Stam's `add_source` does. Without the dt factor the injected impulse per
+    /// second is proportional to the frame rate, and the simulation visibly
+    /// runs at a different speed on a 20 fps part than on a 60 fps one.
+    ///
+    /// The weight is only evaluated over a 3-sigma bounding box; outside that
+    /// the Gaussian is below 0.001 and contributes nothing.
+    void addForce(float dt, float x, float y, float fx, float fy, float radius) {
         const float r2 = radius * radius;
-        for (int j = 1; j <= mH; ++j) {
-            for (int i = 1; i <= mW; ++i) {
-                const float dx = i - x;
-                const float dy = j - y;
-                const float w = fl::expf(-(dx * dx + dy * dy) / r2);
+        const float invR2 = 1.0f / r2;
+        const int i0 = fl::max(1, static_cast<int>(x - 3.0f * radius));
+        const int i1 = fl::min(mW, static_cast<int>(x + 3.0f * radius) + 1);
+        const int j0 = fl::max(1, static_cast<int>(y - 3.0f * radius));
+        const int j1 = fl::min(mH, static_cast<int>(y + 3.0f * radius) + 1);
+        for (int j = j0; j <= j1; ++j) {
+            const float dy = static_cast<float>(j) - y;
+            for (int i = i0; i <= i1; ++i) {
+                const float dx = static_cast<float>(i) - x;
+                const float w = fl::expf(-(dx * dx + dy * dy) * invR2);
                 if (w < 0.001f) {
                     continue;
                 }
-                mU[ix(i, j)] += fx * w;
-                mV[ix(i, j)] += fy * w;
+                mU[ix(i, j)] += dt * fx * w;
+                mV[ix(i, j)] += dt * fy * w;
             }
         }
     }
 
-    /// Gaussian splat of density centered at (x, y) in grid space.
-    void addDensity(float x, float y, float amount, float radius) {
+    /// Gaussian splat of density centered at (x, y) in grid space. `amount` is a
+    /// rate (density per second), scaled by `dt` like `addForce`.
+    void addDensity(float dt, float x, float y, float amount, float radius) {
         const float r2 = radius * radius;
-        for (int j = 1; j <= mH; ++j) {
-            for (int i = 1; i <= mW; ++i) {
-                const float dx = i - x;
-                const float dy = j - y;
-                const float w = fl::expf(-(dx * dx + dy * dy) / r2);
+        const float invR2 = 1.0f / r2;
+        const int i0 = fl::max(1, static_cast<int>(x - 3.0f * radius));
+        const int i1 = fl::min(mW, static_cast<int>(x + 3.0f * radius) + 1);
+        const int j0 = fl::max(1, static_cast<int>(y - 3.0f * radius));
+        const int j1 = fl::min(mH, static_cast<int>(y + 3.0f * radius) + 1);
+        for (int j = j0; j <= j1; ++j) {
+            const float dy = static_cast<float>(j) - y;
+            for (int i = i0; i <= i1; ++i) {
+                const float dx = static_cast<float>(i) - x;
+                const float w = fl::expf(-(dx * dx + dy * dy) * invR2);
                 if (w < 0.001f) {
                     continue;
                 }
-                mD[ix(i, j)] += amount * w;
+                mD[ix(i, j)] += dt * amount * w;
             }
         }
     }
@@ -165,7 +190,9 @@ class Solver {
 
     void diffuse(int b, fl::vector<float> &x, const fl::vector<float> &x0,
                  float diff, float dt, int iter) {
-        const float a = dt * diff * static_cast<float>(mW * mH);
+        // h = 1/mW (see project()), so the Laplacian coefficient is dt*diff/h^2.
+        // Using mW*mH here is only correct on a square grid.
+        const float a = dt * diff * static_cast<float>(mW * mW);
         linSolve(b, x, x0, a, 1.0f + 4.0f * a, iter);
     }
 
@@ -280,9 +307,15 @@ void loop() {
     // Force is applied every frame so the field keeps moving; dye is injected
     // only every 12th frame, otherwise fresh blobs swamp the advected
     // structure and the image reads as a static heat map instead of a fluid.
-    static uint32_t frame = 0;
-    const bool injectDye = (frame % 12) == 0;
-    ++frame;
+    // Both are dt-scaled, so the visual speed is frame-rate independent; the
+    // dye interval is wall-clock too, so a 20 fps part gets the same injection
+    // cadence as a 60 fps one.
+    static float dyeAccumulator = 0.0f;
+    dyeAccumulator += dt;
+    const bool injectDye = dyeAccumulator >= 0.2f;
+    if (injectDye) {
+        dyeAccumulator = 0.0f;
+    }
     for (int k = 0; k < 3; ++k) {
         const float phase = t * jet + static_cast<float>(k) * 2.094f;
         const float angle = fl::sinf(phase) * 1.7f + fl::cosf(phase * 0.7f);
@@ -291,19 +324,20 @@ void loop() {
         const float cy = (0.5f + 0.35f * fl::cosf(phase * 0.61f)) *
                          static_cast<float>(HEIGHT);
         const float mag = forceStrength.as<float>();
-        solver.addForce(cx, cy, fl::cosf(angle) * mag, fl::sinf(angle) * mag,
+        solver.addForce(dt, cx, cy, fl::cosf(angle) * mag, fl::sinf(angle) * mag,
                         splatRadius.as<float>());
         if (injectDye) {
-            solver.addDensity(cx, cy, 0.9f, splatRadius.as<float>());
+            solver.addDensity(dt, cx, cy, 0.9f, splatRadius.as<float>());
         }
     }
 
     solver.step(dt, viscosity.as<float>(), diffusion.as<float>(),
                 dissipation.as<float>(), iterations.as<int>());
 
-    // Render density to the matrix. Auto-exposure keeps the image readable
-    // without hand-tuning the injection rate per grid size: the brightest
-    // cell maps to full scale, everything else is relative to it.
+    // Render density to the matrix. Exposure follows the peak with a slow
+    // decay (2 s time constant) instead of renormalising every frame: a
+    // per-frame 1/peak would strobe the whole matrix whenever the brightest
+    // cell changes, and it hides whether density is actually bounded.
     const int mode = colorMode.as_int();
     float peak = 0.0f;
     for (int y = 0; y < HEIGHT; ++y) {
@@ -314,12 +348,24 @@ void loop() {
             }
         }
     }
-    const float exposure = (peak > 0.001f) ? (1.0f / peak) : 0.0f;
+    static float smoothPeak = 0.0f;
+    if (peak > smoothPeak) {
+        smoothPeak = peak; // rise immediately so nothing clips
+    } else {
+        const float k = 1.0f - fl::expf(-dt / 2.0f);
+        smoothPeak += (peak - smoothPeak) * k;
+    }
+    if (smoothPeak < 0.001f) {
+        smoothPeak = 0.001f;
+    }
+    const float exposure = 1.0f / smoothPeak;
     for (int y = 0; y < HEIGHT; ++y) {
         for (int x = 0; x < WIDTH; ++x) {
-            // sqrt tone map: lifts the low end so advected wisps stay visible
-            // instead of collapsing into a flat mid-tone.
-            const float d = fl::sqrtf(fl::clamp(solver.density(x + 1, y + 1) * exposure, 0.0f, 1.0f));
+            // Quadratic tone map: pushes the diffuse haze down so the advected
+            // filaments and vortex cores read against a dark background. A
+            // sqrt map leaves the whole frame mid-tone, which hides structure.
+            const float n = fl::clamp(solver.density(x + 1, y + 1) * exposure, 0.0f, 1.0f);
+            const float d = n * n;
             const uint8_t v = static_cast<uint8_t>(d * 255.0f);
             CRGB c;
             if (mode == 0) {
@@ -334,4 +380,14 @@ void loop() {
     }
 
     FastLED.show();
+
+    // Report the raw peak density once a second so a run can demonstrate that
+    // density stays bounded (acceptance criterion 1) instead of relying on a
+    // screenshot, which is tone-mapped and cannot show absolute values.
+    static uint32_t lastReport = 0;
+    if (now - lastReport >= 1000) {
+        lastReport = now;
+        Serial.print("fluid peak=");
+        Serial.println(peak);
+    }
 }
