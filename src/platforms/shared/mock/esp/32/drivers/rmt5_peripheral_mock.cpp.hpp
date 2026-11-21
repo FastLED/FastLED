@@ -112,6 +112,7 @@ public:
     size_t getEncoderCount() const FL_NO_EXCEPT override;
     size_t getTransmissionCount() const FL_NO_EXCEPT override;
     bool isChannelEnabled(void* channel_handle) const FL_NO_EXCEPT override;
+    size_t getEnableCount() const FL_NO_EXCEPT override;
     void reset() FL_NO_EXCEPT override;
 
 private:
@@ -132,6 +133,7 @@ private:
     // Pin routing: the channel id that owns each pin, or kOtherPeripheral
     fl::flat_map<fl::i32, u32> mPinRouting;
     size_t mPinRebindCount;
+    size_t mEnableCount;
     static constexpr u32 kOtherPeripheral = 0x8000u;
 
     // Waveform capture
@@ -166,6 +168,7 @@ Rmt5PeripheralMockImpl::Rmt5PeripheralMockImpl()
       mMaxChannels(0),
       mPinRouting(),
       mPinRebindCount(0),
+      mEnableCount(0),
       mHistory(),
       mTransmissionCount(0) {
 }
@@ -281,6 +284,13 @@ bool Rmt5PeripheralMockImpl::deleteChannel(void* channel_handle) FL_NO_EXCEPT {
         return false;
     }
 
+    // ESP-IDF rmt_del_channel() rejects a channel that is still enabled
+    // (ESP_ERR_INVALID_STATE).
+    if (channel->enabled) {
+        FL_WARN("Rmt5PeripheralMock: deleteChannel on an enabled channel");
+        return false;
+    }
+
     int id = channel->id;
     delete channel;  // Free the allocated memory  // ok bare allocation
     mChannels.erase(id);
@@ -296,7 +306,15 @@ bool Rmt5PeripheralMockImpl::enableChannel(void* channel_handle) FL_NO_EXCEPT {
         return false;
     }
 
+    // ESP-IDF rmt_enable() rejects an already-enabled channel
+    // (ESP_ERR_INVALID_STATE).
+    if (channel->enabled) {
+        FL_WARN("Rmt5PeripheralMock: enableChannel on an enabled channel");
+        return false;
+    }
+
     channel->enabled = true;
+    mEnableCount++;
     FL_DBG("RMT5_MOCK: Enabled channel " << channel->id);
     return true;
 }
@@ -517,6 +535,9 @@ bool Rmt5PeripheralMockImpl::rebindTxPin(void* channel_handle, int pin) FL_NO_EX
     if (channel == nullptr) {
         return false;
     }
+    // Like the ESP implementation: rmt_tx_switch_gpio() needs a disabled
+    // channel, so the rebind leaves it disabled.
+    channel->enabled = false;
     channel->config.gpio_num = pin;
     mPinRouting[pin] = static_cast<u32>(channel->id);
     mPinRebindCount++;
@@ -559,6 +580,10 @@ void Rmt5PeripheralMockImpl::simulatePinReroute(int pin) FL_NO_EXCEPT {
 
 size_t Rmt5PeripheralMockImpl::getPinRebindCount() const FL_NO_EXCEPT {
     return mPinRebindCount;
+}
+
+size_t Rmt5PeripheralMockImpl::getEnableCount() const FL_NO_EXCEPT {
+    return mEnableCount;
 }
 
 const fl::vector<Rmt5PeripheralMock::TransmissionRecord>&
@@ -619,6 +644,7 @@ void Rmt5PeripheralMockImpl::reset() FL_NO_EXCEPT {
     mMaxChannels = 0;
     mPinRouting.clear();
     mPinRebindCount = 0;
+    mEnableCount = 0;
     mTransmissionCount = 0;
 
     FL_DBG("RMT5_MOCK: Reset to initial state");

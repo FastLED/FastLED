@@ -566,8 +566,9 @@ bool Rmt5PeripheralESPImpl::rebindTxPin(void* channel_handle, int pin) FL_NO_EXC
         return false;
     }
     rmt_channel_handle_t channel = static_cast<rmt_channel_handle_t>(channel_handle);
-    // rmt_tx_switch_gpio() requires a disabled channel. The engine keeps idle
-    // channels disabled and enables them per transmission, so leave it so.
+    // rmt_tx_switch_gpio() requires a disabled channel. The channel is left
+    // disabled; the caller must clear its enabled tracking and enable it
+    // again before the next transmission.
     esp_err_t err = rmt_disable(channel);
     if (err != ESP_OK && err != ESP_ERR_INVALID_STATE) {
         FL_WARN_ONCE("RMT5_PERIPH: rebind GPIO " << pin << ": rmt_disable failed: " << esp_err_to_name(err));

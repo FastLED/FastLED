@@ -279,8 +279,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
         for (auto &ch : mChannels) {
             if (ch.channel) {
                 mPeripheral.waitAllDone(ch.channel, 1000);
-                mPeripheral.disableChannel(ch.channel);
-                mPeripheral.deleteChannel(ch.channel);
+                deleteHwChannel(&ch);
 
                 // Restore GPIO pulldown when RMT channel is destroyed
                 // This ensures pin returns to stable LOW state
@@ -369,13 +368,21 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
 #endif
                 FL_LOG_RMT("Channel on pin " << ch.pin << " completed transmission");
 
-                // Disable channel to release HW resources
-                if (ch.channel) {
-                    bool disable_success = mPeripheral.disableChannel(ch.channel);
-                    if (!disable_success) {
+                // Without power management the channel stays enabled: the
+                // next frame on this pin reuses it, and a disable/enable pair
+                // per frame cost ~45 us of show() latency (#5359).
+                // deleteHwChannel() disables it before deletion. With
+                // CONFIG_PM_ENABLE, rmt_enable() holds a PM lock (no light
+                // sleep, APB max), so release it once the frame is done.
+#if defined(CONFIG_PM_ENABLE)
+                if (ch.channel && ch.enabled) {
+                    if (mPeripheral.disableChannel(ch.channel)) {
+                        ch.enabled = false;
+                    } else {
                         FL_LOG_RMT("Failed to disable channel");
                     }
                 }
+#endif
 
                 // Release channel back to pool
                 FL_LOG_RMT("Releasing channel " << ch.pin);
@@ -454,6 +461,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
               transmissionComplete(false),
               inUse(false),
               useDMA(false),
+              enabled(false),
               reset_us(0),
               pooledBuffer(),
               memoryChannelId(0),
@@ -468,6 +476,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
               transmissionComplete(other.transmissionComplete.load(fl::memory_order_acquire)),
               inUse(other.inUse),
               useDMA(other.useDMA),
+              enabled(other.enabled),
               reset_us(other.reset_us),
               pooledBuffer(other.pooledBuffer),
               memoryChannelId(other.memoryChannelId),
@@ -485,6 +494,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
                     fl::memory_order_release);
                 inUse = other.inUse;
                 useDMA = other.useDMA;
+                enabled = other.enabled;
                 reset_us = other.reset_us;
                 pooledBuffer = other.pooledBuffer;
                 memoryChannelId = other.memoryChannelId;
@@ -508,6 +518,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
         fl::atomic_bool transmissionComplete;
         bool inUse;
         bool useDMA; // Whether this channel uses DMA
+        bool enabled; // rmt_enable() done; stays set across frames (#5359)
         u32 reset_us;
         fl::span<u8> pooledBuffer; // Buffer acquired from pool (must be
                                         // released on complete)
@@ -889,7 +900,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
                     emitRmtChannelWarning(
                         RmtChannelWarning::DMA_LEDGER_ALLOCATION_FAILED);
 #endif
-                    mPeripheral.deleteChannel(state->channel);
+                    deleteHwChannel(state);
                     state->channel = nullptr;
                     memMgr.rollbackAllocation(state->memoryChannelId, true);
                     return false;
@@ -908,7 +919,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
                     emitRmtChannelWarning(
                         RmtChannelWarning::DMA_ENCODER_CREATION_FAILED);
 #endif
-                    mPeripheral.deleteChannel(state->channel);
+                    deleteHwChannel(state);
                     state->channel = nullptr;
                     mDMAChannelsInUse--;
                     // Free DMA and memory allocation
@@ -1034,7 +1045,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
             emitRmtChannelWarning(
                 RmtChannelWarning::ENCODER_CREATION_FAILED);
 #endif
-            mPeripheral.deleteChannel(state->channel);
+            deleteHwChannel(state);
             state->channel = nullptr;
             // Free memory allocation
             memMgr.rollbackAllocation(state->memoryChannelId, true);
@@ -1061,9 +1072,29 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
         // Keep the original baseline when the rebind fails, so a later frame
         // retries instead of accepting the stolen routing (the peripheral
         // warns only once).
-        if (mPeripheral.rebindTxPin(state->channel, state->pin)) {
+        // rebindTxPin() disables the channel (rmt_tx_switch_gpio() needs it
+        // disabled), even when the switch itself then fails, so the next
+        // transmission must enable it again.
+        const bool rebound = mPeripheral.rebindTxPin(state->channel, state->pin);
+        state->enabled = false;
+        if (rebound) {
             state->pinRouting = mPeripheral.getPinRouting(state->pin);
         }
+    }
+
+    /// @brief Delete a channel's RMT handle, disabling it first if enabled.
+    ///
+    /// Channels stay enabled between frames (#5359), and rmt_del_channel()
+    /// rejects an enabled channel, so every deletion goes through here.
+    bool deleteHwChannel(ChannelState *state) FL_NO_EXCEPT {
+        if (state->enabled) {
+            if (!mPeripheral.disableChannel(state->channel)) {
+                FL_WARN("RMT: failed to disable channel before deletion");
+                return false;
+            }
+            state->enabled = false;
+        }
+        return mPeripheral.deleteChannel(state->channel);
     }
 
     /// @brief Register ISR callback for channel (must be called AFTER
@@ -1095,9 +1126,9 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
                 state->encoder = nullptr;
             }
 
-            // Delete channel directly - no need to disable since we're deleting
-            // (rmt_del_channel handles cleanup internally)
-            mPeripheral.deleteChannel(state->channel);
+            // deleteHwChannel() disables first: rmt_del_channel() rejects an
+            // enabled channel.
+            deleteHwChannel(state);
             state->channel = nullptr;
 
             // Free DMA and memory allocation
@@ -1133,7 +1164,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
                 FL_WARN("Failed to recreate encoder with new timing");
                 // Channel is still valid but encoder is broken - mark channel
                 // as unusable
-                mPeripheral.deleteChannel(state->channel);
+                deleteHwChannel(state);
                 state->channel = nullptr;
 
                 // Free DMA and memory allocation
@@ -1166,10 +1197,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
                     mPeripheral.deleteEncoder(state->encoder);
                     state->encoder = nullptr;
                 }
-                if (state->useDMA) {
-                    mDMAChannelsInUse--;
-                }
-                mPeripheral.deleteChannel(state->channel);
+                deleteHwChannel(state);
                 state->channel = nullptr;
 
                 // Free DMA and memory allocation
@@ -1195,6 +1223,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
         ChannelState* channel, bool disable_channel) FL_NO_EXCEPT {
         if (disable_channel) {
             mPeripheral.disableChannel(channel->channel);
+            channel->enabled = false;
         }
         if (channel->useDMA) {
             mBufferPool.releaseDMA();
@@ -1289,7 +1318,11 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
             // Store pooled buffer in channel state for release on completion
             channel->pooledBuffer = pooledBuffer;
 
-            bool enable_success = mPeripheral.enableChannel(channel->channel);
+            bool enable_success = channel->enabled;
+            if (!enable_success) {
+                enable_success = mPeripheral.enableChannel(channel->channel);
+                channel->enabled = enable_success;
+            }
             if (!enable_success) {
 #if FL_HAS_RMT_LOG
                 emitPendingChannelLog(PendingChannelLog::ENABLE_FAILED,
@@ -1409,7 +1442,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
         (void)channel_index;
 #endif
         if (state.channel) {
-            mPeripheral.deleteChannel(state.channel);
+            deleteHwChannel(&state);
             state.channel = nullptr;
         }
         if (state.encoder) {
@@ -1485,7 +1518,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
             // Delete channel
             if (state.channel) {
                 mPeripheral.waitAllDone(state.channel, 100);
-                mPeripheral.deleteChannel(state.channel);
+                deleteHwChannel(&state);
                 state.channel = nullptr;
             }
 
@@ -1650,7 +1683,7 @@ ChannelEngineRMTImpl::ChannelState *ChannelEngineRMTImpl::acquireChannel(
                 mDMAChannelsInUse--;
             }
             memMgr.rollbackAllocation(stablePtr->memoryChannelId, true);
-            mPeripheral.deleteChannel(stablePtr->channel);
+            deleteHwChannel(stablePtr);
             mChannels.pop_back();
             mAllocationFailed = true; // Mark failure
             return nullptr;
@@ -1746,7 +1779,7 @@ void ChannelEngineRMTImpl::destroyChannel(ChannelState *state) FL_NO_EXCEPT {
     }
 
     // Delete channel
-    bool del_success = mPeripheral.deleteChannel(state->channel);
+    bool del_success = deleteHwChannel(state);
     if (!del_success) {
         FL_WARN("destroyChannel: Failed to delete channel");
     }
