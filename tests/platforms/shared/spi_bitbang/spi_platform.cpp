@@ -86,11 +86,12 @@ FL_TEST_CASE("every width transmits through the selected writes: three per byte"
     {
         fl_gpio_sim_clear();
         SpiBlock32 spi;
-        // 33 pins cannot fit one 32-bit bank; the clock shares lane 31, which is only ever cleared.
-        FL_REQUIRE(spi.setPinMapping(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 31));
+        // 32 data pins plus a clock cannot fit one 32-bit bank, so every
+        // mapping is rejected and the unmapped driver writes nothing.
+        FL_CHECK_FALSE(spi.setPinMapping(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 31));
         spi.loadBuffer(data, 2);
         spi.transmit();
-        FL_CHECK_EQ(fl_gpio_sim_get_event_count(), 6U);
+        FL_CHECK_EQ(fl_gpio_sim_get_event_count(), 0U);
     }
 }
 

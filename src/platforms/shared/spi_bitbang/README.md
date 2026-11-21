@@ -229,8 +229,18 @@ void transmit();                                    // Block and transmit inline
 keeps the previous mapping when:
 
 - a pin is outside GPIO 0-31;
-- two of data lanes 0-7 use the same pin, or one of them uses the clock pin;
-- a lane 8 or higher (16- and 32-way drivers) uses a pin that lanes 0-7 use.
+- two data lanes use the same pin, or one of them uses the clock pin. This
+  includes lanes 8 and up of the 16- and 32-way drivers, which the byte table
+  only ever clears. 32 data pins plus a clock cannot fit one 32-bit bank, so
+  `SpiBlock32::setPinMapping()` always returns `false` on single-bank targets;
+- (`setPinMappingWithMask()`) the clock mask does not name exactly one pin.
+
+`SpiIsr8/16/32` take raw masks instead of pin indices. `setClockMask()`,
+`setLUTEntry()` and `loadLUT()` are `FL_NO_DISCARD` and return `false`,
+changing nothing, when the clock mask is empty, names more than one pin, or
+names a pin the loaded table drives; when a table entry sets and clears the
+same pin or touches the clock; or when `loadLUT()` is given a null array.
+`loadLUT()` checks every entry before writing any.
 
 ### ISR-Based SPI API (All Widths)
 

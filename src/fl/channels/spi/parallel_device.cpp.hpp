@@ -173,7 +173,7 @@ fl::optional<fl::task::Error> ParallelDevice::begin() FL_NO_EXCEPT {
     // cannot represent before it runs.
     if (!spiPinMappingValid(pImpl->config.gpio_pins.data(), num_pins,
                             pImpl->config.clock_pin)) {
-        return fl::task::Error("Invalid pin mapping (pins 0-31; data lanes 0-7 distinct and off the clock)");
+        return fl::task::Error("Invalid pin mapping (pins 0-31; data pins distinct and off the clock)");
     }
 
     // Determine backend width (round up to next supported width: 1,2,4,8,16,32)
