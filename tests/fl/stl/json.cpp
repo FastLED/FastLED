@@ -302,6 +302,40 @@ FL_TEST_CASE("Test simple JSON parsing") {
     }
 }
 
+// The builder interns strings longer than SSO lazily (FastLED#5329); keys and
+// values past that limit, escaped or repeated, must still parse verbatim.
+FL_TEST_CASE("json parse - strings longer than SSO") {
+    const char* json_str =
+        R"({"a_key_that_is_longer_than_the_sso_buffer_0123456789": )"
+        R"(["a_value_that_is_longer_than_the_sso_buffer_0123456789", )"
+        R"("a_value_that_is_longer_than_the_sso_buffer_0123456789", )"
+        R"("escaped \"quote\" in a value longer than the sso buffer", "short"]})";
+    json result = json::parse(json_str);
+    FL_REQUIRE(result.is_object());
+    json arr = result["a_key_that_is_longer_than_the_sso_buffer_0123456789"];
+    FL_REQUIRE(arr.is_array());
+    FL_REQUIRE(arr.size() == 4);
+    FL_CHECK(arr[0].as<fl::string>() ==
+             "a_value_that_is_longer_than_the_sso_buffer_0123456789");
+    FL_CHECK(arr[1].as<fl::string>() == arr[0].as<fl::string>());
+    FL_CHECK(arr[2].as<fl::string>() ==
+             "escaped \"quote\" in a value longer than the sso buffer");
+    FL_CHECK(arr[3].as<fl::string>() == "short");
+}
+
+// Nesting deeper than the builder's inline frames spills to the heap.
+FL_TEST_CASE("json parse - nesting deeper than inline frames") {
+    json result = json::parse(R"([[[[[[[[[[{"k": 7}]]]]]]]]]])");
+    json node = result;
+    for (int i = 0; i < 10; ++i) {
+        FL_REQUIRE(node.is_array());
+        FL_REQUIRE(node.size() == 1);
+        node = node[0];
+    }
+    FL_REQUIRE(node.is_object());
+    FL_CHECK(node["k"].as<i64>() == 7);
+}
+
 
 
 FL_TEST_CASE("Simple JSON test") {

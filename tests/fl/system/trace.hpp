@@ -148,3 +148,27 @@ FL_TEST_CASE("StackTrace - dump output") {
     FL_CHECK(ScopedTrace::depth() == 3);
     FL_TRACE_DUMP();  // Should print stack trace via FL_DBG
 }
+
+FL_TEST_CASE("StackTrace - dump format") {
+    ScopedTrace::clear();
+    FL_CHECK(ScopedTrace::dump() == "Stack trace (depth 0):\n  <empty>\n");
+
+    ScopedTrace::push("outer", 12);
+    ScopedTrace::push("inner", 0);
+    FL_CHECK(ScopedTrace::dump() ==
+             "Stack trace (depth 2):\n"
+             "  [0] outer(12)\n"
+             "  [1] inner\n");
+    ScopedTrace::clear();
+
+    for (int i = 0; i < 33; ++i) {
+        ScopedTrace::push("f", i);
+    }
+    fl::string overflowed = ScopedTrace::dump();
+    FL_CHECK(overflowed.starts_with(
+        "Stack trace (depth 33):\n"
+        "  <WARNING: Stack overflow - showing last 32 of 33 entries>\n"
+        "  [0] f(0)\n"));
+    FL_CHECK(overflowed.ends_with("  [31] f(31)\n"));
+    ScopedTrace::clear();
+}

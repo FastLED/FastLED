@@ -24,6 +24,7 @@
 #include "fl/stl/strstream.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/string_interner.h"
+#include "fl/stl/unique_ptr.h"
 #include "fl/stl/string_view.h"
 #include "fl/stl/noexcept.h"
 
@@ -868,11 +869,33 @@ private:
         fl::string pending_key;  // For objects: key waiting for value
     };
 
-    fl::vector_inlined<StackFrame, 8> mStack;  // Inline first 8 frames (most JSON is shallow)
+    // JsonBuilder lives on parse2()'s stack. On AVR it was 761 B (8 inline
+    // frames at ~49 B plus a 345 B StringInterner), which made parse2 an
+    // 833 B frame (FastLED#5329). Small-memory tiers inline two frames and
+    // spill deeper nesting to the heap.
+#if FL_PLATFORM_HAS_LARGE_MEMORY
+    static constexpr int kInlineFrames = 8;  // Most JSON is shallow
+#else
+    static constexpr int kInlineFrames = 2;
+#endif
+    fl::vector_inlined<StackFrame, kInlineFrames> mStack;
     fl::shared_ptr<json_value> mRoot;
     int mDepth;
-    // String interning enabled for large strings (> 64 bytes) that overflow SSO
-    fl::StringInterner mInterner;
+    // Interns strings too long for SSO. Created on the first such string, so
+    // documents without one never build (or carry) the interner's hash map.
+    fl::unique_ptr<fl::StringInterner> mInterner;
+
+    template <typename Str>
+    fl::string intern(const Str& str) FL_NO_EXCEPT {
+        // Mirrors StringInterner::intern: SSO-sized strings are never interned.
+        if (str.size() <= FASTLED_STR_INLINED_SIZE) {
+            return fl::string(str.data(), str.size());
+        }
+        if (!mInterner) {
+            mInterner = fl::make_unique<fl::StringInterner>();
+        }
+        return mInterner->intern(str);
+    }
 
     // Parse integer array directly from span into vector (zero allocations)
     template<typename T>
@@ -1077,17 +1100,17 @@ public:
                     mStack.back().pending_key.empty()) {
                     // Key: handle escape sequences, then intern (StringInterner handles SSO internally)
                     if (has_escape_sequences(value)) {
-                        mStack.back().pending_key = mInterner.intern(unescape_string(value));
+                        mStack.back().pending_key = intern(unescape_string(value));
                     } else {
-                        mStack.back().pending_key = mInterner.intern(value);
+                        mStack.back().pending_key = intern(value);
                     }
                 } else {
                     // Value: handle escape sequences, then intern (StringInterner handles SSO internally)
                     fl::string str;
                     if (has_escape_sequences(value)) {
-                        str = mInterner.intern(unescape_string(value));
+                        str = intern(unescape_string(value));
                     } else {
-                        str = mInterner.intern(value);
+                        str = intern(value);
                     }
                     auto str_val = fl::make_shared<json_value>(str);
                     push_value(str_val);
