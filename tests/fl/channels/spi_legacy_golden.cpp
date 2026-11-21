@@ -51,6 +51,7 @@
 #include "fl/stl/string.h"
 #include "fl/stl/vector.h"
 #include "crgb.h"
+#include "platforms/stub/time_stub.h"
 #include "test.h"
 
 using namespace fl;
@@ -87,6 +88,56 @@ template <> class FastPin<91> {
     static void toggle() {
         my9221_wire::sampledBits().push_back(my9221_wire::dataLevel() ? 1 : 0);
     }
+    static void strobe() { toggle(); toggle(); }
+};
+}  // namespace fl
+
+// MY9221 timing capture (#5066): pins 92 = DI, 93 = DCKI. Every FastPin write
+// and every requested wait (fl::stub::setNanosecondDelayCallback, which also
+// sees delayMicroseconds) lands in one ordered timeline. Model time advances
+// ONLY by requested waits: GPIO writes cost 0 ns, so incidental host/MMIO
+// latency can never satisfy a datasheet interval.
+namespace my9221_timing {
+struct Event {
+    bool clock;  // true = DCKI write, false = DI write
+    bool level;  // pin level after the write
+    fl::u64 ns;  // model time of the write
+};
+struct State {
+    fl::u64 now = 0;
+    bool data = false;
+    bool clock = false;
+    fl::vector<Event> events;
+    void reset() { now = 0; data = false; clock = false; events.clear(); }
+    void write(bool isClock, bool level) {
+        (isClock ? clock : data) = level;
+        events.push_back({isClock, level, now});
+    }
+};
+inline State& state() { static State s; return s; }
+}  // namespace my9221_timing
+
+namespace fl {
+template <> class FastPin<92> {
+  public:
+    typedef volatile RwReg* port_ptr_t;
+    typedef RwReg port_t;
+    static void setOutput() {}
+    static void setInput() {}
+    static void hi() { my9221_timing::state().write(false, true); }
+    static void lo() { my9221_timing::state().write(false, false); }
+    static void toggle() { my9221_timing::state().write(false, !my9221_timing::state().data); }
+    static void strobe() { toggle(); toggle(); }
+};
+template <> class FastPin<93> {
+  public:
+    typedef volatile RwReg* port_ptr_t;
+    typedef RwReg port_t;
+    static void setOutput() {}
+    static void setInput() {}
+    static void hi() { my9221_timing::state().write(true, true); }
+    static void lo() { my9221_timing::state().write(true, false); }
+    static void toggle() { my9221_timing::state().write(true, !my9221_timing::state().clock); }
     static void strobe() { toggle(); toggle(); }
 };
 }  // namespace fl
@@ -697,6 +748,129 @@ FL_TEST_CASE("MY9221 legacy SPI-channel addLeds uses bit-bang MY9221Controller, 
         }
         FL_CHECK_EQ(got, expectedWords[w]);
     }
+}
+
+// ===========================================================================
+// MY9221 wire timing (#5066). MY-Semi MY9221 datasheet v1.0 pp 6-7, 15:
+//   DI setup / hold around each DCKI edge   >= 10 ns
+//   DCKI pulse duration (each phase, DDR)   >= 50 ns
+//   latch: DCKI quiet before the DI pulses  >  220 us
+//   latch DI pulse high / low               >  70 ns / > 230 ns
+//   cascade stop interval after the latch   >  200 ns + N * 10 ns
+// Only requested waits advance model time (GPIO writes are free), so each
+// interval must come from an explicit delay in the controller.
+// ===========================================================================
+
+FL_TEST_CASE("MY9221 controller enforces DDR setup/hold, clock phase and latch timing") {
+    using my9221_timing::Event;
+    my9221_timing::State& st = my9221_timing::state();
+    st.reset();
+    fl::stub::setNanosecondDelayCallback([](fl::u32 ns) FL_NO_EXCEPT {
+        my9221_timing::state().now += ns;
+    });
+    auto clearCallback = fl::make_scope_exit([] { fl::stub::clearNanosecondDelayCallback(); });
+
+    // 17 LEDs -> N = 5 chips: the stop bound (250 ns) exceeds the 230 ns
+    // latch-low minimum, so it is checked independently of the pulse widths.
+    constexpr int kLeds = 17;
+    constexpr fl::u64 kChips = (kLeds + 3) / 4;
+    static CRGB leds[kLeds];
+    for (int i = 0; i < kLeds; ++i) {
+        leds[i] = CRGB(static_cast<fl::u8>(i * 13), 0xA5, static_cast<fl::u8>(0xFF - i));
+    }
+    ::CLEDController& c = FastLED.addLedsSpiChannel<MY9221, 92, 93, RGB>(leds, kLeds);
+    c.setDither(DISABLE_DITHER);
+
+    c.showLeds(255);
+    const fl::size frame1End = st.events.size();
+    c.showLeds(255);  // second frame bounds the cascade stop interval
+    const fl::vector<Event>& ev = st.events;
+
+    // Frame 1: every DCKI edge with setup/hold/phase measured against DI writes.
+    fl::u64 minSetup = ~0ull, minHold = ~0ull, minPhase = ~0ull;
+    fl::size clockEdges = 0;
+    fl::size lastEdgeIdx = 0;
+    bool clockLevel = false;
+    bool haveData = false;
+    fl::u64 lastDataNs = 0;
+    for (fl::size i = 0; i < frame1End; ++i) {
+        const Event& e = ev[i];
+        if (!e.clock) {
+            haveData = true;
+            lastDataNs = e.ns;
+            continue;
+        }
+        if (e.level == clockLevel) {
+            continue;  // re-park write, not an edge
+        }
+        clockLevel = e.level;
+        FL_REQUIRE_TRUE(haveData);
+        minSetup = fl::min(minSetup, e.ns - lastDataNs);
+        if (clockEdges > 0) {
+            minPhase = fl::min(minPhase, e.ns - ev[lastEdgeIdx].ns);
+        }
+        for (fl::size j = i + 1; j < frame1End; ++j) {
+            if (!ev[j].clock) {
+                minHold = fl::min(minHold, ev[j].ns - e.ns);
+                break;
+            }
+        }
+        lastEdgeIdx = i;
+        ++clockEdges;
+    }
+    FL_REQUIRE_EQ(clockEdges, static_cast<fl::size>(kChips * 208));
+    FL_CHECK_FALSE(clockLevel);  // even edge count: DCKI parks low for the latch
+    const fl::u64 lastEdgeNs = ev[lastEdgeIdx].ns;
+
+    // Latch: DI transitions after the last DCKI edge, with DCKI held low.
+    bool dataLevel = false;
+    for (fl::size i = 0; i < lastEdgeIdx; ++i) {
+        if (!ev[i].clock) {
+            dataLevel = ev[i].level;
+        }
+    }
+    fl::vector<fl::u64> rises, falls;
+    for (fl::size i = lastEdgeIdx + 1; i < frame1End; ++i) {
+        const Event& e = ev[i];
+        if (e.clock) {
+            FL_CHECK_FALSE(e.level);
+            continue;
+        }
+        // A DI fall that only parks a final 1-bit low precedes the pulses.
+        if (e.level != dataLevel && (e.level || !rises.empty())) {
+            (e.level ? rises : falls).push_back(e.ns);
+        }
+        dataLevel = e.level;
+    }
+    FL_REQUIRE_EQ(rises.size(), 4u);
+    FL_REQUIRE_EQ(falls.size(), 4u);
+    FL_CHECK_GT(rises[0] - lastEdgeNs, 220000u);
+    fl::u64 minLatchHigh = ~0ull, minLatchLow = ~0ull;
+    for (int k = 0; k < 4; ++k) {
+        minLatchHigh = fl::min(minLatchHigh, falls[k] - rises[k]);
+        if (k < 3) {
+            minLatchLow = fl::min(minLatchLow, rises[k + 1] - falls[k]);
+        }
+    }
+
+    // Stop: last latch fall to the next DI or DCKI transition of frame 2.
+    fl::u64 nextTransitionNs = ~0ull;
+    bool d = dataLevel, ck = false;
+    for (fl::size i = frame1End; i < ev.size(); ++i) {
+        bool& lvl = ev[i].clock ? ck : d;
+        if (ev[i].level != lvl) {
+            nextTransitionNs = ev[i].ns;
+            break;
+        }
+    }
+    FL_REQUIRE_NE(nextTransitionNs, ~0ull);
+
+    FL_CHECK_GE(minSetup, 10u);
+    FL_CHECK_GE(minHold, 10u);
+    FL_CHECK_GE(minPhase, 50u);
+    FL_CHECK_GT(minLatchHigh, 70u);
+    FL_CHECK_GT(minLatchLow, 230u);
+    FL_CHECK_GT(nextTransitionNs - falls[3], 200u + kChips * 10u);
 }
 
 }  // FL_TEST_FILE
