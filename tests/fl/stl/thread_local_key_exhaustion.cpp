@@ -21,6 +21,15 @@ FL_TEST_FILE(FL_FILEPATH) {
 // constructed in the process would get the shared fallback slot for the rest
 // of the run (#5323). Keep it the only test case here and avoid FL_SUBCASE
 // (fl_unittest.h lazily constructs a static ThreadLocal on first subcase).
+//
+// The sibling pthread_setspecific failure branch in createStorage() is
+// deliberately not injected (#5322). Its only extra code is freeing the
+// storage it just allocated and falling through to fallbackStorage(), the
+// same function this test exercises. With a valid key, setspecific fails only
+// on ENOMEM, which cannot be forced portably without interposing libc
+// symbols (blocked by macOS two-level namespaces, and absent on Windows).
+// A test-only key-policy template parameter would widen ThreadLocalReal's
+// type for every user and is not worth it for two lines of code.
 FL_TEST_CASE("ThreadLocal - key creation failure falls back to a shared slot") {
     const int kMaxKeys = 1 << 16;
     fl::vector<pthread_key_t> hoard;
