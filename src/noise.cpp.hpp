@@ -729,7 +729,9 @@ void fill_raw_noise16into8(fl::u8 *pData, fl::u8 num_points, fl::u8 octaves, fl:
   for(int o = 0; o < octaves; ++o) {
     for(int i = 0,xx=_xx; i < num_points; ++i, xx+=scx) {
       fl::u32 accum = (inoise16(xx,time))>>o;
-      accum += (pData[i]<<8);
+      // Widen before shifting: on 16-bit-int targets (AVR) pData[i]<<8
+      // overflowed int for pData[i] >= 128 and corrupted the clamp.
+      accum += ((fl::u32)pData[i] << 8);
       if(accum > 65535) { accum = 65535; }
       pData[i] = accum>>8;
     }
@@ -889,7 +891,10 @@ static fl::u8 raw_noise16into8_at(int i, fl::u8 octaves, fl::u32 x, int scale, f
   fl::u32 scx = scale;
   fl::u8 v = 0;
   for(int o = 0; o < octaves; ++o) {
-    fl::u32 accum = (inoise16(xx + (fl::u32)i * scx, time)) >> o;
+    // The buffered loop keeps its coordinate in an int, so on 16-bit-int
+    // targets (AVR) it wraps to 16 bits and sign-extends into inoise16's
+    // u32 parameter. Narrow through int the same way; no-op for 32-bit int.
+    fl::u32 accum = (inoise16((fl::u32)(int)(xx + (fl::u32)i * scx), time)) >> o;
     accum += (fl::u32)v << 8;
     if(accum > 65535) { accum = 65535; }
     v = accum >> 8;
