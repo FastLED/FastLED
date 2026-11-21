@@ -52,19 +52,24 @@
 ///    on what fl::scratch is.
 ///
 /// Platform defaults:
-///  - ESP8266: 4608 B. Arduino's loop() runs on a fixed 4 KB "cont" stack,
-///    while ~80 KB of DRAM leaves room in .bss. 4.5 KB holds drawPolygon's
-///    32/64 Exact working set (fl::gfx::detail::PolyScratch<32, 64>: 4208 B,
-///    8-aligned, on ESP8266), which makes 32/64 its default polygon tier,
+///  - ESP8266: 4608 B on single-threaded builds; 0 when
+///    `FASTLED_MULTITHREADED` is set. Arduino's loop() runs on a fixed 4 KB
+///    "cont" stack, while ~80 KB of DRAM leaves room in .bss. 4.5 KB holds
+///    drawPolygon's 32/64 Exact working set
+///    (fl::gfx::detail::PolyScratch<32, 64>: 4208 B, 8-aligned, on ESP8266),
+///    which makes 32/64 its default polygon tier,
 ///    plus ~400 B for a small nested user. The arena is only linked in when
 ///    something uses fl::scratch (`--gc-sections`).
 ///
 ///    Budget for new fl::scratch users on ESP8266 (#5325): drawPolygon's
 ///    32/64 lease reserves up to FL_GFX_POLYGON_LARGE_TIER_ARENA_BYTES
-///    (4215 B, padding included), leaving 393 B. All leases that are live
-///    while drawPolygon runs (including one that calls into it) share that
-///    393 B: the sum of (sizeof(T) + alignof(T) - 1) over them must not
-///    exceed it, or the draw is skipped. Exhaustion warns (FL_WARN_ONCE)
+///    (4215 B, padding included), leaving 393 B. All other leases that are
+///    live while drawPolygon runs (including one that calls into it) share
+///    that 393 B. If the sum of (sizeof(T) + alignof(T) - 1) over them stays
+///    at or below 393 B, every lease is admitted. A larger sum can still fit
+///    when the actual sizes and padding are smaller; a lease that does not
+///    fit comes back empty (for drawPolygon, the draw is skipped). A smaller
+///    explicit polygon tier leaves more room. Exhaustion warns (FL_WARN_ONCE)
 ///    at most once per run and only when warnings are enabled, so a skip
 ///    may be silent. A lease that is released before drawPolygon runs may
 ///    use the whole 4608 B. drawPolygon is currently the only fl::scratch

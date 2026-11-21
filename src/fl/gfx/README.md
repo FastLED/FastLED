@@ -133,11 +133,14 @@ canvas.drawPolygon(CRGB::Yellow, tri);
   do not), or in an `fl::scratch` side-stack arena
   (`FL_SCRATCH_STACK_BYTES`, see `fl/stl/scratch.h`) of at least
   `FL_GFX_POLYGON_LARGE_TIER_ARENA_BYTES` (4215 B). ESP8266 ships a
-  4608 B arena, so it gets 32 even though its `loop()` stack is only
-  4 KB. A working set that fits the arena is leased from it; if the arena
+  4608 B arena (single-threaded builds; 0 under `FASTLED_MULTITHREADED`),
+  so it gets 32 even though its `loop()` stack is only 4 KB. A working
+  set that fits the arena is leased from it; if the arena
   is exhausted at run time (other `fl::scratch` users hold it), the draw
-  is skipped. On ESP8266 all leases live during a draw share 393 B; see
-  the budget in `fl/stl/scratch.h`. Other small-stack targets have no
+  is skipped. On ESP8266 the default 32/64 Exact lease takes up to
+  4215 B, so every *other* lease live during that draw shares the
+  remaining 393 B (a smaller explicit tier leaves more); see the budget
+  in `fl/stl/scratch.h`. Other small-stack targets have no
   arena by default (their stack and `.bss` share one SRAM, so an arena
   frees nothing); a sketch opts in with `-DFL_SCRATCH_STACK_BYTES=N`, see
   `fl/stl/scratch.h` for sizing. A working set that does not fit stays
