@@ -58,6 +58,19 @@
 ///    8-aligned, on ESP8266), which makes 32/64 its default polygon tier,
 ///    plus ~400 B for a small nested user. The arena is only linked in when
 ///    something uses fl::scratch (`--gc-sections`).
+///
+///    Budget for new fl::scratch users on ESP8266 (#5325): drawPolygon's
+///    32/64 lease reserves up to FL_GFX_POLYGON_LARGE_TIER_ARENA_BYTES
+///    (4215 B, padding included), leaving 393 B. A lease that is live while
+///    drawPolygon runs (including one that calls into it) must fit in that
+///    393 B (sizeof(T) + alignof(T) - 1), or the draw is skipped with one
+///    FL_WARN. A lease that is released before drawPolygon runs may use the
+///    whole 4608 B. drawPolygon is currently the only fl::scratch user.
+///    The default is not raised: every extra byte is .bss taken from every
+///    ESP8266 sketch that draws polygons. A sketch that needs more nesting
+///    passes -DFL_SCRATCH_STACK_BYTES=N, or a smaller explicit polygon
+///    tier such as drawPolygon<int, 12>. Check fl::scratch_high_water()
+///    to confirm.
 ///  - Everything else: 0. That includes the other small-stack tiers (AVR,
 ///    LPC804, Teensy LC, nRF51, STM32G03x, low-density STM32F1): their RAM
 ///    is too small to reserve a fixed arena by default, so they opt in with

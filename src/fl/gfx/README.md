@@ -136,7 +136,8 @@ canvas.drawPolygon(CRGB::Yellow, tri);
   4608 B arena, so it gets 32 even though its `loop()` stack is only
   4 KB. A working set that fits the arena is leased from it; if the arena
   is exhausted at run time (other `fl::scratch` users hold it), the draw
-  is skipped. A working set that does not fit stays on the stack. Pass
+  is skipped. On ESP8266 that leaves 393 B for leases live during a draw;
+  see the budget in `fl/stl/scratch.h`. A working set that does not fit stays on the stack. Pass
   MAXN explicitly for more vertices:
   `canvas.drawPolygon<int, 12>(color, span)`.
 - **Fill rule** — even-odd: a point is inside if a ray crosses an odd
