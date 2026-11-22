@@ -944,13 +944,19 @@ void loop() {
         // Do useful work while waiting
         computeNextFrame();
     } else if (state == fl::IChannelDriver::DriverState::ERROR) {
-        Serial.println(state.error.c_str());
+        Serial.println(state.error);
     }
     // BUSY state: Keep polling until DRAINING or READY
 
     delay(20);
 }
 ```
+
+`state.error` is a borrowed C string. Consume it while the driver is alive and
+before another driver operation can change its error storage. Custom drivers
+should return string literals or store dynamic messages in a driver-owned
+`fl::string mLastError` and return `mLastError.c_str()`. Copy the message if it
+must survive later driver operations or driver removal.
 
 **When to use:**
 - High frame rate applications requiring CPU/DMA parallelism

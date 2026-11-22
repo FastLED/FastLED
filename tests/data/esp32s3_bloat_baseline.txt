@@ -466,4 +466,12 @@
 # Local fresh build: image_flash 319439 B. Neither the 320503 B flash ceiling
 # nor the 40016 B RAM ceiling moves.
 # Hosted CI: 319447 B (+8 B versus the local 319439 B build).
-319447
+#
+# -244 B in matched local Blink builds (319027 -> 318783), #5380:
+# DriverState and ChannelManager::poll carry borrowed C strings instead of
+# constructing, copying and destroying empty fl::strings on every driver poll.
+# BEFORE is fixed master 01119e260; AFTER includes the pointer-state change.
+# The ratchet moves 319447 -> 318783, also capturing savings already on master
+# before this change. Attributed RAM stays 22499 B; the 320503 B flash ceiling
+# and 40016 B RAM ceiling are unchanged.
+318783

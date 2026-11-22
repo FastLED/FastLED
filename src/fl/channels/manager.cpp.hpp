@@ -552,7 +552,7 @@ IChannelDriver::DriverState ChannelManager::poll() FL_NO_EXCEPT {
     // Priority order: ERROR > BUSY > DRAINING > READY
     bool anyBusy = false;
     bool anyDraining = false;
-    fl::string firstError;
+    const char* firstError = "";
 
     for (auto& entry : mDrivers) {
         IChannelDriver::DriverState result = entry.driver->poll();
@@ -562,13 +562,13 @@ IChannelDriver::DriverState ChannelManager::poll() FL_NO_EXCEPT {
             anyDraining = true;
         }
         // Capture first error encountered
-        if (result.state == IChannelDriver::DriverState::ERROR && firstError.empty()) {
+        if (result.state == IChannelDriver::DriverState::ERROR && firstError[0] == '\0') {
             firstError = result.error;
         }
     }
 
     // Return error if any driver reported error
-    if (!firstError.empty()) {
+    if (firstError[0] != '\0') {
         return IChannelDriver::DriverState(IChannelDriver::DriverState::ERROR, firstError);
     }
 

@@ -608,7 +608,7 @@ FL_TEST_CASE("ChannelDriverLcdClockless - failed bus recreation reports error an
     driver.enqueue(larger);
     driver.show();
     FL_CHECK(driver.poll() == IChannelDriver::DriverState::ERROR);
-    FL_CHECK_EQ(driver.poll().error,
+    FL_CHECK_EQ(fl::string(driver.poll().error),
                 "LCD_CLOCKLESS: peripheral initialization failed");
     FL_CHECK_FALSE(larger->isInUse());
     const auto failed = driver.workerDiagnostics();
@@ -695,7 +695,7 @@ FL_TEST_CASE("ChannelDriverLcdClockless - failed allocation reports error until 
     driver.show();
 
     FL_CHECK(driver.poll() == IChannelDriver::DriverState::ERROR);
-    FL_CHECK_EQ(driver.poll().error,
+    FL_CHECK_EQ(fl::string(driver.poll().error),
                 "LCD_CLOCKLESS: DMA ring buffer allocation failed");
     FL_CHECK_FALSE(driver.waitForReady(1));
     FL_CHECK_FALSE(data->isInUse());
@@ -724,7 +724,7 @@ FL_TEST_CASE("ChannelDriverLcdClockless - transmit failure") {
     driver.show();
 
     FL_CHECK(driver.poll() == IChannelDriver::DriverState::ERROR);
-    FL_CHECK_EQ(driver.poll().error, "LCD_CLOCKLESS: initial transmit failed");
+    FL_CHECK_EQ(fl::string(driver.poll().error), "LCD_CLOCKLESS: initial transmit failed");
     FL_CHECK_FALSE(driver.waitForReady(1));
     FL_CHECK_EQ(driver.workerDiagnostics().submittedChunks, 0);
     FL_CHECK_EQ(mock.getDeinitCount(), 1);
