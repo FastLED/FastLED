@@ -46,20 +46,20 @@ def _job_names(filename: str, job_ids: set[str]) -> set[str]:
             rows = [dict(enumerate(values)) for values in itertools.product(*axes)]
         else:
             rows = [{}]
-        child = ""
+        children = {""}
         if "uses" in job:
             called = WORKFLOWS / Path(job["uses"]).name
             called_data = yaml.load(called.read_text(), Loader=yaml.BaseLoader)
-            called_jobs = called_data["jobs"]
-            if len(called_jobs) != 1:
-                raise ValueError(f"{filename}/{job_id} calls a multi-job workflow")
-            called_id, called_job = next(iter(called_jobs.items()))
-            child = " / " + called_job.get("name", called_id)
+            # Runner selection may be skipped or fail with a hosted fallback;
+            # the validation jobs it routes still need successful evidence.
+            called_ids = set(called_data["jobs"]) - {"pool"}
+            children = {" / " + name for name in _job_names(called.name, called_ids)}
         for row in rows:
             suffix = (
                 f" ({', '.join(str(value) for value in row.values())})" if row else ""
             )
-            names.add(f"{prefix}{suffix}{child}")
+            for child in children:
+                names.add(f"{prefix}{suffix}{child}")
     return names
 
 
