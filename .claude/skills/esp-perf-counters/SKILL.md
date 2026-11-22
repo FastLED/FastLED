@@ -21,6 +21,11 @@ builds. For example, #5364 took `show()` from 14,439 to 12,953 instructions.
 **Rule:** accept or reject a per-change optimisation on **instruction count**. Use
 wall time only to track cumulative progress across many changes.
 
+Caveat: with IPC around 0.4, a change can retire fewer instructions and still
+add stalls, for example extra loads. If a change alters the memory-access pattern,
+also check that wall time does not regress beyond the 10-20 µs layout-noise band.
+Use the median of several runs for that check.
+
 ## Hardware facts
 
 | Chip | Counter | Detect with (`src/platforms/esp/is_esp.h`) |
@@ -63,6 +68,10 @@ Try one new event at a time and confirm that the board survives.
    PCCR, configured to count cycles. Code that switches the event must save
    PCER/PCMR/PCCR and restore them afterwards. When restoring PCCR, add the
    cycles that elapsed so that IDF's cycle count keeps moving forward.
+   Between `begin()` and `end()`, `esp_cpu_get_cycle_count()` (and anything
+   built on it) returns instructions, not cycles. Do not take cycle-based
+   timestamps or deltas inside that window. The restore cannot fix those reads
+   after the fact.
 3. **Only one event at a time.** Count instructions with PCCR. Derive cycles as
    wall-time µs × `getCpuFrequencyMhz()`. Report `IPC = instructions / cycles`.
 4. **Probe overhead.** Each `csrr` and its bookkeeping adds a few instructions.
@@ -104,11 +113,13 @@ struct InstrCounter {
 ```
 
 Usage: `c.begin(); FastLED.show(); uint32_t n = c.end();`. Use `micros()` for
-`cycles = elapsed_us * getCpuFrequencyMhz()` and report `n / cycles` as IPC.
+`cycles = elapsed_us * getCpuFrequencyMhz()`. Skip the sample if `cycles` is 0.
+Otherwise report `(float)n / cycles` as IPC, using floating-point division.
 
 **Per-phase profiling:** inside the code under test, read 0x7E2 at phase
-boundaries (for example encode, `rmt_transmit`, poll) and take the differences,
-or reset it to 0 at each boundary. Remember the probe overhead from pitfall 4.
+boundaries (for example encode, `rmt_transmit`, poll) and take the differences.
+Do not reset it at the boundaries, because `end()` would then return only the last
+phase. Remember the probe overhead from pitfall 4.
 
 ## Reference numbers (ESP32-C6, `show()` via RMT)
 
@@ -123,8 +134,10 @@ or reset it to 0 at each boundary. Remember the probe overhead from pitfall 4.
   is gaining an `InstrCounter` under **FastLED#5376**. It reports
   `show_instr_total` / `show_instr_count` in the RPC result. Until #5376 merges,
   check whether the struct exists before you rely on it.
-- `ci/autoresearch/show_latency.py` prints `instr/show` and IPC when those fields
-  are present.
+- Host-side reporting is also pending under #5376.
+  `ci/autoresearch/show_latency.py` on master prints only timing fields. The
+  #5376 change makes it print `instr/show` and IPC when the firmware supplies
+  those fields.
 - Find the port with `fbuild port scan`, then run:
   `bash autoresearch esp32c6 --legacy --rmt --upload-port <port>`
 - Take an fbuild lease when you share the board with other agents.
