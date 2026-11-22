@@ -51,8 +51,14 @@ The flags above ask the generic writer to use per-pin operations rather than
 whole-port snapshots or two-write streaming. Apply the policy to each custom
 pin whose operations need this treatment, including a custom clock pin.
 In the per-pin path, clock transitions call `FastPin<CLOCK_PIN>::hi()` and
-`lo()` directly. A custom clock policy prevents the bulk paths from bypassing
-those calls. On most platforms it also selects the clock delay implementation,
+`lo()` directly, unless the clock policy sets `kEsp32LegacyWriteBit`. The ESP32
+platform policy sets it when built with `FL_ESP32_ENABLE_FAST_SOFTWARE_SPI=0`,
+and that legacy writer makes the falling clock edge
+with `toggle()`, so a custom clock still matched by the ESP32 policy can bypass
+its `lo()` override. The example policy above inherits
+`kEsp32LegacyWriteBit = false` from `BitbangPinDefaults` and avoids that path.
+A custom clock policy also prevents the bulk paths from bypassing the clock
+calls. On most platforms it also selects the clock delay implementation,
 because the writer calls the clock policy's `delay()`. Teensy 4
 (`FL_IS_TEENSY_4X`) is the exception: its writer calls `delayNanoseconds()`
 directly, so the clock policy's `delay()` is not used there.
