@@ -15,10 +15,13 @@
 #include "fl/stl/int.h"
 
 // Stand-ins for the BSP names the pin template uses. Its accessors take a fixed
-// u32 port address, which a 64-bit host cannot provide, so the fixture pins below
-// shadow them and only the policy, detector and writer are production code here.
+// u32 port address, which a 64-bit host cannot dereference, so the fixture pins
+// below shadow them and only the policy, detector and writer are production code
+// here. One case compares the real accessors' addresses without dereferencing.
 typedef int bsp_io_port_pin_t;
-struct R_PORT0_Type { volatile fl::u16 PODR, POSR, PORR; };
+// Halfword view of R_PORT0_Type in the BSP's R7FA4M1AB.h: PODR +0x0, PDR +0x2,
+// EIDR +0x4, PIDR +0x6, PORR +0x8, POSR +0xA.
+struct R_PORT0_Type { volatile fl::u16 PODR, PDR, EIDR, PIDR, PORR, POSR; };
 
 #include "platforms/arm/renesas/renesas_pin.h"
 
@@ -66,6 +69,7 @@ struct Base : _ARMPIN<PIN, 0, 0> {
     static void setOutput() {}
 };
 
+constexpr u32 kRenesasPort1 = 0x40040020U; // PORT1.PCNTR1 (RA4M1 manual sec. 19.2.1).
 constexpr u8 kDataPin = 240;
 constexpr u8 kClockPin = 241;
 constexpr u8 kOtherPortClockPin = 242;
@@ -210,6 +214,17 @@ void checkAtomicEdges(const fl::vector<u8>& expected) {
 }
 
 } // namespace
+
+FL_TEST_CASE("Renesas hi, lo and port use the RA4M1 halfword addresses") {
+    // RA4M1 hardware manual R01UH0887EJ0110 sec. 19.2.1 and 19.2.3 list 16-bit
+    // PORTm.PODR at +0x0, PORTm.PORR at +0x8 and PORTm.POSR at +0xA. Only the
+    // addresses are compared; nothing is dereferenced.
+    using P = _ARMPIN<7, 0x0103, kRenesasPort1>;
+    FL_CHECK_EQ(fl::bit_cast<uptr>(P::port()), uptr(kRenesasPort1 + 0x0));
+    FL_CHECK_EQ(fl::bit_cast<uptr>(P::cport()), uptr(kRenesasPort1 + 0x8));
+    FL_CHECK_EQ(fl::bit_cast<uptr>(P::sport()), uptr(kRenesasPort1 + 0xA));
+    FL_CHECK_EQ(P::mask(), 1U << 3);
+}
 
 FL_TEST_CASE("Renesas same-port writeBytes streams two full-port stores per bit") {
     const fl::vector<fl::vector<u8>> inputs = {
