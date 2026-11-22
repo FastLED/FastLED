@@ -17,7 +17,13 @@
 // Define FL_ESP32_USER_APP_MAIN=1 before including FastLED.h when the
 // application supplies app_main (including Arduino-as-component applications).
 // Keep the replacement in sketch objects for normal Arduino startup.
-#if FL_ESP32_ARDUINO_LAZY_SERIAL0
+//
+// FastLED's own unity files (src/fl/build/*.cpp) also include FastLED.h. They
+// define FL_BUILDING_FASTLED_LIBRARY so these weak symbols stay out of library
+// objects. The Arduino IDE links library .o files directly, not as an archive,
+// so a weak app_main there would always beat the core's main.o, and a sketch's
+// FL_ESP32_STOCK_ARDUINO_MAIN opt-out would have no effect (FastLED#5365).
+#if FL_ESP32_ARDUINO_LAZY_SERIAL0 && !defined(FL_BUILDING_FASTLED_LIBRARY)
 // IWYU pragma: begin_keep
 #include <freertos/FreeRTOS.h>  // ok include
 #include <freertos/task.h>      // ok include
