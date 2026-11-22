@@ -5,6 +5,7 @@
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/int.h"
 #include "fl/stl/noexcept.h"
+#include "fl/stl/type_traits.h"
 #include "fl/system/delay.h"
 
 namespace fl {
@@ -70,6 +71,23 @@ FASTLED_FORCE_INLINE void writeBitSetClearNoBranch(u8 value, u32 mask,
     *target = mask;
 }
 
+/// 0-10 cycles as inline NOPs, the same bodies as delay.cpp.hpp's specializations.
+template <fl::cycle_t CYCLES>
+FASTLED_FORCE_INLINE void bitbangDelay(fl::integral_constant<bool, false>) FL_NO_EXCEPT {
+    if (CYCLES > 0 && (CYCLES & 1)) { FL_NOP; }
+    if (CYCLES >= 2) { FL_NOP2; }
+    if (CYCLES >= 4) { FL_NOP2; }
+    if (CYCLES >= 6) { FL_NOP2; }
+    if (CYCLES >= 8) { FL_NOP2; }
+    if (CYCLES >= 10) { FL_NOP2; }
+}
+
+/// More than 10 cycles: the out-of-line delay, so code size stays bounded.
+template <fl::cycle_t CYCLES>
+FASTLED_FORCE_INLINE void bitbangDelay(fl::integral_constant<bool, true>) FL_NO_EXCEPT {
+    fl::delaycycles<CYCLES>();
+}
+
 /// Default pin access; a platform may specialize the data-write operation
 /// while the generic SPI writer continues to own bit order and clock timing.
 template <class Pin> struct BitbangPinDefaults {
@@ -79,9 +97,12 @@ template <class Pin> struct BitbangPinDefaults {
     /// ESP32 with its fast policy off: GenericSoftwareSPIOutput::writeBit()
     /// emits the FastLED 3.10.9 ESP32 sequence (see fastpin_esp32.h).
     static constexpr bool kEsp32LegacyWriteBit = false;
+    /// Up to 10 cycles, emit the NOPs here: fl::delaycycles is only declared in
+    /// headers and the uno LTO build still called it once per bit (#5032). Longer
+    /// delays keep the out-of-line call, so code size stays bounded.
     template <fl::cycle_t CYCLES>
     FASTLED_FORCE_INLINE static void delay() FL_NO_EXCEPT {
-        fl::delaycycles<CYCLES>();
+        bitbangDelay<CYCLES>(fl::integral_constant<bool, (CYCLES > 10)>());
     }
     template <u8 BIT>
     FASTLED_FORCE_INLINE static void write(u8 value) FL_NO_EXCEPT {

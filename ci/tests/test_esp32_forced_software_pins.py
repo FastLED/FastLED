@@ -79,8 +79,12 @@ def test_legacy_esp32_software_spi_keeps_the_inline_delay() -> None:
     source: str = (ROOT / "src/platforms/esp/32/core/fastpin_esp32.h").read_text(
         encoding="utf-8"
     )
-    legacy: str = source.split("#if !FL_ESP32_ENABLE_FAST_SOFTWARE_SPI", 1)[1].split(
-        "#else", 1
+    # End at the block's own #else/#elif/#endif, so later fast-policy
+    # specializations cannot satisfy the legacy assertions.
+    legacy: str = re.split(
+        r"#(?:else|elif|endif)\b",
+        source.split("#if !FL_ESP32_ENABLE_FAST_SOFTWARE_SPI", 1)[1],
+        maxsplit=1,
     )[0]
     assert "struct BitbangPin<FastPin<PIN>> : Esp32BitbangDelay<FastPin<PIN>>" in legacy
     assert "kEsp32LegacyWriteBit = true" in legacy
