@@ -66,4 +66,65 @@ FL_TEST_CASE("[#5157] typed and erased encoders use library availability") {
     FL_REQUIRE_EQ(capture->frames, 3);
     FL_CHECK_EQ(capture->bytes, expected);
 }
+
+// #5162: every constant typed chipset resolves to a factory bound to its one
+// encoder, never to the shared selector that links all of them. Chipsets that
+// share an encoder share a factory; distinct encoders get distinct factories.
+FL_TEST_CASE("[#5162] constant typed chipsets bind only their own encoder") {
+    using Clockless = TypedChannel<Bus::BIT_BANG, ClocklessChipset>;
+    using Spi = TypedChannel<Bus::BIT_BANG, SpiChipsetConfig>;
+    const ChannelFactory clocklessSelector = static_cast<ChannelFactory>(&Clockless::create);
+    const ChannelFactory spiSelector = static_cast<ChannelFactory>(&Spi::create);
+    const ChipsetTimingConfig timing(800, 450, 450, 50, "T");
+    auto clockless = [&](ClocklessEncoder encoder) {
+        const ClocklessChipset chipset(14, timing, encoder);
+        const ChannelFactory factory = Clockless::factoryFor(chipset);
+        // The erased-config overload (add<B>(ChannelConfig)) agrees.
+        FL_CHECK(factory == Clockless::factoryFor(ChipsetVariant(chipset)));
+        return factory;
+    };
+    auto spi = [&](SpiChipset chipset) {
+        const SpiChipsetConfig config(14, 15, SpiEncoder::spiEncoderForChipset(chipset));
+        const ChannelFactory factory = Spi::factoryFor(config);
+        FL_CHECK(factory == Spi::factoryFor(ChipsetVariant(config)));
+        return factory;
+    };
+
+    // Clockless: WS2812, TM1812, TM1908 and the three UCS7604 modes (one encoder).
+    const ChannelFactory ws2812 = clockless(ClocklessEncoder::CLOCKLESS_ENCODER_WS2812);
+    const ChannelFactory tm1812 = clockless(ClocklessEncoder::CLOCKLESS_ENCODER_TM1812_RGBWW);
+    const ChannelFactory tm1908 = clockless(ClocklessEncoder::CLOCKLESS_ENCODER_TM1908);
+    const ChannelFactory ucs7604 = clockless(ClocklessEncoder::CLOCKLESS_ENCODER_UCS7604_8BIT);
+    FL_CHECK(clockless(ClocklessEncoder::CLOCKLESS_ENCODER_UCS7604_16BIT) == ucs7604);
+    FL_CHECK(clockless(ClocklessEncoder::CLOCKLESS_ENCODER_UCS7604_16BIT_1600) == ucs7604);
+    const ChannelFactory clocklessBound[] = {ws2812, tm1812, tm1908, ucs7604};
+    for (fl::size i = 0; i < 4; ++i) {
+        FL_CHECK(clocklessBound[i] != clocklessSelector);
+        for (fl::size j = i + 1; j < 4; ++j) {
+            FL_CHECK(clocklessBound[i] != clocklessBound[j]);
+        }
+    }
+
+    // SPI: the APA102 and SK9822 families each share one encoder.
+    const ChannelFactory apa102 = spi(SpiChipset::APA102);
+    const SpiChipset apa102Family[] = {SpiChipset::DOTSTAR, SpiChipset::APA102HD,
+                                       SpiChipset::DOTSTARHD, SpiChipset::HD107,
+                                       SpiChipset::HD107HD};
+    for (const auto chipset : apa102Family) {
+        FL_CHECK(spi(chipset) == apa102);
+    }
+    const ChannelFactory sk9822 = spi(SpiChipset::SK9822);
+    FL_CHECK(spi(SpiChipset::SK9822HD) == sk9822);
+    const ChannelFactory spiBound[] = {
+        apa102, sk9822, spi(SpiChipset::WS2801), spi(SpiChipset::WS2803),
+        spi(SpiChipset::P9813), spi(SpiChipset::LPD8806), spi(SpiChipset::LPD6803),
+        spi(SpiChipset::SM16716), spi(SpiChipset::MY9221), spi(SpiChipset::HD108)};
+    const fl::size spiCount = sizeof(spiBound) / sizeof(spiBound[0]);
+    for (fl::size i = 0; i < spiCount; ++i) {
+        FL_CHECK(spiBound[i] != spiSelector);
+        for (fl::size j = i + 1; j < spiCount; ++j) {
+            FL_CHECK(spiBound[i] != spiBound[j]);
+        }
+    }
+}
 } // FL_TEST_FILE
