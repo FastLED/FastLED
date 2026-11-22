@@ -14,6 +14,7 @@ from ci.autoresearch.test_timing_drift import (
     WS2812_35_LED_WIRE_US,
     _summarize_sequences,
     _summarize_show,
+    summarize_cold_warm,
 )
 
 
@@ -93,3 +94,24 @@ def test_show_summary_handles_missing_timing(
     _summarize_show({})
     out = capsys.readouterr().out
     assert "no show() timing" in out
+
+
+def test_cold_warm_table_pairs_instruction_and_cycle_runs() -> None:
+    """IPC divides the instruction run's mean by the cycle run's mean (#5422)."""
+    instr = {
+        "cold_count": 2,
+        "cold_instr_total": 20000,
+        "warm_count": 2,
+        "warm_instr_total": 20000,
+    }
+    cycles = {
+        "cold_count": 2,
+        "cold_cycle_total": 80000,
+        "cold_total_us": 500,
+        "warm_count": 2,
+        "warm_cycle_total": 40000,
+        "warm_total_us": 250,
+    }
+    lines = summarize_cold_warm(instr, cycles)
+    assert lines[2] == "| cold | 10000 | 40000 | 0.25 | 250.0 |"
+    assert lines[3] == "| warm | 10000 | 20000 | 0.50 | 125.0 |"
