@@ -56,6 +56,7 @@
 - `bash autoresearch --parlio` — Live device testing (must specify driver)
 - `bash profile <function>` — Performance profiling
 - `bash bloat <board>` — Per-symbol flash/RAM bloat report (see `agents/docs/binary-size-analysis.md`)
+- `./push --test` — Publish a committed feature branch: hands off to `prooft --push` (needs prooft >= 0.3.2), which runs the `ci-attestations.yml` lanes (`bash lint`, then with `--test` `bash test --cpp`), stamps HEAD with `Ci-Attestation:` trailers, pushes with `--force-with-lease` and opens or reuses the PR (`--no-pr` pushes only). **Shadow mode:** no CI job reads the trailers yet, so hosted CI still runs everything.
 
 **NEVER use:** `uv run python test.py` — use `bash test` or `uv run test.py`
 **FORBIDDEN:** `--no-fingerprint` (use `bash test --clean`), the PlatformIO tool (banned repo-wide, lint enforced — fbuild is the only board build backend), bare `meson`/`ninja`/`clang++`

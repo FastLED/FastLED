@@ -1,0 +1,21 @@
+# prooft policy (forge-ci/ci.yml GATE-010, GATE-014); see forge-ci/prooft.
+# `./push` runs `prooft --push`: every lint-stage lane first, then (with
+# `--test`) the test-stage lanes, stamping HEAD with one Ci-Attestation
+# trailer per gate before pushing and opening the PR.
+#
+# Shadow mode: no `jobs:` map and no CI step reads these trailers yet, so
+# hosted CI still runs every job. Board/platform compiles are never attested.
+version: 1
+mode: shadow
+lanes:
+  lint:
+    stage: lint
+    run: [bash, lint]
+    inputs: ["src/**", "tests/**", "ci/**", "examples/**", ".github/**", lint, test, push, test.py, meson.build, meson.options, pyproject.toml, uv.lock, ty.toml, ci.toml, .clang-format, .clang-tidy, ci-attestations.yml]
+  test:
+    stage: test
+    run: [bash, test, --cpp]
+    inputs: ["src/**", "tests/**", "ci/**", "examples/**", lint, test, push, test.py, meson.build, meson.options, pyproject.toml, uv.lock, ci.toml, ci-attestations.yml]
+gates:
+  general/linux-x64/lint: {lane: lint}
+  cpp/linux-x64/test: {lane: test}
