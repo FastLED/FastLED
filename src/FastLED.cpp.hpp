@@ -822,6 +822,13 @@ fl::u32 CFastLED::_getWaitSpinBudgetUs() FL_NO_EXCEPT {
 // Runtime Channel API Implementation
 // ============================================================================
 
+fl::ChannelPtr CFastLED::addWithFactory(const fl::ChannelConfig& config,
+                                          fl::ChannelFactory factory) FL_NO_EXCEPT {
+    auto channel = factory(config);
+    if (channel != nullptr) add(channel);
+    return channel;
+}
+
 fl::ChannelPtr CFastLED::add(const fl::ChannelConfig& config) FL_NO_EXCEPT {
     // Runtime-selection mode links no driver by itself. Drivers come from
     // FastLED.enable<fl::Bus::X>() bindings (constructed here, on first use),
