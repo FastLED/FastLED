@@ -128,6 +128,10 @@ Additional I2S defines and guidance:
 - **Clock source override**
   - **`F_CPU_RMT_CLOCK_MANUALLY_DEFINED`**: If defined, sets `F_CPU_RMT` explicitly for SoCs where APB clock detection is problematic (e.g., some C6/H2 variants). Otherwise `F_CPU_RMT` derives from `APB_CLK_FREQ`.
 
+- **Arduino startup (Arduino-ESP32 3.3.2–3.3.12)**
+  - On these cores FastLED provides its own copy of the core's `app_main()`/`loopTask()` (`cores/esp32/main.cpp`). The copy leaves Serial0 out of sketches that never use Serial. It creates the loop task with the same stack size, priority and core as the stock code, and it runs even if the sketch never calls `addLeds()`/`show()`.
+  - **`FL_ESP32_STOCK_ARDUINO_MAIN`**: Set to `1` to keep the core's stock startup. A `#define` before `#include "FastLED.h"` is enough (no build flag needed, so it works in the Arduino IDE). Use it to check whether FastLED is involved when a sketch misbehaves only after it includes FastLED. For FastLED#5365 (HTTPS requests failing on core 3.3.12), an ESP32-C6 A/B test of stock startup against FastLED's startup showed no difference.
+
 Unless otherwise noted, all defines should be placed before including `FastLED.h` in your sketch.
 
 ## SPI Hardware Manager
