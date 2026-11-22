@@ -39,6 +39,9 @@
 #include "AutoResearchLegacyAsync.h"
 #include "AutoResearchLegacyAsyncErrors.h"
 #include "AutoResearchTimingDrift.h"  // timingDriftTest RPC (#2994 repro)
+#if defined(FL_IS_ESP32) // ok platform specific - fastPinLoopback spare pins are the ESP32 default SPI pins
+#include "AutoResearchFastPinLoopback.h"
+#endif
 #include "fl/chipsets/spi.h"
 #include "fl/channels/config.h"
 #include "fl/stl/span.h"
@@ -471,6 +474,34 @@ void AutoResearchRemoteControl::bindDriverMethods(fl::Remote& remote) {
         response.set("requestedKhz", 250);
         // Pass when the 250 kHz clock is no faster than requested (10% tolerance).
         response.set("success", primed && period >= 3600u);
+        return response;
+#endif
+    });
+    // Register "fastPinLoopback" — FastPin route over the discovered jumper (#5067).
+    remote.bind("fastPinLoopback", [this](const fl::json& args) -> fl::json {
+        (void)args;
+#if !defined(FL_IS_ESP32) // ok platform specific - spare pins are the ESP32 default SPI pins
+        (void)this;
+        fl::json response = fl::json::object();
+        response.set("success", false);
+        response.set("error", "Esp32Only");
+        return response;
+#else
+        const int tx = mState->pin_tx;
+        const int rx = mState->pin_rx;
+        fl::json response;
+        if (!mState->rx_channel || tx < 0 || tx > 23 || rx < 0 ||
+            tx == FL_PIN_SPI_CLOCK_1 || tx == FL_PIN_SPI_DATA_1 ||
+            rx == FL_PIN_SPI_CLOCK_1 || rx == FL_PIN_SPI_DATA_1) {
+            response = fl::json::object();
+            response.set("success", false);
+            response.set("error", "NeedsJumperOffSpareSpiPins");
+        } else {
+            response = autoresearch_fastpin::dispatch<FL_PIN_SPI_CLOCK_1, FL_PIN_SPI_DATA_1>(
+                tx, mState->rx_channel, rx);
+        }
+        response.set("txPin", tx);
+        response.set("rxPin", rx);
         return response;
 #endif
     });

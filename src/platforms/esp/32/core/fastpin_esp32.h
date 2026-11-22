@@ -331,14 +331,11 @@ FASTLED_FORCE_INLINE void gpioStoreBarrier() FL_NO_EXCEPT {
 template <u8 PIN> struct BitbangPin<FastPin<PIN>> : BitbangPinDefaults<FastPin<PIN>> {
     static constexpr bool kEsp32LegacyWriteBit = true;
 };
-#elif !defined(FL_FASTPIN_HAS_NO_PINMAP)
-/// Software SPI data updates are atomic per pin. Whole-port streaming stays off
-/// because a port snapshot could overwrite concurrent GPIO updates.
-template <u8 PIN> struct BitbangPin<FastPin<PIN>> : BitbangPinDefaults<FastPin<PIN>> {
-    static constexpr bool kAtomicWrite = true;
-    // The inline platform template avoids a call per clock phase; the visible
-    // fl::delaycycles is only a declaration with an out-of-line definition.
-    // Long waits use the cycle counter so they cannot expand to a NOP run.
+#else
+/// The inline platform template avoids a call per clock phase; the visible
+/// fl::delaycycles is only a declaration, defined out of line for 50 cycles or
+/// fewer. Long waits use the cycle counter so they cannot expand to a NOP run.
+template <class Pin> struct Esp32BitbangDelay : BitbangPinDefaults<Pin> {
     template <fl::cycle_t CYCLES>
     FASTLED_FORCE_INLINE static void delay() FL_NO_EXCEPT {
         if (CYCLES > 32) {
@@ -348,6 +345,17 @@ template <u8 PIN> struct BitbangPin<FastPin<PIN>> : BitbangPinDefaults<FastPin<P
             ::delaycycles<(CYCLES > 32 ? 0 : CYCLES)>();
         }
     }
+};
+#endif  // FL_ESP32_ENABLE_FAST_SOFTWARE_SPI
+
+#if FL_ESP32_ENABLE_FAST_SOFTWARE_SPI && defined(FL_FASTPIN_HAS_NO_PINMAP)
+/// Forced software pins write through the core API but keep the same delays.
+template <u8 PIN> struct BitbangPin<FastPin<PIN>> : Esp32BitbangDelay<FastPin<PIN>> {};
+#elif FL_ESP32_ENABLE_FAST_SOFTWARE_SPI
+/// Software SPI data updates are atomic per pin. Whole-port streaming stays off
+/// because a port snapshot could overwrite concurrent GPIO updates.
+template <u8 PIN> struct BitbangPin<FastPin<PIN>> : Esp32BitbangDelay<FastPin<PIN>> {
+    static constexpr bool kAtomicWrite = true;
     template <u8 BIT>
     FASTLED_FORCE_INLINE static void write(u8 value) FL_NO_EXCEPT {
         gpioStoreBarrier();
@@ -355,7 +363,7 @@ template <u8 PIN> struct BitbangPin<FastPin<PIN>> : BitbangPinDefaults<FastPin<P
         gpioStoreBarrier();
     }
 };
-#endif  // FL_ESP32_ENABLE_FAST_SOFTWARE_SPI
+#endif  // FL_ESP32_ENABLE_FAST_SOFTWARE_SPI && FL_FASTPIN_HAS_NO_PINMAP
 
 #pragma GCC diagnostic pop
 }  // namespace fl

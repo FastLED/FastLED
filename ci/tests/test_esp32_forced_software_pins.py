@@ -58,3 +58,16 @@ def test_core_api_provider_is_available_without_the_legacy_no_map_flag() -> None
         r'#include "fl/system/fastpin_no_pinmap.h"',
         source,
     )
+
+
+def test_forced_esp32_software_spi_keeps_the_inline_delay() -> None:
+    # fl::delaycycles is defined only up to 50 cycles, so a forced pin without
+    # this policy fails to link SoftwareSPIOutput at practical rates (#5067).
+    source: str = (ROOT / "src/platforms/esp/32/core/fastpin_esp32.h").read_text(
+        encoding="utf-8"
+    )
+    assert "struct Esp32BitbangDelay" in source
+    forced: str = source.split(
+        "#if FL_ESP32_ENABLE_FAST_SOFTWARE_SPI && defined(FL_FASTPIN_HAS_NO_PINMAP)", 1
+    )[1].split("#elif", 1)[0]
+    assert "struct BitbangPin<FastPin<PIN>> : Esp32BitbangDelay<FastPin<PIN>>" in forced
