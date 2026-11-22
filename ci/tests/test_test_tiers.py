@@ -5,7 +5,10 @@ must stay out of every default run.
 """
 
 import sys
+from functools import cache
 from pathlib import Path
+
+from running_process import PIPE, RunningProcess
 
 from ci.meson.test_execution import INTEGRATION_SUITE, meson_suite_args
 from ci.util.smart_selector import strip_test_tier
@@ -13,39 +16,53 @@ from ci.util.smart_selector import strip_test_tier
 
 ROOT = Path(__file__).resolve().parents[2]
 TESTS = ROOT / "tests"
-sys.path.insert(0, str(TESTS))
 
-from discover_tests import discover_test_files, split_tier  # noqa: E402
-from test_config import EXCLUDED_TEST_DIRS, EXCLUDED_TEST_FILES  # noqa: E402
-from test_helpers import extract_test_name  # noqa: E402
+
+@cache
+def _organized() -> dict[str, tuple[str, str]]:
+    """name -> (path, tier), as tests/meson.build receives them."""
+    result = RunningProcess.run(
+        [sys.executable, str(TESTS / "organize_tests.py"), str(TESTS)],
+        stdout=PIPE,
+        stderr=PIPE,
+        encoding="utf-8",
+        errors="replace",
+        check=True,
+        timeout=120,
+    )
+    rows = [
+        line.split(":")
+        for line in result.stdout.splitlines()
+        if line.startswith("TEST:")
+    ]
+    names = [row[1] for row in rows]
+    assert len(names) == len(set(names)), "test names must be unique across tiers"
+    return {row[1]: (row[2], row[4]) for row in rows}
 
 
 def test_names_ignore_the_tier() -> None:
-    assert extract_test_name("unit/fl/channels/spi.cpp") == "fl_channels_spi"
-    assert extract_test_name("unit/misc/containers.cpp") == "containers"
-    assert extract_test_name("unit/noise.cpp") == "noise"
-    assert (
-        extract_test_name("integration/misc/colorimetric_strategy_table.cpp")
-        == "colorimetric_strategy_table"
+    tests = _organized()
+    assert tests["fl_channels_spi"] == ("unit/fl/channels/spi.cpp", "unit")
+    assert tests["containers"] == ("unit/misc/containers.cpp", "unit")
+    assert tests["noise"] == ("unit/noise.cpp", "unit")
+    assert tests["colorimetric_strategy_table"] == (
+        "integration/misc/colorimetric_strategy_table.cpp",
+        "integration",
     )
-    assert split_tier("integration/fl/x.cpp") == ("integration", "fl/x.cpp")
+    assert tests["mp3_simd_perf"] == (
+        "integration/misc/mp3_simd_perf.cpp",
+        "integration",
+    )
 
 
 def test_discovery_only_scans_tier_directories() -> None:
-    files = discover_test_files(TESTS, EXCLUDED_TEST_FILES, EXCLUDED_TEST_DIRS)
-    assert files, "no tests discovered"
-    assert all(f.startswith(("unit/", "integration/")) for f in files)
-    assert "integration/misc/colorimetric_strategy_table.cpp" in files
-    assert "integration/misc/mp3_simd_perf.cpp" in files
-    assert "unit/misc/colorimetric_strategy_checks.cpp" in files
+    tests = _organized()
+    assert tests, "no tests discovered"
+    for path, tier in tests.values():
+        assert path.startswith(f"{tier}/"), path
+    assert "colorimetric_strategy_checks" in tests
     # Shared infrastructure is not a test.
-    assert "unit/misc/coroutine_impl.cpp" not in files
-
-
-def test_every_discovered_name_is_unique_across_tiers() -> None:
-    files = discover_test_files(TESTS, EXCLUDED_TEST_FILES, EXCLUDED_TEST_DIRS)
-    names = [extract_test_name(f) for f in files]
-    assert len(names) == len(set(names))
+    assert "coroutine_impl" not in tests
 
 
 def test_default_meson_test_excludes_integration() -> None:
