@@ -29,6 +29,10 @@ Two numbers matter, and the second is the one that settles #2994:
 Usage:
     uv run python -m ci.autoresearch.test_timing_drift --port COM9
     uv run python -m ci.autoresearch.test_timing_drift --port COM9 --iterations 20
+    uv run python -m ci.autoresearch.test_timing_drift --port COM9 --api channel
+
+`--api channel` registers the same strip with `FastLED.add()` instead of
+`addLeds`, so the channel API's show() cost is measured too (FastLED#5399).
 
 Run it on master and on 3.10.3 and compare. Exits 0 when the run completes,
 1 on a connection/RPC failure. It deliberately does NOT fail on drift: this is
@@ -117,6 +121,10 @@ def _summarize_show(result: dict[str, Any]) -> None:
     )
     if lo is not None and lo > 0:
         print(f"  min / wire floor : {lo / WS2812_35_LED_WIRE_US:.2f}x")
+    instr_count = result.get("show_instr_count")
+    instr_total = result.get("show_instr_total")
+    if instr_count and instr_total is not None:
+        print(f"  instr per show() : {instr_total / instr_count:.0f}")
     print()
     print("  #2994 reports 268-1012 us of excess per fade step. If show()'s")
     print("  mean sits well above the wire floor, that excess is show() itself.")
@@ -139,6 +147,12 @@ def main(argv: list[str] | None = None) -> int:
         default=10,
         type=int,
         help="Sequences to run; each takes ~2.5 s (default: 10)",
+    )
+    p.add_argument(
+        "--api",
+        default="legacy",
+        choices=("legacy", "channel"),
+        help="Register the strip with addLeds (legacy) or FastLED.add() (channel)",
     )
     args = p.parse_args(argv)
 
@@ -177,6 +191,7 @@ def main(argv: list[str] | None = None) -> int:
                 "pin": args.pin,
                 "numLeds": args.num_leds,
                 "iterations": args.iterations,
+                "api": args.api,
             },
             timeout=timeout,
         )
@@ -196,7 +211,7 @@ def main(argv: list[str] | None = None) -> int:
         print("=" * 62)
         print(
             f"CPU: {result.get('cpu_mhz')} MHz   pin={result.get('pin')}   "
-            f"leds={result.get('num_leds')}"
+            f"leds={result.get('num_leds')}   api={result.get('api', 'legacy')}"
         )
         print("=" * 62)
         print()

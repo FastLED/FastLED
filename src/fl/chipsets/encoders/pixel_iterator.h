@@ -106,6 +106,19 @@ struct PixelControllerVtable {
     }
     return n;
   }
+  /// The per-pixel ScaledPixelIteratorRGB sequence -- has(1),
+  /// loadAndScaleRGB, stepDithering, advanceData -- over a run, in one
+  /// type-erased call (#5399). Bytes come out in the controller's own order.
+  static int loadScaledRGBBulk(void* pixel_controller, u8* out, int max_pixels) FL_NO_EXCEPT {
+    PixelControllerT* pc = static_cast<PixelControllerT*>(pixel_controller);
+    int n = 0;
+    for (; n < max_pixels && pc->has(1); ++n, out += 3) {
+      pc->loadAndScaleRGB(out, out + 1, out + 2);
+      pc->stepDithering();
+      pc->advanceData();
+    }
+    return n;
+  }
 
 #if !FL_PLATFORM_HAS_TINY_MEMORY
   // Wide load (P8, #4042), bound only for sources that actually have one.
@@ -192,6 +205,10 @@ typedef void (*loadRawPremixedFunction)(void* pixel_controller, u8* raw, u8* pre
 /// stepping dithering and advancing per pixel; returns how many were read
 /// (FastLED#5377: one type-erased call per run instead of several per pixel).
 typedef int (*loadRawBulkFunction)(void* pixel_controller, u8* raw, int max_pixels);
+/// Up to `max_pixels` loaded, scaled and dithered pixels (3 bytes each, the
+/// source's own order) into `out`, stepping dithering and advancing per pixel;
+/// returns how many were read (FastLED#5399).
+typedef int (*loadScaledRGBBulkFunction)(void* pixel_controller, u8* out, int max_pixels);
 typedef void (*loadAndScaleRGBWWUnorderedFunction)(void* pixel_controller, Rgbww rgbww, u8* r_out, u8* g_out, u8* b_out, u8* ww_out, u8* wc_out);
 
 namespace detail {
@@ -244,6 +261,7 @@ template <typename T, typename = void>
 struct RawPremixBinder {
     static loadRawPremixedFunction get() FL_NO_EXCEPT { return nullptr; }
     static loadRawBulkFunction bulk() FL_NO_EXCEPT { return nullptr; }
+    static loadScaledRGBBulkFunction rgbBulk() FL_NO_EXCEPT { return nullptr; }
     static EOrder order() FL_NO_EXCEPT { return RGB; }
 };
 #if !defined(FL_IS_AVR)
@@ -251,6 +269,7 @@ template <typename T>
 struct RawPremixBinder<T, typename detail::OnlyIf<(T::kColorOrder == T::kColorOrder)>::type> {
     static loadRawPremixedFunction get() FL_NO_EXCEPT { return &PixelControllerVtable<T>::loadRawPremixed; }
     static loadRawBulkFunction bulk() FL_NO_EXCEPT { return &PixelControllerVtable<T>::loadRawBulk; }
+    static loadScaledRGBBulkFunction rgbBulk() FL_NO_EXCEPT { return &PixelControllerVtable<T>::loadScaledRGBBulk; }
     static EOrder order() FL_NO_EXCEPT { return T::kColorOrder; }
 };
 #endif
@@ -307,6 +326,7 @@ class PixelIterator {
       mLoadAndScaleRGBWWUnordered = RgbwLoadBinder<PixelControllerT>::unorderedWW();
       mLoadRawPremixed = RawPremixBinder<PixelControllerT>::get();
       mLoadRawBulk = RawPremixBinder<PixelControllerT>::bulk();
+      mLoadScaledRGBBulk = RawPremixBinder<PixelControllerT>::rgbBulk();
       mSourceOrder = RawPremixBinder<PixelControllerT>::order();
       if (mLoadRawPremixed != nullptr) {
         mRgbwConvert = mRgbw.active() ? detail::rgbw_conversion() : nullptr;
@@ -436,6 +456,39 @@ class PixelIterator {
       *g_out = c[mOrder[1]];
       *b_out = c[mOrder[2]];
     }
+    /// Up to `max_pixels` wire-order RGB pixels (3 bytes each) into `out`,
+    /// stepping dithering and advancing per pixel; returns how many were read.
+    ///
+    /// Byte-identical to calling has(1), loadAndScaleRGB, stepDithering and
+    /// advanceData per pixel, but a `PixelController` source does the run in
+    /// one type-erased call and the colour order is applied over the run
+    /// (FastLED#5399). Other sources (colour-managed) take that per-pixel
+    /// sequence.
+    int loadScaledRGBBulk(u8* out, int max_pixels) FL_NO_EXCEPT {
+      if (mLoadScaledRGBBulk == nullptr) {
+        int n = 0;
+        for (; n < max_pixels && has(1); ++n, out += 3) {
+          loadAndScaleRGB(out, out + 1, out + 2);
+          stepDithering();
+          advanceData();
+        }
+        return n;
+      }
+      const int n = mLoadScaledRGBBulk(mPixelController, out, max_pixels);
+      if (mOrder[0] != 0 || mOrder[1] != 1) {  // not the identity order
+        const u8 o0 = mOrder[0];
+        const u8 o1 = mOrder[1];
+        const u8 o2 = mOrder[2];
+        u8* const end = out + n * 3;
+        for (u8* p = out; p != end; p += 3) {
+          const u8 c[3] = {p[0], p[1], p[2]};
+          p[0] = c[o0];
+          p[1] = c[o1];
+          p[2] = c[o2];
+        }
+      }
+      return n;
+    }
 #if !FL_PLATFORM_HAS_TINY_MEMORY
     /// One pixel at the source's own precision, wire-ordered.
     ///
@@ -503,9 +556,7 @@ class PixelIterator {
         if (mRgbww.active() || mRgbw.active()) {
             writeWS2812WhiteChannel(out);
         } else {
-            auto back_ins = fl::back_inserter(*out);
-            auto range = makeScaledPixelRangeRGB(this);
-            encodeWS2812_RGB(range.first, range.second, back_ins);
+            writeRGBBulk(out);
         }
     }
 
@@ -565,6 +616,32 @@ class PixelIterator {
           return;  // could not grow; the caller's size check drops the frame
         }
         convert(raw, n, premix, out->data() + offset);
+      }
+    }
+
+    /// Plain-RGB WS2812 in runs (FastLED#5399): one loadScaledRGBBulk() and
+    /// one resize per run instead of four type-erased calls and three
+    /// capacity-checked appends per pixel. WS2812 bytes are the wire-order
+    /// pixel bytes, so the run is copied as is.
+    template <typename CONTAINER_UIN8_T>
+    void writeRGBBulk(CONTAINER_UIN8_T* out) FL_NO_EXCEPT {
+      constexpr int kRun = 32;
+      u8 run[kRun * 3];
+      for (;;) {
+        const int n = loadScaledRGBBulk(run, kRun);
+        if (n <= 0) {
+          return;
+        }
+        const fl::size bytes = static_cast<fl::size>(n) * 3;
+        const fl::size offset = out->size();
+        out->resize(offset + bytes);
+        if (out->size() != offset + bytes) {
+          return;  // could not grow; the caller's size check drops the frame
+        }
+        u8* dst = out->data() + offset;
+        for (fl::size i = 0; i < bytes; ++i) {
+          dst[i] = run[i];
+        }
       }
     }
 
@@ -905,6 +982,7 @@ class PixelIterator {
     loadAndScaleRGBWWUnorderedFunction mLoadAndScaleRGBWWUnordered = nullptr;
     loadRawPremixedFunction mLoadRawPremixed = nullptr;
     loadRawBulkFunction mLoadRawBulk = nullptr;
+    loadScaledRGBBulkFunction mLoadScaledRGBBulk = nullptr;
     EOrder mSourceOrder = RGB;
     detail::RgbwConvertFn mRgbwConvert = nullptr;
     detail::RgbwConvertBulkFn mRgbwConvertBulk = nullptr;
