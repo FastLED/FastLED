@@ -61,7 +61,7 @@ def test_library_unity_files_define_marker_before_includes() -> None:
 
     The Arduino IDE links library objects directly, so a weak app_main in any
     of them beats the core's main.o and defeats FL_ESP32_STOCK_ARDUINO_MAIN.
-    esp32_lazy_serial0_main.h skips its definitions under this marker, and the
+    esp32_lazy_serial0_main.h skips its weak app_main under this marker, and the
     marker only works if it is defined before the first include.
     """
     offenders = []
@@ -80,8 +80,18 @@ def test_library_unity_files_define_marker_before_includes() -> None:
 
 
 def test_sketch_startup_header_honors_library_marker() -> None:
-    header = ROOT / "src/platforms/esp/32/esp32_lazy_serial0_main.h"
-    assert "!defined(FL_BUILDING_FASTLED_LIBRARY)" in _code(header.read_text())
+    """Only app_main is kept out of library objects.
+
+    loopTaskHandle/loopTaskWDTEnabled must stay available from library objects
+    for applications that supply app_main without including FastLED.h.
+    """
+    code = _code((ROOT / "src/platforms/esp/32/esp32_lazy_serial0_main.h").read_text())
+    marker = "!defined(FL_BUILDING_FASTLED_LIBRARY)"
+    assert code.count(marker) == 1
+    guard = code.index(marker)
+    assert code.index("app_main(void)") > guard
+    assert code.index("loopTaskHandle") < guard
+    assert code.index("loopTaskWDTEnabled") < guard
 
 
 def test_sketch_only_files_stay_out_of_unity_build() -> None:
