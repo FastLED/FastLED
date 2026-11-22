@@ -555,10 +555,12 @@ IChannelDriver::DriverState ChannelManager::poll() FL_NO_EXCEPT {
     // Priority order: ERROR > BUSY > DRAINING > READY
     bool anyBusy = false;
     bool anyDraining = false;
+    bool allReady = true;
     const char* firstError = "";
 
     for (auto& entry : mDrivers) {
         IChannelDriver::DriverState result = entry.driver->poll();
+        allReady = allReady && result.state == IChannelDriver::DriverState::READY;
         if (result.state == IChannelDriver::DriverState::BUSY) {
             anyBusy = true;
         } else if (result.state == IChannelDriver::DriverState::DRAINING) {
@@ -571,7 +573,8 @@ IChannelDriver::DriverState ChannelManager::poll() FL_NO_EXCEPT {
     }
 
     // Only a poll that saw every driver READY may seed the cache (#5381).
-    mAllReady = firstError[0] == '\0' && !anyBusy && !anyDraining;
+    // Check the states, not the error text: DriverState(ERROR) has none.
+    mAllReady = allReady;
 
     // Return error if any driver reported error
     if (firstError[0] != '\0') {

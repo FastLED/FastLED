@@ -298,6 +298,19 @@ FL_TEST_CASE("a BUSY driver is polled until READY even when it settles async #53
     FL_CHECK_EQ(driver->pollCount, 4);
 }
 
+FL_TEST_CASE("an ERROR without error text never seeds the all-ready cache #5381") {
+    ChannelManager mgr;
+    auto driver = fl::make_shared<StatefulMockDriver>("ERR_CACHE");
+    mgr.addDriver(10, driver);
+
+    driver->mState = DriverState::ERROR;  // DriverState(ERROR): empty text
+    mgr.onEndFrame();
+    const int before = driver->pollCount;
+    driver->mState = DriverState::READY;
+    mgr.onBeginFrame();
+    FL_CHECK_EQ(driver->pollCount, before + 1);
+}
+
 FL_TEST_CASE("driver registration and removal invalidate the cached all-ready state #5381") {
     ChannelManager mgr;
     auto first = fl::make_shared<CountingAsyncDriver>("REG_FIRST");
