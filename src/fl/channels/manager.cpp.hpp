@@ -608,9 +608,10 @@ bool ChannelManager::waitForReadyOrDraining(u32 timeoutMs) FL_NO_EXCEPT {
 
 
 void ChannelManager::onBeginFrame() FL_NO_EXCEPT {
-    // #5381: onEndFrame() usually already saw every driver READY, and nothing
-    // can make a READY driver busy without an enqueue, show() or registration,
-    // all of which clear mAllReady. Trust that result instead of polling.
+    // #5381: synchronous drivers can already be READY in onEndFrame(), so
+    // reuse that result until an enqueue, show() or registration clears it.
+    // Async DMA drivers normally report DRAINING there; idle time between
+    // frames does not set this cache, so they still need the READY poll here.
     if (mAllReady) {
         return;
     }
