@@ -535,9 +535,6 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
     /// available
     struct PendingChannel {
         ChannelDataPtr data;
-        int pin;
-        ChipsetTiming timing;
-        u32 reset_us;
     };
 
     /// @brief Begin LED data transmission for all channels (internal)
@@ -560,6 +557,23 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
             mAllocationFailed = false;
         }
 
+        // A lone strip needs no sorting or temporary shared_ptr owners (#5382).
+        if (channelData.size() == 1 && mPendingChannels.empty()) {
+            const auto& data = channelData[0];
+            const auto result = transmitChannel(data);
+            if (result == TransmissionResult::STARTED) {
+                return;
+            }
+            if (result == TransmissionResult::NO_CHANNEL &&
+                mAllocationFailed && !hasChannelInUse()) {
+                // Match the queued path: failed setup cannot progress this frame.
+                mAllocationFailed = false;
+                return;
+            }
+            mPendingChannels.push_back({data});
+            return;
+        }
+
         // Sort: smallest strips first (helps async parallelism).
         // Container is bounded at 16 by construction (fl::vector_inlined<T, 16>),
         // so use sort_small to avoid instantiating quicksort_impl in the
@@ -572,18 +586,9 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
             return a->getSize() > b->getSize();  // Reverse order for back-to-front processing
         });
 
-        // Queue all channels as pending first
+        // Queue all channels as pending first. Timing remains in ChannelData.
         for (const auto& data : sorted) {
-            int pin = data->getPin();
-            const auto& timingCfg = data->getTiming();
-            ChipsetTiming timing = {
-                timingCfg.t1_ns,
-                timingCfg.t2_ns,
-                timingCfg.t3_ns,
-                timingCfg.reset_us,
-                timingCfg.name
-            };
-            mPendingChannels.push_back({data, pin, timing, timingCfg.reset_us});
+            mPendingChannels.push_back({data});
         }
 
         // Start as many transmissions as HW channels allow
@@ -1261,6 +1266,113 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
         return false;
     }
 
+    enum class TransmissionResult { STARTED, NO_CHANNEL, RETRY };
+
+    // Share hardware acquisition, submission, and cleanup for direct and queued strips.
+    FL_NO_INLINE TransmissionResult transmitChannel(const ChannelDataPtr& data) FL_NO_EXCEPT {
+        const fl::size dataSize = data->getSize();
+        const auto& timingCfg = data->getTiming();
+        ChipsetTiming timing = {
+            timingCfg.t1_ns, timingCfg.t2_ns, timingCfg.t3_ns,
+            timingCfg.reset_us, timingCfg.name
+        };
+        ChannelState* channel = acquireChannel(data->getPin(), timing, dataSize);
+        if (!channel) {
+            return TransmissionResult::NO_CHANNEL;
+        }
+
+        // Verify channel has encoder (should always be true if createChannel succeeded)
+        if (!channel->encoder) {
+#if FL_HAS_WARN
+            emitPendingChannelLog(PendingChannelLog::MISSING_ENCODER,
+                                  channel->pin, dataSize, channel->useDMA);
+#endif
+            releaseChannel(channel);
+            return TransmissionResult::RETRY;
+        }
+
+        // Start transmission
+        channel->reset_us = timingCfg.reset_us;
+        channel->transmissionComplete.store(false, fl::memory_order_release);
+
+        // Acquire buffer from pool (PSRAM -> DRAM/DMA transfer)
+        // Note: dataSize already retrieved earlier for channel acquisition
+        fl::span<u8> pooledBuffer = channel->useDMA ?
+            mBufferPool.acquireDMA(dataSize) :
+            mBufferPool.acquireInternal(dataSize);
+
+        if (pooledBuffer.empty()) {
+#if FL_HAS_WARN
+            emitPendingChannelLog(PendingChannelLog::BUFFER_ACQUIRE_FAILED,
+                                  channel->pin, dataSize, channel->useDMA);
+#endif
+            releaseChannel(channel);
+            return TransmissionResult::RETRY;
+        }
+
+        // Copy data from PSRAM to pooled buffer using writeWithPadding
+        // Note: writeWithPadding uses zero padding since RMT can handle any byte array size
+        data->writeWithPadding(pooledBuffer);
+
+        // Store pooled buffer in channel state for release on completion
+        channel->pooledBuffer = pooledBuffer;
+
+        bool enable_success = channel->enabled;
+        if (!enable_success) {
+            enable_success = mPeripheral.enableChannel(channel->channel);
+            channel->enabled = enable_success;
+        }
+        if (!enable_success) {
+#if FL_HAS_RMT_LOG
+            emitPendingChannelLog(PendingChannelLog::ENABLE_FAILED,
+                                  channel->pin, dataSize, channel->useDMA);
+#endif
+            releaseFailedPendingChannel(channel, false);
+            return TransmissionResult::RETRY;
+        }
+
+        // Explicitly reset encoder before each transmission to ensure clean state
+        if (!mPeripheral.resetEncoder(channel->encoder)) {
+#if FL_HAS_RMT_LOG
+            emitPendingChannelLog(PendingChannelLog::RESET_FAILED,
+                                  channel->pin, dataSize, channel->useDMA);
+#endif
+            releaseFailedPendingChannel(channel, true);
+            return TransmissionResult::RETRY;
+        }
+
+        // CRITICAL: Synchronize cache before DMA transmission
+        // This ensures CPU writes to the LED buffer are flushed to SRAM
+        // before RMT DMA reads the data. Without this, DMA may read stale
+        // cache data, causing LED color corruption on ESP32-S3/C3/C6/H2.
+        // NOTE: Only call syncCache() for DMA buffers.
+        // Non-DMA buffers use internal SRAM (no cache coherency issues).
+        if (channel->useDMA) {
+            mPeripheral.syncCache(pooledBuffer.data(), pooledBuffer.size());
+        }
+
+        // Pass pooled buffer (DRAM/DMA) instead of PSRAM pointer
+        bool tx_success = mPeripheral.transmit(channel->channel, channel->encoder,
+                                                pooledBuffer.data(),
+                                                pooledBuffer.size());
+        if (!tx_success) {
+#if FL_HAS_WARN
+            emitPendingChannelLog(PendingChannelLog::TRANSMIT_FAILED,
+                                  static_cast<int>(channel->pin), dataSize,
+                                  channel->useDMA);
+#endif
+            releaseFailedPendingChannel(channel, true);
+            return TransmissionResult::RETRY;
+        }
+
+#if FL_HAS_RMT_LOG
+        emitPendingChannelLog(PendingChannelLog::STARTED, channel->pin,
+                              data->getSize(), channel->useDMA);
+#endif
+
+        return TransmissionResult::STARTED;
+    }
+
     /// @brief Process pending channels that couldn't be started earlier
     void processPendingChannels() FL_NO_EXCEPT {
         if (mPendingChannels.empty()) {
@@ -1271,12 +1383,8 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
         for (size_t i = 0; i < mPendingChannels.size(); ) {
             const auto& pending = mPendingChannels[i];
 
-            // Get data size for DMA buffer calculation
-            fl::size dataSize = pending.data->getSize();
-
-            // Acquire channel for this transmission
-            ChannelState* channel = acquireChannel(pending.pin, pending.timing, dataSize);
-            if (!channel) {
+            const auto result = transmitChannel(pending.data);
+            if (result == TransmissionResult::NO_CHANNEL) {
                 if (mAllocationFailed && !hasChannelInUse()) {
                     // A failed setup with no active transmission cannot make
                     // progress until the next frame, when acquireChannel() is
@@ -1298,99 +1406,10 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
                 continue;
             }
 
-            // Verify channel has encoder (should always be true if createChannel succeeded)
-            if (!channel->encoder) {
-#if FL_HAS_WARN
-                emitPendingChannelLog(PendingChannelLog::MISSING_ENCODER,
-                                      pending.pin, dataSize, channel->useDMA);
-#endif
-                releaseChannel(channel);
+            if (result == TransmissionResult::RETRY) {
                 ++i;
                 continue;
             }
-
-            // Start transmission
-            channel->reset_us = pending.reset_us;
-            channel->transmissionComplete.store(false, fl::memory_order_release);
-
-            // Acquire buffer from pool (PSRAM -> DRAM/DMA transfer)
-            // Note: dataSize already retrieved earlier for channel acquisition
-            fl::span<u8> pooledBuffer = channel->useDMA ?
-                mBufferPool.acquireDMA(dataSize) :
-                mBufferPool.acquireInternal(dataSize);
-
-            if (pooledBuffer.empty()) {
-#if FL_HAS_WARN
-                emitPendingChannelLog(PendingChannelLog::BUFFER_ACQUIRE_FAILED,
-                                      pending.pin, dataSize, channel->useDMA);
-#endif
-                releaseChannel(channel);
-                ++i;
-                continue;
-            }
-
-            // Copy data from PSRAM to pooled buffer using writeWithPadding
-            // Note: writeWithPadding uses zero padding since RMT can handle any byte array size
-            pending.data->writeWithPadding(pooledBuffer);
-
-            // Store pooled buffer in channel state for release on completion
-            channel->pooledBuffer = pooledBuffer;
-
-            bool enable_success = channel->enabled;
-            if (!enable_success) {
-                enable_success = mPeripheral.enableChannel(channel->channel);
-                channel->enabled = enable_success;
-            }
-            if (!enable_success) {
-#if FL_HAS_RMT_LOG
-                emitPendingChannelLog(PendingChannelLog::ENABLE_FAILED,
-                                      pending.pin, dataSize, channel->useDMA);
-#endif
-                releaseFailedPendingChannel(channel, false);
-                ++i;
-                continue;
-            }
-
-            // Explicitly reset encoder before each transmission to ensure clean state
-            if (!mPeripheral.resetEncoder(channel->encoder)) {
-#if FL_HAS_RMT_LOG
-                emitPendingChannelLog(PendingChannelLog::RESET_FAILED,
-                                      pending.pin, dataSize, channel->useDMA);
-#endif
-                releaseFailedPendingChannel(channel, true);
-                ++i;
-                continue;
-            }
-
-            // CRITICAL: Synchronize cache before DMA transmission
-            // This ensures CPU writes to the LED buffer are flushed to SRAM
-            // before RMT DMA reads the data. Without this, DMA may read stale
-            // cache data, causing LED color corruption on ESP32-S3/C3/C6/H2.
-            // NOTE: Only call syncCache() for DMA buffers.
-            // Non-DMA buffers use internal SRAM (no cache coherency issues).
-            if (channel->useDMA) {
-                mPeripheral.syncCache(pooledBuffer.data(), pooledBuffer.size());
-            }
-
-            // Pass pooled buffer (DRAM/DMA) instead of PSRAM pointer
-            bool tx_success = mPeripheral.transmit(channel->channel, channel->encoder,
-                                                    pooledBuffer.data(),
-                                                    pooledBuffer.size());
-            if (!tx_success) {
-#if FL_HAS_WARN
-                emitPendingChannelLog(PendingChannelLog::TRANSMIT_FAILED,
-                                      static_cast<int>(channel->pin), dataSize,
-                                      channel->useDMA);
-#endif
-                releaseFailedPendingChannel(channel, true);
-                ++i;
-                continue;
-            }
-
-#if FL_HAS_RMT_LOG
-            emitPendingChannelLog(PendingChannelLog::STARTED, pending.pin,
-                                  pending.data->getSize(), channel->useDMA);
-#endif
 
             // Remove from pending queue (swap with last and pop)
             if (i < mPendingChannels.size() - 1) {
