@@ -61,10 +61,13 @@ template <> class FastPin<247> : public fastspi_test::FakePin<fastspi_test::kClo
 
 } // namespace fl
 
-// The wrapper the public API names, at a divider small enough to skip padding.
-using WrapperOutput = SoftwareSPIOutput<246, 247, 2>;
-FL_STATIC_ASSERT((fl::is_base_of<fl::GenericSoftwareSPIOutput<246, 247, 2>, WrapperOutput>::value),
-                 "on a non-ESP32 host, SoftwareSPIOutput forwards its divider unchanged");
+// The host stub takes Hz like ESP32; exercise the public wrapper's conversion.
+constexpr fl::u32 kWrapperRateHz = DATA_RATE_MHZ(10);
+constexpr fl::u32 kWrapperDivider =
+    fl::bitbangDividerFromHz(kWrapperRateHz, FL_CPU_FREQUENCY());
+using WrapperOutput = SoftwareSPIOutput<246, 247, kWrapperRateHz>;
+FL_STATIC_ASSERT((fl::is_base_of<fl::GenericSoftwareSPIOutput<246, 247, kWrapperDivider>, WrapperOutput>::value),
+                 "the host stub converts Hz to a divider like ESP32 (#5051)");
 
 FL_TEST_FILE(FL_FILEPATH) {
 using namespace fl;
