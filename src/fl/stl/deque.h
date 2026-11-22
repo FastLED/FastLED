@@ -193,7 +193,7 @@ public:
         typedef T value_type;
         typedef T& reference;
         typedef T* pointer;
-        typedef fl::size difference_type;
+        typedef fl::ptrdiff_t difference_type;
         typedef fl::random_access_iterator_tag iterator_category;
 
     private:
@@ -201,6 +201,7 @@ public:
         fl::size mIndex;
 
         friend class deque;
+        friend class const_iterator;
 
     public:
         iterator(deque* dq, fl::size index) FL_NO_EXCEPT : mDeque(dq), mIndex(index) {}
@@ -235,32 +236,36 @@ public:
             return temp;
         }
 
-        iterator& operator+=(fl::size n) FL_NO_EXCEPT {
-            mIndex += n;
+        iterator& operator+=(difference_type n) FL_NO_EXCEPT {
+            mIndex = static_cast<fl::size>(static_cast<difference_type>(mIndex) + n);
             return *this;
         }
 
-        iterator operator+(fl::size n) const FL_NO_EXCEPT {
+        iterator operator+(difference_type n) const FL_NO_EXCEPT {
             iterator temp = *this;
             return temp += n;
         }
 
-        iterator& operator-=(fl::size n) FL_NO_EXCEPT {
-            mIndex -= n;
+        friend iterator operator+(difference_type n, const iterator& it) FL_NO_EXCEPT {
+            return it + n;
+        }
+
+        iterator& operator-=(difference_type n) FL_NO_EXCEPT {
+            mIndex = static_cast<fl::size>(static_cast<difference_type>(mIndex) - n);
             return *this;
         }
 
-        iterator operator-(fl::size n) const FL_NO_EXCEPT {
+        iterator operator-(difference_type n) const FL_NO_EXCEPT {
             iterator temp = *this;
             return temp -= n;
         }
 
-        fl::size operator-(const iterator& other) const FL_NO_EXCEPT {
-            return mIndex - other.mIndex;
+        difference_type operator-(const iterator& other) const FL_NO_EXCEPT {
+            return static_cast<difference_type>(mIndex) - static_cast<difference_type>(other.mIndex);
         }
 
-        T& operator[](fl::size n) const FL_NO_EXCEPT {
-            return (*mDeque)[mIndex + n];
+        reference operator[](difference_type n) const FL_NO_EXCEPT {
+            return (*mDeque)[static_cast<fl::size>(static_cast<difference_type>(mIndex) + n)];
         }
 
         bool operator==(const iterator& other) const FL_NO_EXCEPT {
@@ -293,7 +298,7 @@ public:
         typedef T value_type;
         typedef const T& reference;
         typedef const T* pointer;
-        typedef fl::size difference_type;
+        typedef fl::ptrdiff_t difference_type;
         typedef fl::random_access_iterator_tag iterator_category;
 
     private:
@@ -338,32 +343,36 @@ public:
             return temp;
         }
 
-        const_iterator& operator+=(fl::size n) FL_NO_EXCEPT {
-            mIndex += n;
+        const_iterator& operator+=(difference_type n) FL_NO_EXCEPT {
+            mIndex = static_cast<fl::size>(static_cast<difference_type>(mIndex) + n);
             return *this;
         }
 
-        const_iterator operator+(fl::size n) const FL_NO_EXCEPT {
+        const_iterator operator+(difference_type n) const FL_NO_EXCEPT {
             const_iterator temp = *this;
             return temp += n;
         }
 
-        const_iterator& operator-=(fl::size n) FL_NO_EXCEPT {
-            mIndex -= n;
+        friend const_iterator operator+(difference_type n, const const_iterator& it) FL_NO_EXCEPT {
+            return it + n;
+        }
+
+        const_iterator& operator-=(difference_type n) FL_NO_EXCEPT {
+            mIndex = static_cast<fl::size>(static_cast<difference_type>(mIndex) - n);
             return *this;
         }
 
-        const_iterator operator-(fl::size n) const FL_NO_EXCEPT {
+        const_iterator operator-(difference_type n) const FL_NO_EXCEPT {
             const_iterator temp = *this;
             return temp -= n;
         }
 
-        fl::size operator-(const const_iterator& other) const FL_NO_EXCEPT {
-            return mIndex - other.mIndex;
+        difference_type operator-(const const_iterator& other) const FL_NO_EXCEPT {
+            return static_cast<difference_type>(mIndex) - static_cast<difference_type>(other.mIndex);
         }
 
-        const T& operator[](fl::size n) const FL_NO_EXCEPT {
-            return (*mDeque)[mIndex + n];
+        reference operator[](difference_type n) const FL_NO_EXCEPT {
+            return (*mDeque)[static_cast<fl::size>(static_cast<difference_type>(mIndex) + n)];
         }
 
         bool operator==(const const_iterator& other) const FL_NO_EXCEPT {
@@ -389,8 +398,72 @@ public:
         bool operator>=(const const_iterator& other) const FL_NO_EXCEPT {
             return mIndex >= other.mIndex;
         }
+
+        // Mixed iterator/const_iterator overloads
+        friend difference_type operator-(const const_iterator& lhs, const iterator& rhs) FL_NO_EXCEPT {
+            return lhs - const_iterator(rhs);
+        }
+
+        friend difference_type operator-(const iterator& lhs, const const_iterator& rhs) FL_NO_EXCEPT {
+            return const_iterator(lhs) - rhs;
+        }
+
+        friend bool operator==(const const_iterator& lhs, const iterator& rhs) FL_NO_EXCEPT {
+            return lhs == const_iterator(rhs);
+        }
+
+        friend bool operator==(const iterator& lhs, const const_iterator& rhs) FL_NO_EXCEPT {
+            return const_iterator(lhs) == rhs;
+        }
+
+        friend bool operator!=(const const_iterator& lhs, const iterator& rhs) FL_NO_EXCEPT {
+            return lhs != const_iterator(rhs);
+        }
+
+        friend bool operator!=(const iterator& lhs, const const_iterator& rhs) FL_NO_EXCEPT {
+            return const_iterator(lhs) != rhs;
+        }
+
+        friend bool operator<(const const_iterator& lhs, const iterator& rhs) FL_NO_EXCEPT {
+            return lhs < const_iterator(rhs);
+        }
+
+        friend bool operator<(const iterator& lhs, const const_iterator& rhs) FL_NO_EXCEPT {
+            return const_iterator(lhs) < rhs;
+        }
+
+        friend bool operator<=(const const_iterator& lhs, const iterator& rhs) FL_NO_EXCEPT {
+            return lhs <= const_iterator(rhs);
+        }
+
+        friend bool operator<=(const iterator& lhs, const const_iterator& rhs) FL_NO_EXCEPT {
+            return const_iterator(lhs) <= rhs;
+        }
+
+        friend bool operator>(const const_iterator& lhs, const iterator& rhs) FL_NO_EXCEPT {
+            return lhs > const_iterator(rhs);
+        }
+
+        friend bool operator>(const iterator& lhs, const const_iterator& rhs) FL_NO_EXCEPT {
+            return const_iterator(lhs) > rhs;
+        }
+
+        friend bool operator>=(const const_iterator& lhs, const iterator& rhs) FL_NO_EXCEPT {
+            return lhs >= const_iterator(rhs);
+        }
+
+        friend bool operator>=(const iterator& lhs, const const_iterator& rhs) FL_NO_EXCEPT {
+            return const_iterator(lhs) >= rhs;
+        }
     };
 
+    typedef T value_type;
+    typedef fl::size size_type;
+    typedef fl::ptrdiff_t difference_type;
+    typedef T& reference;
+    typedef const T& const_reference;
+    typedef T* pointer;
+    typedef const T* const_pointer;
     typedef fl::reverse_iterator<iterator> reverse_iterator;
     typedef fl::reverse_iterator<const_iterator> const_reverse_iterator;
 
