@@ -125,7 +125,8 @@ void CLEDController::removeFromList(CLEDController* controller) FL_NO_EXCEPT {
 }
 
 ColorAdjustment CLEDController::getAdjustmentData(fl::u8 brightness) FL_NO_EXCEPT {
-#if SKETCH_HAS_LARGE_MEMORY && !(defined(NO_CORRECTION) && NO_CORRECTION == 1)
+#if defined(FL_CONTROLLER_HAS_COLOR_ADJUSTMENT_CACHE) && SKETCH_HAS_LARGE_MEMORY && \
+    !(defined(NO_CORRECTION) && NO_CORRECTION == 1)
     auto& cache = mAdjustmentCache;
     if (cache.mBrightness != brightness || cache.mCorrection != mLegacySettings.mCorrection ||
         cache.mTemperature != mLegacySettings.mTemperature) {

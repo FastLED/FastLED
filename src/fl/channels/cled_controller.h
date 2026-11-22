@@ -15,6 +15,7 @@
 #include "fl/channels/legacy_settings.h"
 #include "fl/log/log.h"
 #include "platforms/is_platform.h"  // for FL_IS_ESP32, FL_IS_AVR
+#include "platforms/color_adjustment_cache.h"
 #include "fl/stl/span.h"
 #include "fl/stl/noexcept.h"
 #include "fl/spi_bus.h"
@@ -43,7 +44,7 @@ namespace detail {
 /// Defined in power_mgt.cpp.hpp.
 void enable_rgbw_power_estimate() FL_NO_EXCEPT;
 
-#if SKETCH_HAS_LARGE_MEMORY
+#if defined(FL_CONTROLLER_HAS_COLOR_ADJUSTMENT_CACHE)
 /// Values are keyed by every input, including direct legacy-settings writes.
 struct ColorAdjustmentCache {
     u16 mBrightness = 256; // Invalid until the first adjustment is computed.
@@ -60,7 +61,7 @@ protected:
     fl::span<CRGB> mLeds;     ///< span of LED data used by this controller
     CLEDController *mPNext = nullptr;   ///< pointer to the next LED controller in the linked list
     LegacySettings mLegacySettings;
-#if SKETCH_HAS_LARGE_MEMORY && !(defined(NO_CORRECTION) && NO_CORRECTION == 1)
+#if defined(FL_CONTROLLER_HAS_COLOR_ADJUSTMENT_CACHE)
     detail::ColorAdjustmentCache mAdjustmentCache;
 #endif
     // Bit-fields share one byte; a fixed-white flag costs no RAM and no
