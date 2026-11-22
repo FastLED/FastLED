@@ -1039,8 +1039,10 @@ void AutoResearchRemoteControl::bindDriverMethods(fl::Remote& remote) {
     // minimal sketch (35-LED WS2812B ring, setMaxRefreshRate(800),
     // millisDelay-gated 255-step fade, delay(1000) between sequences) and
     // returns per-sequence wall time so the host can build a histogram.
-    // Args: [{pin, numLeds, iterations, rgbw}] (all optional;
-    //        default pin=4, numLeds=35, iterations=10; iterations clamped to
+    // Args: [{pin, numLeds, iterations, rgbw, api}] (all optional;
+    //        default pin=4, numLeds=35, iterations=10, api="legacy";
+    //        api="channel" registers the strip with FastLED.add() instead of
+    //        addLeds (#5399); iterations clamped to
     //        autoresearch::timing_drift::kMaxIterations)
     remote.bind("timingDriftTest", [](const fl::json& args) -> fl::json {
         fl::json response = fl::json::object();
@@ -1049,6 +1051,7 @@ void AutoResearchRemoteControl::bindDriverMethods(fl::Remote& remote) {
         int num_leds = 35;
         int iterations = 10;
         bool rgbw = false;
+        fl::string api = "legacy";
 
         fl::json config;
         if (args.is_object()) {
@@ -1069,11 +1072,28 @@ void AutoResearchRemoteControl::bindDriverMethods(fl::Remote& remote) {
             if (config.contains("rgbw") && config["rgbw"].is_bool()) {
                 rgbw = config["rgbw"].as_bool().value();
             }
+            if (config.contains("api") && config["api"].is_string()) {
+                api = config["api"].as_string().value();
+            }
+        }
+        if (api != "legacy" && api != "channel") {
+            response.set("success", false);
+            response.set("error", "InvalidApi");
+            response.set("message", "api must be \"legacy\" or \"channel\"");
+            return response;
+        }
+        const bool channel = api == "channel";
+        if (channel && rgbw) {
+            response.set("success", false);
+            response.set("error", "InvalidArgs");
+            response.set("message", "rgbw applies to the legacy api only");
+            return response;
         }
 
-        auto r = autoresearch::timing_drift::run(pin, num_leds, iterations, rgbw);
+        auto r = autoresearch::timing_drift::run(pin, num_leds, iterations, rgbw, channel);
 
         response.set("success", r.valid_pin);
+        response.set("api", api);
         if (!r.valid_pin) {
             response.set("error", "InvalidPin");
             response.set("message",

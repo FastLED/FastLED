@@ -91,44 +91,14 @@ struct DriftResult {
 // time moves 10-20 us with code layout alone; the instruction count does not.
 
 
-inline DriftResult run(int pin, int num_leds, int iterations, bool rgbw = false) {
-    DriftResult r{};
-    r.pin = pin;
-
-    if (iterations < 1) iterations = 1;
-    if (iterations > kMaxIterations) iterations = kMaxIterations;
-    if (num_leds < 2) num_leds = 2;
-    if (num_leds > kMaxLeds) num_leds = kMaxLeds;
-    r.num_leds = num_leds;
-
-    CRGB* leds = timingDriftState().leds;
-    for (int i = 0; i < num_leds; ++i) {
-        leds[i] = CRGB::Black;
-    }
-
-    // Probe whether the requested pin is dispatchable BEFORE mutating any
-    // global state — invalid pins must not clear other RPC tests' channels.
-    {
-        LegacyClocklessProxy probe(pin, leds, num_leds);
-        if (!probe.valid()) {
-            return r;  // valid_pin stays false; no side effects
-        }
-    }
-
-    // Clean slate: drop any channels left over from earlier RPC tests so
-    // show() drives only the legacy controller under test.
-    FastLED.clear(ClearFlags::CHANNELS);
-
-    // rgbw: the same strip as SK6812-style RGBW, which still encodes through
-    // the type-erased PixelIterator (#5377), so its cost can be measured.
-    LegacyClocklessProxy proxy(pin, leds, num_leds, LegacyClocklessChipset::WS2812B, rgbw);
-    r.valid_pin = true;
-
+/// The reporter's fade loop over whichever strip the caller registered,
+/// timing every show(). Restores the unthrottled refresh rate on exit.
+inline void measureShows(DriftResult& r, CRGB* leds, int num_leds, int iterations) {
 #if defined(ARDUINO_ARCH_ESP32)
     r.cpu_mhz = getCpuFrequencyMhz();
 #endif
 
-    // sketch setup() — addLeds happened in the proxy above.
+    // sketch setup() — the caller registered the strip.
     FastLED.setMaxRefreshRate(800);
     FastLED.show();
 
@@ -235,9 +205,61 @@ inline DriftResult run(int pin, int num_leds, int iterations, bool rgbw = false)
         r.show_min_us = 0;
     }
 
-    // Teardown: restore unthrottled refresh (boot default). The proxy
-    // destructor removes the legacy controller from the draw list.
+    // Teardown: restore unthrottled refresh (boot default).
     FastLED.setMaxRefreshRate(0);
+}
+
+/// @param rgbw    legacy path only: the strip as SK6812-style RGBW (#5377).
+/// @param channel the same strip through the channel API (`FastLED.add()`)
+///                instead of the legacy `addLeds` template path (#5399).
+inline DriftResult run(int pin, int num_leds, int iterations, bool rgbw = false,
+                       bool channel = false) {
+    DriftResult r{};
+    r.pin = pin;
+
+    if (iterations < 1) iterations = 1;
+    if (iterations > kMaxIterations) iterations = kMaxIterations;
+    if (num_leds < 2) num_leds = 2;
+    if (num_leds > kMaxLeds) num_leds = kMaxLeds;
+    r.num_leds = num_leds;
+
+    CRGB* leds = timingDriftState().leds;
+    for (int i = 0; i < num_leds; ++i) {
+        leds[i] = CRGB::Black;
+    }
+
+    // Probe whether the requested pin is dispatchable BEFORE mutating any
+    // global state — invalid pins must not clear other RPC tests' channels.
+    {
+        LegacyClocklessProxy probe(pin, leds, num_leds);
+        if (!probe.valid()) {
+            return r;  // valid_pin stays false; no side effects
+        }
+    }
+
+    // Clean slate: drop any channels left over from earlier RPC tests so
+    // show() drives only the strip under test.
+    FastLED.clear(ClearFlags::CHANNELS);
+
+    if (channel) {
+        // The legacy WS2812B<PIN> strip (800 kHz timing, GRB) registered
+        // through the channel API, which encodes via PixelIterator (#5399).
+        fl::ChannelConfig config(fl::makeClockless<fl::TIMING_WS2812_800KHZ>(pin),
+                                 fl::span<CRGB>(leds, num_leds), GRB);
+        auto ch = FastLED.add(config);
+        if (!ch) {
+            return r;  // valid_pin stays false
+        }
+        r.valid_pin = true;
+        measureShows(r, leds, num_leds, iterations);
+        FastLED.remove(ch);
+        return r;
+    }
+
+    // The proxy destructor removes the legacy controller from the draw list.
+    LegacyClocklessProxy proxy(pin, leds, num_leds, LegacyClocklessChipset::WS2812B, rgbw);
+    r.valid_pin = true;
+    measureShows(r, leds, num_leds, iterations);
     return r;
 }
 
