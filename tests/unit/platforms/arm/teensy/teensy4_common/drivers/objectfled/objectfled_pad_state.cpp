@@ -1,6 +1,6 @@
 /// @file objectfled_pad_state.cpp
-/// @brief The pad snapshot ObjectFLED's SPI mode takes at init and restores at
-/// deinit, run against plain variables standing in for the IMXRT registers.
+/// @brief The pad snapshot ObjectFLED's SPI and clockless modes take at init and
+/// restore at deinit, run against plain variables standing in for the IMXRT registers.
 ///
 /// A small pad model decides what each pad shows. With the mux on ALT5 (GPIO),
 /// a pad follows GPIO6 when its GPR26 bit is set and GPIO1 when it is clear.
@@ -295,6 +295,91 @@ FL_TEST_CASE("restore is one-shot, needs a capture, and repeats cleanly") {
     state.restore(c.regs());
     c.latch();
     FL_CHECK_EQ(c.gpr26, 0U);
+}
+
+
+// ---------------------------------------------------------------------------
+// Clockless mode (#5395): begin() claims each output pin on its own through
+// objectfled_clockless_claim_pad(); the destructor and the init failure paths
+// give them back through objectfled_clockless_release_pads().
+
+namespace {
+
+// Three pins over two GPIO banks; pin 2 repeats pin 0 to cover a pin listed
+// twice. Bank 0 is GPIO6 <-> GPIO1 (GPR26), bank 2 is GPIO8 <-> GPIO3 (GPR28).
+struct ClocklessPin {
+    u32 bank;
+    u32 bit;
+    u32 pad;  // Index into the mux/pad-control arrays.
+};
+constexpr ClocklessPin kClocklessPins[] = {{0, 3, 0}, {2, 5, 1}, {0, 3, 0}};
+constexpr u32 kClocklessCount = sizeof(kClocklessPins) / sizeof(kClocklessPins[0]);
+constexpr u32 kDriverPadCtl = 0x18U;  // DSE = 0b011, SPEED = 0
+
+struct ClocklessChip {
+    volatile u32 gpr[4] = {};       // IOMUXC_GPR_GPR26..29
+    volatile u32 gdir[4] = {};      // GPIO1..4 direction
+    volatile u32 dr[4] = {};        // GPIO1..4 latch
+    volatile u32 dr_set[4] = {};    // GPIO1..4 DR_SET
+    volatile u32 dr_clear[4] = {};  // GPIO1..4 DR_CLEAR
+    volatile u32 mux[2] = {};
+    volatile u32 pad[2] = {};
+
+    ObjectFLEDPadRegs regs(u32 slot) {
+        const ClocklessPin& p = kClocklessPins[slot];
+        return objectfled_single_pad_regs(&gpr[p.bank], &gdir[p.bank], &dr[p.bank],
+                                          &dr_set[p.bank], &dr_clear[p.bank],
+                                          &mux[p.pad], &pad[p.pad]);
+    }
+};
+
+}  // namespace
+
+FL_TEST_CASE("clockless begin/destroy gives the GPR26-29 bank, direction and pads back") {
+    ClocklessChip c;
+    // Teensy's startup state: every pad on GPIO6..9, GPIO1..4 inputs, plus
+    // unrelated bits other code owns in the shared registers.
+    constexpr u32 kGdirOthers = 0x00010000U;
+    for (u32 b = 0; b < 4; ++b) {
+        c.gpr[b] = 0xFFFFFFFFU;
+        c.gdir[b] = kGdirOthers;
+    }
+    for (u32 p = 0; p < 2; ++p) {
+        c.mux[p] = kAlt5Sion;
+        c.pad[p] = 0x10B0U;
+    }
+
+    // begin(): claim every listed pin.
+    ObjectFLEDPadState states[kClocklessCount];
+    for (u32 i = 0; i < kClocklessCount; ++i) {
+        objectfled_clockless_claim_pad(states[i], c.regs(i), 1U << kClocklessPins[i].bit,
+                                       kAlt5, kDriverPadCtl);
+    }
+    FL_CHECK_EQ(c.gpr[0], 0xFFFFFFFFU & ~(1U << 3));
+    FL_CHECK_EQ(c.gpr[2], 0xFFFFFFFFU & ~(1U << 5));
+    FL_CHECK_EQ(c.gdir[0], kGdirOthers | (1U << 3));
+    FL_CHECK_EQ(c.mux[0], kAlt5);
+    FL_CHECK_EQ(c.pad[1], (0x10B0U & ~0xF9U) | kDriverPadCtl);
+
+    // Unrelated bits change while the driver owns the pads.
+    c.gpr[0] = c.gpr[0] & ~(1U << 30);
+    c.gdir[2] = c.gdir[2] | (1U << 7);
+
+    // ~ObjectFLED(): give every pad back.
+    objectfled_clockless_release_pads(states, kClocklessCount,
+                                      [&c](u32 slot) { return c.regs(slot); });
+    FL_CHECK_EQ(c.gpr[0], 0xFFFFFFFFU & ~(1U << 30));
+    FL_CHECK_EQ(c.gpr[2], 0xFFFFFFFFU);
+    FL_CHECK_EQ(c.gpr[1], 0xFFFFFFFFU);
+    FL_CHECK_EQ(c.gdir[0], kGdirOthers);
+    FL_CHECK_EQ(c.gdir[2], kGdirOthers | (1U << 7));
+    for (u32 p = 0; p < 2; ++p) {
+        FL_CHECK_EQ(c.mux[p], kAlt5Sion);
+        FL_CHECK_EQ(c.pad[p], 0x10B0U);
+    }
+    for (u32 i = 0; i < kClocklessCount; ++i) {
+        FL_CHECK_FALSE(states[i].captured());
+    }
 }
 
 } // FL_TEST_FILE
