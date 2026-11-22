@@ -532,8 +532,15 @@ class FunctionListImpl<void(Args...), false> {
         } else {
             mFunctions = fl::move(replacement.mFunctions);
             mPending.clear();
-            mNeedsCompact = false;
+            mNeedsCompact = replacement.mNeedsCompact;
         }
+        // A replacement moved out of its own dispatch carries subscriptions
+        // made during that dispatch. Commit them now unless this list is
+        // itself dispatching, in which case its outermost return commits them.
+        for (auto& entry : replacement.mPending) {
+            if (entry.isValid()) mPending.push_back(fl::move(entry));
+        }
+        compact();
     }
 
   public:

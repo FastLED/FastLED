@@ -901,6 +901,39 @@ FL_TEST_CASE("function_list - destructors mutate safely during compaction") {
     FL_SUBCASE("large clear") { destructorMutatesDuringCompaction<Large>(2); }
 }
 
+// A subscription made during dispatch is pending. Moving the dispatching list
+// must carry it to the destination, whether or not the destination dispatches.
+template <typename List>
+void activeMoveKeepsPendingSubscriptions(bool destinationDispatching) {
+    List source;
+    List destination;
+    int moves = 0;
+    int pendingCalls = 0;
+    source.add([&]() {
+        if (moves++) return;
+        source.add([&]() { ++pendingCalls; });
+        destination = fl::move(source);
+    });
+    if (destinationDispatching) {
+        destination.add([&]() { if (!moves) source(); });
+        destination();
+    } else {
+        source();
+    }
+    FL_CHECK_EQ(pendingCalls, 0);
+    destination();
+    FL_CHECK_EQ(pendingCalls, 1);
+}
+
+FL_TEST_CASE("function_list - active move keeps pending subscriptions") {
+    using Small = fl::detail::FunctionListImpl<void(), false>;
+    using Large = function_list<void()>;
+    FL_SUBCASE("small idle destination") { activeMoveKeepsPendingSubscriptions<Small>(false); }
+    FL_SUBCASE("small dispatching destination") { activeMoveKeepsPendingSubscriptions<Small>(true); }
+    FL_SUBCASE("large idle destination") { activeMoveKeepsPendingSubscriptions<Large>(false); }
+    FL_SUBCASE("large dispatching destination") { activeMoveKeepsPendingSubscriptions<Large>(true); }
+}
+
 // Compile-time error test - commented out because it should NOT compile
 // Uncomment this test to verify that non-void return types trigger static_assert
 /*
