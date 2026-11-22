@@ -152,6 +152,43 @@ FL_TEST_CASE("RMT5 driver - single channel transmission") {
     FL_CHECK(ch->isInUse() == false);
 }
 
+FL_TEST_CASE("RMT5 driver - single channel submits without temporary owners") {
+    resetMock();
+    auto& mock = Rmt5PeripheralMock::instance();
+    auto driver = ChannelEngineRMT::create();
+    uint8_t pixel[] = {0x12, 0x34, 0x56};
+    auto ch = createChannelData(18, 1, pixel);
+    long ownersDuringWrite = 0;
+    ch->setPaddingGenerator([&](fl::span<const u8> src, fl::span<u8> dst) {
+        ownersDuringWrite = ch.use_count();
+        for (size_t i = 0; i < src.size(); ++i) {
+            dst[i] = src[i];
+        }
+    });
+
+    // Exercise both initial hardware acquisition and reuse of the idle channel.
+    for (int frame = 0; frame < 2; ++frame) {
+        driver->enqueue(ch);
+        const long ownersBeforeShow = ch.use_count();
+        driver->show();
+
+        // Sorting and pending-queue copies must not add owners on this path.
+        FL_CHECK_EQ(ownersDuringWrite, ownersBeforeShow);
+        const auto& history = mock.getTransmissionHistory();
+        FL_REQUIRE_EQ(history.size(), static_cast<size_t>(frame + 1));
+        FL_CHECK_EQ(history.back().gpio_pin, 18);
+        FL_REQUIRE_EQ(history.back().buffer_copy.size(), 3u);
+        FL_CHECK_EQ(history.back().buffer_copy[0], 0x34);
+        FL_CHECK_EQ(history.back().buffer_copy[1], 0x12);
+        FL_CHECK_EQ(history.back().buffer_copy[2], 0x56);
+        FL_CHECK(driver->poll() == DriverState::DRAINING);
+
+        mock.simulateTransmitDone(reinterpret_cast<void*>(1));
+        FL_CHECK(driver->poll() == DriverState::READY);
+        FL_CHECK_FALSE(ch->isInUse());
+    }
+}
+
 FL_TEST_CASE("RMT5 driver - multiple LED transmission") {
     resetMock();
     auto& mock = Rmt5PeripheralMock::instance();
@@ -469,11 +506,17 @@ FL_TEST_CASE("RMT5 driver - strips beyond channel limit wait for a free channel"
     FL_CHECK_EQ(mock.getChannelCount(), 1u);
     FL_CHECK_EQ(mock.getTransmissionCount(), 1u);
     FL_CHECK(driver->poll() == DriverState::BUSY);
+    FL_REQUIRE_EQ(mock.getTransmissionHistory().size(), 1u);
+    FL_CHECK_EQ(mock.getTransmissionHistory()[0].gpio_pin, 18);
+    FL_CHECK_EQ(mock.getTransmissionHistory()[0].buffer_size, 30u);
 
     mock.simulateTransmitDone(reinterpret_cast<void*>(1));
     // The second strip is now on the wire and nothing is pending.
     FL_CHECK(driver->poll() == DriverState::DRAINING);
     FL_CHECK_EQ(mock.getTransmissionCount(), 2u);
+    FL_REQUIRE_EQ(mock.getTransmissionHistory().size(), 2u);
+    FL_CHECK_EQ(mock.getTransmissionHistory()[1].gpio_pin, 19);
+    FL_CHECK_EQ(mock.getTransmissionHistory()[1].buffer_size, 15u);
 
     for (int i = 0; i < 10 && second->isInUse(); i++) {
         mock.simulateTransmitDone(reinterpret_cast<void*>(2));

@@ -474,4 +474,12 @@
 # The ratchet moves 319447 -> 318783, also capturing savings already on master
 # before this change. Attributed RAM stays 22499 B; the 320503 B flash ceiling
 # and 40016 B RAM ceiling are unchanged.
-318783
+#
+# -92 B in matched local Blink builds (318787 -> 318695), #5382:
+# RMT5 submits a single strip without copying/sorting ChannelData owners or
+# putting them through the pending queue. Direct and queued strips share the
+# hardware acquisition/submission routine; pending entries retain only their
+# ChannelData owner instead of duplicating its immutable pin/timing fields.
+# BEFORE is master da963db06; the ratchet moves 318783 -> 318695. Attributed
+# RAM stays 22499 B; the 320503 B flash and 40016 B RAM ceilings are unchanged.
+318695
