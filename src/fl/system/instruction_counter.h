@@ -17,6 +17,10 @@
 ///
 /// Supported on ESP32-C3/C6/H2; elsewhere kSupported is false and stop()
 /// returns 0.
+/// For an independent real-cycle sample, take the unsigned difference of
+/// readCycles() before and after the interval, without calling start()/stop().
+/// readCycles() returns 0 on unsupported targets. Instruction and cycle
+/// samples must be separate: both modes use the same hardware counter.
 
 #include "platforms/instruction_counter.h"
 

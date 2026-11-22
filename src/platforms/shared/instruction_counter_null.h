@@ -13,6 +13,7 @@ namespace platforms {
 class InstructionCounter {
   public:
     static constexpr bool kSupported = false;
+    static u32 readCycles() FL_NO_EXCEPT { return 0; }
     void start() FL_NO_EXCEPT {}
     u32 stop(u32 elapsed_cycles) FL_NO_EXCEPT {
         (void)elapsed_cycles;

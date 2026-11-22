@@ -23,6 +23,14 @@ class InstructionCounter {
   public:
     static constexpr bool kSupported = true;
 
+    // IDF configures PCCR for cycles. Only read outside start()/stop():
+    // inside that interval it counts retired instructions instead.
+    static u32 readCycles() FL_NO_EXCEPT {
+        u32 cycles;
+        asm volatile("csrr %0, 0x7E2" : "=r"(cycles));
+        return cycles;
+    }
+
     void start() FL_NO_EXCEPT {
         asm volatile("csrr %0, 0x7E0" : "=r"(mSavedEvent));
         asm volatile("csrr %0, 0x7E1" : "=r"(mSavedMode));

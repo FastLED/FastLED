@@ -111,6 +111,29 @@ def test_instruction_counter_absent_on_other_boards() -> None:
     assert "instr/show" not in verdict.message
 
 
+def test_real_cycles_and_post_show_state_are_reported() -> None:
+    result = _result(215.0)
+    result.update(
+        {
+            "cpu_mhz": 160,
+            "show_cycle_total": 500 * 34567,
+            "show_cycle_count": 500,
+            "show_draining_count": 499,
+            "show_ready_count": 1,
+        }
+    )
+    verdict = evaluate(result, budget_us=280)
+    assert "34567 real cycles/show" in verdict.message
+    assert "DRAINING 499, READY 1" in verdict.message
+    assert "IPC" not in verdict.message
+
+
+def test_zero_cycle_samples_are_not_reported() -> None:
+    result = _result(215.0)
+    result.update({"show_cycle_total": 0, "show_cycle_count": 0})
+    assert "cycles/show" not in evaluate(result, budget_us=280).message
+
+
 def test_zero_mean_does_not_divide_by_zero() -> None:
     result = _result(0.0, count=5)
     result.update({"show_instr_total": 5 * 100, "show_instr_count": 5, "cpu_mhz": 160})

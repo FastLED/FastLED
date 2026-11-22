@@ -77,19 +77,27 @@ def load_budgets(path: Path = BUDGET_FILE) -> dict[tuple[str, str], int]:
 def _counter_summary(result: dict[str, Any], mean_us: float) -> str:
     """Instructions per show() from the RISC-V perf counter (#5376).
 
-    Code layout moves wall time by 10-20 us between builds; the instruction
-    count does not, so per-change savings are judged on it. Cycles come from
-    wall time x CPU MHz, so IPC shows how much of show() is stalls.
+    Instruction runs estimate cycles from wall time x CPU MHz for IPC.
+    Counter-off runs instead report an independent real-cycle measurement.
     """
     counted = int(result.get("show_instr_count") or 0)
-    if counted <= 0:
-        return ""
-    instr = int(result.get("show_instr_total") or 0) / counted
-    text = f"; {instr:.0f} instr/show"
-    mhz = int(result.get("cpu_mhz") or 0)
-    if mhz > 0 and mean_us > 0:
-        cycles = mean_us * mhz
-        text += f", {cycles:.0f} cycles/show (IPC {instr / cycles:.2f})"
+    text = ""
+    if counted > 0:
+        instr = int(result.get("show_instr_total") or 0) / counted
+        text = f"; {instr:.0f} instr/show"
+        mhz = int(result.get("cpu_mhz") or 0)
+        if mhz > 0 and mean_us > 0:
+            cycles = mean_us * mhz
+            text += f", {cycles:.0f} cycles/show (estimated; IPC {instr / cycles:.2f})"
+    cycle_count = int(result.get("show_cycle_count") or 0)
+    if cycle_count > 0:
+        cycles = int(result.get("show_cycle_total") or 0) / cycle_count
+        text += f"; {cycles:.0f} real cycles/show"
+    if "show_draining_count" in result and "show_ready_count" in result:
+        text += (
+            f"; post-show DRAINING {result['show_draining_count']}, "
+            f"READY {result['show_ready_count']}"
+        )
     return text
 
 
