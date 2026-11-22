@@ -1149,11 +1149,19 @@ FL_TEST_CASE("Graphics performance - drawPolygon") {
                   fl::s16x16::from_raw(kPentQ16[2 * i + 1])};
     canvas.drawPolygon(CRGB::Red, pts, fl::DrawMode::DRAW_MODE_OVERWRITE);
 
-    auto start = fl::chrono::steady_clock::now();
-    for (fl::u16 i = 0; i < kPolyIters; ++i)
-        canvas.drawPolygon(CRGB::Red, pts, fl::DrawMode::DRAW_MODE_OVERWRITE);
-    auto end = fl::chrono::steady_clock::now();
-    fl::u32 us = (fl::u32)fl::chrono::duration_cast<fl::chrono::microseconds>(end - start).count();
+    // Fastest of 10 batches, scaled to kPolyIters calls: one preemption on a
+    // loaded host spoils only its batch instead of the whole total.
+    const fl::u16 kBatches = 10;
+    fl::u32 best = 0xFFFFFFFFu;
+    for (fl::u16 b = 0; b < kBatches; ++b) {
+        auto start = fl::chrono::steady_clock::now();
+        for (fl::u16 i = 0; i < kPolyIters / kBatches; ++i)
+            canvas.drawPolygon(CRGB::Red, pts, fl::DrawMode::DRAW_MODE_OVERWRITE);
+        auto end = fl::chrono::steady_clock::now();
+        const fl::u32 batch_us = (fl::u32)fl::chrono::duration_cast<fl::chrono::microseconds>(end - start).count();
+        best = batch_us < best ? batch_us : best;
+    }
+    const fl::u32 us = best * kBatches;
     fl::printf("  drawPolygon(pentagon): %u us total, %u ns/call\n",
                (unsigned)us, (unsigned)((us * 1000) / kPolyIters));
     // Generous host smoke gate (catches pathological regressions only):
