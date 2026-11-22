@@ -222,18 +222,19 @@ public:
 	/// For standard single-line SPI, no additional operations are needed
 	static void finalizeTransmission() FL_NO_EXCEPT { }
 
-	// write a single bit out, which bit from the passed in byte is determined by template parameter
-	template <u8 BIT> inline void writeBit(u8 b) FL_NO_EXCEPT {
-		// Still a whole byte, so one-bit protocols such as SM16716 do not work on this
-		// opt-in backend. SPIClass::transferBits is not a fix: in arduino-esp32 3.20017
-		// its masked data is byte-swapped away from the first byte the peripheral sends.
-		mLedSPI.transfer((b & (1 << BIT)) ? 0xFF : 0x00);
-	}
+	// A single bit cannot be sent: SPIClass::transfer clocks a whole byte, which would turn
+	// each start bit of a one-bit protocol such as SM16716 into eight (#5060).
+	// SPIClass::transferBits is not a fix either: it masks the data to its low bits, but an
+	// MSB-first peripheral sends the high bit first. So asking for one bit fails to compile.
+	// The default native ESP-IDF backend (core/fastspi_esp32_idf.h) does send one clock.
+	template <u8 BIT> void writeBit(u8 b) FL_NO_EXCEPT = delete;
 
 	// write a block of uint8_ts out in groups of three.  len is the total number of uint8_ts to write out.  The template
 	// parameters indicate how many uint8_ts to skip at the beginning of each grouping, as well as a class specifying a per
 	// byte of data modification to be made.  (See DATA_NOP above)
 	template <u8 FLAGS, class D, EOrder RGB_ORDER>  FL_NO_INLINE void writePixels(PixelController<RGB_ORDER> pixels, void* context) FL_NO_EXCEPT {
+		FL_STATIC_ASSERT(!(FLAGS & FLAG_START_BIT),
+			"FL_ESP32_SPI_ARDUINO's SPIClass backend cannot send start bits; use the default native ESP-IDF SPI backend");
 		#if FASTLED_ESP32_SPI_BULK_TRANSFER
 		select();
 		int len = pixels.mLen;
@@ -241,9 +242,6 @@ public:
 		size_t data_block_index = 0;
 
 		while(pixels.has(1)) {
-			if(FLAGS & FLAG_START_BIT) {
-				writeBit<0>(1);
-			}
 			if (data_block_index >= FASTLED_ESP32_SPI_BULK_TRANSFER_SIZE) {
 				writePixelsBulk(data_block, data_block_index);
 				data_block_index = 0;
@@ -267,9 +265,6 @@ public:
 		select();
 		int len = pixels.mLen;
 		while(pixels.has(1)) {
-			if(FLAGS & FLAG_START_BIT) {
-				writeBit<0>(1);
-			}
 			writeByte(D::adjust(pixels.loadAndScale0()));
 			writeByte(D::adjust(pixels.loadAndScale1()));
 			writeByte(D::adjust(pixels.loadAndScale2()));
