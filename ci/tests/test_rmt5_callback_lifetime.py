@@ -141,7 +141,6 @@ inline void delayMicroseconds(unsigned) {}
 struct ChipsetTiming { u32 T1, T2, T3, RESET; };
 template<class T> struct Singleton { static T& instance() { static T value; return value; } };
 namespace detail {
-u32 readPinRouting(int) noexcept;
 using Rmt5TxDoneCallback=bool (*)(void*, const void*, void*);
 struct Rmt5ChannelConfig {
     int gpio_num=1; u32 resolution_hz=10000000;
@@ -301,7 +300,6 @@ def callback_binary(
         "platforms/is_platform.h",
         "platforms/esp/32/feature_flags/enabled.h",
         "platforms/esp/esp_version.h",
-        "platforms/esp/32/core/pin_routing.h",
         "platforms/esp/32/drivers/rmt/rmt_5/rmt5_peripheral_esp.h",
         "platforms/memory_barrier.h",
         "fl/chipsets/led_timing.h",
@@ -336,11 +334,7 @@ def callback_binary(
         encoding="utf-8",
     )
     source = directory / "main.cpp"
-    routing_source = ROOT / "src/platforms/esp/32/core/pin_routing.cpp.hpp"
-    source.write_text(
-        f'#include "{routing_source}"\n#include "{SOURCE}"\n' + HARNESS,
-        encoding="utf-8",
-    )
+    source.write_text(f'#include "{SOURCE}"\n' + HARNESS, encoding="utf-8")
     binary = directory / "callbacks.exe"
     result = RunningProcess.run(
         [

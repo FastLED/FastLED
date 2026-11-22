@@ -77,6 +77,12 @@
 
 namespace fl {
 
+namespace detail {
+bool IRMT5Peripheral::isPinRoutingCurrent(int pin, u32 routing) FL_NO_EXCEPT {
+    return getPinRouting(pin) == routing;
+}
+} // namespace detail
+
 // Import types from detail namespace
 using detail::IRMT5Peripheral;
 using detail::Rmt5ChannelConfig;

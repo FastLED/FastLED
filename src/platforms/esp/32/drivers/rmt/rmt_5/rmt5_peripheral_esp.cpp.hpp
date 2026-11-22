@@ -11,7 +11,6 @@
 
 #include "platforms/esp/32/feature_flags/enabled.h"
 #include "platforms/esp/esp_version.h"
-#include "platforms/esp/32/core/pin_routing.h"
 
 #if FASTLED_RMT5
 
@@ -44,6 +43,9 @@ FL_EXTERN_C_BEGIN
 #include "soc/gpio_sig_map.h"  // For RMT_SIG_OUT0_IDX etc.
 // IWYU pragma: end_keep
 #include "soc/soc_caps.h"  // IWYU pragma: keep
+#include "soc/gpio_reg.h" // IWYU pragma: keep
+#include "soc/gpio_periph.h" // IWYU pragma: keep
+#include "soc/io_mux_reg.h" // IWYU pragma: keep
 FL_EXTERN_C_END
 
 // IDF 6 moved the RMT instance/channel counts from SoC caps to the HAL.
@@ -128,7 +130,7 @@ public:
     bool syncCache(void* buffer, size_t size) FL_NO_EXCEPT override;
     u8* allocateDmaBuffer(size_t size) FL_NO_EXCEPT override;
     void freeDmaBuffer(u8* buffer) FL_NO_EXCEPT override;
-    u32 getPinRouting(int pin) FL_NO_EXCEPT override;
+    FL_NO_INLINE u32 getPinRouting(int pin) FL_NO_EXCEPT override;
     bool isPinRoutingCurrent(int pin, u32 routing) FL_NO_EXCEPT override;
     bool rebindTxPin(void* channel_handle, int pin) FL_NO_EXCEPT override;
 
@@ -549,11 +551,29 @@ void Rmt5PeripheralESPImpl::freeDmaBuffer(u8* buffer) FL_NO_EXCEPT {
 #define FL_RMT5_CAN_REBIND_PIN (ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 5, 0))
 
 u32 Rmt5PeripheralESPImpl::getPinRouting(int pin) FL_NO_EXCEPT {
-    return readPinRouting(pin);
+#if FL_RMT5_CAN_REBIND_PIN
+    if (!GPIO_IS_VALID_GPIO(pin) || !GPIO_PIN_MUX_REG[pin]) {
+        return kPinRoutingUnknown;
+    }
+    // Keep the three-field token identical to the SPI peripheral's snapshot.
+    const u32 signal = REG_GET_FIELD(GPIO_FUNC0_OUT_SEL_CFG_REG + pin * 4, GPIO_FUNC0_OUT_SEL);
+    u32 enableRegister = GPIO_ENABLE_REG;
+#if SOC_GPIO_PIN_COUNT > 32
+    if (pin >= 32) {
+        enableRegister = GPIO_ENABLE1_REG;
+    }
+#endif
+    const u32 enabled = (REG_READ(enableRegister) >> (pin & 31)) & 1u;
+    const u32 function = REG_GET_FIELD(GPIO_PIN_MUX_REG[pin], MCU_SEL);
+    return (signal & 0xFFFFu) | (enabled << 16) | ((function & 0xFFu) << 20);
+#else
+    (void)pin;
+    return kPinRoutingUnknown;
+#endif
 }
 
 bool Rmt5PeripheralESPImpl::isPinRoutingCurrent(int pin, u32 routing) FL_NO_EXCEPT {
-    return readPinRouting(pin) == routing;
+    return Rmt5PeripheralESPImpl::getPinRouting(pin) == routing;
 }
 
 bool Rmt5PeripheralESPImpl::rebindTxPin(void* channel_handle, int pin) FL_NO_EXCEPT {

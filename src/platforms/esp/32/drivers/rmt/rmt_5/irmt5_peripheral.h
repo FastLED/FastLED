@@ -418,9 +418,7 @@ public:
 
     /// Cheap hardware-token comparison before a full routing query (#5383).
     /// Must observe external SDK/pinMode changes too, not just driver events.
-    virtual bool isPinRoutingCurrent(int pin, u32 routing) FL_NO_EXCEPT {
-        return getPinRouting(pin) == routing;
-    }
+    virtual bool isPinRoutingCurrent(int pin, u32 routing) FL_NO_EXCEPT;
 
     /// @brief Route @p pin back to this TX channel
     /// @return true on success, false on failure or when unsupported
