@@ -366,6 +366,9 @@ def test_streaming_stale_recovery_gets_only_remaining_compile_time(
         test_file_filter=None,
         build_optimizer=None,
         build_timer=None,
+        compile_target=None,
+        include_suites=None,
+        test_timeout=None,
     )
     assert streaming_runner.run_streaming_path(ctx) is sentinel
     assert attempts == [600.0, 595.0]
