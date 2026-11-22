@@ -356,7 +356,7 @@ int main() { return __wrap__ZN2fl9libc_impl13aligned_allocEmm(8, 8) != nullptr; 
 ''', args: test_abs_include_args + unit_test_compile_args + unit_test_link_args + [wrap_flag],
         name: 'function_list allocator symbol and linker wrapping')
       if allocator_wrap_supported
-        test_cpp_args += ['-DFASTLED_TEST_ALLOC_FAILURE_WRAP=1']
+        test_cpp_args += ['-DFL_TEST_ALLOC_FAILURE_WRAP=1']
         test_link_args += [wrap_flag]
       else
         warning('Skipping function_list allocation-failure injection: allocator symbol/linker wrapping unavailable')

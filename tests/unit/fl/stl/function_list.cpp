@@ -11,7 +11,7 @@
 #include "fl/stl/move.h"
 #include "fl/stl/vector.h"
 
-#if defined(FASTLED_TEST_ALLOC_FAILURE_WRAP)
+#if defined(FL_TEST_ALLOC_FAILURE_WRAP)
 namespace {
 bool failFunctionListAllocation = false;
 }
@@ -502,7 +502,7 @@ FL_TEST_CASE("function_list - lazy storage keeps copy and move value semantics")
     FL_CHECK_EQ(calls, 113);
 }
 
-#if defined(FASTLED_TEST_ALLOC_FAILURE_WRAP)
+#if defined(FL_TEST_ALLOC_FAILURE_WRAP)
 FL_TEST_CASE("function_list - failed copies consistently become empty") {
     struct AllocationProbe {};
     function_list<void(AllocationProbe)> source;
@@ -580,7 +580,7 @@ FL_TEST_CASE("function_list - running callback survives clear and vector growth"
     FL_SUBCASE("large reallocate then read capture") { runningCallbackLifetime<function_list<void()>>(true); }
 }
 
-#if defined(FASTLED_TEST_ALLOC_FAILURE_WRAP)
+#if defined(FL_TEST_ALLOC_FAILURE_WRAP)
 FL_TEST_CASE("function_list - small tier add has no State allocation failure") {
     fl::detail::FunctionListImpl<void(), false> callbacks;
     int calls = 0;
@@ -739,7 +739,7 @@ FL_TEST_CASE("function_list - nested dispatch preserves priorities and defers su
     FL_SUBCASE("large tier") { nestedSubscriptionWaitsForOutermostReturn<function_list<void()>>(); }
 }
 
-#if defined(FASTLED_TEST_ALLOC_FAILURE_WRAP)
+#if defined(FL_TEST_ALLOC_FAILURE_WRAP)
 FL_TEST_CASE("function_list - failed subscription reports minus one and recovers") {
     function_list<void()> callbacks;
     failFunctionListAllocation = true;
