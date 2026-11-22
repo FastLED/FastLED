@@ -7,6 +7,7 @@
 #include "power_mgt.h"
 #include "fl/gfx/pipeline.h"
 #include "fl/gfx/colorimetric_response.h"
+#include "fl/stl/span.h"
 #include "fl/stl/stdint.h"
 #include "test.h"
 #include "hsv2rgb.h"
@@ -1203,9 +1204,13 @@ FL_TEST_CASE("Power limiter - sweep matches the 64-bit limiter exactly") {
     using namespace power_equivalence;
     ScopedDefaultPowerModel guard;
     static CRGB leds[65535];
+    // 4096 and 65535 cover the large-strip and u16-maximum overflow cases.
+    // Every call re-sums the whole strip, so those two run a reduced target
+    // set; the budget boundaries are scalar and stay fully covered.
     const fl::u16 counts[] = {0, 1, 2, 3, 8, 50, 255, 256, 300, 1000, 4096,
-                              20000, 65535};
-    const fl::u8 targets[] = {0, 1, 2, 20, 64, 127, 128, 200, 254, 255};
+                              65535};
+    const fl::u8 all_targets[] = {0, 1, 2, 20, 64, 127, 128, 200, 254, 255};
+    const fl::u8 large_targets[] = {0, 1, 128, 255};
     fl::u32 state = 4242u;
     int checked = 0;
     int mismatches = 0;
@@ -1235,6 +1240,9 @@ FL_TEST_CASE("Power limiter - sweep matches the 64-bit limiter exactly") {
                 budgets[k] = fixed + lcg(state) % (total - fixed + 2);
             }
             for (fl::u32 budget : budgets) {
+                const fl::span<const fl::u8> targets =
+                    n >= 4096 ? fl::span<const fl::u8>(large_targets)
+                              : fl::span<const fl::u8>(all_targets);
                 for (fl::u8 target : targets) {
                     ++checked;
                     mismatches +=

@@ -440,35 +440,43 @@ FL_TEST_CASE("Graphics performance - drawPolygon kernels") {
     CRGB buffer[28 * 28];
 
     auto benchKernel = [&](const char* name, int kernel) {
-        auto start = fl::chrono::steady_clock::now();
-        for (fl::u16 i = 0; i < kPolyABIters; ++i) {
-            for (int s = 0; s < 4; ++s) {
-                const PolyABTestScene& sc = *perfScenes[s];
-                for (int j = 0; j < sc.w * sc.h; ++j) buffer[j] = CRGB(0, 0, 0);
-                fl::gfx::Canvas<CRGB> canvas(fl::span<CRGB>(buffer, (fl::size)sc.w * sc.h),
-                                              sc.w, sc.h);
-                fl::PolyPoint<fl::s16x16> pts[16];
-                for (int j = 0; j < sc.n; ++j)
-                    pts[j] = { fl::s16x16::from_raw((fl::i32)sc.x[j]),
-                               fl::s16x16::from_raw((fl::i32)sc.y[j]) };
-                if (kernel == 0)
-                    canvas.drawPolygon<fl::s16x16, 16, 64, fl::gfx::PolyFill::Exact>(
-                        CRGB(200, 120, 60),
-                        fl::span<const fl::PolyPoint<fl::s16x16>>(pts, sc.n),
-                        fl::DrawMode::DRAW_MODE_OVERWRITE);
-                else if (kernel == 1)
-                    canvas.drawPolygon<fl::s16x16, 16, 64, fl::gfx::PolyFill::ABuffer>(
-                        CRGB(200, 120, 60),
-                        fl::span<const fl::PolyPoint<fl::s16x16>>(pts, sc.n),
-                        fl::DrawMode::DRAW_MODE_OVERWRITE);
-                else
-                    fl::gfx::detail::drawPolygonTinyGLRef<CRGB, fl::s16x16, true, 16>(
-                        canvas, CRGB(200, 120, 60),
-                        fl::span<const fl::PolyPoint<fl::s16x16>>(pts, sc.n));
+        // Fastest of 10 batches, scaled to the full count: one preemption on a
+        // loaded host spoils only its batch instead of the whole total.
+        const fl::u16 kBatches = 10;
+        fl::u32 best = 0xFFFFFFFFu;
+        for (fl::u16 b = 0; b < kBatches; ++b) {
+            auto start = fl::chrono::steady_clock::now();
+            for (fl::u16 i = 0; i < kPolyABIters / kBatches; ++i) {
+                for (int s = 0; s < 4; ++s) {
+                    const PolyABTestScene& sc = *perfScenes[s];
+                    for (int j = 0; j < sc.w * sc.h; ++j) buffer[j] = CRGB(0, 0, 0);
+                    fl::gfx::Canvas<CRGB> canvas(fl::span<CRGB>(buffer, (fl::size)sc.w * sc.h),
+                                                  sc.w, sc.h);
+                    fl::PolyPoint<fl::s16x16> pts[16];
+                    for (int j = 0; j < sc.n; ++j)
+                        pts[j] = { fl::s16x16::from_raw((fl::i32)sc.x[j]),
+                                   fl::s16x16::from_raw((fl::i32)sc.y[j]) };
+                    if (kernel == 0)
+                        canvas.drawPolygon<fl::s16x16, 16, 64, fl::gfx::PolyFill::Exact>(
+                            CRGB(200, 120, 60),
+                            fl::span<const fl::PolyPoint<fl::s16x16>>(pts, sc.n),
+                            fl::DrawMode::DRAW_MODE_OVERWRITE);
+                    else if (kernel == 1)
+                        canvas.drawPolygon<fl::s16x16, 16, 64, fl::gfx::PolyFill::ABuffer>(
+                            CRGB(200, 120, 60),
+                            fl::span<const fl::PolyPoint<fl::s16x16>>(pts, sc.n),
+                            fl::DrawMode::DRAW_MODE_OVERWRITE);
+                    else
+                        fl::gfx::detail::drawPolygonTinyGLRef<CRGB, fl::s16x16, true, 16>(
+                            canvas, CRGB(200, 120, 60),
+                            fl::span<const fl::PolyPoint<fl::s16x16>>(pts, sc.n));
+                }
             }
+            auto end = fl::chrono::steady_clock::now();
+            const fl::u32 batch_us = (fl::u32)fl::chrono::duration_cast<fl::chrono::microseconds>(end - start).count();
+            best = batch_us < best ? batch_us : best;
         }
-        auto end = fl::chrono::steady_clock::now();
-        fl::u32 us = (fl::u32)fl::chrono::duration_cast<fl::chrono::microseconds>(end - start).count();
+        const fl::u32 us = best * kBatches;
         const fl::u32 calls = (fl::u32)kPolyABIters * 4;
         fl::printf("  drawPolygon %s: %u us total, %u ns/call\n", name, (unsigned)us,
                    (unsigned)((us * 1000) / calls));

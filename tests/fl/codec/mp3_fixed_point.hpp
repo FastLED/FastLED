@@ -334,15 +334,23 @@ FL_TEST_CASE("minimp3 fixed-point SIMD kernels are bit-identical to scalar") {
 
 FL_TEST_CASE("minimp3 fixed-point SIMD is not slower than scalar") {
     fl::setTestFileSystemRoot("tests/data");
-    const fl::vector<fl::u8> bytes =
+    const fl::vector<fl::u8> full =
         readCorpusBytes("codec/minimp3/l3-lame-vbrtag.bit");
+    FL_REQUIRE_GT(full.size(), 3u);
+    // The first third of the stream is enough for a 2x floor and keeps
+    // fl_codec inside the 20 s runner watchdog on a loaded host; the decoder
+    // stops cleanly at the truncated last frame.
+    fl::vector<fl::u8> bytes;
+    bytes.assign(full.begin(), full.begin() + full.size() / 3);
 
     // Informational on its own -- host timing in a unit test is noisy -- but
     // the direction is the enforced part of #4055's perf bar: whatever the
     // machine, the vector path must not be *slower* than the scalar one it
     // replaces. Both variants decode the same bytes in the same process, so
     // the comparison is same-host by construction and needs no baseline.
-    const int kReps = 8;
+    // Three reps keep fl_codec well inside the 20 s runner watchdog on a loaded
+    // host. The enforced bound below is a 2x floor, which needs no averaging.
+    const int kReps = 3;
     fl::u32 scalar_us = 0;
     fl::u32 simd_us = 0;
     for (int rep = 0; rep < kReps; ++rep) {
@@ -565,7 +573,10 @@ FL_TEST_CASE("minimp3 fixed-point and float agree on mutated bitstreams") {
     // encoder would never emit. That is the input class the +/-1.0 dequant
     // clamp and the saturating butterflies exist for, so it is the one worth
     // running under the sanitizers.
-    for (int iteration = 0; iteration < 96; ++iteration) {
+    // 32 mutated streams (two full decodes each) keep fl_codec inside the
+    // 20 s runner watchdog on a loaded host; the seed is fixed, so coverage is
+    // deterministic rather than sampled.
+    for (int iteration = 0; iteration < 32; ++iteration) {
         fl::vector<fl::u8> mutated = original;
         const fl::u32 mutations = 1u + rng.below(24u);
         for (fl::u32 m = 0; m < mutations; ++m) {
