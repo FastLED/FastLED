@@ -81,13 +81,12 @@ def main():
     else:
         sys.exit(0)
 
-    # Check for corresponding test file
-    test_path = f"tests/{stem}.cpp"
-    test_full = os.path.join(project_root, test_path)
-
-    if os.path.exists(test_full):
+    # Check for corresponding test file in any tier
+    candidates = [f"tests/{tier}/{stem}.cpp" for tier in ("unit", "integration")]
+    if any(os.path.exists(os.path.join(project_root, c)) for c in candidates):
         # Test exists, all good
         sys.exit(0)
+    test_path = candidates[0]
 
     # No test file — emit advisory warning (NOT blocking)
     # Print to stdout so it appears as a note, not stderr (which would block)

@@ -10,10 +10,10 @@
 //   * declare an overload of a barrier name directly in `fl`. ADL sees it again,
 //     and qualified `fl::name` lookup stops at fl and never reaches the
 //     barrier's other overloads;
-//   * add a barrier function that tests/fl/stl/adl_barrier.cpp never calls as
+//   * add a barrier function that tests/unit/fl/stl/adl_barrier.cpp never calls as
 //     `fl::name`, the compile check that qualified lookup still reaches it.
 
-const ADL_BARRIER_TEST: &str = "tests/fl/stl/adl_barrier.cpp";
+const ADL_BARRIER_TEST: &str = "tests/unit/fl/stl/adl_barrier.cpp";
 const ADL_BARRIER_REACHABLE_CASE: &str = "every adl_barrier name is reachable as fl::name";
 
 /// Identifiers followed by `(` that are never a declared function name.

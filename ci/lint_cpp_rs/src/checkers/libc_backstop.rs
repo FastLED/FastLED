@@ -1,6 +1,6 @@
 // --- LibcBackstopChecker (structural pass) -----------------------------------
 //
-// FastLED #4838. `tests/fl/stl/adl_barrier.cpp` is the compile back-stop for
+// FastLED #4838. `tests/unit/fl/stl/adl_barrier.cpp` is the compile back-stop for
 // LibcMirrorChecker: it calls every fl libc wrapper unqualified, so a wrapper
 // that ties with libc fails to compile. That only works if the test calls
 // every wrapper, so this pass keeps the two in lock-step:
@@ -14,7 +14,7 @@
 //   * the `libc_every_adl` block must not contain a using-directive;
 //   * neither block calls a libc name that is no longer an fl wrapper.
 
-const LIBC_BACKSTOP_TEST: &str = "tests/fl/stl/adl_barrier.cpp";
+const LIBC_BACKSTOP_TEST: &str = "tests/unit/fl/stl/adl_barrier.cpp";
 const LIBC_BACKSTOP_ADL_BLOCK: &str = "libc_every_adl";
 const LIBC_BACKSTOP_USING_BLOCK: &str = "libc_every_using_fl";
 

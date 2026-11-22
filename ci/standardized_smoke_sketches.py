@@ -2,9 +2,9 @@
 
 Issue: https://github.com/FastLED/FastLED/issues/2411 (Part A).
 
-The manifest at ``tests/platforms/_standard/SMOKE_SKETCHES.txt`` is the
+The manifest at ``tests/unit/platforms/_standard/SMOKE_SKETCHES.txt`` is the
 canonical list of FastLED example sketches that EVERY supported board must
-compile in CI. Per-board overrides remain under ``tests/platforms/<board>/``.
+compile in CI. Per-board overrides remain under ``tests/unit/platforms/<board>/``.
 
 The format is intentionally trivial - one example name per line, ``#`` for
 comments, blank lines ignored - so any consumer (Python, bash, shell scripts,
@@ -33,7 +33,7 @@ from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 # Repo-relative location of the manifest. Kept as a module-level constant so
 # CI tooling can reference it without re-deriving the path.
-MANIFEST_RELATIVE_PATH = "tests/platforms/_standard/SMOKE_SKETCHES.txt"
+MANIFEST_RELATIVE_PATH = "tests/unit/platforms/_standard/SMOKE_SKETCHES.txt"
 
 
 @typechecked

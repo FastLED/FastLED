@@ -15,7 +15,7 @@
 /// Catches hangs / stalls in the streaming engine.
 ///
 /// Does NOT validate transmitted byte correctness — that's covered by the host
-/// bit-exactness test in tests/fl/channels/wave8.cpp added in #2559, and by
+/// bit-exactness test in tests/unit/fl/channels/wave8.cpp added in #2559, and by
 /// the RX-loopback path in the existing autoresearch CLI when run with a
 /// jumper wire.
 ///

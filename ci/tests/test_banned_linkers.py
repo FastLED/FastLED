@@ -63,7 +63,7 @@ def test_scope_is_the_host_build_surface() -> None:
     assert not is_in_scope("src/platforms/wasm/compiler/build_flags.toml")
     assert not is_in_scope("src/platforms/wasm/meson.build")
     assert not is_in_scope("ci/docs/linkers.md")
-    assert not is_in_scope("tests/fl/stl/stdio.cpp")
+    assert not is_in_scope("tests/unit/fl/stl/stdio.cpp")
 
 
 def test_allowlist_stays_small_and_names_the_reld_wiring() -> None:

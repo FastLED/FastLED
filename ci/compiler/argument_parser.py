@@ -146,7 +146,7 @@ class CompilationArgumentParser:
             help=(
                 "Examples to compile (positional arguments after board name). "
                 "'all' compiles every example; 'smoke' compiles "
-                "tests/platforms/_standard/SMOKE_SKETCHES.txt plus examples "
+                "tests/unit/platforms/_standard/SMOKE_SKETCHES.txt plus examples "
                 "changed against GITHUB_BASE_REF / FASTLED_SMOKE_BASE_REF."
             ),
             nargs="*",

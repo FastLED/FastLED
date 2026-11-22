@@ -94,7 +94,9 @@ def test_parser_resolves_smoke_from_its_own_project_root(
 
     monkeypatch.delenv("GITHUB_BASE_REF", raising=False)
     monkeypatch.delenv("FASTLED_SMOKE_BASE_REF", raising=False)
-    manifest = tmp_path / "tests" / "platforms" / "_standard" / "SMOKE_SKETCHES.txt"
+    manifest = (
+        tmp_path / "tests" / "unit" / "platforms" / "_standard" / "SMOKE_SKETCHES.txt"
+    )
     manifest.parent.mkdir(parents=True)
     manifest.write_text("OnlyInTmp\n", encoding="utf-8")
     sketch = tmp_path / "examples" / "OnlyInTmp" / "OnlyInTmp.ino"

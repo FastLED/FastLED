@@ -46,7 +46,7 @@ jobs:
         contains(github.event.pull_request.labels.*.name, 'ci-platform:teensy*')))
     uses: ./.github/workflows/build_template.yml
     with:
-      # Pull requests compile the smoke set (tests/platforms/_standard/
+      # Pull requests compile the smoke set (tests/unit/platforms/_standard/
       # SMOKE_SKETCHES.txt plus examples the PR changes); master compiles
       # every example (#4415).
       args: teensy41 all

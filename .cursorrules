@@ -324,13 +324,15 @@ The tool follows the pattern established in `ci/wasm_test.py` and `ci/util/scrap
 ## Project Structure
 - `src/` - Main FastLED library source code
 - `examples/` - Arduino examples demonstrating FastLED usage
-- `tests/` - Test files and infrastructure
+- `tests/` - Test infrastructure plus three C++ test tiers: `tests/unit/` (default doctest suites),
+  `tests/integration/` (heavy doctest suites, `bash test --integration`) and `tests/profile/` (`bash profile`)
 - `ci/` - Continuous integration scripts
 - `docs/` - Documentation
 
 ## Key Commands
 - `uv run test.py` - Run all tests
 - `uv run test.py --cpp` - Run C++ tests only
+- `uv run test.py --integration` - Run the C++ integration tier (tests/integration/)
 - `uv run test.py TestName` - Run specific C++ test
   - For example: running test_xypath.cpp would be uv run test.py xypath
 - `./lint` - Run code formatting/linting

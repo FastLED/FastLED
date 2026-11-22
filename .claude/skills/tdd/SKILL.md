@@ -28,14 +28,14 @@ $ARGUMENTS
 - Use `FL_` prefixed assertion macros (e.g., `FL_CHECK_EQ`, `FL_REQUIRE_TRUE`)
 - Include `test.h` and `FastLED.h`
 - Use `namespace fl;` and anonymous namespace wrapper
-- Mirror source structure for file placement: `src/fl/foo.h` -> `tests/fl/foo.cpp`
+- Mirror source structure for file placement: `src/fl/foo.h` -> `tests/unit/fl/foo.cpp`
 - Keep tests **simple** — no mocks, no helper classes, minimal setup
 
 ### Output
 ```
 ## RED Phase
 
-**Test file**: tests/fl/example.cpp
+**Test file**: tests/unit/fl/example.cpp
 **Test case**: "Feature - expected behavior"
 **Status**: FAILS as expected
 **Failure reason**: [why it fails — confirms the test is valid]

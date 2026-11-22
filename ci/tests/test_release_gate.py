@@ -31,6 +31,25 @@ def test_catalog_includes_board_tests_and_hosted_macos() -> None:
     assert "unit_test_windows.yml" in required
 
 
+def test_reusable_workflow_requires_all_validation_jobs(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    (tmp_path / "parent.yml").write_text(
+        "jobs:\n  board:\n    uses: ./.github/workflows/child.yml\n"
+    )
+    (tmp_path / "child.yml").write_text(
+        "jobs:\n"
+        "  pool:\n    name: Select runner\n"
+        "  build:\n    needs: pool\n"
+        "  verify:\n    name: Verify output\n    needs: build\n"
+    )
+    monkeypatch.setattr(release_gate, "WORKFLOWS", tmp_path)
+    assert release_gate._job_names("parent.yml", {"board"}) == {
+        "board / build",
+        "board / Verify output",
+    }
+
+
 def test_every_release_cell_can_be_dispatched() -> None:
     workflows = Path(__file__).resolve().parents[2] / ".github/workflows"
     for filename in release_gate.required_workflows():

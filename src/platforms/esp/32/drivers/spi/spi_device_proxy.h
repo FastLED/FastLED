@@ -225,8 +225,9 @@ public:
         writeByte(b);
     }
 
-    /// Write a single bit: one clock on the native single-SPI backend (a whole byte
-    /// under FL_ESP32_SPI_ARDUINO). Every other bus type buffers whole bytes, so a frame
+    /// Write a single bit: one clock on the native single-SPI backend. Under
+    /// FL_ESP32_SPI_ARDUINO the backend's writeBit is deleted, so using this fails to
+    /// compile rather than sending a byte. Every other bus type buffers whole bytes, so a frame
     /// containing a lone bit is refused, with one warning per device, not sent misaligned.
     /// @tparam BIT the bit index in the byte to test
     /// @param b the byte to test

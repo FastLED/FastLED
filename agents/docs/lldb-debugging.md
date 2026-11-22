@@ -48,11 +48,11 @@ uv run clang-tool-chain-lldb --help
 
 ```
 #7  0x00007ffadf7d1d2c [fl_test.dll] function_c() + 84
-    (Line 9 of "../../tests/fl\test.cpp" starts at address 0x180001d2c)
+    (Line 9 of "../../tests/unit/fl\test.cpp" starts at address 0x180001d2c)
 #8  0x00007ffadf7d1cc7 [fl_test.dll] function_b() + 15
-    (Line 13 of "../../tests/fl\test.cpp" starts at address 0x180001cc2)
+    (Line 13 of "../../tests/unit/fl\test.cpp" starts at address 0x180001cc2)
 #9  0x00007ffadf7d1ca7 [fl_test.dll] function_a() + 15
-    (Line 17 of "../../tests/fl\test.cpp" starts at address 0x180001ca2)
+    (Line 17 of "../../tests/unit/fl\test.cpp" starts at address 0x180001ca2)
 ```
 
 ## LLDB Integration Challenges

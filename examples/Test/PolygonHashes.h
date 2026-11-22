@@ -6,7 +6,7 @@
 // or narrows only where int is 16 bits (#5301, #5303, #5292). Test.ino renders
 // these scenes on the AVR emulator (avr8js, `bash test --run uno Test`) and
 // compares each FNV-1a canvas hash to the golden table below. The host unit
-// test in tests/fl/gfx/draw_polygon.hpp renders the same scenes and pins the
+// test in tests/unit/fl/gfx/draw_polygon.hpp renders the same scenes and pins the
 // same table, so a match on AVR means "AVR renders identically to the host".
 //
 // The scenes target the paths that broke on AVR: edges near the +/-8191 px
@@ -79,7 +79,7 @@ const Scene kScenes[kSceneCount] FL_PROGMEM = {
 #undef POLY_HASH_FAR
 
 // Golden hashes: {Exact, ABuffer} per scene. Host output, pinned by
-// tests/fl/gfx/draw_polygon.hpp.
+// tests/unit/fl/gfx/draw_polygon.hpp.
 const fl::u32 kGolden[kSceneCount][2] FL_PROGMEM = {
     {0xA8F35217UL, 0x20F530D5UL},  // 0
     {0x9ADBBC51UL, 0xC5631142UL},  // 1

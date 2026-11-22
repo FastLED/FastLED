@@ -18,7 +18,7 @@
 // implementation is ci/codec_cpu/minimp3_fixed_driver.cpp, linked alongside.
 // Two variants cannot share a translation unit -- different DSP path, different
 // mp3dec_scratch_t layout -- so the header is re-included with the guards
-// cleared, exactly as tests/fl/codec/minimp3_variants.hpp does.
+// cleared, exactly as tests/unit/fl/codec/minimp3_variants.hpp does.
 #undef MINIMP3_H
 #undef _MINIMP3_IMPLEMENTATION_GUARD
 #define MINIMP3_NAMESPACE minimp3_fixed

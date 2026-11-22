@@ -124,7 +124,7 @@ fn scan_container_file(file_content: &FileContent) -> ContainerScan {
     // Names are matched textually within one file, so a name that is ALSO a
     // raw C array somewhere in the file is ambiguous. Raw arrays are out of
     // scope for FastLED#3287, so drop the name rather than risk a false
-    // positive. Real case: tests/fl/slice.cpp declares both
+    // positive. Real case: tests/unit/fl/slice.cpp declares both
     // `fl::array<int, 4> arr` and `int arr[] = {5, 6, 7}` in sibling
     // FL_SUBCASE blocks.
     declarations.retain(|name, _| !shadowed.contains(name));

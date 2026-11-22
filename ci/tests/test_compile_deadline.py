@@ -21,6 +21,8 @@ def _short_thresholds(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(compile_mod, "_COMPILE_QUIET_WARNING_SECONDS", 0.05)
     monkeypatch.setattr(compile_mod, "_COMPILE_QUIET_DUMP_SECONDS", 0.11)
     monkeypatch.setattr(compile_mod, "_COMPILE_HARD_TIMEOUT_SECONDS", 0.2)
+    monkeypatch.setattr(compile_mod, "_COMPILE_STALL_SECONDS", 0.15)
+    monkeypatch.setattr(compile_mod, "load_scale", lambda: 1.0)
 
 
 def test_silent_child_is_diagnosed_and_killed_before_deadline_returns(
@@ -364,6 +366,150 @@ def test_streaming_stale_recovery_gets_only_remaining_compile_time(
         test_file_filter=None,
         build_optimizer=None,
         build_timer=None,
+        compile_target=None,
+        include_suites=None,
+        test_timeout=None,
     )
     assert streaming_runner.run_streaming_path(ctx) is sentinel
     assert attempts == [600.0, 595.0]
+
+
+class _ScriptedLines:
+    """Line source driven by a virtual clock: ``None`` advances time silently."""
+
+    def __init__(self, clock: SimpleNamespace, events: list[str | None]) -> None:
+        self._clock = clock
+        self._events = iter(events)
+        self.exhausted = False
+
+    def __next__(self) -> str:
+        try:
+            event = next(self._events)
+        except StopIteration:
+            self.exhausted = True
+            raise
+        self._clock.now += 0.1
+        if event is None:
+            raise TimeoutError
+        return event
+
+
+class _ScriptedProcess:
+    pid = None
+
+    def __init__(self, clock: SimpleNamespace, events: list[str | None]) -> None:
+        self._lines = _ScriptedLines(clock, events)
+        self.killed = False
+
+    @contextmanager
+    def line_iter(self, **_kwargs: object) -> Iterator[_ScriptedLines]:
+        yield self._lines
+
+    def poll(self) -> int | None:
+        if self.killed:
+            return -9
+        return 0 if self._lines.exhausted else None
+
+    def kill(self) -> None:
+        self.killed = True
+
+
+def _virtual_clock(monkeypatch: pytest.MonkeyPatch) -> SimpleNamespace:
+    clock = SimpleNamespace(now=0.0)
+    monkeypatch.setattr(compile_mod.time, "monotonic", lambda: clock.now)
+    monkeypatch.setattr(compile_mod.time, "sleep", lambda _s: None)
+    return clock
+
+
+def _drain(proc: _ScriptedProcess, deadline: float) -> list[str]:
+    return list(
+        compile_mod._monitored_compile_lines(
+            cast(RunningProcess, proc),
+            command=["meson", "compile"],
+            target="smoke",
+            started=0.0,
+            deadline_seconds=deadline,
+        )
+    )
+
+
+def test_progressing_build_is_not_killed_at_the_deadline(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """#5398: a build still linking targets at the deadline keeps running."""
+    _short_thresholds(monkeypatch)
+    monkeypatch.setattr(compile_mod, "_COMPILE_STALL_SECONDS", 0.35)
+    clock = _virtual_clock(monkeypatch)
+    # Output every 0.3 s of virtual time, out to 3x the 1.0 s deadline.
+    events: list[str | None] = []
+    for step in range(10):
+        events += [f"[{step}/10] Linking target t{step}", None, None]
+    events.append("[10/10] done")
+    proc = _ScriptedProcess(clock, events)
+    lines = _drain(proc, deadline=1.0)
+    assert len(lines) == 11
+    assert not proc.killed
+    assert clock.now > 3.0
+    assert "Hard compilation deadline exceeded" not in capsys.readouterr().err
+
+
+def test_build_that_stalls_after_the_deadline_is_killed(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    _short_thresholds(monkeypatch)
+    monkeypatch.setattr(compile_mod, "_COMPILE_STALL_SECONDS", 0.35)
+    monkeypatch.setattr("ci.util.test_env.dump_thread_stacks", lambda: None)
+    clock = _virtual_clock(monkeypatch)
+    events: list[str | None] = ["[1/3] a", None, None, "[2/3] b", None, None]
+    events += ["[3/3] c"] + [None] * 50
+    proc = _ScriptedProcess(clock, events)
+    with pytest.raises(compile_mod._CompileDeadlineExceeded):
+        _drain(proc, deadline=0.5)
+    assert proc.killed
+    # Killed one stall window after the last line, not at the deadline.
+    assert 0.9 <= clock.now <= 1.2
+    stderr = capsys.readouterr().err
+    assert "Hard compilation deadline exceeded" in stderr
+    assert "PID" in stderr or "Process tree unavailable" in stderr
+
+
+def test_stall_window_scales_with_host_load(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _short_thresholds(monkeypatch)
+    monkeypatch.setattr(compile_mod, "_COMPILE_STALL_SECONDS", 0.35)
+    monkeypatch.setattr(compile_mod, "load_scale", lambda: 4.0)
+    monkeypatch.setattr("ci.util.test_env.dump_thread_stacks", lambda: None)
+    clock = _virtual_clock(monkeypatch)
+    # 1.2 s of silence: a hang at load 1, slow-but-alive at load 4 (1.4 s).
+    events: list[str | None] = ["[1/2] a"] + [None] * 12 + ["[2/2] b"]
+    proc = _ScriptedProcess(clock, events)
+    assert len(_drain(proc, deadline=0.5)) == 2
+    assert not proc.killed
+
+
+def test_progressing_build_still_has_an_absolute_cap(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _short_thresholds(monkeypatch)
+    monkeypatch.setattr(compile_mod, "_COMPILE_STALL_SECONDS", 0.35)
+    monkeypatch.setattr("ci.util.test_env.dump_thread_stacks", lambda: None)
+    clock = _virtual_clock(monkeypatch)
+    proc = _ScriptedProcess(clock, ["[n/m] step"] * 1000)
+    with pytest.raises(compile_mod._CompileDeadlineExceeded):
+        _drain(proc, deadline=1.0)
+    assert proc.killed
+    cap = compile_mod._COMPILE_MAX_DEADLINE_FACTOR * 1.0
+    assert cap - 0.01 <= clock.now <= cap + 0.2
+
+
+def test_absolute_cap_stays_inside_the_ci_job(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv("CI", raising=False)
+    assert compile_mod._absolute_compile_cap(1800.0) == 9000.0
+    monkeypatch.setenv("CI", "true")
+    assert compile_mod._absolute_compile_cap(1800.0) == 2400.0
+    assert compile_mod._absolute_compile_cap(600.0) == 2400.0
+    # The cap never undercuts the deadline itself.
+    assert compile_mod._absolute_compile_cap(3000.0) == 3000.0

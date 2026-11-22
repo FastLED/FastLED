@@ -42,7 +42,7 @@ impl FileContentChecker for TestIncludePathsChecker {
                 violations.push((
                     index + 1,
                     format!(
-                        "Relative include not allowed in tests: #include \"{include_path}\" — use a fully-qualified path (e.g., tests/fl/...). Add '// ok test include' to suppress."
+                        "Relative include not allowed in tests: #include \"{include_path}\" — use a fully-qualified path (e.g., tests/unit/fl/...). Add '// ok test include' to suppress."
                     ),
                 ));
                 continue;
@@ -75,7 +75,7 @@ impl FileContentChecker for TestIncludePathsChecker {
                 violations.push((
                     index + 1,
                     format!(
-                        "Sub-path include not allowed in tests: #include \"{include_path}\" — use a fully-qualified path (e.g., tests/fl/...). Add '// ok test include' to suppress."
+                        "Sub-path include not allowed in tests: #include \"{include_path}\" — use a fully-qualified path (e.g., tests/unit/fl/...). Add '// ok test include' to suppress."
                     ),
                 ));
                 continue;
@@ -86,10 +86,16 @@ impl FileContentChecker for TestIncludePathsChecker {
                 "fl" | "misc" | "platforms" | "shared" | "profile"
             ) && !include_path.starts_with("tests/")
             {
+                // Test sources live in the unit tier; shared/ and profile/ do not.
+                let tier = if matches!(first_component, "shared" | "profile") {
+                    ""
+                } else {
+                    "unit/"
+                };
                 violations.push((
                     index + 1,
                     format!(
-                        "Include missing tests/ prefix: #include \"{include_path}\" — use #include \"tests/{include_path}\" instead. Add '// ok test include' to suppress."
+                        "Include missing tests/ prefix: #include \"{include_path}\" — use #include \"tests/{tier}{include_path}\" instead. Add '// ok test include' to suppress."
                     ),
                 ));
             }
@@ -184,7 +190,7 @@ impl FileContentChecker for TestPathStructureChecker {
         vec![(
             1,
             format!(
-                "Test file has no corresponding source file at matching path. Test is at '{}' but no source file found at '{}', '{}', or '{}'. \n\nREQUIRED ACTIONS (in order of preference):\n  1. RENAME the test to match the source file it's testing (best option)\n  2. MERGE this test into an existing test file that tests the same source — each test\n     file costs compile time, so consolidating into fewer files is strongly preferred\n  3. MOVE to 'tests/misc/{test_name}' if this truly doesn't test a specific source file\n\n⚠️  DO NOT add '// ok standalone' unless absolutely necessary. This amnesty is a last\nresort for rare infrastructure files that genuinely cannot be organized. AI agents\nshould NEVER add this comment — instead fix the path or consolidate tests.\n\nAvoid creating tests in 'tests/misc/' - prefer mirroring source directory structure.\nTest organization should mirror source organization for maintainability.\nNote: Source matcher checks .h, .hpp, and .cpp.hpp files.",
+                "Test file has no corresponding source file at matching path. Test is at '{}' but no source file found at '{}', '{}', or '{}'. \n\nREQUIRED ACTIONS (in order of preference):\n  1. RENAME the test to match the source file it's testing (best option)\n  2. MERGE this test into an existing test file that tests the same source — each test\n     file costs compile time, so consolidating into fewer files is strongly preferred\n  3. MOVE to 'tests/unit/misc/{test_name}' if this truly doesn't test a specific source file\n\n⚠️  DO NOT add '// ok standalone' unless absolutely necessary. This amnesty is a last\nresort for rare infrastructure files that genuinely cannot be organized. AI agents\nshould NEVER add this comment — instead fix the path or consolidate tests.\n\nAvoid creating tests in 'tests/unit/misc/' - prefer mirroring source directory structure.\nTest organization should mirror source organization for maintainability.\nNote: Source matcher checks .h, .hpp, and .cpp.hpp files.",
                 python_path_display(&project_rel),
                 python_path_display(&expected_h),
                 python_path_display(&expected_hpp),

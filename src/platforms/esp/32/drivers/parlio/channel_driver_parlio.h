@@ -167,7 +167,7 @@
 ///
 /// ## See Also
 /// - Implementation: `channel_driver_parlio.cpp`
-/// - Unit Tests: `tests/fl/channels/parlio.cpp`
+/// - Unit Tests: `tests/unit/fl/channels/parlio.cpp`
 /// - Example Sketch: `examples/ParlioTest/ParlioTest.ino`
 /// - Feature Flag: `FASTLED_ESP32_HAS_PARLIO` in
 /// `src/platforms/esp/32/feature_flags/enabled.h`

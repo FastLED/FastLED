@@ -64,7 +64,7 @@ index 9fbd4d2..292241a 100644
 +   symptom is a glibc "malloc.c: assertion failed" from somewhere unrelated
 +   rather than anything pointing at MP3. Confirmed by doing exactly that.
 +
-+   The test harness in tests/fl/codec/minimp3_variants.hpp is the one safe
++   The test harness in tests/unit/fl/codec/minimp3_variants.hpp is the one safe
 +   exception: it sets the macro per-inclusion but also renames MINIMP3_NAMESPACE,
 +   so its types are distinct from production's and never meet them. */
 +#if defined(MINIMP3_FIXED_POINT) && defined(MINIMP3_FLOAT_POINT)

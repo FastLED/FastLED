@@ -159,7 +159,7 @@ The objective, the luminance/chroma tradeoff and the tie-breaks are the
 executable reference in `ci/color_gamut_study.py`, derived in
 [color-gamut-algorithm-selection.md](color-gamut-algorithm-selection.md). The
 numerical tolerances the embedded mappers are held to are these. Each is
-asserted in `tests/fl/gfx/gamut_map.cpp` on all three mappers (RGB, RGBW,
+asserted in `tests/unit/fl/gfx/gamut_map.cpp` on all three mappers (RGB, RGBW,
 RGBWW) unless the row says otherwise.
 
 | property | tolerance | worst measured |
@@ -321,7 +321,7 @@ unreachable altogether, because a cycle can average to a sub-ULP drive; see
 the note below on the unsupported low-light region, which is the same
 distinction from the other side. Eight of the 57 carry a sub-ULP drive.
 
-What `tests/fl/gfx/pipeline.cpp` asserts, stated exactly rather than as "both
+What `tests/unit/fl/gfx/pipeline.cpp` asserts, stated exactly rather than as "both
 figures are pinned", which they are not:
 
 * the corpus size and the excluded count are pinned exactly -- `kVectorCount
@@ -392,7 +392,7 @@ with brightness already applied as C4's flux scalar.
 
 **Where §6 is met.** Every encoder that embeds a gamma, expansion or field-derivation stage skips it on a managed channel. That includes APA102/SK9822 under `FASTLED_USE_GLOBAL_BRIGHTNESS` (#4457), and nothing on the managed path applies a second shaping stage after the device solve.
 
-**Narrow wires (B3).** LPD8806 and LPD6803 have wires narrower than 8 bits. On a managed channel they quantize the 16-bit drive once, straight to their width, through `ColorPipelineHooks::encodeManagedSpi`. Their 8-bit path would round to 8 bits and then shift or truncate again. `tests/fl/channels/color_managed_source.cpp` checks every byte against the single-step computation, and requires that it differ from the two-step result somewhere.
+**Narrow wires (B3).** LPD8806 and LPD6803 have wires narrower than 8 bits. On a managed channel they quantize the 16-bit drive once, straight to their width, through `ColorPipelineHooks::encodeManagedSpi`. Their 8-bit path would round to 8 bits and then shift or truncate again. `tests/unit/fl/channels/color_managed_source.cpp` checks every byte against the single-step computation, and requires that it differ from the two-step result somewhere.
 
 ## Ownership and tiers (R9)
 

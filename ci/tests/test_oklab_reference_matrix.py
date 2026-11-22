@@ -7,7 +7,7 @@ stated in it. Its two matrices exist in three places:
   they were quantized from written in the comments beside them;
 * ``ci/color_reference.py`` -- float64, and what the golden corpus's
   ``mapped_xyz`` targets are computed with;
-* ``tests/fl/gfx/oklab_q16.cpp`` -- a float transcription, which is what
+* ``tests/unit/fl/gfx/oklab_q16.cpp`` -- a float transcription, which is what
   "OKLab Q16 forward agrees with the float definition" scores the integers
   against.
 

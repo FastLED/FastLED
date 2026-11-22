@@ -14,6 +14,25 @@ from pathlib import Path
 from typing import Optional, cast
 
 
+# Doctest tier directories under tests/. Mirrors TEST_TIERS in
+# tests/discover_tests.py; the tier is never part of a test's name.
+TEST_TIERS = ("unit", "integration")
+
+
+def strip_test_tier(path: str) -> str:
+    """Return a test path relative to its tier directory.
+
+    ``tests/unit/fl/async`` and ``unit/fl/async`` both become ``fl/async``.
+    A path without a tier, such as the pre-tier spelling ``tests/fl/async``,
+    comes back without its ``tests/`` prefix.
+    """
+    rel = path.replace("\\", "/").removeprefix("tests/")
+    tier, sep, rest = rel.partition("/")
+    if sep and tier in TEST_TIERS:
+        return rest
+    return rel
+
+
 @dataclass
 class TestMatch:
     """Represents a matched test or example."""
@@ -212,6 +231,14 @@ def _score_match(query: str, match: TestMatch) -> tuple[float, int]:
         if path_no_ext == normalized_query:
             return (1.0, len(match.name))  # Exact path match (without extension)
 
+        # Tier-less spelling: "tests/fl/async" still names tests/unit/fl/async.cpp
+        if match.type == "unit_test" and match.path.startswith("tests/"):
+            query_no_ext = normalized_query.replace(".cpp", "")
+            if query_no_ext.startswith("tests/") and strip_test_tier(
+                path_no_ext
+            ) == strip_test_tier(query_no_ext):
+                return (1.0, len(match.name))
+
         # Try fuzzy match on path
         path_score, path_len = _fuzzy_score(normalized_query, match.path)
         if path_score > 0.0:
@@ -226,7 +253,7 @@ def _score_match(query: str, match: TestMatch) -> tuple[float, int]:
         path_no_ext = match.path.replace(".cpp", "").replace(".ino", "")
         if space_to_slash in path_no_ext:
             # Substring match in path - check if it's a component match
-            # e.g., "fl async" matches "tests/fl/async.cpp"
+            # e.g., "fl async" matches "tests/unit/fl/async.cpp"
             parts = path_no_ext.split("/")
             query_parts = space_to_slash.split("/")
 
@@ -243,13 +270,11 @@ def _score_match(query: str, match: TestMatch) -> tuple[float, int]:
             return (min(1.0, path_score + 0.05), path_len)
 
     # Try matching against the Meson target name derived from the path
-    # e.g., "tests/fl/stl/string.cpp" -> "fl_stl_string"
+    # e.g., "tests/unit/fl/stl/string.cpp" -> "fl_stl_string"
     # This allows queries like "fl_stl_string" to match even though
     # match.name is just "string"
     if match.path.startswith("tests/") and match.path.endswith(".cpp"):
-        target_name = (
-            match.path.removeprefix("tests/").removesuffix(".cpp").replace("/", "_")
-        )
+        target_name = strip_test_tier(match.path).removesuffix(".cpp").replace("/", "_")
         target_score, target_len = _fuzzy_score(query, target_name)
         name_score, name_len = _fuzzy_score(query, match.name)
         if target_score > name_score:
@@ -335,7 +360,7 @@ def _find_aggregator_matches(
 ) -> list[TestMatch]:
     """Search inside aggregator test .cpp files for #include lines matching query.
 
-    Aggregator files (e.g., tests/fl/codec.cpp) include sub-test headers like
+    Aggregator files (e.g., tests/unit/fl/codec.cpp) include sub-test headers like
     "codec/gif.hpp". When the user searches for "gif", this finds codec.cpp as
     the parent aggregator containing gif tests.
 
@@ -404,7 +429,7 @@ def smart_select(
     - A list of TestMatch objects if disambiguation is needed
 
     Args:
-        query: Search query (e.g., "Animartrix", "string", "async", "tests/fl/async")
+        query: Search query (e.g., "Animartrix", "string", "async", "tests/unit/fl/async")
         project_dir: Project root directory (defaults to current directory)
         filter_type: Optional type filter ("unit_test" or "example")
 
@@ -414,7 +439,7 @@ def smart_select(
     if project_dir is None:
         project_dir = Path.cwd()
 
-    # Handle explicit .hpp file queries (e.g., "tests/fl/audio/detectors/backbeat.hpp")
+    # Handle explicit .hpp file queries (e.g., "tests/unit/fl/audio/detectors/backbeat.hpp")
     # Extract the .hpp filename for later filtering
     hpp_filter = None
     if query.endswith(".hpp"):
@@ -597,7 +622,7 @@ def get_best_match_or_prompt(
             print("  - Check spelling")
             print("  - Use a longer query string")
             if filter_type == "unit_test":
-                print("  - Use path-based query (e.g., 'tests/fl/async')")
+                print("  - Use path-based query (e.g., 'tests/unit/fl/async')")
                 print("  - Run 'uv run test.py --list' to see all available tests")
                 print("  - Run 'uv run test.py --list --cpp' to see only unit tests")
             elif filter_type == "example":
@@ -605,7 +630,7 @@ def get_best_match_or_prompt(
                 print("  - Run 'uv run test.py --list --examples' to see all examples")
             else:
                 print(
-                    "  - Use path-based query (e.g., 'tests/fl/async' or 'examples/Blink')"
+                    "  - Use path-based query (e.g., 'tests/unit/fl/async' or 'examples/Blink')"
                 )
                 print("  - Run 'uv run test.py --list' to see all available tests")
                 print("  - Run 'uv run test.py --list --cpp' to see only unit tests")
