@@ -186,6 +186,8 @@ void resetBus(fl::u32 padConfig) {
 #define CORE_PIN21_CONFIG gOtherPins[7]
 
 #include "platforms/arm/teensy/teensy_lc/fastspi_arm_kl26.h"
+#include "platforms/arm/teensy/teensy_lc/spi_output_selector.h"
+#include "fl/stl/type_traits.h"
 
 namespace fl {
 
@@ -216,7 +218,7 @@ constexpr u32 kDivider = 4;
 using Output = ARMHardwareSPIOutput<11, 13, kDivider, 0x40076000>;
 
 // The production dispatch for Teensy LC, onto the host's SPIOutput name.
-template <> class SPIOutput<11, 13, kDivider> : public Output {};
+template <> class SPIOutput<11, 13, kDivider> : public TeensyLcSPIOutputBase<11, 13, kDivider> {};
 
 class Controller : public SM16716Controller<11, 13, RGB, kDivider> {
   public:
@@ -359,6 +361,30 @@ FL_TEST_CASE("the real SM16716 controller: start bits, data, and the 50-bit head
         FL_CHECK_EQ(gWire[i], 0);
     }
     checkClean();
+}
+
+FL_TEST_CASE("SPI0 pads get the native writer; any other pins get software SPI, not silence") {
+    // The native writer only drives SPI0 (0x40076000). On any other pad its bytes go
+    // nowhere, so such pins must take the software writer, which drives the GPIO itself.
+    FL_CHECK((fl::is_same<TeensyLcSPIOutputBase<11, 13, kDivider>, Output>::value));
+    FL_CHECK((fl::is_same<TeensyLcSPIOutputBase<12, 13, kDivider>,
+                          ARMHardwareSPIOutput<12, 13, kDivider, 0x40076000>>::value));
+    FL_CHECK((fl::is_same<TeensyLcSPIOutputBase<7, 14, kDivider>,
+                          ARMHardwareSPIOutput<7, 14, kDivider, 0x40076000>>::value));
+    FL_CHECK((fl::is_same<TeensyLcSPIOutputBase<8, 13, kDivider>,
+                          ARMHardwareSPIOutput<8, 13, kDivider, 0x40076000>>::value));
+
+    // Not SPI0 pads: the FirstLight default, SPI1 pads, swapped and mixed pairs.
+    FL_CHECK((fl::is_same<TeensyLcSPIOutputBase<3, 13, kDivider>,
+                          GenericSoftwareSPIOutput<3, 13, kDivider>>::value));
+    FL_CHECK((fl::is_same<TeensyLcSPIOutputBase<0, 20, kDivider>,
+                          GenericSoftwareSPIOutput<0, 20, kDivider>>::value));
+    FL_CHECK((fl::is_same<TeensyLcSPIOutputBase<21, 20, kDivider>,
+                          GenericSoftwareSPIOutput<21, 20, kDivider>>::value));
+    FL_CHECK((fl::is_same<TeensyLcSPIOutputBase<13, 11, kDivider>,
+                          GenericSoftwareSPIOutput<13, 11, kDivider>>::value));
+    FL_CHECK((fl::is_same<TeensyLcSPIOutputBase<11, 20, kDivider>,
+                          GenericSoftwareSPIOutput<11, 20, kDivider>>::value));
 }
 
 } // FL_TEST_FILE
