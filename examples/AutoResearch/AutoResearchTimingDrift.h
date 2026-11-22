@@ -28,6 +28,7 @@
 #pragma once
 
 #include "FastLED.h"
+#include "fl/channels/manager.h"
 #include "fl/stl/int.h"
 #include "fl/stl/singleton.h"
 #include "fl/system/instruction_counter.h"
@@ -82,6 +83,10 @@ struct DriftResult {
     uint32_t show_count;               // FastLED.show() calls inside the fade loop
     uint32_t show_min_us;
     uint32_t show_max_us;
+    uint32_t show_draining_count;
+    uint32_t show_ready_count;
+    uint32_t show_cycle_count;         // real cycles, in counter-off runs only
+    uint64_t show_cycle_total;
     uint64_t show_total_us;
     uint32_t show_instr_count;         // show() calls with an instruction count (#5376)
     uint64_t show_instr_total;         // retired instructions across those calls
@@ -93,7 +98,7 @@ struct DriftResult {
 
 /// The reporter's fade loop over whichever strip the caller registered,
 /// timing every show(). Restores the unthrottled refresh rate on exit.
-inline void measureShows(DriftResult& r, CRGB* leds, int num_leds, int iterations) {
+inline void measureShows(DriftResult& r, CRGB* leds, int num_leds, int iterations, bool countInstructions) {
 #if defined(ARDUINO_ARCH_ESP32)
     r.cpu_mhz = getCpuFrequencyMhz();
 #endif
@@ -114,18 +119,28 @@ inline void measureShows(DriftResult& r, CRGB* leds, int num_leds, int iteration
     int completed = 0;
 
     r.show_min_us = 0xFFFFFFFFu;
-
     auto timedShow = [&]() {
         fl::InstructionCounter counter;
-        counter.start();
+        if (countInstructions) counter.start();
+        // The C3/C6/H2 share the instruction and cycle counter. Read real
+        // cycles only when start() has not repurposed it for instructions.
+        const uint32_t cycleStart = countInstructions ? 0 : fl::InstructionCounter::readCycles();
         const uint32_t t0 = micros();
         FastLED.show();
         const uint32_t dt = micros() - t0;
-        const uint32_t instructions = counter.stop(dt * r.cpu_mhz);
-        if (fl::InstructionCounter::kSupported) {
+        const uint32_t measuredCycles = countInstructions ? 0 : fl::InstructionCounter::readCycles() - cycleStart;
+        const uint32_t instructions = countInstructions ? counter.stop(dt * r.cpu_mhz) : 0;
+        if (countInstructions && fl::InstructionCounter::kSupported) {
             r.show_instr_total += instructions;
             r.show_instr_count++;
         }
+        if (!countInstructions && fl::InstructionCounter::kSupported) {
+            r.show_cycle_total += measuredCycles;
+            r.show_cycle_count++;
+        }
+        const auto state = fl::ChannelManager::instance().poll();
+        if (state == fl::IChannelDriver::DriverState::DRAINING) r.show_draining_count++;
+        if (state == fl::IChannelDriver::DriverState::READY) r.show_ready_count++;
         r.show_count++;
         r.show_total_us += dt;
         if (dt < r.show_min_us) r.show_min_us = dt;
@@ -213,7 +228,7 @@ inline void measureShows(DriftResult& r, CRGB* leds, int num_leds, int iteration
 /// @param channel the same strip through the channel API (`FastLED.add()`)
 ///                instead of the legacy `addLeds` template path (#5399).
 inline DriftResult run(int pin, int num_leds, int iterations, bool rgbw = false,
-                       bool channel = false) {
+                       bool channel = false, bool countInstructions = true) {
     DriftResult r{};
     r.pin = pin;
 
@@ -251,7 +266,7 @@ inline DriftResult run(int pin, int num_leds, int iterations, bool rgbw = false,
             return r;  // valid_pin stays false
         }
         r.valid_pin = true;
-        measureShows(r, leds, num_leds, iterations);
+        measureShows(r, leds, num_leds, iterations, countInstructions);
         FastLED.remove(ch);
         return r;
     }
@@ -259,7 +274,7 @@ inline DriftResult run(int pin, int num_leds, int iterations, bool rgbw = false,
     // The proxy destructor removes the legacy controller from the draw list.
     LegacyClocklessProxy proxy(pin, leds, num_leds, LegacyClocklessChipset::WS2812B, rgbw);
     r.valid_pin = true;
-    measureShows(r, leds, num_leds, iterations);
+    measureShows(r, leds, num_leds, iterations, countInstructions);
     return r;
 }
 

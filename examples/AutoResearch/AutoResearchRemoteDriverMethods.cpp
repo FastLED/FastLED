@@ -1039,11 +1039,12 @@ void AutoResearchRemoteControl::bindDriverMethods(fl::Remote& remote) {
     // minimal sketch (35-LED WS2812B ring, setMaxRefreshRate(800),
     // millisDelay-gated 255-step fade, delay(1000) between sequences) and
     // returns per-sequence wall time so the host can build a histogram.
-    // Args: [{pin, numLeds, iterations, rgbw, api}] (all optional;
+    // Args: [{pin, numLeds, iterations, rgbw, api, countInstructions}] (all optional;
     //        default pin=4, numLeds=35, iterations=10, api="legacy";
     //        api="channel" registers the strip with FastLED.add() instead of
     //        addLeds (#5399); iterations clamped to
-    //        autoresearch::timing_drift::kMaxIterations)
+    //        autoresearch::timing_drift::kMaxIterations). countInstructions=false
+    //        reads real cycles on supported cores without switching counter events.
     remote.bind("timingDriftTest", [](const fl::json& args) -> fl::json {
         fl::json response = fl::json::object();
 
@@ -1090,7 +1091,11 @@ void AutoResearchRemoteControl::bindDriverMethods(fl::Remote& remote) {
             return response;
         }
 
-        auto r = autoresearch::timing_drift::run(pin, num_leds, iterations, rgbw, channel);
+        bool countInstructions = true;
+        if (config.contains("countInstructions") && config["countInstructions"].is_bool()) {
+            countInstructions = config["countInstructions"].as_bool().value();
+        }
+        auto r = autoresearch::timing_drift::run(pin, num_leds, iterations, rgbw, channel, countInstructions);
 
         response.set("success", r.valid_pin);
         response.set("api", api);
@@ -1108,6 +1113,10 @@ void AutoResearchRemoteControl::bindDriverMethods(fl::Remote& remote) {
         response.set("show_count", static_cast<int64_t>(r.show_count));
         response.set("show_min_us", static_cast<int64_t>(r.show_min_us));
         response.set("show_max_us", static_cast<int64_t>(r.show_max_us));
+        response.set("show_draining_count", static_cast<int64_t>(r.show_draining_count));
+        response.set("show_ready_count", static_cast<int64_t>(r.show_ready_count));
+        response.set("show_cycle_count", static_cast<int64_t>(r.show_cycle_count));
+        response.set("show_cycle_total", static_cast<int64_t>(r.show_cycle_total));
         response.set("show_total_us", static_cast<int64_t>(r.show_total_us));
         if (r.show_instr_count > 0) {
             response.set("show_instr_count", static_cast<int64_t>(r.show_instr_count));

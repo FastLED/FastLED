@@ -7,6 +7,7 @@
 // before reporting, and stop() must be harmless without one.
 FL_TEST_CASE("InstructionCounter - host has the null counter") {
     FL_CHECK_FALSE(fl::InstructionCounter::kSupported);
+    FL_CHECK_EQ(fl::InstructionCounter::readCycles(), 0u);
     fl::InstructionCounter counter;
     counter.start();
     FL_CHECK_EQ(counter.stop(1000u), 0u);
