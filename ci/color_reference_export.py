@@ -32,7 +32,13 @@ from typeguard import typechecked
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 GOLDEN_FILE = PROJECT_ROOT / "ci" / "golden" / "color-reference-v1.json"
 HEADER_FILE = (
-    PROJECT_ROOT / "tests" / "unit" / "fl" / "gfx" / "test_utils" / "color_reference_vectors.hpp"
+    PROJECT_ROOT
+    / "tests"
+    / "unit"
+    / "fl"
+    / "gfx"
+    / "test_utils"
+    / "color_reference_vectors.hpp"
 )
 
 # The device this table covers.

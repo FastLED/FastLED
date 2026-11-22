@@ -56,16 +56,24 @@ _DEFAULT_TEST_PROCESS_TIMEOUT_SECONDS = 600
 _MACOS_TEST_PROCESS_TIMEOUT_SECONDS = 90
 
 
-def _test_process_timeout_seconds() -> int:
+_WATCHDOG_FLUSH_MARGIN_SECONDS = 70
+
+
+def _test_process_timeout_seconds(watchdog_seconds: Optional[int] = None) -> int:
     """Return the outer runner timeout for the current platform.
 
     Apple runners have their own 20-second watchdog.  Keep a wider Python
     deadline so normal watchdog diagnostics can flush, while still bounding a
     pre-main sanitizer/dyld stall that cannot arm the in-process watchdog.
+    A widened in-process watchdog (the integration tier) widens this too.
     """
     if sys.platform == "darwin":
-        return _MACOS_TEST_PROCESS_TIMEOUT_SECONDS
-    return _DEFAULT_TEST_PROCESS_TIMEOUT_SECONDS
+        outer = _MACOS_TEST_PROCESS_TIMEOUT_SECONDS
+    else:
+        outer = _DEFAULT_TEST_PROCESS_TIMEOUT_SECONDS
+    if watchdog_seconds is not None:
+        outer = max(outer, watchdog_seconds + _WATCHDOG_FLUSH_MARGIN_SECONDS)
+    return outer
 
 
 def _wait_for_test_process(proc: RunningProcess) -> TestResult:
@@ -387,7 +395,7 @@ def run_streaming_path(ctx: StreamingContext) -> MesonTestResult:
             proc = RunningProcess(
                 cmd,
                 cwd=ctx.source_dir,
-                timeout=_test_process_timeout_seconds(),
+                timeout=_test_process_timeout_seconds(ctx.test_timeout),
                 auto_run=True,
                 check=False,
                 env=env,

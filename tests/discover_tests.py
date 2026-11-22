@@ -94,13 +94,43 @@ def discover_test_files(
             # Skip hidden directories and .dir directories
             rel = f.relative_to(tests_dir)
             parent_parts = rel.parts[:-1]  # directory components only
-            if any(part.startswith(".") or part.endswith(".dir") for part in parent_parts):
+            if any(
+                part.startswith(".") or part.endswith(".dir") for part in parent_parts
+            ):
                 continue
 
             test_files.append(rel.as_posix())
 
     # Sort and deduplicate
     return sorted(set(test_files))
+
+
+# Directories under tests/ that hold doctest sources but are not tiers.
+# tests/profile builds its own standalone binaries.
+NON_TIER_TEST_DIRS = ("profile",)
+
+
+def find_untiered_test_sources(tests_dir: Path) -> list[str]:
+    """Return doctest sources that sit outside every tier directory.
+
+    Discovery only scans tests/<tier>/, so a test case left at the pre-tier
+    layout (e.g. tests/fl/x.cpp after a rebase) would never build or run.
+    Callers must treat a non-empty result as an error.
+    """
+    stray: list[str] = []
+    for f in chain.from_iterable(tests_dir.rglob(g) for g in TEST_SOURCE_GLOBS):
+        rel = f.relative_to(tests_dir)
+        top = rel.parts[0] if len(rel.parts) > 1 else ""
+        if top in TEST_TIERS or top in NON_TIER_TEST_DIRS:
+            continue
+        if any(
+            part.startswith(".") or part.endswith(".dir") for part in rel.parts[:-1]
+        ):
+            continue
+        text = f.read_text(encoding="utf-8", errors="replace")
+        if "FL_TEST_CASE(" in text or "TEST_CASE(" in text:
+            stray.append(rel.as_posix())
+    return sorted(stray)
 
 
 def main() -> None:

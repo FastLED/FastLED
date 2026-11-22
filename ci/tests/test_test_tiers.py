@@ -96,3 +96,21 @@ def test_strip_test_tier() -> None:
     assert strip_test_tier("tests/integration/misc/x.cpp") == "misc/x.cpp"
     assert strip_test_tier("tests/fl/async") == "fl/async"
     assert strip_test_tier("tests/profile/x.cpp") == "profile/x.cpp"
+
+
+def test_test_case_outside_a_tier_fails_configuration(tmp_path: Path) -> None:
+    (tmp_path / "unit").mkdir()
+    (tmp_path / "unit" / "kept.cpp").write_text('FL_TEST_CASE("kept") {}\n')
+    (tmp_path / "fl").mkdir()
+    (tmp_path / "fl" / "stray.cpp").write_text('FL_TEST_CASE("stray") {}\n')
+    result = RunningProcess.run(
+        [sys.executable, str(TESTS / "organize_tests.py"), str(tmp_path)],
+        stdout=PIPE,
+        stderr=PIPE,
+        encoding="utf-8",
+        errors="replace",
+        check=False,
+        timeout=120,
+    )
+    assert result.returncode != 0
+    assert "tests/fl/stray.cpp" in result.stderr

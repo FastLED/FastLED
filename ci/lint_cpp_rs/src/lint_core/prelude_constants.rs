@@ -252,6 +252,8 @@ const PLATFORM_INCLUDE_LOCATIONS: &[&str] = &[
     "/src/sensors/",
     "/tests/unit/fl/",
     "/tests/unit/fx/",
+    "/tests/integration/fl/",
+    "/tests/integration/fx/",
     "/examples/",
 ];
 

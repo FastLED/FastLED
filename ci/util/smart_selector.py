@@ -274,9 +274,7 @@ def _score_match(query: str, match: TestMatch) -> tuple[float, int]:
     # This allows queries like "fl_stl_string" to match even though
     # match.name is just "string"
     if match.path.startswith("tests/") and match.path.endswith(".cpp"):
-        target_name = (
-            strip_test_tier(match.path).removesuffix(".cpp").replace("/", "_")
-        )
+        target_name = strip_test_tier(match.path).removesuffix(".cpp").replace("/", "_")
         target_score, target_len = _fuzzy_score(query, target_name)
         name_score, name_len = _fuzzy_score(query, match.name)
         if target_score > name_score:

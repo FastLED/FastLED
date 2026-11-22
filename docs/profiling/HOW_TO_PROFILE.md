@@ -20,7 +20,7 @@ This guide documents the profiling workflow used for optimizing Chasing Spirals 
 ## Quick Start
 
 ```bash
-# 1. Create a profiler in tests/fx/profile_myfeature.cpp
+# 1. Create a profiler in tests/profile/profile_myfeature.cpp
 # 2. Compile with profile mode
 uv run test.py profile_myfeature --cpp --build-mode profile --build
 
@@ -39,7 +39,7 @@ uv run test.py myfeature --cpp
 
 ### 1. Create a Standalone Profiler
 
-Create `tests/fx/profile_myfeature.cpp`:
+Create `tests/profile/profile_myfeature.cpp`:
 
 ```cpp
 #include "FastLED.h"
@@ -295,7 +295,7 @@ taskset -c 0 nice -n -20 ./profile_myfeature
 
 ### 1. Create Accuracy Tests
 
-Add to `tests/fx/myfeature.cpp`:
+Add to `tests/unit/fl/fx/myfeature.cpp`:
 
 ```cpp
 #include "test.h"
@@ -547,7 +547,7 @@ Complete workflow from the real optimization that achieved 7.9% speedup:
 
 ### Step 1: Create Profiler
 
-`tests/fx/profile_chasing_spirals.cpp`:
+`tests/profile/profile_chasing_spirals.cpp`:
 - Float baseline (original Animartrix)
 - Q31 original
 - Q31 Batch4 (4-pixel loop unrolling)

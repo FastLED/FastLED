@@ -164,11 +164,12 @@ def run_meson_test(
         cmd.append(test_name)
 
     cmd.extend(meson_suite_args(test_name, exclude_suites, include_suites))
-    if exclude_suites or include_suites:
-        print_banner("Test", "▶️", verbose=verbose)
+    print_banner("Test", "▶️", verbose=verbose)
+    if test_name:
         print(f"Running: {test_name}")
+    elif include_suites:
+        print(f"Running suites: {', '.join(include_suites)}")
     else:
-        print_banner("Test", "▶️", verbose=verbose)
         print("Running all tests...")
 
     start_time = time.time()

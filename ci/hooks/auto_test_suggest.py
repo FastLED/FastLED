@@ -89,18 +89,20 @@ def main() -> int:
     if not stem:
         return 0
 
-    # Check if corresponding test exists
-    test_path = f"tests/unit/{stem}.cpp"
-    test_full = os.path.join(str(PROJECT_ROOT), test_path)
+    # Check if corresponding test exists in any tier
+    for tier in ("unit", "integration"):
+        test_path = f"tests/{tier}/{stem}.cpp"
+        if os.path.exists(os.path.join(str(PROJECT_ROOT), test_path)):
+            break
+    else:
+        return 0
 
-    if os.path.exists(test_full):
-        # Extract test name for bash test command
-        # bash test uses the test file stem as argument
-        test_name = Path(stem).name
-        print(
-            f"AFFECTED TEST: '{test_path}' corresponds to edited '{rel_path}'. "
-            f"Run: bash test {test_name}"
-        )
+    # bash test uses the test file stem as argument
+    test_name = Path(stem).name
+    print(
+        f"AFFECTED TEST: '{test_path}' corresponds to edited '{rel_path}'. "
+        f"Run: bash test {test_name}"
+    )
 
     return 0
 

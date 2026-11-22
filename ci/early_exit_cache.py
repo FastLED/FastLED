@@ -620,9 +620,13 @@ def check_single_test_cached(test_name_raw: str, build_dir: Path) -> bool:
         narrow_dir: Path | None = test_raw_path.parent
     else:
         narrow_dir = Path("tests") / test_raw_path.parent
-    # Only use narrow scan when the directory exists and differs from tests/ root
+    # Only use narrow scan when the directory exists and differs from tests/ root.
+    # Integration sources include shared headers from tests/unit, which a
+    # narrowed scan would never see, so that tier always scans all of tests/.
     if narrow_dir is not None and (
-        not narrow_dir.exists() or narrow_dir == Path("tests")
+        not narrow_dir.exists()
+        or narrow_dir == Path("tests")
+        or narrow_dir.parts[1:2] == ("integration",)
     ):
         narrow_dir = None
 

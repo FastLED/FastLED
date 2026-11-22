@@ -482,10 +482,9 @@ endforeach
 alias_target('all_tests', all_test_dlls + all_test_runners)
 
 # `bash test --integration` compiles this alias, then runs the integration
-# suite. runner_exe is included so a fresh build directory can run them.
-if integration_test_targets.length() > 0
-  alias_target('integration_tests', integration_test_targets + [runner_exe])
-endif
+# suite. runner_exe is included so a fresh build directory can run them, and
+# keeps the alias valid (and the run a no-op) when the tier is empty.
+alias_target('integration_tests', integration_test_targets + [runner_exe])
 
 message('Individual test DLL build enabled: ' + test_names.length().to_string() + ' test DLLs + runners ('
   + integration_test_names.length().to_string() + ' integration tier, built on request)')

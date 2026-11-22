@@ -117,8 +117,9 @@ jobs:
           done
 
       # The fixed-point SIMD kernels must not be slower than the scalar ones
-      # they replace (FastLED/FastLED#4055). That comparison lives in the codec
-      # unit tests, which measure both variants in one process so the result is
+      # they replace (FastLED/FastLED#4055). That comparison is the
+      # mp3_simd_perf integration test (tests/integration/misc/), which
+      # measures both variants in one process so the result is
       # same-host by construction and needs no baseline -- but it only asserts
       # in an optimised build, because -O0 punishes intrinsics far more than
       # scalar integer code and would measure the compiler instead of the
@@ -142,6 +143,12 @@ jobs:
       # stalled FastLED#4183; with this, every run says which it was.
       - name: Verify the fixed-point SIMD is not slower than scalar
         run: bash test mp3_simd_perf --cpp --build-mode release --verbose
+
+      # The SIMD-vs-scalar bit-exactness cases stay in the fl_codec unit suite,
+      # which the default (-O0) runs cover. Run them optimised too: a kernel
+      # bug that only the optimiser exposes would pass at -O0.
+      - name: Verify the fixed-point SIMD is bit-exact in an optimised build
+        run: bash test fl_codec --cpp --build-mode release
 
       # Measure before gating, so a red gate still produces the numbers needed
       # to diagnose it -- and so that adding a backend can bootstrap its

@@ -277,7 +277,9 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
     # --integration is a C++-only run of the integration tier.
     if test_args.integration:
         if test_args.examples is not None or test_args.py or test_args.full:
-            parser.error("--integration cannot be combined with --examples, --py or --full")
+            parser.error(
+                "--integration cannot be combined with --examples, --py or --full"
+            )
         test_args.cpp = True
         test_args.unit = True
 

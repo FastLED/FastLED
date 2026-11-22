@@ -14,7 +14,11 @@ does not (see test_helpers.extract_test_name).
 import sys
 from pathlib import Path
 
-from discover_tests import discover_test_files, split_tier
+from discover_tests import (
+    discover_test_files,
+    find_untiered_test_sources,
+    split_tier,
+)
 from test_config import EXCLUDED_TEST_DIRS, EXCLUDED_TEST_FILES
 from test_helpers import categorize_test, extract_test_name
 
@@ -29,6 +33,16 @@ def main() -> None:
 
     if not tests_dir.exists():
         print(f"Error: Tests directory not found: {tests_dir}", file=sys.stderr)
+        sys.exit(1)
+
+    stray = find_untiered_test_sources(tests_dir)
+    if stray:
+        for path in stray:
+            print(
+                f"Error: tests/{path} defines test cases outside a tier; "
+                f"move it under tests/unit/ (or tests/integration/)",
+                file=sys.stderr,
+            )
         sys.exit(1)
 
     # Discover all test files
