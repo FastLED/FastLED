@@ -21,9 +21,9 @@
 //                            single-instruction encoding limit of plain
 //                            M0 doesn't bite us.
 //   FL_IS_ARM_LPC_15               — supported via shared LPC8xx fastpin + the
-//                            same C++ clockless path. UM11074 confirms
-//                            the same modern GPIO controller at
-//                            0xA0000000. M3 has DWT cycle counters and
+//                            same C++ clockless path. Same modern GPIO
+//                            register offsets, at 0x1C000000 and without
+//                            DIRSET/DIRCLR (UM10736). M3 has DWT cycle counters and
 //                            full Thumb-2 encoding (no offset limit), but
 //                            the unified C++ path keeps the driver
 //                            surface consistent.

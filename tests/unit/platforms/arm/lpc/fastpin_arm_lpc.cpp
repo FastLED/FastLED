@@ -20,7 +20,7 @@
 #endif
 
 struct FakeLpcGpio {
-    volatile fl::u32 PIN[2], SET[2], CLR[2], NOT[2], DIRSET[2], DIRCLR[2];
+    volatile fl::u32 DIR[2], PIN[2], SET[2], CLR[2], NOT[2], DIRSET[2], DIRCLR[2];
 };
 static FakeLpcGpio gFakeGpio;
 #undef GPIO
@@ -162,6 +162,38 @@ FL_TEST_CASE("LPC production accessors use the documented GPIO registers") {
     FL_CHECK(P::cport() == &gFakeGpio.CLR[0]);
     FL_CHECK_EQ(P::mask(), 1U << 3);
     FL_CHECK_EQ(FastPin<31>::mask(), 1U << 31);
+}
+
+FL_TEST_CASE("LPC845 direction writes stay on DIRSET and DIRCLR") {
+    // LPC8xx has the DIRSET/DIRCLR aliases (UM11029); LPC11Uxx/LPC15xx do not.
+    FL_STATIC_ASSERT((fl::is_same<lpc_detail::LpcGpioDir, lpc_detail::LpcGpioDirSetClr>::value),
+                     "LPC845 must keep the single-store DIRSET/DIRCLR direction writes");
+    gFakeGpio.DIR[0] = kOther;
+    gFakeGpio.DIRSET[0] = 0;
+    gFakeGpio.DIRCLR[0] = 0;
+    FastPin<3>::setOutput();
+    FL_CHECK_EQ(gFakeGpio.DIRSET[0], 1U << 3);
+    FL_CHECK_EQ(gFakeGpio.DIRCLR[0], 0U);
+    FastPin<3>::setInput();
+    FL_CHECK_EQ(gFakeGpio.DIRCLR[0], 1U << 3);
+    FL_CHECK_EQ(gFakeGpio.DIR[0], kOther); // Never read-modify-written.
+}
+
+FL_TEST_CASE("LPC11Uxx/LPC15xx direction backend read-modify-writes DIR") {
+    // The LPC11Uxx and LPC15xx GPIO blocks have DIR but no DIRSET/DIRCLR, so
+    // those builds select this backend. It runs here on the same fake DIR word.
+    using Rmw = lpc_detail::LpcGpioDirReadModifyWrite;
+    gFakeGpio.DIR[0] = kOther;
+    gFakeGpio.DIRSET[0] = 0;
+    gFakeGpio.DIRCLR[0] = 0;
+    Rmw::setOutput(1U << 3);
+    FL_CHECK_EQ(gFakeGpio.DIR[0], kOther | (1U << 3));
+    Rmw::setInput(1U << 3);
+    FL_CHECK_EQ(gFakeGpio.DIR[0], kOther);
+    Rmw::setInput(kOther);
+    FL_CHECK_EQ(gFakeGpio.DIR[0], 0U);
+    FL_CHECK_EQ(gFakeGpio.DIRSET[0], 0U); // Never touches the LPC8xx-only aliases.
+    FL_CHECK_EQ(gFakeGpio.DIRCLR[0], 0U);
 }
 
 FL_TEST_CASE("LPC writeBytes streams two PIN stores per bit") {

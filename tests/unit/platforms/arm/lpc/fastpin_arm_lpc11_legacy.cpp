@@ -22,7 +22,35 @@
 static fl::u32 gFakeGpioMemory[0x10000]; // Four 0x10000-byte port blocks.
 #define FL_LPC11_LEGACY_GPIO_BASE reinterpret_cast<fl::uptr>(gFakeGpioMemory) // ok reinterpret cast
 
+// Same layout as NXP's LPC11xx.h LPC_GPIO_TypeDef but a distinct type, as when
+// the vendor header is on the include path and defines LPC_GPIO0..3 itself.
+struct LPC_GPIO_TypeDef {
+    volatile fl::u32 MASKED_ACCESS[4095];
+    volatile fl::u32 DATA;
+    fl::u32 RESERVED1[4096];
+    volatile fl::u32 DIR;
+};
+#define LPC_GPIO0 ((LPC_GPIO_TypeDef*)(FL_LPC11_LEGACY_GPIO_BASE + 0x00000u)) // ok reinterpret cast
+#define LPC_GPIO1 ((LPC_GPIO_TypeDef*)(FL_LPC11_LEGACY_GPIO_BASE + 0x10000u)) // ok reinterpret cast
+#define LPC_GPIO2 ((LPC_GPIO_TypeDef*)(FL_LPC11_LEGACY_GPIO_BASE + 0x20000u)) // ok reinterpret cast
+#define LPC_GPIO3 ((LPC_GPIO_TypeDef*)(FL_LPC11_LEGACY_GPIO_BASE + 0x30000u)) // ok reinterpret cast
+
 #include "platforms/arm/lpc/fastpin_arm_lpc11_legacy.h"
+
+// CPU defaults for the legacy parts. The host build already defines F_CPU, so
+// drop it to see the LPC default.
+#undef F_CPU
+#include "platforms/arm/lpc/lpc_cpu_defaults.h"
+#ifdef F_CPU
+static constexpr unsigned long kLpc11LegacyFcpu = F_CPU;
+#else
+static constexpr unsigned long kLpc11LegacyFcpu = 0;
+#endif
+#ifdef FL_IS_ARM_M0
+static constexpr bool kLpc11LegacyIsM0 = true;
+#else
+static constexpr bool kLpc11LegacyIsM0 = false;
+#endif
 
 #include "fastspi_types.h"
 #include "fl/stl/static_assert.h"
@@ -159,6 +187,31 @@ FL_TEST_CASE("LPC11 production accessors use the UM10398 layout") {
     FL_CHECK_EQ(*fl::bit_cast<volatile u32*>(base + 0x8000), 1U << 3);
     P0::setInput();
     FL_CHECK_EQ(*fl::bit_cast<volatile u32*>(base + 0x8000), 0U);
+}
+
+FL_TEST_CASE("LPC11 toggle flips only its masked-access slot") {
+    using P = FastPin<3>;
+    *P::port() = kOther;
+    *P::sport() = 0;
+    P::toggle();
+    FL_CHECK_EQ(*P::sport(), 1U << 3);
+    FL_CHECK_EQ(*P::port(), kOther); // Full-port DATA is never read-modify-written.
+    P::toggle();
+    FL_CHECK_EQ(*P::sport(), 0U);
+    FL_CHECK_EQ(*P::port(), kOther);
+}
+
+FL_TEST_CASE("LPC11 pin table stops at PIO3_5") {
+    // UM10398 lists PIO3_0..PIO3_5 for port 3; there is no PIO3_6..PIO3_11.
+    FL_CHECK_EQ(MAX_PIN, 41);
+    FL_CHECK((fl::is_base_of<ValidPinBase, FastPin<41>>::value));
+    FL_CHECK_FALSE((fl::is_base_of<ValidPinBase, FastPin<42>>::value));
+    FL_CHECK_FALSE((fl::is_base_of<ValidPinBase, FastPin<47>>::value));
+}
+
+FL_TEST_CASE("LPC11 legacy parts get a Cortex-M0 F_CPU default") {
+    FL_CHECK_EQ(kLpc11LegacyFcpu, 12000000UL); // 12 MHz IRC at boot.
+    FL_CHECK(kLpc11LegacyIsM0);
 }
 
 FL_TEST_CASE("LPC11 same-port bulk writes use masked access, not snapshots") { checkBulk<SamePort>(); }
