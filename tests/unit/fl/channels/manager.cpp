@@ -16,9 +16,13 @@
 /// lost (mapped to BUSY), onEndFrame() blocks for the full transmission
 /// duration, starving WebSockets and other tasks.
 
+#include "fl/channels/channel.h"
+#include "fl/channels/config.h"
 #include "fl/channels/driver.h"
 #include "fl/channels/data.h"
 #include "fl/channels/manager.h"
+#include "fl/chipsets/chipset_timing_config.h"
+#include "fl/stl/scope_exit.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/string.h"
 #include "test.h"
@@ -200,6 +204,145 @@ FL_TEST_CASE("isDriverEnabled(driver) matches by instance, falls back to name (#
     // An unregistered instance with a registered name uses that name's state.
     StatefulMockDriver lookalike("BY_PTR_A");
     FL_CHECK_FALSE(mgr.isDriverEnabled(lookalike));
+}
+
+/// Driver whose completion is asynchronous: show() starts a transfer that
+/// reports BUSY, then DRAINING, for a set number of polls before READY.
+class CountingAsyncDriver : public IChannelDriver {
+public:
+    explicit CountingAsyncDriver(const char* name) : mName(name) {}
+
+    int pollCount = 0;
+    int enqueueCount = 0;
+    int busyPolls = 0;      // polls left reporting BUSY
+    int drainingPolls = 0;  // polls left reporting DRAINING after BUSY
+    int showBusyPolls = 0;      // loaded into busyPolls by show()
+    int showDrainingPolls = 0;  // loaded into drainingPolls by show()
+
+    bool canHandle(const ChannelDataPtr&) const override { return true; }
+    void enqueue(ChannelDataPtr) override { enqueueCount++; }
+    void show() override {
+        busyPolls = showBusyPolls;
+        drainingPolls = showDrainingPolls;
+    }
+    DriverState poll() override {
+        pollCount++;
+        if (busyPolls > 0) {
+            --busyPolls;
+            return DriverState(DriverState::BUSY);
+        }
+        if (drainingPolls > 0) {
+            --drainingPolls;
+            return DriverState(DriverState::DRAINING);
+        }
+        return DriverState(DriverState::READY);
+    }
+    bool idle() const { return busyPolls == 0 && drainingPolls == 0; }
+    fl::string getName() const override { return mName; }
+    Capabilities getCapabilities() const override {
+        return Capabilities(true, false);
+    }
+
+private:
+    fl::string mName;
+};
+
+FL_TEST_CASE("onBeginFrame skips the poll after onEndFrame saw every driver READY #5381") {
+    ChannelManager mgr;
+    auto driver = fl::make_shared<CountingAsyncDriver>("READY_CACHE");
+    mgr.addDriver(10, driver);
+
+    mgr.onEndFrame();
+    FL_CHECK_EQ(driver->pollCount, 1);  // onEndFrame observed READY
+    mgr.onBeginFrame();
+    FL_CHECK_EQ(driver->pollCount, 1);  // no second, redundant poll
+
+    // Nothing created work since, so a repeated frame start polls neither.
+    mgr.onBeginFrame();
+    FL_CHECK_EQ(driver->pollCount, 1);
+}
+
+FL_TEST_CASE("show() leaving a driver DRAINING makes onBeginFrame poll until READY #5381") {
+    ChannelManager mgr;
+    auto driver = fl::make_shared<CountingAsyncDriver>("DRAIN_CACHE");
+    mgr.addDriver(10, driver);
+
+    mgr.onEndFrame();  // READY: caches all-ready
+    driver->showDrainingPolls = 3;
+    mgr.onEndFrame();  // show() starts a transfer; returns on DRAINING
+    FL_CHECK_EQ(driver->pollCount, 2);
+    FL_CHECK_FALSE(driver->idle());
+
+    mgr.onBeginFrame();
+    FL_CHECK(driver->idle());          // no frame starts while it drains
+    FL_CHECK_EQ(driver->pollCount, 5);  // 2 more DRAINING polls, then READY
+}
+
+FL_TEST_CASE("a BUSY driver is polled until READY even when it settles async #5381") {
+    ChannelManager mgr;
+    auto driver = fl::make_shared<CountingAsyncDriver>("BUSY_CACHE");
+    mgr.addDriver(10, driver);
+
+    driver->showBusyPolls = 2;
+    driver->showDrainingPolls = 2;
+    mgr.onEndFrame();  // BUSY, BUSY, DRAINING -> returns
+    FL_CHECK_EQ(driver->pollCount, 3);
+
+    // The transfer completes in an ISR, without the manager noticing.
+    driver->drainingPolls = 0;
+    mgr.onBeginFrame();
+    FL_CHECK_EQ(driver->pollCount, 4);  // polled once and saw READY
+
+    // Only that READY poll seeds the cache; the DRAINING one did not.
+    mgr.onBeginFrame();
+    FL_CHECK_EQ(driver->pollCount, 4);
+}
+
+FL_TEST_CASE("driver registration and removal invalidate the cached all-ready state #5381") {
+    ChannelManager mgr;
+    auto first = fl::make_shared<CountingAsyncDriver>("REG_FIRST");
+    mgr.addDriver(10, first);
+    mgr.onEndFrame();
+
+    // A newly registered driver may already be transmitting.
+    auto late = fl::make_shared<CountingAsyncDriver>("REG_LATE");
+    late->busyPolls = 2;
+    mgr.addDriver(20, late);
+    mgr.onBeginFrame();
+    FL_CHECK(late->idle());
+    FL_CHECK_EQ(late->pollCount, 3);
+
+    mgr.onEndFrame();
+    const int before = first->pollCount;
+    FL_CHECK(mgr.removeDriver(late));
+    mgr.onBeginFrame();
+    FL_CHECK_EQ(first->pollCount, before + 1);
+}
+
+FL_TEST_CASE("a channel enqueue invalidates the cached all-ready state #5381") {
+    ChannelManager& mgr = ChannelManager::instance();
+    auto driver = fl::make_shared<CountingAsyncDriver>("ENQ_CACHE");
+    mgr.addDriver(90000, driver);
+    CRGB leds[4] = {};
+    auto timing = makeTimingConfig<TIMING_WS2812_800KHZ>();
+    // The highest priority wins AUTO dispatch.
+    auto channel = Channel::create(
+        ChannelConfig(4, timing, fl::span<CRGB>(leds, 4), RGB));
+    FL_REQUIRE(channel != nullptr);
+    auto cleanup = fl::make_scope_exit([&]() {
+        channel->removeFromDrawList();
+        mgr.removeDriver(driver);
+    });
+
+    mgr.onEndFrame();
+    // Enqueue outside a frame: showLeds() would wrap it in frame events.
+    void* frame = channel->beginShowLeds(4);
+    channel->showLedsInternal(255);
+    channel->endShowLeds(frame);
+    FL_REQUIRE_EQ(driver->enqueueCount, 1);
+    const int before = driver->pollCount;
+    mgr.onBeginFrame();
+    FL_CHECK_EQ(driver->pollCount, before + 1);
 }
 
 } // namespace draining_state_test

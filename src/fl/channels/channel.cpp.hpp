@@ -1018,13 +1018,14 @@ void Channel::submitFrame(const fl::shared_ptr<IChannelDriver>& driver) FL_NO_EX
     // Reset the latch whenever the driver returns to ENABLED so a later
     // disable re-emits the diagnostic.
     fl::string driverName = driver->getName();
-    auto status = ChannelManager::instance().driverStatus(driverName);
+    auto& manager = ChannelManager::instance();
+    auto status = manager.driverStatus(driverName);
     if (status == ChannelManager::DriverStatus::STATUS_DISABLED) {
 #if FASTLED_LOG_RUNTIME_ENABLED
         if (!mDisabledDriverWarned) {
             emitDisabledDriverError(
                 mName, driverName,
-                ChannelManager::instance().exclusiveDriverName());
+                manager.exclusiveDriverName());
             mDisabledDriverWarned = true;
         }
 #endif
@@ -1048,6 +1049,7 @@ void Channel::submitFrame(const fl::shared_ptr<IChannelDriver>& driver) FL_NO_EX
 
     // Enqueue for transmission (will be sent when driver->show() is called)
     driver->enqueue(mChannelData);
+    manager.onDriverEnqueued();  // The next frame start must poll (#5381).
     // Presented, per the driver contract: an accepted enqueue is the frame.
     ++mDitherPhase;
     auto& events = ChannelEvents::instance();

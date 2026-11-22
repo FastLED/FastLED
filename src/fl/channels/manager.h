@@ -276,6 +276,10 @@ public:
     /// @note Call this between test cases or when reinitializing the LED system
     void reset() FL_NO_EXCEPT;
 
+    /// @brief Record that data was enqueued to a driver outside the manager.
+    /// @note Drops the cached all-READY state so the next frame start polls.
+    void onDriverEnqueued() FL_NO_EXCEPT { mAllReady = false; }
+
 private:
     enum class AddDriverSlowReason : u8 {
         NULL_DRIVER,
@@ -343,6 +347,11 @@ private:
 
     /// @brief Platform wait primitive owned by the manager.
     platforms::ChannelPollSignal mPollNeededSignal;
+
+    /// @brief The last poll() saw every driver READY and no work was created
+    /// since (#5381). Set only by poll(); cleared by enqueue, show() and
+    /// driver registration/removal. Lets onBeginFrame() skip a redundant poll.
+    bool mAllReady = false;
 
     // Non-copyable, non-movable
     ChannelManager(const ChannelManager&) FL_NO_EXCEPT = delete;
