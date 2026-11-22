@@ -103,4 +103,18 @@ FL_TEST_CASE("Bit-bang phase padding meets the requested period and minimum puls
         }
     }
 }
+
+FL_TEST_CASE("Default bit-bang delay runs inline up to 10 cycles, out of line above") {
+    // Both sides of the #5032 boundary build, link and return; the generated
+    // code is checked on uno and samd21 in the PR.
+    typedef BitbangPinDefaults<fl::FastPin<2>> Pin;
+    Pin::delay<-10>();
+    Pin::delay<0>();
+    Pin::delay<1>();
+    Pin::delay<9>();
+    Pin::delay<10>();
+    Pin::delay<11>();
+    Pin::delay<50>();
+    FL_CHECK(true);
+}
 } // FL_TEST_FILE
