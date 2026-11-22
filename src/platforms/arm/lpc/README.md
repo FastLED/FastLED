@@ -3,7 +3,7 @@
 [![Build LPC845](https://github.com/FastLED/fbuild/actions/workflows/build-lpc845.yml/badge.svg)](https://github.com/FastLED/fbuild/actions/workflows/build-lpc845.yml)
 [![Build LPC804](https://github.com/FastLED/fbuild/actions/workflows/build-lpc804.yml/badge.svg)](https://github.com/FastLED/fbuild/actions/workflows/build-lpc804.yml)
 
-> **LPC11Uxx** and **LPC15xx** compile against the same `clockless_arm_lpc.h` / `fastpin_arm_lpc.h` driver headers as LPC845/LPC804 (sharing the modern 0xA0000000 GPIO controller layout). Dedicated CI workflows for those families are tracked under FastLED/fbuild [#456](https://github.com/FastLED/fbuild/issues/456); until then their build status mirrors LPC845's.
+> **LPC11Uxx** and **LPC15xx** compile against the same `clockless_arm_lpc.h` / `fastpin_arm_lpc.h` driver headers as LPC845/LPC804 (sharing the modern GPIO register offsets; the block sits at 0x50000000 on LPC11Uxx and 0x1C000000 on LPC15xx, and neither has DIRSET/DIRCLR). Dedicated CI workflows for those families are tracked under FastLED/fbuild [#456](https://github.com/FastLED/fbuild/issues/456); until then their build status mirrors LPC845's.
 
 NXP LPC microcontroller family support. Initial port landed in #2837 ([meta #2836](https://github.com/FastLED/FastLED/issues/2836)); the second-batch roadmap meta [#2845](https://github.com/FastLED/FastLED/issues/2845) — Stages 3 + 4 — has been closed with the bulk of Stage 4 shipped in #2872 + #2876; the remaining work is split across per-repo follow-ups (see the implementation map below).
 
@@ -120,7 +120,7 @@ generate.
 
 | # | Location | Peripheral(s) | Replace with |
 |---|----------|---------------|--------------|
-| ⏳ 6 | `FL_LPC_GPIO_*_OFFSET` constants + `lpc_gpio_*()` fallback helpers, `fastpin_arm_lpc.h:55-86` | Modern LPC GPIO @ 0xA0000000 (LPC8xx / LPC11Uxx / LPC15xx) | File already prefers vendor `LPC_GPIO` when on the include path — once CMSIS is required, delete the `#else` fallback path |
+| ⏳ 6 | `FL_LPC_GPIO_*_OFFSET` constants + `lpc_gpio_*()` fallback helpers, `fastpin_arm_lpc.h:55-86` | Modern LPC GPIO @ 0xA0000000 (LPC8xx), 0x50000000 (LPC11Uxx), 0x1C000000 (LPC15xx) | File already prefers vendor `LPC_GPIO` / `GPIO` / `LPC_GPIO_PORT` when on the include path — once CMSIS is required, delete the `#else` fallback path |
 | ✅ 7 | `kPluBase`, `kSysconBase`, `kOff*` offsets + `reg32(base, off)` helper, `clockless_arm_lpc_plu.h:82-180` | LPC804 PLU (UM11065 §12) + SYSCON | `LPC_PLU_Type`, `LPC_SYSCON_Type` from `LPC804.h` |
 | ⏳ 8 | `kSctBase`, `kDmaBase`, `kSwmBase`, `kSysconBase`, dozens of `kOff*` constants + `reg(base, off)` helper, `rx_sct_capture.cpp.hpp:80-220` | LPC845 SCT + DMA + SWM + SYSCON | `LPC_SCT_Type`, `LPC_DMA_Type`, `LPC_SWM_Type`, `LPC_SYSCON_Type` from `LPC845.h` |
 
