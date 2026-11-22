@@ -126,6 +126,17 @@ FL_TEST_CASE("fl::Watchdog — Tier 2 crash report API surface") {
     FL_CHECK_FALSE(r.valid);
 }
 
+// Waits until the stub worker thread has recorded at least `target` crashes.
+// A fixed sleep flakes on a loaded host, where the worker may not be scheduled
+// for hundreds of milliseconds; polling returns as soon as the crash lands and
+// gives up after 5 s so a genuine regression still fails.
+static bool waitForCrashCount(Watchdog& dog, fl::u16 target) {
+    for (int i = 0; i < 500 && dog.consecutiveCrashCount() < target; ++i) {
+        fl::this_thread::sleep_for(fl::chrono::milliseconds(10));  // ok sleep for
+    }
+    return dog.consecutiveCrashCount() >= target;
+}
+
 FL_TEST_CASE("fl::Watchdog — timeout fires callback and increments crash counter") {
     Watchdog& dog = Watchdog::instance();
     dog.markCleanShutdown();
@@ -140,9 +151,9 @@ FL_TEST_CASE("fl::Watchdog — timeout fires callback and increments crash count
 
     dog.begin(50);
 
-    // Wait long enough for the stub timer thread (10 ms tick) to detect
-    // expiry + run the callback + bump the counter.
-    fl::this_thread::sleep_for(fl::chrono::milliseconds(300));  // ok sleep for
+    // Wait for the stub timer thread (10 ms tick) to detect expiry, run the
+    // callback and bump the counter.
+    FL_CHECK(waitForCrashCount(dog, 1));
 
     FL_CHECK(fired.load());
     FL_CHECK(dog.consecutiveCrashCount() >= 1);
@@ -199,7 +210,7 @@ FL_TEST_CASE("fl::Watchdog — isInSafeMode trips at threshold") {
     for (int i = 0; i < 2; ++i) {
         dog.onTimeout([](void*) {}, nullptr);
         dog.begin(30);
-        fl::this_thread::sleep_for(fl::chrono::milliseconds(200));  // ok sleep for
+        FL_CHECK(waitForCrashCount(dog, static_cast<fl::u16>(i + 1)));
     }
 
     FL_CHECK(dog.consecutiveCrashCount() >= 2);
@@ -239,7 +250,7 @@ FL_TEST_CASE("fl::Watchdog - a threshold of zero never escapes, however many cra
     for (int i = 0; i < 2; ++i) {
         dog.onTimeout([](void*) {}, nullptr);
         dog.begin(30);
-        fl::this_thread::sleep_for(fl::chrono::milliseconds(200));  // ok sleep for
+        FL_CHECK(waitForCrashCount(dog, static_cast<fl::u16>(i + 1)));
     }
     dog.disable();
 
@@ -261,7 +272,7 @@ FL_TEST_CASE("fl::Watchdog - escape trips once consecutive crashes reach the thr
     for (int i = 0; i < 2; ++i) {
         dog.onTimeout([](void*) {}, nullptr);
         dog.begin(30);
-        fl::this_thread::sleep_for(fl::chrono::milliseconds(200));  // ok sleep for
+        FL_CHECK(waitForCrashCount(dog, static_cast<fl::u16>(i + 1)));
     }
     dog.disable();
 
@@ -285,7 +296,7 @@ FL_TEST_CASE("fl::Watchdog - escape preserves the crash count when unsupported")
 
     dog.onTimeout([](void*) {}, nullptr);
     dog.begin(30);
-    fl::this_thread::sleep_for(fl::chrono::milliseconds(200));  // ok sleep for
+    FL_CHECK(waitForCrashCount(dog, 1));
     dog.disable();
 
     const fl::u16 before = dog.consecutiveCrashCount();
