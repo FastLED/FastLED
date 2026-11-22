@@ -7,6 +7,7 @@ a new enough prooft is on PATH and then replaces itself with it.
 """
 
 import os
+import platform
 import re
 import shutil
 import sys
@@ -45,7 +46,25 @@ def version_problem(version_text: str) -> str | None:
     return None
 
 
+def host_problem(system: str, machine: str, libc: str) -> str | None:
+    """Why this host may not stamp the linux-x64 gates, or None when it may.
+
+    prooft stamps every gate of a lane without looking at the host, so a run on
+    macOS or Windows would record a false `*/linux-x64/*` proof.
+    """
+    if (system, machine, libc) == ("Linux", "x86_64", "glibc"):
+        return None
+    return (
+        "the ci-attestations.yml gates are linux-x64; "
+        f"this host is {system}/{machine}/{libc or 'no glibc'}"
+    )
+
+
 def main(argv: list[str]) -> int:
+    host = host_problem(platform.system(), platform.machine(), platform.libc_ver()[0])
+    if host is not None:
+        print(f"./push: {host}", file=sys.stderr)
+        return 2
     prooft = shutil.which("prooft")
     if prooft is None:
         print(f"./push: prooft is not on PATH; {INSTALL_HINT}", file=sys.stderr)

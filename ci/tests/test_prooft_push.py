@@ -1,6 +1,6 @@
 """The ./push delegate refuses a prooft older than 0.3.2, the first runner that pushes the attested SHA."""
 
-from ci.prooft_push import parse_version, version_problem
+from ci.prooft_push import host_problem, parse_version, version_problem
 
 
 def test_parse_version_reads_prooft_output() -> None:
@@ -18,3 +18,10 @@ def test_version_problem_rejects_older_or_unreadable() -> None:
     too_old = version_problem("prooft 0.3.1")
     assert too_old is not None and ">= 0.3.2" in too_old
     assert version_problem("garbage") is not None
+
+
+def test_host_problem_allows_only_linux_x64_glibc() -> None:
+    assert host_problem("Linux", "x86_64", "glibc") is None
+    assert host_problem("Darwin", "arm64", "") is not None
+    assert host_problem("Windows", "AMD64", "") is not None
+    assert host_problem("Linux", "aarch64", "glibc") is not None
