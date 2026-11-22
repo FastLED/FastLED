@@ -465,4 +465,5 @@
 # instructions (489 -> 181 us mean, 35 LEDs); legacy RGB 12926 -> 12578.
 # Local fresh build: image_flash 319439 B. Neither the 320503 B flash ceiling
 # nor the 40016 B RAM ceiling moves.
-319439
+# Hosted CI: 319447 B (+8 B versus the local 319439 B build).
+319447
