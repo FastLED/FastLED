@@ -413,8 +413,12 @@ public:
     /// Another peripheral (or pinMode()) can take the pin of an idle channel.
     /// Comparing snapshots detects that without knowing the channel's signal.
     ///
-    /// Maps to ESP-IDF: gpio_get_io_config() (IDF 5.5+)
+    /// Reads the routing fields exposed by ESP-IDF gpio_get_io_config() (5.5+).
     virtual u32 getPinRouting(int pin) FL_NO_EXCEPT = 0;
+
+    /// Cheap hardware-token comparison before a full routing query (#5383).
+    /// Must observe external SDK/pinMode changes too, not just driver events.
+    virtual bool isPinRoutingCurrent(int pin, u32 routing) FL_NO_EXCEPT;
 
     /// @brief Route @p pin back to this TX channel
     /// @return true on success, false on failure or when unsupported

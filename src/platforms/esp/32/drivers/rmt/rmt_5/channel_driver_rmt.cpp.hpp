@@ -38,6 +38,7 @@
 #include "fl/system/pin.h"
 #include "fl/log/log.h"
 #include "fl/stl/algorithm.h"
+#include "fl/stl/array.h"
 #include "fl/stl/bit_cast.h"
 #include "fl/stl/assert.h"
 #include "fl/stl/optional.h"
@@ -75,6 +76,12 @@
 #endif
 
 namespace fl {
+
+namespace detail {
+bool IRMT5Peripheral::isPinRoutingCurrent(int pin, u32 routing) FL_NO_EXCEPT {
+    return getPinRouting(pin) == routing;
+}
+} // namespace detail
 
 // Import types from detail namespace
 using detail::IRMT5Peripheral;
@@ -600,6 +607,8 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
     /// @return Pointer to channel state, or nullptr if no HW available
     ChannelState *acquireChannel(int pin, const ChipsetTiming &timing,
                                  fl::size dataSize = 0) FL_NO_EXCEPT;
+    FL_NO_INLINE ChannelState *acquireChannelSlow(int pin, const ChipsetTiming &timing,
+                                                 fl::size dataSize) FL_NO_EXCEPT;
 
     /// @brief True when an observed transmit-done flag implies the RMT ISR
     /// has finished its post-completion hand-off (#5364). On one core the
@@ -1606,6 +1615,9 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
 
     /// @brief All RMT channels (active and idle)
     fl::vector_inlined<ChannelState, 16> mChannels;
+    // One-based channel indices, never borrowed vector pointers. Stale entries
+    // after a pop/reconfiguration are rejected by size, handle and pin checks.
+    fl::array<u8, 64> mChannelForPin{};
 
     /// @brief Pending channel data waiting for show() to be called
     fl::vector_inlined<ChannelDataPtr, 16> mEnqueuedChannels;
@@ -1654,6 +1666,40 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
 //=============================================================================
 
 ChannelEngineRMTImpl::ChannelState *ChannelEngineRMTImpl::acquireChannel(
+    int pin, const ChipsetTiming &timing, fl::size dataSize) FL_NO_EXCEPT {
+    if (static_cast<u32>(pin) < mChannelForPin.size()) {
+        const u8 cached = mChannelForPin[pin];
+        if (cached && cached <= mChannels.size()) {
+            auto &ch = mChannels[cached - 1];
+            if (!ch.inUse && ch.channel && ch.pin == pin) {
+                ch.inUse = true;
+#if !FL_RMT_STATIC_ALLOCATION
+                if (ch.timing.T1 != timing.T1 ||
+                    ch.timing.T2 != timing.T2 || ch.timing.T3 != timing.T3 ||
+                    ch.timing.RESET != timing.RESET) {
+                    configureChannel(&ch, pin, timing, dataSize);
+                    if (!ch.channel || !ch.encoder) {
+                        ch.inUse = false;
+                        mAllocationFailed = true;
+                        return nullptr;
+                    }
+                }
+#endif
+                if (!mPeripheral.isPinRoutingCurrent(pin, ch.pinRouting)) {
+                    reclaimPin(&ch);
+                }
+                return &ch;
+            }
+        }
+    }
+    auto *channel = acquireChannelSlow(pin, timing, dataSize);
+    if (channel && static_cast<u32>(pin) < mChannelForPin.size()) {
+        mChannelForPin[pin] = channel->memoryChannelId + 1;
+    }
+    return channel;
+}
+
+ChannelEngineRMTImpl::ChannelState *ChannelEngineRMTImpl::acquireChannelSlow(
     int pin, const ChipsetTiming &timing, fl::size dataSize) FL_NO_EXCEPT {
     // Strategy 1: Find channel with matching pin (zero-cost reuse)
     // This applies to both DMA and non-DMA channels

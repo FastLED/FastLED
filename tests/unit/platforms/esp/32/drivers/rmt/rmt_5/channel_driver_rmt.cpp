@@ -298,6 +298,60 @@ FL_TEST_CASE("RMT5 driver - same pin sequential frames") {
     }
 }
 
+FL_TEST_CASE("RMT5 driver - cached pin skips routing query until changed") {
+    resetMock();
+    auto& mock = Rmt5PeripheralMock::instance();
+    auto driver = ChannelEngineRMT::create();
+    auto showFrame = [&](int pin, int handle, size_t numLeds = 1) {
+        auto data = createChannelData(pin, numLeds);
+        const auto before = mock.getTransmissionHistory().size();
+        driver->enqueue(data);
+        driver->show();
+        FL_REQUIRE_EQ(mock.getTransmissionHistory().size(), before + 1);
+        FL_CHECK_EQ(driver->poll().state, DriverState::DRAINING);
+        mock.simulateTransmitDone(reinterpret_cast<void*>(static_cast<uintptr_t>(handle)));
+        FL_CHECK_EQ(driver->poll().state, DriverState::READY);
+    };
+
+    showFrame(18, 1);
+    const auto initialQueries = mock.getPinRoutingQueryCount();
+    FL_REQUIRE_GT(initialQueries, 0u);
+    showFrame(18, 1); // The same hardware handle must complete this frame too.
+    FL_CHECK_EQ(mock.getPinRoutingQueryCount(), initialQueries);
+    FL_CHECK_EQ(mock.getChannelCount(), 1u);
+    FL_CHECK_EQ(mock.getPinRebindCount(), 0u);
+
+    // Payload buffers can change size without changing the bound hardware.
+    showFrame(18, 1, 2);
+    FL_CHECK_EQ(mock.getPinRoutingQueryCount(), initialQueries);
+    FL_CHECK_EQ(mock.getTransmissionHistory().back().buffer_size, 6u);
+
+    auto timing = createWS2812Timing();
+    timing.t1_ns += 50;
+    fl::vector_psram<uint8_t> bytes(3, 0x12);
+    auto retimed = ChannelData::create(18, timing, fl::move(bytes));
+    const auto beforeRetime = mock.getTransmissionHistory().size();
+    driver->enqueue(retimed);
+    driver->show();
+    FL_REQUIRE_EQ(mock.getTransmissionHistory().size(), beforeRetime + 1);
+    FL_CHECK_EQ(mock.getTransmissionHistory().back().timing.T1, timing.t1_ns);
+    mock.simulateTransmitDone(reinterpret_cast<void*>(1));
+    FL_CHECK_EQ(driver->poll().state, DriverState::READY);
+    FL_CHECK_EQ(mock.getPinRoutingQueryCount(), initialQueries);
+
+    mock.simulatePinReroute(18);
+    showFrame(18, 1);
+    FL_CHECK_GT(mock.getPinRoutingQueryCount(), initialQueries);
+    FL_CHECK_EQ(mock.getPinRebindCount(), 1u);
+    const auto reclaimedQueries = mock.getPinRoutingQueryCount();
+    showFrame(18, 1);
+    FL_CHECK_EQ(mock.getPinRoutingQueryCount(), reclaimedQueries);
+
+    showFrame(19, 2);
+    FL_CHECK_GT(mock.getPinRoutingQueryCount(), reclaimedQueries);
+    FL_CHECK_EQ(mock.getTransmissionHistory().back().gpio_pin, 19);
+}
+
 // FastLED#4905: another peripheral (or pinMode) can take the pin of an idle
 // cached channel. Reusing that channel must route the pin back to it, and
 // must leave an untouched pin alone.

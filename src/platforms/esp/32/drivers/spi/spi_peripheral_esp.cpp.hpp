@@ -33,6 +33,9 @@ FL_EXTERN_C_BEGIN
 // IWYU pragma: end_keep
 #include "esp_heap_caps.h"
 #include "esp_timer.h"          // For esp_timer_get_time()
+#include "soc/gpio_reg.h" // IWYU pragma: keep
+#include "soc/gpio_periph.h" // IWYU pragma: keep
+#include "soc/io_mux_reg.h" // IWYU pragma: keep
 // IWYU pragma: begin_keep
 #include "freertos/FreeRTOS.h"
 // IWYU pragma: end_keep
@@ -80,7 +83,7 @@ public:
     u8* allocateInternal(size_t size) FL_NO_EXCEPT override;
     void freeInternal(u8* buffer) FL_NO_EXCEPT override;
     void resetPin(int pin) FL_NO_EXCEPT override;
-    u32 getPinRouting(int pin) FL_NO_EXCEPT override;
+    FL_NO_INLINE u32 getPinRouting(int pin) FL_NO_EXCEPT override;
     void delay(u32 ms) FL_NO_EXCEPT override;
     u64 getMicroseconds() FL_NO_EXCEPT override;
 
@@ -436,15 +439,21 @@ void SpiPeripheralESPImpl::resetPin(int pin) FL_NO_EXCEPT {
 }
 
 u32 SpiPeripheralESPImpl::getPinRouting(int pin) FL_NO_EXCEPT {
-    // FastLED#4907: needs gpio_get_io_config() (IDF 5.5); older cores report
-    // unknown and keep the previous behaviour.
 #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 5, 0)
-    gpio_io_config_t io = {};
-    if (::gpio_get_io_config(static_cast<gpio_num_t>(pin), &io) != ESP_OK) {
+    if (!GPIO_IS_VALID_GPIO(pin) || !GPIO_PIN_MUX_REG[pin]) {
         return kPinRoutingUnknown;
     }
-    return (io.sig_out & 0xFFFFu) | (io.oe ? (1u << 16) : 0u) |
-           ((io.fun_sel & 0xFFu) << 20);
+    // Keep the three-field token identical to the RMT5 peripheral's snapshot.
+    const u32 signal = REG_GET_FIELD(GPIO_FUNC0_OUT_SEL_CFG_REG + pin * 4, GPIO_FUNC0_OUT_SEL);
+    u32 enableRegister = GPIO_ENABLE_REG;
+#if SOC_GPIO_PIN_COUNT > 32
+    if (pin >= 32) {
+        enableRegister = GPIO_ENABLE1_REG;
+    }
+#endif
+    const u32 enabled = (REG_READ(enableRegister) >> (pin & 31)) & 1u;
+    const u32 function = REG_GET_FIELD(GPIO_PIN_MUX_REG[pin], MCU_SEL);
+    return (signal & 0xFFFFu) | (enabled << 16) | ((function & 0xFFu) << 20);
 #else
     (void)pin;
     return kPinRoutingUnknown;

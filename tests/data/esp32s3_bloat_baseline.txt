@@ -482,4 +482,9 @@
 # ChannelData owner instead of duplicating its immutable pin/timing fields.
 # BEFORE is master da963db06; the ratchet moves 318783 -> 318695. Attributed
 # RAM stays 22499 B; the 320503 B flash and 40016 B RAM ceilings are unchanged.
-318695
+# -96 B, #5383: cache the channel index per pin and narrow RMT/SPI GPIO
+# snapshots to routing fields in their existing units. Isolated image_flash is
+# 318583 B / 22499 B RAM; combined with upstream #5424/#5425 it is 318599 B /
+# 22503 B RAM. Lower the ratchet 318695 -> 318599 using the measured queue tree;
+# the 320503 B flash and 40016 B RAM ceilings are unchanged.
+318599
