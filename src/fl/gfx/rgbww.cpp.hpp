@@ -413,14 +413,33 @@ void rgbww_convert_pixel(const Rgbww& rgbww, const fl::u8 (&raw)[3],
     rgbww_partial_reorder(rgbww.w_placement, c[order[0]], c[order[1]],
                           c[order[2]], ww, wc, b0, b1, b2, b3, b4);
 }
+
+RgbwwConvertBulkFn& rgbww_convert_bulk_slot() FL_NO_EXCEPT {
+    static RgbwwConvertBulkFn slot = nullptr;
+    return slot;
+}
+
+void rgbww_convert_bulk(const Rgbww& rgbww, const fl::u8* raw, int n,
+                        const fl::u8 (&premix)[3], const fl::u8 (&order)[3],
+                        fl::u8* out) FL_NO_EXCEPT {
+    for (int i = 0; i < n; ++i, raw += 3, out += 5) {
+        const fl::u8 px[3] = {raw[0], raw[1], raw[2]};
+        rgbww_convert_pixel(rgbww, px, premix, order, out, out + 1, out + 2,
+                            out + 3, out + 4);
+    }
+}
 }  // namespace
 
 void enable_rgbww_conversion() FL_NO_EXCEPT {
 #if !defined(FL_IS_AVR)
     rgbww_convert_slot() = &rgbww_convert_pixel;
+    rgbww_convert_bulk_slot() = &rgbww_convert_bulk;
 #endif
 }
 RgbwwConvertFn rgbww_conversion() FL_NO_EXCEPT { return rgbww_convert_slot(); }
+RgbwwConvertBulkFn rgbww_conversion_bulk() FL_NO_EXCEPT {
+    return rgbww_convert_bulk_slot();
+}
 }  // namespace detail
 
 } // namespace fl

@@ -455,4 +455,15 @@
 # writeWS2812WhiteChannel (+179 B) replace it. Local fresh builds: master
 # 320383 B, PR 320447 B (with the has() bound); hosted measured 320443 B before it. Neither the
 # 320503 B flash ceiling nor the 40016 B RAM ceiling moves.
-320451
+#
+# -1012 B (320451 -> 319439), PR for #5377: SlimBridgeController encodes RGBW
+# and RGBWW WS2812 frames straight from the concrete PixelController in runs
+# (bulk RGBW/RGBWW conversion, mode and W placement resolved once per run)
+# instead of constructing a PixelIterator per frame. Blink no longer links the
+# PixelIterator vtable thunks, per-pixel RGBW adapters or
+# writeWS2812WhiteChannel. ESP32-C6 legacy RGBW show(): 31570 -> 15145
+# instructions (489 -> 181 us mean, 35 LEDs); legacy RGB 12926 -> 12578.
+# Local fresh build: image_flash 319439 B. Neither the 320503 B flash ceiling
+# nor the 40016 B RAM ceiling moves.
+# Hosted CI: 319447 B (+8 B versus the local 319439 B build).
+319447

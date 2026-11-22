@@ -5,6 +5,7 @@
 #include "tests/unit/fl/chipsets/encoders/lpd6803.hpp"
 #include "tests/unit/fl/chipsets/encoders/lpd8806.hpp"
 #include "tests/unit/fl/chipsets/encoders/p9813.hpp"
+#include "tests/unit/fl/chipsets/encoders/pixel_iterator.hpp"
 #include "tests/unit/fl/chipsets/encoders/sk9822.hpp"
 #include "tests/unit/fl/chipsets/encoders/sm16716.hpp"
 #include "tests/unit/fl/chipsets/encoders/tm1812.hpp"

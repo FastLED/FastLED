@@ -69,6 +69,13 @@ using RgbwwConvertFn = void (*)(const Rgbww& rgbww, const fl::u8 (&raw)[3],
                                 fl::u8* b0, fl::u8* b1, fl::u8* b2,
                                 fl::u8* b3, fl::u8* b4);
 RgbwwConvertFn rgbww_conversion() FL_NO_EXCEPT;
+/// Whole-run RGBWW conversion (FastLED#5377): `n` raw source-order pixels,
+/// one premixed scale -> 5 wire bytes each at `out`. Byte-identical to
+/// RgbwwConvertFn per pixel, without a type-erased call per pixel.
+using RgbwwConvertBulkFn = void (*)(const Rgbww& rgbww, const fl::u8* raw, int n,
+                                    const fl::u8 (&premix)[3],
+                                    const fl::u8 (&order)[3], fl::u8* out);
+RgbwwConvertBulkFn rgbww_conversion_bulk() FL_NO_EXCEPT;
 }  // namespace detail
 
 struct Rgbww {

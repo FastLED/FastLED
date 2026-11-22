@@ -727,15 +727,90 @@ void rgbw_convert_pixel(const Rgbw& rgbw, const u8 (&raw)[3],
     rgbw_partial_reorder(rgbw.w_placement, c[order[0]], c[order[1]],
                          c[order[2]], w, b0, b1, b2, b3);
 }
+
+RgbwConvertBulkFn& rgbw_convert_bulk_slot() FL_NO_EXCEPT {
+    static RgbwConvertBulkFn slot = nullptr;
+    return slot;
+}
+
+/// One conversion over a run of pixels: `convert` is the mode's per-pixel
+/// conversion, resolved by the caller once per run, and the W placement is
+/// resolved here into output slots (the same layout rgbw_partial_reorder
+/// builds per pixel).
+template <typename Convert>
+void rgbw_convert_run(Convert convert, EOrderW w_placement, const u8* raw,
+                      int n, const u8 (&premix)[3], const u8 (&order)[3],
+                      u8* out) FL_NO_EXCEPT {
+    // slot[0..2]: where wire RGB bytes 0..2 go; slot[3]: where W goes.
+    u8 slot[4] = {0, 1, 2, 3};
+    bool keep_w = true;
+    switch (w_placement) {
+    case W3: break;
+    case W2: slot[2] = 3; slot[3] = 2; break;
+    case W1: slot[1] = 2; slot[2] = 3; slot[3] = 1; break;
+    case W0: slot[0] = 1; slot[1] = 2; slot[2] = 3; slot[3] = 0; break;
+    default: keep_w = false; break;  // rgbw_partial_reorder leaves W at 0
+    }
+    const u8 o0 = order[0], o1 = order[1], o2 = order[2];
+    const u8 s0 = slot[0], s1 = slot[1], s2 = slot[2], s3 = slot[3];
+    for (int i = 0; i < n; ++i, raw += 3, out += 4) {
+        u8 c[3];
+        u8 w = 0;
+        convert(raw[0], raw[1], raw[2], premix[0], premix[1], premix[2],
+                &c[0], &c[1], &c[2], &w);
+        out[s0] = c[o0];
+        out[s1] = c[o1];
+        out[s2] = c[o2];
+        out[s3] = keep_w ? w : 0;
+    }
+}
+
+void rgbw_convert_bulk(const Rgbw& rgbw, const u8* raw, int n,
+                       const u8 (&premix)[3], const u8 (&order)[3],
+                       u8* out) FL_NO_EXCEPT {
+    const u16 temp = rgbw.white_color_temp;
+    switch (rgbw.rgbw_mode) {
+    case RGBW_MODE::kRGBWExactColors:
+        rgbw_convert_run(
+            [temp](u8 r, u8 g, u8 b, u8 rs, u8 gs, u8 bs, u8* o_r, u8* o_g,
+                   u8* o_b, u8* o_w) FL_NO_EXCEPT {
+                rgb_2_rgbw_exact(temp, r, g, b, rs, gs, bs, o_r, o_g, o_b, o_w);
+            },
+            rgbw.w_placement, raw, n, premix, order, out);
+        return;
+    case RGBW_MODE::kRGBWMaxBrightness:
+        rgbw_convert_run(
+            [temp](u8 r, u8 g, u8 b, u8 rs, u8 gs, u8 bs, u8* o_r, u8* o_g,
+                   u8* o_b, u8* o_w) FL_NO_EXCEPT {
+                rgb_2_rgbw_max_brightness(temp, r, g, b, rs, gs, bs, o_r, o_g,
+                                          o_b, o_w);
+            },
+            rgbw.w_placement, raw, n, premix, order, out);
+        return;
+    default:
+        // Every other mode: the same per-pixel dispatch as rgbw_convert_pixel.
+        rgbw_convert_run(
+            [&rgbw](u8 r, u8 g, u8 b, u8 rs, u8 gs, u8 bs, u8* o_r, u8* o_g,
+                    u8* o_b, u8* o_w) FL_NO_EXCEPT {
+                rgb_2_rgbw(rgbw, r, g, b, rs, gs, bs, o_r, o_g, o_b, o_w);
+            },
+            rgbw.w_placement, raw, n, premix, order, out);
+        return;
+    }
+}
 }  // namespace
 
 void enable_rgbw_conversion() FL_NO_EXCEPT {
 #if !defined(FL_IS_AVR)
     // AVR's PixelIterator keeps its own thunk and never reads the slot.
     rgbw_convert_slot() = &rgbw_convert_pixel;
+    rgbw_convert_bulk_slot() = &rgbw_convert_bulk;
 #endif
 }
 RgbwConvertFn rgbw_conversion() FL_NO_EXCEPT { return rgbw_convert_slot(); }
+RgbwConvertBulkFn rgbw_conversion_bulk() FL_NO_EXCEPT {
+    return rgbw_convert_bulk_slot();
+}
 }  // namespace detail
 
 } // namespace fl

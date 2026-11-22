@@ -855,6 +855,57 @@ FL_TEST_CASE("Direct RGB encode matches PixelIterator::writeWS2812 byte for byte
     }
 }
 
+FL_TEST_CASE("Direct RGBW/RGBWW encode matches PixelIterator byte for byte #5377") {
+    CRGB leds[70];  // more than two 32-pixel runs
+    for (int i = 0; i < 70; ++i) {
+        leds[i] = CRGB(static_cast<u8>(i * 7 + 1), static_cast<u8>(255 - i * 3),
+                       static_cast<u8>(i * 13 + 3));
+    }
+    ColorAdjustment adjustment = ColorAdjustment::noAdjustment();
+    adjustment.premixed = CRGB(200, 97, 31);
+
+    const Rgbw rgbws[] = {Rgbw(kRGBWDefaultColorTemp, kRGBWExactColors, W3),
+                          Rgbw(kRGBWDefaultColorTemp, kRGBWMaxBrightness, W0),
+                          Rgbw(kRGBWDefaultColorTemp, kRGBWBoostedWhite, W1)};
+    for (const Rgbw& rgbw : rgbws) {
+        PixelController<GRB> base(leds, 70, adjustment, BINARY_DITHER);
+        PixelController<GRB> viaIterator(base);
+        PixelController<GRB> viaDirect(base);
+        fl::vector<u8> expected;
+        fl::PixelIterator iterator(&viaIterator, rgbw, RgbwwInvalid());
+        iterator.writeWS2812(&expected);
+        fl::vector<u8> actual;
+        actual.push_back(0xEE);  // stale bytes must be overwritten
+        fl::detail::encode_ws2812_white_direct(viaDirect, rgbw, RgbwwInvalid(),
+                                               actual, 70 * 4);
+        FL_REQUIRE_EQ(expected.size(), 70u * 4u);
+        FL_CHECK_EQ(actual, expected);
+    }
+
+    const Rgbww rgbww(kRGBWWDefaultWarmCct, kRGBWWDefaultCoolCct,
+                      RGBWW_MODE::kRGBWWColorimetric, EOrderWW::WcWwStart);
+    PixelController<BRG> base(leds, 70, adjustment, DISABLE_DITHER);
+    PixelController<BRG> viaIterator(base);
+    PixelController<BRG> viaDirect(base);
+    fl::vector<u8> expected;
+    fl::PixelIterator iterator(&viaIterator, RgbwInvalid(), rgbww);
+    iterator.writeWS2812(&expected);
+    fl::vector<u8> actual;
+    fl::detail::encode_ws2812_white_direct(viaDirect, RgbwInvalid(), rgbww,
+                                           actual, 70 * 5);
+    FL_REQUIRE_EQ(expected.size(), 70u * 5u);
+    FL_CHECK_EQ(actual, expected);
+}
+
+FL_TEST_CASE("Direct RGBW encode rejects a size mismatch #5377") {
+    CRGB leds[4] = {CRGB::Red, CRGB::Green, CRGB::Blue, CRGB::White};
+    PixelController<RGB> pixels(leds, 4, ColorAdjustment::noAdjustment(), DISABLE_DITHER);
+    fl::vector<u8> encoded;
+    fl::detail::encode_ws2812_white_direct(pixels, RgbwDefault(), RgbwwInvalid(),
+                                           encoded, 4 * 3);  // RGB-sized
+    FL_CHECK(encoded.empty());
+}
+
 // The direct encode sizes its loop from expectedSize; a controller that has
 // already advanced has fewer pixels left than size() reports, so encoding it
 // would read past the end. It must drop the frame instead.
