@@ -692,7 +692,7 @@ inline ClearFlags& operator|=(ClearFlags& a, ClearFlags b) FL_NO_EXCEPT {
 /// dithering off, in Hertz.
 ///
 /// Named because it was a bare `100` at both call sites, which meant the case
-/// in `tests/pixel_controller.cpp` that records the resulting cadence had to
+/// in `tests/unit/pixel_controller.cpp` that records the resulting cadence had to
 /// carry its own copy of the number -- so changing the threshold moved the
 /// behaviour without failing anything.
 ///

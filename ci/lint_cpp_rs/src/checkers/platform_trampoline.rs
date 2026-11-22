@@ -13,7 +13,7 @@ impl FileContentChecker for PlatformIncludesChecker {
         if is_excluded_file(&normalized) {
             return false;
         }
-        if normalized.contains("/platforms/") || normalized.contains("/tests/platforms/") {
+        if normalized.contains("/platforms/") || normalized.contains("/tests/unit/platforms/") {
             return false;
         }
         PLATFORM_INCLUDE_LOCATIONS

@@ -192,7 +192,7 @@ FastLED 3.10.6
       * Implementation: [src/fl/font/truetype.cpp.hpp](src/fl/font/truetype.cpp.hpp) (264 lines)
       * Embedded font: [src/fl/font/ttf_covenant5x5.cpp.hpp](src/fl/font/ttf_covenant5x5.cpp.hpp) (657 lines, 9.9KB font data)
       * stb_truetype: [src/third_party/stb/truetype/stb_truetype.h](src/third_party/stb/truetype/stb_truetype.h) (414 lines header, 5108 lines implementation)
-      * Tests: [tests/fl/font/truetype.cpp](tests/fl/font/truetype.cpp)
+      * Tests: [tests/unit/fl/font/truetype.cpp](tests/unit/fl/font/truetype.cpp)
   * **NEW: WS2812B-V5 and WS2812B-Mini-V3 Chipset Support**: Added support for newer WS2812B variants with tighter timing specifications
     * **WS2812B-V5**: Newer variant with 220/580ns timing (T0H: 220-380ns, T1H: 580-1000ns)
     * **WS2812B-Mini-V3**: Compact 3535 package with identical timing to V5
@@ -252,7 +252,7 @@ FastLED 3.10.6
     * **Third-Party Integration**: Uses Sean Barrett's stb_vorbis single-header library
     * Usage: `auto decoder = Vorbis::createDecoder(); decoder->begin(byteStream); decoder->decodeNextFrame(&sample);`
     * See API documentation in [src/fl/codec/vorbis.h](src/fl/codec/vorbis.h)
-    * Comprehensive unit tests in [tests/fl/vorbis.cpp](tests/fl/vorbis.cpp)
+    * Comprehensive unit tests in [tests/unit/fl/vorbis.cpp](tests/unit/fl/vorbis.cpp)
   * **DEPRECATED: BulkClockless API (Teensy 4.x, ESP32)**: The BulkClockless API has been superseded by the Channel/ChannelEngine API
     * **Note**: The BulkClockless API and its methods (`FastLED.addBulkLeds()`, `BulkClockless`, `BulkStripConfig`) have been deprecated and removed
     * **Migration Path**: Use the new Channel API for multi-strip LED control

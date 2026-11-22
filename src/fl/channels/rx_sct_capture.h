@@ -3,7 +3,7 @@
 ///
 /// The driver itself lives in `platforms/arm/lpc/rx_sct_capture.h`; this
 /// header sits in `src/fl/channels/` so the test file
-/// `tests/fl/channels/rx_sct_capture.cpp` has a matching source path
+/// `tests/unit/fl/channels/rx_sct_capture.cpp` has a matching source path
 /// (per `TestPathStructureChecker`) and so application code can
 /// reference the driver from a stable `fl/channels/...` include without
 /// reaching into `platforms/arm/lpc/`.

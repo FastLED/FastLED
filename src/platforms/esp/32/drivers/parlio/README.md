@@ -668,7 +668,7 @@ TEST_CASE("ParlioEngine transmission test") {
 - `simulateTransmitComplete()` - Manually trigger ISR callback
 
 **Example Tests:**
-See `tests/fl/channels/parlio_mock.cpp` for comprehensive test examples covering:
+See `tests/unit/fl/channels/parlio_mock.cpp` for comprehensive test examples covering:
 - Single/multi-lane initialization
 - Transmission lifecycle
 - ISR callback simulation

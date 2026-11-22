@@ -1340,7 +1340,7 @@ FL_TEST_CASE("MyEngine: Basic enqueue and transmission") {
 }
 ```
 
-See `tests/fl/channels/driver.cpp` for more test examples.
+See `tests/unit/fl/channels/driver.cpp` for more test examples.
 
 ---
 

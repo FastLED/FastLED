@@ -37,10 +37,10 @@
 
 // Engine compiles on LPC845 (the target) AND on host/stub builds so the
 // channels-API contract — canHandle filtering, state machine, capabilities,
-// name — can be exercised by `tests/fl/channels/lpc_sct_dma_engine.cpp`
+// name — can be exercised by `tests/unit/fl/channels/lpc_sct_dma_engine.cpp`
 // without requiring silicon. Same gate convention as `ChannelEngineObjectFLED`
 // which compiles under `FASTLED_STUB_IMPL` for its tests in
-// `tests/platforms/arm/teensy/teensy4_common/drivers/objectfled/`.
+// `tests/unit/platforms/arm/teensy/teensy4_common/drivers/objectfled/`.
 #if defined(FL_IS_ARM_LPC_845) || defined(FL_IS_STUB) || defined(FASTLED_STUB_IMPL)
 
 #include "fl/channels/driver.h"
@@ -127,7 +127,7 @@ public:
     ///
     /// Test-facing accessor added for the #3468 TX→RX readback
     /// contract: on host the transmitter records the byte stream the
-    /// engine handed it, so `tests/fl/channels/lpc_sct_dma_engine.cpp`
+    /// engine handed it, so `tests/unit/fl/channels/lpc_sct_dma_engine.cpp`
     /// can round-trip the exact bytes through the LPC RX device's
     /// decoder without bypassing the engine's `show()` path.
     LpcSctDmaTransmitter& transmitter() FL_NO_EXCEPT { return mTransmitter; }

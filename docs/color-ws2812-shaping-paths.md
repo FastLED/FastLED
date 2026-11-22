@@ -10,7 +10,7 @@ path that moves hue or tints neutrals by itself is not a re-encoding, and no
 amount of smoothness makes it one. This document is that first step, and it
 removes two of the five candidates.
 
-Harness: the `ws2812_shaping` section of `tests/fl/gfx/hsv16.cpp`. It is grouped
+Harness: the `ws2812_shaping` section of `tests/unit/fl/gfx/hsv16.cpp`. It is grouped
 into that file rather than standing alone because the paths under test --
 `HSV16::ToRGB` and `CRGB::colorBoost` -- both live in `fl/gfx/hsv16.h`, and the
 repo prefers consolidating tests over paying another file's compile time.
@@ -243,7 +243,7 @@ This is what R8 means by a quantized reference concealing optical error:
 against an 8-bit reference every one of these matches, and against the light
 they are asking for they do not. The denominator has to be emitted light.
 
-`tests/pixel_controller.cpp` carries all of it as measurements rather than
+`tests/unit/pixel_controller.cpp` carries all of it as measurements rather than
 prose. No change to the dither is proposed here -- R8 asks for the contract to
 be defined, and shifting the low-code rendering of every existing sketch is a
 decision, not a cleanup.
@@ -280,7 +280,7 @@ implements the weaker one:
 * *"8-frame cycle at 400Hz = 50Hz complete cycle"* -- about the **cycle**.
 
 What the eye integrates is the modulation, and the modulation is at the cycle
-rate. `tests/pixel_controller.cpp` records the arithmetic rather than asserting
+rate. `tests/unit/pixel_controller.cpp` records the arithmetic rather than asserting
 an intent: raising the threshold would disable dithering for most sketches,
 which is a decision rather than a cleanup, and the case fails if either number
 moves so that whoever moves it writes down why.
@@ -421,7 +421,7 @@ A colour-managed channel with `BINARY_DITHER` now dithers the pipeline's drive i
 - **Default: off.** `setColorProfile` still selects `DISABLE_DITHER`, so a managed channel dithers only when asked to.
 - **Power.** The limiter reserves one code on every channel of every lit pixel for a managed channel that dithers (#4342).
 
-`tests/fl/channels/color_managed_source.cpp` pins it, and each case was checked to fail under mutation:
+`tests/unit/fl/channels/color_managed_source.cpp` pins it, and each case was checked to fail under mutation:
 
 | case | what it checks | caught when |
 |---|---|---|

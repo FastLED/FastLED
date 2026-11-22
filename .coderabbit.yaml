@@ -229,7 +229,7 @@ reviews:
         interface method to `XxxMock::instance().foo(...)`. The
         `MockWrapper` is passed to the engine via
         `fl::make_shared<MockWrapper>()`. See the S3 sibling at
-        `tests/platforms/esp/32/drivers/i2s/channel_driver_i2s.cpp:43-87`
+        `tests/unit/platforms/esp/32/drivers/i2s/channel_driver_i2s.cpp:43-87`
         for the canonical `createMockPeripheral()` helper.
 
         Flag any PR that:

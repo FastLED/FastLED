@@ -109,6 +109,9 @@ class TestArgs:
     setup_only: bool = (
         False  # Run Meson setup only (generate compile_commands.json), skip build/test
     )
+    integration: bool = (
+        False  # Run the C++ integration tier (tests/integration/) instead of unit
+    )
 
 
 @typechecked

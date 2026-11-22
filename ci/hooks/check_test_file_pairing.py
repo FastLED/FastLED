@@ -2,12 +2,12 @@
 """
 PreToolUse hook for Write: enforce test-file-to-header pairing.
 
-When creating a NEW .cpp or .hpp file under tests/ (except tests/misc/),
+When creating a NEW .cpp or .hpp file under tests/ (except tests/unit/misc/),
 verify that a corresponding header exists in src/ with the same
 relative path. For example:
 
-    tests/fl/async.cpp  ->  src/fl/async.h
-    tests/fl/eorder.hpp ->  src/fl/eorder.h
+    tests/unit/fl/async.cpp  ->  src/fl/async.h
+    tests/unit/fl/eorder.hpp ->  src/fl/eorder.h
 
 If no matching header is found, the hook blocks the Write and
 instructs the agent to find an existing test file instead.
@@ -71,8 +71,17 @@ def main():
     else:
         sys.exit(0)
 
-    # Exempt tests/misc/ and tests/profile/ (standalone benchmarks, not paired)
-    if rel_path.startswith("tests/misc/") or rel_path.startswith("tests/profile/"):
+    # Extract relative path within tests/ and its tier, e.g.
+    # "tests/unit/fl/async.cpp" -> tier "tests/unit/", inner "fl/async.cpp"
+    tier_prefix = "tests/"
+    for tier in ("unit", "integration"):
+        if rel_path.startswith(f"tests/{tier}/"):
+            tier_prefix = f"tests/{tier}/"
+            break
+    inner_path = rel_path[len(tier_prefix) :]
+
+    # Exempt misc/ in a tier and tests/profile/ (standalone benchmarks, not paired)
+    if inner_path.startswith("misc/") or rel_path.startswith("tests/profile/"):
         sys.exit(0)
 
     # If the file already exists on disk, it's an overwrite, not a new file
@@ -80,8 +89,6 @@ def main():
     if os.path.exists(full_path):
         sys.exit(0)
 
-    # Extract relative path within tests/  e.g. "fl/async.cpp"
-    inner_path = rel_path[len("tests/") :]
     # Strip extension  e.g. "fl/async"
     stem = inner_path[: -len(ext)]
 
@@ -94,8 +101,8 @@ def main():
         sys.exit(0)
 
     # Sibling-split allowance: if this looks like a split of an existing paired
-    # test file (e.g. tests/fl/math/fixed_point_misc.cpp alongside
-    # tests/fl/math/fixed_point.cpp + src/fl/math/fixed_point.h), allow it.
+    # test file (e.g. tests/unit/fl/math/fixed_point_misc.cpp alongside
+    # tests/unit/fl/math/fixed_point.cpp + src/fl/math/fixed_point.h), allow it.
     # The split file shares its base name with the paired test; we look for
     # the longest base prefix that has both a paired test file and matching
     # src header.
@@ -109,7 +116,9 @@ def main():
     while "_" in name_part:
         name_part = name_part.rsplit("_", 1)[0]
         candidate_stem = dir_part + name_part
-        candidate_test = os.path.join(project_root, f"tests/{candidate_stem}{ext}")
+        candidate_test = os.path.join(
+            project_root, f"{tier_prefix}{candidate_stem}{ext}"
+        )
         candidate_header = os.path.join(project_root, f"src/{candidate_stem}.h")
         if os.path.exists(candidate_test) and os.path.exists(candidate_header):
             # Allowed: this is a split of an existing paired test file.
@@ -122,8 +131,8 @@ def main():
         f"No matching header found at '{header_path}'.",
         f"",
         f"Test files under tests/ must correspond to a header in src/ with the same path:",
-        f"  tests/fl/foo.cpp  ->  src/fl/foo.h",
-        f"  tests/fl/stl/bar.cpp  ->  src/fl/stl/bar.h",
+        f"  tests/unit/fl/foo.cpp  ->  src/fl/foo.h",
+        f"  tests/unit/fl/stl/bar.cpp  ->  src/fl/stl/bar.h",
         f"",
         f"What to do instead:",
         f"  1. Find an EXISTING test file that tests the header you're working with.",
@@ -131,8 +140,8 @@ def main():
         f"  2. Edit that existing test file to add your new test cases.",
         f"",
         f"Escape hatch (intentional unpaired test):",
-        f"  Create the file under tests/misc/ first, then move it to the final location.",
-        f"  Example: Write to 'tests/misc/{os.path.basename(inner_path)}' instead.",
+        f"  Create the file under tests/unit/misc/ first, then move it to the final location.",
+        f"  Example: Write to '{tier_prefix}misc/{os.path.basename(inner_path)}' instead.",
     ]
     print("\n".join(error_lines), file=sys.stderr)
     sys.exit(2)

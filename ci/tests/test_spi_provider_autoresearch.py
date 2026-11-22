@@ -160,14 +160,14 @@ def test_spi_provider_deployment_and_rpc_contract(
         extra_defines=spi_provider.spi_provider_defines(native),
     )
     fixture = (
-        "tests/platforms/esp/32/drivers/spi/spi_hw_1_esp32.hpp"
+        "tests/unit/platforms/esp/32/drivers/spi/spi_hw_1_esp32.hpp"
         if native
-        else "tests/platforms/arduino/spi/spi_arduino.hpp"
+        else "tests/unit/platforms/arduino/spi/spi_arduino.hpp"
     )
     inject.assert_called_once_with(
         project / "src/sketch",
         tmp_path / fixture,
-        tmp_path / "tests/platforms/esp/32/drivers/spi/spi_provider.hpp",
+        tmp_path / "tests/unit/platforms/esp/32/drivers/spi/spi_provider.hpp",
     )
     dependencies.assert_called_once_with(project / "platformio.ini", "esp32dev_idf44")
     deploy.assert_called_once_with(

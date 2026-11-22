@@ -67,7 +67,7 @@ const char *raw = R"fixture(
         for path in ["src/platforms/esp/32/io.hpp", "/repo/src/platforms/esp/8266/io.h"] {
             assert!(checker.should_process_file(path, Path::new(".")));
         }
-        for path in ["src/platforms/arduino/io.hpp", "tests/platforms/esp/x.cpp",
+        for path in ["src/platforms/arduino/io.hpp", "tests/unit/platforms/esp/x.cpp",
                      "src/platforms/espish/x.h", "src/platforms/esp/readme.md"] {
             assert!(!checker.should_process_file(path, Path::new(".")));
         }
@@ -467,12 +467,12 @@ constexpr int kX = 5;
 
     #[test]
     fn container_ptr_drops_names_shadowed_by_raw_arrays() {
-        // tests/fl/slice.cpp declares `fl::array<int, 4> arr` and
+        // tests/unit/fl/slice.cpp declares `fl::array<int, 4> arr` and
         // `int arr[] = {5, 6, 7}` in sibling FL_SUBCASE blocks. Name matching
         // is per-file, not scope-aware, so an ambiguous name must be dropped.
         let checker = ContainerElementAddressChecker;
         let hits = checker.check_file_content(&file(
-            "tests/fl/slice.cpp",
+            "tests/unit/fl/slice.cpp",
             concat!(
                 "fl::array<int, 4> arr = {7, 8, 9, 10};\n",
                 "int arr[] = {5, 6, 7};\n",
@@ -856,7 +856,7 @@ fl::vector<int> pins; // fl-lint: int-template-ok GPIO numbers are int in the pu
         assert!(c.should_process_file("src/fl/audio/fft/fft_impl.cpp.hpp", root));
         assert!(!c.should_process_file("src/third_party/x/y.h", root));
         assert!(!c.should_process_file("src/fl/stl/vector.h", root));
-        assert!(!c.should_process_file("tests/fl/foo.cpp", root));
+        assert!(!c.should_process_file("tests/unit/fl/foo.cpp", root));
         // A baselined file may keep its recorded count but not grow it.
         let (path, allowed) = INT_TEMPLATE_ARG_BASELINE[0];
         let at = "int x = static_cast<int>(y);\n".repeat(allowed);
@@ -935,7 +935,7 @@ u32 sep = 1'000 + (x << 16);
         assert!(!c.should_process_file("src/platforms/arm/d51/clockless_arm_d51.h", root));
         assert!(!c.should_process_file("src/platforms/esp/32/foo.h", root));
         assert!(!c.should_process_file("src/third_party/x/y.h", root));
-        assert!(!c.should_process_file("tests/fl/foo.cpp", root));
+        assert!(!c.should_process_file("tests/unit/fl/foo.cpp", root));
     }
 
     #[test]

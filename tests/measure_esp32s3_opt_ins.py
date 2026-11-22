@@ -376,13 +376,19 @@ def format_table(results: dict[str, BuildMeasurement]) -> str:
             continue
         measurement = results[name]
         flash_delta = (
-            "" if baseline is None else f"{measurement.total_flash - baseline.total_flash:+,} B"
+            ""
+            if baseline is None
+            else f"{measurement.total_flash - baseline.total_flash:+,} B"
         )
         ram_delta = (
-            "" if baseline is None else f"{measurement.total_ram - baseline.total_ram:+,} B"
+            ""
+            if baseline is None
+            else f"{measurement.total_ram - baseline.total_ram:+,} B"
         )
         symbol_delta = (
-            "" if baseline is None else f"{measurement.symbol_count - baseline.symbol_count:+,}"
+            ""
+            if baseline is None
+            else f"{measurement.symbol_count - baseline.symbol_count:+,}"
         )
         firmware_delta = (
             ""

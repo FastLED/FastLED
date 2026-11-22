@@ -563,7 +563,7 @@ All operations for `s0x32x4` and `s16x16x4` are fully implemented:
 | **sin/cos** | Trigonometric functions |
 | **sincos** | Combined sin/cos (more efficient) |
 
-See test file for comprehensive coverage: `tests/fl/simd.cpp` (30+ test cases)
+See test file for comprehensive coverage: `tests/unit/fl/simd.cpp` (30+ test cases)
 
 ### Example: SIMD Array Processing
 
@@ -686,12 +686,12 @@ bash test fixed_point
 
 1. **Run the test suite**: `bash test fixed_point` — validates all implementations
 2. **Look at real usage**: Search for `s16x16` in `src/fl/fx/2d/animartrix_detail/` for production examples
-3. **Check accuracy bounds**: `tests/fl/fixed_point.cpp` for type-specific precision guarantees
+3. **Check accuracy bounds**: `tests/unit/fl/fixed_point.cpp` for type-specific precision guarantees
 4. **Benchmark your code**: Use profiling if performance matters (fixed-point should be plenty fast)
 
 ## Key Files
 
 - **Header**: `fl/stl/fixed_point.h` — Main template APIs and free-function math
 - **Aliases**: `fl/stl/fixed_point/s16x16.h`, `u8x8.h`, etc.
-- **Tests**: `tests/fl/fixed_point.cpp` — 197+ test groupings with accuracy bounds
+- **Tests**: `tests/unit/fl/fixed_point.cpp` — 197+ test groupings with accuracy bounds
 - **Internals**: `fl/stl/fixed_point/base.h` — CRTP implementation

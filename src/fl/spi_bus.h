@@ -14,7 +14,7 @@ namespace fl {
 /// `#define SPI2 ((SPI_TypeDef *) SPI2_BASE)` -- so the preprocessor rewrote
 /// the enumerator to `((SPI_TypeDef *) SPI2_BASE) = 2` and every STM32 board
 /// failed to compile (FastLED#4113). Arduino-ESP32 3.1.0+ defines SPI2 as well.
-/// tests/fl/spi_bus_macro_collision.cpp pins this.
+/// tests/unit/fl/spi_bus_macro_collision.cpp pins this.
 enum class Esp32SpiBus : u8 {
     AUTO = 0,
     HOST2 = 2,

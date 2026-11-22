@@ -12,7 +12,7 @@ The deadlock detection system automatically detects, diagnoses, and reports hung
 
 ### Components
 
-1. **Hung Test** (`tests/fl/test_hung.cpp`)
+1. **Hung Test** (`tests/unit/fl/test_hung.cpp`)
    - Demonstration test that intentionally hangs
    - Uses volatile variables to prevent compiler optimization
 
@@ -175,7 +175,7 @@ test(test_name, runner_exe,
 ### Create a Hung Test
 
 ```cpp
-// tests/fl/test_hung.cpp
+// tests/unit/fl/test_hung.cpp
 #include "test.h"
 #include <cstdio>
 

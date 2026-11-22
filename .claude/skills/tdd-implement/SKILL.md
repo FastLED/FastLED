@@ -61,7 +61,7 @@ For EACH testable behavior, execute a full Red-Green-Refactor cycle:
 ### Report Each Cycle
 ```
 ### Behavior N: [description]
-- RED: Test written at tests/fl/foo.cpp — FAILS (expected: [reason])
+- RED: Test written at tests/unit/fl/foo.cpp — FAILS (expected: [reason])
 - GREEN: Implemented in src/fl/foo.h — PASSES
 - REFACTOR: [changes made, or "clean as-is"]
 ```
@@ -96,7 +96,7 @@ After all behaviors are implemented:
 ### Files Changed
 | File | Change Type | Description |
 |------|-------------|-------------|
-| tests/fl/foo.cpp | Added | 3 test cases for [feature] |
+| tests/unit/fl/foo.cpp | Added | 3 test cases for [feature] |
 | src/fl/foo.h | Modified | Added [function/method] |
 
 ### Test Coverage

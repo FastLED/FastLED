@@ -140,7 +140,7 @@ Run from the repo root, against the build dir that failed (`--build-dir
 
 2. **Probe the failing TU exactly as the build compiles it:**
    ```bash
-   uv run python .claude/skills/pch-debug/pch_probe.py tu tests/fl/stl/adl_barrier.cpp
+   uv run python .claude/skills/pch-debug/pch_probe.py tu tests/unit/fl/stl/adl_barrier.cpp
    uv run python .claude/skills/pch-debug/pch_probe.py tu adl_barrier --zccache .venv/bin/zccache
    ```
    This takes the TU's entry from `compile_commands.json`, runs it with `-H

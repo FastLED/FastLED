@@ -186,7 +186,7 @@ FrameSetup setupChasingSpiralFrame(Context &ctx, ChasingSpiralState &state) FL_N
     //      when move.linear grows large (ULP at 200,000 ≈ 0.024 > pixel step 0.1).
     // Perlin noise is exactly periodic with period 256 at integer coordinates,
     // so with scale_x=0.1 the effective period for offset_x is 256/0.1 = 2560.
-    // See: tests/fl/fx/2d/animartrix2.cpp "period reduction" test cases.
+    // See: tests/unit/fl/fx/2d/animartrix2.cpp "period reduction" test cases.
     constexpr float perlin_period = 2560.0f; // 256.0f / scale_x(0.1f)
     constexpr float scale_f = 0.1f;
     const FP linear0_scaled = FP(fmodf(e->move.linear[0], perlin_period) * scale_f);

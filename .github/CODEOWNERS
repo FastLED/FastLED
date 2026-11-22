@@ -10,9 +10,9 @@
 /src/fl/codec/mp3.h                @zackees
 /src/fl/codec/mp3.cpp.hpp          @zackees
 /src/fl/codec/mp3_memory.h         @zackees
-/tests/fl/codec/mp3.hpp            @zackees
-/tests/fl/codec/mp3_fixed_point.hpp @zackees
-/tests/fl/codec/minimp3_variants.hpp @zackees
+/tests/unit/fl/codec/mp3.hpp            @zackees
+/tests/unit/fl/codec/mp3_fixed_point.hpp @zackees
+/tests/unit/fl/codec/minimp3_variants.hpp @zackees
 /tests/profile/mp3_memory_audit.cpp @zackees
 /ci/codec_memory/                  @zackees
 /ci/codec_cpu/                     @zackees

@@ -117,7 +117,7 @@ void mapAndAllocateRgbwQ16(const GamutMapRgbwQ16& map, const i32 (&xyz)[3],
 /// Two whites enlarge the reachable set again, and the one-white mapper
 /// under-reports it for the same reason the three-emitter one under-reports
 /// a device with one white: it tests feasibility against a hull the device
-/// is bigger than. `tests/fl/gfx/gamut_map.cpp` measures how much on the
+/// is bigger than. `tests/unit/fl/gfx/gamut_map.cpp` measures how much on the
 /// corpus's cool/warm device.
 struct GamutMapRgbwwQ16 {
     TwoWhiteAllocationQ16 allocation;

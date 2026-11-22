@@ -25,6 +25,11 @@ from ci.util.timestamp_print import ts_print as _ts_print
 # Meson suite holding the example targets, as passed to --no-suite.
 EXAMPLES_SUITE = "fastled:examples"
 
+# Meson suite holding the integration-tier doctest suites (tests/integration/).
+# They never run as part of a plain `meson test`; `bash test --integration`
+# selects them with --suite, and `bash test <name>` runs one directly.
+INTEGRATION_SUITE = "fastled:integration"
+
 
 def _bare_suite(suite: str) -> str:
     """Strip meson's optional ``project:`` qualifier from a suite name."""
@@ -94,11 +99,34 @@ class MesonTestResult:
         return out
 
 
+def meson_suite_args(
+    test_name: Optional[str],
+    exclude_suites: Optional[list[str]],
+    include_suites: Optional[list[str]],
+) -> list[str]:
+    """Return the ``--suite`` / ``--no-suite`` arguments for ``meson test``.
+
+    The integration tier is excluded unless it is selected explicitly, either
+    through ``include_suites`` or by naming one of its tests.
+    """
+    args: list[str] = []
+    for suite in include_suites or []:
+        args.extend(["--suite", suite])
+    excluded = list(exclude_suites or [])
+    if not include_suites and not test_name:
+        if _bare_suite(INTEGRATION_SUITE) not in {_bare_suite(s) for s in excluded}:
+            excluded.append(INTEGRATION_SUITE)
+    for suite in excluded:
+        args.extend(["--no-suite", suite])
+    return args
+
+
 def run_meson_test(
     build_dir: Path,
     test_name: Optional[str] = None,
     verbose: bool = False,
     exclude_suites: Optional[list[str]] = None,
+    include_suites: Optional[list[str]] = None,
 ) -> MesonTestResult:
     """
     Run tests using Meson.
@@ -108,6 +136,8 @@ def run_meson_test(
         test_name: Specific test to run (None = all)
         verbose: Enable verbose test output
         exclude_suites: Optional list of test suites to exclude (e.g., ['examples'])
+        include_suites: Optional list of the only suites to run (e.g.,
+            [INTEGRATION_SUITE]). Without it the integration suite is excluded.
 
     Returns:
         MesonTestResult with success status, duration, and test counts
@@ -133,14 +163,13 @@ def run_meson_test(
     if test_name:
         cmd.append(test_name)
 
-    # Add --no-suite flags to exclude specified suites
-    if exclude_suites:
-        for suite in exclude_suites:
-            cmd.extend(["--no-suite", suite])
-        print_banner("Test", "▶️", verbose=verbose)
+    cmd.extend(meson_suite_args(test_name, exclude_suites, include_suites))
+    print_banner("Test", "▶️", verbose=verbose)
+    if test_name:
         print(f"Running: {test_name}")
+    elif include_suites:
+        print(f"Running suites: {', '.join(include_suites)}")
     else:
-        print_banner("Test", "▶️", verbose=verbose)
         print("Running all tests...")
 
     start_time = time.time()
@@ -300,7 +329,9 @@ def run_meson_test(
         # excluded every test counted is a unit test, so the total is fully
         # attributable. With them included the split stays unknown -- say so
         # rather than inventing one.
-        examples_included = examples_are_included(exclude_suites, test_name)
+        examples_included = not include_suites and examples_are_included(
+            exclude_suites, test_name
+        )
         num_examples_run = None if examples_included else 0
         num_examples_passed = None if examples_included else 0
         breakdown = describe_test_counts(

@@ -534,14 +534,24 @@ fn project_relative_path(path: &str) -> Option<String> {
     None
 }
 
+/// Doctest tier directories under `tests/` (see `tests/discover_tests.py`).
+/// A tier never mirrors a `src/` directory, so path checks look past it.
+const TEST_TIER_DIRS: &[&str] = &["unit/", "integration/"];
+
+/// Path of a test file relative to `tests/` and, when it sits in a doctest
+/// tier, relative to that tier: `tests/unit/fl/x.cpp` -> `fl/x.cpp`.
 fn tests_relative_path(path: &str) -> Option<String> {
     let normalized = normalize_path(path);
-    if let Some(index) = normalized.find("/tests/") {
-        return Some(normalized[index + "/tests/".len()..].to_string());
-    }
-    normalized
-        .strip_prefix("tests/")
-        .map(|value| value.to_string())
+    let rel = if let Some(index) = normalized.find("/tests/") {
+        &normalized[index + "/tests/".len()..]
+    } else {
+        normalized.strip_prefix("tests/")?
+    };
+    let rel = TEST_TIER_DIRS
+        .iter()
+        .find_map(|tier| rel.strip_prefix(tier))
+        .unwrap_or(rel);
+    Some(rel.to_string())
 }
 
 fn path_without_extension(path: &str) -> String {

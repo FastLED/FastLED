@@ -1,6 +1,6 @@
 """The generated C++ reference vectors must match the golden corpus.
 
-`tests/fl/gfx/pipeline.cpp` measures P6 (FastLED#4040) against
+`tests/unit/fl/gfx/pipeline.cpp` measures P6 (FastLED#4040) against
 `ci/golden/color-reference-v1.json`. It used to do that by carrying 48 of the
 corpus's vectors as hand-typed literals, with the corpus named only in a
 comment -- so the two could diverge with nothing to say so, which is the
