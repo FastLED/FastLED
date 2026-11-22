@@ -397,7 +397,7 @@ IChannelDriver::DriverState ChannelEngineRpPio::fail(const char* message) FL_NO_
     releaseInFlight();
     mActive = false;
     mFailed = false;
-    return DriverState(DriverState::ERROR, fl::string(message));
+    return DriverState(DriverState::ERROR, mLastError.c_str());
 }
 
 }  // namespace fl

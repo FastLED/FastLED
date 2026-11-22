@@ -160,6 +160,7 @@ void ChannelEngineRpSpi::releaseInFlight() FL_NO_EXCEPT {
 }
 
 IChannelDriver::DriverState ChannelEngineRpSpi::fail(const char* message) FL_NO_EXCEPT {
+    mLastError = message;
     if (mPeripheral) {
         mPeripheral->abort();
         mPeripheral->deinitialize();
@@ -167,7 +168,7 @@ IChannelDriver::DriverState ChannelEngineRpSpi::fail(const char* message) FL_NO_
     releaseInFlight();
     mActive = false;
     mFailed = false;
-    return DriverState(DriverState::ERROR, fl::string(message));
+    return DriverState(DriverState::ERROR, mLastError.c_str());
 }
 
 }  // namespace fl

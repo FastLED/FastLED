@@ -18,6 +18,7 @@
 #include "fl/stl/span.h"
 #include "fl/stl/allocator.h"
 #include "fl/stl/string.h"
+#include "fl/stl/type_traits.h"
 // Note: `fl/stl/cstdio.h` intentionally NOT included directly.
 // Workaround for zackees/zccache#619 — on Windows, the same physical
 // cstdio.h header gets two different canonical path spellings (one via
@@ -92,7 +93,7 @@ public:
 
     DriverState poll() override {
         if (mShouldFail) {
-            return DriverState::ERROR;
+            return DriverState(DriverState::ERROR, mLastError.c_str());
         }
         // Fake implementation: always return READY (transmission completes instantly)
         if (!mTransmittingChannels.empty()) {
@@ -134,6 +135,8 @@ ChannelDataPtr createDummyChannelData(int pin = 1) {
 
 FL_TEST_CASE("ChannelManager - poll() returns aggregate state") {
     ChannelManager manager;
+    using DriverState = IChannelDriver::DriverState;
+    FL_CHECK((is_trivially_copyable<DriverState>::value));
 
     // With no drivers, should return READY
     FL_CHECK(manager.poll().state == IChannelDriver::DriverState::READY);
@@ -141,12 +144,33 @@ FL_TEST_CASE("ChannelManager - poll() returns aggregate state") {
     // Add an driver
     auto driver = fl::make_shared<FakeEngine>("TEST_POLL");
     manager.addDriver(100, driver);
+    const auto ready = driver->poll();
+    FL_CHECK((is_same<decltype(ready.error), const char*>::value));
+    FL_CHECK_EQ(fl::string(ready.error), "");
 
     // Should return READY (fake driver is always ready)
     FL_CHECK(manager.poll().state == IChannelDriver::DriverState::READY);
 
     // Cleanup
     manager.removeDriver(driver);
+}
+
+FL_TEST_CASE("ChannelManager - poll() preserves the first driver-owned error #5380") {
+    ChannelManager manager;
+    auto first = fl::make_shared<FakeEngine>("FIRST", true);
+    auto ready = fl::make_shared<FakeEngine>("READY");
+    auto second = fl::make_shared<FakeEngine>("SECOND", true);
+    manager.addDriver(300, first);
+    manager.addDriver(200, ready);
+    manager.addDriver(100, second);
+    first->enqueue(createDummyChannelData());
+    second->enqueue(createDummyChannelData());
+    first->show();
+    second->show();
+
+    const auto result = manager.poll();
+    FL_REQUIRE_EQ(result.state, IChannelDriver::DriverState::ERROR);
+    FL_CHECK_EQ(fl::string(result.error), "Engine FIRST failed");
 }
 
 FL_TEST_CASE("ChannelManager - Query driver info") {

@@ -1441,7 +1441,7 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
     if (selected_driver) {
         const auto state = selected_driver->poll();
         if (state.state == fl::IChannelDriver::DriverState::ERROR) {
-            response.set("driverError", state.error.c_str());
+            response.set("driverError", state.error);
             passed = false;
         }
     }
