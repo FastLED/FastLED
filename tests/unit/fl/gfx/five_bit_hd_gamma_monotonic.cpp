@@ -3,7 +3,7 @@
 ///
 /// P8 owns the criterion "APA102/SK9822 HD + native 16-bit encoders consume
 /// wide output; **monotonic**; improved low-light resolution". Monotonicity
-/// was covered for the gamma LUTs (`tests/fl/gfx/gamma_lut.cpp`), the
+/// was covered for the gamma LUTs (`tests/unit/fl/gfx/gamma_lut.cpp`), the
 /// transfer functions and OKLab, but not for the encoders themselves -- and
 /// they are where it is least obvious.
 ///

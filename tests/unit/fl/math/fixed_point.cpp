@@ -118,8 +118,8 @@ namespace { // Anonymous namespace for fixed_point tests
 template <typename T>
 using raw_t = decltype(T().raw());
 
-#include "tests/fl/math/fixed_point_bounds.h"
-#include "tests/fl/math/fixed_point_test_helpers.h"
+#include "tests/unit/fl/math/fixed_point_bounds.h"
+#include "tests/unit/fl/math/fixed_point_test_helpers.h"
 
 // --- Helper functions ---
 

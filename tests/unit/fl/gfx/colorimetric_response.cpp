@@ -450,7 +450,7 @@ FL_TEST_CASE("[#4194] invert3x3 accepts a finite matrix of wildly mixed scale") 
 // `ci/tests/test_profile_generator.py` regenerates this header and fails on
 // drift, so the two halves cannot diverge.
 
-#include "tests/fl/gfx/colorimetric_response_profiles.hpp"
+#include "tests/unit/fl/gfx/colorimetric_response_profiles.hpp"
 
 FL_TEST_CASE("The floating alias and the enum lookup resolve to the pinned profile") {
     namespace gp = fl::generated_profiles;

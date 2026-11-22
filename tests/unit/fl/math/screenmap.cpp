@@ -310,7 +310,7 @@ FL_TEST_CASE("ScreenMap v2 JSON parsing — EL geometry remains shape-native") {
 }
 
 // Grouped tests
-#include "tests/fl/math/xymap.hpp"
+#include "tests/unit/fl/math/xymap.hpp"
 
 FL_TEST_FILE(FL_FILEPATH) {
 

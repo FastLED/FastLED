@@ -111,7 +111,7 @@ class MemoryFs : public fl::FsImpl {
 };
 
 // Build a minimal valid v1 .fled byte buffer with the given envelope
-// + payload. Mirrors the helper in tests/fl/fled/fled.cpp.
+// + payload. Mirrors the helper in tests/unit/fl/fled/fled.cpp.
 fl::vector<fl::u8> buildBundle(const char* envelope, fl::size envelopeLen,
                                const fl::u8* payload, fl::size payloadLen) {
     const fl::u32 jsonLen = static_cast<fl::u32>(envelopeLen);

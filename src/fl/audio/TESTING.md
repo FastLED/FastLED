@@ -31,7 +31,7 @@ These tiers have fundamentally different feature distributions in CQ (Constant-Q
 
 ### Signal Generators
 
-Located in `tests/fl/audio/test_helpers.h`:
+Located in `tests/unit/fl/audio/test_helpers.h`:
 
 | Generator | Purpose | Key Parameters |
 |-----------|---------|----------------|
@@ -536,7 +536,7 @@ The <DetectorName> uses <N> spectral features (<list>). This has blind spots:
 
 ### 1. Add synthetic signal generators to test helpers
 
-**File:** `tests/fl/audio/test_helpers.h`
+**File:** `tests/unit/fl/audio/test_helpers.h`
 
 For each new signal type, add an inline generator function in the
 `fl::audio::test` namespace. Each generator must:
@@ -577,7 +577,7 @@ Update `calculateRawConfidence()` with weighted combination. Guidelines:
 
 ### 4. Add test cases
 
-**File:** `tests/fl/audio/detectors/<detector>.cpp`
+**File:** `tests/unit/fl/audio/detectors/<detector>.cpp`
 
 Each test feeds 10 frames (lets EMA settle), then asserts on `isDetected()`
 and `getConfidence()`. Include:
@@ -631,7 +631,7 @@ The VocalDetector uses 3 spectral features (centroid, rolloff, formant ratio) av
 
 ##### 1. Synthetic signal generators added to test helpers
 
-**File:** `tests/fl/audio/test_helpers.h`
+**File:** `tests/unit/fl/audio/test_helpers.h`
 
 Four functions added to the `fl::audio::test` namespace (with `#include "fl/math/random.h"`):
 
@@ -694,7 +694,7 @@ Weights sum to 1.0.
 
 ##### 5. Seven new test cases
 
-**File:** `tests/fl/audio/detectors/vocal.cpp`
+**File:** `tests/unit/fl/audio/detectors/vocal.cpp`
 
 | Test Name | Signal | Expected |
 |-----------|--------|----------|
@@ -772,4 +772,4 @@ bash test vocal --verbose
 bash test
 ```
 
-All synthetic tests are in `tests/fl/audio/detectors/vocal.cpp`.
+All synthetic tests are in `tests/unit/fl/audio/detectors/vocal.cpp`.

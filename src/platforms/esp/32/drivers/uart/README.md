@@ -452,7 +452,7 @@ TEST_CASE("UART transmission test") {
 - Automatic delay calculation based on baud rate and byte count
 
 **Example Tests:**
-See `tests/platforms/esp/32/drivers/uart/test_uart_peripheral.cpp` for comprehensive test examples covering:
+See `tests/unit/platforms/esp/32/drivers/uart/test_uart_peripheral.cpp` for comprehensive test examples covering:
 - Initialization and lifecycle
 - Single/multi-byte transmission
 - Waveform validation (8N1, 8N2)

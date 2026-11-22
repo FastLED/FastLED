@@ -1,4 +1,4 @@
-// tests/fl/remote/transport/serial.cpp
+// tests/unit/fl/remote/transport/serial.cpp
 // Tests for serial transport layer optimizations
 
 #include "fl/remote/transport/serial.h"

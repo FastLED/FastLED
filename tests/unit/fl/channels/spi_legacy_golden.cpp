@@ -1,4 +1,4 @@
-/// @file tests/fl/channels/spi_legacy_golden.cpp
+/// @file tests/unit/fl/channels/spi_legacy_golden.cpp
 /// @brief Golden-byte lock-down for legacy `FastLED.addLeds<ESPIChipsets ...>`
 ///        under FASTLED_SPI_USES_CHANNEL_API (#4585 T1).
 ///

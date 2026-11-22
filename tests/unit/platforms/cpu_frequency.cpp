@@ -1,4 +1,4 @@
-/// @file tests/platforms/cpu_frequency.cpp
+/// @file tests/unit/platforms/cpu_frequency.cpp
 /// Covers the FL_CPU_FREQUENCY() rename and its deprecated alias.
 
 #include "test.h"

@@ -2,7 +2,7 @@
 #include "fl/audio/audio_processor.h"
 #include "fl/audio/detector/equalizer.h"
 #include "fl/audio/input.h"
-#include "tests/fl/audio/test_helpers.hpp"
+#include "tests/unit/fl/audio/test_helpers.hpp"
 #include "fl/audio/audio.h"
 #include "fl/stl/circular_buffer.h"
 #include "fl/math/math.h"

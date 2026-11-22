@@ -182,7 +182,7 @@ FL_TEST_CASE("OKLab Q16 round-trips chroma the forward transform can produce") {
     // then checked their ratio was unchanged -- an arithmetic identity that
     // passes for any implementation whatsoever. The real hue-preservation
     // test needs the production chroma-compression path, which lives in the
-    // P7 mapper; it is in tests/fl/gfx/gamut_map.cpp, with a control leg.
+    // P7 mapper; it is in tests/unit/fl/gfx/gamut_map.cpp, with a control leg.
     //
     // What belongs here is the composition property the mapper relies on:
     // whatever OKLab the forward transform produces, the inverse must accept

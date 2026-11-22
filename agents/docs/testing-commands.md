@@ -8,8 +8,9 @@
 
 ```bash
 # ✅ CORRECT - Use bash wrapper scripts
-bash test                           # Run all tests
+bash test                           # Run all tests (C++ unit tier, examples, Python)
 bash test <test_name>               # Build and run specific test
+bash test --integration             # Run the C++ integration tier (tests/integration/)
 bash compile wasm --examples Blink  # Compile for WASM (default target)
 bash compile <platform> --examples X # Only when user requests specific platform
 bash lint                           # Run linting
@@ -26,6 +27,29 @@ clang++ main.cpp -o main            # WRONG - use bash scripts
 ```
 
 **Exceptions:** Runtime debugging (e.g., `lldb .build/runner.exe`) and compiler feature testing are allowed. See `agents/docs/build-system.md` for details.
+
+## C++ Test Tiers
+
+Host C++ tests live in three tiers under `tests/`:
+
+| Tier | Path | How to run | What belongs there |
+|------|------|------------|--------------------|
+| unit | `tests/unit/**` | `bash test`, `bash test --cpp`, `bash test <name>` | Fast doctest suites. The default set. |
+| integration | `tests/integration/**` | `bash test --integration`, or `bash test <name>` | Heavy or slow doctest suites with real pass/fail, e.g. the colorimetric strategy comparison table. |
+| profile | `tests/profile/**` | `bash profile <name>` | Standalone benchmark binaries, not doctest suites. |
+
+```bash
+bash test --cpp                           # unit tier only; integration is not built or run
+bash test --integration                   # build and run every integration-tier suite
+bash test colorimetric_strategy_table     # one named test, from whichever tier it lives in
+bash profile <function>                   # profile tier
+```
+
+The tier directory is not part of a test's name: `tests/unit/fl/channels/spi.cpp`
+is `fl_channels_spi`, and `tests/integration/misc/colorimetric_strategy_table.cpp`
+is `colorimetric_strategy_table`. Integration-tier suites are excluded from the
+default build (`build_by_default: false`) and from the default `meson test` run
+(`--no-suite integration`), and they get a 300 s watchdog instead of 20 s.
 
 ## Test Timeouts and Hang Detection
 
@@ -66,7 +90,7 @@ THREAD STACK TRACES:
 ```bash
 # ✅ CORRECT - Use clean flag
 bash test --clean                          # Clean and rebuild all tests
-bash test --clean tests/fl/async           # Clean and rebuild specific test
+bash test --clean tests/unit/fl/async           # Clean and rebuild specific test
 bash compile --clean wasm --examples Blink  # Clean and rebuild WASM
 
 # ❌ FORBIDDEN - Never manually delete build caches

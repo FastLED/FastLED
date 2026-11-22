@@ -1,4 +1,4 @@
-/// @file tests/platforms/esp/32/core/clock_divider.cpp
+/// @file tests/unit/platforms/esp/32/core/clock_divider.cpp
 /// Host tests for the shared ESP32 fractional clock-divider solver (#3562).
 ///
 /// The solver was hoisted out of the I2S peripheral impl, so the most useful

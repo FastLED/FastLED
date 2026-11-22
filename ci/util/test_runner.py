@@ -1640,7 +1640,7 @@ def runner(
             # Extract .hpp filename if user requested a specific detector file
             test_file_filter = None
             if args.raw_test_query and args.raw_test_query.endswith(".hpp"):
-                # Extract just the filename (e.g., "backbeat.hpp" from "tests/fl/audio/detectors/backbeat.hpp")
+                # Extract just the filename (e.g., "backbeat.hpp" from "tests/unit/fl/audio/detectors/backbeat.hpp")
                 test_file_filter = args.raw_test_query.split("/")[-1]
 
             result = run_meson_build_and_test(
@@ -1657,6 +1657,7 @@ def runner(
                 ],  # Exclude examples in unit-test-only mode
                 test_file_filter=test_file_filter,
                 log_failures=args.log_failures,
+                integration=args.integration,
             )
 
             if not result.success:
@@ -1675,8 +1676,10 @@ def runner(
             # Update fingerprint metadata for cache display on next run.
             # Record whether this run covered the whole suite: the counts are
             # replayed verbatim on later cache hits, so a filtered run's number
-            # must never be presentable as a full-suite pass (#3763).
-            if fingerprint_manager is not None:
+            # must never be presentable as a full-suite pass (#3763). An
+            # integration-tier run says nothing about the unit tier, so it
+            # leaves the unit metadata alone.
+            if fingerprint_manager is not None and not args.integration:
                 fingerprint_manager.update_test_metadata(
                     "cpp_test",
                     num_tests_run=result.num_tests_run,
@@ -1698,7 +1701,7 @@ def runner(
 
                 show_zccache_stats()
             unit_timing = ProcessTiming(
-                name=f"cpp_unit_tests ({_describe_cpp_counts(result)})",
+                name=f"{'cpp_integration_tests' if args.integration else 'cpp_unit_tests'} ({_describe_cpp_counts(result)})",
                 duration=result.duration,
                 command="meson test",
                 skipped=False,
@@ -1740,7 +1743,7 @@ def runner(
             # Extract .hpp filename if user requested a specific detector file
             test_file_filter = None
             if args.raw_test_query and args.raw_test_query.endswith(".hpp"):
-                # Extract just the filename (e.g., "backbeat.hpp" from "tests/fl/audio/detectors/backbeat.hpp")
+                # Extract just the filename (e.g., "backbeat.hpp" from "tests/unit/fl/audio/detectors/backbeat.hpp")
                 test_file_filter = args.raw_test_query.split("/")[-1]
 
             result = run_meson_build_and_test(

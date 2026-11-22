@@ -8,7 +8,7 @@
 #include "fl/stl/shared_ptr.h"
 #include "fl/math/math.h"
 #include "fl/math/math.h"
-#include "tests/fl/audio/test_helpers.h"
+#include "tests/unit/fl/audio/test_helpers.h"
 
 using namespace fl;
 using fl::audio::test::makeSample;

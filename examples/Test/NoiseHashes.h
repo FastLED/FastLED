@@ -13,7 +13,7 @@
 //    the host. kHostCases keep every inoise16 coordinate below 0x8000 (no int
 //    narrowing anywhere) and use octaves >= 2, so their output must equal the
 //    host's. The FNV-1a hash of each fill is compared with the golden table,
-//    which tests/noise.cpp pins on the host.
+//    which tests/unit/noise.cpp pins on the host.
 //
 // 2. Coordinate narrowing. The buffered fill_raw_noise16into8 keeps its
 //    coordinate in an int, so on AVR a coordinate >= 0x8000 wraps and
@@ -57,7 +57,7 @@ const Case kWrapCases[kWrapCaseCount] FL_PROGMEM = {
 };
 
 // Golden hashes of fill_noise16 for kHostCases. Host output, pinned by
-// tests/noise.cpp.
+// tests/unit/noise.cpp.
 const fl::u32 kGolden[kHostCaseCount] FL_PROGMEM = {
     0xCBBD05F1UL,  // 0
     0x1F322165UL,  // 1

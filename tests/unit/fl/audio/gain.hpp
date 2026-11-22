@@ -9,7 +9,7 @@
 #include "fl/math/math.h"
 #include "fl/math/math.h"
 #include "fl/stl/vector.h"
-#include "tests/fl/audio/test_helpers.hpp"
+#include "tests/unit/fl/audio/test_helpers.hpp"
 #include "test.h"
 
 using namespace fl;

@@ -465,8 +465,8 @@ FL_TEST_CASE("Hash collision resistance") {
 }
 
 // Grouped tests
-#include "tests/fl/stl/unordered_map_lru.hpp"
-#include "tests/fl/stl/insert_result.hpp"
+#include "tests/unit/fl/stl/unordered_map_lru.hpp"
+#include "tests/unit/fl/stl/insert_result.hpp"
 
 FL_TEST_FILE(FL_FILEPATH) {
 

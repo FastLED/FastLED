@@ -38,7 +38,7 @@
 ///
 /// The queue is deliberately platform-independent — no BTstack, no NimBLE,
 /// no ATT types — so the ordering and chunking contract is covered by host
-/// unit tests (`tests/fl/net/ble_notify_queue.cpp`) on targets that have no
+/// unit tests (`tests/unit/fl/net/ble_notify_queue.cpp`) on targets that have no
 /// BLE silicon.
 
 #include "fl/stl/int.h"

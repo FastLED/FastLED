@@ -22,7 +22,7 @@
 // targets the budget exists for, and the vector kernels legitimately need more
 // stack (the DCT-32 holds its 4x8 scratch as 16-byte vectors rather than
 // int32). The SIMD build's own footprint is covered by the bit-exactness and
-// perf gates in tests/fl/codec/mp3_fixed_point.hpp.
+// perf gates in tests/unit/fl/codec/mp3_fixed_point.hpp.
 #define MINIMP3_FIXED_POINT 1
 #define MINIMP3_NO_SIMD
 #define MINIMP3_IMPLEMENTATION

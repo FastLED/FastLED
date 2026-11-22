@@ -15,19 +15,19 @@ FL_TEST_CASE("Audio - Test registration works") {
 }
 
 // Include audio test files (unity build pattern)
-#include "tests/fl/audio/audio_context.hpp"
-#include "tests/fl/audio/auto_gain.hpp"
-#include "tests/fl/audio/frequency_bin_mapper.hpp"
-#include "tests/fl/audio/noise_floor_tracker.hpp"
-#include "tests/fl/audio/signal_conditioner.hpp"
-#include "tests/fl/audio/silence_envelope.hpp"
-#include "tests/fl/audio/spectral_equalizer.hpp"
-#include "tests/fl/audio/synth.hpp"
-#include "tests/fl/audio/detector/equalizer.hpp"
-#include "tests/fl/audio/gain.hpp"
-#include "tests/fl/audio/mic_response_data.hpp"
-#include "tests/fl/audio/detector/multiband_beat_detector.hpp"
-#include "tests/fl/audio/detector/musical_beat_detector.hpp"
+#include "tests/unit/fl/audio/audio_context.hpp"
+#include "tests/unit/fl/audio/auto_gain.hpp"
+#include "tests/unit/fl/audio/frequency_bin_mapper.hpp"
+#include "tests/unit/fl/audio/noise_floor_tracker.hpp"
+#include "tests/unit/fl/audio/signal_conditioner.hpp"
+#include "tests/unit/fl/audio/silence_envelope.hpp"
+#include "tests/unit/fl/audio/spectral_equalizer.hpp"
+#include "tests/unit/fl/audio/synth.hpp"
+#include "tests/unit/fl/audio/detector/equalizer.hpp"
+#include "tests/unit/fl/audio/gain.hpp"
+#include "tests/unit/fl/audio/mic_response_data.hpp"
+#include "tests/unit/fl/audio/detector/multiband_beat_detector.hpp"
+#include "tests/unit/fl/audio/detector/musical_beat_detector.hpp"
 
 FL_TEST_FILE(FL_FILEPATH) {
 

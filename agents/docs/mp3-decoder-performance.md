@@ -121,7 +121,7 @@ get wrong in the other direction. `_common_compile_flags()` passes
 `-DMINIMP3_NO_SIMD` on every build path the audit has, so `mp3d_synth_pair`'s
 SSE2/NEON form is never compiled here -- see "Disable SIMD when tracing on the
 host" below for why that is right. The consequence is worth stating plainly
-because a comment in `tests/fl/codec/mp3_fixed_point.hpp` used to claim the
+because a comment in `tests/unit/fl/codec/mp3_fixed_point.hpp` used to claim the
 opposite: **nothing anywhere gates how fast the vector path is.** The
 wall-clock check in that file is a floor (`ratio >= 0.5`, #4183) after the
 0.95 threshold proved unable to separate a regression from which runner GitHub

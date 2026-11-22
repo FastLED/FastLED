@@ -18,8 +18,8 @@ Before writing ANY test, read `agents/tests.md` for complete conventions. Key ru
 ## Test File Conventions
 
 ### File Placement
-- **Mirror source structure**: `src/fl/foo.h` -> `tests/fl/foo.cpp`
-- **NEVER create tests in `tests/misc/`**
+- **Mirror source structure**: `src/fl/foo.h` -> `tests/unit/fl/foo.cpp`
+- **NEVER create tests in `tests/unit/misc/`**
 - **Check for existing test files first** — add to them rather than creating new ones
 
 ### File Template

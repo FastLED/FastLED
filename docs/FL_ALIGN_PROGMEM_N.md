@@ -113,7 +113,7 @@ From the sincos32_simd optimization (see `.loop/log.txt` lines 531-537):
 
 ## Testing
 
-The feature is tested in `tests/misc/test_progmem_coverage.cpp`:
+The feature is tested in `tests/unit/misc/test_progmem_coverage.cpp`:
 
 ```cpp
 // 4-byte aligned (default)

@@ -1,7 +1,7 @@
 
 #include "test.h"
-#include "tests/fl/stl/asio/http/test_utils/mock_http_server.h"
-#include "tests/fl/stl/asio/http/test_utils/mock_http_client.h"
+#include "tests/unit/fl/stl/asio/http/test_utils/mock_http_server.h"
+#include "tests/unit/fl/stl/asio/http/test_utils/mock_http_client.h"
 #include "fl/stl/json.h"
 
 FL_TEST_FILE(FL_FILEPATH) {

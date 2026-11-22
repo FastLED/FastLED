@@ -6,7 +6,7 @@
 /// Pure-function header — no Teensy hardware dependency, so it links
 /// cleanly into both the Teensy build (where lpuart_driver.cpp.hpp
 /// calls it) and the host unit-test build (where the encoder test in
-/// `tests/platforms/.../lpuart_encoder.cpp` exercises the math).
+/// `tests/unit/platforms/.../lpuart_encoder.cpp` exercises the math).
 ///
 /// See `lpuart_driver.h` for the full derivation of the wave8 table.
 /// Summary:

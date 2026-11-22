@@ -4,8 +4,8 @@
 // The library build does not define FASTLED_RGBW_COLORIMETRIC by default, so
 // the colorimetric dispatch here exercises the stub path (warn-once + zero
 // output). Math-correctness of solve_rgbcct itself is covered by
-// tests/fl/gfx/rgbw_colorimetric.cpp. Encoder + variant migration coverage
-// is in tests/fastled_core.cpp.
+// tests/unit/fl/gfx/rgbw_colorimetric.cpp. Encoder + variant migration coverage
+// is in tests/unit/fastled_core.cpp.
 
 #include "test.h"
 

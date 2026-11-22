@@ -59,7 +59,7 @@ def main(argv: list[str]) -> int:
         REPO_ROOT / "ci" / "tests" / "fixtures" / "profiles",
         REPO_ROOT / "ci" / "golden" / "profiles",
     ]
-    target = REPO_ROOT / "tests" / "fl" / "gfx" / "colorimetric_response_profiles.hpp"
+    target = REPO_ROOT / "tests" / "unit" / "fl" / "gfx" / "colorimetric_response_profiles.hpp"
     rendered = render(directories)
 
     if parsed.mode == "write":

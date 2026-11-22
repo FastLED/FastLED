@@ -93,7 +93,9 @@ runner_exe = executable('runner',
 )
 
 # Discover and organize tests using external Python script
-# Output format: TEST:<name>:<file_path>:<category>
+# Output format: TEST:<name>:<file_path>:<category>:<tier>
+# <file_path> is relative to this directory and starts with the tier directory
+# (unit/ or integration/); <name> never includes the tier.
 # Uses hash-based caching to avoid re-running organize_tests.py when test files unchanged
 cache_script = meson.current_source_dir() / 'test_metadata_cache.py'
 tests_source_dir = meson.current_source_dir()
@@ -137,18 +139,21 @@ endif
 test_names = []
 test_file_paths = {}
 test_categories = {}
+test_tiers = {}
 
 foreach line : test_metadata_output.split('\n')
   if line != ''
-    # Parse line format: TEST:<name>:<file_path>:<category>
+    # Parse line format: TEST:<name>:<file_path>:<category>:<tier>
     parts = line.split(':')
     test_name = parts[1]
     test_file = parts[2]
     test_category = parts[3]
+    test_tier = parts.length() > 4 ? parts[4] : 'unit'
 
     test_names += test_name
     test_file_paths += {test_name: test_file}
     test_categories += {test_name: test_category}
+    test_tiers += {test_name: test_tier}
   endif
 endforeach
 
@@ -157,6 +162,10 @@ endforeach
 # Track all test DLLs and runners for alias
 all_test_dlls = []
 all_test_runners = []
+# Integration-tier DLLs and runner copies (tests/integration/**): not built by default, built by
+# the `integration_tests` alias that `bash test --integration` compiles.
+integration_test_targets = []
+integration_test_names = []
 
 # Environment for test execution - ensure fastled.dll and runtime DLLs are discoverable
 test_env = environment()
@@ -185,7 +194,7 @@ test_shared_objs_lib = static_library('test_shared_objs',
     # (FastLED#2887).
     'doctest_main.cpp',
     'shared/fl_unittest.cpp',
-    'misc/coroutine_impl.cpp',
+    'unit/misc/coroutine_impl.cpp',
     test_pch,
   ],
   cpp_args: shared_test_cpp_args,
@@ -199,7 +208,7 @@ shared_test_objects = test_shared_objs_lib.extract_all_objects(recursive: false)
 # configuration. It deliberately does not link fastled_lib or use test_pch,
 # avoiding host-tier ODR/PCH contamination of sizeof assertions.
 color_profile_tiny_layout = executable('color_profile_tiny_layout',
-  'fl/channels/color_profile_tiny_layout.cpp',
+  'unit/fl/channels/color_profile_tiny_layout.cpp',
   cpp_args: test_abs_include_args + unit_test_compile_args + [
     '-DFL_PLATFORM_HAS_TINY_MEMORY=1',
     '-DFL_PLATFORM_HAS_LARGE_MEMORY=0',
@@ -229,7 +238,7 @@ fastled_tiny_lib = static_library('fastled_tiny_profile',
   install: false
 )
 color_profile_tiny_runtime = executable('color_profile_tiny_runtime',
-  'fl/channels/color_profile_tiny_runtime.cpp',
+  'unit/fl/channels/color_profile_tiny_runtime.cpp',
   cpp_args: test_abs_include_args + unit_test_compile_args + [
     '-DFL_PLATFORM_HAS_TINY_MEMORY=1',
     '-DFL_PLATFORM_HAS_LARGE_MEMORY=0',
@@ -261,7 +270,7 @@ engine_worker_defaults_lib = static_library('fastled_engine_worker_defaults',
   install: false
 )
 engine_worker_defaults_runtime = shared_library('engine_worker_defaults_runtime',
-  'fl/channels/engine_worker_defaults.cpp',
+  'unit/fl/channels/engine_worker_defaults.cpp',
   objects: shared_test_objects,
   cpp_args: test_abs_include_args + unit_test_compile_args + engine_worker_default_args + [
     '-DTEST_DLL_MODE',
@@ -284,6 +293,7 @@ test('engine_worker_defaults_runtime', runner_exe,
 foreach test_name : test_names
   # Get test file path from dynamic map (for subdirectories) or default to test_name.cpp
   test_file = test_file_paths.get(test_name, test_name + '.cpp')
+  is_integration = test_tiers.get(test_name, 'unit') == 'integration'
 
   # Test sources: only the unique test file + PCH dependency
   # doctest_main.cpp and fl_unittest.cpp are pre-compiled in shared_test_objects
@@ -292,7 +302,7 @@ foreach test_name : test_names
   # into that name, e.g.
   #   C__Users_me_dev_fastled_.claude_worktrees_my-branch_tests_misc_foo.cpp.obj
   # `test_file` is already relative to this directory, so passing it directly
-  # collapses the object name to misc_foo.cpp.obj -- around 90 characters
+  # collapses the object name to unit_misc_foo.cpp.obj -- around 90 characters
   # shorter per object. That matters on Windows, where the encoded name is what
   # pushed builds under .claude/worktrees/<branch>/ past MAX_PATH (FastLED#2887).
   test_sources = [
@@ -329,11 +339,18 @@ foreach test_name : test_names
     link_with: test_link_with,
     name_prefix: '',  # Remove 'lib' prefix on Windows (produce 'test.dll' not 'libtest.dll')
     implicit_include_directories: false,
+    # Integration-tier suites are heavy; only build them on request.
+    build_by_default: not is_integration,
     install: false
   )
 
   # Track test DLL for alias
-  all_test_dlls += test_dll
+  if is_integration
+    integration_test_targets += test_dll
+    integration_test_names += test_name
+  else
+    all_test_dlls += test_dll
+  endif
 
   # Copy runner.exe to test directory as <test_name>.exe
   # build_by_default: false - only built when running specific tests (runner.py:855)
@@ -347,7 +364,11 @@ foreach test_name : test_names
   )
 
   # Track test runner for alias
-  all_test_runners += test_runner
+  if is_integration
+    integration_test_targets += test_runner
+  else
+    all_test_runners += test_runner
+  endif
 
   # Register test: runner.exe loads the DLL and executes it
 
@@ -406,6 +427,16 @@ foreach test_name : test_names
     test_timeout = 60  # Extended timeout for slow tests
   endif
 
+  # Integration-tier suites are heavy by definition (the colorimetric strategy
+  # table alone took ~96 s on a heavily loaded host). They run in their own suite so
+  # the default `meson test` invocation can exclude them with
+  # `--no-suite integration`.
+  test_suite = []
+  if is_integration
+    test_timeout = 300  # INTEGRATION_TEST_TIMEOUT_SECONDS in ci/meson/test_discovery.py
+    test_suite = ['integration']
+  endif
+
   # Check if deadlock detection wrapper should be used
   # Set FASTLED_TEST_WRAPPER=1 to enable wrapper with stack dumping
   use_wrapper = get_option('test_wrapper')
@@ -431,6 +462,7 @@ foreach test_name : test_names
       is_parallel: not is_serial,
       timeout: test_timeout,
       env: this_test_env,
+      suite: test_suite,
     )
   else
     # Direct test execution (Meson handles timeout, but no stack dumps)
@@ -441,14 +473,22 @@ foreach test_name : test_names
       is_parallel: not is_serial,
       timeout: test_timeout,
       env: this_test_env,
+      suite: test_suite,
     )
   endif
 endforeach
 
-# Create alias target that builds all test DLLs and runners
+# Create alias target that builds all unit-tier test DLLs and runners
 alias_target('all_tests', all_test_dlls + all_test_runners)
 
-message('Individual test DLL build enabled: ' + test_names.length().to_string() + ' test DLLs + runners')
+# `bash test --integration` compiles this alias, then runs the integration
+# suite. runner_exe is included so a fresh build directory can run them.
+if integration_test_targets.length() > 0
+  alias_target('integration_tests', integration_test_targets + [runner_exe])
+endif
+
+message('Individual test DLL build enabled: ' + test_names.length().to_string() + ' test DLLs + runners ('
+  + integration_test_names.length().to_string() + ' integration tier, built on request)')
 
 # ============================================================================
 # PROFILING BINARIES (standalone, not tests)

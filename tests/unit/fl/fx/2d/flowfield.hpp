@@ -335,7 +335,7 @@ FL_TEST_CASE("flowfield - base class pointer interface") {
 }
 
 // ---------------------------------------------------------------------------
-//  NoiseBias tests (moved from tests/fl/noise_bias.cpp)
+//  NoiseBias tests (moved from tests/unit/fl/noise_bias.cpp)
 // ---------------------------------------------------------------------------
 
 FL_TEST_CASE("NoiseBias1D - constructor initializes to zero") {

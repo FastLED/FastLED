@@ -1,7 +1,7 @@
 """Emit the C++ reference-vector table from `ci/golden/color-reference-v1.json`.
 
 The golden corpus is the P5 deliverable and the thing FastLED#4040 (P6) is
-measured against. Before this, `tests/fl/gfx/pipeline.cpp` carried 48 of its
+measured against. Before this, `tests/unit/fl/gfx/pipeline.cpp` carried 48 of its
 285 vectors as hand-typed literals with the file named only in a comment --
 so the C++ side could drift from the corpus silently, and nothing said which
 48 or why. That is the same defect FastLED#4279 fixed elsewhere: a test that
@@ -32,7 +32,7 @@ from typeguard import typechecked
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 GOLDEN_FILE = PROJECT_ROOT / "ci" / "golden" / "color-reference-v1.json"
 HEADER_FILE = (
-    PROJECT_ROOT / "tests" / "fl" / "gfx" / "test_utils" / "color_reference_vectors.hpp"
+    PROJECT_ROOT / "tests" / "unit" / "fl" / "gfx" / "test_utils" / "color_reference_vectors.hpp"
 )
 
 # The device this table covers.

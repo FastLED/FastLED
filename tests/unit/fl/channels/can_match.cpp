@@ -1,4 +1,4 @@
-/// @file tests/fl/channels/can_match.cpp
+/// @file tests/unit/fl/channels/can_match.cpp
 /// @brief Unit tests for fl::canMatch against synthetic
 ///        DriverCapabilities + PinGroup[] fixtures (#3186).
 ///

@@ -14,7 +14,7 @@ All board compiles use `fbuild`. Do not add board allowlists or legacy-backend f
 
 ### Board examples run on explicit CI labels (#4543)
 
-`bash compile <board> smoke` remains available for local focused validation: it builds `tests/platforms/_standard/SMOKE_SKETCHES.txt` plus every example the PR changes (diffed against `GITHUB_BASE_REF`, or `FASTLED_SMOKE_BASE_REF` locally). Routine PR and master events skip the costly board workflows. An internal PR with `ci-full` or a matching `ci-platform:` label runs each selected board's full example set, including esp32s3, teensy41, and uno. Use `bash ci-labels list --json` to choose a label. The smoke manifest still records sketches that uniquely caught real defects; do not remove an entry without replacement evidence.
+`bash compile <board> smoke` remains available for local focused validation: it builds `tests/unit/platforms/_standard/SMOKE_SKETCHES.txt` plus every example the PR changes (diffed against `GITHUB_BASE_REF`, or `FASTLED_SMOKE_BASE_REF` locally). Routine PR and master events skip the costly board workflows. An internal PR with `ci-full` or a matching `ci-platform:` label runs each selected board's full example set, including esp32s3, teensy41, and uno. Use `bash ci-labels list --json` to choose a label. The smoke manifest still records sketches that uniquely caught real defects; do not remove an entry without replacement evidence.
 
 ### 🚨 Deployment (flash / upload) is fbuild's job — ALWAYS
 
@@ -111,7 +111,7 @@ rm -rf .build/fbuild
 rm -rf .fbuild
 
 # ❌ WRONG - Never combine cache deletion with commands
-rm -rf .build/meson-quick && uv run test.py tests/fl/stl/move
+rm -rf .build/meson-quick && uv run test.py tests/unit/fl/stl/move
 rm -rf .build && bash test
 ```
 
@@ -120,11 +120,11 @@ rm -rf .build && bash test
 ```bash
 # ✅ CORRECT - Use clean flag to rebuild from scratch
 bash test --clean                          # Clean and rebuild all tests
-bash test --clean tests/fl/stl/move        # Clean and rebuild specific test
+bash test --clean tests/unit/fl/stl/move        # Clean and rebuild specific test
 bash compile --clean wasm --examples Blink  # Clean and rebuild WASM
 
 # ✅ CORRECT - Just run the command (build system self-heals)
-bash test tests/fl/stl/move                # Build system revalidates automatically
+bash test tests/unit/fl/stl/move                # Build system revalidates automatically
 ```
 
 ### Rationale: Why Manual Deletion Is Discouraged
@@ -147,7 +147,7 @@ bash test tests/fl/stl/move                # Build system revalidates automatica
 # ❌ WRONG - Never disable fingerprint caching
 uv run test.py --no-fingerprint
 bash test --no-fingerprint
-uv run test.py tests/fl/async --no-fingerprint
+uv run test.py tests/unit/fl/async --no-fingerprint
 
 # ❌ WRONG - This makes builds extremely slow
 uv run test.py --no-fingerprint --cpp
@@ -158,12 +158,12 @@ uv run test.py --no-fingerprint --cpp
 ```bash
 # ✅ CORRECT - Let fingerprint caching work
 bash test
-bash test tests/fl/async
+bash test tests/unit/fl/async
 bash test --cpp
 
 # ✅ CORRECT - Use --clean if you suspect cache issues
 bash test --clean                    # Clean rebuilds, but keeps fingerprint cache
-bash test --clean tests/fl/async     # Selective clean rebuild
+bash test --clean tests/unit/fl/async     # Selective clean rebuild
 ```
 
 ### Rationale: Why --no-fingerprint Is Forbidden

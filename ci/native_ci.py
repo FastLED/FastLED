@@ -16,10 +16,10 @@ ROOT = Path(__file__).resolve().parent.parent
 # targets reuse that Meson build instead of compiling the 664-target full suite.
 # channel_driver_uart is the one live test currently declared serial by Meson.
 CPP_SMOKE = {
-    "fastled_core": "tests/fastled_core.cpp",
-    "fl_hsv2rgb_accuracy": "tests/fl/hsv2rgb_accuracy.cpp",
-    "channel_driver_uart": "tests/platforms/esp/32/drivers/uart/channel_driver_uart.cpp",
-    "channel_driver_rmt": "tests/platforms/esp/32/drivers/rmt/rmt_5/channel_driver_rmt.cpp",
+    "fastled_core": "tests/unit/fastled_core.cpp",
+    "fl_hsv2rgb_accuracy": "tests/unit/fl/hsv2rgb_accuracy.cpp",
+    "channel_driver_uart": "tests/unit/platforms/esp/32/drivers/uart/channel_driver_uart.cpp",
+    "channel_driver_rmt": "tests/unit/platforms/esp/32/drivers/rmt/rmt_5/channel_driver_rmt.cpp",
 }
 
 # Representative color-reference/corpus coverage from #4359, plus selector

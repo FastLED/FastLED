@@ -1,4 +1,4 @@
-/// @file tests/fl/gfx/rgbw_type_erased_golden.cpp
+/// @file tests/unit/fl/gfx/rgbw_type_erased_golden.cpp
 /// @brief The type-erased RGBW/RGBWW path in PixelIterator (#4795) must
 /// produce exactly the bytes of PixelController's own templated loaders,
 /// for every colour order, W placement and mode, including an iterator

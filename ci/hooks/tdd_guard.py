@@ -82,7 +82,7 @@ def main():
         sys.exit(0)
 
     # Check for corresponding test file
-    test_path = f"tests/{stem}.cpp"
+    test_path = f"tests/unit/{stem}.cpp"
     test_full = os.path.join(project_root, test_path)
 
     if os.path.exists(test_full):

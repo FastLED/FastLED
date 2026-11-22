@@ -198,7 +198,7 @@ FL_TEST_CASE("A response LUT is validated, owned, and applied after flux scaling
     // then invert the response to get the physical drive code.
     //
     // When one is added, the ordering constraint is written down as
-    // arithmetic in `tests/fl/gfx/flux_scalar.cpp`: "A shared scalar is only
+    // arithmetic in `tests/unit/fl/gfx/flux_scalar.cpp`: "A shared scalar is only
     // chromaticity-preserving on linear quantities".
     ChannelOptions options;
     EmitterProfile profile = kFixtureProfile;

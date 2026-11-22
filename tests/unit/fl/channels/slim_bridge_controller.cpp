@@ -1,4 +1,4 @@
-/// @file tests/fl/channels/slim_bridge_controller.cpp
+/// @file tests/unit/fl/channels/slim_bridge_controller.cpp
 /// @brief Conformance suite for fl::SlimBridgeController (#4581 T0)
 ///
 /// SlimBridgeController<DATA_PIN, TIMING, RGB_ORDER, WAIT_TIME, DriverTraits>

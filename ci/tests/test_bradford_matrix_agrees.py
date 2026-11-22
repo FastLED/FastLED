@@ -16,7 +16,7 @@ respect to the forward matrix: mistype ``0.8951`` as ``0.8591`` and it still
 passes, having inverted the typo perfectly consistently.
 
 The end-to-end budget does not close the gap either. The golden corpus is
-generated from the Python copy and ``tests/fl/gfx/pipeline.cpp`` measures the
+generated from the Python copy and ``tests/unit/fl/gfx/pipeline.cpp`` measures the
 C++ copy against it, so both copies wrong the same way keeps dE2000 at
 0.395096 and fires nothing, while one copy wrong moves the budget but names
 the pipeline rather than a mistyped constant.

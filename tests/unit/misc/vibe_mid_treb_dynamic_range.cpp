@@ -10,5 +10,5 @@
 #include "test.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
-#include "tests/misc/vibe_mid_treb_dynamic_range.hpp"
+#include "tests/unit/misc/vibe_mid_treb_dynamic_range.hpp"
 } // FL_TEST_FILE

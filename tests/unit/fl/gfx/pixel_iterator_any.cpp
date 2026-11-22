@@ -1,4 +1,4 @@
-/// @file tests/fl/gfx/pixel_iterator_any.cpp
+/// @file tests/unit/fl/gfx/pixel_iterator_any.cpp
 /// @brief `PixelIteratorAny` must survive being copied or moved (#4201).
 
 #include "fl/gfx/pixel_iterator_any.h"

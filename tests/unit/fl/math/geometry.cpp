@@ -792,9 +792,9 @@ FL_TEST_CASE("vec2::cross_type_operations") {
 }
 
 // Grouped tests
-#include "tests/fl/math/grid.hpp"
-#include "tests/fl/gfx/tile2x2.hpp"
-#include "tests/fl/math/traverse_grid.hpp"
+#include "tests/unit/fl/math/grid.hpp"
+#include "tests/unit/fl/gfx/tile2x2.hpp"
+#include "tests/unit/fl/math/traverse_grid.hpp"
 
 FL_TEST_FILE(FL_FILEPATH) {
 

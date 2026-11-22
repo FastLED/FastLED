@@ -1,7 +1,7 @@
 #pragma once
 //
 // Colorimetric strategy harness - types and evaluator used by
-// tests/misc/colorimetric_strategy_table.cpp (issue #3422).
+// tests/integration/misc/colorimetric_strategy_table.cpp (issue #3422).
 //
 // The fixture provides the sample set and measured target chromaticities. The
 // closed-form baseline is computed live from the current solver so the table
@@ -14,7 +14,7 @@
 #include "fl/stl/algorithm.h"
 #include "fl/stl/stdint.h"
 #include "fl/stl/vector.h"
-#include "tests/misc/golden/verifier_known_bad.hpp"
+#include "tests/unit/misc/golden/verifier_known_bad.hpp"
 
 namespace fl {
 namespace colorimetric_test {

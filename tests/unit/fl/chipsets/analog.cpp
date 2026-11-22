@@ -1,4 +1,4 @@
-/// @file tests/fl/chipsets/analog.cpp
+/// @file tests/unit/fl/chipsets/analog.cpp
 /// @brief Tests for three-pin PWM analog RGB output.
 
 #include "FastLED.h"

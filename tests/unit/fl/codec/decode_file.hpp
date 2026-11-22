@@ -34,7 +34,7 @@
 FL_TEST_FILE(FL_FILEPATH) {
 
 // ---------------------------------------------------------------------------
-// TestIO — same pattern as tests/fl/remote/remote.cpp
+// TestIO — same pattern as tests/unit/fl/remote/remote.cpp
 // ---------------------------------------------------------------------------
 
 struct TestIO {

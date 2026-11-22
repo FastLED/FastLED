@@ -87,15 +87,15 @@ FL_TEST_CASE("fl::resolve_asset - registered path returns registered URL") {
 // -----------------------------------------------------------------------------
 
 FL_TEST_CASE("fl::resolve_asset - host fallback finds local file") {
-    // tests/fl/data/test_audio.ogg is checked into the repo; pwd for tests is
+    // tests/unit/fl/data/test_audio.ogg is checked into the repo; pwd for tests is
     // the project root, so this relative path exists on disk.
-    asset_ref r = FL_ASSET("tests/fl/data/test_audio.ogg");
+    asset_ref r = FL_ASSET("tests/unit/fl/data/test_audio.ogg");
     url resolved = fl::resolve_asset(r);
     FL_CHECK(resolved.isValid());
     // url.repaired() is true because we passed a bare path (no scheme); fl::url
     // prepends https:// automatically. The important part is the string() contains
     // our path.
-    FL_CHECK(resolved.string().find("tests/fl/data/test_audio.ogg") != fl::string::npos);
+    FL_CHECK(resolved.string().find("tests/unit/fl/data/test_audio.ogg") != fl::string::npos);
 }
 
 FL_TEST_CASE("fl::resolve_asset - host fallback finds sibling .lnk") {

@@ -36,7 +36,7 @@ artifacts disagree.
 uv run python -m ci.generate_profile_header --mode write
 ```
 
-Rewrites `tests/fl/gfx/colorimetric_response_profiles.hpp`. Review the diff.
+Rewrites `tests/unit/fl/gfx/colorimetric_response_profiles.hpp`. Review the diff.
 This is the ingest half of C9.1 and never runs automatically.
 
 ### Freshness — network, informational, always exits 0

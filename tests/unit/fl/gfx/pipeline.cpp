@@ -9,7 +9,7 @@
 #include <cmath>  // ok include -- see the note on `fl::exp` in test_metric below
 
 #include "test.h"
-#include "tests/fl/gfx/test_utils/color_reference_vectors.hpp"
+#include "tests/unit/fl/gfx/test_utils/color_reference_vectors.hpp"
 
 namespace fl {
 namespace test_metric {
@@ -28,7 +28,7 @@ namespace test_metric {
 /// Ported from `ci/color_reference.py`, which is the reference the budget is
 /// measured against, and checked against that implementation's own numbers
 /// rather than assumed to match: see the port-fidelity case in
-/// `tests/fl/gfx/pipeline.cpp`.
+/// `tests/unit/fl/gfx/pipeline.cpp`.
 ///
 /// Test support, not a runtime feature -- `src/` has no need of dE2000 and
 /// this is deliberately not there.

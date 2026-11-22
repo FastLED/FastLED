@@ -8,7 +8,7 @@
 /// machine, capabilities, name) without hardware, the engine class is also
 /// gated to compile under `FASTLED_STUB_IMPL` — same convention as
 /// `ChannelEngineObjectFLED` in
-/// `tests/platforms/arm/teensy/teensy4_common/drivers/objectfled/`.
+/// `tests/unit/platforms/arm/teensy/teensy4_common/drivers/objectfled/`.
 ///
 /// Two tiers of test coverage:
 ///
@@ -47,7 +47,7 @@ using DriverState = IChannelDriver::DriverState;
 namespace {
 
 // WS2812B timing config — same nominal values as the rx_sct_capture tests
-// (`tests/fl/channels/rx_sct_capture.cpp`). Total period = T1+T2+T3 = 1250 ns
+// (`tests/unit/fl/channels/rx_sct_capture.cpp`). Total period = T1+T2+T3 = 1250 ns
 // → inside the engine's [1000, 2500] ns `canHandle()` window.
 ChipsetTimingConfig ws2812_timing_config() {
     return ChipsetTimingConfig(/*T1=*/350, /*T2=*/450, /*T3=*/450,
@@ -75,7 +75,7 @@ ChannelDataPtr makeClocklessChannelData(int pin, fl::size num_leds,
 }
 
 // WS2812 edge-pair decoder timings — same tolerance as
-// `tests/fl/channels/rx_sct_capture.cpp::ws2812_timing()`.
+// `tests/unit/fl/channels/rx_sct_capture.cpp::ws2812_timing()`.
 ChipsetTiming4Phase ws2812_decoder_timing() {
     ChipsetTiming4Phase t{};
     t.t0h_min_ns = 250;   t.t0h_max_ns = 550;

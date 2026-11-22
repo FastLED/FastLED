@@ -1,7 +1,7 @@
 #pragma once
 
 // fixed_point test helpers
-// Extracted from tests/fl/math/fixed_point.cpp as part of #3127 / #3130.
+// Extracted from tests/unit/fl/math/fixed_point.cpp as part of #3127 / #3130.
 //
 // Contains:
 //   - Bit-exact test impl templates (test_*_impl<T>)

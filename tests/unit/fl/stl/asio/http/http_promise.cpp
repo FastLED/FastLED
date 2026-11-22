@@ -8,8 +8,8 @@
 #include "fl/stl/json.h"
 #include "fl/task/promise.h"
 #include "fl/stl/vector.h"
-#include "fl/stl/asio/http/test_utils/mock_http_server.h"
-#include "fl/stl/asio/http/test_utils/mock_http_client.h"
+#include "tests/unit/fl/stl/asio/http/test_utils/mock_http_server.h"
+#include "tests/unit/fl/stl/asio/http/test_utils/mock_http_client.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
 

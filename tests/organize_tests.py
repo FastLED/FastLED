@@ -4,15 +4,19 @@ Organize tests and output metadata for Meson build system.
 This script discovers test files, extracts names, and categorizes them,
 outputting all metadata in a format that Meson can easily parse.
 
-Output format: TEST:<name>:<file_path>:<category>
-Example: TEST:fl_algorithm:fl/algorithm.cpp:fl_tests
+Output format: TEST:<name>:<file_path>:<category>:<tier>
+Example: TEST:fl_algorithm:unit/fl/algorithm.cpp:fl_tests:unit
+
+<file_path> is relative to tests/ and includes the tier directory; <name>
+does not (see test_helpers.extract_test_name).
 """
 
 import sys
 from pathlib import Path
-from discover_tests import discover_test_files
+
+from discover_tests import discover_test_files, split_tier
 from test_config import EXCLUDED_TEST_DIRS, EXCLUDED_TEST_FILES
-from test_helpers import extract_test_name, categorize_test
+from test_helpers import categorize_test, extract_test_name
 
 
 def main() -> None:
@@ -30,15 +34,25 @@ def main() -> None:
     # Discover all test files
     test_files = discover_test_files(tests_dir, EXCLUDED_TEST_FILES, EXCLUDED_TEST_DIRS)
 
+    seen: dict[str, str] = {}
     for test_file_path in test_files:
         if not test_file_path:  # Skip empty strings
             continue
 
         test_name = extract_test_name(test_file_path)
+        if test_name in seen:
+            print(
+                f"Error: test name '{test_name}' is produced by both "
+                f"tests/{seen[test_name]} and tests/{test_file_path}",
+                file=sys.stderr,
+            )
+            sys.exit(1)
+        seen[test_name] = test_file_path
         category = categorize_test(test_name, test_file_path)
+        tier, _ = split_tier(test_file_path)
 
         # Output in parseable format
-        print(f"TEST:{test_name}:{test_file_path}:{category}")
+        print(f"TEST:{test_name}:{test_file_path}:{category}:{tier}")
 
 
 if __name__ == "__main__":

@@ -562,7 +562,7 @@ def check_single_test_cached(test_name_raw: str, build_dir: Path) -> bool:
     and the post-parse_args early exit in main().
 
     Args:
-        test_name_raw: Raw test name string (e.g., "xypath", "tests/fl/alloca").
+        test_name_raw: Raw test name string (e.g., "xypath", "tests/unit/fl/alloca").
         build_dir: Meson build directory (e.g., .build/meson-quick/).
 
     Returns:
@@ -574,10 +574,16 @@ def check_single_test_cached(test_name_raw: str, build_dir: Path) -> bool:
     if not cached_names:
         return False
 
-    # Normalize: strip "tests/" prefix and convert path separators to underscores
-    name_lower = test_name_raw.lower()
-    if name_lower.startswith("tests/") or name_lower.startswith("tests\\"):
+    # Normalize: strip "tests/" and the tier directory (unit/, integration/;
+    # never part of a test name, see tests/test_helpers.py), then convert path
+    # separators to underscores.
+    name_lower = test_name_raw.lower().replace("\\", "/")
+    if name_lower.startswith("tests/"):
         name_lower = name_lower[len("tests/") :]
+    for _tier in ("unit/", "integration/"):
+        if name_lower.startswith(_tier):
+            name_lower = name_lower[len(_tier) :]
+            break
     name_normalized = name_lower.replace("/", "_").replace("\\", "_")
     stem = Path(test_name_raw).stem.lower()
 
@@ -607,7 +613,7 @@ def check_single_test_cached(test_name_raw: str, build_dir: Path) -> bool:
         return False
 
     # Determine the test's source directory to narrow the tests/ scan.
-    # For "tests/fl/alloca" → narrow to tests/fl/ (+ tests/ root for shared headers).
+    # For "tests/unit/fl/alloca" → narrow to tests/unit/fl/ (+ tests/ root for shared headers).
     # This reduces the file scan from ~329 files to ~74 files (~78% faster).
     test_raw_path = Path(test_name_raw)
     if test_raw_path.parts and test_raw_path.parts[0].lower() == "tests":

@@ -1,4 +1,4 @@
-// tests/fl/channels/detail/validation/result_formatter.cpp
+// tests/unit/fl/channels/detail/validation/result_formatter.cpp
 //
 // Unit tests for result formatter
 

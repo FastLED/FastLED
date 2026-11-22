@@ -57,10 +57,10 @@ VERBOSE_SUPPRESS_PATTERNS: list[re.Pattern[str]] = [
         r"^\d+\.\d+\s+\d+/\d+\s+examples\s+-\s+fastled:example-.*OK\s+\d+\.\d+s"
     ),
     # Doctest file:line reference lines (noise without context)
-    # Matches lines like "0.01 ../../tests/fl/xypath.cpp:50:" (standalone file refs)
+    # Matches lines like "0.01 ../../tests/unit/fl/xypath.cpp:50:" (standalone file refs)
     re.compile(r"^\d+\.\d+\s+\.\./\.\./.*:\d+:\s*$"),
     # Doctest MESSAGE lines (debug output with any content)
-    # Matches lines like "0.01 ../../tests/fl/xypath.cpp:50: MESSAGE: some value"
+    # Matches lines like "0.01 ../../tests/unit/fl/xypath.cpp:50: MESSAGE: some value"
     re.compile(r"^\d+\.\d+\s+.*:\d+:\s*MESSAGE:"),
     # Doctest INFO() output lines (debug print values without MESSAGE prefix)
     # These are multi-line debug values from INFO() statements

@@ -1,4 +1,4 @@
-/// @file tests/fl/channels/dither_frame.cpp
+/// @file tests/unit/fl/channels/dither_frame.cpp
 /// @brief The shared temporal-dither phase: who advances it, and when.
 ///
 /// `docs/color-pipeline-contracts.md` asks for this directly:
@@ -7,7 +7,7 @@
 ///   contract, with explicit tests for dropped submissions and irregular
 ///   dwell.
 ///
-/// There were none. `tests/pixel_controller.cpp` drives `advanceDitherFrame()`
+/// There were none. `tests/unit/pixel_controller.cpp` drives `advanceDitherFrame()`
 /// to walk a cycle, but nothing observed who advances the phase or what
 /// happens to a frame that never reaches a driver.
 

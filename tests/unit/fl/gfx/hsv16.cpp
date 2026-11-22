@@ -403,7 +403,7 @@ FL_TEST_CASE("colorBoost() preserves hue - hard cases") {
 }
 
 // Grouped tests
-#include "tests/fl/gfx/eorder.hpp"
+#include "tests/unit/fl/gfx/eorder.hpp"
 FL_TEST_FILE(FL_FILEPATH) {
 
 } // FL_TEST_FILE
@@ -424,7 +424,7 @@ FL_TEST_FILE(FL_FILEPATH) {
 // Measured numbers and what they rule in or out:
 // docs/color-ws2812-shaping-paths.md
 //
-// Grouped into `tests/fl/gfx/hsv16.cpp` rather than standing alone: the
+// Grouped into `tests/unit/fl/gfx/hsv16.cpp` rather than standing alone: the
 // paths under test are `HSV16::ToRGB` and `CRGB::colorBoost`, both of which
 // live in `fl/gfx/hsv16.h`, and each extra test file costs compile time.
 
@@ -447,7 +447,7 @@ struct Oklab {
 /// Built by value on each call rather than cached in a function-local
 /// static. A static inside a header gets one copy per module that links it,
 /// which is a real portability trap (see the BusTraits singleton note in
-/// tests/fl/channels/channel.cpp) and buys nothing here: this is a 3x3
+/// tests/unit/fl/channels/channel.cpp) and buys nothing here: this is a 3x3
 /// inverse.
 RgbColorimetricCache ws2812Cache() {
     RgbColorimetricCache cache;

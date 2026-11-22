@@ -195,7 +195,7 @@ FL_TEST_CASE("The shipped order scales linear drives, which is the safe one") {
     // cannot arise.
     //
     // A per-channel response is inverted only after this scalar. The
-    // unequal-curve integration case in `tests/fl/gfx/pipeline.cpp` verifies
+    // unequal-curve integration case in `tests/unit/fl/gfx/pipeline.cpp` verifies
     // that emitted light remains proportional at several brightnesses.
     //
     // Linearity, checked directly: scaling by a half twice is scaling by a

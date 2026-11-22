@@ -39,7 +39,7 @@ uv run ci/debug_attached.py esp32s3 --use-fbuild --example Blink
 When multiple tests match a query, use these methods:
 
 **Path-based queries:**
-- `bash test tests/fl/async` — Run unit test by path
+- `bash test tests/unit/fl/async` — Run unit test by path
 - `bash test examples/Blink` — Run example by path
 
 **Flag-based filtering:**

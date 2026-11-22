@@ -4,7 +4,7 @@
 /// **Status:**
 ///   * Host / non-LPC builds: edge buffer is RAM-backed; `injectEdges()` +
 ///     `decode()` round-trip works without hardware (see
-///     `tests/fl/channels/rx_sct_capture.cpp`).
+///     `tests/unit/fl/channels/rx_sct_capture.cpp`).
 ///   * LPC845 builds with `-DFASTLED_LPC_RX_SCT=1`: the SCT input-capture
 ///     path in `begin()` / `wait()` polls SCT EVFLAG and reads CAPTURE[0..1]
 ///     to populate the edge buffer from real silicon. The polling design is

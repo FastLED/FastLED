@@ -1,6 +1,6 @@
 // Unit tests for WLEDClient
 
-#include "tests/fl/fx/mock_fastled.h"
+#include "tests/unit/fl/fx/mock_fastled.h"
 #include "fl/stl/cstddef.h"
 #include "crgb.h"
 #include "test.h"

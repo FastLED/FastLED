@@ -157,10 +157,20 @@ class StreamingContext:
     start_time: float
     build_timer: BuildTimer
     build_optimizer: Optional[BuildOptimizer]
+    # Ninja target to compile instead of the default set (e.g. the
+    # ``integration_tests`` alias), and the only meson suites the
+    # nothing-relinked fallback may run. Both None for the default unit run.
+    compile_target: Optional[str] = None
+    include_suites: Optional[list[str]] = None
+    # Runner watchdog seconds when the caller set none (FASTLED_TEST_TIMEOUT).
+    test_timeout: Optional[int] = None
 
 
 def _make_streaming_env(
-    source_dir: Path, build_dir: Path, build_mode: str
+    source_dir: Path,
+    build_dir: Path,
+    build_mode: str,
+    test_timeout: Optional[int] = None,
 ) -> dict[str, str]:
     """Build the environment dict for streamed test processes.
 
@@ -181,6 +191,8 @@ def _make_streaming_env(
     # The streaming path invokes test DLLs directly, so it does not inherit
     # the per-test timeout from Meson's test() environment. Sanitizer runs
     # make the threaded JSON stress test exceed the default 20-second watchdog.
+    if test_timeout is not None:
+        streaming_env.setdefault("FASTLED_TEST_TIMEOUT", str(test_timeout))
     if build_mode in ("debug", "debug-thin"):
         streaming_env.setdefault("FASTLED_TEST_TIMEOUT", "60")
     # source_dir is intentionally unused — only the build_dir matters for
@@ -233,6 +245,7 @@ def _streaming_no_tests_fallback(
         test_name=None,
         verbose=ctx.verbose,
         exclude_suites=ctx.exclude_suites,
+        include_suites=ctx.include_suites,
     )
 
     ctx.build_timer.checkpoint("test_execution_done")
@@ -325,7 +338,9 @@ def run_streaming_path(ctx: StreamingContext) -> MesonTestResult:
         _ts_print("[MESON] Using streaming execution (compile + test in parallel)")
 
     failed_test_outputs: dict[str, str] = {}
-    streaming_env = _make_streaming_env(ctx.source_dir, ctx.build_dir, ctx.build_mode)
+    streaming_env = _make_streaming_env(
+        ctx.source_dir, ctx.build_dir, ctx.build_mode, ctx.test_timeout
+    )
     failed_outputs_lock = threading.Lock()
 
     active_procs: set[RunningProcess] = set()
@@ -426,8 +441,13 @@ def run_streaming_path(ctx: StreamingContext) -> MesonTestResult:
     # measured margin while leaving the 45-minute CI job time for tests.
     compile_timeout = 1800 if ctx.use_debug else 600
 
-    include_examples = examples_are_included(ctx.exclude_suites)
-    compile_target = "all-with-examples" if include_examples else None
+    compile_target: Optional[str]
+    if ctx.compile_target is not None:
+        include_examples = False
+        compile_target = ctx.compile_target
+    else:
+        include_examples = examples_are_included(ctx.exclude_suites)
+        compile_target = "all-with-examples" if include_examples else None
 
     if compile_target == "all-with-examples":
         _check_all_with_examples_target(ctx)

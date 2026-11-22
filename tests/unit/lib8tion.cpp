@@ -3,7 +3,7 @@
 /// Issue #875 reported that lerp8by8 "hangs" an ESP32. The function is a
 /// branch and two arithmetic ops with no loop, so it cannot hang -- but that
 /// was never demonstrated either way, because the whole lerp family had no
-/// tests at all. Its sibling blend8 has ten (tests/platforms/shared/math8.cpp).
+/// tests at all. Its sibling blend8 has ten (tests/unit/platforms/shared/math8.cpp).
 ///
 /// These assert the properties any interpolator must hold, so a future
 /// regression in scale8/scale16 shows up here rather than as drifting colour.

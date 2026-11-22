@@ -20,6 +20,31 @@ class SplitSourceHashes:
     test_files: list[str]
 
 
+# Runner watchdog and meson timeout for integration-tier suites
+# (tests/integration/). Keep in sync with tests/meson.build.
+INTEGRATION_TEST_TIMEOUT_SECONDS = 300
+
+
+def integration_test_names(build_dir: Path) -> set[str]:
+    """Names of the integration-tier tests registered in ``build_dir``.
+
+    Read from the discovery metadata tests/meson.build caches at configure
+    time (``TEST:<name>:<file>:<category>:<tier>`` lines), so the answer
+    matches what the build registered. Empty when the cache is missing.
+    """
+    cache_path = build_dir / "tests" / "test_metadata.cache"
+    try:
+        metadata = json.loads(cache_path.read_text(encoding="utf-8"))["metadata"]
+    except (OSError, json.JSONDecodeError, KeyError, TypeError):
+        return set()
+    names: set[str] = set()
+    for line in str(metadata).splitlines():
+        parts = line.split(":")
+        if len(parts) >= 5 and parts[0] == "TEST" and parts[4] == "integration":
+            names.add(parts[1])
+    return names
+
+
 def _load_introspect_tests_cache(build_dir: Path) -> list[str] | None:
     """
     Load cached test names from disk if the cache is still valid.

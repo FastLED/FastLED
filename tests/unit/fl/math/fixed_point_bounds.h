@@ -20,7 +20,7 @@
 //   } // anonymous namespace
 //   }
 //
-// Extracted from tests/fl/math/fixed_point.cpp as part of #3127 / #3130.
+// Extracted from tests/unit/fl/math/fixed_point.cpp as part of #3127 / #3130.
 
 template<typename T> struct accuracy_bounds;
 

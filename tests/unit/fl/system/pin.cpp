@@ -1,4 +1,4 @@
-/// @file tests/fl/pin.cpp
+/// @file tests/unit/fl/pin.cpp
 /// Unit tests for fl::pin API (GPIO and unified PWM frequency)
 /// and digitalMultiWrite bulk pin API
 /// Implementation is in src/fl/pin.cpp.hpp

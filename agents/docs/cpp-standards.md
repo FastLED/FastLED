@@ -432,7 +432,7 @@ Tracking issue for the per-platform audit: **#4018**.
 
 ## Peripheral Mocks: Singleton + `MockWrapper` Forwarder (REQUIRED)
 - **Rule:** Every peripheral mock in FastLED (`Rmt4PeripheralMock`, `Rmt5PeripheralMock`, `UartPeripheralMock`, `I2sLcdCamPeripheralMock`, `I2sPeripheralEsp32DevMock`, `SpiPeripheralMock`, `FlexIOPeripheralMock`, etc.) MUST expose `static XxxMock& instance() FL_NO_EXCEPT` backed by `fl::Singleton<XxxMockImpl>`. Per-test factories (`createShared()`, `create()`, `make_shared<Mock>()`) are **not** acceptable — they fragment state across the process, break the mental model shared with every peer mock, and turn `reset()` between tests from mandatory hygiene into an unreachable no-op.
-- **How to wire a singleton mock into an engine that takes `fl::shared_ptr<IPeripheral>`:** define a thin `MockWrapper : public IPeripheral` class inside the test TU that forwards every interface method to `XxxMock::instance().foo(...)`, then pass `fl::make_shared<MockWrapper>()` to the engine ctor. See `tests/platforms/esp/32/drivers/i2s/channel_driver_i2s.cpp:43-87` for the canonical `createMockPeripheral()` helper — every new engine test copies this pattern.
+- **How to wire a singleton mock into an engine that takes `fl::shared_ptr<IPeripheral>`:** define a thin `MockWrapper : public IPeripheral` class inside the test TU that forwards every interface method to `XxxMock::instance().foo(...)`, then pass `fl::make_shared<MockWrapper>()` to the engine ctor. See `tests/unit/platforms/esp/32/drivers/i2s/channel_driver_i2s.cpp:43-87` for the canonical `createMockPeripheral()` helper — every new engine test copies this pattern.
 - **Why:** The peripheral is a real hardware resource — there is exactly one on the chip. The mock mirrors that constraint. Tests that need different mock configurations use error-injection knobs on the singleton (`setTransmitFailure(true)` etc.) and `reset()` between cases, not a fresh mock per test.
 - **Exception:** none. If your engine's ctor doesn't take a `shared_ptr<IPeripheral>`, put the mock in a member field of the test fixture and call `instance()` directly — the singleton pattern still holds.
 - **History:** Established during #3471 (I2S esp32dev bring-up) after an earlier draft used `createShared()`. Every peer mock in the tree pre-dates that draft and uses the singleton — the wrapper pattern was documented in code but not in the standards until this point.
@@ -789,13 +789,13 @@ virtual fl::shared_ptr<StreamingPipelineQ16> colorPipeline() const FL_NO_EXCEPT;
 
 ## Test Mirrors Must Call Production Symbols, Not Redeclare Them
 
-**Core Principle**: When `tests/fl/foo/test_bar.cpp` mirrors part of `src/fl/foo/bar.cpp.hpp` (e.g. to verify mathematical identities like Hermite-basis sum = 1), the test MUST call the production symbol directly. Re-declaring the algorithm as a local lambda or helper inside the test file means the test passes regardless of bugs introduced into the production implementation.
+**Core Principle**: When `tests/unit/fl/foo/test_bar.cpp` mirrors part of `src/fl/foo/bar.cpp.hpp` (e.g. to verify mathematical identities like Hermite-basis sum = 1), the test MUST call the production symbol directly. Re-declaring the algorithm as a local lambda or helper inside the test file means the test passes regardless of bugs introduced into the production implementation.
 
 **Rules**:
 1. ❌ **NEVER redefine a production algorithm inside a test file just to assert properties of it.**
    - ❌ Bad:
      ```cpp
-     // tests/fl/gfx/rgbw_colorimetric.cpp
+     // tests/unit/fl/gfx/rgbw_colorimetric.cpp
      FL_TEST_CASE("hermite basis sums to 1") {
          auto h0 = [](float t) { return (1 - t)*(1 - t)*(1 + 2*t); };
          auto h1 = [](float t) { return t*t*(3 - 2*t); };

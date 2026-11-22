@@ -4,7 +4,7 @@
 #include "fl/audio/audio.h"
 #include "fl/audio/audio_context.h"
 #include "fl/audio/detector/percussion.h"
-#include "tests/fl/audio/test_helpers.h"
+#include "tests/unit/fl/audio/test_helpers.h"
 #include "fl/stl/vector.h"
 #include "fl/math/math.h"
 #include "fl/stl/shared_ptr.h"

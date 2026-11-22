@@ -121,7 +121,7 @@ FL_TEST_CASE("downscale 11x11 to 2x2") {
 }
 
 // Grouped tests
-#include "tests/fl/gfx/splat.hpp"
+#include "tests/unit/fl/gfx/splat.hpp"
 FL_TEST_FILE(FL_FILEPATH) {
 
 } // FL_TEST_FILE

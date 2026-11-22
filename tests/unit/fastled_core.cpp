@@ -525,7 +525,7 @@ FL_TEST_CASE("Channel API: 4 parallel strips via FastLED.add() routes through mo
     #undef PIN4
 }
 
-// --- Tests moved from tests/fl/channels/channel_add_remove.cpp ---
+// --- Tests moved from tests/unit/fl/channels/channel_add_remove.cpp ---
 
 namespace channel_add_remove_test {
 

@@ -21,7 +21,7 @@
 /// very samples the driver emitted and the decoder reconstructs the LED bytes.
 ///
 /// This header is deliberately free of SDK headers so it is unit-tested on the
-/// host (see tests/platforms/esp/8266/i2s_ws2812_codec.cpp), mirroring
+/// host (see tests/unit/platforms/esp/8266/i2s_ws2812_codec.cpp), mirroring
 /// `spi_hspi_clock.h`.
 
 #include "fl/channels/rx.h"       // EdgeTime (RX capture reconstruction)

@@ -8,7 +8,7 @@ under tests/ and prints an advisory message suggesting the agent run that test.
 This is advisory only (exit 0 + stdout) — it does NOT run the test or block.
 The agent can then choose to run `bash test TestName` at an appropriate time.
 
-Mapping: src/fl/foo.h → tests/fl/foo.cpp (test name: "fl/foo")
+Mapping: src/fl/foo.h → tests/unit/fl/foo.cpp (test name: "fl/foo")
 
 Exit codes:
 - 0: Always (advisory only)
@@ -90,7 +90,7 @@ def main() -> int:
         return 0
 
     # Check if corresponding test exists
-    test_path = f"tests/{stem}.cpp"
+    test_path = f"tests/unit/{stem}.cpp"
     test_full = os.path.join(str(PROJECT_ROOT), test_path)
 
     if os.path.exists(test_full):

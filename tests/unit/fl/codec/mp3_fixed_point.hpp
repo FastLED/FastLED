@@ -16,7 +16,7 @@
 #include "fl/math/math.h"
 #include "fl/stl/span.h"
 #include "fl/stl/vector.h"
-#include "tests/fl/codec/minimp3_variants.hpp" // ok cpp include
+#include "tests/unit/fl/codec/minimp3_variants.hpp" // ok cpp include
 #ifdef FASTLED_TESTING
 #include "platforms/stub/fs_stub.hpp" // ok platform headers
 #endif

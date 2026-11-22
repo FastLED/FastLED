@@ -210,7 +210,7 @@ template <typename T> class ThreadLocalReal {
                     return storage;
                 }
                 // setspecific failed (ENOMEM): not injected by tests, see
-                // tests/fl/stl/thread_local_key_exhaustion.cpp (#5322).
+                // tests/unit/fl/stl/thread_local_key_exhaustion.cpp (#5322).
                 delete storage;  // ok bare allocation
             }
         }

@@ -142,7 +142,7 @@ FASTLED_FORCE_INLINE FL_IRAM simd_u8x16 blend_u8_16(simd_u8x16 a, simd_u8x16 b, 
     // and `amount` spans 0..255, so the product needs 17 signed bits: at
     // a=0, b=255, amount=192 the true value is 48960, which wraps int16 to
     // -16576, shifts to -65, and saturates to 0 where 191 was wanted. The
-    // 25% case in `tests/fl/math/simd.cpp` passed only because 255*64 fits.
+    // 25% case in `tests/unit/fl/math/simd.cpp` passed only because 255*64 fits.
     //
     // The scalar fallback has no such problem: `diff * amount` promotes to
     // `int` there, so it never lost the bits in the first place.

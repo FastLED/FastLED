@@ -20,7 +20,7 @@ namespace {
 
 // Helper function to load a font file
 fl::vector<unsigned char> loadFontFile(const char* filename) {
-    fl::setTestFileSystemRoot("tests/fl/font/data");
+    fl::setTestFileSystemRoot("tests/unit/fl/font/data");
     fl::FileSystem fs;
 
     // Initialize the filesystem (required for stub platform)

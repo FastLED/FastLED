@@ -1,7 +1,7 @@
 // Unit tests for audio::Processor
 
 #include "test.h"
-#include "tests/fl/audio/test_helpers.h"
+#include "tests/unit/fl/audio/test_helpers.h"
 #include "fl/audio/audio.h"
 #include "fl/audio/audio_processor.h"
 #include "fl/stl/vector.h"

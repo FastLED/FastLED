@@ -33,7 +33,7 @@ from ci.color_profile_generator import (
 REPO_ROOT = Path(__file__).resolve().parents[2]
 MIRRORED = REPO_ROOT / "ci" / "golden" / "profiles"
 FIXTURES = REPO_ROOT / "ci" / "tests" / "fixtures" / "profiles"
-GENERATED = REPO_ROOT / "tests" / "fl" / "gfx" / "colorimetric_response_profiles.hpp"
+GENERATED = REPO_ROOT / "tests" / "unit" / "fl" / "gfx" / "colorimetric_response_profiles.hpp"
 
 
 def _decide(directory: Path) -> list[object]:

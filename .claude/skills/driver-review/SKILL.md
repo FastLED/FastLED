@@ -123,7 +123,7 @@ src/platforms/esp/32/drivers/foo/
   ├─ foo_peripheral_mock.cpp.hpp    # Mock implementation (synchronous)
   └─ channel_driver_foo.cpp.hpp     # Channel driver using IFooPeripheral
 
-tests/platforms/esp/32/drivers/foo/
+tests/unit/platforms/esp/32/drivers/foo/
   ├─ foo_peripheral_mock.cpp        # Mock peripheral unit tests
   └─ channel_driver_foo.cpp         # Driver integration tests
 ```

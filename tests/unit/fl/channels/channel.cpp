@@ -1,4 +1,4 @@
-/// @file tests/fl/channels/channels.cpp
+/// @file tests/unit/fl/channels/channels.cpp
 /// @brief Test suite for Channel API with addressing, color order, and
 ///        Bus-templated create<B>()/FastLED.add<B>() overloads (#2428/#2167)
 
@@ -860,7 +860,7 @@ FL_TEST_CASE("[#2517] Re-enabling the driver resumes enqueue and re-arms the lat
 
 
 // ============ UCS7604 through the Channels encode path (#4326) ============
-// `tests/fl/chipsets/ucs7604.cpp` drives `testUCS7604Controller`, the legacy
+// `tests/unit/fl/chipsets/ucs7604.cpp` drives `testUCS7604Controller`, the legacy
 // `CLEDController` path. `fl::Channel`'s own `writeUCS7604` sits in an
 // anonymous namespace in `channel.cpp.hpp` and is reachable only through
 // `showPixels()`, so nothing observed what it puts on the wire.
@@ -945,7 +945,7 @@ fl::vector<u8> encodeOnce(CRGB colour, bool bindProfile, float gamma, int pin) {
 }  // namespace
 
 FL_TEST_CASE("[#4326] the Channels UCS7604 path encodes a frame at all") {
-    // The floor this file exists to lay down. `tests/fl/chipsets/ucs7604.cpp`
+    // The floor this file exists to lay down. `tests/unit/fl/chipsets/ucs7604.cpp`
     // drives the legacy CLEDController; `fl::Channel`'s writeUCS7604 lives in
     // an anonymous namespace and is reachable only through showPixels(), so
     // nothing observed it. If this stops producing bytes the cases below stop

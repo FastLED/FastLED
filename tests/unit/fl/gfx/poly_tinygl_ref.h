@@ -1,6 +1,6 @@
 #pragma once
 
-/// @file tests/fl/gfx/poly_tinygl_ref.h
+/// @file tests/unit/fl/gfx/poly_tinygl_ref.h
 /// @brief Test/benchmark-only faithful C++ port of aykevl/tinygl's polygon fill
 ///
 /// Faithful port of the A-buffer scanline polygon fill from aykevl/tinygl

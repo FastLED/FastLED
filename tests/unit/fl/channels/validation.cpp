@@ -1,4 +1,4 @@
-// tests/fl/channels/validation.cpp
+// tests/unit/fl/channels/validation.cpp
 //
 // Unit tests for validation logic
 

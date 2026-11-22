@@ -13,7 +13,7 @@ on:
       - 'src/third_party/minimp3/**'
       - 'ci/codec_conformance/**'
       - 'ci/codec_tables/**'
-      - 'tests/fl/codec/mp3*'
+      - 'tests/unit/fl/codec/mp3*'
       - 'tests/data/codec/minimp3/**'
       - '.github/workflows/mp3_conformance.yml'
   pull_request:
@@ -23,7 +23,7 @@ on:
       - 'src/third_party/minimp3/**'
       - 'ci/codec_conformance/**'
       - 'ci/codec_tables/**'
-      - 'tests/fl/codec/mp3*'
+      - 'tests/unit/fl/codec/mp3*'
       - 'tests/data/codec/minimp3/**'
       - '.github/workflows/mp3_conformance.yml'
 

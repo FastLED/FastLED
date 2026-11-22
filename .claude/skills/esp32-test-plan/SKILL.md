@@ -102,14 +102,14 @@ bash autoresearch --parlio       # For PARLIO (ESP32-S3 parallel)
 ## Step 4: Writing Host Unit Tests for FastLED
 
 Host tests live in `tests/`. Conventions:
-- Mirror source path: `src/fl/foo.h` → `tests/fl/foo.cpp`
+- Mirror source path: `src/fl/foo.h` → `tests/unit/fl/foo.cpp`
 - Use `FL_CHECK_EQ`, `FL_REQUIRE_TRUE` assertion macros
 - Include `test.h` and `FastLED.h`
 - No mocks — test real implementations
 - Keep tests simple and fast (< 10 seconds each)
 
 ```cpp
-// Example test structure for tests/fl/my_feature.cpp
+// Example test structure for tests/unit/fl/my_feature.cpp
 #include "test.h"
 #include "FastLED.h"
 #include "fl/my_feature.h"
@@ -176,7 +176,7 @@ TEST_CASE("MyFeature - boundary values") {
 | [description] | [board + wiring] | [expected LED output] | ⬜ Pending (hardware) |
 
 ## Infrastructure Requirements
-- [ ] New test file: `tests/fl/[name].cpp`
+- [ ] New test file: `tests/unit/fl/[name].cpp`
 - [ ] Example sketch modification (if testing new API): `examples/[name]/`
 - [ ] Hardware board: [ESP32 variant] + [LED strip type]
 

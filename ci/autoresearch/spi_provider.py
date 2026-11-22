@@ -150,14 +150,14 @@ async def run_spi_provider(args: Args) -> int:
         extra_defines=spi_provider_defines(args.spi_provider_native),
     )
     fixture = (
-        "tests/platforms/esp/32/drivers/spi/spi_hw_1_esp32.hpp"
+        "tests/unit/platforms/esp/32/drivers/spi/spi_hw_1_esp32.hpp"
         if args.spi_provider_native
-        else "tests/platforms/arduino/spi/spi_arduino.hpp"
+        else "tests/unit/platforms/arduino/spi/spi_arduino.hpp"
     )
     inject_spi_provider_fixture(
         project / "src/sketch",
         root / fixture,
-        root / "tests/platforms/esp/32/drivers/spi/spi_provider.hpp",
+        root / "tests/unit/platforms/esp/32/drivers/spi/spi_provider.hpp",
     )
     configure_spi_provider_dependencies(project / "platformio.ini", environment)
     deployed = await asyncio.to_thread(

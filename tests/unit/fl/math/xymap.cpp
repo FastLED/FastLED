@@ -1,4 +1,4 @@
-/// @file tests/fl/xymap.cpp
+/// @file tests/unit/fl/xymap.cpp
 /// @brief Test suite for XYMap addressing transformations
 
 #include "fl/math/xymap.h"
@@ -296,7 +296,7 @@ FL_TEST_CASE("[#4201] XYMap::fromXMap builds its own lookup table") {
     // table and passes `nullptr` for the contents, meaning "I will fill it".
     // The helper copied from that pointer unconditionally, so this crashed in
     // `memcpy` -- taking every caller of `Channel::setScreenMap(const XMap&)`
-    // with it. The dormant `tests/fl/channels/channel.cpp` was the only thing
+    // with it. The dormant `tests/unit/fl/channels/channel.cpp` was the only thing
     // exercising that path, so nothing caught it.
     fl::XMap reverse = fl::XMap(4, true);
     fl::XYMap mapped = fl::XYMap::fromXMap(reverse);

@@ -7,7 +7,7 @@
 #include "fl/math/fixed_point/s16x16.h"
 #include "fl/stl/bitset.h"
 #include "fl/stl/scratch.h"
-#include "tests/fl/gfx/poly_tinygl_ref.h"
+#include "tests/unit/fl/gfx/poly_tinygl_ref.h"
 
 // ============================================================================
 // drawPolygon A-buffer backend tests

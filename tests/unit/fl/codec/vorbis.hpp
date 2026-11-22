@@ -16,7 +16,7 @@ using namespace fl;
 
 // Test audio file: 1 second 440Hz sine wave at 8kHz mono
 // OGG file created with: ffmpeg -f lavfi -i "sine=frequency=440:duration=1" -ar 8000 -ac 1 -c:a libvorbis -q:a 0 test_audio.ogg
-static const char* TEST_AUDIO_PATH = "tests/fl/data/test_audio.ogg";
+static const char* TEST_AUDIO_PATH = "tests/unit/fl/data/test_audio.ogg";
 
 // Helper function to load test audio file into memory
 static fl::vector<fl::u8> loadTestAudioFile() {
