@@ -1039,7 +1039,7 @@ void AutoResearchRemoteControl::bindDriverMethods(fl::Remote& remote) {
     // minimal sketch (35-LED WS2812B ring, setMaxRefreshRate(800),
     // millisDelay-gated 255-step fade, delay(1000) between sequences) and
     // returns per-sequence wall time so the host can build a histogram.
-    // Args: [{pin, numLeds, iterations}] (all optional;
+    // Args: [{pin, numLeds, iterations, rgbw}] (all optional;
     //        default pin=4, numLeds=35, iterations=10; iterations clamped to
     //        autoresearch::timing_drift::kMaxIterations)
     remote.bind("timingDriftTest", [](const fl::json& args) -> fl::json {
@@ -1048,6 +1048,7 @@ void AutoResearchRemoteControl::bindDriverMethods(fl::Remote& remote) {
         int pin = 4;
         int num_leds = 35;
         int iterations = 10;
+        bool rgbw = false;
 
         fl::json config;
         if (args.is_object()) {
@@ -1065,9 +1066,12 @@ void AutoResearchRemoteControl::bindDriverMethods(fl::Remote& remote) {
             if (config.contains("iterations") && config["iterations"].is_int()) {
                 iterations = static_cast<int>(config["iterations"].as_int().value());
             }
+            if (config.contains("rgbw") && config["rgbw"].is_bool()) {
+                rgbw = config["rgbw"].as_bool().value();
+            }
         }
 
-        auto r = autoresearch::timing_drift::run(pin, num_leds, iterations);
+        auto r = autoresearch::timing_drift::run(pin, num_leds, iterations, rgbw);
 
         response.set("success", r.valid_pin);
         if (!r.valid_pin) {

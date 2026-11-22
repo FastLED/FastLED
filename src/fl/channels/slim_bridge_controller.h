@@ -90,6 +90,62 @@ void encode_ws2812_rgb_direct(PixelControllerT& pixels, Buffer& encoded,
         pixels.advanceData();
     }
 }
+
+/// RGBW / RGBWW WS2812 encode straight from the concrete PixelController
+/// (FastLED#5377). The type is known here, so raw pixels are read inline and
+/// the conversion runs once per run of pixels with its mode and W placement
+/// resolved once, instead of PixelIterator's five type-erased calls and
+/// per-byte capacity-checked appends per pixel. Byte-identical to
+/// PixelIterator::writeWS2812WhiteChannel. Leaves `encoded` empty (the
+/// caller drops the frame) on a size mismatch or a missing conversion.
+template <typename PixelControllerT, typename Buffer>
+void encode_ws2812_white_direct(PixelControllerT& pixels, const Rgbw& rgbw,
+                                const Rgbww& rgbww, Buffer& encoded,
+                                fl::size expectedSize) FL_NO_EXCEPT {
+    const bool ww = rgbww.active();
+    const fl::size bytes = ww ? 5u : 4u;
+    const detail::RgbwConvertBulkFn convertW =
+        ww ? nullptr : detail::rgbw_conversion_bulk();
+    const detail::RgbwwConvertBulkFn convertWW =
+        ww ? detail::rgbww_conversion_bulk() : nullptr;
+    encoded.resize(expectedSize);
+    if ((ww ? convertWW == nullptr : (!rgbw.active() || convertW == nullptr)) ||
+        encoded.size() != expectedSize ||
+        expectedSize != static_cast<fl::size>(pixels.size()) * bytes ||
+        !pixels.has(pixels.size())) {
+        encoded.clear();
+        return;
+    }
+    // Wire byte i comes from source channel order[i] -- the iterator's
+    // identity order on top of the controller's own (refreshWireOrder()).
+    const fl::i32 sourceOrder = static_cast<fl::i32>(PixelControllerT::kColorOrder);
+    const u8 order[3] = {static_cast<u8>((sourceOrder >> 6) & 0x3),
+                         static_cast<u8>((sourceOrder >> 3) & 0x3),
+                         static_cast<u8>(sourceOrder & 0x3)};
+    const u8 premix[3] = {pixels.mColorAdjustment.premixed.r,
+                          pixels.mColorAdjustment.premixed.g,
+                          pixels.mColorAdjustment.premixed.b};
+    constexpr int kRun = 32;
+    u8 raw[kRun * 3];
+    u8* out = encoded.data();
+    for (int left = pixels.size(); left > 0;) {
+        const int n = left < kRun ? left : kRun;
+        for (int i = 0; i < n; ++i) {
+            raw[i * 3 + 0] = pixels.mData[0];
+            raw[i * 3 + 1] = pixels.mData[1];
+            raw[i * 3 + 2] = pixels.mData[2];
+            pixels.stepDithering();
+            pixels.advanceData();
+        }
+        if (ww) {
+            convertWW(rgbww, raw, n, premix, order, out);
+        } else {
+            convertW(rgbw, raw, n, premix, order, out);
+        }
+        out += static_cast<fl::size>(n) * bytes;
+        left -= n;
+    }
+}
 } // namespace detail
 
 /// How a SlimBridgeController reaches its driver. Specialized (not an
@@ -304,8 +360,9 @@ protected:
         if (mData->getPixelFormat() == ChannelPixelFormat::RGB) {
             detail::encode_ws2812_rgb_direct(pixels, encoded, expectedSize);
         } else {
-            fl::PixelIterator iterator(&pixels, this->getRgbw(), this->getRgbww());
-            iterator.writeWS2812WhiteChannel(&encoded);
+            detail::encode_ws2812_white_direct(pixels, this->getRgbw(),
+                                               this->getRgbww(), encoded,
+                                               expectedSize);
         }
         if (encoded.size() != expectedSize) {
             encoded.clear();

@@ -91,7 +91,7 @@ struct DriftResult {
 // time moves 10-20 us with code layout alone; the instruction count does not.
 
 
-inline DriftResult run(int pin, int num_leds, int iterations) {
+inline DriftResult run(int pin, int num_leds, int iterations, bool rgbw = false) {
     DriftResult r{};
     r.pin = pin;
 
@@ -119,7 +119,9 @@ inline DriftResult run(int pin, int num_leds, int iterations) {
     // show() drives only the legacy controller under test.
     FastLED.clear(ClearFlags::CHANNELS);
 
-    LegacyClocklessProxy proxy(pin, leds, num_leds);
+    // rgbw: the same strip as SK6812-style RGBW, which still encodes through
+    // the type-erased PixelIterator (#5377), so its cost can be measured.
+    LegacyClocklessProxy proxy(pin, leds, num_leds, LegacyClocklessChipset::WS2812B, rgbw);
     r.valid_pin = true;
 
 #if defined(ARDUINO_ARCH_ESP32)
