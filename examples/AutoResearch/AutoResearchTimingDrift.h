@@ -33,20 +33,25 @@
 #include "fl/stl/singleton.h"
 #include "fl/system/instruction_counter.h"
 #include "LegacyClocklessProxy.h"
+#include "fl/stl/isr/critical_section.h"
 #include "platforms/is_platform.h"
 
 #include <Arduino.h>  // millis(), micros(), delay()
 
 // Cold-vs-warm mode (#5422): the ROM call that empties the flash cache. On the
 // C3/C6/H2 the one L1 cache serves both code and rodata fetched from flash.
-#if defined(FL_IS_ESP_32C6)
-#include "esp32c6/rom/cache.h"  // ok platform headers - AutoResearch #5422 cache eviction probe
+// These lines are a one-off measurement probe for the RISC-V ESP flash-XIP
+// cache (the same chips fl::InstructionCounter supports); no core API exists
+// or is warranted for evicting a cache, and other targets report
+// cache_flush_supported=false.
+#if defined(FL_IS_ESP_32C6) // ok platform specific - #5422 flash-cache probe; cache eviction has no core API and is meaningful only on flash-XIP RISC-V ESP
+#include "esp32c6/rom/cache.h"  // ok platform headers; ok platform specific - ROM Cache_Invalidate_ICache_All() for the #5422 probe, no core equivalent
 #define FL_TIMING_DRIFT_HAS_CACHE_FLUSH 1
-#elif defined(FL_IS_ESP_32C3)
-#include "esp32c3/rom/cache.h"  // ok platform headers - AutoResearch #5422 cache eviction probe
+#elif defined(FL_IS_ESP_32C3) // ok platform specific - #5422 flash-cache probe; cache eviction has no core API and is meaningful only on flash-XIP RISC-V ESP
+#include "esp32c3/rom/cache.h"  // ok platform headers; ok platform specific - ROM Cache_Invalidate_ICache_All() for the #5422 probe, no core equivalent
 #define FL_TIMING_DRIFT_HAS_CACHE_FLUSH 1
-#elif defined(FL_IS_ESP_32H2)
-#include "esp32h2/rom/cache.h"  // ok platform headers - AutoResearch #5422 cache eviction probe
+#elif defined(FL_IS_ESP_32H2) // ok platform specific - #5422 flash-cache probe; cache eviction has no core API and is meaningful only on flash-XIP RISC-V ESP
+#include "esp32h2/rom/cache.h"  // ok platform headers; ok platform specific - ROM Cache_Invalidate_ICache_All() for the #5422 probe, no core equivalent
 #define FL_TIMING_DRIFT_HAS_CACHE_FLUSH 1
 #else
 #define FL_TIMING_DRIFT_HAS_CACHE_FLUSH 0
@@ -270,9 +275,8 @@ inline void measureShows(DriftResult& r, CRGB* leds, int num_leds, int iteration
 /// a half-invalidated cache.
 inline bool evictFlashCache() {
 #if FL_TIMING_DRIFT_HAS_CACHE_FLUSH
-    portDISABLE_INTERRUPTS();
-    Cache_Invalidate_ICache_All();
-    portENABLE_INTERRUPTS();
+    fl::isr::critical_section cs;
+    Cache_Invalidate_ICache_All();  // ok platform specific - ROM cache flush for the #5422 probe, no core equivalent
     return true;
 #else
     return false;
@@ -306,9 +310,18 @@ inline void timeOneShow(ColdWarmSide& side, uint32_t cpu_mhz, bool countInstruct
     if (dt > side.max_us) side.max_us = dt;
 }
 
+inline void addSample(ColdWarmSide& into, const ColdWarmSide& one) {
+    into.count += one.count;
+    into.total_us += one.total_us;
+    into.instr_total += one.instr_total;
+    into.cycle_total += one.cycle_total;
+    if (one.min_us < into.min_us) into.min_us = one.min_us;
+    if (one.max_us > into.max_us) into.max_us = one.max_us;
+}
+
 /// The cold-vs-warm loop over whichever strip the caller registered.
 inline void measureColdWarm(ColdWarmResult& r, CRGB* leds, int num_leds, int repeats, bool countInstructions) {
-#if defined(ARDUINO_ARCH_ESP32)
+#if defined(ARDUINO_ARCH_ESP32) // ok platform specific - same CPU-MHz read as measureShows(); no core CPU-frequency API, and only ESP32 reports one
     r.cpu_mhz = getCpuFrequencyMhz();
 #endif
     r.supported = FL_TIMING_DRIFT_HAS_CACHE_FLUSH != 0;
@@ -320,12 +333,24 @@ inline void measureColdWarm(ColdWarmResult& r, CRGB* leds, int num_leds, int rep
     FastLED.show();  // first show allocates; keep it out of the samples
     r.cold.min_us = r.warm.min_us = 0xFFFFFFFFu;
     for (int i = 0; i < repeats; ++i) {
-        if (!waitForDriversReady()) r.ready_timeouts++;
-        evictFlashCache();
-        timeOneShow(r.cold, r.cpu_mhz, countInstructions);
-        if (!waitForDriversReady()) r.ready_timeouts++;
-        timeOneShow(r.warm, r.cpu_mhz, countInstructions);
         FastLED.watchdog().feed();
+        // A show() after a failed READY wait would include the previous
+        // frame's wire time, so such a pair is dropped, not recorded.
+        if (!waitForDriversReady()) {
+            r.ready_timeouts++;
+            continue;
+        }
+        evictFlashCache();
+        ColdWarmSide cold{0, 0, 0, 0, 0xFFFFFFFFu, 0};
+        timeOneShow(cold, r.cpu_mhz, countInstructions);
+        if (!waitForDriversReady()) {
+            r.ready_timeouts++;
+            continue;
+        }
+        ColdWarmSide warm{0, 0, 0, 0, 0xFFFFFFFFu, 0};
+        timeOneShow(warm, r.cpu_mhz, countInstructions);
+        addSample(r.cold, cold);
+        addSample(r.warm, warm);
     }
     waitForDriversReady();
     r.repeats = repeats;

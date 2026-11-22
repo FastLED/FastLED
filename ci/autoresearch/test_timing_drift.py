@@ -197,15 +197,33 @@ def _run_cold_warm(bench: RpcBench, args: argparse.Namespace) -> int:
         if not result or not result.get("success", False):
             print(f"ERROR: cold-warm run failed: {result}", file=sys.stderr)
             return 1
+        if result.get("mode") != "coldWarm":
+            print(
+                "ERROR: firmware ignored coldWarm; flash an AutoResearch build "
+                "that includes the #5422 cold-vs-warm mode",
+                file=sys.stderr,
+            )
+            return 1
+        if not result.get("cold_count") or not result.get("warm_count"):
+            print(
+                "ERROR: no complete cold/warm pair was measured "
+                f"({result.get('ready_timeouts')} READY waits timed out)",
+                file=sys.stderr,
+            )
+            return 1
         if result.get("ready_timeouts"):
             print(
-                f"WARNING: {result['ready_timeouts']} READY waits timed out",
+                f"WARNING: {result['ready_timeouts']} READY waits timed out; "
+                "those pairs were dropped",
                 file=sys.stderr,
             )
         results[count_instructions] = result
     print(
-        f"CPU {results[False].get('cpu_mhz')} MHz, leds={args.num_leds}, "
-        f"api={args.api}, order={args.order}, repeats={args.repeats}, cache flush="
+        f"CPU {results[False].get('cpu_mhz')} MHz, "
+        f"leds={results[False].get('num_leds')}, api={args.api}, "
+        f"order={results[False].get('order')}, "
+        f"pairs={results[True].get('cold_count')}+{results[False].get('cold_count')}, "
+        "cache flush="
         f"{results[False].get('cache_flush_supported')}"
     )
     for line in summarize_cold_warm(results[True], results[False]):
