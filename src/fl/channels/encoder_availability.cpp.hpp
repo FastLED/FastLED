@@ -3,57 +3,55 @@
 
 namespace fl {
 
+namespace {
+struct EncoderSelectBinder {
+    using Result = EncoderAvailability::PixelEncoder;
+    template<EncoderAvailability::Getter Get>
+    static Result bind() FL_NO_EXCEPT { return Get(); }
+    static Result none() FL_NO_EXCEPT { return nullptr; }
+};
+}  // namespace
+
 FL_NO_INLINE
 EncoderAvailability::PixelEncoder
 EncoderAvailability::select(const ChipsetVariant& chipset) FL_NO_EXCEPT {
-        if (const ClocklessChipset* clockless = chipset.ptr<ClocklessChipset>()) {
-            switch (clockless->encoder) {
-                case ClocklessEncoder::CLOCKLESS_ENCODER_WS2812:
-                    return &Channel::encodeWS2812;
-                case ClocklessEncoder::CLOCKLESS_ENCODER_TM1812_RGBWW:
-                    return &Channel::encodeTM1812RGBWW;
-                case ClocklessEncoder::CLOCKLESS_ENCODER_TM1908:
-                    return &Channel::encodeTM1908;
+    return dispatch<EncoderSelectBinder>(chipset);
+}
+
 #if !defined(FASTLED_DISABLE_UCS7604) || !FASTLED_DISABLE_UCS7604
-                case ClocklessEncoder::CLOCKLESS_ENCODER_UCS7604_8BIT:
-                case ClocklessEncoder::CLOCKLESS_ENCODER_UCS7604_16BIT:
-                case ClocklessEncoder::CLOCKLESS_ENCODER_UCS7604_16BIT_1600:
-                    return &Channel::encodeUCS7604;
+#define FL_ENCODER_UCS7604(encoder) encoder
+#else
+#define FL_ENCODER_UCS7604(encoder) nullptr
 #endif
-            }
-        } else if (const SpiChipsetConfig* spi = chipset.ptr<SpiChipsetConfig>()) {
 #if !defined(FASTLED_DISABLE_SPI_CHIPSETS) || !FASTLED_DISABLE_SPI_CHIPSETS
-            switch (spi->timing.chipset) {
-                case SpiChipset::APA102:
-                case SpiChipset::DOTSTAR:
-                case SpiChipset::APA102HD:
-                case SpiChipset::DOTSTARHD:
-                case SpiChipset::HD107:
-                case SpiChipset::HD107HD:
-                    return &Channel::encodeAPA102;
-                case SpiChipset::SK9822:
-                case SpiChipset::SK9822HD:
-                    return &Channel::encodeSK9822;
-                case SpiChipset::WS2801:
-                    return &Channel::encodeWS2801;
-                case SpiChipset::WS2803:
-                    return &Channel::encodeWS2803;
-                case SpiChipset::P9813:
-                    return &Channel::encodeP9813;
-                case SpiChipset::LPD8806:
-                    return &Channel::encodeLPD8806;
-                case SpiChipset::LPD6803:
-                    return &Channel::encodeLPD6803;
-                case SpiChipset::SM16716:
-                    return &Channel::encodeSM16716;
-                case SpiChipset::MY9221:
-                    return &Channel::encodeMY9221;
-                case SpiChipset::HD108:
-                    return &Channel::encodeHD108;
-            }
-#endif  // !FASTLED_DISABLE_SPI_CHIPSETS
-        }
-        return nullptr;
+#define FL_ENCODER_SPI(encoder) encoder
+#else
+#define FL_ENCODER_SPI(encoder) nullptr
+#endif
+
+#define FL_ENCODER_GETTER(getter, value)                                          \
+    FL_NO_INLINE EncoderAvailability::PixelEncoder EncoderAvailability::getter()  \
+        FL_NO_EXCEPT {                                                            \
+        return value;                                                             \
     }
+
+FL_ENCODER_GETTER(ws2812, &Channel::encodeWS2812)
+FL_ENCODER_GETTER(tm1812, &Channel::encodeTM1812RGBWW)
+FL_ENCODER_GETTER(tm1908, &Channel::encodeTM1908)
+FL_ENCODER_GETTER(ucs7604, FL_ENCODER_UCS7604(&Channel::encodeUCS7604))
+FL_ENCODER_GETTER(apa102, FL_ENCODER_SPI(&Channel::encodeAPA102))
+FL_ENCODER_GETTER(sk9822, FL_ENCODER_SPI(&Channel::encodeSK9822))
+FL_ENCODER_GETTER(ws2801, FL_ENCODER_SPI(&Channel::encodeWS2801))
+FL_ENCODER_GETTER(ws2803, FL_ENCODER_SPI(&Channel::encodeWS2803))
+FL_ENCODER_GETTER(p9813, FL_ENCODER_SPI(&Channel::encodeP9813))
+FL_ENCODER_GETTER(lpd8806, FL_ENCODER_SPI(&Channel::encodeLPD8806))
+FL_ENCODER_GETTER(lpd6803, FL_ENCODER_SPI(&Channel::encodeLPD6803))
+FL_ENCODER_GETTER(sm16716, FL_ENCODER_SPI(&Channel::encodeSM16716))
+FL_ENCODER_GETTER(my9221, FL_ENCODER_SPI(&Channel::encodeMY9221))
+FL_ENCODER_GETTER(hd108, FL_ENCODER_SPI(&Channel::encodeHD108))
+
+#undef FL_ENCODER_GETTER
+#undef FL_ENCODER_SPI
+#undef FL_ENCODER_UCS7604
 
 } // namespace fl

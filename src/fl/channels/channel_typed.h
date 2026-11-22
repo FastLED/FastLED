@@ -82,12 +82,11 @@ public:
 
     // Only the encoder/factory choice is duplicated at a constant call site.
     // Registration, settings copies and attachment remain out of line.
+    // A constant chipset folds to a factory bound to its one encoder (#5162);
+    // an unknown chipset falls back to the shared selector.
     template<typename ConfigChipset>
     FL_ALWAYS_INLINE ChannelFactory factoryFor(const ConfigChipset& chipset) FL_NO_EXCEPT {
-        if (EncoderAvailability::isWS2812(chipset)) {
-            return &createWS2812;
-        }
-        return static_cast<ChannelFactory>(&create);
+        return EncoderAvailability::dispatch<FactoryBinder>(chipset);
     }
 
     FL_ALWAYS_INLINE ChannelPtr create(const ChannelConfigOf<Chipset>& cfg) FL_NO_EXCEPT {
@@ -101,9 +100,18 @@ public:
     }
 
 private:
-    FL_NO_INLINE static ChannelPtr createWS2812(const ChannelConfig& cfg) FL_NO_EXCEPT {
-        return create(cfg, &Channel::encodeWS2812);
-    }
+    struct FactoryBinder {
+        using Result = ChannelFactory;
+        template<EncoderAvailability::Getter Get>
+        FL_NO_INLINE static ChannelPtr createBound(const ChannelConfig& cfg) FL_NO_EXCEPT {
+            return TypedChannel::create(cfg, Get());
+        }
+        template<EncoderAvailability::Getter Get>
+        FL_ALWAYS_INLINE Result bind() FL_NO_EXCEPT { return &createBound<Get>; }
+        FL_ALWAYS_INLINE Result none() FL_NO_EXCEPT {
+            return static_cast<ChannelFactory>(&TypedChannel::create);
+        }
+    };
 
     FL_NO_INLINE static ChannelPtr create(const ChannelConfig& cfg,
                                          EncoderAvailability::PixelEncoder encoder) FL_NO_EXCEPT {
