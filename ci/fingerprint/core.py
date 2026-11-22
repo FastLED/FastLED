@@ -26,7 +26,15 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Optional
 
-from running_process import PIPE, CalledProcessError, CompletedProcess, RunningProcess
+from running_process import (
+    PIPE,
+    CalledProcessError,
+    CompletedProcess,
+    RunningProcess,
+    TimeoutExpired,
+)
+
+from ci.util.host_load import load_scale
 
 
 # ==============================================================================
@@ -342,6 +350,31 @@ def _find_zccache_fp() -> str:
     return found
 
 
+def _run_fp_command(
+    cmd: list[str], *, check: bool, timeout: float
+) -> CompletedProcess[str]:
+    """Run one fingerprint command, tolerating a slow, overloaded host (#5398).
+
+    The timeout is scaled by host load, and one timeout is retried with a
+    freshly scaled timeout before the ``TimeoutExpired`` propagates.
+    """
+    for attempt in range(2):
+        try:
+            return RunningProcess.run(
+                cmd,
+                stdout=PIPE,
+                stderr=PIPE,
+                encoding="utf-8",
+                errors="replace",
+                check=check,
+                timeout=timeout * load_scale(),
+            )
+        except TimeoutExpired:
+            if attempt == 1:
+                raise
+    raise AssertionError("unreachable")
+
+
 def _run_zccache(
     args: list[str], *, check: bool = False, timeout: float = 60.0
 ) -> CompletedProcess[str]:
@@ -353,7 +386,8 @@ def _run_zccache(
     Args:
         args: Arguments after ``fp`` / the binary name.
         check: If True, raise on non-zero exit.
-        timeout: Child-process timeout in seconds.
+        timeout: Child-process timeout in seconds on an idle host; scaled by
+            host load and retried once on expiry.
 
     Returns:
         CompletedProcess with captured stdout/stderr.
@@ -362,34 +396,14 @@ def _run_zccache(
     zccache_bin = _find_zccache()
     if zccache_bin:
         cmd = [zccache_bin, "fp"] + args
-        result = RunningProcess.run(
-            cmd,
-            stdout=PIPE,
-            stderr=PIPE,
-            encoding="utf-8",
-            errors="replace",
-            check=False,
-            timeout=timeout,
-        )
+        result = _run_fp_command(cmd, check=False, timeout=timeout)
         # exit 0 (run) or 1 (skip) are valid; exit 2+ means daemon error
         if result.returncode in (0, 1):
-            if check and result.returncode not in (0, 1):
-                raise CalledProcessError(
-                    result.returncode, cmd, result.stdout, result.stderr
-                )
             return result
 
     # Fallback to standalone: ``zccache-fp <args>``
     cmd = [_find_zccache_fp()] + args
-    return RunningProcess.run(
-        cmd,
-        stdout=PIPE,
-        stderr=PIPE,
-        encoding="utf-8",
-        errors="replace",
-        check=check,
-        timeout=timeout,
-    )
+    return _run_fp_command(cmd, check=check, timeout=timeout)
 
 
 # ==============================================================================
