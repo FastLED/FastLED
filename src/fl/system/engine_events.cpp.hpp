@@ -1,4 +1,5 @@
 #include "fl/system/engine_events.h"
+#include "fl/stl/array.h"
 #include "fl/stl/int.h"
 // Note: fl/stl/cstdio.h intentionally NOT included — workaround for
 // zackees/zccache#619 (Windows PCH path-spelling drift). The comment
@@ -115,32 +116,39 @@ void EngineEvents::_removeListener(Listener *listener) FL_NO_EXCEPT {
 }
 
 void EngineEvents::_onBeginFrame() FL_NO_EXCEPT {
-    // Make the copy of the listener list to avoid issues with listeners being
-    // added or removed during the loop.
-    ListenerList copy = mListeners;
-    for (auto &item : copy) {
-        auto listener = item.listener;
-        listener->onBeginFrame();
-    }
+    _dispatchFrame(&Listener::onBeginFrame);
 }
 
 void EngineEvents::_onEndShowLeds() FL_NO_EXCEPT {
-    // Make the copy of the listener list to avoid issues with listeners being
-    // added or removed during the loop.
-    ListenerList copy = mListeners;
-    for (auto &item : copy) {
-        auto listener = item.listener;
-        listener->onEndShowLeds();
-    }
+    _dispatchFrame(&Listener::onEndShowLeds);
 }
 
 void EngineEvents::_onEndFrame() FL_NO_EXCEPT {
-    // Make the copy of the listener list to avoid issues with listeners being
-    // added or removed during the loop.
+    _dispatchFrame(&Listener::onEndFrame);
+}
+
+void EngineEvents::_dispatchFrame(void (Listener::*callback)() FL_NO_EXCEPT) FL_NO_EXCEPT {
+    const fl::size count = mListeners.size();
+    if (count == 0) {
+        return;
+    }
+    constexpr fl::size kStackListeners = 16;
+    if (count <= kStackListeners) {
+        // Dispatch only needs addresses, not the registry's priority metadata
+        // or vector storage. Capture every address before invoking user code.
+        fl::array<Listener*, kStackListeners> snapshot;
+        for (fl::size i = 0; i < count; ++i) {
+            snapshot[i] = mListeners[i].listener;
+        }
+        for (fl::size i = 0; i < count; ++i) {
+            (snapshot[i]->*callback)();
+        }
+        return;
+    }
+    // Larger registries retain their dynamically sized snapshot.
     ListenerList copy = mListeners;
     for (auto &item : copy) {
-        auto listener = item.listener;
-        listener->onEndFrame();
+        (item.listener->*callback)();
     }
 }
 

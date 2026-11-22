@@ -292,10 +292,9 @@ protected:
         // #2517 silent-drop failure mode); the frame goes to an enabled driver
         // that can handle it instead, with a warning naming the fix.
         fl::shared_ptr<IChannelDriver> fallback;
-        if (!Policy::enabled(DriverTraits::instance())) {
+        IChannelDriver& wanted = DriverTraits::instance();
+        if (!Policy::enabled(wanted)) {
             fallback = Policy::fallback(mData);
-            IChannelDriver& wanted = DriverTraits::instance();
-            FL_UNUSED(wanted);  // FL_WARN_EVERY compiles out on low-memory targets
             if (!fallback) {
                 FL_WARN_EVERY(1000, "addLeds: driver '" << wanted.getName().c_str()
                               << "' is not enabled and no enabled driver can take this strip - dropping frame. "
@@ -308,7 +307,7 @@ protected:
                           << "'. Fix: FastLED.setDriverEnabled(\"" << wanted.getName().c_str()
                           << "\", true), or name the enabled bus in addLeds<..., fl::Bus::X>().");
         }
-        IChannelDriver& driver = fallback ? *fallback : DriverTraits::instance();
+        IChannelDriver& driver = fallback ? *fallback : wanted;
 
         // (A8) If the previous frame's buffer is still in flight, block
         // (bounded) until the driver reports it can accept more work rather

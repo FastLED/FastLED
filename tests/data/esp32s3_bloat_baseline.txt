@@ -487,4 +487,9 @@
 # 318583 B / 22499 B RAM; combined with upstream #5424/#5425 it is 318599 B /
 # 22503 B RAM. Lower the ratchet 318695 -> 318599 using the measured queue tree;
 # the 320503 B flash and 40016 B RAM ceilings are unchanged.
+# -12 B, #5384: frame-event snapshots, colour-adjustment caching and reuse of
+# the validated driver reference. Matched local ESP32-S3 Blink image_flash:
+# 318599 -> 318587 B; attributed RAM 22503 -> 22519 B for the controller cache.
+# The shrink is under 64 B, so the 318599 B ratchet stays unchanged. Small-memory
+# targets omit the cache; the 320503 B flash and 40016 B RAM ceilings are unchanged.
 318599
