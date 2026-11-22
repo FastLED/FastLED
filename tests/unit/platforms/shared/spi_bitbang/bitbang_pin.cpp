@@ -1,6 +1,9 @@
 #include "platforms/shared/spi_bitbang/bitbang_pin.h"
 #include "test.h"
 
+#include "fastspi.h"
+#include "fl/stl/type_traits.h"
+
 FL_TEST_FILE(FL_FILEPATH) {
 using namespace fl;
 
@@ -52,6 +55,28 @@ FL_TEST_CASE("bitbangDividerFromHz converts a rate to cycles per bit") {
     FL_CHECK_EQ(bitbangDividerFromHz(240000000, 240000000), 11U);
     FL_CHECK_EQ(bitbangDividerFromHz(1000000000, 240000000), 11U);
     FL_CHECK_EQ(bitbangDividerFromHz(1, 240000000), 240000000U);
+}
+
+// ESP32 and the host stub both define DATA_RATE_* in Hz (fastspi.h), so the
+// public SoftwareSPIOutput must convert to the divider GenericSoftwareSPIOutput
+// consumes. Forwarding the Hz value made DATA_RATE_MHZ(1) a ~1e6-cycle
+// divider (#5051).
+template <u32 HZ>
+using ExpectedSoftwareSpi = GenericSoftwareSPIOutput<2, 3, bitbangDividerFromHz(HZ, FL_CPU_FREQUENCY())>;
+template <u32 HZ>
+using RawHzSoftwareSpi = GenericSoftwareSPIOutput<2, 3, HZ>;
+
+FL_TEST_CASE("SoftwareSPIOutput converts DATA_RATE_MHZ/KHZ from Hz to a divider") {
+    FL_CHECK_EQ(DATA_RATE_MHZ(1), 1000000);
+    FL_CHECK_EQ(DATA_RATE_KHZ(250), 250000);
+    FL_CHECK((fl::is_base_of<ExpectedSoftwareSpi<1000000>, ::SoftwareSPIOutput<2, 3, DATA_RATE_MHZ(1)>>::value));
+    FL_CHECK((fl::is_base_of<ExpectedSoftwareSpi<250000>, ::SoftwareSPIOutput<2, 3, DATA_RATE_KHZ(250)>>::value));
+    FL_CHECK((fl::is_base_of<ExpectedSoftwareSpi<100000>, ::SoftwareSPIOutput<2, 3, DATA_RATE_KHZ(100)>>::value));
+    FL_CHECK_FALSE((fl::is_base_of<RawHzSoftwareSpi<1000000>, ::SoftwareSPIOutput<2, 3, DATA_RATE_MHZ(1)>>::value));
+    FL_CHECK_FALSE((fl::is_base_of<RawHzSoftwareSpi<250000>, ::SoftwareSPIOutput<2, 3, DATA_RATE_KHZ(250)>>::value));
+    // The same request is four times the divider at a quarter of the rate.
+    FL_CHECK_EQ(bitbangDividerFromHz(DATA_RATE_KHZ(250), 160000000), 640U);
+    FL_CHECK_EQ(bitbangDividerFromHz(DATA_RATE_MHZ(1), 160000000), 160U);
 }
 
 FL_TEST_CASE("Hz phase delay keeps sub-MHz and fractional rates") {

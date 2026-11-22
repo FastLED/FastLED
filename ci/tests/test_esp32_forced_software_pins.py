@@ -71,3 +71,20 @@ def test_forced_esp32_software_spi_keeps_the_inline_delay() -> None:
         "#if FL_ESP32_ENABLE_FAST_SOFTWARE_SPI && defined(FL_FASTPIN_HAS_NO_PINMAP)", 1
     )[1].split("#elif", 1)[0]
     assert "struct BitbangPin<FastPin<PIN>> : Esp32BitbangDelay<FastPin<PIN>>" in forced
+
+
+def test_legacy_esp32_software_spi_keeps_the_inline_delay() -> None:
+    # FL_ESP32_ENABLE_FAST_SOFTWARE_SPI=0 must not fall back to fl::delaycycles
+    # either: DATA_RATE_KHZ(250) on esp32c6 needs 314/317 cycles (#5393).
+    source: str = (ROOT / "src/platforms/esp/32/core/fastpin_esp32.h").read_text(
+        encoding="utf-8"
+    )
+    legacy: str = source.split("#if !FL_ESP32_ENABLE_FAST_SOFTWARE_SPI", 1)[1].split(
+        "#else", 1
+    )[0]
+    assert "struct BitbangPin<FastPin<PIN>> : Esp32BitbangDelay<FastPin<PIN>>" in legacy
+    assert "kEsp32LegacyWriteBit = true" in legacy
+    # The shared delay is defined outside the fast-path-only branch.
+    assert source.index("struct Esp32BitbangDelay") < source.index(
+        "#if !FL_ESP32_ENABLE_FAST_SOFTWARE_SPI"
+    )
