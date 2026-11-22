@@ -13,9 +13,15 @@
 
 #include "platforms/is_platform.h"
 
-#if (defined(FL_IS_ESP_32C3) || defined(FL_IS_ESP_32C6) || \
-     defined(FL_IS_ESP_32H2)) && !defined(FL_RMT4_DIAGNOSTICS)
+#if defined(FL_IS_ESP_32C3) || defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2)
+// Defines FL_RMT4_DIAGNOSTICS (0 unless the build enables it), so the choice
+// below does not depend on include order.
+#include "platforms/esp/32/drivers/rmt/rmt_4/rmt4_config.h"
+#if FL_RMT4_DIAGNOSTICS
+#include "platforms/shared/instruction_counter_null.h"
+#else
 #include "platforms/esp/32/core/instruction_counter_riscv.h"
+#endif
 #else
 #include "platforms/shared/instruction_counter_null.h"
 #endif
