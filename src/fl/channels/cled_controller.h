@@ -45,19 +45,11 @@ void enable_rgbw_power_estimate() FL_NO_EXCEPT;
 
 #if SKETCH_HAS_LARGE_MEMORY
 /// Values are keyed by every input, including direct legacy-settings writes.
-class ColorAdjustmentCache {
-  public:
-    bool get(u8 brightness, const CRGB& correction, const CRGB& temperature,
-             ColorAdjustment& adjustment) const FL_NO_EXCEPT;
-    void put(u8 brightness, const CRGB& correction, const CRGB& temperature,
-             const ColorAdjustment& adjustment) FL_NO_EXCEPT;
-
-  private:
-    bool mValid = false;
-    u8 mBrightness = 0;
+struct ColorAdjustmentCache {
+    u16 mBrightness = 256; // Invalid until the first adjustment is computed.
     CRGB mCorrection;
     CRGB mTemperature;
-    ColorAdjustment mAdjustment{};
+    ColorAdjustment mAdjustment;
 };
 #endif
 }  // namespace detail

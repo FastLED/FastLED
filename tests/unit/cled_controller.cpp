@@ -83,35 +83,6 @@ FL_TEST_CASE("clearLedData on a single-lane controller is unchanged (#1017)") {
     for (const auto &px : buffer) { FL_CHECK_EQ(px, CRGB(0, 0, 0)); }
 }
 
-#if SKETCH_HAS_LARGE_MEMORY
-FL_TEST_CASE("Colour adjustment cache requires the complete input key #5384") {
-    fl::detail::ColorAdjustmentCache cache;
-    FakeParallelController controller(1);
-    controller.setCorrection(CRGB(190, 0, 255));
-    controller.setTemperature(CRGB(73, 255, 129));
-    const CRGB correction = controller.getCorrection();
-    const CRGB temperature = controller.getTemperature();
-    const ColorAdjustment expected = controller.getAdjustmentData(127);
-    ColorAdjustment actual = ColorAdjustment::noAdjustment();
-
-    FL_CHECK_FALSE(cache.get(127, correction, temperature, actual));
-    cache.put(127, correction, temperature, expected);
-    FL_REQUIRE(cache.get(127, correction, temperature, actual));
-    FL_CHECK_EQ(actual.premixed, expected.premixed);
-#if FASTLED_HD_COLOR_MIXING
-    FL_CHECK_EQ(actual.color, expected.color);
-    FL_CHECK_EQ(actual.brightness, expected.brightness);
-#endif
-    // Returned adjustments are values, not writable aliases of the cache.
-    actual.premixed = CRGB::Black;
-    FL_REQUIRE(cache.get(127, correction, temperature, actual));
-    FL_CHECK_EQ(actual.premixed, expected.premixed);
-
-    FL_CHECK_FALSE(cache.get(128, correction, temperature, actual));
-    FL_CHECK_FALSE(cache.get(127, CRGB(191, 0, 255), temperature, actual));
-    FL_CHECK_FALSE(cache.get(127, correction, CRGB(73, 254, 129), actual));
-}
-#endif
 
 FL_TEST_CASE("Controller colour adjustment stays exact as cached inputs change #5384") {
     FakeParallelController controller(1);
@@ -135,6 +106,18 @@ FL_TEST_CASE("Controller colour adjustment stays exact as cached inputs change #
             }
         }
     }
+    // Temperature must invalidate the cache even at a fixed brightness.
+    controller.setCorrection(CRGB(255, 255, 255));
+    controller.setTemperature(CRGB(255, 255, 255));
+    auto adjusted = controller.getAdjustmentData(127);
+    adjusted.premixed = CRGB::Black;
+    FL_CHECK_EQ(adjusted.premixed, CRGB::Black);
+    FL_CHECK_EQ(controller.getAdjustmentData(127).premixed,
+                CRGB::computeAdjustment(127, controller.getCorrection(), controller.getTemperature()));
+    controller.setTemperature(CRGB(0, 255, 255));
+    FL_CHECK_EQ(controller.getAdjustmentData(127).premixed,
+                CRGB::computeAdjustment(127, controller.getCorrection(), controller.getTemperature()));
+    controller.getAdjustmentData(255);
     // Legacy subclasses can write the protected settings without a setter.
     controller.changeLegacyCorrection(CRGB(5, 15, 25));
     const auto direct = controller.getAdjustmentData(255);
