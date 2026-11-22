@@ -325,16 +325,11 @@ FASTLED_FORCE_INLINE void gpioStoreBarrier() FL_NO_EXCEPT {
 #ifndef FL_ESP32_ENABLE_FAST_SOFTWARE_SPI
 #define FL_ESP32_ENABLE_FAST_SOFTWARE_SPI 1
 #endif
-#if !FL_ESP32_ENABLE_FAST_SOFTWARE_SPI
-/// Opt-out (flag 0): GenericSoftwareSPIOutput keeps the FastLED 3.10.9 ESP32 writeBit()
-/// pin sequence and delays (writeBitEsp32Legacy), for mapped and no-pin-map pins.
-template <u8 PIN> struct BitbangPin<FastPin<PIN>> : BitbangPinDefaults<FastPin<PIN>> {
-    static constexpr bool kEsp32LegacyWriteBit = true;
-};
-#else
+
 /// The inline platform template avoids a call per clock phase; the visible
 /// fl::delaycycles is only a declaration, defined out of line for 50 cycles or
 /// fewer. Long waits use the cycle counter so they cannot expand to a NOP run.
+/// Every ESP32 policy below uses it, or practical rates fail to link (#5067, #5393).
 template <class Pin> struct Esp32BitbangDelay : BitbangPinDefaults<Pin> {
     template <fl::cycle_t CYCLES>
     FASTLED_FORCE_INLINE static void delay() FL_NO_EXCEPT {
@@ -346,7 +341,14 @@ template <class Pin> struct Esp32BitbangDelay : BitbangPinDefaults<Pin> {
         }
     }
 };
-#endif  // FL_ESP32_ENABLE_FAST_SOFTWARE_SPI
+
+#if !FL_ESP32_ENABLE_FAST_SOFTWARE_SPI
+/// Opt-out (flag 0): GenericSoftwareSPIOutput keeps the FastLED 3.10.9 ESP32 writeBit()
+/// pin sequence (writeBitEsp32Legacy), for mapped and no-pin-map pins.
+template <u8 PIN> struct BitbangPin<FastPin<PIN>> : Esp32BitbangDelay<FastPin<PIN>> {
+    static constexpr bool kEsp32LegacyWriteBit = true;
+};
+#endif  // !FL_ESP32_ENABLE_FAST_SOFTWARE_SPI
 
 #if FL_ESP32_ENABLE_FAST_SOFTWARE_SPI && defined(FL_FASTPIN_HAS_NO_PINMAP)
 /// Forced software pins write through the core API but keep the same delays.

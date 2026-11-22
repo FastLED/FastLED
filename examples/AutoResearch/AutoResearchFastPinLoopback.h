@@ -3,7 +3,8 @@
 // fastPinLoopback RPC (#5067): drives the selected FastPin<TX> route over the
 // discovered TX->RX jumper. Build with --define FASTLED_FORCE_SOFTWARE_PINS to
 // check the software route; without it, the same RPC checks native GPIO.
-// Pin levels, clock LOW after init, MSB-first data bits and clock edge counts
+// Pin levels, clock LOW after init, MSB-first data bits at two software-SPI
+// rates (their bit periods must differ by the requested 6000 ns) and clock edge counts
 // are read back on RX. ESP32 only: the spare pins are the default SPI pins.
 
 #include "fl/channels/rx/channel.h"
@@ -90,6 +91,65 @@ inline int decodeBadBits(const Runs& runs, bool finalHigh, fl::json& r) {
     return bad;
 }
 
+// Writes kPattern with TX as SoftwareSPIOutput data at RATE_HZ and decodes it on RX.
+// Sets rateHz, bitPeriodNs and the data* fields; returns the bad bit count, or
+// -1 if nothing was decoded.
+template <int TX, int SPARE_CLOCK, fl::u32 RATE_HZ>
+int measureData(const fl::shared_ptr<fl::RxChannel>& ch, int rx, fl::json& r) {
+    typedef fl::FastPin<TX> Pin;
+    r.set("rateHz", static_cast<int>(RATE_HZ));
+    // Data on TX, starting LOW so the first one bit is the first RX edge.
+    SoftwareSPIOutput<TX, SPARE_CLOCK, RATE_HZ> dataSpi;
+    dataSpi.init();
+    Pin::lo();
+    // RX is not armed yet: run the measured writeBytes() path through both bit
+    // branches so its first bits are not stretched by flash fetches (seen as 1.6
+    // bit periods; the legacy writer branches on the bit), ending with TX LOW.
+    fl::u8 warm[2] = {0xFF, 0x00};
+    dataSpi.writeBytes(warm, 2);
+    delayMicroseconds(20);
+    Runs data;
+    const bool armed = armRx(ch);
+    if (armed) {
+        dataSpi.select();
+        dataSpi.writeBytes(const_cast<fl::u8*>(kPattern), kBytes);
+        dataSpi.release();
+        collect(ch, data);
+    }
+    delayMicroseconds(20);
+    const bool dataFinalHigh = rxHigh(rx);
+    Pin::lo();
+    r.set("dataArmed", armed);
+    r.set("dataCaptured", data.ok);
+    r.set("dataRuns", static_cast<int>(data.count));
+    fl::json runsNs = fl::json::array();
+    for (size_t i = 0; i < data.count && i < 80; ++i) {
+        runsNs.push_back(static_cast<int>(data.edges[i].high ? data.edges[i].ns : -static_cast<int>(data.edges[i].ns)));
+    }
+    r.set("dataRunsNs", runsNs);  // negative = LOW
+    r.set("dataLastRunNs", data.count ? static_cast<int>(data.edges[data.count - 1].ns) : -1);
+    r.set("dataFinalHigh", dataFinalHigh);
+    const int badBits = armed && data.ok ? decodeBadBits(data, dataFinalHigh, r) : -1;
+    r.set("dataBadBits", badBits);
+    return badBits;
+}
+
+// Nominal periods at 250 kHz and 100 kHz are 4000 ns and 10000 ns. Neither may
+// be more than 2% short (RX timing resolution; the writer only adds time), and
+// their difference must be 6000 ns within 5%: the per-bit GPIO overhead cancels,
+// so this checks the Hz-to-divider scale itself. A rate passed through as a
+// cycle count would be thousands of times too slow.
+inline bool checkRates(fl::json& fast, const fl::json& slow) {
+    const int fastNs = static_cast<int>(fast["bitPeriodNs"].as_int().value_or(0));
+    const int slowNs = static_cast<int>(slow["bitPeriodNs"].as_int().value_or(0));
+    const int slopeNs = slowNs - fastNs;
+    const bool ok = fastNs >= 3920 && slowNs >= 9800 && slopeNs >= 5700 && slopeNs <= 6300;
+    fast.set("rateOverheadNs", fastNs - 4000);
+    fast.set("rateSlopeNs", slopeNs);
+    fast.set("rateOk", ok);
+    return ok;
+}
+
 template <int TX, int SPARE_CLOCK, int SPARE_DATA>
 fl::json runAt(const fl::shared_ptr<fl::RxChannel>& ch, int rx, fl::true_type) {
     typedef fl::FastPin<TX> Pin;
@@ -125,37 +185,18 @@ fl::json runAt(const fl::shared_ptr<fl::RxChannel>& ch, int rx, fl::true_type) {
     r.set("lowAfterLo", lowAfterLo);
     r.set("levelMismatches", levelMismatches);
 
-    // Data on TX, starting LOW so the first one bit is the first RX edge.
-    SoftwareSPIOutput<TX, SPARE_CLOCK, DATA_RATE_KHZ(250)> dataSpi;
-    dataSpi.init();
-    Pin::lo();
-    // A zero byte keeps TX LOW but loads the writer into cache, so the first
-    // measured bit is not stretched by flash fetches (seen as 1.6 bit periods).
-    dataSpi.writeByte(0x00);
-    delayMicroseconds(20);
-    Runs data;
-    bool armed = armRx(ch);
-    if (armed) {
-        dataSpi.select();
-        dataSpi.writeBytes(const_cast<fl::u8*>(kPattern), kBytes);
-        dataSpi.release();
-        collect(ch, data);
-    }
-    delayMicroseconds(20);
-    const bool dataFinalHigh = rxHigh(rx);
-    Pin::lo();
-    r.set("dataArmed", armed);
-    r.set("dataCaptured", data.ok);
-    r.set("dataRuns", static_cast<int>(data.count));
-    fl::json runsNs = fl::json::array();
-    for (size_t i = 0; i < data.count && i < 80; ++i) {
-        runsNs.push_back(static_cast<int>(data.edges[i].high ? data.edges[i].ns : -static_cast<int>(data.edges[i].ns)));
-    }
-    r.set("dataRunsNs", runsNs);  // negative = LOW
-    r.set("dataLastRunNs", data.count ? static_cast<int>(data.edges[data.count - 1].ns) : -1);
-    r.set("dataFinalHigh", dataFinalHigh);
-    const int badBits = armed && data.ok ? decodeBadBits(data, dataFinalHigh, r) : -1;
-    r.set("dataBadBits", badBits);
+    // Data on TX at two rates. The writer's GPIO work adds a fixed number of
+    // cycles per bit on top of the requested period, so each period may run
+    // long by that overhead, but the difference between the rates must equal
+    // the difference between the requested periods (#5051). The 100 kHz write
+    // takes ~0.7 ms, so a tick interrupt usually lands in it and can stretch a
+    // run by a bit; RX decodes data without the clock, so only its period gates
+    // success, and its decoded bits are reported for inspection.
+    const int badBits = measureData<TX, SPARE_CLOCK, DATA_RATE_KHZ(250)>(ch, rx, r);
+    fl::json slow = fl::json::object();
+    measureData<TX, SPARE_CLOCK, DATA_RATE_KHZ(100)>(ch, rx, slow);
+    const bool rateOk = checkRates(r, slow);
+    r.set("rate100k", slow);
 
     // Clock on TX: init() drives it LOW, then one rising edge per bit and idle LOW.
     Pin::hi();
@@ -166,7 +207,7 @@ fl::json runAt(const fl::shared_ptr<fl::RxChannel>& ch, int rx, fl::true_type) {
     delayMicroseconds(20);
     const bool clockLowAfterInit = !rxHigh(rx);
     Runs clock;
-    armed = armRx(ch);
+    const bool armed = armRx(ch);
     int rising = 0;
     if (armed) {
         clockSpi.select();
@@ -187,7 +228,7 @@ fl::json runAt(const fl::shared_ptr<fl::RxChannel>& ch, int rx, fl::true_type) {
     (fl::pinMode)(SPARE_CLOCK, fl::PinMode::Input);
     (fl::pinMode)(SPARE_DATA, fl::PinMode::Input);
 
-    r.set("success", lowAfterLo && levelMismatches == 0 && badBits == 0 &&
+    r.set("success", lowAfterLo && levelMismatches == 0 && badBits == 0 && rateOk &&
                          clockHighBeforeInit && clockLowAfterInit && clock.ok &&
                          rising == kBytes * 8 && clockIdleLow);
     return r;

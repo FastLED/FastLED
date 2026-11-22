@@ -105,11 +105,12 @@
 /// NOTE: This is NOT in the fl namespace per fastspi.h design requirements
 ///
 /// Pass DATA_RATE_MHZ()/DATA_RATE_KHZ() as the third parameter. Its unit depends on
-/// the platform: on ESP32 and Teensy 4 it is Hz, and on other platforms it is what
-/// GenericSoftwareSPIOutput consumes, normally a clock divider. The ESP32 conversion
-/// uses the compile-time CPU frequency. For a literal divider on ESP32, use
-/// fl::GenericSoftwareSPIOutput.
-#if defined(ESP32)
+/// the platform: on ESP32, Teensy 4 and the host stub it is Hz, and on other platforms
+/// it is what GenericSoftwareSPIOutput consumes, normally a clock divider. The ESP32
+/// and stub conversion uses the compile-time CPU frequency. For a literal divider on
+/// ESP32, use fl::GenericSoftwareSPIOutput. The stub shares the ESP32 branch because
+/// its DATA_RATE_* are also Hz, which lets host tests pin the conversion (#5051).
+#if defined(ESP32) || defined(FASTLED_STUB_IMPL)
 template<fl::u8 _DATA_PIN, fl::u8 _CLOCK_PIN, fl::u32 _SPI_RATE_HZ>
 class SoftwareSPIOutput : public fl::GenericSoftwareSPIOutput<
     _DATA_PIN, _CLOCK_PIN, fl::bitbangDividerFromHz(_SPI_RATE_HZ > 0 ? _SPI_RATE_HZ : 1, FL_CPU_FREQUENCY())> {
