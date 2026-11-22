@@ -24,6 +24,8 @@
 #ifdef FASTLED_FORCE_SOFTWARE_PINS
 #include "fl/system/pin.h"  // IWYU pragma: keep
 #include "fl/system/fastpin_no_pinmap.h"  // IWYU pragma: keep
+#include "fl/stl/cstddef.h"  // IWYU pragma: keep
+#include "fl/stl/int.h"  // IWYU pragma: keep
 #endif
 
 FL_DISABLE_WARNING_PUSH
@@ -103,6 +105,42 @@ template<fl::u8 PIN> class FastPin : public NoPinMapPin<PIN> {};
 #endif
 #elif defined(FASTLED_FORCE_SOFTWARE_PINS)
 #define FL_FASTPIN_HAS_RUNTIME_PORT
+
+// How the runtime-port FastPin writes one pin, selected per platform. Each
+// writer gets the pin's output and input registers from the Arduino port map.
+#if defined(FL_IS_NRF52)
+/// nRF52: drive the pin through the GPIO block's OUTSET/OUTCLR, one store each.
+/// A load and store of the whole OUT latch would write back, and so undo, any
+/// other pin an interrupt changed in between (#5396). The Arduino map hands
+/// out &NRF_GPIO_Type::OUT; the vendor struct locates OUTSET/OUTCLR from it.
+struct SoftwarePinWriter {
+	static NRF_GPIO_Type *gpio(volatile RwReg *out) {
+		return reinterpret_cast<NRF_GPIO_Type *>(  // ok reinterpret cast
+			reinterpret_cast<fl::uptr>(out) - FL_OFFSETOF(NRF_GPIO_Type, OUT));  // ok reinterpret cast
+	}
+	static void hi(volatile RwReg *out, volatile RoReg *, RwReg mask) { gpio(out)->OUTSET = mask; }
+	static void lo(volatile RwReg *out, volatile RoReg *, RwReg mask) { gpio(out)->OUTCLR = mask; }
+	static void toggle(volatile RwReg *out, volatile RoReg *in, RwReg mask) {
+		if (*out & mask) { lo(out, in, mask); } else { hi(out, in, mask); }
+	}
+};
+#else
+/// Ports without set/clear registers: read-modify-write the output latch.
+struct SoftwarePinWriter {
+	static void hi(volatile RwReg *out, volatile RoReg *, RwReg mask) { *out |= mask; }
+	static void lo(volatile RwReg *out, volatile RoReg *, RwReg mask) { *out &= ~mask; }
+	static void toggle(volatile RwReg *out, volatile RoReg *in, RwReg mask) {
+#ifdef FL_IS_AVR
+		(void)out;
+		*in = mask; // AVR PIN registers toggle output bits when written with ones.
+#else
+		(void)in;
+		*out ^= mask;
+#endif
+	}
+};
+#endif
+
 template<fl::u8 PIN> class FastPin {
 	static RwReg sPinMask;            ///< Bitmask for the pin within its register
 	static volatile RwReg *sPort;     ///< Output register for the pin
@@ -123,26 +161,20 @@ public:
 	inline static void setInput() { _init(); (fl::pinMode)(PIN, PinMode::Input); }
 
 	/// @copydoc Pin::hi()
-	inline static void hi() __attribute__ ((always_inline)) { *sPort |= sPinMask; }
+	inline static void hi() __attribute__ ((always_inline)) { SoftwarePinWriter::hi(sPort, sInPort, sPinMask); }
 	/// @copydoc Pin::lo()
-	inline static void lo() __attribute__ ((always_inline)) { *sPort &= ~sPinMask; }
+	inline static void lo() __attribute__ ((always_inline)) { SoftwarePinWriter::lo(sPort, sInPort, sPinMask); }
 
 	/// @copydoc Pin::strobe()
 	inline static void strobe() __attribute__ ((always_inline)) { toggle(); toggle(); }
 
 	/// @copydoc Pin::toggle()
-	inline static void toggle() __attribute__ ((always_inline)) {
-#ifdef FL_IS_AVR
-		*sInPort = sPinMask; // AVR PIN registers toggle output bits when written with ones.
-#else
-		*sPort ^= sPinMask;
-#endif
-	}
+	inline static void toggle() __attribute__ ((always_inline)) { SoftwarePinWriter::toggle(sPort, sInPort, sPinMask); }
 
 	/// @copydoc Pin::hi(FASTLED_REGISTER port_ptr_t)
-	inline static void hi(FASTLED_REGISTER port_ptr_t port) __attribute__ ((always_inline)) { *port |= sPinMask; }
+	inline static void hi(FASTLED_REGISTER port_ptr_t port) __attribute__ ((always_inline)) { SoftwarePinWriter::hi(port, sInPort, sPinMask); }
 	/// @copydoc Pin::lo(FASTLED_REGISTER port_ptr_t)
-	inline static void lo(FASTLED_REGISTER port_ptr_t port) __attribute__ ((always_inline)) { *port &= ~sPinMask; }
+	inline static void lo(FASTLED_REGISTER port_ptr_t port) __attribute__ ((always_inline)) { SoftwarePinWriter::lo(port, sInPort, sPinMask); }
 	/// @copydoc Pin::set(FASTLED_REGISTER port_t)
 	inline static void set(FASTLED_REGISTER port_t val) __attribute__ ((always_inline)) { *sPort = val; }
 
