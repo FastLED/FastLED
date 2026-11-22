@@ -5,3 +5,4 @@
 /// Includes all implementation files in alphabetical order
 
 #include "platforms/esp/32/core/cpu_frequency.cpp.hpp"
+#include "platforms/esp/32/core/pin_routing.cpp.hpp"

@@ -36,6 +36,24 @@ SDK = r"""
 #define FL_EXTERN_C_END
 #define FL_MEMORY_BARRIER ((void)0)
 #define FL_FALLTHROUGH [[fallthrough]]
+#define FL_NO_INLINE __attribute__((noinline))
+#define SOC_GPIO_PIN_COUNT 40
+#define GPIO_IS_VALID_GPIO(pin) ((pin) >= 0 && (pin) < SOC_GPIO_PIN_COUNT)
+#define GPIO_FUNC0_OUT_SEL_CFG_REG 0u
+#define GPIO_FUNC0_OUT_SEL_M 0x1FFu
+#define GPIO_FUNC0_OUT_SEL_S 0
+#define GPIO_ENABLE_REG 0x100u
+#define GPIO_ENABLE1_REG 0x104u
+#define MCU_SEL_M 0x7000u
+#define MCU_SEL_S 12
+inline uint32_t gpio_registers[256]{};
+inline const auto GPIO_PIN_MUX_REG=[] {
+    std::array<uint32_t,SOC_GPIO_PIN_COUNT> regs{};
+    for (unsigned i=0; i<regs.size(); ++i) regs[i]=0x200u+i*4;
+    return regs;
+}();
+#define REG_READ(reg) (gpio_registers[(reg)/4])
+#define REG_GET_FIELD(reg, field) ((REG_READ(reg) & field##_M) >> field##_S)
 #define ESP_IDF_VERSION_VAL(a,b,c) ((a)*10000+(b)*100+(c))
 #define ESP_IDF_VERSION ESP_IDF_VERSION_VAL(TEST_IDF_MAJOR,1,0)
 #define ESP_IDF_VERSION_6_OR_HIGHER (TEST_IDF_MAJOR >= 6)
@@ -123,6 +141,7 @@ inline void delayMicroseconds(unsigned) {}
 struct ChipsetTiming { u32 T1, T2, T3, RESET; };
 template<class T> struct Singleton { static T& instance() { static T value; return value; } };
 namespace detail {
+u32 readPinRouting(int) noexcept;
 using Rmt5TxDoneCallback=bool (*)(void*, const void*, void*);
 struct Rmt5ChannelConfig {
     int gpio_num=1; u32 resolution_hz=10000000;
@@ -149,6 +168,7 @@ public:
     virtual u8* allocateDmaBuffer(size_t) noexcept=0;
     virtual void freeDmaBuffer(u8*) noexcept=0;
     virtual u32 getPinRouting(int) noexcept=0;
+    virtual bool isPinRoutingCurrent(int, u32) noexcept=0;
     virtual bool rebindTxPin(void*, int) noexcept=0;
 };
 }
@@ -170,6 +190,29 @@ bool fire(void* handle, const rmt_tx_done_event_data_t& event) {
 }
 int main(int argc, char**) {
     fl::detail::Rmt5PeripheralESPImpl peripheral;
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5,5,0)
+    gpio_registers[7]=0x1AB;
+    gpio_registers[GPIO_ENABLE_REG/4]=1u<<7;
+    gpio_registers[GPIO_PIN_MUX_REG[7]/4]=3u<<MCU_SEL_S;
+    const auto routing=peripheral.getPinRouting(7);
+    REQUIRE(routing==0x003101ABu);
+    REQUIRE(peripheral.isPinRoutingCurrent(7,routing));
+    gpio_registers[GPIO_ENABLE_REG/4]=0;
+    REQUIRE(!peripheral.isPinRoutingCurrent(7,routing));
+    gpio_registers[GPIO_ENABLE_REG/4]=1u<<7;
+    gpio_registers[GPIO_PIN_MUX_REG[7]/4]=4u<<MCU_SEL_S;
+    REQUIRE(!peripheral.isPinRoutingCurrent(7,routing));
+    gpio_registers[GPIO_PIN_MUX_REG[7]/4]=3u<<MCU_SEL_S;
+    gpio_registers[7]^=1;
+    REQUIRE(!peripheral.isPinRoutingCurrent(7,routing));
+    gpio_registers[35]=5;
+    gpio_registers[GPIO_ENABLE1_REG/4]=1u<<3;
+    REQUIRE(peripheral.getPinRouting(35)==0x10005u);
+#else
+    REQUIRE(peripheral.getPinRouting(7)==~0u);
+#endif
+    REQUIRE(peripheral.getPinRouting(-1)==~0u);
+    REQUIRE(peripheral.getPinRouting(SOC_GPIO_PIN_COUNT)==~0u);
     fl::detail::Rmt5ChannelConfig config;
     CallbackState first, second;
     rmt_tx_done_event_data_t event;
@@ -258,6 +301,7 @@ def callback_binary(
         "platforms/is_platform.h",
         "platforms/esp/32/feature_flags/enabled.h",
         "platforms/esp/esp_version.h",
+        "platforms/esp/32/core/pin_routing.h",
         "platforms/esp/32/drivers/rmt/rmt_5/rmt5_peripheral_esp.h",
         "platforms/memory_barrier.h",
         "fl/chipsets/led_timing.h",
@@ -276,6 +320,9 @@ def callback_binary(
         "esp_rom_gpio.h",
         "soc/gpio_sig_map.h",
         "soc/soc_caps.h",
+        "soc/gpio_reg.h",
+        "soc/gpio_periph.h",
+        "soc/io_mux_reg.h",
         "platforms/esp/esp_cache_compat.h",
     ]
     for name in headers:
@@ -289,7 +336,11 @@ def callback_binary(
         encoding="utf-8",
     )
     source = directory / "main.cpp"
-    source.write_text(f'#include "{SOURCE}"\n' + HARNESS, encoding="utf-8")
+    routing_source = ROOT / "src/platforms/esp/32/core/pin_routing.cpp.hpp"
+    source.write_text(
+        f'#include "{routing_source}"\n#include "{SOURCE}"\n' + HARNESS,
+        encoding="utf-8",
+    )
     binary = directory / "callbacks.exe"
     result = RunningProcess.run(
         [

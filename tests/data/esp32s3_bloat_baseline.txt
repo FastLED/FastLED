@@ -482,4 +482,8 @@
 # ChannelData owner instead of duplicating its immutable pin/timing fields.
 # BEFORE is master da963db06; the ratchet moves 318783 -> 318695. Attributed
 # RAM stays 22499 B; the 320503 B flash and 40016 B RAM ceilings are unchanged.
-318695
+# -104 B, #5383: cache the channel index per pin and use the same narrow GPIO
+# routing snapshot reader for RMT and SPI. Local image_flash is 318591 B;
+# attributed RAM remains 22499 B. Lower the ratchet from 318695 to 318591;
+# the 320503 B flash and 40016 B RAM ceilings are unchanged.
+318591

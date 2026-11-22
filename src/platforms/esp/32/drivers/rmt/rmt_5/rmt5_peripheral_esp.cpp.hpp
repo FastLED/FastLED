@@ -11,6 +11,7 @@
 
 #include "platforms/esp/32/feature_flags/enabled.h"
 #include "platforms/esp/esp_version.h"
+#include "platforms/esp/32/core/pin_routing.h"
 
 #if FASTLED_RMT5
 
@@ -128,6 +129,7 @@ public:
     u8* allocateDmaBuffer(size_t size) FL_NO_EXCEPT override;
     void freeDmaBuffer(u8* buffer) FL_NO_EXCEPT override;
     u32 getPinRouting(int pin) FL_NO_EXCEPT override;
+    bool isPinRoutingCurrent(int pin, u32 routing) FL_NO_EXCEPT override;
     bool rebindTxPin(void* channel_handle, int pin) FL_NO_EXCEPT override;
 
 private:
@@ -542,22 +544,16 @@ void Rmt5PeripheralESPImpl::freeDmaBuffer(u8* buffer) FL_NO_EXCEPT {
 // Pin Routing (FastLED#4905)
 //=============================================================================
 
-// gpio_get_io_config() and rmt_tx_switch_gpio() both ship in the IDF 5.5
-// bundled with Arduino-ESP32 3.3; older cores keep the previous behaviour.
+// rmt_tx_switch_gpio() ships in IDF 5.5, bundled with Arduino-ESP32 3.3;
+// older cores keep the previous behaviour.
 #define FL_RMT5_CAN_REBIND_PIN (ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 5, 0))
 
 u32 Rmt5PeripheralESPImpl::getPinRouting(int pin) FL_NO_EXCEPT {
-#if FL_RMT5_CAN_REBIND_PIN
-    gpio_io_config_t io = {};
-    if (gpio_get_io_config(static_cast<gpio_num_t>(pin), &io) != ESP_OK) {
-        return kPinRoutingUnknown;
-    }
-    return (io.sig_out & 0xFFFFu) | (io.oe ? (1u << 16) : 0u) |
-           ((io.fun_sel & 0xFFu) << 20);
-#else
-    (void)pin;
-    return kPinRoutingUnknown;
-#endif
+    return readPinRouting(pin);
+}
+
+bool Rmt5PeripheralESPImpl::isPinRoutingCurrent(int pin, u32 routing) FL_NO_EXCEPT {
+    return readPinRouting(pin) == routing;
 }
 
 bool Rmt5PeripheralESPImpl::rebindTxPin(void* channel_handle, int pin) FL_NO_EXCEPT {

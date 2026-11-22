@@ -15,6 +15,7 @@
 
 #include "platforms/esp/32/drivers/spi/spi_peripheral_esp.h"
 #include "platforms/esp/esp_version.h"
+#include "platforms/esp/32/core/pin_routing.h"
 #include "fl/log/log.h"
 #include "fl/stl/array.h"
 #include "fl/stl/noexcept.h"
@@ -436,19 +437,7 @@ void SpiPeripheralESPImpl::resetPin(int pin) FL_NO_EXCEPT {
 }
 
 u32 SpiPeripheralESPImpl::getPinRouting(int pin) FL_NO_EXCEPT {
-    // FastLED#4907: needs gpio_get_io_config() (IDF 5.5); older cores report
-    // unknown and keep the previous behaviour.
-#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 5, 0)
-    gpio_io_config_t io = {};
-    if (::gpio_get_io_config(static_cast<gpio_num_t>(pin), &io) != ESP_OK) {
-        return kPinRoutingUnknown;
-    }
-    return (io.sig_out & 0xFFFFu) | (io.oe ? (1u << 16) : 0u) |
-           ((io.fun_sel & 0xFFu) << 20);
-#else
-    (void)pin;
-    return kPinRoutingUnknown;
-#endif
+    return readPinRouting(pin);
 }
 
 //=============================================================================
