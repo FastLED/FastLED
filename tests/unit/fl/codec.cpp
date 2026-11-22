@@ -6,6 +6,7 @@
 #include "tests/unit/fl/codec/minimp3_variants.hpp"
 #include "tests/unit/fl/codec/mp3.hpp"
 #include "tests/unit/fl/codec/mp3_fixed_point.hpp"
+#include "tests/unit/fl/codec/mp3_variant_decode.hpp"
 #include "tests/unit/fl/codec/mp4_parser.hpp"
 #include "tests/unit/fl/codec/mpeg1.hpp"
 #include "tests/unit/fl/codec/pixel.hpp"

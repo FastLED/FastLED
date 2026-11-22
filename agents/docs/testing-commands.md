@@ -35,7 +35,7 @@ Host C++ tests live in three tiers under `tests/`:
 | Tier | Path | How to run | What belongs there |
 |------|------|------------|--------------------|
 | unit | `tests/unit/**` | `bash test`, `bash test --cpp`, `bash test <name>` | Fast doctest suites. The default set. |
-| integration | `tests/integration/**` | `bash test --integration`, or `bash test <name>` | Heavy or slow doctest suites with real pass/fail, e.g. the colorimetric strategy comparison table. |
+| integration | `tests/integration/**` | `bash test --integration`, or `bash test <name>` | Heavy or slow doctest suites with real pass/fail, e.g. the colorimetric strategy comparison table and the minimp3 SIMD-vs-scalar timing (`mp3_simd_perf`). |
 | profile | `tests/profile/**` | `bash profile <name>` | Standalone benchmark binaries, not doctest suites. |
 
 ```bash

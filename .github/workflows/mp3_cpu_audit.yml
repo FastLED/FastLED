@@ -13,6 +13,7 @@ on:
       - 'ci/codec_tables/**'
       - 'tests/unit/fl/codec/mp3*'
       - 'tests/unit/fl/codec/minimp3_variants.hpp'
+      - 'tests/integration/misc/mp3_simd_perf.cpp'
       - 'tests/data/codec/minimp3/**'
       - 'ci/codec_cpu/**'
       - 'ci/codec_memory/*_audit.cpp'
@@ -26,6 +27,7 @@ on:
       - 'ci/codec_tables/**'
       - 'tests/unit/fl/codec/mp3*'
       - 'tests/unit/fl/codec/minimp3_variants.hpp'
+      - 'tests/integration/misc/mp3_simd_perf.cpp'
       - 'tests/data/codec/minimp3/**'
       - 'ci/codec_cpu/**'
       - 'ci/codec_memory/*_audit.cpp'
@@ -139,7 +141,7 @@ jobs:
       # want of integer SIMD and passed vacuously. That ambiguity is what
       # stalled FastLED#4183; with this, every run says which it was.
       - name: Verify the fixed-point SIMD is not slower than scalar
-        run: bash test fl_codec --cpp --build-mode release --verbose
+        run: bash test mp3_simd_perf --cpp --build-mode release --verbose
 
       # Measure before gating, so a red gate still produces the numbers needed
       # to diagnose it -- and so that adding a backend can bootstrap its

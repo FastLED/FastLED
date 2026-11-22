@@ -36,6 +36,7 @@ def test_discovery_only_scans_tier_directories() -> None:
     assert files, "no tests discovered"
     assert all(f.startswith(("unit/", "integration/")) for f in files)
     assert "integration/misc/colorimetric_strategy_table.cpp" in files
+    assert "integration/misc/mp3_simd_perf.cpp" in files
     assert "unit/misc/colorimetric_strategy_checks.cpp" in files
     # Shared infrastructure is not a test.
     assert "unit/misc/coroutine_impl.cpp" not in files
