@@ -89,7 +89,10 @@ def test_sketch_startup_header_honors_library_marker() -> None:
     marker = "!defined(FL_BUILDING_FASTLED_LIBRARY)"
     assert code.count(marker) == 1
     guard = code.index(marker)
-    assert code.index("app_main(void)") > guard
+    # Match the weak definition itself, not the fl_esp32_arduino_app_main
+    # declaration, and require it to sit inside the guarded block.
+    endif = code.index("#endif", guard)
+    assert guard < code.index("void app_main(void)") < endif
     assert code.index("loopTaskHandle") < guard
     assert code.index("loopTaskWDTEnabled") < guard
 
