@@ -52,13 +52,18 @@ whole-port snapshots or two-write streaming. Apply the policy to each custom
 pin whose operations need this treatment, including a custom clock pin.
 In the per-pin path, clock transitions call `FastPin<CLOCK_PIN>::hi()` and
 `lo()` directly. A custom clock policy prevents the bulk paths from bypassing
-those calls and selects its delay implementation.
+those calls. On most platforms it also selects the clock delay implementation,
+because the writer calls the clock policy's `delay()`. Teensy 4
+(`FL_IS_TEENSY_4X`) is the exception: its writer calls `delayNanoseconds()`
+directly, so the clock policy's `delay()` is not used there.
 Here `kAtomicWrite` is a writer-selection property, **not** a guarantee that the
 integration's GPIO implementation is atomic or synchronized.
 
 Keep the default conservative latency metadata unless it has been measured for
-the custom operations. Inheriting the default policy also uses its generic delay
-path rather than a platform policy's specialized timing implementation. Do not
+the custom operations. Except on Teensy 4, where the writer's
+`delayNanoseconds()` timing is fixed, inheriting the default policy also uses
+its generic `fl::delaycycles()` path rather than a platform policy's
+specialized timing implementation. Do not
 copy native streaming or timing hints merely because the custom pin derives
 from the same hardware class. Validate logical edges and unrelated-pin
 preservation in tests, then validate electrical polarity and timing on the
