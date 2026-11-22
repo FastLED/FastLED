@@ -33,8 +33,24 @@
 #include "fl/stl/singleton.h"
 #include "fl/system/instruction_counter.h"
 #include "LegacyClocklessProxy.h"
+#include "platforms/is_platform.h"
 
 #include <Arduino.h>  // millis(), micros(), delay()
+
+// Cold-vs-warm mode (#5422): the ROM call that empties the flash cache. On the
+// C3/C6/H2 the one L1 cache serves both code and rodata fetched from flash.
+#if defined(FL_IS_ESP_32C6)
+#include "esp32c6/rom/cache.h"  // ok platform headers - AutoResearch #5422 cache eviction probe
+#define FL_TIMING_DRIFT_HAS_CACHE_FLUSH 1
+#elif defined(FL_IS_ESP_32C3)
+#include "esp32c3/rom/cache.h"  // ok platform headers - AutoResearch #5422 cache eviction probe
+#define FL_TIMING_DRIFT_HAS_CACHE_FLUSH 1
+#elif defined(FL_IS_ESP_32H2)
+#include "esp32h2/rom/cache.h"  // ok platform headers - AutoResearch #5422 cache eviction probe
+#define FL_TIMING_DRIFT_HAS_CACHE_FLUSH 1
+#else
+#define FL_TIMING_DRIFT_HAS_CACHE_FLUSH 0
+#endif
 
 namespace autoresearch {
 namespace timing_drift {
@@ -90,6 +106,31 @@ struct DriftResult {
     uint64_t show_total_us;
     uint32_t show_instr_count;         // show() calls with an instruction count (#5376)
     uint64_t show_instr_total;         // retired instructions across those calls
+};
+
+/// Cold-vs-warm show() pairs (#5422). Each pair: wait for the driver to go
+/// READY, empty the flash cache, time show() (cold), wait for READY again,
+/// time show() (warm). Counters follow the same split as DriftResult: either
+/// instructions (countInstructions) or real cycles, never both in one run.
+struct ColdWarmSide {
+    uint32_t count;
+    uint64_t total_us;
+    uint64_t instr_total;   // countInstructions runs only
+    uint64_t cycle_total;   // counter-off runs only
+    uint32_t min_us;
+    uint32_t max_us;
+};
+
+struct ColdWarmResult {
+    bool valid_pin;
+    bool supported;          // false where no cache flush exists (cold == warm)
+    int pin;
+    int num_leds;
+    int repeats;
+    uint32_t cpu_mhz;
+    uint32_t ready_timeouts; // READY waits that gave up (should be 0)
+    ColdWarmSide cold;
+    ColdWarmSide warm;
 };
 
 // Instructions per show() come from fl::InstructionCounter (#5376): wall
@@ -224,6 +265,72 @@ inline void measureShows(DriftResult& r, CRGB* leds, int num_leds, int iteration
     FastLED.setMaxRefreshRate(0);
 }
 
+/// Empty the flash cache so the next show() fetches its code and rodata from
+/// flash. Interrupts stay off for the ROM call so no handler fetches through
+/// a half-invalidated cache.
+inline bool evictFlashCache() {
+#if FL_TIMING_DRIFT_HAS_CACHE_FLUSH
+    portDISABLE_INTERRUPTS();
+    Cache_Invalidate_ICache_All();
+    portENABLE_INTERRUPTS();
+    return true;
+#else
+    return false;
+#endif
+}
+
+/// Poll until every channel driver reports READY, so the next show() never
+/// blocks on the previous frame's wire time. Returns false on timeout.
+inline bool waitForDriversReady() {
+    const uint32_t t0 = millis();
+    while (fl::ChannelManager::instance().poll() != fl::IChannelDriver::DriverState::READY) {
+        if (millis() - t0 > 50) return false;
+    }
+    return true;
+}
+
+inline void timeOneShow(ColdWarmSide& side, uint32_t cpu_mhz, bool countInstructions) {
+    fl::InstructionCounter counter;
+    if (countInstructions) counter.start();
+    const uint32_t cycleStart = countInstructions ? 0 : fl::InstructionCounter::readCycles();
+    const uint32_t t0 = micros();
+    FastLED.show();
+    const uint32_t dt = micros() - t0;
+    const uint32_t cycles = countInstructions ? 0 : fl::InstructionCounter::readCycles() - cycleStart;
+    const uint32_t instructions = countInstructions ? counter.stop(dt * cpu_mhz) : 0;
+    side.count++;
+    side.total_us += dt;
+    side.instr_total += instructions;
+    side.cycle_total += cycles;
+    if (dt < side.min_us) side.min_us = dt;
+    if (dt > side.max_us) side.max_us = dt;
+}
+
+/// The cold-vs-warm loop over whichever strip the caller registered.
+inline void measureColdWarm(ColdWarmResult& r, CRGB* leds, int num_leds, int repeats, bool countInstructions) {
+#if defined(ARDUINO_ARCH_ESP32)
+    r.cpu_mhz = getCpuFrequencyMhz();
+#endif
+    r.supported = FL_TIMING_DRIFT_HAS_CACHE_FLUSH != 0;
+    // No refresh-rate throttle: it would add a sleep to back-to-back shows.
+    FastLED.setMaxRefreshRate(0);
+    for (int i = 0; i < num_leds; ++i) {
+        leds[i] = CRGB(static_cast<uint8_t>(i * 7), static_cast<uint8_t>(i * 3), static_cast<uint8_t>(255 - i));
+    }
+    FastLED.show();  // first show allocates; keep it out of the samples
+    r.cold.min_us = r.warm.min_us = 0xFFFFFFFFu;
+    for (int i = 0; i < repeats; ++i) {
+        if (!waitForDriversReady()) r.ready_timeouts++;
+        evictFlashCache();
+        timeOneShow(r.cold, r.cpu_mhz, countInstructions);
+        if (!waitForDriversReady()) r.ready_timeouts++;
+        timeOneShow(r.warm, r.cpu_mhz, countInstructions);
+        FastLED.watchdog().feed();
+    }
+    waitForDriversReady();
+    r.repeats = repeats;
+}
+
 /// @param rgbw    legacy path only: the strip as SK6812-style RGBW (#5377).
 /// @param channel the same strip through the channel API (`FastLED.add()`)
 ///                instead of the legacy `addLeds` template path (#5399).
@@ -275,6 +382,48 @@ inline DriftResult run(int pin, int num_leds, int iterations, bool rgbw = false,
     LegacyClocklessProxy proxy(pin, leds, num_leds, LegacyClocklessChipset::WS2812B, rgbw);
     r.valid_pin = true;
     measureShows(r, leds, num_leds, iterations, countInstructions);
+    return r;
+}
+
+/// Cold-vs-warm show() on the legacy addLeds strip, or the channel API (#5422).
+/// @param channelOrder channel API only. GRB matches the legacy strip; RGB is
+///        the identity order, which skips PixelIterator's per-run reorder, so
+///        the instruction difference between the two is that pass (#5378).
+inline ColdWarmResult runColdWarm(int pin, int num_leds, int repeats, bool channel, bool countInstructions,
+                                  EOrder channelOrder = GRB) {
+    ColdWarmResult r{};
+    r.pin = pin;
+    if (repeats < 1) repeats = 1;
+    if (repeats > 1000) repeats = 1000;
+    if (num_leds < 2) num_leds = 2;
+    if (num_leds > kMaxLeds) num_leds = kMaxLeds;
+    r.num_leds = num_leds;
+
+    CRGB* leds = timingDriftState().leds;
+    {
+        LegacyClocklessProxy probe(pin, leds, num_leds);
+        if (!probe.valid()) {
+            return r;
+        }
+    }
+    FastLED.clear(ClearFlags::CHANNELS);
+
+    if (channel) {
+        fl::ChannelConfig config(fl::makeClockless<fl::TIMING_WS2812_800KHZ>(pin),
+                                 fl::span<CRGB>(leds, num_leds), channelOrder);
+        auto ch = FastLED.add(config);
+        if (!ch) {
+            return r;
+        }
+        r.valid_pin = true;
+        measureColdWarm(r, leds, num_leds, repeats, countInstructions);
+        FastLED.remove(ch);
+        return r;
+    }
+
+    LegacyClocklessProxy proxy(pin, leds, num_leds, LegacyClocklessChipset::WS2812B, false);
+    r.valid_pin = true;
+    measureColdWarm(r, leds, num_leds, repeats, countInstructions);
     return r;
 }
 

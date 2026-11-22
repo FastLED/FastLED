@@ -1045,6 +1045,9 @@ void AutoResearchRemoteControl::bindDriverMethods(fl::Remote& remote) {
     //        addLeds (#5399); iterations clamped to
     //        autoresearch::timing_drift::kMaxIterations). countInstructions=false
     //        reads real cycles on supported cores without switching counter events.
+    //        coldWarm=true (#5422) instead times `repeats` (default 32) pairs of
+    //        show(): one right after the flash cache is emptied, then a warm one;
+    //        with api="channel" it also takes order="grb" (default) or "rgb".
     remote.bind("timingDriftTest", [](const fl::json& args) -> fl::json {
         fl::json response = fl::json::object();
 
@@ -1095,6 +1098,68 @@ void AutoResearchRemoteControl::bindDriverMethods(fl::Remote& remote) {
         if (config.contains("countInstructions") && config["countInstructions"].is_bool()) {
             countInstructions = config["countInstructions"].as_bool().value();
         }
+        if (config.contains("coldWarm") && config["coldWarm"].is_bool() &&
+            config["coldWarm"].as_bool().value()) {
+            // #5422: `repeats` pairs of (flash-cache-evicted show, warm show).
+            if (rgbw) {
+                response.set("success", false);
+                response.set("error", "InvalidArgs");
+                response.set("message", "coldWarm does not take rgbw");
+                return response;
+            }
+            int repeats = 32;
+            if (config.contains("repeats") && config["repeats"].is_int()) {
+                repeats = static_cast<int>(config["repeats"].as_int().value());
+            }
+            // order, api="channel" only: "grb" (default, as the legacy strip)
+            // or "rgb", the identity order with no per-run reorder (#5378).
+            fl::string order = "grb";
+            if (config.contains("order") && config["order"].is_string()) {
+                order = config["order"].as_string().value();
+            }
+            if ((order != "grb" && order != "rgb") || (order == "rgb" && !channel)) {
+                response.set("success", false);
+                response.set("error", "InvalidArgs");
+                response.set("message", "order is \"grb\", or \"rgb\" with api=\"channel\"");
+                return response;
+            }
+            auto cw = autoresearch::timing_drift::runColdWarm(pin, num_leds, repeats, channel, countInstructions,
+                                                              order == "rgb" ? RGB : GRB);
+            response.set("success", cw.valid_pin);
+            response.set("api", api);
+            response.set("order", order);
+            response.set("mode", "coldWarm");
+            response.set("pin", cw.pin);
+            if (!cw.valid_pin) {
+                response.set("error", "InvalidPin");
+                response.set("message", "pin is outside LegacyClocklessProxy range");
+                return response;
+            }
+            response.set("num_leds", cw.num_leds);
+            response.set("repeats", cw.repeats);
+            response.set("cpu_mhz", static_cast<int64_t>(cw.cpu_mhz));
+            response.set("cache_flush_supported", cw.supported);
+            response.set("counter", countInstructions ? "instructions" : "cycles");
+            response.set("ready_timeouts", static_cast<int64_t>(cw.ready_timeouts));
+            auto side = [&](const char* prefix, const autoresearch::timing_drift::ColdWarmSide& s) {
+                const fl::string p(prefix);
+                response.set(p + "_count", static_cast<int64_t>(s.count));
+                response.set(p + "_total_us", static_cast<int64_t>(s.total_us));
+                response.set(p + "_min_us", static_cast<int64_t>(s.min_us));
+                response.set(p + "_max_us", static_cast<int64_t>(s.max_us));
+                if (fl::InstructionCounter::kSupported) {
+                    if (countInstructions) {
+                        response.set(p + "_instr_total", static_cast<int64_t>(s.instr_total));
+                    } else {
+                        response.set(p + "_cycle_total", static_cast<int64_t>(s.cycle_total));
+                    }
+                }
+            };
+            side("cold", cw.cold);
+            side("warm", cw.warm);
+            return response;
+        }
+
         auto r = autoresearch::timing_drift::run(pin, num_leds, iterations, rgbw, channel, countInstructions);
 
         response.set("success", r.valid_pin);
