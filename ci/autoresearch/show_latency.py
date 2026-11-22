@@ -87,7 +87,7 @@ def _counter_summary(result: dict[str, Any], mean_us: float) -> str:
     instr = int(result.get("show_instr_total") or 0) / counted
     text = f"; {instr:.0f} instr/show"
     mhz = int(result.get("cpu_mhz") or 0)
-    if mhz > 0:
+    if mhz > 0 and mean_us > 0:
         cycles = mean_us * mhz
         text += f", {cycles:.0f} cycles/show (IPC {instr / cycles:.2f})"
     return text

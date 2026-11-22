@@ -109,3 +109,11 @@ def test_instruction_counter_is_reported_when_present() -> None:
 def test_instruction_counter_absent_on_other_boards() -> None:
     verdict = evaluate(_result(215.0), budget_us=280)
     assert "instr/show" not in verdict.message
+
+
+def test_zero_mean_does_not_divide_by_zero() -> None:
+    result = _result(0.0, count=5)
+    result.update({"show_instr_total": 5 * 100, "show_instr_count": 5, "cpu_mhz": 160})
+    verdict = evaluate(result, budget_us=280)
+    assert "100 instr/show" in verdict.message
+    assert "IPC" not in verdict.message

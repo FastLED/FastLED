@@ -30,6 +30,7 @@
 #include "FastLED.h"
 #include "fl/stl/int.h"
 #include "fl/stl/singleton.h"
+#include "fl/system/instruction_counter.h"
 #include "LegacyClocklessProxy.h"
 
 #include <Arduino.h>  // millis(), micros(), delay()
@@ -86,37 +87,9 @@ struct DriftResult {
     uint64_t show_instr_total;         // retired instructions across those calls
 };
 
-// Instructions retired per FastLED.show() (#5376). Wall time moves 10-20 us
-// with code layout alone; the instruction count does not, so it is what
-// per-change savings are judged on. ESP32-C3/C6/H2 have Espressif's custom
-// performance counter (PCER 0x7E0 event select, PCMR 0x7E1 enable, PCCR 0x7E2
-// count); the standard minstret/mcycle CSRs trap on these cores. ESP-IDF uses
-// the same counter as the cycle counter, so the cycle event, the enable and a
-// cycle count advanced by the measured interval are restored afterwards.
-#if defined(FL_IS_ESP_32C3) || defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2)
-#define AUTORESEARCH_SHOW_INSTR_COUNTER 1
-struct InstrCounter {
-    uint32_t saved_event;
-    uint32_t saved_mode;
-    uint32_t saved_count;
-    void start() {
-        asm volatile("csrr %0, 0x7E0" : "=r"(saved_event));
-        asm volatile("csrr %0, 0x7E1" : "=r"(saved_mode));
-        asm volatile("csrr %0, 0x7E2" : "=r"(saved_count));
-        asm volatile("csrw 0x7E0, %0" ::"r"(1u << 1));  // event: instructions
-        asm volatile("csrw 0x7E2, %0" ::"r"(0u));
-        asm volatile("csrw 0x7E1, %0" ::"r"(1u));       // count enable
-    }
-    uint32_t stop(uint32_t elapsed_cycles) {
-        uint32_t instructions;
-        asm volatile("csrr %0, 0x7E2" : "=r"(instructions));
-        asm volatile("csrw 0x7E0, %0" ::"r"(saved_event));
-        asm volatile("csrw 0x7E2, %0" ::"r"(saved_count + elapsed_cycles));
-        asm volatile("csrw 0x7E1, %0" ::"r"(saved_mode));
-        return instructions;
-    }
-};
-#endif
+// Instructions per show() come from fl::InstructionCounter (#5376): wall
+// time moves 10-20 us with code layout alone; the instruction count does not.
+
 
 inline DriftResult run(int pin, int num_leds, int iterations) {
     DriftResult r{};
@@ -171,17 +144,16 @@ inline DriftResult run(int pin, int num_leds, int iterations) {
     r.show_min_us = 0xFFFFFFFFu;
 
     auto timedShow = [&]() {
-#if defined(AUTORESEARCH_SHOW_INSTR_COUNTER)
-        InstrCounter counter;
+        fl::InstructionCounter counter;
         counter.start();
-#endif
         const uint32_t t0 = micros();
         FastLED.show();
         const uint32_t dt = micros() - t0;
-#if defined(AUTORESEARCH_SHOW_INSTR_COUNTER)
-        r.show_instr_total += counter.stop(dt * r.cpu_mhz);
-        r.show_instr_count++;
-#endif
+        const uint32_t instructions = counter.stop(dt * r.cpu_mhz);
+        if (fl::InstructionCounter::kSupported) {
+            r.show_instr_total += instructions;
+            r.show_instr_count++;
+        }
         r.show_count++;
         r.show_total_us += dt;
         if (dt < r.show_min_us) r.show_min_us = dt;
