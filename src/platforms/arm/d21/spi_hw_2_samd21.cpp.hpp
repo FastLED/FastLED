@@ -173,7 +173,9 @@ bool SPIDualSAMD21::begin(const SpiHw2::Config& config) {
     mData0Pin = config.data0_pin;
     mData1Pin = config.data1_pin;
 
-    // SAMD21 has 6 SERCOM peripherals (0-5)
+    // SAMD21G/J have 6 SERCOM peripherals (0-5); the 32-pin SAMD21E parts
+    // (Gemma M0, Trinket M0, QT Py) only have SERCOM0-3 (#5373). Instances
+    // the vendor CMSIS header does not define fall through to `default`.
     // Map bus_num to SERCOM instance
     int sercom_num = (mBusId != -1) ? mBusId : config.bus_num;
     if (sercom_num < 0 || sercom_num > 5) {
@@ -188,10 +190,14 @@ bool SPIDualSAMD21::begin(const SpiHw2::Config& config) {
         case 1: mSercom = SERCOM1; break;
         case 2: mSercom = SERCOM2; break;
         case 3: mSercom = SERCOM3; break;
+#if defined(SERCOM4)
         case 4: mSercom = SERCOM4; break;
+#endif
+#if defined(SERCOM5)
         case 5: mSercom = SERCOM5; break;
+#endif
         default:
-            FL_WARN("SPIDualSAMD21: Invalid SERCOM");
+            FL_WARN("SPIDualSAMD21: SERCOM" << sercom_num << " not present on this chip");
             return false;
     }
 
@@ -228,18 +234,22 @@ bool SPIDualSAMD21::begin(const SpiHw2::Config& config) {
                                 GCLK_CLKCTRL_GEN_GCLK0 |
                                 GCLK_CLKCTRL_CLKEN;
             break;
+#if defined(SERCOM4)
         case 4:
             PM->APBCMASK.bit.SERCOM4_ = 1;
             GCLK->CLKCTRL.reg = GCLK_CLKCTRL_ID_SERCOM4_CORE |
                                 GCLK_CLKCTRL_GEN_GCLK0 |
                                 GCLK_CLKCTRL_CLKEN;
             break;
+#endif
+#if defined(SERCOM5)
         case 5:
             PM->APBCMASK.bit.SERCOM5_ = 1;
             GCLK->CLKCTRL.reg = GCLK_CLKCTRL_ID_SERCOM5_CORE |
                                 GCLK_CLKCTRL_GEN_GCLK0 |
                                 GCLK_CLKCTRL_CLKEN;
             break;
+#endif
     }
 
     // Wait for clock synchronization

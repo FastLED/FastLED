@@ -32,6 +32,7 @@ KNOWN_UNBADGED_ALL_BOARD_ALIASES = {
     "nrfmicro_nrf52840",
     "nucleo_g070rb",
     "rp2350w",
+    "samd21e",  # SAMD21E (Gemma M0) compile probe for #5373; no dedicated workflow.
     "seeed_xiao_esp32s3",
     "web",
     "xiaoblesense_adafrui",
