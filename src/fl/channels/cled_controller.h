@@ -42,6 +42,24 @@ namespace detail {
 /// that never configures RGBW does not link the conversion into the limiter.
 /// Defined in power_mgt.cpp.hpp.
 void enable_rgbw_power_estimate() FL_NO_EXCEPT;
+
+#if SKETCH_HAS_LARGE_MEMORY
+/// Values are keyed by every input, including direct legacy-settings writes.
+class ColorAdjustmentCache {
+  public:
+    bool get(u8 brightness, const CRGB& correction, const CRGB& temperature,
+             ColorAdjustment& adjustment) const FL_NO_EXCEPT;
+    void put(u8 brightness, const CRGB& correction, const CRGB& temperature,
+             const ColorAdjustment& adjustment) FL_NO_EXCEPT;
+
+  private:
+    bool mValid = false;
+    u8 mBrightness = 0;
+    CRGB mCorrection;
+    CRGB mTemperature;
+    ColorAdjustment mAdjustment{};
+};
+#endif
 }  // namespace detail
 
 class CLEDController {
@@ -50,6 +68,9 @@ protected:
     fl::span<CRGB> mLeds;     ///< span of LED data used by this controller
     CLEDController *mPNext = nullptr;   ///< pointer to the next LED controller in the linked list
     LegacySettings mLegacySettings;
+#if SKETCH_HAS_LARGE_MEMORY && !(defined(NO_CORRECTION) && NO_CORRECTION == 1)
+    detail::ColorAdjustmentCache mAdjustmentCache;
+#endif
     // Bit-fields share one byte; a fixed-white flag costs no RAM and no
     // vtable slot on AVR (#4788).
     bool mEnabled : 1;

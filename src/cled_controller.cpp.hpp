@@ -125,14 +125,44 @@ void CLEDController::removeFromList(CLEDController* controller) FL_NO_EXCEPT {
 }
 
 ColorAdjustment CLEDController::getAdjustmentData(fl::u8 brightness) FL_NO_EXCEPT {
-    // *premixed = getAdjustment(brightness);
-    // if (color_correction) {
-    //     *color_correction = getAdjustment(255);
-    // }
+#if SKETCH_HAS_LARGE_MEMORY && !(defined(NO_CORRECTION) && NO_CORRECTION == 1)
+    ColorAdjustment cached;
+    if (mAdjustmentCache.get(brightness, mLegacySettings.mCorrection,
+                            mLegacySettings.mTemperature, cached)) {
+        return cached;
+    }
+#endif
     #if FASTLED_HD_COLOR_MIXING
     ColorAdjustment out = {this->getAdjustment(brightness), this->getAdjustment(255), brightness};
     #else
     ColorAdjustment out = {getAdjustment(brightness)};
     #endif
+#if SKETCH_HAS_LARGE_MEMORY && !(defined(NO_CORRECTION) && NO_CORRECTION == 1)
+    mAdjustmentCache.put(brightness, mLegacySettings.mCorrection,
+                         mLegacySettings.mTemperature, out);
+#endif
     return out;
 }
+
+#if SKETCH_HAS_LARGE_MEMORY
+bool fl::detail::ColorAdjustmentCache::get(
+    fl::u8 brightness, const CRGB& correction, const CRGB& temperature,
+    ColorAdjustment& adjustment) const FL_NO_EXCEPT {
+    if (!mValid || mBrightness != brightness || mCorrection != correction ||
+        mTemperature != temperature) {
+        return false;
+    }
+    adjustment = mAdjustment;
+    return true;
+}
+
+void fl::detail::ColorAdjustmentCache::put(
+    fl::u8 brightness, const CRGB& correction, const CRGB& temperature,
+    const ColorAdjustment& adjustment) FL_NO_EXCEPT {
+    mBrightness = brightness;
+    mCorrection = correction;
+    mTemperature = temperature;
+    mAdjustment = adjustment;
+    mValid = true;
+}
+#endif

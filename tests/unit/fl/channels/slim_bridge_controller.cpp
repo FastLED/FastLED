@@ -607,6 +607,22 @@ struct CountingWorkerDriverTraits : DirectDriverTraits {
     }
 };
 
+FL_TEST_CASE("Slim bridge resolves its driver once per frame #5384") {
+    using Controller = SlimBridgeController<7, TIMING_WS2812_800KHZ, RGB, 280,
+        CountingWorkerDriverTraits, 0, true>;
+    Controller controller;
+    CRGB leds[1] = {CRGB(17, 31, 63)};
+    controller.setLeds(leds, 1);
+    controller.setDither(DISABLE_DITHER);
+    directDriverInstance().mState = IChannelDriver::DriverState::READY;
+    CountingWorkerDriverTraits::accesses() = 0;
+
+    controller.showLeds(255);
+    FL_CHECK_EQ(CountingWorkerDriverTraits::accesses(), 1);
+    controller.showLeds(255);
+    FL_CHECK_EQ(CountingWorkerDriverTraits::accesses(), 2);
+}
+
 FL_TEST_CASE("Legacy bus rebinding does not access the driver singleton at construction #5001") {
     using Automatic = SlimBridgeController<7, TIMING_WS2812_800KHZ, RGB, 280,
         CountingWorkerDriverTraits, 0, true>;
