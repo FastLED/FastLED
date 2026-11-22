@@ -91,3 +91,29 @@ def test_firmware_failure_message_is_reported() -> None:
         budget_us=280,
     )
     assert "pin out of range" in verdict.message
+
+
+def test_instruction_counter_is_reported_when_present() -> None:
+    """#5376: the C6 reports instructions per show(), immune to code layout."""
+    result = _result(215.0, count=500)
+    result.update(
+        {"show_instr_total": 500 * 12400, "show_instr_count": 500, "cpu_mhz": 160}
+    )
+    verdict = evaluate(result, budget_us=280)
+    assert verdict.ok
+    assert "12400 instr/show" in verdict.message
+    assert "34400 cycles/show" in verdict.message
+    assert "IPC 0.36" in verdict.message
+
+
+def test_instruction_counter_absent_on_other_boards() -> None:
+    verdict = evaluate(_result(215.0), budget_us=280)
+    assert "instr/show" not in verdict.message
+
+
+def test_zero_mean_does_not_divide_by_zero() -> None:
+    result = _result(0.0, count=5)
+    result.update({"show_instr_total": 5 * 100, "show_instr_count": 5, "cpu_mhz": 160})
+    verdict = evaluate(result, budget_us=280)
+    assert "100 instr/show" in verdict.message
+    assert "IPC" not in verdict.message

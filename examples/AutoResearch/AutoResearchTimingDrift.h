@@ -30,6 +30,7 @@
 #include "FastLED.h"
 #include "fl/stl/int.h"
 #include "fl/stl/singleton.h"
+#include "fl/system/instruction_counter.h"
 #include "LegacyClocklessProxy.h"
 
 #include <Arduino.h>  // millis(), micros(), delay()
@@ -82,7 +83,13 @@ struct DriftResult {
     uint32_t show_min_us;
     uint32_t show_max_us;
     uint64_t show_total_us;
+    uint32_t show_instr_count;         // show() calls with an instruction count (#5376)
+    uint64_t show_instr_total;         // retired instructions across those calls
 };
+
+// Instructions per show() come from fl::InstructionCounter (#5376): wall
+// time moves 10-20 us with code layout alone; the instruction count does not.
+
 
 inline DriftResult run(int pin, int num_leds, int iterations) {
     DriftResult r{};
@@ -137,9 +144,16 @@ inline DriftResult run(int pin, int num_leds, int iterations) {
     r.show_min_us = 0xFFFFFFFFu;
 
     auto timedShow = [&]() {
+        fl::InstructionCounter counter;
+        counter.start();
         const uint32_t t0 = micros();
         FastLED.show();
         const uint32_t dt = micros() - t0;
+        const uint32_t instructions = counter.stop(dt * r.cpu_mhz);
+        if (fl::InstructionCounter::kSupported) {
+            r.show_instr_total += instructions;
+            r.show_instr_count++;
+        }
         r.show_count++;
         r.show_total_us += dt;
         if (dt < r.show_min_us) r.show_min_us = dt;

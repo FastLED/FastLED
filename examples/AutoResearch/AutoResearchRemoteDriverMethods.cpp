@@ -1085,6 +1085,10 @@ void AutoResearchRemoteControl::bindDriverMethods(fl::Remote& remote) {
         response.set("show_min_us", static_cast<int64_t>(r.show_min_us));
         response.set("show_max_us", static_cast<int64_t>(r.show_max_us));
         response.set("show_total_us", static_cast<int64_t>(r.show_total_us));
+        if (r.show_instr_count > 0) {
+            response.set("show_instr_count", static_cast<int64_t>(r.show_instr_count));
+            response.set("show_instr_total", static_cast<int64_t>(r.show_instr_total));
+        }
 
         fl::json iter_ms_arr = fl::json::array();
         for (int i = 0; i < r.iterations; ++i) {

@@ -74,6 +74,25 @@ def load_budgets(path: Path = BUDGET_FILE) -> dict[tuple[str, str], int]:
     return parse_budgets(path.read_text(encoding="utf-8"))
 
 
+def _counter_summary(result: dict[str, Any], mean_us: float) -> str:
+    """Instructions per show() from the RISC-V perf counter (#5376).
+
+    Code layout moves wall time by 10-20 us between builds; the instruction
+    count does not, so per-change savings are judged on it. Cycles come from
+    wall time x CPU MHz, so IPC shows how much of show() is stalls.
+    """
+    counted = int(result.get("show_instr_count") or 0)
+    if counted <= 0:
+        return ""
+    instr = int(result.get("show_instr_total") or 0) / counted
+    text = f"; {instr:.0f} instr/show"
+    mhz = int(result.get("cpu_mhz") or 0)
+    if mhz > 0 and mean_us > 0:
+        cycles = mean_us * mhz
+        text += f", {cycles:.0f} cycles/show (IPC {instr / cycles:.2f})"
+    return text
+
+
 def evaluate(result: dict[str, Any], budget_us: int) -> LatencyVerdict:
     """Judge one timingDriftTest result against a mean show() budget."""
     if not result.get("success", False):
@@ -92,6 +111,7 @@ def evaluate(result: dict[str, Any], budget_us: int) -> LatencyVerdict:
         f"(min {result.get('show_min_us')}, max {result.get('show_max_us')}); "
         f"budget {budget_us} us"
     )
+    summary += _counter_summary(result, mean)
     if mean >= WIRE_US / 2:
         return LatencyVerdict(
             False,
