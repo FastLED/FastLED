@@ -1614,6 +1614,14 @@ SAMD21G18A_ZERO = Board(
     framework="arduino",
 )
 
+# SAMD21E (32-pin package): only SERCOM0-3 exist, unlike the G/J parts (#5373).
+SAMD21E18A_GEMMA_M0 = Board(
+    board_name="samd21e",
+    real_board_name="adafruit_gemma_m0",
+    platform="atmelsam",
+    framework="arduino",
+)
+
 # SAMD51 boards (Cortex-M4F @ 120 MHz)
 SAMD51J19A_FEATHER_M4 = Board(
     board_name="samd51j",
