@@ -298,10 +298,12 @@ bool ChannelEngineRpPio::startClockless(TxSlot& slot, size_t job_index) FL_NO_EX
     size_t transfers = 0;
     if (extra_zero_bits == 0) {
         // Packed (#4621): each data byte becomes an 8*lanes-bit column of
-        // bit-planes, MSB plane first and lane 0 in each plane's MSB, split
+        // bit-planes, MSB plane first and lane 0 in each plane's LSB, split
         // into transfers of rpPioPackedTransferBytes(lanes) bytes (high
         // half first for 8 lanes). DMA memory equals the data size, and
         // the stream holds no padding, so no partial extra LED symbol.
+        // Lane 0 must be the plane's LSB: `mov pins, x` writes x bit 0 to
+        // the base pin, and lane 0 is the channel on the base pin.
         const u8 unit = rpPioPackedTransferBytes(lanes);
         const size_t total_bytes = input.size() * lanes;
         words.resize((total_bytes + 3u) / 4u, 0u);
@@ -313,7 +315,7 @@ bool ChannelEngineRpPio::startClockless(TxSlot& slot, size_t job_index) FL_NO_EX
                 u32 plane = 0;
                 for (u8 lane = 0; lane < lanes; ++lane) {
                     const u8 value = mInFlightChannels[job.first + lane]->getData()[byte_index];
-                    plane |= static_cast<u32>((value >> bit) & 1u) << (lanes - 1u - lane);
+                    plane |= static_cast<u32>((value >> bit) & 1u) << lane;
                 }
                 if (lanes == 8) {
                     u32& half = bit >= 4 ? high : low;
@@ -343,7 +345,7 @@ bool ChannelEngineRpPio::startClockless(TxSlot& slot, size_t job_index) FL_NO_EX
                 u32 plane = 0;
                 for (u8 lane = 0; lane < lanes; ++lane) {
                     const u8 value = mInFlightChannels[job.first + lane]->getData()[byte_index];
-                    plane |= static_cast<u32>((value >> bit) & 1u) << (lanes - 1u - lane);
+                    plane |= static_cast<u32>((value >> bit) & 1u) << lane;
                 }
                 words.push_back(plane << (32u - lanes));
             }

@@ -193,10 +193,10 @@ FL_TEST_CASE("RP PIO TX batches only equal-length consecutive compatible lanes")
     FL_REQUIRE_EQ(peripheral.lastConfig.tx_pin, 10);
     FL_REQUIRE_EQ(peripheral.lastConfig.lane_count, 2);
     // One 16-bit transfer per data byte: 8 two-bit planes, MSB plane first,
-    // lane 0 in each plane's MSB.
+    // lane 0 (the base pin) in each plane's LSB.
     FL_CHECK_EQ(peripheral.transferCount, static_cast<size_t>(1));
     FL_REQUIRE_EQ(peripheral.capturedWords.size(), static_cast<size_t>(1));
-    FL_CHECK_EQ(peripheral.capturedWords[0], 0x00008000u);
+    FL_CHECK_EQ(peripheral.capturedWords[0], 0x00004000u);
     peripheral.dmaBusy = false;
     peripheral.terminal = true;
     FL_REQUIRE_EQ(engine.poll(), IChannelDriver::DriverState::DRAINING);
@@ -359,24 +359,25 @@ FL_TEST_CASE("RP PIO TX selects four and eight lane batches only for full runs")
     }
 }
 
-FL_TEST_CASE("RP PIO TX packs multi-lane planes MSB-plane and lane-0 first") {
+FL_TEST_CASE("RP PIO TX packs multi-lane planes MSB-plane first, lane 0 in the plane LSB") {
     for (u8 lanes = 4; lanes <= 8; lanes = static_cast<u8>(lanes * 2)) {
         RpPioTxPeripheralMock& peripheral = resetTxMock();
         ChannelEngineRpPio engine(createTxMockPeripheral());
         for (u8 lane = 0; lane < lanes; ++lane) {
             fl::vector_psram<u8> bytes;
-            // lane 0: MSB set (first plane, top bit); last lane: LSB set.
+            // lane 0: MSB set (first plane, plane bit 0); last lane: LSB set
+            // (last plane, plane's top bit).
             bytes.push_back(lane == 0 ? 0x80 : lane == lanes - 1 ? 0x01 : 0x00);
             engine.enqueue(makeChannel(12 + lane, bytes));
         }
         engine.show();
         if (lanes == 4) {
             FL_REQUIRE_EQ(peripheral.capturedWords.size(), static_cast<size_t>(1));
-            FL_CHECK_EQ(peripheral.capturedWords[0], 0x80000001u);
+            FL_CHECK_EQ(peripheral.capturedWords[0], 0x10000008u);
         } else {
             FL_REQUIRE_EQ(peripheral.capturedWords.size(), static_cast<size_t>(2));
-            FL_CHECK_EQ(peripheral.capturedWords[0], 0x80000000u);  // planes 7..4
-            FL_CHECK_EQ(peripheral.capturedWords[1], 0x00000001u);  // planes 3..0
+            FL_CHECK_EQ(peripheral.capturedWords[0], 0x01000000u);  // planes 7..4
+            FL_CHECK_EQ(peripheral.capturedWords[1], 0x00000080u);  // planes 3..0
         }
     }
 }
