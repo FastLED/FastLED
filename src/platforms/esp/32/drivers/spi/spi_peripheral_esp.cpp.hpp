@@ -129,14 +129,14 @@ SpiPeripheralESP::~SpiPeripheralESP() {
 //=============================================================================
 
 SpiPeripheralESPImpl::SpiPeripheralESPImpl() FL_NO_EXCEPT
-    : mHost(SPI2_HOST)
+    : mTransactions()
+    , mNextTransaction(0)
+    , mHost(SPI2_HOST)
     , mDeviceHandle(nullptr)
     , mBusInitialized(false)
     , mDeviceAdded(false)
     , mCallback(nullptr)
-    , mUserContext(nullptr)
-    , mTransactions()
-    , mNextTransaction(0) {
+    , mUserContext(nullptr) {
 }
 
 SpiPeripheralESPImpl::~SpiPeripheralESPImpl() {
