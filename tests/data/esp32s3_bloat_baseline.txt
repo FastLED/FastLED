@@ -492,4 +492,8 @@
 # 318599 -> 318587 B; attributed RAM 22503 -> 22519 B for the controller cache.
 # The shrink is under 64 B, so the 318599 B ratchet stays unchanged. Small-memory
 # targets omit the cache; the 320503 B flash and 40016 B RAM ceilings are unchanged.
-318599
+# RMT5 initialization failure handling (#5438): reject partial encoders
+# and release SDK allocations before returning. Hosted ESP32-S3 Blink run
+# 45509906148 measured 318603 B image flash (+4 B against the prior pin)
+# and 22519 B attributed RAM after keeping timing values local to initialization.
+318603
