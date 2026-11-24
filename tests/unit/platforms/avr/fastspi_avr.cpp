@@ -9,7 +9,9 @@
 #include "fastspi_types.h"
 #include "pixel_controller.h"
 #include "platforms/shared/spi_pixel_writer.h"
+#include "platforms/shared/spi_bitbang/generic_software_spi.h"
 #include "fl/stl/int.h"
+#include "fl/stl/type_traits.h"
 
 namespace fl {
 
@@ -293,6 +295,13 @@ template <u8 PIN> struct AvrRecordingPin {
 #define SPDR avr_regs::spdr
 #define AVRHardwareSPIOutput AvrClassicSpiOutput
 #include "platforms/avr/fastspi_avr.h" // allow-include-after-namespace
+#define SPI_DATA 11
+#define SPI_CLOCK 13
+#define SPIOutput AvrTestSpiOutput
+#include "platforms/avr/spi_output_template.h" // allow-include-after-namespace
+#undef SPIOutput
+#undef SPI_CLOCK
+#undef SPI_DATA
 #undef AVRHardwareSPIOutput
 #undef SPCR
 #undef SPSR
@@ -311,6 +320,13 @@ template <u8 PIN> struct AvrRecordingPin {
 FL_TEST_FILE(FL_FILEPATH) {
 
 using namespace fl;
+
+FL_TEST_CASE("AVR uses hardware SPI only for the native pin pair") {
+    FL_CHECK((is_base_of<AvrClassicSpiOutput<11, 13, 4>, AvrTestSpiOutput<11, 13, 4>>::value));
+    FL_CHECK((is_base_of<GenericSoftwareSPIOutput<7, 8, 4>, AvrTestSpiOutput<7, 8, 4>>::value));
+    FL_CHECK((is_base_of<GenericSoftwareSPIOutput<11, 8, 4>, AvrTestSpiOutput<11, 8, 4>>::value));
+    FL_CHECK((is_base_of<GenericSoftwareSPIOutput<7, 13, 4>, AvrTestSpiOutput<7, 13, 4>>::value));
+}
 
 namespace {
 
