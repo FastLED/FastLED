@@ -175,15 +175,30 @@ _FL_DEFPIN(8,15); _FL_DEFPIN(9,3); _FL_DEFPIN(10,1);
 #endif
 // The fast policy writes GPIO registers directly, bypassing forced core-API pins.
 #if FL_ESP8266_ENABLE_FAST_SOFTWARE_SPI && !defined(FL_FASTPIN_HAS_NO_PINMAP)
-template <u8 PIN> struct BitbangPin<FastPin<PIN>> {
-    static constexpr bool kAtomicWrite = true;
-    static constexpr bool kEsp32LegacyWriteBit = false;  // generic writer trait
-    static constexpr bool kTwoWriteStream = FastPin<PIN>::kRealPin < 16;
+struct Esp8266BitbangPinTraits {
+    BitbangPinAccess access;
+    bool normalGpio;
+};
+
+template <class Pin, u8 REAL_PIN, u32 MASK>
+constexpr Esp8266BitbangPinTraits esp8266BitbangPinTraits(const _ESPPIN<REAL_PIN, MASK>*) FL_NO_EXCEPT {
+    return {bitbangPinAccess<Pin, _ESPPIN<REAL_PIN, MASK>>(), REAL_PIN < 16};
+}
+template <class Pin>
+constexpr Esp8266BitbangPinTraits esp8266BitbangPinTraits(const void*) FL_NO_EXCEPT {
+    return {BitbangPinAccess::Default, false};
+}
+
+template <u8 PIN> struct BitbangPin<FastPin<PIN>> : BitbangPinDefaults<FastPin<PIN>> {
+    static constexpr auto kPinTraits = esp8266BitbangPinTraits<FastPin<PIN>>(static_cast<const FastPin<PIN>*>(nullptr));
+    static constexpr bool kAtomicWrite = kPinTraits.access == BitbangPinAccess::Native;
+    static constexpr bool kRequiresPinWrites = kPinTraits.access == BitbangPinAccess::Custom;
+    static constexpr bool kTwoWriteStream = kAtomicWrite && kPinTraits.normalGpio;
     // Normal GPIO writes serialize through the 80 MHz peripheral bus. The
     // measured floor is six bus cycles (12 CPU cycles at 160 MHz); at 80 MHz
     // the CPU can add another cycle. Keep the conservative six-cycle bound.
     // GPIO16 uses a different RTC path and is excluded from this optimization.
-    static constexpr cycle_t kMinWriteCycles = FastPin<PIN>::kRealPin < 16
+    static constexpr cycle_t kMinWriteCycles = kTwoWriteStream
         ? static_cast<cycle_t>(FL_CPU_FREQUENCY()) * 6 / ESP8266_CLOCK : 0;
     FASTLED_FORCE_INLINE static u32 cycles() FL_NO_EXCEPT {
         u32 value;
@@ -208,12 +223,22 @@ template <u8 PIN> struct BitbangPin<FastPin<PIN>> {
     }
     template <u8 BIT>
     FASTLED_FORCE_INLINE static void write(u8 value) FL_NO_EXCEPT {
-        if (FastPin<PIN>::kRealPin < 16) {
+        writeImpl<BIT>(value, fl::integral_constant<bool, kAtomicWrite>());
+    }
+
+  private:
+    template <u8 BIT>
+    FASTLED_FORCE_INLINE static void writeImpl(u8 value, fl::integral_constant<bool, true>) FL_NO_EXCEPT {
+        if (kTwoWriteStream) {
             writeBitSetClear<BIT>(value, FastPin<PIN>::mask(), &GPOS, &GPOC);
         } else {
             // GPIO16 belongs to the RTC block, with no W1TS/W1TC registers.
             GP16O = (GP16O & ~1UL) | ((value >> BIT) & 1U);
         }
+    }
+    template <u8 BIT>
+    FASTLED_FORCE_INLINE static void writeImpl(u8 value, fl::integral_constant<bool, false>) FL_NO_EXCEPT {
+        BitbangPinDefaults<FastPin<PIN>>::template write<BIT>(value);
     }
 };
 #endif  // FL_ESP8266_ENABLE_FAST_SOFTWARE_SPI && !FL_FASTPIN_HAS_NO_PINMAP

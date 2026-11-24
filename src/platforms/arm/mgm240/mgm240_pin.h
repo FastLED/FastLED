@@ -129,10 +129,13 @@ public:
     }
 };
 
-/// True only for FastPin specializations backed by a real MGM240 _ARMPIN.
-template <u32 MASK, typename PORT_STRUCT, u8 PORT_NUMBER, u8 PIN_NUMBER>
-constexpr bool isMgm240HardwarePin(const _ARMPIN<MASK, PORT_STRUCT, PORT_NUMBER, PIN_NUMBER>*) { return true; }
-constexpr bool isMgm240HardwarePin(const void*) { return false; }
+/// Match FastPin specializations backed by a real MGM240 _ARMPIN.
+template <class Pin, u32 MASK, typename PORT_STRUCT, u8 PORT_NUMBER, u8 PIN_NUMBER>
+constexpr BitbangPinAccess mgm240BitbangPinAccess(const _ARMPIN<MASK, PORT_STRUCT, PORT_NUMBER, PIN_NUMBER>*) {
+    return bitbangPinAccess<Pin, _ARMPIN<MASK, PORT_STRUCT, PORT_NUMBER, PIN_NUMBER>>();
+}
+template <class Pin>
+constexpr BitbangPinAccess mgm240BitbangPinAccess(const void*) { return BitbangPinAccess::Default; }
 
 // FL_MGM240_ENABLE_FAST_SOFTWARE_SPI: optimized bit-bang software SPI pin policy (default 1).
 // Opt-out: define it to 0 to fall back to the legacy bit-bang writer.
@@ -146,7 +149,9 @@ constexpr bool isMgm240HardwarePin(const void*) { return false; }
 /// the P_SET/P_CLR aliases. kMinWriteCycles stays at its default: no GPIO write
 /// latency has been measured here, so existing padding is kept.
 template <u8 PIN> struct BitbangPin<FastPin<PIN>> : BitbangPinDefaults<FastPin<PIN>> {
-    static constexpr bool kAtomicWrite = isMgm240HardwarePin(static_cast<const FastPin<PIN>*>(nullptr));
+    static constexpr auto kPinAccess = mgm240BitbangPinAccess<FastPin<PIN>>(static_cast<const FastPin<PIN>*>(nullptr));
+    static constexpr bool kAtomicWrite = kPinAccess == BitbangPinAccess::Native;
+    static constexpr bool kRequiresPinWrites = kPinAccess == BitbangPinAccess::Custom;
     static constexpr bool kTwoWriteStream = kAtomicWrite;
     template <u8 BIT>
     FASTLED_FORCE_INLINE static void write(u8 value) FL_NO_EXCEPT {

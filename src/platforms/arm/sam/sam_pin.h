@@ -84,11 +84,14 @@ public:
 	static constexpr bool validpin() { return true; }
 };
 
-/// True only for FastPin specializations backed by a real _DUEPIN. FastPinBB and
+/// Match FastPin specializations backed by a real _DUEPIN. FastPinBB and
 /// its one-bit aliases never match.
-template <u8 PIN, u32 MASK, typename PDOR, typename PSOR, typename PCOR, typename PDDR>
-constexpr bool isDueHardwarePin(const _DUEPIN<PIN, MASK, PDOR, PSOR, PCOR, PDDR>*) { return true; }
-constexpr bool isDueHardwarePin(const void*) { return false; }
+template <class Pin, u8 PIN, u32 MASK, typename PDOR, typename PSOR, typename PCOR, typename PDDR>
+constexpr BitbangPinAccess dueBitbangPinAccess(const _DUEPIN<PIN, MASK, PDOR, PSOR, PCOR, PDDR>*) {
+    return bitbangPinAccess<Pin, _DUEPIN<PIN, MASK, PDOR, PSOR, PCOR, PDDR>>();
+}
+template <class Pin>
+constexpr BitbangPinAccess dueBitbangPinAccess(const void*) { return BitbangPinAccess::Default; }
 
 // FL_SAM_ENABLE_FAST_SOFTWARE_SPI: optimized bit-bang software SPI pin policy (default 1).
 // Opt-out: define it to 0 to fall back to the legacy bit-bang writer.
@@ -104,7 +107,9 @@ constexpr bool isDueHardwarePin(const void*) { return false; }
 /// kMinWriteCycles stays at its default: no GPIO write latency has been measured
 /// here, so existing padding is kept.
 template <u8 PIN> struct BitbangPin<FastPin<PIN>> : BitbangPinDefaults<FastPin<PIN>> {
-    static constexpr bool kAtomicWrite = isDueHardwarePin(static_cast<const FastPin<PIN>*>(nullptr));
+    static constexpr auto kPinAccess = dueBitbangPinAccess<FastPin<PIN>>(static_cast<const FastPin<PIN>*>(nullptr));
+    static constexpr bool kAtomicWrite = kPinAccess == BitbangPinAccess::Native;
+    static constexpr bool kRequiresPinWrites = kPinAccess == BitbangPinAccess::Custom;
     template <u8 BIT>
     FASTLED_FORCE_INLINE static void write(u8 value) FL_NO_EXCEPT {
         writeImpl<BIT>(value, fl::integral_constant<bool, kAtomicWrite>());

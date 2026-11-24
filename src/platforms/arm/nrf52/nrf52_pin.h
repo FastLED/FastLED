@@ -68,10 +68,13 @@ public:
     FASTLED_NRF52_INLINE_ATTRIBUTE static u32   nrf_pin()  { return NRF_GPIO_PIN_MAP(_PORT_NUMBER, _PIN_NUMBER); }
 };
 
-/// True only for FastPin specializations backed by a real nRF52 _ARMPIN.
-template <u32 MASK, typename PORT, u8 PORT_NUMBER, u8 PIN_NUMBER>
-constexpr bool isNrf52HardwarePin(const _ARMPIN<MASK, PORT, PORT_NUMBER, PIN_NUMBER>*) { return true; }
-constexpr bool isNrf52HardwarePin(const void*) { return false; }
+/// Match FastPin specializations backed by a real nRF52 _ARMPIN.
+template <class Pin, u32 MASK, typename PORT, u8 PORT_NUMBER, u8 PIN_NUMBER>
+constexpr BitbangPinAccess nrf52BitbangPinAccess(const _ARMPIN<MASK, PORT, PORT_NUMBER, PIN_NUMBER>*) {
+    return bitbangPinAccess<Pin, _ARMPIN<MASK, PORT, PORT_NUMBER, PIN_NUMBER>>();
+}
+template <class Pin>
+constexpr BitbangPinAccess nrf52BitbangPinAccess(const void*) { return BitbangPinAccess::Default; }
 
 // FL_NRF52_ENABLE_FAST_SOFTWARE_SPI: optimized bit-bang software SPI pin policy (default 1).
 // Opt-out: define it to 0 to fall back to the legacy bit-bang writer.
@@ -86,7 +89,9 @@ constexpr bool isNrf52HardwarePin(const void*) { return false; }
 /// kMinWriteCycles stays at its default: no GPIO write latency has been measured
 /// here, so existing padding is kept.
 template <u8 PIN> struct BitbangPin<FastPin<PIN>> : BitbangPinDefaults<FastPin<PIN>> {
-    static constexpr bool kAtomicWrite = isNrf52HardwarePin(static_cast<const FastPin<PIN>*>(nullptr));
+    static constexpr auto kPinAccess = nrf52BitbangPinAccess<FastPin<PIN>>(static_cast<const FastPin<PIN>*>(nullptr));
+    static constexpr bool kAtomicWrite = kPinAccess == BitbangPinAccess::Native;
+    static constexpr bool kRequiresPinWrites = kPinAccess == BitbangPinAccess::Custom;
     template <u8 BIT>
     FASTLED_FORCE_INLINE static void write(u8 value) FL_NO_EXCEPT {
         writeImpl<BIT>(value, fl::integral_constant<bool, kAtomicWrite>());

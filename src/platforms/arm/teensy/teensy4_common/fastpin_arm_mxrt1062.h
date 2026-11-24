@@ -52,10 +52,13 @@ public:
 	inline static u32 pinbit() __attribute__ ((always_inline)) { return _BIT; }
 };
 
-/// True only for FastPin specializations backed by a real i.MXRT _ARMPIN.
-template <u8 PIN, u32 BIT, u32 MASK, typename DR, typename SET, typename CLEAR, typename TOGGLE>
-constexpr bool isMxrtHardwarePin(const _ARMPIN<PIN, BIT, MASK, DR, SET, CLEAR, TOGGLE>*) { return true; }
-constexpr bool isMxrtHardwarePin(const void*) { return false; }
+/// Match FastPin specializations backed by a real i.MXRT _ARMPIN.
+template <class Pin, u8 PIN, u32 BIT, u32 MASK, typename DR, typename SET, typename CLEAR, typename TOGGLE>
+constexpr BitbangPinAccess mxrtBitbangPinAccess(const _ARMPIN<PIN, BIT, MASK, DR, SET, CLEAR, TOGGLE>*) {
+    return bitbangPinAccess<Pin, _ARMPIN<PIN, BIT, MASK, DR, SET, CLEAR, TOGGLE>>();
+}
+template <class Pin>
+constexpr BitbangPinAccess mxrtBitbangPinAccess(const void*) { return BitbangPinAccess::Default; }
 
 // FL_TEENSY_ENABLE_FAST_SOFTWARE_SPI: optimized bit-bang software SPI pin policy (default 1).
 // Opt-out: define it to 0 to fall back to the legacy bit-bang writer.
@@ -69,11 +72,23 @@ constexpr bool isMxrtHardwarePin(const void*) { return false; }
 /// other data updates use the write-one set/clear aliases. kMinWriteCycles stays
 /// zero because Teensy 4 SPI rates are in Hz, not the cycles it would be compared to.
 template <u8 PIN> struct BitbangPin<FastPin<PIN>> : BitbangPinDefaults<FastPin<PIN>> {
-	static constexpr bool kAtomicWrite = isMxrtHardwarePin(static_cast<const FastPin<PIN>*>(nullptr));
+	static constexpr auto kPinAccess = mxrtBitbangPinAccess<FastPin<PIN>>(static_cast<const FastPin<PIN>*>(nullptr));
+	static constexpr bool kAtomicWrite = kPinAccess == BitbangPinAccess::Native;
+	static constexpr bool kRequiresPinWrites = kPinAccess == BitbangPinAccess::Custom;
 	static constexpr bool kTwoWriteStream = kAtomicWrite;
 	template <u8 BIT>
 	FASTLED_FORCE_INLINE static void write(u8 value) FL_NO_EXCEPT {
+		writeImpl<BIT>(value, fl::integral_constant<bool, kAtomicWrite>());
+	}
+
+  private:
+	template <u8 BIT>
+	FASTLED_FORCE_INLINE static void writeImpl(u8 value, fl::integral_constant<bool, true>) FL_NO_EXCEPT {
 		writeBitSetClear<BIT>(value, FastPin<PIN>::mask(), FastPin<PIN>::sport(), FastPin<PIN>::cport());
+	}
+	template <u8 BIT>
+	FASTLED_FORCE_INLINE static void writeImpl(u8 value, fl::integral_constant<bool, false>) FL_NO_EXCEPT {
+		BitbangPinDefaults<FastPin<PIN>>::template write<BIT>(value);
 	}
 };
 #endif  // FL_TEENSY_ENABLE_FAST_SOFTWARE_SPI

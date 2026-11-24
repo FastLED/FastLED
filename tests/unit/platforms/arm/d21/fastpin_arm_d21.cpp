@@ -60,6 +60,7 @@ using Base = _ARMPIN<PIN, 3, MASK, PORT>;
 constexpr u8 kDataPin = 240;
 constexpr u8 kClockPin = 241;
 constexpr u8 kOtherPortClockPin = 242;
+constexpr u8 kCustomClockPin = 244;
 constexpr u32 kDivider = 4;
 
 } // namespace d21_test
@@ -106,6 +107,7 @@ template <u8 PIN, int PORT> struct TracedClock : d21_test::Base<PIN, d21_test::k
 
 template <> class FastPin<d21_test::kClockPin> : public TracedClock<d21_test::kClockPin, 0> {};
 template <> class FastPin<d21_test::kOtherPortClockPin> : public TracedClock<d21_test::kOtherPortClockPin, 1> {};
+template <> class FastPin<d21_test::kCustomClockPin> : public TracedClock<d21_test::kCustomClockPin, 0> {};
 
 // A user-defined pin without sport()/cport() must still compile and use hi()/lo().
 template <> class FastPin<243> : public ValidPinBase {
@@ -119,6 +121,14 @@ int FastPin<243>::sHi = 0;
 int FastPin<243>::sLo = 0;
 FL_STATIC_ASSERT(!BitbangPin<FastPin<243>>::kAtomicWrite && !BitbangPin<FastPin<243>>::kTwoWriteStream,
                  "user-defined pins keep the default policy");
+
+// The traced clock replaces hi()/lo() to observe edges. Use the native policy's
+// streaming flags here so these tests still exercise the native bulk path.
+template <> struct BitbangPin<FastPin<d21_test::kClockPin>>
+    : BitbangPinDefaults<FastPin<d21_test::kClockPin>> {
+    static constexpr bool kAtomicWrite = BitbangPin<FastPin<d21_test::kDataPin>>::kAtomicWrite;
+    static constexpr bool kTwoWriteStream = BitbangPin<FastPin<d21_test::kDataPin>>::kTwoWriteStream;
+};
 
 FL_STATIC_ASSERT(BitbangPin<FastPin<d21_test::kDataPin>>::kTwoWriteStream,
                  "SAMD21 hardware pins must stream on an exclusive same-port bus");
@@ -252,6 +262,15 @@ FL_TEST_CASE("SAMD21 split-port bulk writes keep concurrent unrelated changes") 
     SplitPort::writeBytesValueRaw(0x5A, 1);
     FL_CHECK_EQ(dr0(), kOther | (1U << 9));
     FL_CHECK_EQ(dr1() & kClock, 0U);
+}
+
+FL_TEST_CASE("SAMD21 same-port bulk writes honor custom clock methods") {
+    reset();
+    GenericSoftwareSPIOutput<kDataPin, kCustomClockPin, kDivider> spi;
+    u8 input[] = {0xA5, 0x3C};
+    spi.writeBytes<DATA_NOP>(input, 2);
+    checkAtomicEdges({0xA5, 0x3C});
+    FL_CHECK_EQ(gClockAliasStores, 32);
 }
 
 } // FL_TEST_FILE

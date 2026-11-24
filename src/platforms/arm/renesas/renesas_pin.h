@@ -66,10 +66,13 @@ public:
 #undef digitalBspPinToPort
 #undef PORT
 
-/// True only for FastPin specializations backed by a real Renesas _ARMPIN.
-template <u8 PIN, bsp_io_port_pin_t BSP, u32 PORT_ADDR>
-constexpr bool isRenesasHardwarePin(const _ARMPIN<PIN, BSP, PORT_ADDR>*) { return true; }
-constexpr bool isRenesasHardwarePin(const void*) { return false; }
+/// Match FastPin specializations backed by a real Renesas _ARMPIN.
+template <class Pin, u8 PIN, bsp_io_port_pin_t BSP, u32 PORT_ADDR>
+constexpr BitbangPinAccess renesasBitbangPinAccess(const _ARMPIN<PIN, BSP, PORT_ADDR>*) {
+    return bitbangPinAccess<Pin, _ARMPIN<PIN, BSP, PORT_ADDR>>();
+}
+template <class Pin>
+constexpr BitbangPinAccess renesasBitbangPinAccess(const void*) { return BitbangPinAccess::Default; }
 
 // FL_RENESAS_ENABLE_FAST_SOFTWARE_SPI: optimized bit-bang software SPI pin policy (default 1).
 // Opt-out: define it to 0 to fall back to the legacy bit-bang writer.
@@ -83,7 +86,9 @@ constexpr bool isRenesasHardwarePin(const void*) { return false; }
 /// updates use POSR/PORR at their native 16-bit width. kMinWriteCycles stays at its
 /// default: no GPIO write latency has been measured, so existing padding is kept.
 template <u8 PIN> struct BitbangPin<FastPin<PIN>> : BitbangPinDefaults<FastPin<PIN>> {
-    static constexpr bool kAtomicWrite = isRenesasHardwarePin(static_cast<const FastPin<PIN>*>(nullptr));
+    static constexpr auto kPinAccess = renesasBitbangPinAccess<FastPin<PIN>>(static_cast<const FastPin<PIN>*>(nullptr));
+    static constexpr bool kAtomicWrite = kPinAccess == BitbangPinAccess::Native;
+    static constexpr bool kRequiresPinWrites = kPinAccess == BitbangPinAccess::Custom;
     static constexpr bool kTwoWriteStream = kAtomicWrite;
     template <u8 BIT>
     FASTLED_FORCE_INLINE static void write(u8 value) FL_NO_EXCEPT {

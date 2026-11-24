@@ -101,6 +101,10 @@ template <> class FastPin<240> : public stm32_test::TracedData<240, true> {};
 template <> class FastPin<241> : public stm32_test::TracedClock<241, true> {};
 template <> class FastPin<242> : public stm32_test::TracedData<242, false> {};
 template <> class FastPin<243> : public stm32_test::TracedClock<243, false> {};
+template <> class FastPin<245> : public stm32_test::DataBase<245, true> {
+  public:
+    static void hi() { stm32_test::DataBase<245, true>::lo(); }
+};
 
 // A user-defined pin without the BSRR accessor must still compile and use hi()/lo().
 template <> class FastPin<244> : public ValidPinBase {
@@ -208,6 +212,19 @@ template <class Spi> void checkWriter() {
 
 FL_TEST_CASE("STM32SPIOutput uses one BSRR store per bit with BRR") {
     checkWriter<STM32SPIOutput<240, 241, kDivider>>();
+}
+FL_TEST_CASE("Generic software SPI honors a derived STM32 pin's custom hi") {
+    reset();
+    GenericSoftwareSPIOutput<245, 241, kDivider> spi;
+    spi.writeByte(0x80);
+    FL_REQUIRE_EQ(gEdges.size(), 8U);
+    FL_CHECK_FALSE(gEdges.front().dataHigh);
+
+    reset();
+    spi.writeBytesValueRaw(0x80, 2);
+    FL_REQUIRE_EQ(gEdges.size(), 16U);
+    FL_CHECK_FALSE(gEdges[0].dataHigh);
+    FL_CHECK_FALSE(gEdges[8].dataHigh);
 }
 FL_TEST_CASE("STM32SPIOutput uses one BSRR store per bit without BRR") {
     checkWriter<STM32SPIOutput<242, 243, kDivider>>();

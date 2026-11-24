@@ -128,6 +128,14 @@ int FastPin<243>::sLo = 0;
 FL_STATIC_ASSERT(!BitbangPin<FastPin<243>>::kAtomicWrite && !BitbangPin<FastPin<243>>::kTwoWriteStream,
                  "user-defined pins keep the default policy");
 
+// The traced clock replaces hi()/lo() to observe edges. Use the native policy's
+// streaming flags here so these tests still exercise the native bulk path.
+template <> struct BitbangPin<FastPin<k20_test::kClockPin>>
+    : BitbangPinDefaults<FastPin<k20_test::kClockPin>> {
+    static constexpr bool kAtomicWrite = BitbangPin<FastPin<k20_test::kDataPin>>::kAtomicWrite;
+    static constexpr bool kTwoWriteStream = BitbangPin<FastPin<k20_test::kDataPin>>::kTwoWriteStream;
+};
+
 FL_STATIC_ASSERT(BitbangPin<FastPin<k20_test::kDataPin>>::kTwoWriteStream,
                  "Teensy K20 hardware pins must stream on an exclusive same-port bus");
 FL_STATIC_ASSERT(BitbangPin<FastPin<k20_test::kDataPin>>::kAtomicWrite,

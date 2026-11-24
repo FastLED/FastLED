@@ -51,10 +51,13 @@ public:
   inline static port_t mask() __attribute__ ((always_inline)) { return _MASK; }
 };
 
-/// True only for FastPin specializations backed by a real _RP2040PIN.
-template <uint PIN, u32 MASK>
-constexpr bool isRp2040HardwarePin(const _RP2040PIN<PIN, MASK>*) { return true; }
-constexpr bool isRp2040HardwarePin(const void*) { return false; }
+/// Match FastPin specializations backed by a real _RP2040PIN.
+template <class Pin, uint PIN, u32 MASK>
+constexpr BitbangPinAccess rp2040BitbangPinAccess(const _RP2040PIN<PIN, MASK>*) {
+    return bitbangPinAccess<Pin, _RP2040PIN<PIN, MASK>>();
+}
+template <class Pin>
+constexpr BitbangPinAccess rp2040BitbangPinAccess(const void*) { return BitbangPinAccess::Default; }
 
 // FL_RP_ENABLE_FAST_SOFTWARE_SPI: optimized bit-bang software SPI pin policy (default 1).
 // Opt-out: define it to 0 to fall back to the legacy bit-bang writer.
@@ -72,7 +75,9 @@ constexpr bool isRp2040HardwarePin(const void*) { return false; }
 /// owns all of SIO. kMinWriteCycles stays at its default: no SIO write latency
 /// has been measured here, so existing padding is kept.
 template <u8 PIN> struct BitbangPin<FastPin<PIN>> : BitbangPinDefaults<FastPin<PIN>> {
-  static constexpr bool kAtomicWrite = isRp2040HardwarePin(static_cast<const FastPin<PIN>*>(nullptr));
+  static constexpr auto kPinAccess = rp2040BitbangPinAccess<FastPin<PIN>>(static_cast<const FastPin<PIN>*>(nullptr));
+  static constexpr bool kAtomicWrite = kPinAccess == BitbangPinAccess::Native;
+  static constexpr bool kRequiresPinWrites = kPinAccess == BitbangPinAccess::Custom;
   static constexpr bool kTwoWriteStream = kAtomicWrite;
   template <u8 BIT>
   FASTLED_FORCE_INLINE static void write(u8 value) FL_NO_EXCEPT {

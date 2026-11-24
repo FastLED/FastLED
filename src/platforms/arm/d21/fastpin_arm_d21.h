@@ -64,10 +64,13 @@ public:
     inline static port_t mask() __attribute__ ((always_inline)) { return _MASK; }
 };
 
-/// True only for FastPin specializations backed by a real SAMD21 _ARMPIN.
-template <u8 PIN, u8 BIT, u32 MASK, int GRP>
-constexpr bool isD21HardwarePin(const _ARMPIN<PIN, BIT, MASK, GRP>*) { return true; }
-constexpr bool isD21HardwarePin(const void*) { return false; }
+/// Match FastPin specializations backed by a real SAMD21 _ARMPIN.
+template <class Pin, u8 PIN, u8 BIT, u32 MASK, int GRP>
+constexpr BitbangPinAccess d21BitbangPinAccess(const _ARMPIN<PIN, BIT, MASK, GRP>*) {
+    return bitbangPinAccess<Pin, _ARMPIN<PIN, BIT, MASK, GRP>>();
+}
+template <class Pin>
+constexpr BitbangPinAccess d21BitbangPinAccess(const void*) { return BitbangPinAccess::Default; }
 
 // FL_SAMD_ENABLE_FAST_SOFTWARE_SPI: optimized bit-bang software SPI pin policy (default 1).
 // Opt-out: define it to 0 to fall back to the legacy bit-bang writer.
@@ -81,7 +84,9 @@ constexpr bool isD21HardwarePin(const void*) { return false; }
 /// updates use OUTSET/OUTCLR. kMinWriteCycles stays at its default: no IOBUS
 /// write latency has been measured here, so existing padding is kept.
 template <u8 PIN> struct BitbangPin<FastPin<PIN>> : BitbangPinDefaults<FastPin<PIN>> {
-    static constexpr bool kAtomicWrite = isD21HardwarePin(static_cast<const FastPin<PIN>*>(nullptr));
+    static constexpr auto kPinAccess = d21BitbangPinAccess<FastPin<PIN>>(static_cast<const FastPin<PIN>*>(nullptr));
+    static constexpr bool kAtomicWrite = kPinAccess == BitbangPinAccess::Native;
+    static constexpr bool kRequiresPinWrites = kPinAccess == BitbangPinAccess::Custom;
     static constexpr bool kTwoWriteStream = kAtomicWrite;
     template <u8 BIT>
     FASTLED_FORCE_INLINE static void write(u8 value) FL_NO_EXCEPT {
