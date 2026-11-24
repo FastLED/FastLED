@@ -25,6 +25,8 @@
         defined(FL_IS_ESP_32H2) || defined(FL_IS_ESP_32P4)
         // Known RISC-V variants: scalar loops (no SIMD hardware), RVV-ready
         #include "platforms/esp/32/simd_riscv.hpp"
+    #elif defined(FL_IS_ESP_32S31)
+        #include "platforms/shared/simd_noop.hpp"
     #else
         // Unknown RISC-V variant: using scalar noop fallback
         #warning "RISC-V SIMD ops are untested on this chip, using scalar noop fallback"

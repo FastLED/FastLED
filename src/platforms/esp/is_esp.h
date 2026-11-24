@@ -19,6 +19,7 @@
 /// - FL_IS_ESP_32DEV: Original ESP32 (dual-core Xtensa LX6)
 /// - FL_IS_ESP_32S2: ESP32-S2 (single-core Xtensa LX7)
 /// - FL_IS_ESP_32S3: ESP32-S3 (dual-core Xtensa LX7)
+/// - FL_IS_ESP_32S31: ESP32-S31 (dual-core RISC-V)
 /// - FL_IS_ESP_32C2: ESP32-C2 (RISC-V)
 /// - FL_IS_ESP_32C3: ESP32-C3 (RISC-V)
 /// - FL_IS_ESP_32C5: ESP32-C5 (RISC-V)
@@ -49,7 +50,7 @@
     defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32C2) || \
     defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32C5) || \
     defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32H2) || \
-    defined(CONFIG_IDF_TARGET_ESP32P4)
+    defined(CONFIG_IDF_TARGET_ESP32P4) || defined(CONFIG_IDF_TARGET_ESP32S31)
 #define FL_IS_ESP32
 #endif
 
@@ -77,6 +78,11 @@
 // FL_IS_ESP_32S3 - ESP32-S3 (dual-core Xtensa LX7)
 #if defined(CONFIG_IDF_TARGET_ESP32S3)
 #define FL_IS_ESP_32S3
+#endif
+
+// FL_IS_ESP_32S31 - ESP32-S31 (dual-core RISC-V)
+#if defined(CONFIG_IDF_TARGET_ESP32S31)
+#define FL_IS_ESP_32S31
 #endif
 
 // FL_IS_ESP_32C2 - ESP32-C2 (RISC-V)
