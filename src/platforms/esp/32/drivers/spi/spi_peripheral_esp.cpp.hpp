@@ -36,6 +36,9 @@ FL_EXTERN_C_BEGIN
 #include "soc/gpio_reg.h" // IWYU pragma: keep
 #include "soc/gpio_periph.h" // IWYU pragma: keep
 #include "soc/io_mux_reg.h" // IWYU pragma: keep
+#if defined(FL_IS_ESP_32S31)
+#include "soc/io_mux_struct.h" // IWYU pragma: keep
+#endif
 // IWYU pragma: begin_keep
 #include "freertos/FreeRTOS.h"
 // IWYU pragma: end_keep
@@ -440,9 +443,18 @@ void SpiPeripheralESPImpl::resetPin(int pin) FL_NO_EXCEPT {
 
 u32 SpiPeripheralESPImpl::getPinRouting(int pin) FL_NO_EXCEPT {
 #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 5, 0)
-    if (!GPIO_IS_VALID_GPIO(pin) || !GPIO_PIN_MUX_REG[pin]) {
+    if (!GPIO_IS_VALID_GPIO(pin)) {
         return kPinRoutingUnknown;
     }
+#if defined(FL_IS_ESP_32S31)
+    const u32 function = IO_MUX.gpio[pin].mcu_sel;
+#else
+    const u32 muxRegister = GPIO_PIN_MUX_REG[pin];
+    if (!muxRegister) {
+        return kPinRoutingUnknown;
+    }
+    const u32 function = REG_GET_FIELD(muxRegister, MCU_SEL);
+#endif
     // Keep the three-field token identical to the RMT5 peripheral's snapshot.
     const u32 signal = REG_GET_FIELD(GPIO_FUNC0_OUT_SEL_CFG_REG + pin * 4, GPIO_FUNC0_OUT_SEL);
     u32 enableRegister = GPIO_ENABLE_REG;
@@ -452,7 +464,6 @@ u32 SpiPeripheralESPImpl::getPinRouting(int pin) FL_NO_EXCEPT {
     }
 #endif
     const u32 enabled = (REG_READ(enableRegister) >> (pin & 31)) & 1u;
-    const u32 function = REG_GET_FIELD(GPIO_PIN_MUX_REG[pin], MCU_SEL);
     return (signal & 0xFFFFu) | (enabled << 16) | ((function & 0xFFu) << 20);
 #else
     (void)pin;
