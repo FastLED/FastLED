@@ -94,6 +94,14 @@ template <u8 PIN, int PORT> struct TracedClock : mxrt_test::Base<PIN, mxrt_test:
 template <> class FastPin<mxrt_test::kClockPin> : public TracedClock<mxrt_test::kClockPin, 0> {};
 template <> class FastPin<mxrt_test::kOtherPortClockPin> : public TracedClock<mxrt_test::kOtherPortClockPin, 1> {};
 
+// The traced clock replaces hi()/lo() to observe edges. Use the native policy's
+// streaming flags here so these tests still exercise the native bulk path.
+template <> struct BitbangPin<FastPin<mxrt_test::kClockPin>>
+    : BitbangPinDefaults<FastPin<mxrt_test::kClockPin>> {
+    static constexpr bool kAtomicWrite = BitbangPin<FastPin<mxrt_test::kDataPin>>::kAtomicWrite;
+    static constexpr bool kTwoWriteStream = BitbangPin<FastPin<mxrt_test::kDataPin>>::kTwoWriteStream;
+};
+
 FL_STATIC_ASSERT(BitbangPin<FastPin<mxrt_test::kDataPin>>::kTwoWriteStream,
                  "i.MXRT hardware pins must stream on an exclusive same-port bus");
 FL_STATIC_ASSERT(BitbangPin<FastPin<mxrt_test::kDataPin>>::kAtomicWrite,

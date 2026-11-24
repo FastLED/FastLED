@@ -135,6 +135,14 @@ FL_STATIC_ASSERT(!BitbangPin<FastPin<243>>::kAtomicWrite && !BitbangPin<FastPin<
                  "user-defined pins keep the default policy");
 
 FL_STATIC_ASSERT(FastPin<mgm240_test::kDataPin>::validpin(), "MGM240 pins must expose validpin()");
+// The traced clock replaces hi()/lo() to observe edges. Use the native policy's
+// streaming flags here so these tests still exercise the native bulk path.
+template <> struct BitbangPin<FastPin<mgm240_test::kClockPin>>
+    : BitbangPinDefaults<FastPin<mgm240_test::kClockPin>> {
+    static constexpr bool kAtomicWrite = BitbangPin<FastPin<mgm240_test::kDataPin>>::kAtomicWrite;
+    static constexpr bool kTwoWriteStream = BitbangPin<FastPin<mgm240_test::kDataPin>>::kTwoWriteStream;
+};
+
 FL_STATIC_ASSERT(BitbangPin<FastPin<mgm240_test::kDataPin>>::kTwoWriteStream,
                  "MGM240 hardware pins must stream on an exclusive same-port bus");
 FL_STATIC_ASSERT(BitbangPin<FastPin<mgm240_test::kDataPin>>::kAtomicWrite,

@@ -137,6 +137,14 @@ FL_STATIC_ASSERT(!BitbangPin<FastPin<243>>::kAtomicWrite && !BitbangPin<FastPin<
                  "user-defined pins keep the default policy");
 
 FL_STATIC_ASSERT(FastPin<renesas_test::kDataPin>::validpin(), "Renesas pins must expose validpin()");
+// The traced clock replaces hi()/lo() to observe edges. Use the native policy's
+// streaming flags here so these tests still exercise the native bulk path.
+template <> struct BitbangPin<FastPin<renesas_test::kClockPin>>
+    : BitbangPinDefaults<FastPin<renesas_test::kClockPin>> {
+    static constexpr bool kAtomicWrite = BitbangPin<FastPin<renesas_test::kDataPin>>::kAtomicWrite;
+    static constexpr bool kTwoWriteStream = BitbangPin<FastPin<renesas_test::kDataPin>>::kTwoWriteStream;
+};
+
 FL_STATIC_ASSERT(BitbangPin<FastPin<renesas_test::kDataPin>>::kTwoWriteStream,
                  "Renesas hardware pins must stream on an exclusive same-port bus");
 FL_STATIC_ASSERT(BitbangPin<FastPin<renesas_test::kDataPin>>::kAtomicWrite,
