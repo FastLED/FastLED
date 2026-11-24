@@ -25,7 +25,11 @@ from ci.meson.mtime_stabilizer import restore_executable_bits
 from ci.meson.output import print_banner, print_error, print_success
 from ci.meson.phase_tracker import PhaseTracker
 from ci.meson.runner_helpers import _apply_phase_timing, _write_failure_log
-from ci.meson.test_discovery import get_fuzzy_test_candidates
+from ci.meson.test_discovery import (
+    INTEGRATION_TEST_TIMEOUT_SECONDS,
+    get_fuzzy_test_candidates,
+    integration_test_names,
+)
 from ci.meson.test_execution import MesonTestResult
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 from ci.util.output_formatter import TimestampFormatter
@@ -353,7 +357,7 @@ def _resolve_test_command(
 
 
 def _make_direct_test_env(
-    source_dir: Path, build_dir: Path, build_mode: str
+    source_dir: Path, build_dir: Path, build_mode: str, test_timeout: int = 60
 ) -> dict[str, str]:
     """Build env for the direct test process (PATH/LD_LIBRARY_PATH + ASAN)."""
     test_env = os.environ.copy()
@@ -368,7 +372,7 @@ def _make_direct_test_env(
             fastled_lib_dir + os.pathsep + test_env.get("LD_LIBRARY_PATH", "")
         )
     if "FASTLED_TEST_TIMEOUT" not in test_env:
-        test_env["FASTLED_TEST_TIMEOUT"] = "60"
+        test_env["FASTLED_TEST_TIMEOUT"] = str(test_timeout)
     # ASAN's vectored exception handler conflicts with our crash handler on Windows.
     if build_mode == "debug" and os.name == "nt":
         test_env["FASTLED_DISABLE_CRASH_HANDLER"] = "1"
@@ -500,7 +504,15 @@ def run_direct_test(ctx: DirectTestContext) -> MesonTestResult:
     )
 
     try:
-        test_env = _make_direct_test_env(ctx.source_dir, ctx.build_dir, ctx.build_mode)
+        # Integration-tier suites are heavy; give them their meson timeout.
+        test_timeout = (
+            INTEGRATION_TEST_TIMEOUT_SECONDS
+            if ctx.meson_test_name in integration_test_names(ctx.build_dir)
+            else 60
+        )
+        test_env = _make_direct_test_env(
+            ctx.source_dir, ctx.build_dir, ctx.build_mode, test_timeout
+        )
         proc = RunningProcess(
             test_cmd,
             cwd=ctx.source_dir,

@@ -514,22 +514,22 @@ IChannelDriver::DriverState ChannelDriverLcdClockless::poll() FL_NO_EXCEPT {
     switch (mStartError) {
     case StartError::InvalidConfig:
         return DriverState(DriverState::ERROR,
-                           fl::string::from_literal("LCD_CLOCKLESS: invalid transmission configuration"));
+                           "LCD_CLOCKLESS: invalid transmission configuration");
     case StartError::WorkerCreation:
         return DriverState(DriverState::ERROR,
-                           fl::string::from_literal("LCD_CLOCKLESS: worker task creation failed"));
+                           "LCD_CLOCKLESS: worker task creation failed");
     case StartError::PeripheralInitialization:
         return DriverState(DriverState::ERROR,
-                           fl::string::from_literal("LCD_CLOCKLESS: peripheral initialization failed"));
+                           "LCD_CLOCKLESS: peripheral initialization failed");
     case StartError::BufferAllocation:
         return DriverState(DriverState::ERROR,
-                           fl::string::from_literal("LCD_CLOCKLESS: DMA ring buffer allocation failed"));
+                           "LCD_CLOCKLESS: DMA ring buffer allocation failed");
     case StartError::CallbackRegistration:
         return DriverState(DriverState::ERROR,
-                           fl::string::from_literal("LCD_CLOCKLESS: transmit callback registration failed"));
+                           "LCD_CLOCKLESS: transmit callback registration failed");
     case StartError::InitialTransmit:
         return DriverState(DriverState::ERROR,
-                           fl::string::from_literal("LCD_CLOCKLESS: initial transmit failed"));
+                           "LCD_CLOCKLESS: initial transmit failed");
     case StartError::None:
         break;
     }

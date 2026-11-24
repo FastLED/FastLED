@@ -11,7 +11,7 @@
 // (clockless_arm_lpc_plu.h) provides the ClocklessController specialisation;
 // compile this bit-banged driver out so we don't double-define the template.
 //
-// Scoped to LPC chips that share the "modern" 0xA0000000 GPIO controller
+// Scoped to LPC chips that share the "modern" GPIO controller offsets
 // (LPC845, LPC804, LPC11U24/U35, LPC15xx — see fastpin_arm_lpc.h). The
 // FL_LPC_HI_OFFSET / FL_LPC_LO_OFFSET constants below are byte offsets in
 // that controller's register layout and apply uniformly.

@@ -1014,6 +1014,27 @@ template <typename T> struct is_trivially_copyable_v_helper {
 };
 
 //-------------------------------------------------------------------------------
+// is_trivially_destructible trait - destroying a T is a no-op
+// Clang and MSVC ship __is_trivially_destructible (clang deprecates the older
+// __has_trivial_destructor); GCC has offered __has_trivial_destructor since
+// 4.3 but __is_trivially_destructible only in recent releases.
+//-------------------------------------------------------------------------------
+#if defined(__clang__) || defined(_MSC_VER)
+template <typename T> struct is_trivially_destructible {
+    enum : bool { value = __is_trivially_destructible(T) };
+};
+#elif defined(__GNUC__)
+template <typename T> struct is_trivially_destructible {
+    enum : bool { value = __has_trivial_destructor(T) };
+};
+#else
+// Conservative fallback: trivially copyable implies trivially destructible.
+template <typename T> struct is_trivially_destructible {
+    enum : bool { value = is_trivially_copyable<T>::value };
+};
+#endif
+
+//-------------------------------------------------------------------------------
 // underlying_type trait - gets underlying type of enum
 //-------------------------------------------------------------------------------
 #if defined(__GNUC__) || defined(__clang__)

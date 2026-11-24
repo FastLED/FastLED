@@ -102,8 +102,8 @@ def test_message_is_self_identifying() -> None:
 
 def test_link_line_yields_test_path() -> None:
     build = Path("/b")
-    line = "[35/1084] Linking CXX executable tests/fl/test_foo"
-    assert link_line_test_path(line, build) == build / "tests/fl/test_foo"
+    line = "[35/1084] Linking CXX executable tests/unit/fl/test_foo"
+    assert link_line_test_path(line, build) == build / "tests/unit/fl/test_foo"
 
 
 def test_link_line_skips_runner_and_profile_and_library() -> None:
@@ -118,12 +118,12 @@ def test_collect_test_paths_from_retry_output() -> None:
     build = Path("/b")
     output = "\n".join(
         [
-            "[1/3] Compiling C++ object tests/fl/test_foo.p/foo.cpp.o",
-            "[2/3] Linking CXX executable tests/fl/test_foo",
+            "[1/3] Compiling C++ object tests/unit/fl/test_foo.p/foo.cpp.o",
+            "[2/3] Linking CXX executable tests/unit/fl/test_foo",
             "[3/3] Linking CXX executable examples/Blink/Blink",
         ]
     )
     assert collect_test_paths(output, build) == [
-        build / "tests/fl/test_foo",
+        build / "tests/unit/fl/test_foo",
         build / "examples/Blink/Blink",
     ]

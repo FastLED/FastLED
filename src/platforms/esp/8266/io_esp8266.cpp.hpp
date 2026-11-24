@@ -14,6 +14,7 @@
 #include "fl/stl/chrono.h"
 #include "fl/stl/noexcept.h"
 #include "fl/stl/stdint.h"
+#include "fl/stl/string.h"
 #include "fl/system/yield.h"
 #include "platforms/io.h"
 
@@ -141,15 +142,12 @@ int read() FL_NO_EXCEPT {
     return c;
 }
 
-int readLineNative(char delimiter, char* out, int outLen) FL_NO_EXCEPT {
-    if (outLen <= 0) {
-        return 0;
-    }
+int readLineNative(char delimiter, fl::string& out) FL_NO_EXCEPT {
+    out.clear();
     // Same contract as Stream::readStringUntil: block until the delimiter or
     // a 1 s gap between bytes.
     const u32 timeoutMs = 1000;
     u32 start = fl::millis();
-    int len = 0;
     while (true) {
         const int value = read();
         if (value < 0) {
@@ -163,13 +161,12 @@ int readLineNative(char delimiter, char* out, int outLen) FL_NO_EXCEPT {
         if (c == delimiter) {
             break;
         }
-        if (len < outLen - 1) {
-            out[len++] = c;
+        if (out.size() < static_cast<fl::size>(kReadLineNativeMaxLen)) {
+            out.push_back(c);
         }
         start = fl::millis();
     }
-    out[len] = '\0';
-    return len;
+    return static_cast<int>(out.size());  // fl-lint: int-template-ok API returns int; size <= kReadLineNativeMaxLen
 }
 
 bool flush(u32 timeoutMs) FL_NO_EXCEPT {

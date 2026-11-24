@@ -175,13 +175,16 @@ public:
         };
 
         Value state;        ///< Current driver state
-        fl::string error;   ///< Error message (only populated when state == ERROR)
+        /// Borrowed, non-null error text (only populated for ERROR). Use a
+        /// literal or driver-owned storage; consume or copy it before the next
+        /// driver call that can change that storage, and keep the driver alive.
+        const char* error;
 
         /// @brief Construct from state only (no error)
-        DriverState(Value v) FL_NO_EXCEPT : state(v), error() {}
+        DriverState(Value v) FL_NO_EXCEPT : state(v), error("") {}
 
         /// @brief Construct from state and error message
-        DriverState(Value v, const fl::string& e) FL_NO_EXCEPT : state(v), error(e) {}
+        DriverState(Value v, const char* e) FL_NO_EXCEPT : state(v), error(e ? e : "") {}
 
         /// @brief Implicit conversion to Value for backward compatibility
         operator Value() const FL_NO_EXCEPT { return state; }

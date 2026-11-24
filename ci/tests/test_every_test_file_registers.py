@@ -23,7 +23,7 @@ TESTS = PROJECT_ROOT / "tests"
 
 # Defines the harness rather than using it, so it is the one file that
 # legitimately includes `fltest.h` directly.
-HARNESS_OWN_TEST = "fl/test/fltest.cpp"
+HARNESS_OWN_TEST = "unit/fl/test/fltest.cpp"
 
 # Empty, and meant to stay that way. `fl/channels/channel.cpp` was the last
 # entry; its two crashes were fixed in #4239 and its four assertion failures
@@ -81,7 +81,7 @@ class TestEveryTestFileRegisters(unittest.TestCase):
     ) -> None:
         # Guards the specific regression this list existed for. Without it the
         # sweep above would still pass if channel.cpp were deleted outright.
-        woken = TESTS / "fl/channels/channel.cpp"
+        woken = TESTS / "unit/fl/channels/channel.cpp"
         self.assertTrue(woken.is_file(), msg=f"{woken} is missing")
         source = woken.read_text(encoding="utf-8")
         self.assertIsNotNone(DEFINES_A_CASE.search(source))

@@ -59,7 +59,7 @@ void xyzToOklabQ16(const i32 (&xyz)[3], i32 (&out_lab)[3]) FL_NO_EXCEPT;
 /// in-gamut colours the worst measured round trip there is about 300 ULP.
 /// This is conditioning rather than representation -- carrying lms or XYZ at
 /// Q32 was measured and does not fix it -- and it costs the P7 mapper
-/// nothing. `tests/fl/gfx/oklab_q16.cpp` pins both ends.
+/// nothing. `tests/unit/fl/gfx/oklab_q16.cpp` pins both ends.
 void oklabToXyzQ16(const i32 (&lab)[3], i32 (&out_xyz)[3]) FL_NO_EXCEPT;
 
 }  // namespace fl

@@ -409,4 +409,87 @@
 # the CI Blink report contains no ResponseLutsQ16 symbol. The local fbuild
 # symbol total remains ~4 KB higher for the same source (FastLED/fbuild#1456),
 # so this ratchet uses the CI measurement from PR #4511.
-320359
+#
+# +20 B (320359 -> 320379), PR #5300 (unify the ESP8266 OTA support gate):
+# platforms/ota.cpp.hpp and the ESP8266 backend each carried their own copy of
+# the "is OTA supported" check, and they had drifted -- the ESP8266 backend
+# required <WiFi.h>, which the ESP8266 core does not ship, so the null
+# IOTA::create() was dropped and the backend's own copy was never compiled,
+# leaving the OTA example unlinkable. Both now read one gate in
+# platforms/esp/8266/ota/ota_support.h. platforms/ota.cpp.hpp compiles into
+# every platform's image, ESP32-S3 included, so the unified gate changes the
+# null-stub branch that Blink links. Measured by the hosted bloat regression
+# job on this PR's head 6257b1c64: image_flash 320379 B, attributed RAM 23000 B
+# unchanged. Layout drift of this size is normal for a changed unity TU (the
+# file's own history records +19 B and +3 B for comparable edits), but the
+# change is intentional and is recorded as a decision rather than left as
+# headroom. Neither the 320503 B flash ceiling nor the 40016 B RAM ceiling
+# moves.
+#
+# +8 B (320379 -> 320387), PR #5316 / #5310: ThreadLocalReal no longer
+# dereferences null when pthread_key_create or pthread_setspecific fails; it
+# falls back to a lazily created per-object shared slot (cold FL_NO_INLINE
+# path, CAS-published) and warns once (defined in singleton.cpp.hpp).
+# ESP32-S3 is multithreaded, so the fallback branch is
+# compiled in. Measured by the hosted bloat regression job (run 44749737093) on
+# this PR's head: image_flash 320387 B, attributed flash 301375 B, attributed
+# RAM 22499 B. The crash fix is intentional and is recorded as a decision.
+# Neither the 320503 B flash ceiling nor the 40016 B RAM ceiling moves.
+#
+# +4 B (320387 -> 320391), PR #5350 / #2994: the RMT5 driver's poll() now
+# reports DRAINING once every strip is on the wire instead of BUSY for the
+# whole transmission, so FastLED.show() returns while RMT finishes the frame
+# (ESP32-C6 forced-RMT legacy path: show() 1687 -> 369 us, the reporter's
+# sketch back to a steady 2495 ms sequence). The 4 B is the third state in
+# ChannelEngineRMTImpl::poll(). Measured by the hosted bloat regression job
+# (run 44889084601) on head 3c04f6b: image_flash 320391 B, attributed flash
+# 301379 B, attributed RAM 22499 B. Neither the 320503 B flash ceiling nor the
+# 40016 B RAM ceiling moves.
+#
+# +60 B (320391 -> 320451), PR #5358 / #5357: SlimBridgeController encodes
+# plain-RGB WS2812 frames straight from the concrete PixelController instead of
+# through PixelIterator's four type-erased calls per pixel (ESP32-C6 forced-RMT
+# legacy path: show() 357 -> 219 us mean for 35 LEDs). The generic RGB encode
+# is no longer linked (writeWS2812 -243 B, ScaledPixelIteratorRGB::advance
+# -96 B); the inlined RGB loop in showPixels (+226 B) and the RGBW/RGBWW-only
+# writeWS2812WhiteChannel (+179 B) replace it. Local fresh builds: master
+# 320383 B, PR 320447 B (with the has() bound); hosted measured 320443 B before it. Neither the
+# 320503 B flash ceiling nor the 40016 B RAM ceiling moves.
+#
+# -1012 B (320451 -> 319439), PR for #5377: SlimBridgeController encodes RGBW
+# and RGBWW WS2812 frames straight from the concrete PixelController in runs
+# (bulk RGBW/RGBWW conversion, mode and W placement resolved once per run)
+# instead of constructing a PixelIterator per frame. Blink no longer links the
+# PixelIterator vtable thunks, per-pixel RGBW adapters or
+# writeWS2812WhiteChannel. ESP32-C6 legacy RGBW show(): 31570 -> 15145
+# instructions (489 -> 181 us mean, 35 LEDs); legacy RGB 12926 -> 12578.
+# Local fresh build: image_flash 319439 B. Neither the 320503 B flash ceiling
+# nor the 40016 B RAM ceiling moves.
+# Hosted CI: 319447 B (+8 B versus the local 319439 B build).
+#
+# -244 B in matched local Blink builds (319027 -> 318783), #5380:
+# DriverState and ChannelManager::poll carry borrowed C strings instead of
+# constructing, copying and destroying empty fl::strings on every driver poll.
+# BEFORE is fixed master 01119e260; AFTER includes the pointer-state change.
+# The ratchet moves 319447 -> 318783, also capturing savings already on master
+# before this change. Attributed RAM stays 22499 B; the 320503 B flash ceiling
+# and 40016 B RAM ceiling are unchanged.
+#
+# -92 B in matched local Blink builds (318787 -> 318695), #5382:
+# RMT5 submits a single strip without copying/sorting ChannelData owners or
+# putting them through the pending queue. Direct and queued strips share the
+# hardware acquisition/submission routine; pending entries retain only their
+# ChannelData owner instead of duplicating its immutable pin/timing fields.
+# BEFORE is master da963db06; the ratchet moves 318783 -> 318695. Attributed
+# RAM stays 22499 B; the 320503 B flash and 40016 B RAM ceilings are unchanged.
+# -96 B, #5383: cache the channel index per pin and narrow RMT/SPI GPIO
+# snapshots to routing fields in their existing units. Isolated image_flash is
+# 318583 B / 22499 B RAM; combined with upstream #5424/#5425 it is 318599 B /
+# 22503 B RAM. Lower the ratchet 318695 -> 318599 using the measured queue tree;
+# the 320503 B flash and 40016 B RAM ceilings are unchanged.
+# -12 B, #5384: frame-event snapshots, colour-adjustment caching and reuse of
+# the validated driver reference. Matched local ESP32-S3 Blink image_flash:
+# 318599 -> 318587 B; attributed RAM 22503 -> 22519 B for the controller cache.
+# The shrink is under 64 B, so the 318599 B ratchet stays unchanged. Small-memory
+# targets omit the cache; the 320503 B flash and 40016 B RAM ceilings are unchanged.
+318599

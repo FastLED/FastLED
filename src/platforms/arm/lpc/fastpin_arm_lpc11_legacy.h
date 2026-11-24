@@ -34,15 +34,16 @@ FL_DISABLE_WARNING_DEPRECATED_REGISTER
 //   - DATA      at offset 0x3FFC -- full-port read / write (read-modify-write).
 //   - DIR       at offset 0x8000 -- direction (1 = output).
 //
-// The "modern" 0xA0000000 controller used by LPC8xx / LPC11Uxx / LPC15xx
-// is in `fastpin_arm_lpc.h`; this header is its sibling for the legacy
-// parts. Both share the same `clockless_arm_lpc.h` (M0 C++ implementation)
-// because the clockless driver only consumes the `_ARMPIN` interface.
+// The "modern" controller used by LPC8xx / LPC11Uxx / LPC15xx is in
+// `fastpin_arm_lpc.h`; this header is its sibling for the legacy parts.
+// `clockless_arm_lpc.h` excludes the legacy parts: its SET/CLR offsets are
+// modern-controller offsets, so legacy parts have no clockless driver yet.
 //
 // Pin coverage: PIO0_0..PIO0_11 + PIO1_0..PIO1_11 + PIO2_0..PIO2_11 +
-//               PIO3_0..PIO3_5 (LPC1114 LQFP48). Per-package availability is
-//               enforced by hardware; the FastPin template fans out the
-//               full grid and the linker keeps only what is used.
+//               PIO3_0..PIO3_5 (UM10398; port 3 has no PIO3_6..PIO3_11).
+//               Per-package availability is enforced by hardware; the
+//               FastPin template fans out the full grid and the linker
+//               keeps only what is used.
 // =============================================================================
 
 #if defined(FL_IS_ARM_LPC_11_LEGACY)
@@ -94,7 +95,7 @@ FL_STATIC_ASSERT(FL_OFFSETOF(FL_LPC11_LEGACY_GPIO_Type, DIR) == 0x8000, "UM10398
 // Map a FastLED logical pin number to the (port, bit) pair this controller
 // uses. Each port carries 12 logical pins (the legacy LPC11xx ports have
 // at most 12 PIO lines each per UM10398). The template parameter `PIN`
-// is the 0-based linear index; ports 0..3 cover pins 0..47.
+// is the 0-based linear index; ports 0..3 cover pins 0..41.
 template <u8 PIN>
 struct LpcLegacyPinAddr {
     static constexpr u8 PORT = static_cast<u8>(PIN / 12u);
@@ -111,7 +112,9 @@ public:
     typedef volatile u32* port_ptr_t;
     typedef u32           port_t;
 
-    inline static FL_LPC11_LEGACY_GPIO_Type* gpio() __attribute__((always_inline)) {
+    // decltype keeps the vendor LPC_GPIO_TypeDef* when <LPC11xx.h> supplies
+    // LPC_GPIO0..3; it does not convert to the local mirror type.
+    inline static decltype(LPC_GPIO0) gpio() __attribute__((always_inline)) {
         switch (_PORT) {
             case 1: return LPC_GPIO1;
             case 2: return LPC_GPIO2;
@@ -138,8 +141,11 @@ public:
     }
 
     inline static void strobe() __attribute__((always_inline)) { toggle(); toggle(); }
+    // The masked slot reads and writes only this pin's bit, so the toggle
+    // cannot overwrite other pins on the port the way a DATA RMW could.
     inline static void toggle() __attribute__((always_inline)) {
-        gpio()->DATA = gpio()->DATA ^ _MASK;
+        volatile u32* slot = &gpio()->MASKED_ACCESS[_MASK];
+        *slot = *slot ^ _MASK;
     }
 
     inline static void hi(FASTLED_REGISTER port_ptr_t /*port*/) __attribute__((always_inline)) { hi(); }
@@ -170,14 +176,12 @@ template <u8 PIN, u32 MASK, u8 PORT_INDEX>
 constexpr bool isLpc11LegacyHardwarePin(const _ARMPIN_LPC11LEGACY<PIN, MASK, PORT_INDEX>*) { return true; }
 constexpr bool isLpc11LegacyHardwarePin(const void*) { return false; }
 
-// FL_LPC_ENABLE_FAST_SOFTWARE_SPI: optimized bit-bang software SPI pin policy (default 0).
-// UNTESTED ON HARDWARE: no bench evidence exists for this platform yet.
-// Default 0 keeps the legacy bit-bang writer. Define it to 1 to enable the
-// optimized path at your own risk.
+// FL_LPC_ENABLE_FAST_SOFTWARE_SPI: optimized bit-bang software SPI pin policy (default 1).
+// Opt-out: define it to 0 to fall back to the legacy bit-bang writer.
 // Set it as a build flag (-D / build_flags), not a #define in the sketch: the
 // value must match in every translation unit, including FastLED's own sources.
 #ifndef FL_LPC_ENABLE_FAST_SOFTWARE_SPI
-#define FL_LPC_ENABLE_FAST_SOFTWARE_SPI 0
+#define FL_LPC_ENABLE_FAST_SOFTWARE_SPI 1
 #endif
 #if FL_LPC_ENABLE_FAST_SOFTWARE_SPI
 /// Data updates store the mask or zero to the pin's masked-access slot. sport() and
@@ -211,7 +215,7 @@ template <u8 PIN> struct BitbangPin<FastPin<PIN>> : BitbangPinDefaults<FastPin<P
         (1u << (LpcLegacyPinAddr<PIN>::BIT)), LpcLegacyPinAddr<PIN>::PORT> {};
 
 // PIO0_0..PIO0_11
-#define MAX_PIN 47
+#define MAX_PIN 41
 _FL_DEFPIN_LPC11LEGACY(0);  _FL_DEFPIN_LPC11LEGACY(1);  _FL_DEFPIN_LPC11LEGACY(2);  _FL_DEFPIN_LPC11LEGACY(3);
 _FL_DEFPIN_LPC11LEGACY(4);  _FL_DEFPIN_LPC11LEGACY(5);  _FL_DEFPIN_LPC11LEGACY(6);  _FL_DEFPIN_LPC11LEGACY(7);
 _FL_DEFPIN_LPC11LEGACY(8);  _FL_DEFPIN_LPC11LEGACY(9);  _FL_DEFPIN_LPC11LEGACY(10); _FL_DEFPIN_LPC11LEGACY(11);
@@ -223,10 +227,9 @@ _FL_DEFPIN_LPC11LEGACY(20); _FL_DEFPIN_LPC11LEGACY(21); _FL_DEFPIN_LPC11LEGACY(2
 _FL_DEFPIN_LPC11LEGACY(24); _FL_DEFPIN_LPC11LEGACY(25); _FL_DEFPIN_LPC11LEGACY(26); _FL_DEFPIN_LPC11LEGACY(27);
 _FL_DEFPIN_LPC11LEGACY(28); _FL_DEFPIN_LPC11LEGACY(29); _FL_DEFPIN_LPC11LEGACY(30); _FL_DEFPIN_LPC11LEGACY(31);
 _FL_DEFPIN_LPC11LEGACY(32); _FL_DEFPIN_LPC11LEGACY(33); _FL_DEFPIN_LPC11LEGACY(34); _FL_DEFPIN_LPC11LEGACY(35);
-// PIO3_0..PIO3_11 (LPC1115 / LPC1114 LQFP48 only)
+// PIO3_0..PIO3_5 (UM10398; not every package bonds all six)
 _FL_DEFPIN_LPC11LEGACY(36); _FL_DEFPIN_LPC11LEGACY(37); _FL_DEFPIN_LPC11LEGACY(38); _FL_DEFPIN_LPC11LEGACY(39);
-_FL_DEFPIN_LPC11LEGACY(40); _FL_DEFPIN_LPC11LEGACY(41); _FL_DEFPIN_LPC11LEGACY(42); _FL_DEFPIN_LPC11LEGACY(43);
-_FL_DEFPIN_LPC11LEGACY(44); _FL_DEFPIN_LPC11LEGACY(45); _FL_DEFPIN_LPC11LEGACY(46); _FL_DEFPIN_LPC11LEGACY(47);
+_FL_DEFPIN_LPC11LEGACY(40); _FL_DEFPIN_LPC11LEGACY(41);
 
 #define HAS_HARDWARE_PIN_SUPPORT
 

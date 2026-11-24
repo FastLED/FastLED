@@ -11,6 +11,7 @@
 #include "fl/stl/variant.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/noexcept.h"
+#include "fl/stl/scratch_config.h"
 #include "fl/system/sketch_macros.h"
 
 namespace fl {
@@ -33,41 +34,69 @@ struct PolyPoint {
 ///  - Exact: exact per-pixel sub-pixel area integration (256 alpha
 ///    levels). The default; byte-stable across builds.
 ///  - ABuffer: 8x4 subpixel A-buffer sampling (32 alpha levels, 32-bit
-///    masks, no division in the scan loops, shallow stack). Faster on
+///    masks, no division in the scan loops, small working set). Faster on
 ///    dense fills and low-memory targets; see fl/gfx/poly_abuffer.h.
 enum class PolyFill { Exact, ABuffer };
 
 /// @brief Default drawPolygon tier (MAXN vertex cap, CHUNK accumulator px)
-/// Both kernels keep their whole working set on the stack, sized by MAXN
-/// (and CHUNK for Exact). Kernel frame on AVR (avr-gcc 7.3 -Os,
+/// Both kernels keep their whole working set (fl/gfx/poly_scratch.h:
+/// PolyScratch / AbScratch, sized by MAXN, and CHUNK for Exact) in one
+/// struct, leased from fl::scratch's side-stack arena (fl/stl/scratch.h)
+/// when FL_SCRATCH_STACK_BYTES > 0 and it fits there, else kept on the call
+/// stack. Kernel frame on AVR with the stack local (avr-gcc 7.3 -Os,
 /// -fstack-usage; callees add ~0.2 KB):
-///  - Exact:   MAXN = 32, CHUNK = 64: 4134 B;  MAXN = 8, CHUNK = 16:  989 B
-///  - ABuffer: MAXN = 32:             2142 B;  MAXN = 8:              605 B
-/// On an Uno (2 KB SRAM), a 16x16 CRGB canvas (768 B) plus FastLED and
-/// Serial leaves ~950 B of stack: enough for ABuffer, not for Exact's
-/// ~1.2 KB call chain (use ABuffer there, or a 16x8 canvas for Exact).
-/// The large tier needs ~4.5 KB of stack, so the default is 8/16 where
-/// FL_PLATFORM_HAS_SMALL_STACK (fl/system/sketch_macros.h: AVR, ESP8266's
-/// 4 KB loop() stack, Teensy LC, LPC804, ...) and 32/64 elsewhere. That is a
-/// stack-size predicate, not the flash-size FL_PLATFORM_HAS_LARGE_MEMORY
-/// tier: STM32F103C8, Teensy 3.x, Uno R4 and LPC845 sit on the low flash
-/// tier yet have the stack for 32/64. Vertices beyond MAXN are ignored;
-/// pass MAXN explicitly for larger polygons. To change the default, set
-/// these build-wide (-D compiler flag) so every translation unit sees the
-/// same Canvas default template arguments.
-#ifndef FL_GFX_POLYGON_DEFAULT_MAXN
-#if FL_PLATFORM_HAS_SMALL_STACK
-#define FL_GFX_POLYGON_DEFAULT_MAXN 8
+///  - Exact:   MAXN = 32, CHUNK = 64: 4134 B;  MAXN = 8, CHUNK = 16:  992 B
+///  - ABuffer: MAXN = 32:             2139 B;  MAXN = 8:              603 B
+/// On an Uno (2 KB SRAM), the reference build (a 16x16 CRGB canvas (768 B),
+/// FastLED, Serial, no other globals) leaves ~950 B of stack: enough for
+/// ABuffer (~0.8 KB with callees), not for Exact's ~1.2 KB call chain,
+/// which overflows the stack (verified in simavr). Use PolyFill::ABuffer
+/// there, or a 16x8 canvas for Exact. Every extra global shrinks that
+/// margin, so check the sketch's free stack before choosing. fl::scratch
+/// does not help: the arena and the stack share the same SRAM. This is a
+/// documented limit, not handled automatically (#5328): about half the
+/// Exact 8/16 set is its 8 per-edge records, so trimming CHUNK or the band
+/// tables cannot save the ~250 B needed without dropping vertices;
+/// free stack depends on the sketch's RAM map, so no compile-time check
+/// can see it; and a silent ABuffer fallback would change the output (32
+/// vs 256 alpha levels) and link both kernels into a 32 KB-flash part.
+/// The default is 32/64 when that working set has a home, else 8/16:
+///  - a big stack: !FL_PLATFORM_HAS_SMALL_STACK (fl/system/sketch_macros.h
+///    marks AVR, ESP8266's 4 KB loop() stack, Teensy LC, LPC804, ... as
+///    small). That is a stack-size predicate, not the flash-size
+///    FL_PLATFORM_HAS_LARGE_MEMORY tier: STM32F103C8, Teensy 3.x, Uno R4 and
+///    LPC845 sit on the low flash tier yet have the stack for 32/64; or
+///  - an fl::scratch arena of at least FL_GFX_POLYGON_LARGE_TIER_ARENA_BYTES
+///    (both 32/64 working sets plus alignment padding; fl/gfx/poly_scratch.h
+///    static-asserts the bound on every target). ESP8266's default arena is
+///    4608 B, so it gets 32/64 while its loop() stack only holds the
+///    kernels' small locals.
+/// Vertices beyond MAXN are ignored; pass MAXN explicitly for larger
+/// polygons. To change the default, set these build-wide (-D compiler flag)
+/// so every translation unit sees the same Canvas default template
+/// arguments.
+#define FL_GFX_POLYGON_LARGE_TIER_ARENA_BYTES 4215
+
+#if !FL_PLATFORM_HAS_SMALL_STACK || \
+    (FL_SCRATCH_STACK_BYTES >= FL_GFX_POLYGON_LARGE_TIER_ARENA_BYTES)
+#define FL_GFX_POLYGON_LARGE_TIER_DEFAULT 1
 #else
+#define FL_GFX_POLYGON_LARGE_TIER_DEFAULT 0
+#endif
+
+#ifndef FL_GFX_POLYGON_DEFAULT_MAXN
+#if FL_GFX_POLYGON_LARGE_TIER_DEFAULT
 #define FL_GFX_POLYGON_DEFAULT_MAXN 32
+#else
+#define FL_GFX_POLYGON_DEFAULT_MAXN 8
 #endif
 #endif
 
 #ifndef FL_GFX_POLYGON_DEFAULT_CHUNK
-#if FL_PLATFORM_HAS_SMALL_STACK
-#define FL_GFX_POLYGON_DEFAULT_CHUNK 16
-#else
+#if FL_GFX_POLYGON_LARGE_TIER_DEFAULT
 #define FL_GFX_POLYGON_DEFAULT_CHUNK 64
+#else
+#define FL_GFX_POLYGON_DEFAULT_CHUNK 16
 #endif
 #endif
 

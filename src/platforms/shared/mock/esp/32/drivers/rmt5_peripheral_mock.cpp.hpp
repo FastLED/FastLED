@@ -94,6 +94,7 @@ public:
     u8* allocateDmaBuffer(size_t size) FL_NO_EXCEPT override;
     void freeDmaBuffer(u8* buffer) FL_NO_EXCEPT override;
     u32 getPinRouting(int pin) FL_NO_EXCEPT override;
+    bool isPinRoutingCurrent(int pin, u32 routing) FL_NO_EXCEPT override;
     bool rebindTxPin(void* channel_handle, int pin) FL_NO_EXCEPT override;
 
     //=========================================================================
@@ -105,6 +106,7 @@ public:
     void setMaxChannels(size_t max_channels) FL_NO_EXCEPT override;
     void simulatePinReroute(int pin) FL_NO_EXCEPT override;
     size_t getPinRebindCount() const FL_NO_EXCEPT override;
+    size_t getPinRoutingQueryCount() const FL_NO_EXCEPT override;
     const fl::vector<TransmissionRecord>& getTransmissionHistory() const FL_NO_EXCEPT override;
     void clearTransmissionHistory() FL_NO_EXCEPT override;
     fl::span<const u8> getLastTransmissionData() const FL_NO_EXCEPT override;
@@ -112,6 +114,8 @@ public:
     size_t getEncoderCount() const FL_NO_EXCEPT override;
     size_t getTransmissionCount() const FL_NO_EXCEPT override;
     bool isChannelEnabled(void* channel_handle) const FL_NO_EXCEPT override;
+    size_t getEnableCount() const FL_NO_EXCEPT override;
+    size_t getWaitAllDoneCount() const FL_NO_EXCEPT override;
     void reset() FL_NO_EXCEPT override;
 
 private:
@@ -132,6 +136,9 @@ private:
     // Pin routing: the channel id that owns each pin, or kOtherPeripheral
     fl::flat_map<fl::i32, u32> mPinRouting;
     size_t mPinRebindCount;
+    size_t mPinRoutingQueryCount = 0;
+    size_t mEnableCount;
+    size_t mWaitAllDoneCount;
     static constexpr u32 kOtherPeripheral = 0x8000u;
 
     // Waveform capture
@@ -166,6 +173,8 @@ Rmt5PeripheralMockImpl::Rmt5PeripheralMockImpl()
       mMaxChannels(0),
       mPinRouting(),
       mPinRebindCount(0),
+      mEnableCount(0),
+      mWaitAllDoneCount(0),
       mHistory(),
       mTransmissionCount(0) {
 }
@@ -281,6 +290,13 @@ bool Rmt5PeripheralMockImpl::deleteChannel(void* channel_handle) FL_NO_EXCEPT {
         return false;
     }
 
+    // ESP-IDF rmt_del_channel() rejects a channel that is still enabled
+    // (ESP_ERR_INVALID_STATE).
+    if (channel->enabled) {
+        FL_WARN("Rmt5PeripheralMock: deleteChannel on an enabled channel");
+        return false;
+    }
+
     int id = channel->id;
     delete channel;  // Free the allocated memory  // ok bare allocation
     mChannels.erase(id);
@@ -296,7 +312,15 @@ bool Rmt5PeripheralMockImpl::enableChannel(void* channel_handle) FL_NO_EXCEPT {
         return false;
     }
 
+    // ESP-IDF rmt_enable() rejects an already-enabled channel
+    // (ESP_ERR_INVALID_STATE).
+    if (channel->enabled) {
+        FL_WARN("Rmt5PeripheralMock: enableChannel on an enabled channel");
+        return false;
+    }
+
     channel->enabled = true;
+    mEnableCount++;
     FL_DBG("RMT5_MOCK: Enabled channel " << channel->id);
     return true;
 }
@@ -373,6 +397,7 @@ bool Rmt5PeripheralMockImpl::transmit(void* channel_handle, void* encoder_handle
 
 bool Rmt5PeripheralMockImpl::waitAllDone(void* channel_handle, u32 timeout_ms) FL_NO_EXCEPT {
     (void)timeout_ms;  // Mock always returns immediately
+    mWaitAllDoneCount++;
 
     MockChannel* channel = findChannel(channel_handle);
     if (channel == nullptr) {
@@ -508,6 +533,7 @@ void Rmt5PeripheralMockImpl::freeDmaBuffer(u8* buffer) FL_NO_EXCEPT {
 }
 
 u32 Rmt5PeripheralMockImpl::getPinRouting(int pin) FL_NO_EXCEPT {
+    ++mPinRoutingQueryCount;
     auto it = mPinRouting.find(pin);
     return it == mPinRouting.end() ? kPinRoutingUnknown : it->second;
 }
@@ -517,10 +543,18 @@ bool Rmt5PeripheralMockImpl::rebindTxPin(void* channel_handle, int pin) FL_NO_EX
     if (channel == nullptr) {
         return false;
     }
+    // Like the ESP implementation: rmt_tx_switch_gpio() needs a disabled
+    // channel, so the rebind leaves it disabled.
+    channel->enabled = false;
     channel->config.gpio_num = pin;
     mPinRouting[pin] = static_cast<u32>(channel->id);
     mPinRebindCount++;
     return true;
+}
+
+bool Rmt5PeripheralMockImpl::isPinRoutingCurrent(int pin, u32 routing) FL_NO_EXCEPT {
+    auto it = mPinRouting.find(pin);
+    return it != mPinRouting.end() && it->second == routing;
 }
 
 //=============================================================================
@@ -559,6 +593,18 @@ void Rmt5PeripheralMockImpl::simulatePinReroute(int pin) FL_NO_EXCEPT {
 
 size_t Rmt5PeripheralMockImpl::getPinRebindCount() const FL_NO_EXCEPT {
     return mPinRebindCount;
+}
+
+size_t Rmt5PeripheralMockImpl::getPinRoutingQueryCount() const FL_NO_EXCEPT {
+    return mPinRoutingQueryCount;
+}
+
+size_t Rmt5PeripheralMockImpl::getEnableCount() const FL_NO_EXCEPT {
+    return mEnableCount;
+}
+
+size_t Rmt5PeripheralMockImpl::getWaitAllDoneCount() const FL_NO_EXCEPT {
+    return mWaitAllDoneCount;
 }
 
 const fl::vector<Rmt5PeripheralMock::TransmissionRecord>&
@@ -619,6 +665,9 @@ void Rmt5PeripheralMockImpl::reset() FL_NO_EXCEPT {
     mMaxChannels = 0;
     mPinRouting.clear();
     mPinRebindCount = 0;
+    mPinRoutingQueryCount = 0;
+    mEnableCount = 0;
+    mWaitAllDoneCount = 0;
     mTransmissionCount = 0;
 
     FL_DBG("RMT5_MOCK: Reset to initial state");

@@ -156,6 +156,15 @@ class TestStreamingExecutionCoordination(unittest.TestCase):
         with patch("ci.meson.streaming_runner.sys.platform", "linux"):
             self.assertEqual(600, _test_process_timeout_seconds())
 
+    def test_widened_watchdog_widens_the_runner_timeout(self) -> None:
+        """Integration suites get 300 s in-process; the outer kill must not undercut it."""
+        with patch("ci.meson.streaming_runner.sys.platform", "darwin"):
+            self.assertEqual(370, _test_process_timeout_seconds(300))
+            self.assertEqual(90, _test_process_timeout_seconds(None))
+
+        with patch("ci.meson.streaming_runner.sys.platform", "linux"):
+            self.assertEqual(600, _test_process_timeout_seconds(300))
+
     def test_dll_touch_timeout_is_reported_in_compile_output(self) -> None:
         """Timeout diagnostics propagate to callers and persisted failure logs."""
         process = MagicMock()

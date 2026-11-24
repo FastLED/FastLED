@@ -1,0 +1,16 @@
+// Combined encoder tests — one test binary for all LED chipset encoders
+// ok cpp include
+#include "tests/unit/fl/chipsets/encoders/apa102.hpp"
+#include "tests/unit/fl/chipsets/encoders/hd108.hpp"
+#include "tests/unit/fl/chipsets/encoders/lpd6803.hpp"
+#include "tests/unit/fl/chipsets/encoders/lpd8806.hpp"
+#include "tests/unit/fl/chipsets/encoders/p9813.hpp"
+#include "tests/unit/fl/chipsets/encoders/pixel_iterator.hpp"
+#include "tests/unit/fl/chipsets/encoders/sk9822.hpp"
+#include "tests/unit/fl/chipsets/encoders/sm16716.hpp"
+#include "tests/unit/fl/chipsets/encoders/tm1812.hpp"
+#include "tests/unit/fl/chipsets/encoders/tm1908.hpp"
+#include "tests/unit/fl/chipsets/encoders/ws2801.hpp"
+#include "tests/unit/fl/chipsets/encoders/ws2803.hpp"
+#include "tests/unit/fl/chipsets/encoders/ws2812.hpp"
+#include "tests/unit/fl/chipsets/encoders/ws2816.hpp"

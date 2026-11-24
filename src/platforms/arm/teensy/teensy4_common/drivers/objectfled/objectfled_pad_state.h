@@ -3,7 +3,9 @@
 // IWYU pragma: private
 
 /// @file objectfled_pad_state.h
-/// @brief Saves and restores the pad state ObjectFLED's SPI mode takes over.
+/// @brief Saves and restores the pad state ObjectFLED's SPI and clockless modes
+/// take over. The clockless mode claims each output pin on its own through
+/// objectfled_clockless_claim_pad() below, using the same snapshot per pad.
 ///
 /// The SPI mode moves its two pads from fast GPIO6 to GPIO1, because eDMA cannot
 /// reach GPIO6, by clearing their IOMUXC_GPR_GPR26 bits. It then drives them as
@@ -98,5 +100,46 @@ class ObjectFLEDPadState {
     u32 mSclkPad = 0;
     bool mCaptured = false;
 };
+
+/// Registers for one pad, for the clockless mode, which claims each output pin
+/// on its own. Both pad slots of ObjectFLEDPadRegs name the same mux and
+/// pad-control registers, so ObjectFLEDPadState snapshots and restores a single
+/// pad. `gpr` is the pad's bank select, IOMUXC_GPR_GPR26..29 for GPIO6..9, and
+/// the GPIO registers are those of the GPIO1..4 bank it is remapped to.
+inline ObjectFLEDPadRegs objectfled_single_pad_regs(
+    volatile u32* gpr, volatile u32* gdir, volatile u32* dr, volatile u32* dr_set,
+    volatile u32* dr_clear, volatile u32* mux, volatile u32* pad) FL_NO_EXCEPT {
+    return ObjectFLEDPadRegs{gpr, gdir, dr, dr_set, dr_clear, mux, pad, mux, pad};
+}
+
+/// What clockless ObjectFLED begin() does to one output pin: snapshot the pad
+/// (once; a repeated begin() keeps the first snapshot), take the mux, set the
+/// pad's SPEED/DSE/SRE bits, remap it to GPIO1..4 and make it an output there.
+inline void objectfled_clockless_claim_pad(ObjectFLEDPadState& state,
+                                           const ObjectFLEDPadRegs& regs, u32 mask,
+                                           u32 mux, u32 pad_ctl) FL_NO_EXCEPT {
+    if (!state.captured()) {
+        state.capture(regs, mask);
+    }
+    *regs.mosi_mux = mux;
+    constexpr u32 kSpeedDseSre = 0xF9U;  // bits 7:6 SPEED, 5:3 DSE, 0 SRE
+    *regs.mosi_pad = (*regs.mosi_pad & ~kSpeedDseSre) | (pad_ctl & kSpeedDseSre);
+    *regs.gpr26 = *regs.gpr26 & ~mask;
+    *regs.gpio1_gdir = *regs.gpio1_gdir | mask;
+}
+
+/// Gives back every pad claimed through objectfled_clockless_claim_pad(), in
+/// reverse claim order so a pin listed twice ends in its first, pre-driver
+/// snapshot. `regs_for(i)` returns slot i's registers; it is only called for
+/// slots that hold a snapshot. Call only once the DMA has stopped.
+template <typename RegsFor>
+void objectfled_clockless_release_pads(ObjectFLEDPadState* states, u32 count,
+                                       RegsFor regs_for) FL_NO_EXCEPT {
+    for (u32 i = count; i-- > 0;) {
+        if (states[i].captured()) {
+            states[i].restore(regs_for(i));
+        }
+    }
+}
 
 }  // namespace fl

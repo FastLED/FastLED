@@ -21,7 +21,7 @@ General task scheduling and platform defaults remain outside this API change.
 No memory savings are claimed without a matched measurement. No release,
 version tag, workflow addition or hardware deployment is part of this task.
 
-RED evidence: `bash test tests/fl/channels/slim_bridge_controller.cpp --debug`
+RED evidence: `bash test tests/unit/fl/channels/slim_bridge_controller.cpp --debug`
 fails exactly the clockless/SPI priority-acceptance assertions on base
 `e5016e7c09f082bb2e9f4ed332532a99b43e9ea7`; core-rejection assertions and
 23 other cases pass. Log: ignored

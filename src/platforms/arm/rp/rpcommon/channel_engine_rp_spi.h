@@ -53,6 +53,7 @@ class ChannelEngineRpSpi final : public IChannelDriver {
     bool mActive;
     bool mFailed;
     fl::string mError;
+    fl::string mLastError;
 };
 
 }  // namespace fl

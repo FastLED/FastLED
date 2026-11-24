@@ -36,6 +36,7 @@ from ci.meson.zccache_retry import (
     is_zccache_transient_failure,
 )
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt
+from ci.util.host_load import load_scale
 from ci.util.output_formatter import TimestampFormatter
 from ci.util.tee import StreamTee
 from ci.util.timestamp_print import ts_print as _ts_print
@@ -55,6 +56,15 @@ _ZCCACHE_TRANSIENT_MAX_RETRIES = 2
 # The cold full-debug/ASan build in #4529 took 1130.84s. Leave headroom for
 # slower hosted runners, but keep an absolute bound inside the 45-minute job.
 _COMPILE_HARD_TIMEOUT_SECONDS = 1800
+# The deadline only ends a build that is no longer progressing (#5398): past
+# it, a build still printing build steps keeps running until it goes silent
+# for the stall window (scaled by host load) or reaches
+# ``_COMPILE_MAX_DEADLINE_FACTOR`` times the deadline.
+_COMPILE_STALL_SECONDS = 600.0
+_COMPILE_MAX_DEADLINE_FACTOR = 5.0
+# Hosted CI jobs time out at 45 minutes; end the build first so the failure
+# carries the process-tree diagnostics instead of a bare runner cancellation.
+_COMPILE_CI_ABSOLUTE_CAP_SECONDS = 2400.0
 _COMPILE_QUIET_WARNING_SECONDS = 300.0
 _COMPILE_QUIET_DUMP_SECONDS = 600.0
 _COMPILE_POLL_SECONDS = 1.0
@@ -62,6 +72,14 @@ _COMPILE_POLL_SECONDS = 1.0
 
 class _CompileDeadlineExceeded(RuntimeError):
     """A non-retryable build failure, even when fuzzy targets are available."""
+
+
+def _absolute_compile_cap(deadline_seconds: float) -> float:
+    """Total time a still-progressing build may run past its deadline."""
+    cap = deadline_seconds * _COMPILE_MAX_DEADLINE_FACTOR
+    if os.environ.get("CI"):
+        cap = min(cap, max(deadline_seconds, _COMPILE_CI_ABSOLUTE_CAP_SECONDS))
+    return cap
 
 
 def _compile_process_tree(pid: int | None) -> str:
@@ -94,13 +112,21 @@ def _monitored_compile_lines(
     started: float,
     deadline_seconds: float | None = None,
 ) -> Generator[str, None, None]:
-    """Drain output while enforcing a wall deadline and quiet diagnostics."""
+    """Drain output, ending the build only once it stops progressing.
+
+    Past ``deadline_seconds`` the build is killed when it has printed nothing
+    for the load-scaled stall window, or when it reaches
+    ``_COMPILE_MAX_DEADLINE_FACTOR`` times the deadline. A silent hang still
+    fails at the first deadline on an unloaded host.
+    """
     if deadline_seconds is None:
         deadline_seconds = _COMPILE_HARD_TIMEOUT_SECONDS
+    absolute_cap = _absolute_compile_cap(deadline_seconds)
     last_output = time.monotonic()
     last_milestone = "starting Meson compile"
     warned = False
     dumped = False
+    extended = False
     stream_ended = False
     with proc.line_iter(timeout=_COMPILE_POLL_SECONDS) as lines:
         while True:
@@ -111,10 +137,24 @@ def _monitored_compile_lines(
                 f"target={target or 'all'} pid={proc.pid} elapsed={elapsed:.0f}s "
                 f"quiet={quiet:.0f}s last={last_milestone}"
             )
+            stalled = False
             if elapsed >= deadline_seconds:
+                stall_window = _COMPILE_STALL_SECONDS * load_scale()
+                stalled = quiet >= stall_window
+                if not stalled and not extended and elapsed < absolute_cap:
+                    _ts_print(
+                        f"[BUILD] Past the {deadline_seconds:.0f}s compile deadline "
+                        f"but still progressing; continuing until "
+                        f"{stall_window:.0f}s of silence or {absolute_cap:.0f}s "
+                        f"total; {context}",
+                        file=sys.stderr,
+                    )
+                    extended = True
+            if stalled or elapsed >= absolute_cap:
+                reason = "no build progress" if stalled else "absolute cap reached"
                 _ts_print(
-                    f"[BUILD] ERROR: Hard compilation deadline exceeded; {context}; "
-                    f"command={command}",
+                    f"[BUILD] ERROR: Hard compilation deadline exceeded ({reason}); "
+                    f"{context}; command={command}",
                     file=sys.stderr,
                 )
                 _ts_print(_compile_process_tree(proc.pid), file=sys.stderr)
@@ -132,8 +172,8 @@ def _monitored_compile_lines(
                 finally:
                     proc.kill()
                 raise _CompileDeadlineExceeded(
-                    f"Hard compilation deadline exceeded after {elapsed:.0f}s; "
-                    f"{context}"
+                    f"Hard compilation deadline exceeded after {elapsed:.0f}s "
+                    f"({reason}); {context}"
                 )
             if quiet >= _COMPILE_QUIET_WARNING_SECONDS and not warned:
                 _ts_print(

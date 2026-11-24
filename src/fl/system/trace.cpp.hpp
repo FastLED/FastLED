@@ -13,7 +13,6 @@
 #include "fl/stl/chrono.h"
 #include "fl/log/log.h"
 #include "fl/stl/singleton.h"
-#include "fl/stl/stdio.h"
 #include "fl/stl/noexcept.h"
 
 // Configuration: Maximum stack depth (can be overridden at compile time)
@@ -93,12 +92,13 @@ fl::size ScopedTrace::depth() FL_NO_EXCEPT {
 }
 
 fl::string ScopedTrace::dump() FL_NO_EXCEPT {
+    // Append integers straight into the result instead of formatting through
+    // fixed char buffers: the old 256 B line buffer plus two 32 B number
+    // buffers made this a 399 B frame on AVR (FastLED#5329).
     auto& storage = getTraceStorage();
+    const fl::size depth = storage.stackDepth;
     fl::string result = "Stack trace (depth ";
-
-    char depth_str[32];
-    fl::snprintf(depth_str, sizeof(depth_str), "%zu", (size_t)storage.stackDepth);
-    result += depth_str;
+    result += depth;
     result += "):\n";
 
     if (storage.callStack.empty()) {
@@ -107,26 +107,28 @@ fl::string ScopedTrace::dump() FL_NO_EXCEPT {
     }
 
     // Show overflow warning if depth exceeds capacity
-    if (storage.stackDepth > FL_STACK_TRACE_MAX_DEPTH) {
-        result += "  <WARNING: Stack overflow - showing last ";
-        char max_str[32];
-        fl::snprintf(max_str, sizeof(max_str), "%d", FL_STACK_TRACE_MAX_DEPTH);
-        result += max_str;
+    if (depth > FL_STACK_TRACE_MAX_DEPTH) {
+        // push() keeps the outermost entries and drops deeper ones.
+        result += "  <WARNING: Stack overflow - showing first ";
+        result += static_cast<fl::size>(FL_STACK_TRACE_MAX_DEPTH);
         result += " of ";
-        result += depth_str;
+        result += depth;
         result += " entries>\n";
     }
 
     // Dump all stored entries in format: functionName(lineNo)
     for (fl::size i = 0; i < storage.callStack.size(); ++i) {
         const auto& entry = storage.callStack[i];
-        char line_buf[256];
+        result += "  [";
+        result += i;
+        result += "] ";
+        result += entry.function;
         if (entry.line > 0) {
-            fl::snprintf(line_buf, sizeof(line_buf), "  [%zu] %s(%d)\n", (size_t)i, entry.function, entry.line);
-        } else {
-            fl::snprintf(line_buf, sizeof(line_buf), "  [%zu] %s\n", (size_t)i, entry.function);
+            result += "(";
+            result += entry.line;
+            result += ")";
         }
-        result += line_buf;
+        result += "\n";
     }
 
     return result;

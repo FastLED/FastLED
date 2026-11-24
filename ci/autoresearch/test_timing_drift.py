@@ -29,6 +29,15 @@ Two numbers matter, and the second is the one that settles #2994:
 Usage:
     uv run python -m ci.autoresearch.test_timing_drift --port COM9
     uv run python -m ci.autoresearch.test_timing_drift --port COM9 --iterations 20
+    uv run python -m ci.autoresearch.test_timing_drift --port COM9 --api channel
+
+`--api channel` registers the same strip with `FastLED.add()` instead of
+`addLeds`, so the channel API's show() cost is measured too (FastLED#5399).
+
+`--cold-warm` (FastLED#5422) times show() right after the firmware empties the
+flash cache against an immediately following warm show(), once counting
+retired instructions and once reading real cycles, and prints IPC for each:
+    uv run python -m ci.autoresearch.test_timing_drift --port COM9 --cold-warm
 
 Run it on master and on 3.10.3 and compare. Exits 0 when the run completes,
 1 on a connection/RPC failure. It deliberately does NOT fail on drift: this is
@@ -117,9 +126,109 @@ def _summarize_show(result: dict[str, Any]) -> None:
     )
     if lo is not None and lo > 0:
         print(f"  min / wire floor : {lo / WS2812_35_LED_WIRE_US:.2f}x")
+    instr_count = result.get("show_instr_count")
+    instr_total = result.get("show_instr_total")
+    if instr_count and instr_total is not None:
+        print(f"  instr per show() : {instr_total / instr_count:.0f}")
     print()
     print("  #2994 reports 268-1012 us of excess per fade step. If show()'s")
     print("  mean sits well above the wire floor, that excess is show() itself.")
+
+
+def _mean(total: Any, count: Any) -> float | None:
+    if not count or total is None:
+        return None
+    return total / count
+
+
+def _fmt(value: float | None, spec: str) -> str:
+    return "-" if value is None else format(value, spec)
+
+
+def summarize_cold_warm(
+    instr_result: dict[str, Any], cycle_result: dict[str, Any]
+) -> list[str]:
+    """Rows for the #5422 cold-vs-warm table: instructions, cycles, IPC, us.
+
+    Instructions come from the counting run and cycles from the counter-off
+    run (the two share one hardware counter). Mean us is from the cycle run,
+    which carries no counter bookkeeping.
+    """
+    lines = [
+        "| show() | instructions | cycles | IPC | mean us |",
+        "|---|---:|---:|---:|---:|",
+    ]
+    for side in ("cold", "warm"):
+        instr = _mean(
+            instr_result.get(f"{side}_instr_total"), instr_result.get(f"{side}_count")
+        )
+        cycles = _mean(
+            cycle_result.get(f"{side}_cycle_total"), cycle_result.get(f"{side}_count")
+        )
+        us = _mean(
+            cycle_result.get(f"{side}_total_us"), cycle_result.get(f"{side}_count")
+        )
+        ipc = instr / cycles if instr is not None and cycles else None
+        lines.append(
+            f"| {side} | {_fmt(instr, '.0f')} | {_fmt(cycles, '.0f')} | "
+            f"{_fmt(ipc, '.2f')} | {_fmt(us, '.1f')} |"
+        )
+    return lines
+
+
+def _run_cold_warm(bench: RpcBench, args: argparse.Namespace) -> int:
+    """Run both counter modes of the #5422 cold-vs-warm probe and print a table."""
+    results: dict[bool, dict[str, Any]] = {}
+    for count_instructions in (True, False):
+        result = _call(
+            bench,
+            "timingDriftTest",
+            {
+                "pin": args.pin,
+                "numLeds": args.num_leds,
+                "api": args.api,
+                "coldWarm": True,
+                "repeats": args.repeats,
+                "order": args.order,
+                "countInstructions": count_instructions,
+            },
+            timeout=60.0,
+        )
+        if not result or not result.get("success", False):
+            print(f"ERROR: cold-warm run failed: {result}", file=sys.stderr)
+            return 1
+        if result.get("mode") != "coldWarm":
+            print(
+                "ERROR: firmware ignored coldWarm; flash an AutoResearch build "
+                "that includes the #5422 cold-vs-warm mode",
+                file=sys.stderr,
+            )
+            return 1
+        if not result.get("cold_count") or not result.get("warm_count"):
+            print(
+                "ERROR: no complete cold/warm pair was measured "
+                f"({result.get('ready_timeouts')} READY waits timed out)",
+                file=sys.stderr,
+            )
+            return 1
+        if result.get("ready_timeouts"):
+            print(
+                f"WARNING: {result['ready_timeouts']} READY waits timed out; "
+                "those pairs were dropped",
+                file=sys.stderr,
+            )
+        results[count_instructions] = result
+    print(
+        f"CPU {results[False].get('cpu_mhz')} MHz, "
+        f"leds={results[False].get('num_leds')}, api={args.api}, "
+        f"order={results[False].get('order')}, "
+        f"pairs={results[True].get('cold_count')}+{results[False].get('cold_count')}, "
+        "cache flush="
+        f"{results[False].get('cache_flush_supported')}"
+    )
+    for line in summarize_cold_warm(results[True], results[False]):
+        print(line)
+    return 0
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -139,6 +248,29 @@ def main(argv: list[str] | None = None) -> int:
         default=10,
         type=int,
         help="Sequences to run; each takes ~2.5 s (default: 10)",
+    )
+    p.add_argument(
+        "--api",
+        default="legacy",
+        choices=("legacy", "channel"),
+        help="Register the strip with addLeds (legacy) or FastLED.add() (channel)",
+    )
+    p.add_argument(
+        "--cold-warm",
+        action="store_true",
+        help="Time cache-evicted vs warm show() pairs instead of the fade (#5422)",
+    )
+    p.add_argument(
+        "--repeats",
+        default=32,
+        type=int,
+        help="Cold/warm pairs per counter mode with --cold-warm (default: 32)",
+    )
+    p.add_argument(
+        "--order",
+        default="grb",
+        choices=("grb", "rgb"),
+        help="With --cold-warm --api channel: colour order; rgb skips the reorder pass (#5378)",
     )
     args = p.parse_args(argv)
 
@@ -162,6 +294,9 @@ def main(argv: list[str] | None = None) -> int:
             return 1
         print(f"[timing-drift] ping ok: uptime={ping.get('uptimeMs')} ms")
 
+        if args.cold_warm:
+            return _run_cold_warm(bench, args)
+
         # Each sequence is ~2.5 s of device-side blocking, plus headroom.
         timeout = args.iterations * 3.0 + 30.0
         print(
@@ -177,6 +312,7 @@ def main(argv: list[str] | None = None) -> int:
                 "pin": args.pin,
                 "numLeds": args.num_leds,
                 "iterations": args.iterations,
+                "api": args.api,
             },
             timeout=timeout,
         )
@@ -196,7 +332,7 @@ def main(argv: list[str] | None = None) -> int:
         print("=" * 62)
         print(
             f"CPU: {result.get('cpu_mhz')} MHz   pin={result.get('pin')}   "
-            f"leds={result.get('num_leds')}"
+            f"leds={result.get('num_leds')}   api={result.get('api', 'legacy')}"
         )
         print("=" * 62)
         print()

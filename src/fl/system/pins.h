@@ -2,8 +2,8 @@
 /// Bulk pin write API for setting multiple pins simultaneously.
 ///
 /// DigitalMultiWrite8 groups up to 8 pins and DigitalMultiWrite16 groups
-/// up to 16 pins. Both use nibble LUT tables to convert data into set/clear
-/// masks without per-bit branching in the hot loop.
+/// up to 16 pins. Both keep only the pin numbers and an active-pin mask, and
+/// turn each data value into HIGH/LOW masks with two AND operations.
 
 #pragma once
 
@@ -19,12 +19,24 @@ struct Pins8 {
     int pins[8];
 };
 
-/// Pre-computed nibble LUT for fast 8-pin digital writes.
+namespace pins_detail {
+/// Write 8 pins: `pins[b]` goes HIGH when bit b of @p high is set, LOW when
+/// bit b of @p low is set, and is untouched otherwise. Per 4-pin group in
+/// ascending order, every HIGH goes first, then every LOW, each in ascending
+/// bit order. Takes an array reference rather than `fl::span<const int, 8>`:
+/// span has a user-provided copy constructor, so the ABI would pass it through
+/// memory on this timing-critical call.
+void writeEight(const int (&pins)[8], u8 high, u8 low) FL_NO_EXCEPT;
+} // namespace pins_detail
+
+/// Fast 8-pin digital writes.
 ///
 /// Call init() once with your 8 pin numbers (-1 to skip a position), then
-/// call write() in your hot loop. Each byte in the data stream is split
-/// into two 4-bit nibbles; each nibble indexes into a 16-entry LUT that
-/// yields the pin indices to set HIGH or LOW — no per-bit branching.
+/// call write() or writeByte() in your hot loop. Each data byte is ANDed with
+/// the active-pin mask to get the pins to drive HIGH and LOW, which are then
+/// written in a fixed, unrolled order. The object holds only the pins and the
+/// mask (17 B on AVR, 36 B on 32-bit targets); the per-nibble LUTs it used to
+/// carry were 592 B / ~1.3 KB and made writeByte slower on AVR (FastLED#5314).
 class DigitalMultiWrite8 {
   public:
     DigitalMultiWrite8() FL_NO_EXCEPT = default;
@@ -42,12 +54,10 @@ class DigitalMultiWrite8 {
     ///
     /// Same as write() but optimized for the single-byte case in
     /// timing-critical hot loops (clockless bit-banging). Avoids span
-    /// iteration overhead — inlines directly to two nibble LUT lookups.
+    /// iteration overhead: two ANDs inline, then one out-of-line call.
     void writeByte(u8 byte) const FL_NO_EXCEPT {
-        const u8 lo_nib = byte & 0x0F;
-        const u8 hi_nib = (byte >> 4) & 0x0F;
-        applyNibble(mSetLo[lo_nib], mClrLo[lo_nib]);
-        applyNibble(mSetHi[hi_nib], mClrHi[hi_nib]);
+        pins_detail::writeEight(mPins, static_cast<u8>(byte & mActive),
+                                static_cast<u8>(~byte & mActive));
     }
 
     /// Check whether all active pins (non -1) share the same GPIO port.
@@ -55,27 +65,13 @@ class DigitalMultiWrite8 {
     bool allSamePort() const FL_NO_EXCEPT;
 
   private:
-    // Each LUT entry stores up to 4 pin indices to set or clear.
-    struct PinList {
-        int pins[4];
-        u8 count;
-    };
-
-    void buildNibbleLut(u8 bit_offset, PinList (&set_lut)[16],
-                        PinList (&clr_lut)[16]) FL_NO_EXCEPT;
-
-    static void applyNibble(const PinList &set, const PinList &clr) FL_NO_EXCEPT;
-
     int mPins[8] = {-1, -1, -1, -1, -1, -1, -1, -1};
-    PinList mSetLo[16] = {};
-    PinList mClrLo[16] = {};
-    PinList mSetHi[16] = {};
-    PinList mClrHi[16] = {};
+    u8 mActive = 0;  // bit N set when mPins[N] is driven
 };
 
 /// Convenience free function — creates a temporary DigitalMultiWrite8,
 /// initializes it, and writes. For repeated writes, prefer the class
-/// directly to amortize the LUT build cost.
+/// directly so the majority-port check in init() runs once.
 void digitalMultiWrite8(const Pins8& pins, fl::span<const u8> pin_data) FL_NO_EXCEPT;
 
 /// POD struct holding 16 pin numbers for bulk pin writes.
@@ -84,12 +80,12 @@ struct Pins16 {
     int pins[16];
 };
 
-/// Pre-computed nibble LUT for fast 16-pin digital writes.
+/// Fast 16-pin digital writes.
 ///
 /// Call init() once with your 16 pin numbers (-1 to skip a position), then
-/// call write() in your hot loop. Each u16 in the data stream is split
-/// into four 4-bit nibbles; each nibble indexes into a 16-entry LUT that
-/// yields the pin indices to set HIGH or LOW — no per-bit branching.
+/// call write() in your hot loop. Each u16 is written as two bytes, low byte
+/// first, the same way DigitalMultiWrite8 writes one. The object holds only
+/// the pins and the active-pin mask (34 B on AVR, 68 B on 32-bit targets).
 class DigitalMultiWrite16 {
   public:
     DigitalMultiWrite16() FL_NO_EXCEPT = default;
@@ -108,25 +104,15 @@ class DigitalMultiWrite16 {
     bool allSamePort() const FL_NO_EXCEPT;
 
   private:
-    // Each LUT entry stores up to 4 pin indices to set or clear.
-    struct PinList {
-        int pins[4];
-        u8 count;
-    };
-
-    void buildNibbleLut(u8 bit_offset, PinList (&set_lut)[16],
-                        PinList (&clr_lut)[16]) FL_NO_EXCEPT;
-
-    static void applyNibble(const PinList &set, const PinList &clr) FL_NO_EXCEPT;
-
-    int mPins[16] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
-    PinList mSetNib[4][16] = {};  // nibbles 0-3 (bits 0-3, 4-7, 8-11, 12-15)
-    PinList mClrNib[4][16] = {};
+    // Pin N is mPins[N / 8][N % 8]: two 8-pin halves for writeEight().
+    int mPins[2][8] = {{-1, -1, -1, -1, -1, -1, -1, -1},
+                       {-1, -1, -1, -1, -1, -1, -1, -1}};
+    u16 mActive = 0;  // bit N set when pin N is driven
 };
 
 /// Convenience free function — creates a temporary DigitalMultiWrite16,
 /// initializes it, and writes. For repeated writes, prefer the class
-/// directly to amortize the LUT build cost.
+/// directly so the majority-port check in init() runs once.
 void digitalMultiWrite16(const Pins16& pins, fl::span<const u16> pin_data) FL_NO_EXCEPT;
 
 /// Pin number with its resolved port ID.

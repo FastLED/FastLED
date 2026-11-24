@@ -38,6 +38,7 @@
 #include "fl/system/pin.h"
 #include "fl/log/log.h"
 #include "fl/stl/algorithm.h"
+#include "fl/stl/array.h"
 #include "fl/stl/bit_cast.h"
 #include "fl/stl/assert.h"
 #include "fl/stl/optional.h"
@@ -75,6 +76,12 @@
 #endif
 
 namespace fl {
+
+namespace detail {
+bool IRMT5Peripheral::isPinRoutingCurrent(int pin, u32 routing) FL_NO_EXCEPT {
+    return getPinRouting(pin) == routing;
+}
+} // namespace detail
 
 // Import types from detail namespace
 using detail::IRMT5Peripheral;
@@ -279,8 +286,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
         for (auto &ch : mChannels) {
             if (ch.channel) {
                 mPeripheral.waitAllDone(ch.channel, 1000);
-                mPeripheral.disableChannel(ch.channel);
-                mPeripheral.deleteChannel(ch.channel);
+                deleteHwChannel(&ch);
 
                 // Restore GPIO pulldown when RMT channel is destroyed
                 // This ensures pin returns to stable LOW state
@@ -369,17 +375,28 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
 #endif
                 FL_LOG_RMT("Channel on pin " << ch.pin << " completed transmission");
 
-                // Disable channel to release HW resources
-                if (ch.channel) {
-                    bool disable_success = mPeripheral.disableChannel(ch.channel);
-                    if (!disable_success) {
+                // Without power management the channel stays enabled: the
+                // next frame on this pin reuses it, and a disable/enable pair
+                // per frame cost ~45 us of show() latency (#5359).
+                // deleteHwChannel() disables it before deletion. With
+                // CONFIG_PM_ENABLE, rmt_enable() holds a PM lock (no light
+                // sleep, APB max), so release it once the frame is done.
+#if defined(CONFIG_PM_ENABLE)
+                if (ch.channel && ch.enabled) {
+                    if (mPeripheral.disableChannel(ch.channel)) {
+                        ch.enabled = false;
+                    } else {
                         FL_LOG_RMT("Failed to disable channel");
                     }
                 }
+#endif
 
                 // Release channel back to pool
                 FL_LOG_RMT("Releasing channel " << ch.pin);
-                releaseChannel(&ch);
+                // The transmit-done ISR set the flag: the hardware is done.
+                // On a single core the ISR has also finished its hand-off by
+                // the time this task runs, so the queue wait is redundant.
+                releaseChannel(&ch, /*hardwareDone=*/kIsrHandoffComplete);
 
                 // Decrement activeCount since we just released this channel
                 activeCount--;
@@ -392,8 +409,10 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
         }
 
         // Check if any pending channels remain
+        bool anyPending = false;
         if (!mPendingChannels.empty()) {
             anyActive = true;
+            anyPending = true;
             FL_LOG_RMT("Pending channels: " << mPendingChannels.size());
         } else if (activeCount > 0 || hasChannelInUse()) {
             // hasChannelInUse(): a release above may have started a pending
@@ -405,9 +424,9 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
             anyActive = false;
         }
 
-        // When transmission completes (READY or ERROR), clear the "in use"
-        // flags and release the transmitted channels
-        DriverState state = anyActive ? DriverState::BUSY : DriverState::READY;
+        // When transmission completes (READY), clear the "in use" flags and
+        // release the transmitted channels.
+        DriverState state = transmissionState(anyActive, anyPending);
         if (state == DriverState::READY) {
             for (auto &channel : mTransmittingChannels) {
                 channel->setInUse(false);
@@ -423,6 +442,24 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
     }
 
   private:
+    /// @brief Map transmission progress to a driver state.
+    ///
+    /// BUSY only while strips still wait for a hardware channel. Once every
+    /// strip is on the wire its bytes live in our pool buffer, so the state is
+    /// DRAINING: ChannelManager::onEndFrame() returns on DRAINING, which lets
+    /// FastLED.show() return while RMT finishes the frame in the background.
+    /// Reporting BUSY here made every show() block for the full wire time
+    /// plus the reset latch (#2994).
+    static DriverState::Value transmissionState(bool anyActive, bool anyPending) FL_NO_EXCEPT {
+        if (!anyActive) {
+            return DriverState::READY;
+        }
+        if (anyPending) {
+            return DriverState::BUSY;
+        }
+        return DriverState::DRAINING;
+    }
+
     /// @brief RMT channel state (replaces RmtWorkerSimple)
     struct ChannelState {
         ChannelState() FL_NO_EXCEPT
@@ -434,6 +471,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
               transmissionComplete(false),
               inUse(false),
               useDMA(false),
+              enabled(false),
               reset_us(0),
               pooledBuffer(),
               memoryChannelId(0),
@@ -448,6 +486,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
               transmissionComplete(other.transmissionComplete.load(fl::memory_order_acquire)),
               inUse(other.inUse),
               useDMA(other.useDMA),
+              enabled(other.enabled),
               reset_us(other.reset_us),
               pooledBuffer(other.pooledBuffer),
               memoryChannelId(other.memoryChannelId),
@@ -465,6 +504,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
                     fl::memory_order_release);
                 inUse = other.inUse;
                 useDMA = other.useDMA;
+                enabled = other.enabled;
                 reset_us = other.reset_us;
                 pooledBuffer = other.pooledBuffer;
                 memoryChannelId = other.memoryChannelId;
@@ -488,6 +528,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
         fl::atomic_bool transmissionComplete;
         bool inUse;
         bool useDMA; // Whether this channel uses DMA
+        bool enabled; // rmt_enable() done; stays set across frames (#5359)
         u32 reset_us;
         fl::span<u8> pooledBuffer; // Buffer acquired from pool (must be
                                         // released on complete)
@@ -501,9 +542,6 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
     /// available
     struct PendingChannel {
         ChannelDataPtr data;
-        int pin;
-        ChipsetTiming timing;
-        u32 reset_us;
     };
 
     /// @brief Begin LED data transmission for all channels (internal)
@@ -526,6 +564,23 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
             mAllocationFailed = false;
         }
 
+        // A lone strip needs no sorting or temporary shared_ptr owners (#5382).
+        if (channelData.size() == 1 && mPendingChannels.empty()) {
+            const auto& data = channelData[0];
+            const auto result = transmitChannel(data);
+            if (result == TransmissionResult::STARTED) {
+                return;
+            }
+            if (result == TransmissionResult::NO_CHANNEL &&
+                mAllocationFailed && !hasChannelInUse()) {
+                // Match the queued path: failed setup cannot progress this frame.
+                mAllocationFailed = false;
+                return;
+            }
+            mPendingChannels.push_back({data});
+            return;
+        }
+
         // Sort: smallest strips first (helps async parallelism).
         // Container is bounded at 16 by construction (fl::vector_inlined<T, 16>),
         // so use sort_small to avoid instantiating quicksort_impl in the
@@ -538,18 +593,9 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
             return a->getSize() > b->getSize();  // Reverse order for back-to-front processing
         });
 
-        // Queue all channels as pending first
+        // Queue all channels as pending first. Timing remains in ChannelData.
         for (const auto& data : sorted) {
-            int pin = data->getPin();
-            const auto& timingCfg = data->getTiming();
-            ChipsetTiming timing = {
-                timingCfg.t1_ns,
-                timingCfg.t2_ns,
-                timingCfg.t3_ns,
-                timingCfg.reset_us,
-                timingCfg.name
-            };
-            mPendingChannels.push_back({data, pin, timing, timingCfg.reset_us});
+            mPendingChannels.push_back({data});
         }
 
         // Start as many transmissions as HW channels allow
@@ -561,9 +607,26 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
     /// @return Pointer to channel state, or nullptr if no HW available
     ChannelState *acquireChannel(int pin, const ChipsetTiming &timing,
                                  fl::size dataSize = 0) FL_NO_EXCEPT;
+    FL_NO_INLINE ChannelState *acquireChannelSlow(int pin, const ChipsetTiming &timing,
+                                                 fl::size dataSize) FL_NO_EXCEPT;
+
+    /// @brief True when an observed transmit-done flag implies the RMT ISR
+    /// has finished its post-completion hand-off (#5364). On one core the
+    /// task cannot run until the ISR returns. On two cores poll() may run
+    /// while the ISR is still deciding whether to start a queued transaction;
+    /// an rmt_transmit() in that window can leave a frame queued but never
+    /// started (ESP-IDF 5.5), so dual-core chips keep rmt_tx_wait_all_done().
+#if defined(FL_CPU_CORES) && FL_CPU_CORES > 1
+    static constexpr bool kIsrHandoffComplete = false;
+#else
+    static constexpr bool kIsrHandoffComplete = true;  // single core / host mock
+#endif
 
     /// @brief Release a channel (marks as available for reuse)
-    void releaseChannel(ChannelState *channel) FL_NO_EXCEPT;
+    /// @param hardwareDone true when the transmit-done ISR already reported
+    ///        completion, so rmt_tx_wait_all_done() would only repeat it.
+    void releaseChannel(ChannelState *channel,
+                        bool hardwareDone = false) FL_NO_EXCEPT;
 
     /// @brief Out-of-line diagnostic emitters (#2773 item 2.2).
     /// Both messages are ~15 lines of multi-line literal + integer
@@ -869,7 +932,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
                     emitRmtChannelWarning(
                         RmtChannelWarning::DMA_LEDGER_ALLOCATION_FAILED);
 #endif
-                    mPeripheral.deleteChannel(state->channel);
+                    deleteHwChannel(state);
                     state->channel = nullptr;
                     memMgr.rollbackAllocation(state->memoryChannelId, true);
                     return false;
@@ -888,7 +951,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
                     emitRmtChannelWarning(
                         RmtChannelWarning::DMA_ENCODER_CREATION_FAILED);
 #endif
-                    mPeripheral.deleteChannel(state->channel);
+                    deleteHwChannel(state);
                     state->channel = nullptr;
                     mDMAChannelsInUse--;
                     // Free DMA and memory allocation
@@ -1014,7 +1077,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
             emitRmtChannelWarning(
                 RmtChannelWarning::ENCODER_CREATION_FAILED);
 #endif
-            mPeripheral.deleteChannel(state->channel);
+            deleteHwChannel(state);
             state->channel = nullptr;
             // Free memory allocation
             memMgr.rollbackAllocation(state->memoryChannelId, true);
@@ -1041,9 +1104,29 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
         // Keep the original baseline when the rebind fails, so a later frame
         // retries instead of accepting the stolen routing (the peripheral
         // warns only once).
-        if (mPeripheral.rebindTxPin(state->channel, state->pin)) {
+        // rebindTxPin() disables the channel (rmt_tx_switch_gpio() needs it
+        // disabled), even when the switch itself then fails, so the next
+        // transmission must enable it again.
+        const bool rebound = mPeripheral.rebindTxPin(state->channel, state->pin);
+        state->enabled = false;
+        if (rebound) {
             state->pinRouting = mPeripheral.getPinRouting(state->pin);
         }
+    }
+
+    /// @brief Delete a channel's RMT handle, disabling it first if enabled.
+    ///
+    /// Channels stay enabled between frames (#5359), and rmt_del_channel()
+    /// rejects an enabled channel, so every deletion goes through here.
+    bool deleteHwChannel(ChannelState *state) FL_NO_EXCEPT {
+        if (state->enabled) {
+            if (!mPeripheral.disableChannel(state->channel)) {
+                FL_WARN("RMT: failed to disable channel before deletion");
+                return false;
+            }
+            state->enabled = false;
+        }
+        return mPeripheral.deleteChannel(state->channel);
     }
 
     /// @brief Register ISR callback for channel (must be called AFTER
@@ -1075,9 +1158,9 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
                 state->encoder = nullptr;
             }
 
-            // Delete channel directly - no need to disable since we're deleting
-            // (rmt_del_channel handles cleanup internally)
-            mPeripheral.deleteChannel(state->channel);
+            // deleteHwChannel() disables first: rmt_del_channel() rejects an
+            // enabled channel.
+            deleteHwChannel(state);
             state->channel = nullptr;
 
             // Free DMA and memory allocation
@@ -1113,7 +1196,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
                 FL_WARN("Failed to recreate encoder with new timing");
                 // Channel is still valid but encoder is broken - mark channel
                 // as unusable
-                mPeripheral.deleteChannel(state->channel);
+                deleteHwChannel(state);
                 state->channel = nullptr;
 
                 // Free DMA and memory allocation
@@ -1146,10 +1229,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
                     mPeripheral.deleteEncoder(state->encoder);
                     state->encoder = nullptr;
                 }
-                if (state->useDMA) {
-                    mDMAChannelsInUse--;
-                }
-                mPeripheral.deleteChannel(state->channel);
+                deleteHwChannel(state);
                 state->channel = nullptr;
 
                 // Free DMA and memory allocation
@@ -1175,6 +1255,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
         ChannelState* channel, bool disable_channel) FL_NO_EXCEPT {
         if (disable_channel) {
             mPeripheral.disableChannel(channel->channel);
+            channel->enabled = false;
         }
         if (channel->useDMA) {
             mBufferPool.releaseDMA();
@@ -1194,6 +1275,113 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
         return false;
     }
 
+    enum class TransmissionResult { STARTED, NO_CHANNEL, RETRY };
+
+    // Share hardware acquisition, submission, and cleanup for direct and queued strips.
+    FL_NO_INLINE TransmissionResult transmitChannel(const ChannelDataPtr& data) FL_NO_EXCEPT {
+        const fl::size dataSize = data->getSize();
+        const auto& timingCfg = data->getTiming();
+        ChipsetTiming timing = {
+            timingCfg.t1_ns, timingCfg.t2_ns, timingCfg.t3_ns,
+            timingCfg.reset_us, timingCfg.name
+        };
+        ChannelState* channel = acquireChannel(data->getPin(), timing, dataSize);
+        if (!channel) {
+            return TransmissionResult::NO_CHANNEL;
+        }
+
+        // Verify channel has encoder (should always be true if createChannel succeeded)
+        if (!channel->encoder) {
+#if FL_HAS_WARN
+            emitPendingChannelLog(PendingChannelLog::MISSING_ENCODER,
+                                  channel->pin, dataSize, channel->useDMA);
+#endif
+            releaseChannel(channel);
+            return TransmissionResult::RETRY;
+        }
+
+        // Start transmission
+        channel->reset_us = timingCfg.reset_us;
+        channel->transmissionComplete.store(false, fl::memory_order_release);
+
+        // Acquire buffer from pool (PSRAM -> DRAM/DMA transfer)
+        // Note: dataSize already retrieved earlier for channel acquisition
+        fl::span<u8> pooledBuffer = channel->useDMA ?
+            mBufferPool.acquireDMA(dataSize) :
+            mBufferPool.acquireInternal(dataSize);
+
+        if (pooledBuffer.empty()) {
+#if FL_HAS_WARN
+            emitPendingChannelLog(PendingChannelLog::BUFFER_ACQUIRE_FAILED,
+                                  channel->pin, dataSize, channel->useDMA);
+#endif
+            releaseChannel(channel);
+            return TransmissionResult::RETRY;
+        }
+
+        // Copy data from PSRAM to pooled buffer using writeWithPadding
+        // Note: writeWithPadding uses zero padding since RMT can handle any byte array size
+        data->writeWithPadding(pooledBuffer);
+
+        // Store pooled buffer in channel state for release on completion
+        channel->pooledBuffer = pooledBuffer;
+
+        bool enable_success = channel->enabled;
+        if (!enable_success) {
+            enable_success = mPeripheral.enableChannel(channel->channel);
+            channel->enabled = enable_success;
+        }
+        if (!enable_success) {
+#if FL_HAS_RMT_LOG
+            emitPendingChannelLog(PendingChannelLog::ENABLE_FAILED,
+                                  channel->pin, dataSize, channel->useDMA);
+#endif
+            releaseFailedPendingChannel(channel, false);
+            return TransmissionResult::RETRY;
+        }
+
+        // Explicitly reset encoder before each transmission to ensure clean state
+        if (!mPeripheral.resetEncoder(channel->encoder)) {
+#if FL_HAS_RMT_LOG
+            emitPendingChannelLog(PendingChannelLog::RESET_FAILED,
+                                  channel->pin, dataSize, channel->useDMA);
+#endif
+            releaseFailedPendingChannel(channel, true);
+            return TransmissionResult::RETRY;
+        }
+
+        // CRITICAL: Synchronize cache before DMA transmission
+        // This ensures CPU writes to the LED buffer are flushed to SRAM
+        // before RMT DMA reads the data. Without this, DMA may read stale
+        // cache data, causing LED color corruption on ESP32-S3/C3/C6/H2.
+        // NOTE: Only call syncCache() for DMA buffers.
+        // Non-DMA buffers use internal SRAM (no cache coherency issues).
+        if (channel->useDMA) {
+            mPeripheral.syncCache(pooledBuffer.data(), pooledBuffer.size());
+        }
+
+        // Pass pooled buffer (DRAM/DMA) instead of PSRAM pointer
+        bool tx_success = mPeripheral.transmit(channel->channel, channel->encoder,
+                                                pooledBuffer.data(),
+                                                pooledBuffer.size());
+        if (!tx_success) {
+#if FL_HAS_WARN
+            emitPendingChannelLog(PendingChannelLog::TRANSMIT_FAILED,
+                                  static_cast<int>(channel->pin), dataSize,
+                                  channel->useDMA);
+#endif
+            releaseFailedPendingChannel(channel, true);
+            return TransmissionResult::RETRY;
+        }
+
+#if FL_HAS_RMT_LOG
+        emitPendingChannelLog(PendingChannelLog::STARTED, channel->pin,
+                              data->getSize(), channel->useDMA);
+#endif
+
+        return TransmissionResult::STARTED;
+    }
+
     /// @brief Process pending channels that couldn't be started earlier
     void processPendingChannels() FL_NO_EXCEPT {
         if (mPendingChannels.empty()) {
@@ -1204,12 +1392,8 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
         for (size_t i = 0; i < mPendingChannels.size(); ) {
             const auto& pending = mPendingChannels[i];
 
-            // Get data size for DMA buffer calculation
-            fl::size dataSize = pending.data->getSize();
-
-            // Acquire channel for this transmission
-            ChannelState* channel = acquireChannel(pending.pin, pending.timing, dataSize);
-            if (!channel) {
+            const auto result = transmitChannel(pending.data);
+            if (result == TransmissionResult::NO_CHANNEL) {
                 if (mAllocationFailed && !hasChannelInUse()) {
                     // A failed setup with no active transmission cannot make
                     // progress until the next frame, when acquireChannel() is
@@ -1231,95 +1415,10 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
                 continue;
             }
 
-            // Verify channel has encoder (should always be true if createChannel succeeded)
-            if (!channel->encoder) {
-#if FL_HAS_WARN
-                emitPendingChannelLog(PendingChannelLog::MISSING_ENCODER,
-                                      pending.pin, dataSize, channel->useDMA);
-#endif
-                releaseChannel(channel);
+            if (result == TransmissionResult::RETRY) {
                 ++i;
                 continue;
             }
-
-            // Start transmission
-            channel->reset_us = pending.reset_us;
-            channel->transmissionComplete.store(false, fl::memory_order_release);
-
-            // Acquire buffer from pool (PSRAM -> DRAM/DMA transfer)
-            // Note: dataSize already retrieved earlier for channel acquisition
-            fl::span<u8> pooledBuffer = channel->useDMA ?
-                mBufferPool.acquireDMA(dataSize) :
-                mBufferPool.acquireInternal(dataSize);
-
-            if (pooledBuffer.empty()) {
-#if FL_HAS_WARN
-                emitPendingChannelLog(PendingChannelLog::BUFFER_ACQUIRE_FAILED,
-                                      pending.pin, dataSize, channel->useDMA);
-#endif
-                releaseChannel(channel);
-                ++i;
-                continue;
-            }
-
-            // Copy data from PSRAM to pooled buffer using writeWithPadding
-            // Note: writeWithPadding uses zero padding since RMT can handle any byte array size
-            pending.data->writeWithPadding(pooledBuffer);
-
-            // Store pooled buffer in channel state for release on completion
-            channel->pooledBuffer = pooledBuffer;
-
-            bool enable_success = mPeripheral.enableChannel(channel->channel);
-            if (!enable_success) {
-#if FL_HAS_RMT_LOG
-                emitPendingChannelLog(PendingChannelLog::ENABLE_FAILED,
-                                      pending.pin, dataSize, channel->useDMA);
-#endif
-                releaseFailedPendingChannel(channel, false);
-                ++i;
-                continue;
-            }
-
-            // Explicitly reset encoder before each transmission to ensure clean state
-            if (!mPeripheral.resetEncoder(channel->encoder)) {
-#if FL_HAS_RMT_LOG
-                emitPendingChannelLog(PendingChannelLog::RESET_FAILED,
-                                      pending.pin, dataSize, channel->useDMA);
-#endif
-                releaseFailedPendingChannel(channel, true);
-                ++i;
-                continue;
-            }
-
-            // CRITICAL: Synchronize cache before DMA transmission
-            // This ensures CPU writes to the LED buffer are flushed to SRAM
-            // before RMT DMA reads the data. Without this, DMA may read stale
-            // cache data, causing LED color corruption on ESP32-S3/C3/C6/H2.
-            // NOTE: Only call syncCache() for DMA buffers.
-            // Non-DMA buffers use internal SRAM (no cache coherency issues).
-            if (channel->useDMA) {
-                mPeripheral.syncCache(pooledBuffer.data(), pooledBuffer.size());
-            }
-
-            // Pass pooled buffer (DRAM/DMA) instead of PSRAM pointer
-            bool tx_success = mPeripheral.transmit(channel->channel, channel->encoder,
-                                                    pooledBuffer.data(),
-                                                    pooledBuffer.size());
-            if (!tx_success) {
-#if FL_HAS_WARN
-                emitPendingChannelLog(PendingChannelLog::TRANSMIT_FAILED,
-                                      static_cast<int>(channel->pin), dataSize,
-                                      channel->useDMA);
-#endif
-                releaseFailedPendingChannel(channel, true);
-                ++i;
-                continue;
-            }
-
-#if FL_HAS_RMT_LOG
-            emitPendingChannelLog(PendingChannelLog::STARTED, pending.pin,
-                                  pending.data->getSize(), channel->useDMA);
-#endif
 
             // Remove from pending queue (swap with last and pop)
             if (i < mPendingChannels.size() - 1) {
@@ -1389,7 +1488,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
         (void)channel_index;
 #endif
         if (state.channel) {
-            mPeripheral.deleteChannel(state.channel);
+            deleteHwChannel(&state);
             state.channel = nullptr;
         }
         if (state.encoder) {
@@ -1465,7 +1564,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
             // Delete channel
             if (state.channel) {
                 mPeripheral.waitAllDone(state.channel, 100);
-                mPeripheral.deleteChannel(state.channel);
+                deleteHwChannel(&state);
                 state.channel = nullptr;
             }
 
@@ -1516,6 +1615,9 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
 
     /// @brief All RMT channels (active and idle)
     fl::vector_inlined<ChannelState, 16> mChannels;
+    // One-based channel indices, never borrowed vector pointers. Stale entries
+    // after a pop/reconfiguration are rejected by size, handle and pin checks.
+    fl::array<u8, 64> mChannelForPin{};
 
     /// @brief Pending channel data waiting for show() to be called
     fl::vector_inlined<ChannelDataPtr, 16> mEnqueuedChannels;
@@ -1564,6 +1666,40 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
 //=============================================================================
 
 ChannelEngineRMTImpl::ChannelState *ChannelEngineRMTImpl::acquireChannel(
+    int pin, const ChipsetTiming &timing, fl::size dataSize) FL_NO_EXCEPT {
+    if (static_cast<u32>(pin) < mChannelForPin.size()) {
+        const u8 cached = mChannelForPin[pin];
+        if (cached && cached <= mChannels.size()) {
+            auto &ch = mChannels[cached - 1];
+            if (!ch.inUse && ch.channel && ch.pin == pin) {
+                ch.inUse = true;
+#if !FL_RMT_STATIC_ALLOCATION
+                if (ch.timing.T1 != timing.T1 ||
+                    ch.timing.T2 != timing.T2 || ch.timing.T3 != timing.T3 ||
+                    ch.timing.RESET != timing.RESET) {
+                    configureChannel(&ch, pin, timing, dataSize);
+                    if (!ch.channel || !ch.encoder) {
+                        ch.inUse = false;
+                        mAllocationFailed = true;
+                        return nullptr;
+                    }
+                }
+#endif
+                if (!mPeripheral.isPinRoutingCurrent(pin, ch.pinRouting)) {
+                    reclaimPin(&ch);
+                }
+                return &ch;
+            }
+        }
+    }
+    auto *channel = acquireChannelSlow(pin, timing, dataSize);
+    if (channel && static_cast<u32>(pin) < mChannelForPin.size()) {
+        mChannelForPin[pin] = channel->memoryChannelId + 1;
+    }
+    return channel;
+}
+
+ChannelEngineRMTImpl::ChannelState *ChannelEngineRMTImpl::acquireChannelSlow(
     int pin, const ChipsetTiming &timing, fl::size dataSize) FL_NO_EXCEPT {
     // Strategy 1: Find channel with matching pin (zero-cost reuse)
     // This applies to both DMA and non-DMA channels
@@ -1630,7 +1766,7 @@ ChannelEngineRMTImpl::ChannelState *ChannelEngineRMTImpl::acquireChannel(
                 mDMAChannelsInUse--;
             }
             memMgr.rollbackAllocation(stablePtr->memoryChannelId, true);
-            mPeripheral.deleteChannel(stablePtr->channel);
+            deleteHwChannel(stablePtr);
             mChannels.pop_back();
             mAllocationFailed = true; // Mark failure
             return nullptr;
@@ -1646,17 +1782,23 @@ ChannelEngineRMTImpl::ChannelState *ChannelEngineRMTImpl::acquireChannel(
     return nullptr;
 }
 
-void ChannelEngineRMTImpl::releaseChannel(ChannelState *channel) FL_NO_EXCEPT {
+void ChannelEngineRMTImpl::releaseChannel(ChannelState *channel,
+                                          bool hardwareDone) FL_NO_EXCEPT {
     FL_ASSERT(channel != nullptr, "releaseChannel called with nullptr");
 
-    // CRITICAL: Wait for RMT hardware to fully complete transmission
-    // The ISR callback (transmitDoneCallback) may fire slightly before the last
-    // bits have fully propagated out of the RMT peripheral. We must ensure
-    // hardware is truly done before allowing buffer reuse to prevent race
-    // conditions.
-    bool wait_success = mPeripheral.waitAllDone(channel->channel, 100);
-    FL_ASSERT(wait_success,
-              "RMT transmission wait timeout - hardware may be stalled");
+    // ESP-IDF invokes the transmit-done callback from the TX-end interrupt,
+    // after the RMT has sent the last symbol, so the pooled buffer is free.
+    // rmt_tx_wait_all_done() only moves the finished transaction descriptor
+    // from the complete queue back to the ready queue, which rmt_transmit()
+    // also does on demand; repeating it cost ~2.1k instructions per frame
+    // (#5364). The caller passes hardwareDone only where that is safe
+    // (kIsrHandoffComplete); failure paths have no completion event and
+    // still wait.
+    if (!hardwareDone) {
+        bool wait_success = mPeripheral.waitAllDone(channel->channel, 100);
+        FL_ASSERT(wait_success,
+                  "RMT transmission wait timeout - hardware may be stalled");
+    }
 
     // Release pooled buffer if one was acquired
     if (!channel->pooledBuffer.empty()) {
@@ -1726,7 +1868,7 @@ void ChannelEngineRMTImpl::destroyChannel(ChannelState *state) FL_NO_EXCEPT {
     }
 
     // Delete channel
-    bool del_success = mPeripheral.deleteChannel(state->channel);
+    bool del_success = deleteHwChannel(state);
     if (!del_success) {
         FL_WARN("destroyChannel: Failed to delete channel");
     }
@@ -1781,41 +1923,24 @@ void ChannelEngineRMTImpl::destroyLeastUsedChannels(size_t count) FL_NO_EXCEPT {
 
 /// @brief ISR callback fired when RMT transmission completes
 ///
-/// CRITICAL TIMING CONTRACT:
-/// This callback is invoked by ESP-IDF when the RMT peripheral signals that
-/// the transmission queue is empty. However, there is a small timing window
-/// where the callback may fire BEFORE the last bits have fully propagated
-/// out of the RMT shift register and onto the GPIO pin.
-///
-/// RACE CONDITION PREVENTION:
-/// To prevent buffer corruption, releaseChannel() MUST call
-/// rmt_tx_wait_all_done() with a timeout BEFORE marking the channel as
-/// available for reuse. This ensures the RMT hardware has fully completed
-/// transmission before:
-///   1. The channel's pooled buffer is released back to the buffer pool
-///   2. The ChannelData's mInUse flag is cleared (allowing new pixel data
-///   writes)
-///   3. The channel is marked as available for acquisition by other
-///   transmissions
-///
-/// Without this hardware wait, the following race condition can occur:
-///   - Frame N transmission starts (RMT hardware reading buffer A)
-///   - ISR fires (callback sets transmissionComplete = true)
-///   - Main thread calls releaseChannel() -> clears mInUse flag
-///   - User calls FastLED.show() for Frame N+1
-///   - ClocklessRMT::showPixels() sees mInUse == false -> proceeds to encode
-///   - NEW pixel data overwrites buffer A while RMT is still shifting it out
-///   - LEDs display corrupted mix of Frame N and Frame N+1 data
+/// TIMING CONTRACT:
+/// ESP-IDF invokes this callback from the RMT TX-end interrupt, after the
+/// peripheral has sent the final symbol, so the transmission (and any DMA or
+/// encoder read of the pooled buffer) is complete when the flag is set.
 ///
 /// SYNCHRONIZATION STRATEGY:
 /// - ISR: Sets transmissionComplete flag (lightweight, non-blocking)
 /// - Main thread poll(): Calls releaseChannel() when transmissionComplete is
-/// true
-/// - releaseChannel(): Calls rmt_tx_wait_all_done() to ensure hardware is done
-/// - ClocklessRMT::showPixels(): Asserts !mInUse before writing new pixel data
-///
-/// This multi-layered approach provides both correctness (hardware wait) and
-/// fail-fast debugging (assertions catch any timing bugs).
+///   true; the buffer and channel are reused from there. On single-core
+///   chips it skips rmt_tx_wait_all_done(): the ISR has returned before the
+///   task runs, and the wait only recycles the transaction descriptor, which
+///   rmt_transmit() does itself (#5364).
+/// - Dual-core: poll() may run while this ISR is still deciding whether to
+///   start a queued transaction, and an rmt_transmit() in that window can
+///   leave the frame queued but unstarted, so those chips keep the wait
+///   (kIsrHandoffComplete).
+/// - ChannelData::isInUse() stays set until releaseChannel() runs, which
+///   keeps a controller from re-encoding into data still being sent.
 bool IRAM_ATTR ChannelEngineRMTImpl::transmitDoneCallback(
     void* channel, const void* edata,
     void* user_data) FL_NO_EXCEPT {
@@ -1827,7 +1952,7 @@ bool IRAM_ATTR ChannelEngineRMTImpl::transmitDoneCallback(
     }
 
     // Mark transmission as complete (polled by main thread)
-    // NOTE: This flag triggers releaseChannel(), which performs hardware wait
+    // NOTE: This flag triggers releaseChannel() from the main thread.
     state->transmissionComplete.store(true, fl::memory_order_release);
     if (state->owner != nullptr) {
         state->owner->mPollNeededCallback.invoke();

@@ -3,7 +3,7 @@
    This file is included exactly once per expansion of minimp3.h's
    implementation block, which carries its own _MINIMP3_IMPLEMENTATION_GUARD.
    A guard here would be redundant in the ordinary case and wrong in the one
-   that matters: tests/fl/codec/minimp3_variants.hpp builds several complete
+   that matters: tests/unit/fl/codec/minimp3_variants.hpp builds several complete
    copies of the decoder in a single translation unit -- float, fixed, and
    fixed with MINIMP3_NO_SIMD -- by #undef-ing MINIMP3_H and
    _MINIMP3_IMPLEMENTATION_GUARD between them. `#pragma once` is immune to

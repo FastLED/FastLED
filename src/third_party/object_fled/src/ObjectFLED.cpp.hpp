@@ -136,19 +136,28 @@ static volatile uint32_t *standard_gpio_addr(volatile uint32_t *fastgpio) {
 	return (volatile uint32_t *)((uint32_t)fastgpio - 0x01E48000);
 }
 
-static void force_pin_to_gpio_mux(uint8_t pin) {
-	// Teensy 4.x GPIO pads use MUX_MODE=5. Keep SION set so diagnostics can
-	// observe the pad input path while DMA drives the standard GPIO alias.
-	// #3416 OF-LOW-5: SION=1 enables the pad input keeper even on a
-	// pure-output pin and can leak ~1-2 mA per pin plus capacitively
-	// couple noise back into the input keeper on long traces. Gate
-	// behind a define so production users can drop the keeper if not
-	// using the loopback RX path for diagnostics.
+// Teensy 4.x GPIO pads use MUX_MODE=5. Keep SION set so diagnostics can
+// observe the pad input path while DMA drives the standard GPIO alias.
+// #3416 OF-LOW-5: SION=1 enables the pad input keeper even on a
+// pure-output pin and can leak ~1-2 mA per pin plus capacitively
+// couple noise back into the input keeper on long traces. Gate
+// behind a define so production users can drop the keeper if not
+// using the loopback RX path for diagnostics.
 #ifdef FASTLED_OBJECTFLED_PROBE_INPUT
-	*portConfigRegister(pin) = 5 | 0x10;  // ALT5 (GPIO) + SION
+static constexpr uint32_t kObjectFledGpioMux = 5 | 0x10;  // ALT5 (GPIO) + SION
 #else
-	*portConfigRegister(pin) = 5;          // ALT5 (GPIO) only
+static constexpr uint32_t kObjectFledGpioMux = 5;          // ALT5 (GPIO) only
 #endif
+
+// The registers begin() writes for one pin: its GPR26..29 bank select, the
+// GPIO1-4 direction and latch it is remapped to, and its mux and pad control.
+static ObjectFLEDPadRegs objectfled_pin_pad_regs(uint8_t pin, uint8_t offset) {
+	return objectfled_single_pad_regs(&IOMUXC_GPR_GPR26 + offset,
+		standard_gpio_addr(portModeRegister(pin)),
+		standard_gpio_addr(portOutputRegister(pin)),
+		standard_gpio_addr(portSetRegister(pin)),
+		standard_gpio_addr(portClearRegister(pin)),
+		portConfigRegister(pin), portControlRegister(pin));
 }
 
 static void configure_objectfled_xbar_dma_edges() {
@@ -265,14 +274,13 @@ void ObjectFLED::begin(void) {
 		pin_offsetLocal[i] = offset;	//local copy for context switch
 		uint32_t mask = 1 << bit;	//mask32 = bit set @position in GPIO DR
 		tempBitmask[offset] |= mask;	//bitmask32[0..3] = collective pin bit masks for each GPIO DR
-		force_pin_to_gpio_mux(pin);	// reclaim pin after PWM/Serial/FlexIO mux use
-		//bit7:6 SPEED; bit 5:3 DSE; bit0 SRE  (default SPEED = 0b10; def. DSE = 0b110)
-		*portControlRegister(pin) &= ~0xF9;		//clear SPEED, DSE, SRE
-		*portControlRegister(pin) |= ((OUTPUT_PAD_SPEED & 0x3) << 6) | \
-			((OUTPUT_PAD_DSE & 0x7) << 3);	//DSE = 0b011 for LED overclock
-		//clear pin bit in IOMUX_GPR26 to map GPIO6-9 to GPIO1-4 for DMA
-		*(&IOMUXC_GPR_GPR26 + offset) &= ~mask;
-		*standard_gpio_addr(portModeRegister(pin)) |= mask;		//GDIR? bit flag set output mode
+		// Snapshot the pad, then reclaim it after PWM/Serial/FlexIO mux use,
+		// set SPEED/DSE/SRE (DSE = 0b011 for LED overclock), clear its
+		// IOMUXC_GPR26..29 bit to map GPIO6-9 to GPIO1-4 for DMA, and make
+		// it a GPIO1-4 output. releasePads() undoes all of it (#5395).
+		objectfled_clockless_claim_pad(padStateLocal[i], objectfled_pin_pad_regs(pin, offset),
+			mask, kObjectFledGpioMux,
+			((OUTPUT_PAD_SPEED & 0x3) << 6) | ((OUTPUT_PAD_DSE & 0x7) << 3));
 	}
 
 	// Check if any valid pins were configured
@@ -357,10 +365,12 @@ void ObjectFLED::begin(void) {
 		// All channels needed for ObjectFLED; abandon init.
 		initialized = false;
 		numpinsLocal = 0;
+		releasePads();
 		return;
 	}
 	if (!objectfled_has_dma_tcds(dma)) {
 		numpinsLocal = 0;
+		releasePads();
 		return;
 	}
 
@@ -937,7 +947,18 @@ ObjectFLED::~ObjectFLED() {
 	if (dma.frameBuffer == frameBufferLocal) {
 		dma.frameBuffer = nullptr;
 	}
+	// begin() remapped the pins to GPIO1-4 through IOMUXC_GPR26..29. Teensy's
+	// pinMode()/digitalWrite() and FastPin drive GPIO6-9 and never write
+	// those bits, so give the pads back or ordinary GPIO on them stays
+	// disconnected (#5395).
+	releasePads();
 	delete[] frameBufferLocal;
+}
+
+void ObjectFLED::releasePads() {
+	objectfled_clockless_release_pads(padStateLocal, NUM_DIGITAL_PINS, [this](uint32_t i) {
+		return objectfled_pin_pad_regs(pinlist[i], pin_offsetLocal[i]);
+	});
 }
 
 void ObjectFLED::waitForDmaToFinish() {

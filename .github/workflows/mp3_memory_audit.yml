@@ -12,8 +12,8 @@ on:
       - 'src/fl/codec/mp3*'
       - 'src/third_party/minimp3/**'
       - 'ci/codec_tables/**'
-      - 'tests/fl/codec/mp3*'
-      - 'tests/fl/codec/minimp3_variants.hpp'
+      - 'tests/unit/fl/codec/mp3*'
+      - 'tests/unit/fl/codec/minimp3_variants.hpp'
       - 'tests/profile/mp3_memory_audit.cpp'
       - 'ci/codec_memory/**'
       - 'codec_memory_ledger.md'
@@ -24,8 +24,8 @@ on:
       - 'src/fl/codec/mp3*'
       - 'src/third_party/minimp3/**'
       - 'ci/codec_tables/**'
-      - 'tests/fl/codec/mp3*'
-      - 'tests/fl/codec/minimp3_variants.hpp'
+      - 'tests/unit/fl/codec/mp3*'
+      - 'tests/unit/fl/codec/minimp3_variants.hpp'
       - 'tests/profile/mp3_memory_audit.cpp'
       - 'ci/codec_memory/**'
       - 'codec_memory_ledger.md'
@@ -64,7 +64,7 @@ jobs:
         run: uv sync
 
       - name: Verify codec allocation hooks
-        run: bash test --cpp tests/fl/codec.cpp
+        run: bash test --cpp tests/unit/fl/codec.cpp
 
       - name: Build production decoder memory profile
         run: bash profile mp3_memory_audit --no-generate --iterations 1 --build-mode release

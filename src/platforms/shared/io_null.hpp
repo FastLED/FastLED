@@ -5,6 +5,9 @@
 
 
 namespace fl {
+
+class string;  // fl/stl/string.h; only bound by reference here
+
 namespace platforms {
 
 // Low-level Teensy print functions that avoid ALL Arduino dependencies
@@ -41,8 +44,8 @@ inline int read() FL_NO_EXCEPT {
     return -1;
 }
 
-inline int readLineNative(char delimiter, char* out, int outLen) FL_NO_EXCEPT {
-    (void)delimiter; (void)out; (void)outLen;
+inline int readLineNative(char delimiter, fl::string& out) FL_NO_EXCEPT {
+    (void)delimiter; (void)out;
     return -1;  // Not supported
 }
 

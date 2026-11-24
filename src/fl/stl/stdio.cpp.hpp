@@ -238,28 +238,38 @@ void format_arg(sstream& stream, const FormatSpec& spec, const fl::string_view& 
 
 namespace fl {
 
-void printf(const char* format) FL_NO_EXCEPT {
+namespace printf_detail {
+
+fl::size print_no_args(const char* format, fl::size max_chars) FL_NO_EXCEPT {
     char output[64];
     fl::size used = 0;
+    fl::size total = 0;
     const auto flush_buffer = [&]() {
         if (used == 0) {
             return;
         }
         output[used] = '\0';
         fl::print(output);
-        // `append` resumes writing only after this shared cursor is reset.
+        // `put` resumes writing only after this shared cursor is reset.
         used = 0;
+    };
+    const auto put = [&](char c) {
+        if (total == max_chars) {
+            return;
+        }
+        if (used == sizeof(output) - 1) {
+            flush_buffer();
+        }
+        output[used++] = c;
+        ++total;
     };
     const auto append = [&](const char* text) {
         while (*text) {
-            if (used == sizeof(output) - 1) {
-                flush_buffer();
-            }
-            output[used++] = *text++;
+            put(*text++);
         }
     };
 
-    while (*format) {
+    while (*format && total < max_chars) {
         if (*format == '%') {
             printf_detail::FormatSpec spec =
                 printf_detail::parse_format_spec(format);
@@ -281,12 +291,16 @@ void printf(const char* format) FL_NO_EXCEPT {
             format += 2;
             continue;
         }
-        if (used == sizeof(output) - 1) {
-            flush_buffer();
-        }
-        output[used++] = *format++;
+        put(*format++);
     }
     flush_buffer();
+    return total;
+}
+
+}  // namespace printf_detail
+
+void printf(const char* format) FL_NO_EXCEPT {
+    printf_detail::print_no_args(format, ~fl::size(0));
 }
 
 int snprintf(char* buffer, fl::size size, const char* format) FL_NO_EXCEPT {

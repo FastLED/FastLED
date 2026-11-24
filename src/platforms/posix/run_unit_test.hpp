@@ -29,6 +29,7 @@
 #include <cstring>
 #include <cstdio>
 #include <csignal>
+#include <ctime>    // For clock_gettime(CLOCK_PROCESS_CPUTIME_ID)
 #include <dlfcn.h>  // For dlopen, dlsym, dlclose
 #include <unistd.h> // For readlink, alarm
 #include "fl/stl/noexcept.h"
@@ -43,9 +44,42 @@ namespace runner_watchdog {
 
 static volatile bool g_active = false;
 static double g_timeout_seconds = 20.0;
+static unsigned int g_window_seconds = 20;
+static unsigned int g_windows_elapsed = 0;
+static double g_window_start_cpu = 0.0;
+
+// Hard cap on extensions: a test never runs past 5x its timeout in wall time.
+static const unsigned int kMaxWindows = 5;
+// A window counts as progress when the test got at least this share of one
+// CPU in it. A deadlocked test sits near zero; one starved by a loaded host
+// (load average 200+ on 16 cores was measured) still runs a few percent.
+static const double kMinProgressShare = 0.05;
+
+// Process CPU time in seconds. clock_gettime is async-signal-safe.
+static double process_cpu_seconds() FL_NO_EXCEPT {
+    struct timespec ts;
+    if (clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &ts) != 0) {
+        return 0.0;
+    }
+    return static_cast<double>(ts.tv_sec) + static_cast<double>(ts.tv_nsec) * 1e-9;
+}
 
 static void alarm_handler(int) FL_NO_EXCEPT {
     if (!g_active) {
+        return;
+    }
+
+    // The deadline is wall-clock, so on a starved host a test that is still
+    // working can reach it. Re-arm while the test made progress in the last
+    // window and has not used its whole timeout in CPU time; a hang (no CPU),
+    // a spin (CPU budget spent) or the 5x wall cap still fails it.
+    const double cpu = process_cpu_seconds();
+    const double window_cpu = cpu - g_window_start_cpu;
+    ++g_windows_elapsed;
+    if (g_windows_elapsed < kMaxWindows && cpu < g_timeout_seconds &&
+        window_cpu >= kMinProgressShare * static_cast<double>(g_window_seconds)) {
+        g_window_start_cpu = cpu;
+        alarm(g_window_seconds);
         return;
     }
 
@@ -54,6 +88,8 @@ static void alarm_handler(int) FL_NO_EXCEPT {
     fprintf(stderr, "RUNNER WATCHDOG TIMEOUT\n");
     fprintf(stderr, "================================================================================\n");
     fprintf(stderr, "Test exceeded runner timeout of %.1f seconds\n", g_timeout_seconds);
+    fprintf(stderr, "(%.1f s CPU in total, %.2f s in the last %u s window)\n", cpu,
+            window_cpu, g_window_seconds);
     fprintf(stderr, "Dumping stack trace...\n");
     fprintf(stderr, "================================================================================\n");
     fprintf(stderr, "\n");
@@ -85,6 +121,12 @@ static void setup(double timeout_seconds = 20.0) FL_NO_EXCEPT {
     }
 
     g_timeout_seconds = timeout_seconds;
+    g_window_seconds = static_cast<unsigned int>(timeout_seconds);
+    if (g_window_seconds == 0) {
+        g_window_seconds = 1;
+    }
+    g_windows_elapsed = 0;
+    g_window_start_cpu = process_cpu_seconds();
     g_active = true;
 
     struct sigaction sa;
@@ -94,7 +136,7 @@ static void setup(double timeout_seconds = 20.0) FL_NO_EXCEPT {
     sa.sa_flags = 0;
 
     if (sigaction(SIGALRM, &sa, nullptr) == 0) {
-        alarm(static_cast<unsigned int>(timeout_seconds));
+        alarm(g_window_seconds);
         printf("Runner watchdog enabled (%.1f seconds)\n", timeout_seconds);
     }
 }

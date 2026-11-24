@@ -51,8 +51,9 @@
 // sysdefs follow-up will set FL_IS_ARM_M0 (not M0+) for this family.
 // Sub-family split:
 //   FL_IS_ARM_LPC_11_USB    — LPC11U24 / LPC11U35 ("USB-capable" M0
-//     parts). Modern GPIO controller at 0xA0000000 with the same DIR/
-//     MASK/PIN/SET/CLR/NOT layout as LPC8xx per UM10462 §9. Can reuse
+//     parts). Modern GPIO controller at 0x50000000 with the same DIR/
+//     MASK/PIN/SET/CLR/NOT offsets as LPC8xx (UM10462) but no DIRSET/
+//     DIRCLR. Can reuse
 //     the LPC8xx fastpin + M0 ASM clockless path (NOT M0+).
 //   FL_IS_ARM_LPC_11_LEGACY — LPC1110 / LPC1112 / LPC1114 / LPC1115.
 //     Legacy GPIO controller at 0x50000000 with 12-bit "masked access"

@@ -5,6 +5,7 @@
 #include "platforms/ota.h"
 #include "platforms/esp/is_esp.h"
 #include "platforms/esp/esp_version.h"
+#include "platforms/esp/8266/ota/ota_support.h"
 #include "fl/log/log.h"
 #include "fl/stl/has_include.h"
 #include "fl/stl/noexcept.h"
@@ -20,7 +21,7 @@
     !ESP_IDF_VERSION_6_OR_HIGHER && \
     !defined(FL_IS_ESP_32H2) && !defined(FL_IS_ESP_32P4)
 #define FL_OTA_HAS_PLATFORM_IMPL 1
-#elif defined(FL_IS_ESP8266) && FL_HAS_INCLUDE(<ArduinoOTA.h>)
+#elif FL_ESP8266_OTA_SUPPORTED
 #define FL_OTA_HAS_PLATFORM_IMPL 1
 #else
 #define FL_OTA_HAS_PLATFORM_IMPL 0

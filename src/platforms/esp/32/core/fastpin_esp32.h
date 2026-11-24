@@ -318,29 +318,19 @@ FASTLED_FORCE_INLINE void gpioStoreBarrier() FL_NO_EXCEPT {
 #endif
 }
 
-// FL_ESP32_ENABLE_FAST_SOFTWARE_SPI: optimized bit-bang software SPI pin policy (default 0).
-// UNTESTED ON HARDWARE: no bench evidence exists for this platform yet.
-// Default 0 keeps the legacy bit-bang writer. Define it to 1 to enable the
-// optimized path at your own risk.
+// FL_ESP32_ENABLE_FAST_SOFTWARE_SPI: optimized bit-bang software SPI pin policy (default 1).
+// Opt-out: define it to 0 to fall back to the legacy bit-bang writer.
 // Set it as a build flag (-D / build_flags), not a #define in the sketch: the
 // value must match in every translation unit, including FastLED's own sources.
 #ifndef FL_ESP32_ENABLE_FAST_SOFTWARE_SPI
-#define FL_ESP32_ENABLE_FAST_SOFTWARE_SPI 0
+#define FL_ESP32_ENABLE_FAST_SOFTWARE_SPI 1
 #endif
-#if !FL_ESP32_ENABLE_FAST_SOFTWARE_SPI
-/// Default: GenericSoftwareSPIOutput keeps the FastLED 3.10.9 ESP32 writeBit()
-/// pin sequence and delays (writeBitEsp32Legacy), for mapped and no-pin-map pins.
-template <u8 PIN> struct BitbangPin<FastPin<PIN>> : BitbangPinDefaults<FastPin<PIN>> {
-    static constexpr bool kEsp32LegacyWriteBit = true;
-};
-#elif !defined(FL_FASTPIN_HAS_NO_PINMAP)
-/// Software SPI data updates are atomic per pin. Whole-port streaming stays off
-/// because a port snapshot could overwrite concurrent GPIO updates.
-template <u8 PIN> struct BitbangPin<FastPin<PIN>> : BitbangPinDefaults<FastPin<PIN>> {
-    static constexpr bool kAtomicWrite = true;
-    // The inline platform template avoids a call per clock phase; the visible
-    // fl::delaycycles is only a declaration with an out-of-line definition.
-    // Long waits use the cycle counter so they cannot expand to a NOP run.
+
+/// The inline platform template avoids a call per clock phase; the visible
+/// fl::delaycycles is only a declaration, defined out of line for 50 cycles or
+/// fewer. Long waits use the cycle counter so they cannot expand to a NOP run.
+/// Every ESP32 policy below uses it, or practical rates fail to link (#5067, #5393).
+template <class Pin> struct Esp32BitbangDelay : BitbangPinDefaults<Pin> {
     template <fl::cycle_t CYCLES>
     FASTLED_FORCE_INLINE static void delay() FL_NO_EXCEPT {
         if (CYCLES > 32) {
@@ -350,6 +340,24 @@ template <u8 PIN> struct BitbangPin<FastPin<PIN>> : BitbangPinDefaults<FastPin<P
             ::delaycycles<(CYCLES > 32 ? 0 : CYCLES)>();
         }
     }
+};
+
+#if !FL_ESP32_ENABLE_FAST_SOFTWARE_SPI
+/// Opt-out (flag 0): GenericSoftwareSPIOutput keeps the FastLED 3.10.9 ESP32 writeBit()
+/// pin sequence (writeBitEsp32Legacy), for mapped and no-pin-map pins.
+template <u8 PIN> struct BitbangPin<FastPin<PIN>> : Esp32BitbangDelay<FastPin<PIN>> {
+    static constexpr bool kEsp32LegacyWriteBit = true;
+};
+#endif  // !FL_ESP32_ENABLE_FAST_SOFTWARE_SPI
+
+#if FL_ESP32_ENABLE_FAST_SOFTWARE_SPI && defined(FL_FASTPIN_HAS_NO_PINMAP)
+/// Forced software pins write through the core API but keep the same delays.
+template <u8 PIN> struct BitbangPin<FastPin<PIN>> : Esp32BitbangDelay<FastPin<PIN>> {};
+#elif FL_ESP32_ENABLE_FAST_SOFTWARE_SPI
+/// Software SPI data updates are atomic per pin. Whole-port streaming stays off
+/// because a port snapshot could overwrite concurrent GPIO updates.
+template <u8 PIN> struct BitbangPin<FastPin<PIN>> : Esp32BitbangDelay<FastPin<PIN>> {
+    static constexpr bool kAtomicWrite = true;
     template <u8 BIT>
     FASTLED_FORCE_INLINE static void write(u8 value) FL_NO_EXCEPT {
         gpioStoreBarrier();
@@ -357,7 +365,7 @@ template <u8 PIN> struct BitbangPin<FastPin<PIN>> : BitbangPinDefaults<FastPin<P
         gpioStoreBarrier();
     }
 };
-#endif  // FL_ESP32_ENABLE_FAST_SOFTWARE_SPI
+#endif  // FL_ESP32_ENABLE_FAST_SOFTWARE_SPI && FL_FASTPIN_HAS_NO_PINMAP
 
 #pragma GCC diagnostic pop
 }  // namespace fl

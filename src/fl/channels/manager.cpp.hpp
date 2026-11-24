@@ -175,6 +175,7 @@ void ChannelManager::addDriver(int priority, fl::shared_ptr<IChannelDriver> driv
 
     mDrivers.push_back({priority, driver, engineName, enabled});
     driver->setPollNeededCallback(mPollNeededCallback);
+    mAllReady = false;  // The new driver may already be transmitting.
 
     // Build capability string for debug output. Gate the entire block behind
     // FASTLED_HAS_DBG because the `capStr` exists ONLY to feed the FL_DBG
@@ -222,6 +223,7 @@ bool ChannelManager::removeDriver(fl::shared_ptr<IChannelDriver> driver) FL_NO_E
 
             // Remove using vector::erase (preserves sort order)
             mDrivers.erase(mDrivers.begin() + i);
+            mAllReady = false;
             return true;  // Engine found and removed
         }
     }
@@ -248,6 +250,7 @@ void ChannelManager::clearAllDrivers() FL_NO_EXCEPT {
 
     // Clear all drivers (shared_ptr handles cleanup automatically)
     mDrivers.clear();
+    mAllReady = false;
 
     // Drop the exclusive-driver filter along with the registry it refers to.
     // Leaving it set would name a driver that no longer exists, and
@@ -552,23 +555,29 @@ IChannelDriver::DriverState ChannelManager::poll() FL_NO_EXCEPT {
     // Priority order: ERROR > BUSY > DRAINING > READY
     bool anyBusy = false;
     bool anyDraining = false;
-    fl::string firstError;
+    bool allReady = true;
+    const char* firstError = "";
 
     for (auto& entry : mDrivers) {
         IChannelDriver::DriverState result = entry.driver->poll();
+        allReady = allReady && result.state == IChannelDriver::DriverState::READY;
         if (result.state == IChannelDriver::DriverState::BUSY) {
             anyBusy = true;
         } else if (result.state == IChannelDriver::DriverState::DRAINING) {
             anyDraining = true;
         }
         // Capture first error encountered
-        if (result.state == IChannelDriver::DriverState::ERROR && firstError.empty()) {
+        if (result.state == IChannelDriver::DriverState::ERROR && firstError[0] == '\0') {
             firstError = result.error;
         }
     }
 
+    // Only a poll that saw every driver READY may seed the cache (#5381).
+    // Check the states, not the error text: DriverState(ERROR) has none.
+    mAllReady = allReady;
+
     // Return error if any driver reported error
-    if (!firstError.empty()) {
+    if (firstError[0] != '\0') {
         return IChannelDriver::DriverState(IChannelDriver::DriverState::ERROR, firstError);
     }
 
@@ -599,6 +608,13 @@ bool ChannelManager::waitForReadyOrDraining(u32 timeoutMs) FL_NO_EXCEPT {
 
 
 void ChannelManager::onBeginFrame() FL_NO_EXCEPT {
+    // #5381: synchronous drivers can already be READY in onEndFrame(), so
+    // reuse that result until an enqueue, show() or registration clears it.
+    // Async DMA drivers normally report DRAINING there; idle time between
+    // frames does not set this cache, so they still need the READY poll here.
+    if (mAllReady) {
+        return;
+    }
     waitForReady();  // Wait for all drivers to become READY before clearing previous frame state.
 }
 
@@ -606,6 +622,7 @@ void ChannelManager::onEndFrame() FL_NO_EXCEPT {
     // Call show() on all drivers to trigger transmission
     // Channels have enqueued data directly to drivers during showPixels()
     // Now we trigger transmission by calling show() on each driver
+    mAllReady = false;
     for (auto& entry : mDrivers) {
         if (entry.enabled) {
             entry.driver->show();

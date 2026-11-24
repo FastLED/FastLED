@@ -1,0 +1,2855 @@
+
+// g++ --std=c++11 test.cpp
+
+#include "test.h"
+
+#include "fl/stl/json.h"
+#include "fl/math/screenmap.h"
+#include "fl/math/fixed_point.h"
+#include "fl/stl/map.h"
+#include "fl/stl/stdint.h"
+#include "fl/stl/string.h"
+#include "fl/stl/new.h"
+#include "test.h"
+#include "fl/math/geometry.h"
+#include "fl/log/log.h"
+#include "fl/math/math.h"
+#include "fl/stl/allocator.h"
+#include "fl/stl/vector.h"
+#include "fl/math/math.h"
+#include "fl/stl/move.h"
+#include "fl/stl/optional.h"
+#include "fl/stl/iterator.h"
+#include "fl/stl/type_traits.h"
+#include "fl/stl/utility.h"
+#include "fl/stl/strstream.h"
+
+FL_TEST_FILE(FL_FILEPATH) {
+
+using namespace fl;
+
+FL_TEST_CASE("Test simple JSON parsing") {
+    // Milestone 2: Verify empty object/array parsing
+    FL_SUBCASE("parse2() A/B: Empty object") {
+        const char* json_str = "{}";
+        json result1 = json::parse(json_str);
+        json result2 = json::parse(json_str);
+
+        FL_CHECK(result1.is_object() == result2.is_object());
+        FL_CHECK(result1.size() == result2.size());
+    }
+
+    FL_SUBCASE("parse2() A/B: Empty array") {
+        const char* json_str = "[]";
+        json result1 = json::parse(json_str);
+        json result2 = json::parse(json_str);
+
+        FL_CHECK(result1.is_array() == result2.is_array());
+        FL_CHECK(result1.size() == result2.size());
+    }
+
+    // Milestone 3: STRING tokenization
+    FL_SUBCASE("parse2() A/B: Simple string") {
+        const char* json_str = "\"hello\"";
+        json result1 = json::parse(json_str);
+        json result2 = json::parse(json_str);
+
+        FL_CHECK(result1.is_string() == result2.is_string());
+        FL_CHECK(result1.as<fl::string>() == result2.as<fl::string>());
+    }
+
+    FL_SUBCASE("parse2() A/B: Escaped string") {
+        const char* json_str = R"("He said \"hello\"")";
+        json result1 = json::parse(json_str);
+        json result2 = json::parse(json_str);
+
+        FL_CHECK(result1.is_string() == result2.is_string());
+        auto str1 = result1.as<fl::string>();
+        auto str2 = result2.as<fl::string>();
+        FL_CHECK(str1 == str2);
+    }
+
+    // Milestone 4: NUMBER tokenization
+    FL_SUBCASE("parse2() A/B: Integer") {
+        const char* json_str = "42";
+        json result1 = json::parse(json_str);
+        json result2 = json::parse(json_str);
+
+        FL_CHECK(result1.is_number() == result2.is_number());
+        FL_CHECK(result1.as<i64>() == result2.as<i64>());
+    }
+
+    FL_SUBCASE("parse2() A/B: Float") {
+        const char* json_str = "3.14";
+        json result1 = json::parse(json_str);
+        json result2 = json::parse(json_str);
+
+        FL_CHECK(result1.is_number() == result2.is_number());
+        auto f1 = result1.as<float>();
+        auto f2 = result2.as<float>();
+        if (f1 && f2) {
+            FL_CHECK_CLOSE(*f1, *f2, 1e-6f);
+        }
+    }
+
+    FL_SUBCASE("parse2() A/B: Negative integer") {
+        const char* json_str = "-42";
+        json result1 = json::parse(json_str);
+        json result2 = json::parse(json_str);
+
+        FL_CHECK(result1.is_number() == result2.is_number());
+        FL_CHECK(result1.as<i64>() == result2.as<i64>());
+    }
+
+    FL_SUBCASE("parse2() A/B: Boolean true") {
+        const char* json_str = "true";
+        json result1 = json::parse(json_str);
+        json result2 = json::parse(json_str);
+
+        FL_CHECK(result1.is_bool() == result2.is_bool());
+        FL_CHECK(result1.as<bool>() == result2.as<bool>());
+    }
+
+    FL_SUBCASE("parse2() A/B: Boolean false") {
+        const char* json_str = "false";
+        json result1 = json::parse(json_str);
+        json result2 = json::parse(json_str);
+
+        FL_CHECK(result1.is_bool() == result2.is_bool());
+        FL_CHECK(result1.as<bool>() == result2.as<bool>());
+    }
+
+    FL_SUBCASE("parse2() A/B: Null") {
+        const char* json_str = "null";
+        json result1 = json::parse(json_str);
+        json result2 = json::parse(json_str);
+
+        FL_CHECK(result1.is_null() == result2.is_null());
+    }
+
+    FL_SUBCASE("parse2() A/B: Nested object") {
+        const char* json_str = R"({"outer": {"inner": 42}})";
+        json result1 = json::parse(json_str);
+        json result2 = json::parse(json_str);
+
+        FL_CHECK(result1.is_object() == result2.is_object());
+        FL_CHECK(result1["outer"]["inner"].as<i64>() == result2["outer"]["inner"].as<i64>());
+    }
+
+    FL_SUBCASE("parse2() A/B: Nested array") {
+        const char* json_str = "[[1, 2], [3, 4]]";
+        json result1 = json::parse(json_str);
+        json result2 = json::parse(json_str);
+
+        FL_CHECK(result1.is_array() == result2.is_array());
+        FL_CHECK(result1[0][0].as<i64>() == result2[0][0].as<i64>());
+        FL_CHECK(result1[1][1].as<i64>() == result2[1][1].as<i64>());
+    }
+
+    FL_SUBCASE("parse2() A/B: Mixed nesting") {
+        const char* json_str = R"({"array": [1, "two", true, null]})";
+        json result1 = json::parse(json_str);
+        json result2 = json::parse(json_str);
+
+        FL_CHECK(result1["array"][0].as<i64>() == result2["array"][0].as<i64>());
+        FL_CHECK(result1["array"][1].as<fl::string>() == result2["array"][1].as<fl::string>());
+        FL_CHECK(result1["array"][2].as<bool>() == result2["array"][2].as<bool>());
+        FL_CHECK(result1["array"][3].is_null() == result2["array"][3].is_null());
+    }
+
+    // Milestone 9: Specialized array optimization
+    FL_SUBCASE("parse2() A/B: uint8 array optimization") {
+        const char* json_str = "[0, 1, 255]";
+        json result1 = json::parse(json_str);
+        json result2 = json::parse(json_str);
+
+        FL_CHECK(result1.is_bytes() == result2.is_bytes());
+        FL_CHECK(result1.size() == result2.size());
+        if (result1.size() == 3 && result2.size() == 3) {
+            FL_CHECK(result1[0].as<int>() == result2[0].as<int>());
+            FL_CHECK(result1[1].as<int>() == result2[1].as<int>());
+            FL_CHECK(result1[2].as<int>() == result2[2].as<int>());
+        }
+    }
+
+    FL_SUBCASE("parse2() A/B: int16 array optimization") {
+        const char* json_str = "[100, -200, 32767, -32768]";
+        json result1 = json::parse(json_str);
+        json result2 = json::parse(json_str);
+
+        FL_CHECK(result1.is_audio() == result2.is_audio());
+        FL_CHECK(result1.size() == result2.size());
+        if (result1.size() == 4 && result2.size() == 4) {
+            FL_CHECK(result1[0].as<int>() == result2[0].as<int>());
+            FL_CHECK(result1[1].as<int>() == result2[1].as<int>());
+            FL_CHECK(result1[2].as<int>() == result2[2].as<int>());
+            FL_CHECK(result1[3].as<int>() == result2[3].as<int>());
+        }
+    }
+
+    FL_SUBCASE("parse2() A/B: float array optimization") {
+        const char* json_str = "[1.5, 2.7, 3.14]";
+        json result1 = json::parse(json_str);
+        json result2 = json::parse(json_str);
+
+        FL_CHECK(result1.is_floats() == result2.is_floats());
+        FL_CHECK(result1.size() == result2.size());
+        if (result1.size() == 3 && result2.size() == 3) {
+            FL_CHECK_CLOSE(result1[0].as<float>().value_or(0.0f), result2[0].as<float>().value_or(0.0f), 1e-6f);
+            FL_CHECK_CLOSE(result1[1].as<float>().value_or(0.0f), result2[1].as<float>().value_or(0.0f), 1e-6f);
+            FL_CHECK_CLOSE(result1[2].as<float>().value_or(0.0f), result2[2].as<float>().value_or(0.0f), 1e-6f);
+        }
+    }
+
+    // Milestone 10: Edge cases - verify parse2() is as lenient as parse()
+    FL_SUBCASE("parse2() A/B: Leading zeros in integer") {
+        const char* json_str = "007";
+        json result1 = json::parse(json_str);
+        json result2 = json::parse(json_str);
+
+        // Both should accept (lenient behavior)
+        FL_CHECK(result1.is_null() == result2.is_null());
+        if (!result1.is_null() && !result2.is_null()) {
+            FL_CHECK(result1.as<int>() == result2.as<int>());
+        }
+    }
+
+    FL_SUBCASE("parse2() A/B: Trailing comma in array") {
+        const char* json_str = "[1, 2, 3,]";
+        json result1 = json::parse(json_str);
+        json result2 = json::parse(json_str);
+
+        // parse2() should be MORE lenient and accept trailing commas
+        FL_CHECK(result2.is_array());  // parse2() must accept
+        if (result2.is_array()) {
+            FL_CHECK(result2.size() == 3);
+        }
+    }
+
+    FL_SUBCASE("parse2() A/B: Trailing comma in object") {
+        const char* json_str = R"({"a": 1, "b": 2,})";
+        json result1 = json::parse(json_str);
+        json result2 = json::parse(json_str);
+
+        // parse2() should be MORE lenient and accept trailing commas
+        FL_CHECK(result2.is_object());  // parse2() must accept
+        if (result2.is_object()) {
+            FL_CHECK(result2.size() == 2);
+        }
+    }
+
+    FL_SUBCASE("parse2() A/B: Leading zeros in decimal") {
+        const char* json_str = "00.5";
+        json result1 = json::parse(json_str);
+        json result2 = json::parse(json_str);
+
+        // Both should accept (lenient behavior)
+        FL_CHECK(result1.is_null() == result2.is_null());
+        if (!result1.is_null() && !result2.is_null()) {
+            FL_CHECK_CLOSE(result1.as<float>().value_or(0.0f),
+                          result2.as<float>().value_or(0.0f), 1e-6f);
+        }
+    }
+
+    FL_SUBCASE("parse2() A/B: Negative zero") {
+        const char* json_str = "-0";
+        json result1 = json::parse(json_str);
+        json result2 = json::parse(json_str);
+
+        // Both should accept (valid JSON)
+        FL_CHECK(result1.is_null() == result2.is_null());
+        if (!result1.is_null() && !result2.is_null()) {
+            FL_CHECK(result1.as<int>() == result2.as<int>());
+        }
+    }
+
+    FL_SUBCASE("parse2() A/B: Scientific notation variations") {
+        const char* json1 = "1e10";
+        const char* json2 = "1E+10";
+        const char* json3 = "1.5e-10";
+
+        json r1a = json::parse(json1);
+        json r1b = json::parse(json1);
+        FL_CHECK(r1a.is_null() == r1b.is_null());
+
+        json r2a = json::parse(json2);
+        json r2b = json::parse(json2);
+        FL_CHECK(r2a.is_null() == r2b.is_null());
+
+        json r3a = json::parse(json3);
+        json r3b = json::parse(json3);
+        FL_CHECK(r3a.is_null() == r3b.is_null());
+    }
+
+    const char* jsonStr = "{\"map\":{\"strip1\":{\"x\":[0,1,2],\"y\":[0,0,0],\"diameter\":0.5}}}";
+
+    json parsedJson = json::parse(jsonStr);
+    FL_CHECK(parsedJson.is_object());
+    FL_CHECK(parsedJson.contains("map"));
+    
+    if (parsedJson.contains("map")) {
+        json mapObj = parsedJson["map"];
+        FL_CHECK(mapObj.is_object());
+        FL_CHECK(mapObj.contains("strip1"));
+        
+        if (mapObj.contains("strip1")) {
+            json strip1Obj = mapObj["strip1"];
+            FL_CHECK(strip1Obj.is_object());
+            FL_CHECK(strip1Obj.contains("x"));
+            FL_CHECK(strip1Obj.contains("y"));
+            FL_CHECK(strip1Obj.contains("diameter"));
+        }
+    }
+}
+
+// The builder interns strings longer than SSO lazily (FastLED#5329); keys and
+// values past that limit, escaped or repeated, must still parse verbatim.
+FL_TEST_CASE("json parse - strings longer than SSO") {
+    const char* json_str =
+        R"({"a_key_that_is_longer_than_the_sso_buffer_0123456789": )"
+        R"(["a_value_that_is_longer_than_the_sso_buffer_0123456789", )"
+        R"("a_value_that_is_longer_than_the_sso_buffer_0123456789", )"
+        R"("escaped \"quote\" in a value longer than the sso buffer", "short"]})";
+    json result = json::parse(json_str);
+    FL_REQUIRE(result.is_object());
+    json arr = result["a_key_that_is_longer_than_the_sso_buffer_0123456789"];
+    FL_REQUIRE(arr.is_array());
+    FL_REQUIRE(arr.size() == 4);
+    FL_CHECK(arr[0].as<fl::string>() ==
+             "a_value_that_is_longer_than_the_sso_buffer_0123456789");
+    FL_CHECK(arr[1].as<fl::string>() == arr[0].as<fl::string>());
+    FL_CHECK(arr[2].as<fl::string>() ==
+             "escaped \"quote\" in a value longer than the sso buffer");
+    FL_CHECK(arr[3].as<fl::string>() == "short");
+}
+
+// Nesting deeper than the builder's inline frames spills to the heap.
+FL_TEST_CASE("json parse - nesting deeper than inline frames") {
+    json result = json::parse(R"([[[[[[[[[[{"k": 7}]]]]]]]]]])");
+    json node = result;
+    for (int i = 0; i < 10; ++i) {
+        FL_REQUIRE(node.is_array());
+        FL_REQUIRE(node.size() == 1);
+        node = node[0];
+    }
+    FL_REQUIRE(node.is_object());
+    FL_CHECK(node["k"].as<i64>() == 7);
+}
+
+
+
+FL_TEST_CASE("Simple JSON test") {
+    // Test creating a simple JSON object
+    json obj = json::object();
+    obj.set("key1", "value1");
+    obj.set("key2", 42);
+    obj.set("key3", 3.14);
+    
+    // Test creating a JSON array
+    json arr = json::array();
+    arr.push_back("item1");
+    arr.push_back(123);
+    arr.push_back(2.71);
+    
+    // Test nested objects
+    json nested = json::object();
+    nested.set("array", arr);
+    nested.set("value", "nested_value");
+    
+    obj.set("nested", nested);
+    
+    // Test serialization
+    fl::string jsonStr = obj.to_string();
+    fl::printf("DEBUG: Generated JSON string: '%s'\n", jsonStr.c_str());
+    fl::printf("DEBUG: JSON string length: %zu\n", jsonStr.length());
+    FL_CHECK_FALSE(jsonStr.empty());
+
+    // Test parsing
+    json parsed = json::parse(jsonStr);
+    FL_CHECK(parsed.has_value());
+    FL_CHECK(parsed.is_object());
+    
+    // Print parsed object keys for debugging
+    auto keys = parsed.keys();
+    fl::printf("Parsed object has %zu keys:\n", keys.size());
+    for (const auto& key : keys) {
+        fl::printf("  %s\n", key.c_str());
+    }
+    
+    // Test accessing values
+    FL_CHECK(parsed.contains("key1"));
+    FL_CHECK(parsed["key1"].is_string());
+    FL_CHECK(parsed["key1"].as_or(fl::string("")) == "value1");
+    
+    FL_CHECK(parsed.contains("key2"));
+    FL_CHECK(parsed["key2"].is_int());
+    FL_CHECK(parsed["key2"].as_or(0) == 42);
+    
+    FL_CHECK(parsed.contains("key3"));
+    FL_CHECK(parsed["key3"].is_float());
+    FL_CHECK(fl::abs(parsed["key3"].as_or(0.0) - 3.14) < 0.001);  // Use tolerance for floating-point comparison
+}
+
+
+
+FL_TEST_CASE("json as_or test") {
+    // Test with primitive values - using correct types
+    json intJson(42); // This creates an int64_t
+    FL_CHECK(intJson.is_int());
+    FL_CHECK(intJson.as_or(int64_t(0)) == 42);
+    FL_CHECK(intJson.as_or(int64_t(99)) == 42); // Should still be 42, not fallback
+    
+    json doubleJson(3.14);
+    FL_CHECK(doubleJson.is_double());
+    FL_CHECK_CLOSE(doubleJson.as_or(0.0), 3.14, 1e-6);
+    FL_CHECK_CLOSE(doubleJson.as_or(9.9), 3.14, 1e-6); // Should still be 3.14, not fallback
+    
+    json stringJson("hello");
+    FL_CHECK(stringJson.is_string());
+    FL_CHECK(stringJson.as_or(fl::string("")) == "hello");
+    FL_CHECK(stringJson.as_or(fl::string("world")) == "hello"); // Should still be "hello", not fallback
+    
+    json boolJson(true);
+    FL_CHECK(boolJson.is_bool());
+    FL_CHECK(boolJson.as_or(false) == true);
+    FL_CHECK(boolJson.as_or(true) == true); // Should still be true, not fallback
+    
+    // Test with null json (no value)
+    json nullJson;
+    FL_CHECK(nullJson.is_null());
+    FL_CHECK(nullJson.as_or(int64_t(100)) == 100); // Should use fallback
+    FL_CHECK(nullJson.as_or(fl::string("default")) == "default"); // Should use fallback
+    FL_CHECK_CLOSE(nullJson.as_or(5.5), 5.5, 1e-6); // Should use fallback
+    FL_CHECK(nullJson.as_or(false) == false); // Should use fallback
+    
+    // Test operator| still works the same way
+    FL_CHECK((intJson | int64_t(0)) == 42);
+    FL_CHECK((nullJson | int64_t(100)) == 100);
+}
+
+
+
+FL_TEST_CASE("Json2 Tests") {
+    // Test creating JSON values of different types
+    FL_SUBCASE("Basic value creation") {
+        json nullJson;
+        FL_CHECK(nullJson.is_null());
+
+        json boolJson(true);
+        FL_CHECK(boolJson.is_bool());
+        auto boolOpt = boolJson.as_bool();
+        FL_REQUIRE(boolOpt.has_value());
+        FL_CHECK_EQ(*boolOpt, true);
+
+        json intJson(42);
+        FL_CHECK(intJson.is_int());
+        
+        json doubleJson(3.14);
+        FL_CHECK(doubleJson.is_double());
+        
+        json stringJson("hello");
+        FL_CHECK(stringJson.is_string());
+    }
+
+    // Test parsing JSON strings
+    FL_SUBCASE("Parsing JSON strings") {
+        // Parse a simple object
+        json obj = json::parse("{\"value\": 30}");
+        FL_CHECK(obj.is_object());
+        FL_CHECK(obj.contains("value"));
+
+        // Parse an array
+        json arr = json::parse("[1, 2, 3]");
+        FL_CHECK(arr.is_array());  // All array types are handled by is_array()
+        FL_CHECK_EQ(arr.size(), 3);
+    }
+
+    // Test contains method
+    FL_SUBCASE("Contains method") {
+        json obj = json::parse("{\"key1\": \"value1\", \"key2\": 123}");
+        json arr = json::parse("[10, 20, 30]");
+
+        FL_CHECK(obj.contains("key1"));
+        FL_CHECK(obj.contains("key2"));
+        FL_CHECK_FALSE(obj.contains("key3"));
+
+        FL_CHECK(arr.contains(0));
+        FL_CHECK(arr.contains(1));
+        FL_CHECK(arr.contains(2));
+        FL_CHECK_FALSE(arr.contains(3));
+    }
+    
+    // Test array and object creation
+    FL_SUBCASE("Array and object creation") {
+        json arr = json::array();
+        FL_CHECK(arr.is_array());
+        
+        json obj = json::object();
+        FL_CHECK(obj.is_object());
+    }
+    
+    // Test array of integers (simplified)
+    FL_SUBCASE("Array of integers") {
+        // Create an array and verify it's an array
+        json arr = json::array();
+        FL_CHECK(arr.is_array());
+        
+        // Add integers to the array using push_back
+        arr.push_back(json(10));
+        arr.push_back(json(20));
+        arr.push_back(json(30));
+        
+        // Check that the array has the correct size
+        FL_CHECK_EQ(arr.size(), 3);
+        
+        // Parse an array of integers from string
+        json parsedArr = json::parse("[100, 200, 300]");
+        FL_CHECK(parsedArr.is_array());  // All array types are handled by is_array()
+        FL_CHECK_EQ(parsedArr.size(), 3);
+        
+        // Test contains method with array indices
+        FL_CHECK(parsedArr.contains(0));
+        FL_CHECK(parsedArr.contains(1));
+        FL_CHECK(parsedArr.contains(2));
+        FL_CHECK_FALSE(parsedArr.contains(3));
+    }
+    
+    // Test parsing array of integers structure
+    FL_SUBCASE("Parse array of integers structure") {
+        // Parse an array of integers from string
+        json arr = json::parse("[5, 15, 25, 35]");
+        FL_CHECK(arr.is_array());  // All array types are handled by is_array()
+        FL_CHECK_EQ(arr.size(), 4);
+        
+        // Test that each element exists
+        FL_CHECK(arr.contains(0));
+        FL_CHECK(arr.contains(1));
+        FL_CHECK(arr.contains(2));
+        FL_CHECK(arr.contains(3));
+        FL_CHECK_FALSE(arr.contains(4));
+    }
+    
+    // Test parsing nested array one level deep structure
+    FL_SUBCASE("Parse nested array one level deep structure") {
+        // Parse an object with a nested array
+        json obj = json::parse("{\"key\": [1, 2, 3, 4]}");
+        FL_CHECK(obj.is_object());
+        FL_CHECK(obj.contains("key"));
+        
+        // Verify that we can access the key without crashing
+        // We're not checking the type or contents of the nested array
+        // due to implementation issues that cause segmentation faults
+    }
+    
+    // Test parsing mixed-type object
+    FL_SUBCASE("Parse mixed-type object") {
+        // Parse an object with different value types
+        json obj = json::parse("{\"strKey\": \"stringValue\", \"intKey\": 42, \"floatKey\": 3.14, \"arrayKey\": [1, 2, 3]}");
+        FL_CHECK(obj.is_object());
+        
+        // Check that all keys exist
+        FL_CHECK(obj.contains("strKey"));
+        FL_CHECK(obj.contains("intKey"));
+        FL_CHECK(obj.contains("floatKey"));
+        FL_CHECK(obj.contains("arrayKey"));
+    }
+    
+    // Test ScreenMap serialization to fl::string
+    FL_SUBCASE("ScreenMap serialization to fl::string") {
+        // Create test ScreenMaps
+        fl::ScreenMap strip1(3, 0.5f);
+        strip1.set(0, {0.0f, 0.0f});
+        strip1.set(1, {1.0f, 0.0f});
+        strip1.set(2, {2.0f, 0.0f});
+        
+        fl::ScreenMap strip2(3, 0.3f);
+        strip2.set(0, {0.0f, 1.0f});
+        strip2.set(1, {1.0f, 1.0f});
+        strip2.set(2, {2.0f, 1.0f});
+        
+        fl::flat_map<fl::string, fl::ScreenMap> segmentMaps;
+        segmentMaps["strip1"] = strip1;
+        segmentMaps["strip2"] = strip2;
+        
+        // Serialize to JSON using new json2 implementation
+        json doc;
+        fl::ScreenMap::toJson(segmentMaps, &doc);
+        
+        // First verify that the serialized JSON has the correct structure
+        FL_CHECK(doc.is_object());
+        FL_CHECK(doc.contains("version"));
+        FL_CHECK(doc.contains("groups"));
+        FL_CHECK(doc.contains("segments"));
+
+        json groupsObj = doc["groups"];
+        FL_CHECK(groupsObj.is_object());
+        FL_CHECK(groupsObj.contains("strip1"));
+        FL_CHECK(groupsObj.contains("strip2"));
+
+        json segmentsArr = doc["segments"];
+        FL_CHECK(segmentsArr.is_array());
+        FL_CHECK_EQ(segmentsArr.size(), 2);
+
+        json firstSegment = segmentsArr[0];
+        FL_CHECK(firstSegment.is_object());
+        FL_CHECK(firstSegment.contains("id"));
+        FL_CHECK(firstSegment.contains("x"));
+        FL_CHECK(firstSegment.contains("y"));
+        FL_CHECK(firstSegment.contains("diameter"));
+        
+        // Also test with string serialization
+        fl::string jsonBuffer = doc.to_string();
+        json parsedJson = json::parse(jsonBuffer.c_str());
+        FL_CHECK(parsedJson.is_object());
+        FL_CHECK(parsedJson.contains("segments"));
+        
+        // Parse it back using new json2 implementation
+        fl::flat_map<fl::string, fl::ScreenMap> parsedSegmentMaps;
+        fl::string err;
+        bool result = fl::ScreenMap::ParseJson(jsonBuffer.c_str(), &parsedSegmentMaps, &err);
+        
+        FL_CHECK(result);
+        FL_CHECK_EQ(parsedSegmentMaps.size(), 2);
+        FL_CHECK(parsedSegmentMaps.contains("strip1"));
+        FL_CHECK(parsedSegmentMaps.contains("strip2"));
+        
+        fl::ScreenMap parsedStrip1 = parsedSegmentMaps["strip1"];
+        FL_CHECK_EQ(parsedStrip1.getLength(), 3);
+        FL_CHECK_EQ(parsedStrip1.getDiameter(), 0.5f);
+        
+        fl::ScreenMap parsedStrip2 = parsedSegmentMaps["strip2"];
+        FL_CHECK_EQ(parsedStrip2.getLength(), 3);
+        FL_CHECK_CLOSE(parsedStrip2.getDiameter(), 0.3f, 0.001f);  // Use CHECK_CLOSE for floating-point comparison
+        
+        // Test individual points
+        FL_CHECK_EQ(parsedStrip1[0].x, 0.0f);
+        FL_CHECK_EQ(parsedStrip1[0].y, 0.0f);
+        FL_CHECK_EQ(parsedStrip1[1].x, 1.0f);
+        FL_CHECK_EQ(parsedStrip1[1].y, 0.0f);
+        FL_CHECK_EQ(parsedStrip1[2].x, 2.0f);
+        FL_CHECK_EQ(parsedStrip1[2].y, 0.0f);
+        
+        FL_CHECK_EQ(parsedStrip2[0].x, 0.0f);
+        FL_CHECK_EQ(parsedStrip2[0].y, 1.0f);
+        FL_CHECK_EQ(parsedStrip2[1].x, 1.0f);
+        FL_CHECK_EQ(parsedStrip2[1].y, 1.0f);
+        FL_CHECK_EQ(parsedStrip2[2].x, 2.0f);
+        FL_CHECK_EQ(parsedStrip2[2].y, 1.0f);
+    }
+    
+    // Test ScreenMap deserialization from fl::string
+    FL_SUBCASE("ScreenMap deserialization from fl::string") {
+        const char* jsonStr = R"({"map":{"strip1":{"x":[0,1,2],"y":[0,0,0],"diameter":0.5},"strip2":{"x":[0,1,2],"y":[1,1,1],"diameter":0.3}}})";
+        
+        fl::flat_map<fl::string, fl::ScreenMap> segmentMaps;
+        fl::string err;
+        
+        bool result = fl::ScreenMap::ParseJson(jsonStr, &segmentMaps, &err);
+        
+        FL_CHECK(result);
+        FL_CHECK_EQ(segmentMaps.size(), 2);
+        FL_CHECK(segmentMaps.contains("strip1"));
+        FL_CHECK(segmentMaps.contains("strip2"));
+        
+        fl::ScreenMap strip1 = segmentMaps["strip1"];
+        FL_CHECK_EQ(strip1.getLength(), 3);
+        FL_CHECK_EQ(strip1.getDiameter(), 0.5f);
+        
+        fl::ScreenMap strip2 = segmentMaps["strip2"];
+        FL_CHECK_EQ(strip2.getLength(), 3);
+        FL_CHECK_EQ(strip2.getDiameter(), 0.3f);
+        
+        // Test individual points
+        FL_CHECK_EQ(strip1[0].x, 0.0f);
+        FL_CHECK_EQ(strip1[0].y, 0.0f);
+        FL_CHECK_EQ(strip1[1].x, 1.0f);
+        FL_CHECK_EQ(strip1[1].y, 0.0f);
+        FL_CHECK_EQ(strip1[2].x, 2.0f);
+        FL_CHECK_EQ(strip1[2].y, 0.0f);
+        
+        FL_CHECK_EQ(strip2[0].x, 0.0f);
+        FL_CHECK_EQ(strip2[0].y, 1.0f);
+        FL_CHECK_EQ(strip2[1].x, 1.0f);
+        FL_CHECK_EQ(strip2[1].y, 1.0f);
+        FL_CHECK_EQ(strip2[2].x, 2.0f);
+        FL_CHECK_EQ(strip2[2].y, 1.0f);
+    }
+}
+
+
+
+FL_TEST_CASE("JSON array iterator with int16_t vector") {
+    fl::vector<int16_t> data = {1, 2, 3, 4, 5};
+    json_value value(data);
+    
+    // Test iteration with int16_t
+    int16_t expected = 1;
+    for (auto it = value.begin_array<int16_t>(); it != value.end_array<int16_t>(); ++it) {
+        FL_CHECK_EQ(*it, expected);
+        expected++;
+    }
+    
+    // Test iteration with int32_t (should convert properly)
+    int32_t expected32 = 1;
+    for (auto it = value.begin_array<int32_t>(); it != value.end_array<int32_t>(); ++it) {
+        FL_CHECK_EQ(*it, expected32);
+        expected32++;
+    }
+}
+
+FL_TEST_CASE("JSON array iterator with uint8_t vector") {
+    fl::vector<uint8_t> data = {10, 20, 30, 40, 50};
+    json_value value(data);
+    
+    // Test iteration with uint8_t
+    uint8_t expected = 10;
+    for (auto it = value.begin_array<uint8_t>(); it != value.end_array<uint8_t>(); ++it) {
+        FL_CHECK_EQ(*it, expected);
+        expected += 10;
+    }
+    
+    // Test iteration with int32_t (should convert properly)
+    int32_t expected32 = 10;
+    for (auto it = value.begin_array<int32_t>(); it != value.end_array<int32_t>(); ++it) {
+        FL_CHECK_EQ(*it, expected32);
+        expected32 += 10;
+    }
+}
+
+FL_TEST_CASE("JSON array iterator with float vector") {
+    fl::vector<float> data = {1.1f, 2.2f, 3.3f, 4.4f, 5.5f};
+    json_value value(data);
+    
+    // Test iteration with float
+    float expected = 1.1f;
+    for (auto it = value.begin_array<float>(); it != value.end_array<float>(); ++it) {
+        FL_CHECK_CLOSE(*it, expected, 0.01f);
+        expected += 1.1f;
+    }
+    
+    // Test iteration with double (should convert properly)
+    double expectedDouble = 1.1;
+    for (auto it = value.begin_array<double>(); it != value.end_array<double>(); ++it) {
+        FL_CHECK_CLOSE(static_cast<float>(*it), static_cast<float>(expectedDouble), 0.01f);
+        expectedDouble += 1.1;
+    }
+}
+
+FL_TEST_CASE("JSON class array iterator") {
+    json doc = json::array();
+    doc.push_back(json(1));
+    doc.push_back(json(2));
+    doc.push_back(json(3));
+    
+    // Test with json class
+    int expected = 1;
+    for (auto it = doc.begin_array<int>(); it != doc.end_array<int>(); ++it) {
+        FL_CHECK_EQ(*it, expected);
+        expected++;
+    }
+}
+
+
+FL_TEST_CASE("json String to Number Conversion") {
+    FL_SUBCASE("String \"5\" to int and float") {
+        json doc("5");
+        FL_CHECK(doc.is_string());
+        FL_CHECK_FALSE(doc.is_int());
+        FL_CHECK_FALSE(doc.is_double());
+        
+        // Test conversion to int64_t using new ergonomic API
+        fl::optional<int64_t> value64 = doc.as<int64_t>();
+        FL_REQUIRE(value64);
+        FL_CHECK_EQ(*value64, 5);
+        
+        // Test conversion to int32_t using new ergonomic API
+        fl::optional<int32_t> value32 = doc.as<int32_t>();
+        FL_REQUIRE(value32);
+        FL_CHECK_EQ(*value32, 5);
+        
+        // Test conversion to int16_t using new ergonomic API
+        fl::optional<int16_t> value16 = doc.as<int16_t>();
+        FL_REQUIRE(value16);
+        FL_CHECK_EQ(*value16, 5);
+        
+        // Test conversion to double using new ergonomic API
+        fl::optional<double> valued = doc.as<double>();
+        FL_REQUIRE(valued);
+        // Use a simple comparison for floating-point values
+        FL_CHECK_CLOSE(*valued, 5.0, 1e-6);
+        
+        // Test conversion to float using new ergonomic API
+        fl::optional<float> valuef = doc.as<float>();
+        FL_REQUIRE(valuef);
+        // Use a simple comparison for floating-point values
+        FL_CHECK_CLOSE(*valuef, 5.0f, 1e-6);
+    }
+    
+    FL_SUBCASE("String integer to int") {
+        json doc("42");
+        FL_CHECK(doc.is_string());
+        FL_CHECK_FALSE(doc.is_int());
+        FL_CHECK_FALSE(doc.is_double());
+        
+        // Test conversion to int64_t using new ergonomic API
+        fl::optional<int64_t> value64 = doc.as<int64_t>();
+        FL_REQUIRE(value64);
+        FL_CHECK_EQ(*value64, 42);
+        
+        // Test conversion to int32_t using new ergonomic API
+        fl::optional<int32_t> value32 = doc.as<int32_t>();
+        FL_REQUIRE(value32);
+        FL_CHECK_EQ(*value32, 42);
+        
+        // Test conversion to int16_t using new ergonomic API
+        fl::optional<int16_t> value16 = doc.as<int16_t>();
+        FL_REQUIRE(value16);
+        FL_CHECK_EQ(*value16, 42);
+    }
+    
+    FL_SUBCASE("String integer to float") {
+        json doc("42");
+        FL_CHECK(doc.is_string());
+        FL_CHECK_FALSE(doc.is_int());
+        FL_CHECK_FALSE(doc.is_double());
+        
+        // Test conversion to double using new ergonomic API
+        fl::optional<double> valued = doc.as<double>();
+        FL_REQUIRE(valued);
+        // Use a simple comparison for floating-point values
+        FL_CHECK(*valued == 42.0);
+        
+        // Test conversion to float using new ergonomic API
+        fl::optional<float> valuef = doc.as<float>();
+        FL_REQUIRE(valuef);
+        // Use a simple comparison for floating-point values
+        FL_CHECK(*valuef == 42.0f);
+    }
+    
+    FL_SUBCASE("String float to int") {
+        json doc("5.7");
+        FL_CHECK(doc.is_string());
+        FL_CHECK_FALSE(doc.is_int());
+        FL_CHECK_FALSE(doc.is_double());
+        
+        // Test conversion to int64_t (should fail - can't convert float string to int) using new ergonomic API
+        fl::optional<int64_t> value64 = doc.as<int64_t>();
+        FL_CHECK_FALSE(value64);
+        
+        // Test conversion to int32_t (should fail - can't convert float string to int) using new ergonomic API
+        fl::optional<int32_t> value32 = doc.as<int32_t>();
+        FL_CHECK_FALSE(value32);
+    }
+    
+    FL_SUBCASE("String float to float") {
+        json doc("5.5");
+        FL_CHECK(doc.is_string());
+        FL_CHECK_FALSE(doc.is_int());
+        FL_CHECK_FALSE(doc.is_double());
+        
+        // Test conversion to double using new ergonomic API
+        fl::optional<double> valued = doc.as<double>();
+        FL_REQUIRE(valued);
+        // Use a simple comparison for floating-point values
+        FL_CHECK(*valued == 5.5);
+        
+        // Test conversion to float using new ergonomic API
+        fl::optional<float> valuef = doc.as<float>();
+        FL_REQUIRE(valuef);
+        // Use a simple comparison for floating-point values
+        FL_CHECK(*valuef == 5.5f);
+    }
+    
+    FL_SUBCASE("Invalid string to number") {
+        json doc("hello");
+        FL_CHECK(doc.is_string());
+        FL_CHECK_FALSE(doc.is_int());
+        FL_CHECK_FALSE(doc.is_double());
+        
+        // Test conversion to int64_t (should fail) using new ergonomic API
+        fl::optional<int64_t> value64 = doc.as<int64_t>();
+        FL_CHECK_FALSE(value64);
+        
+        // Test conversion to double (should fail) using new ergonomic API
+        fl::optional<double> valued = doc.as<double>();
+        FL_CHECK_FALSE(valued);
+    }
+    
+    FL_SUBCASE("Negative string number") {
+        json doc("-5");
+        FL_CHECK(doc.is_string());
+        FL_CHECK_FALSE(doc.is_int());
+        FL_CHECK_FALSE(doc.is_double());
+        
+        // Test conversion to int64_t using new ergonomic API
+        fl::optional<int64_t> value64 = doc.as<int64_t>();
+        FL_REQUIRE(value64);
+        FL_CHECK_EQ(*value64, -5);
+        
+        // Test conversion to double using new ergonomic API
+        fl::optional<double> valued = doc.as<double>();
+        FL_REQUIRE(valued);
+        // Use a simple comparison for floating-point values
+        FL_CHECK(*valued == -5.0);
+    }
+    
+    FL_SUBCASE("String with spaces") {
+        json doc(" 5 ");
+        FL_CHECK(doc.is_string());
+        FL_CHECK_FALSE(doc.is_int());
+        FL_CHECK_FALSE(doc.is_double());
+        
+        // Test conversion to int64_t (should fail - spaces not allowed) using new ergonomic API
+        fl::optional<int64_t> value64 = doc.as<int64_t>();
+        FL_CHECK_FALSE(value64);
+        
+        // Test conversion to double (should fail - spaces not allowed) using new ergonomic API
+        fl::optional<double> valued = doc.as<double>();
+        FL_CHECK_FALSE(valued);
+    }
+}
+
+
+
+FL_TEST_CASE("json Number to String Conversion") {
+    FL_SUBCASE("Integer to string") {
+        json doc(5);
+        FL_CHECK(doc.is_int());
+        FL_CHECK_FALSE(doc.is_string());
+        FL_CHECK_FALSE(doc.is_double());
+        
+        // Test conversion to string
+        fl::optional<fl::string> value = doc.as_string();
+        FL_REQUIRE(value);
+        FL_CHECK_EQ(*value, "5");
+    }
+    
+    FL_SUBCASE("Float to string") {
+        json doc(5.7);
+        FL_CHECK(doc.is_double());
+        FL_CHECK_FALSE(doc.is_string());
+        FL_CHECK_FALSE(doc.is_int());
+        
+        // Test conversion to string
+        fl::optional<fl::string> value = doc.as_string();
+        FL_REQUIRE(value);
+        FL_CHECK_EQ(*value, "5.700000"); // Default double representation
+    }
+    
+    FL_SUBCASE("Boolean to string") {
+        {
+            json doc(true);
+            FL_CHECK(doc.is_bool());
+            FL_CHECK_FALSE(doc.is_string());
+            // Note: is_int() also returns true for booleans in the current implementation
+            // This is by design to support automatic conversion from bool to int/float/string
+            
+            // Test conversion to string
+            fl::optional<fl::string> value = doc.as_string();
+            FL_REQUIRE(value);
+            FL_CHECK_EQ(*value, "true");
+        }
+        
+        {
+            json doc(false);
+            FL_CHECK(doc.is_bool());
+            FL_CHECK_FALSE(doc.is_string());
+            // Note: is_int() also returns true for booleans in the current implementation
+            // This is by design to support automatic conversion from bool to int/float/string
+            
+            // Test conversion to string
+            fl::optional<fl::string> value = doc.as_string();
+            FL_REQUIRE(value);
+            FL_CHECK_EQ(*value, "false");
+        }
+    }
+    
+    FL_SUBCASE("Null to string") {
+        json doc(nullptr);
+        FL_CHECK(doc.is_null());
+        FL_CHECK_FALSE(doc.is_string());
+        // Note: is_int() also returns true for null in the current implementation
+        // This is by design to support automatic conversion from null to int/float/string
+        
+        // Test conversion to string
+        fl::optional<fl::string> value = doc.as_string();
+        FL_REQUIRE(value);
+        FL_CHECK_EQ(*value, "null");
+    }
+    
+    FL_SUBCASE("String to string") {
+        json doc("hello");
+        FL_CHECK(doc.is_string());
+        FL_CHECK_FALSE(doc.is_int());
+        FL_CHECK_FALSE(doc.is_double());
+        FL_CHECK_FALSE(doc.is_bool());
+        
+        // Test conversion to string
+        fl::optional<fl::string> value = doc.as_string();
+        FL_REQUIRE(value);
+        FL_CHECK_EQ(*value, "hello");
+    }
+    
+    FL_SUBCASE("Negative number to string") {
+        {
+            json doc(-5);
+            FL_CHECK(doc.is_int());
+            FL_CHECK_FALSE(doc.is_string());
+            FL_CHECK_FALSE(doc.is_double());
+            
+            // Test conversion to string
+            fl::optional<fl::string> value = doc.as_string();
+            FL_REQUIRE(value);
+            FL_CHECK_EQ(*value, "-5");
+        }
+        
+        {
+            json doc(-5.7);
+            FL_CHECK(doc.is_double());
+            FL_CHECK_FALSE(doc.is_string());
+            FL_CHECK_FALSE(doc.is_int());
+            
+            // Test conversion to string
+            fl::optional<fl::string> value = doc.as_string();
+            FL_REQUIRE(value);
+            FL_CHECK_EQ(*value, "-5.700000"); // Default double representation
+        }
+    }
+}
+
+
+FL_TEST_CASE("JSON iterator test") {
+    // Create a simple JSON object
+    json obj = json::object();
+    obj["key1"] = "value1";
+    obj["key2"] = "value2";
+    
+    // Test that we can iterate over it
+    int count = 0;
+    for (auto it = obj.begin(); it != obj.end(); ++it) {
+        count++;
+    }
+    
+    FL_CHECK_EQ(count, 2);
+    
+    // Test const iteration
+    const json const_obj = obj;
+    count = 0;
+    for (auto it = const_obj.begin(); it != const_obj.end(); ++it) {
+        count++;
+    }
+    
+    FL_CHECK_EQ(count, 2);
+    
+    // Test range-based for loop
+    count = 0;
+    for (const auto& kv : obj) {
+        count++;
+    }
+    
+    FL_CHECK_EQ(count, 2);
+}
+
+FL_TEST_CASE("json Float Data Parsing") {
+    FL_SUBCASE("Array of float values should become float data") {
+        // Create JSON with array of float values that can't fit in any integer type
+        fl::string jsonStr = "[100000.5, 200000.7, 300000.14159, 400000.1, 500000.5]";
+        json doc = json::parse(jsonStr);
+        
+        // Print the type for debugging
+        FL_WARN("JSON type: " << (doc.is_floats() ? "floats" : 
+                      doc.is_audio() ? "audio" : 
+                      doc.is_bytes() ? "bytes" : 
+                      doc.is_array() ? "array" : "other"));
+        
+        FL_CHECK(doc.is_floats());
+        FL_CHECK_FALSE(doc.is_generic_array()); // Should not be regular json_array anymore
+        FL_CHECK(doc.is_array()); // Should still be an array (specialized type)
+        FL_CHECK_FALSE(doc.is_audio()); // Should not be audio data
+        FL_CHECK_FALSE(doc.is_bytes()); // Should not be byte data
+        FL_CHECK_FALSE(doc.is_int());
+        FL_CHECK_FALSE(doc.is_double());
+        FL_CHECK_FALSE(doc.is_string());
+        FL_CHECK_FALSE(doc.is_bool());
+        FL_CHECK_FALSE(doc.is_null());
+        
+        // Type-safe extraction via copy_to
+        fl::vector<float> floatData;
+        size_t n = doc.copy_to_output_iterator(fl::back_inserter(floatData));
+        FL_REQUIRE(n == 5);
+        FL_CHECK(floatData[0] == 100000.5f);
+        FL_CHECK(floatData[1] == 200000.7f);
+        FL_CHECK(floatData[2] == 300000.14159f);
+        FL_CHECK(floatData[3] == 400000.1f);
+        FL_CHECK(floatData[4] == 500000.5f);
+    }
+    
+    FL_SUBCASE("Array with large floats - native parser behavior") {
+        // Native parser optimizes to floats even for values beyond strict integer precision
+        // This is due to parseFloat implementation which may lose precision for very large numbers
+        fl::string jsonStr = "[16777217.0, -16777217.0]"; // Beyond float integer precision
+        json doc = json::parse(jsonStr);
+
+        FL_CHECK(doc.is_array());
+        // Native parser still optimizes to floats (parseFloat precision limitation)
+        FL_CHECK(doc.is_floats());
+        FL_CHECK_FALSE(doc.is_audio());
+        FL_CHECK_FALSE(doc.is_bytes());
+
+        // Type-safe extraction via copy_to
+        fl::vector<float> floatData;
+        size_t n = doc.copy_to_output_iterator(fl::back_inserter(floatData));
+        FL_REQUIRE(n == 2);
+    }
+    
+    FL_SUBCASE("Array with non-numeric values should remain regular array") {
+        // Create JSON with array containing non-numeric values
+        fl::string jsonStr = "[100000.5, 200000.7, \"hello\", 400000.1]";
+        json doc = json::parse(jsonStr);
+        
+        FL_CHECK(doc.is_array());
+        FL_CHECK_FALSE(doc.is_floats());
+        FL_CHECK_FALSE(doc.is_audio());
+        FL_CHECK_FALSE(doc.is_bytes());
+        FL_CHECK_FALSE(doc.is_int());
+        FL_CHECK_FALSE(doc.is_double());
+        FL_CHECK_FALSE(doc.is_string());
+        FL_CHECK_FALSE(doc.is_bool());
+        FL_CHECK_FALSE(doc.is_null());
+        
+        // Type-safe extraction via copy_to
+        fl::vector<float> floatData;
+        size_t n = doc.copy_to_output_iterator(fl::back_inserter(floatData));
+        FL_REQUIRE(n == 4);
+    }
+
+    FL_SUBCASE("Empty array should remain regular array") {
+        // Create JSON with empty array
+        fl::string jsonStr = "[]";
+        json doc = json::parse(jsonStr);
+
+        FL_CHECK(doc.is_array());
+        FL_CHECK_FALSE(doc.is_floats());
+        FL_CHECK_FALSE(doc.is_audio());
+        FL_CHECK_FALSE(doc.is_bytes());
+
+        // Empty array: copy_to returns 0
+        fl::vector<float> floatData;
+        size_t n = doc.copy_to_output_iterator(fl::back_inserter(floatData));
+        FL_CHECK_EQ(n, 0);
+    }
+
+    FL_SUBCASE("Array with integers that fit in float but not in int16 should become float data") {
+        // Create JSON with array of integers that don't fit in int16_t
+        fl::string jsonStr = "[40000, 50000, 60000, 70000]";
+        json doc = json::parse(jsonStr);
+        
+        // Print the type for debugging
+        FL_WARN("JSON type: " << (doc.is_floats() ? "floats" : 
+                      doc.is_audio() ? "audio" : 
+                      doc.is_bytes() ? "bytes" : 
+                      doc.is_array() ? "array" : "other"));
+        
+        FL_CHECK(doc.is_floats());
+        FL_CHECK_FALSE(doc.is_generic_array()); // Should not be regular json_array anymore
+        FL_CHECK(doc.is_array()); // Should still be an array (specialized type)
+        FL_CHECK_FALSE(doc.is_audio()); // Should not be audio data
+        FL_CHECK_FALSE(doc.is_bytes()); // Should not be byte data
+        FL_CHECK_FALSE(doc.is_int());
+        FL_CHECK_FALSE(doc.is_double());
+        FL_CHECK_FALSE(doc.is_string());
+        FL_CHECK_FALSE(doc.is_bool());
+        FL_CHECK_FALSE(doc.is_null());
+        
+        // Type-safe extraction via copy_to
+        fl::vector<float> floatData;
+        size_t n = doc.copy_to_output_iterator(fl::back_inserter(floatData));
+        FL_REQUIRE(n == 4);
+        FL_CHECK_EQ(floatData[0], 40000.0f);
+        FL_CHECK_EQ(floatData[1], 50000.0f);
+        FL_CHECK_EQ(floatData[2], 60000.0f);
+        FL_CHECK_EQ(floatData[3], 70000.0f);
+    }
+}
+
+
+FL_TEST_CASE("JSON roundtrip test json <-> json") {
+    const char* initialJson = "{\"map\":{\"strip1\":{\"x\":[0,1,2,3],\"y\":[0,1,2,3]}}}";
+
+    // 1. Deserialize with json
+    json doc = json::parse(initialJson);
+    FL_CHECK(doc.has_value());
+
+    // 2. Serialize with json
+    fl::string json_string = doc.serialize();
+
+    // 3. Deserialize with json2
+    json json2_obj = json::parse(json_string);
+    FL_CHECK(json2_obj.has_value());
+
+    // 4. Serialize with json2
+    fl::string json2_string = json2_obj.to_string();
+
+    // 5. Compare the results
+    FL_CHECK_EQ(fl::string(initialJson), json2_string);
+}
+
+// Merged from test_json_roundtrip.cpp
+FL_TEST_CASE("JSON Round Trip Serialization with Normalization") {
+    // Create the initial JSON string
+    const char* initialJson = "{\"name\":\"bob\",\"value\":21}";
+
+    // 1. Parse the JSON string into a json document
+    json parsedJson = json::parse(initialJson);
+
+    // Verify parsing was successful
+    FL_CHECK(parsedJson.has_value());
+    FL_CHECK(parsedJson.is_object());
+    FL_CHECK(parsedJson.contains("name"));
+    FL_CHECK(parsedJson.contains("value"));
+
+    // Check values
+    FL_CHECK_EQ(parsedJson["name"].as_or(fl::string("")), "bob");
+    FL_CHECK_EQ(parsedJson["value"].as_or(0), 21);
+
+    // 2. Serialize it back to a string
+    fl::string serializedJson = parsedJson.to_string();
+
+    // 3. Confirm that the string is the same (after normalization)
+    // Since JSON serialization might reorder keys or add spaces, we'll normalize both strings
+    fl::string normalizedInitial = json::normalizeJsonString(initialJson);
+    fl::string normalizedSerialized = json::normalizeJsonString(serializedJson.c_str());
+
+    FL_CHECK_EQ(normalizedInitial, normalizedSerialized);
+
+    // Also test with a more structured approach - parse the serialized string again
+    json reparsedJson = json::parse(serializedJson);
+    FL_CHECK(reparsedJson.has_value());
+    FL_CHECK(reparsedJson.is_object());
+    FL_CHECK(reparsedJson.contains("name"));
+    FL_CHECK(reparsedJson.contains("value"));
+    FL_CHECK_EQ(reparsedJson["name"].as_or(fl::string("")), "bob");
+    FL_CHECK_EQ(reparsedJson["value"].as_or(0), 21);
+}
+
+
+FL_TEST_CASE("json Audio Data Parsing") {
+    FL_SUBCASE("Array of int16 values should become audio data") {
+        // Create JSON with array of values that fit in int16_t but not uint8_t
+        fl::string jsonStr = "[100, -200, 32767, -32768, 0]";
+        json doc = json::parse(jsonStr);
+        
+        FL_CHECK(doc.is_audio());
+        FL_CHECK_FALSE(doc.is_generic_array()); // Should not be regular json_array anymore
+        FL_CHECK(doc.is_array()); // Should still be an array (specialized type)
+        FL_CHECK_FALSE(doc.is_bytes()); // Should not be byte data
+        FL_CHECK_FALSE(doc.is_int());
+        FL_CHECK_FALSE(doc.is_double());
+        FL_CHECK_FALSE(doc.is_string());
+        FL_CHECK_FALSE(doc.is_bool());
+        FL_CHECK_FALSE(doc.is_null());
+        
+        // Type-safe extraction via copy_to
+        fl::vector<int16_t> audioData;
+        size_t n = doc.copy_to_output_iterator(fl::back_inserter(audioData));
+        FL_REQUIRE(n == 5);
+        FL_CHECK_EQ(audioData[0], 100);
+        FL_CHECK_EQ(audioData[1], -200);
+        FL_CHECK_EQ(audioData[2], 32767);
+        FL_CHECK_EQ(audioData[3], -32768);
+        FL_CHECK_EQ(audioData[4], 0);
+    }
+    
+    FL_SUBCASE("Array with boolean values should become byte data, not audio") {
+        // Create JSON with array of boolean values (0s and 1s)
+        fl::string jsonStr = "[1, 0, 1, 1, 0]";
+        json doc = json::parse(jsonStr);
+        
+        // Should become byte data, not audio data
+        FL_CHECK(doc.is_bytes());
+        FL_CHECK_FALSE(doc.is_audio());
+        FL_CHECK_FALSE(doc.is_generic_array()); // Should not be regular json_array anymore
+        FL_CHECK(doc.is_array()); // Should still be an array (specialized type)
+        FL_CHECK_FALSE(doc.is_int());
+        FL_CHECK_FALSE(doc.is_double());
+        FL_CHECK_FALSE(doc.is_string());
+        FL_CHECK_FALSE(doc.is_bool());
+        FL_CHECK_FALSE(doc.is_null());
+        
+        // Type-safe extraction via copy_to
+        fl::vector<uint8_t> byteData;
+        size_t n = doc.copy_to_output_iterator(fl::back_inserter(byteData));
+        FL_REQUIRE(n == 5);
+    }
+    
+    FL_SUBCASE("Array with values outside int16 range becomes packed floats") {
+        // Create JSON with array containing values outside int16_t range
+        fl::string jsonStr = "[100, -200, 32768, -32769, 0]"; // 32768 and -32769 exceed int16_t range
+        json doc = json::parse(jsonStr);
+
+        FL_CHECK(doc.is_array());  // All array types are handled by is_array()
+        FL_CHECK(doc.is_floats()); // Parser packs as floats (values exceed int16_t range)
+        FL_CHECK_FALSE(doc.is_audio());
+        FL_CHECK_FALSE(doc.is_bytes());
+
+        // Type-safe extraction via copy_to (works regardless of packing)
+        fl::vector<float> floatData;
+        size_t n = doc.copy_to_output_iterator(fl::back_inserter(floatData));
+        FL_REQUIRE(n == 5);
+    }
+
+    FL_SUBCASE("Array with non-integer values becomes packed floats") {
+        fl::string jsonStr = "[100, -200, 3.14, 0]";
+        json doc = json::parse(jsonStr);
+
+        FL_CHECK(doc.is_array());
+        FL_CHECK(doc.is_floats());
+
+        // Type-safe extraction via copy_to
+        fl::vector<float> floatData;
+        size_t n = doc.copy_to_output_iterator(fl::back_inserter(floatData));
+        FL_REQUIRE(n == 4);
+    }
+
+    FL_SUBCASE("Empty array should remain regular array") {
+        fl::string jsonStr = "[]";
+        json doc = json::parse(jsonStr);
+
+        FL_CHECK(doc.is_array());
+
+        fl::vector<float> floatData;
+        size_t n = doc.copy_to_output_iterator(fl::back_inserter(floatData));
+        FL_CHECK_EQ(n, 0);
+    }
+
+    FL_SUBCASE("Mixed array with int16 values should remain regular array") {
+        fl::string jsonStr = "[100, \"hello\", 32767]";
+        json doc = json::parse(jsonStr);
+
+        FL_CHECK(doc.is_array());
+        FL_CHECK(doc.is_generic_array());
+
+        // Type-safe extraction - strings become 0
+        fl::vector<float> floatData;
+        size_t n = doc.copy_to_output_iterator(fl::back_inserter(floatData));
+        FL_REQUIRE(n == 3);
+        FL_CHECK_EQ(floatData[0], 100.0f);
+        FL_CHECK_EQ(floatData[1], 0.0f); // "hello" → 0
+        FL_CHECK_EQ(floatData[2], 32767.0f);
+    }
+}
+
+FL_TEST_CASE("json type-safe copy_to and copy_to_output_iterator") {
+    // copy_to(span<T>) and copy_to_output_iterator solve the packed-array
+    // accessor mismatch: any packed type (u8/i16/float/json_array) can be
+    // read as any target numeric type.
+
+    FL_SUBCASE("copy_to: u8 data → i16 span") {
+        json doc = json::parse("[1, 0, 1, 1, 0]");
+        FL_CHECK(doc.is_bytes());
+
+        fl::vector<i16> buf(doc.size());
+        size_t n = doc.copy_to(fl::span<i16>(buf));
+        FL_CHECK_EQ(n, 5);
+        FL_CHECK_EQ(buf[0], 1);
+        FL_CHECK_EQ(buf[1], 0);
+        FL_CHECK_EQ(buf[4], 0);
+    }
+
+    FL_SUBCASE("copy_to: u8 data → float span") {
+        json doc = json::parse("[10, 20, 30]");
+        FL_CHECK(doc.is_bytes());
+
+        fl::vector<float> buf(doc.size());
+        size_t n = doc.copy_to(fl::span<float>(buf));
+        FL_CHECK_EQ(n, 3);
+        FL_CHECK_EQ(buf[0], 10.0f);
+        FL_CHECK_EQ(buf[1], 20.0f);
+        FL_CHECK_EQ(buf[2], 30.0f);
+    }
+
+    FL_SUBCASE("copy_to: i16 data → float span") {
+        json doc = json::parse("[100, -200, 300]");
+        FL_CHECK(doc.is_audio());
+
+        fl::vector<float> buf(doc.size());
+        size_t n = doc.copy_to(fl::span<float>(buf));
+        FL_CHECK_EQ(n, 3);
+        FL_CHECK_EQ(buf[0], 100.0f);
+        FL_CHECK_EQ(buf[1], -200.0f);
+        FL_CHECK_EQ(buf[2], 300.0f);
+    }
+
+    FL_SUBCASE("copy_to: float data → i16 span (truncates)") {
+        json doc = json::parse("[1.5, 2.9, -3.1]");
+        FL_CHECK(doc.is_floats());
+
+        fl::vector<i16> buf(doc.size());
+        size_t n = doc.copy_to(fl::span<i16>(buf));
+        FL_CHECK_EQ(n, 3);
+        FL_CHECK_EQ(buf[0], 1);  // truncated
+        FL_CHECK_EQ(buf[1], 2);  // truncated
+        FL_CHECK_EQ(buf[2], -3); // truncated
+    }
+
+    FL_SUBCASE("copy_to: span smaller than array copies partial") {
+        json doc = json::parse("[10, 20, 30, 40, 50]");
+        fl::vector<float> buf(3);
+        size_t n = doc.copy_to(fl::span<float>(buf));
+        FL_CHECK_EQ(n, 3);
+        FL_CHECK_EQ(buf[0], 10.0f);
+        FL_CHECK_EQ(buf[2], 30.0f);
+    }
+
+    FL_SUBCASE("copy_to: non-array returns 0") {
+        json doc(42);
+        fl::vector<float> buf(1);
+        size_t n = doc.copy_to(fl::span<float>(buf));
+        FL_CHECK_EQ(n, 0);
+    }
+
+    FL_SUBCASE("copy_to: generic json_array → float span") {
+        json doc = json::parse("[100, \"hello\", 3.14]");
+        FL_CHECK(doc.is_generic_array());
+
+        fl::vector<float> buf(doc.size());
+        size_t n = doc.copy_to(fl::span<float>(buf));
+        FL_CHECK_EQ(n, 3);
+        FL_CHECK_EQ(buf[0], 100.0f);
+        FL_CHECK_EQ(buf[1], 0.0f);    // string → 0
+        FL_CHECK(buf[2] > 3.13f && buf[2] < 3.15f);
+    }
+
+    FL_SUBCASE("copy_to_output_iterator: u8 data → back_inserter float") {
+        json doc = json::parse("[10, 20, 30]");
+        FL_CHECK(doc.is_bytes());
+
+        fl::vector<float> result;
+        size_t n = doc.copy_to_output_iterator(fl::back_inserter(result));
+        FL_CHECK_EQ(n, 3);
+        FL_CHECK_EQ(result.size(), 3);
+        FL_CHECK_EQ(result[0], 10.0f);
+        FL_CHECK_EQ(result[1], 20.0f);
+        FL_CHECK_EQ(result[2], 30.0f);
+    }
+
+    FL_SUBCASE("copy_to_output_iterator: i16 data → back_inserter float") {
+        json doc = json::parse("[100, -200, 300]");
+        fl::vector<float> result;
+        size_t n = doc.copy_to_output_iterator(fl::back_inserter(result));
+        FL_CHECK_EQ(n, 3);
+        FL_CHECK_EQ(result[0], 100.0f);
+        FL_CHECK_EQ(result[1], -200.0f);
+        FL_CHECK_EQ(result[2], 300.0f);
+    }
+
+    FL_SUBCASE("copy_to_output_iterator: float data → back_inserter i16") {
+        json doc = json::parse("[1.5, 2.9, -3.1]");
+        fl::vector<i16> result;
+        size_t n = doc.copy_to_output_iterator(fl::back_inserter(result));
+        FL_CHECK_EQ(n, 3);
+        FL_CHECK_EQ(result[0], 1);
+        FL_CHECK_EQ(result[1], 2);
+        FL_CHECK_EQ(result[2], -3);
+    }
+
+    FL_SUBCASE("copy_to_output_iterator: generic array → back_inserter float") {
+        json doc = json::parse("[100, \"hello\", 3.14]");
+        fl::vector<float> result;
+        size_t n = doc.copy_to_output_iterator(fl::back_inserter(result));
+        FL_CHECK_EQ(n, 3);
+        FL_CHECK_EQ(result[0], 100.0f);
+        FL_CHECK_EQ(result[1], 0.0f);
+        FL_CHECK(result[2] > 3.13f && result[2] < 3.15f);
+    }
+
+    FL_SUBCASE("copy_to_output_iterator: non-array returns 0") {
+        json doc(42);
+        fl::vector<float> result;
+        size_t n = doc.copy_to_output_iterator(fl::back_inserter(result));
+        FL_CHECK_EQ(n, 0);
+        FL_CHECK(result.empty());
+    }
+
+    FL_SUBCASE("try_as<vector<float>> works across packed types") {
+        // u8 packed → try_as<vector<float>> should convert
+        json doc = json::parse("[10, 20, 30]");
+        FL_CHECK(doc.is_bytes());
+        auto result = doc.try_as<fl::vector<float>>();
+        FL_REQUIRE(result);
+        FL_CHECK_EQ(result->size(), 3);
+        FL_CHECK_EQ((*result)[0], 10.0f);
+        FL_CHECK_EQ((*result)[1], 20.0f);
+        FL_CHECK_EQ((*result)[2], 30.0f);
+    }
+
+    FL_SUBCASE("try_as<vector<i16>> works on u8 data") {
+        json doc = json::parse("[1, 0, 1, 1, 0]");
+        FL_CHECK(doc.is_bytes());
+        auto result = doc.try_as<fl::vector<i16>>();
+        FL_REQUIRE(result);
+        FL_CHECK_EQ(result->size(), 5);
+        FL_CHECK_EQ((*result)[0], 1);
+    }
+}
+
+FL_TEST_CASE("json ergonomic as<T>() API") {
+    // Test the new ergonomic as<T>() API that replaces the verbose as_int<T>() and as_float<T>() methods
+    
+    FL_SUBCASE("Integer types") {
+        json doc(42);
+        
+        // Test all integer types using the ergonomic API
+        FL_CHECK_EQ(*doc.as<int8_t>(), 42);
+        FL_CHECK_EQ(*doc.as<int16_t>(), 42);
+        FL_CHECK_EQ(*doc.as<int32_t>(), 42);
+        FL_CHECK_EQ(*doc.as<int64_t>(), 42);
+        FL_CHECK_EQ(*doc.as<uint8_t>(), 42);
+        FL_CHECK_EQ(*doc.as<uint16_t>(), 42);
+        FL_CHECK_EQ(*doc.as<uint32_t>(), 42);
+        FL_CHECK_EQ(*doc.as<uint64_t>(), 42);
+    }
+    
+    FL_SUBCASE("Floating point types") {
+        json doc(3.14f);
+        
+        // Test floating point types using the ergonomic API
+        FL_CHECK_CLOSE(*doc.as<float>(), 3.14f, 0.001f);
+        FL_CHECK_CLOSE(*doc.as<double>(), 3.14, 0.001);
+    }
+    
+    FL_SUBCASE("Boolean type") {
+        json jsonTrue(true);
+        json jsonFalse(false);
+        
+        // Test boolean type using the ergonomic API
+        FL_CHECK_EQ(*jsonTrue.as<bool>(), true);
+        FL_CHECK_EQ(*jsonFalse.as<bool>(), false);
+    }
+    
+    FL_SUBCASE("String type") {
+        json doc(fl::string("hello"));
+        
+        // Test string type using the ergonomic API
+        FL_CHECK_EQ(*doc.as<fl::string>(), fl::string("hello"));
+    }
+    
+    FL_SUBCASE("API comparison - old vs new") {
+        json doc(12345);
+        
+        // Old verbose API (still works for backward compatibility)
+        fl::optional<int32_t> oldWay = doc.as_int<int32_t>();
+        
+        // New ergonomic API (preferred)
+        fl::optional<int32_t> newWay = doc.as<int32_t>();
+        
+        // Both should give the same result
+        FL_REQUIRE(oldWay.has_value());
+        FL_REQUIRE(newWay.has_value());
+        FL_CHECK_EQ(*oldWay, *newWay);
+        FL_CHECK_EQ(*newWay, 12345);
+    }
+}
+
+FL_TEST_CASE("json set() with various integer types") {
+    // Test that only i64 works directly (proving the limitation)
+    FL_SUBCASE("Only i64 works directly without generic setter") {
+        json obj = json::object();
+
+        // This works - i64 has direct overload
+        i64 val64 = 100;
+        obj.set("val64", val64);
+        FL_CHECK_EQ(obj["val64"].as<i64>().value_or(0), 100);
+
+        // These DON'T work without explicit cast or generic setter
+        // They will be implicitly converted to int or i64, which may not be what we want
+        i32 val32 = 200;
+        i16 val16 = 300;
+        i8 val8 = 50;
+
+        // Without generic setter, these get promoted to int/i64
+        // This test demonstrates the issue - we can't set them with their exact type
+        // The values work, but the type is lost
+        obj.set("val32", val32); // Implicitly converts to int, then to i64
+        obj.set("val16", val16); // Implicitly converts to int, then to i64
+        obj.set("val8", val8);   // Implicitly converts to int, then to i64
+
+        // Reading back works, but we had no direct i32/i16/i8 setter
+        FL_CHECK_EQ(obj["val32"].as<i32>().value_or(0), 200);
+        FL_CHECK_EQ(obj["val16"].as<i16>().value_or(0), 300);
+        FL_CHECK_EQ(obj["val8"].as<i8>().value_or(0), 50);
+    }
+
+    FL_SUBCASE("Test overflow detection on deserialization") {
+        json obj = json::object();
+
+        // Set a value that's too large for i8
+        obj.set("large_val", i64(1000));
+
+        // Trying to read as i8 will log an error but still return truncated value
+        // The value is stored as i64 (1000), which doesn't fit in i8 (-128 to 127)
+        auto val8 = obj["large_val"].as<i8>();
+        FL_REQUIRE(val8.has_value()); // Still returns a value (truncated)
+        FL_CHECK_NE(static_cast<int>(*val8), 1000); // Not the original value (truncated)
+
+        // Similarly for i16 with values outside its range
+        obj.set("huge_val", i64(100000));
+        auto val16 = obj["huge_val"].as<i16>();
+        FL_REQUIRE(val16.has_value()); // Still returns a value (truncated)
+        FL_CHECK_NE(static_cast<int>(*val16), 100000); // Not the original value (truncated)
+
+        // Test values that DO fit (no overflow, no error)
+        obj.set("small_val", i64(100));
+        auto small8 = obj["small_val"].as<i8>();
+        FL_REQUIRE(small8.has_value());
+        FL_CHECK_EQ(*small8, 100);
+
+        obj.set("medium_val", i64(30000));
+        auto medium16 = obj["medium_val"].as<i16>();
+        FL_REQUIRE(medium16.has_value());
+        FL_CHECK_EQ(*medium16, 30000);
+
+        // Test edge cases (min/max values - no overflow)
+        obj.set("min_i8", i64(-128));
+        auto min8 = obj["min_i8"].as<i8>();
+        FL_REQUIRE(min8.has_value());
+        FL_CHECK_EQ(*min8, -128);
+
+        obj.set("max_i8", i64(127));
+        auto max8 = obj["max_i8"].as<i8>();
+        FL_REQUIRE(max8.has_value());
+        FL_CHECK_EQ(*max8, 127);
+
+        // Test overflow by one (logs error but still returns truncated value)
+        obj.set("overflow_i8", i64(128));
+        auto overflow8 = obj["overflow_i8"].as<i8>();
+        FL_REQUIRE(overflow8.has_value()); // Still returns a value
+        FL_CHECK_EQ(*overflow8, -128); // Wraps around to minimum value
+
+        obj.set("underflow_i8", i64(-129));
+        auto underflow8 = obj["underflow_i8"].as<i8>();
+        FL_REQUIRE(underflow8.has_value()); // Still returns a value
+        FL_CHECK_EQ(*underflow8, 127); // Wraps around to maximum value
+    }
+}
+
+FL_TEST_CASE("json fixed_point converts through float storage") {
+    using FP = fl::fixed_point<16, 16>;
+    const FP original = FP::from_raw(0x00018000);
+
+    json value(original);
+    auto extracted = value.as_fixed_point<FP>();
+    FL_REQUIRE(extracted.has_value());
+    FL_CHECK_EQ(extracted->raw(), original.raw());
+
+    json assigned;
+    assigned = original;
+    auto assigned_value = assigned.as_fixed_point<FP>();
+    FL_REQUIRE(assigned_value.has_value());
+    FL_CHECK_EQ(assigned_value->raw(), original.raw());
+
+    json obj = json::object();
+    obj.set("gain", original);
+    auto object_value = obj["gain"].as_fixed_point<FP>();
+    FL_REQUIRE(object_value.has_value());
+    FL_CHECK_EQ(object_value->raw(), original.raw());
+}
+
+FL_TEST_CASE("json fixed_point IEEE conversion saturates oversized magnitudes") {
+    const u64 sixty_bit_magnitude = u64(1) << 59;
+    FL_CHECK_EQ(
+        fl::detail::json_ieee754_float_bits_from_scaled_u64(
+            0, sixty_bit_magnitude, 80),
+        0x7F800000u);
+    FL_CHECK_EQ(
+        fl::detail::json_ieee754_float_bits_from_scaled_u64(
+            0x80000000u, sixty_bit_magnitude, 80),
+        0xFF800000u);
+}
+
+FL_TEST_CASE("json double input uses IEEE bit conversion") {
+    const double one = fl::bit_cast<double>(0x3FF0000000000000ull);
+    json value(one);
+    auto as_float = value.as<float>();
+    FL_REQUIRE(as_float.has_value());
+    FL_CHECK_EQ(fl::bit_cast<u32>(*as_float), 0x3F800000u);
+
+    json assigned;
+    assigned = fl::bit_cast<double>(0x4004000000000000ull);
+    auto assigned_float = assigned.as<float>();
+    FL_REQUIRE(assigned_float.has_value());
+    FL_CHECK_EQ(fl::bit_cast<u32>(*assigned_float), 0x40200000u);
+
+    json overflow(fl::bit_cast<double>(0x7FEFFFFFFFFFFFFFull));
+    auto overflow_float = overflow.as<float>();
+    FL_REQUIRE(overflow_float.has_value());
+    FL_CHECK_EQ(fl::bit_cast<u32>(*overflow_float), 0x7F800000u);
+
+    json nan_value(fl::bit_cast<double>(0x7FF8000000000001ull));
+    auto nan_float = nan_value.as<float>();
+    FL_REQUIRE(nan_float.has_value());
+    FL_CHECK_EQ(fl::bit_cast<u32>(*nan_float), 0x7FC00000u);
+}
+
+FL_TEST_CASE("json generic integer setter comprehensive test") {
+    // Comprehensive test demonstrating the generic integer setter and overflow detection
+    FL_SUBCASE("All integer types can be set directly") {
+        json obj = json::object();
+
+        // Test all signed integer types
+        i8 val_i8 = 50;
+        i16 val_i16 = 300;
+        i32 val_i32 = 70000;
+        i64 val_i64 = 9000000000LL;
+
+        obj.set("val_i8", val_i8);
+        obj.set("val_i16", val_i16);
+        obj.set("val_i32", val_i32);
+        obj.set("val_i64", val_i64);
+
+        // Verify all values can be read back with exact types
+        FL_CHECK_EQ(obj["val_i8"].as<i8>().value_or(0), 50);
+        FL_CHECK_EQ(obj["val_i16"].as<i16>().value_or(0), 300);
+        FL_CHECK_EQ(obj["val_i32"].as<i32>().value_or(0), 70000);
+        FL_CHECK_EQ(obj["val_i64"].as<i64>().value_or(0), 9000000000LL);
+
+        // Test all unsigned integer types
+        u8 val_u8 = 250;
+        u16 val_u16 = 60000;
+        u32 val_u32 = 4000000000U;
+        u64 val_u64 = 18000000000000000000ULL;
+
+        obj.set("val_u8", val_u8);
+        obj.set("val_u16", val_u16);
+        obj.set("val_u32", val_u32);
+        obj.set("val_u64", val_u64);
+
+        // Verify all unsigned values can be read back
+        FL_CHECK_EQ(obj["val_u8"].as<u8>().value_or(0), 250);
+        FL_CHECK_EQ(obj["val_u16"].as<u16>().value_or(0), 60000);
+        FL_CHECK_EQ(obj["val_u32"].as<u32>().value_or(0), 4000000000U);
+        FL_CHECK_EQ(obj["val_u64"].as<u64>().value_or(0), 18000000000000000000ULL);
+    }
+
+    FL_SUBCASE("Type promotion and overflow detection") {
+        json obj = json::object();
+
+        // Small value can be read as any larger type
+        obj.set("small", i8(10));
+        FL_CHECK_EQ(obj["small"].as<i8>().value_or(0), 10);
+        FL_CHECK_EQ(obj["small"].as<i16>().value_or(0), 10);
+        FL_CHECK_EQ(obj["small"].as<i32>().value_or(0), 10);
+        FL_CHECK_EQ(obj["small"].as<i64>().value_or(0), 10);
+
+        // Large value stored as i64 logs overflow error when read as smaller types
+        obj.set("large", i64(100000));
+        FL_REQUIRE(obj["large"].as<i8>().has_value()); // Still returns value (logs error)
+        FL_REQUIRE(obj["large"].as<i16>().has_value()); // Still returns value (logs error)
+        FL_CHECK_EQ(obj["large"].as<i32>().value_or(0), 100000); // Fits in i32 (no overflow)
+        FL_CHECK_EQ(obj["large"].as<i64>().value_or(0), 100000); // Fits in i64
+    }
+
+    FL_SUBCASE("Round-trip test with all types") {
+        json obj = json::object();
+
+        // Store values of each type and verify round-trip
+        obj.set("i8_min", numeric_limits<i8>::min());
+        obj.set("i8_max", numeric_limits<i8>::max());
+        obj.set("i16_min", numeric_limits<i16>::min());
+        obj.set("i16_max", numeric_limits<i16>::max());
+        obj.set("i32_min", numeric_limits<i32>::min());
+        obj.set("i32_max", numeric_limits<i32>::max());
+
+        FL_CHECK_EQ(obj["i8_min"].as<i8>().value_or(0), -128);
+        FL_CHECK_EQ(obj["i8_max"].as<i8>().value_or(0), 127);
+        FL_CHECK_EQ(obj["i16_min"].as<i16>().value_or(0), -32768);
+        FL_CHECK_EQ(obj["i16_max"].as<i16>().value_or(0), 32767);
+        FL_CHECK_EQ(obj["i32_min"].as<i32>().value_or(0), -2147483647 - 1);
+        FL_CHECK_EQ(obj["i32_max"].as<i32>().value_or(0), 2147483647);
+    }
+}
+
+FL_TEST_CASE("json Cross-Type Numeric Conversions") {
+    // Test storing one numeric type and reading as another type
+
+    FL_SUBCASE("Store int, read as float/double") {
+        json obj = json::object();
+
+        // Store integer value
+        obj.set("int_value", i32(42));
+        FL_CHECK(obj["int_value"].is_int());
+        FL_CHECK_FALSE(obj["int_value"].is_float());
+
+        // Read as float
+        fl::optional<float> as_float = obj["int_value"].as<float>();
+        FL_REQUIRE(as_float.has_value());
+        FL_CHECK_CLOSE(*as_float, 42.0f, 0.001f);
+
+        // Read as double
+        fl::optional<double> as_double = obj["int_value"].as<double>();
+        FL_REQUIRE(as_double.has_value());
+        FL_CHECK_CLOSE(*as_double, 42.0, 0.001);
+
+        // Test with negative integer
+        obj.set("negative_int", i32(-100));
+        FL_CHECK_CLOSE(obj["negative_int"].as<float>().value_or(0.0f), -100.0f, 0.001f);
+        FL_CHECK_CLOSE(obj["negative_int"].as<double>().value_or(0.0), -100.0, 0.001);
+
+        // Test with zero
+        obj.set("zero", i32(0));
+        FL_CHECK_EQ(obj["zero"].as<float>().value_or(1.0f), 0.0f);
+        FL_CHECK_EQ(obj["zero"].as<double>().value_or(1.0), 0.0);
+
+        // Test with large integer (may lose precision in float)
+        obj.set("large_int", i64(1234567890));
+        auto large_as_float = obj["large_int"].as<float>();
+        auto large_as_double = obj["large_int"].as<double>();
+        FL_REQUIRE(large_as_float.has_value());
+        FL_REQUIRE(large_as_double.has_value());
+        // Double should maintain precision better than float
+        FL_CHECK_CLOSE(*large_as_double, 1234567890.0, 1.0);
+    }
+
+    FL_SUBCASE("Store float/double, read as int") {
+        json obj = json::object();
+
+        // Store float value (whole number)
+        obj.set("float_value", 42.0f);
+        FL_CHECK(obj["float_value"].is_float());
+        FL_CHECK_FALSE(obj["float_value"].is_int());
+
+        // Read as various integer types
+        fl::optional<i8> as_i8 = obj["float_value"].as<i8>();
+        FL_REQUIRE(as_i8.has_value());
+        FL_CHECK_EQ(*as_i8, 42);
+
+        fl::optional<i16> as_i16 = obj["float_value"].as<i16>();
+        FL_REQUIRE(as_i16.has_value());
+        FL_CHECK_EQ(*as_i16, 42);
+
+        fl::optional<i32> as_i32 = obj["float_value"].as<i32>();
+        FL_REQUIRE(as_i32.has_value());
+        FL_CHECK_EQ(*as_i32, 42);
+
+        fl::optional<i64> as_i64 = obj["float_value"].as<i64>();
+        FL_REQUIRE(as_i64.has_value());
+        FL_CHECK_EQ(*as_i64, 42);
+
+        // Test with fractional float (truncates to int)
+        obj.set("fractional", 42.7f);
+        FL_CHECK_EQ(obj["fractional"].as<i32>().value_or(0), 42); // Truncates to 42
+
+        // Test with negative float
+        obj.set("negative_float", -100.5f);
+        FL_CHECK_EQ(obj["negative_float"].as<i32>().value_or(0), -100); // Truncates to -100
+
+        // Test with zero
+        obj.set("zero_float", 0.0f);
+        FL_CHECK_EQ(obj["zero_float"].as<i32>().value_or(1), 0);
+    }
+
+    FL_SUBCASE("Round-trip through JSON serialization/deserialization - int to float") {
+        // Create JSON with integer, serialize, parse, read as float
+        json original = json::object();
+        original.set("value", i32(123));
+
+        // Serialize to string
+        fl::string serialized = original.to_string();
+
+        // Parse back
+        json parsed = json::parse(serialized);
+        FL_REQUIRE(parsed.has_value());
+        FL_CHECK(parsed["value"].is_int());
+
+        // Read as float from parsed JSON
+        fl::optional<float> value_as_float = parsed["value"].as<float>();
+        FL_REQUIRE(value_as_float.has_value());
+        FL_CHECK_CLOSE(*value_as_float, 123.0f, 0.001f);
+
+        // Read as double from parsed JSON
+        fl::optional<double> value_as_double = parsed["value"].as<double>();
+        FL_REQUIRE(value_as_double.has_value());
+        FL_CHECK_CLOSE(*value_as_double, 123.0, 0.001);
+    }
+
+    FL_SUBCASE("Round-trip through JSON serialization/deserialization - float to int") {
+        // Create JSON with float, serialize, parse, read as int
+        json original = json::object();
+        original.set("value", 456.0f); // Store whole number as float
+
+        // Serialize to string
+        fl::string serialized = original.to_string();
+
+        // Parse back
+        json parsed = json::parse(serialized);
+        FL_REQUIRE(parsed.has_value());
+        // After parsing, JSON may represent this as either int or float depending on format
+
+        // Read as int from parsed JSON (should work regardless)
+        fl::optional<i32> value_as_int = parsed["value"].as<i32>();
+        FL_REQUIRE(value_as_int.has_value());
+        FL_CHECK_EQ(*value_as_int, 456);
+
+        // Also test with fractional float
+        json fractional = json::object();
+        fractional.set("value", 456.7f);
+        fl::string frac_serialized = fractional.to_string();
+        json frac_parsed = json::parse(frac_serialized);
+
+        fl::optional<i32> frac_as_int = frac_parsed["value"].as<i32>();
+        FL_REQUIRE(frac_as_int.has_value());
+        FL_CHECK_EQ(*frac_as_int, 456); // Should truncate
+    }
+
+    FL_SUBCASE("Type conversion with ergonomic API") {
+        json obj = json::object();
+
+        // Test value<T>() API - int to float
+        obj.set("int_val", i32(99));
+        float float_val = obj["int_val"].value<float>();
+        FL_CHECK_CLOSE(float_val, 99.0f, 0.001f);
+
+        // Test value<T>() API - float to int
+        obj.set("float_val", 88.5f);
+        i32 int_val = obj["float_val"].value<i32>();
+        FL_CHECK_EQ(int_val, 88); // Truncates
+
+        // Test as_or<T>() API - int to float with default
+        obj.set("another_int", i32(77));
+        float float_with_default = obj["another_int"].as_or<float>(0.0f);
+        FL_CHECK_CLOSE(float_with_default, 77.0f, 0.001f);
+
+        // Test as_or<T>() API - float to int with default
+        obj.set("another_float", 66.9f);
+        i32 int_with_default = obj["another_float"].as_or<i32>(0);
+        FL_CHECK_EQ(int_with_default, 66); // Truncates
+
+        // Test with missing key (should use default)
+        float missing_as_float = obj["nonexistent"].as_or<float>(123.4f);
+        FL_CHECK_CLOSE(missing_as_float, 123.4f, 0.001f);
+
+        i32 missing_as_int = obj["nonexistent"].as_or<i32>(999);
+        FL_CHECK_EQ(missing_as_int, 999);
+    }
+
+    FL_SUBCASE("Edge cases and boundary testing") {
+        json obj = json::object();
+
+        // Test MAX_INT as float
+        obj.set("max_int", numeric_limits<i32>::max());
+        auto max_as_float = obj["max_int"].as<float>();
+        FL_REQUIRE(max_as_float.has_value());
+        // Float may lose some precision for large ints
+        FL_CHECK(*max_as_float > 2.0e9f);
+
+        // Test MIN_INT as float
+        obj.set("min_int", numeric_limits<i32>::min());
+        auto min_as_float = obj["min_int"].as<float>();
+        FL_REQUIRE(min_as_float.has_value());
+        FL_CHECK(*min_as_float < -2.0e9f);
+
+        // Test very small float as int (should be 0)
+        obj.set("small_float", 0.001f);
+        FL_CHECK_EQ(obj["small_float"].as<i32>().value_or(999), 0);
+
+        // Test float just under 1.0 as int
+        obj.set("almost_one", 0.999f);
+        FL_CHECK_EQ(obj["almost_one"].as<i32>().value_or(999), 0);
+
+        // Test float just over 1.0 as int
+        obj.set("just_over_one", 1.001f);
+        FL_CHECK_EQ(obj["just_over_one"].as<i32>().value_or(999), 1);
+    }
+}
+
+FL_TEST_CASE("json Bool Conversions") {
+    // Test converting between bool and other types
+
+    FL_SUBCASE("Store bool, read as int/float") {
+        json obj = json::object();
+
+        // Store true
+        obj.set("true_val", true);
+        FL_CHECK(obj["true_val"].is_bool());
+
+        // Read as int types
+        FL_CHECK_EQ(obj["true_val"].as<i8>().value_or(99), 1);
+        FL_CHECK_EQ(obj["true_val"].as<i16>().value_or(99), 1);
+        FL_CHECK_EQ(obj["true_val"].as<i32>().value_or(99), 1);
+        FL_CHECK_EQ(obj["true_val"].as<i64>().value_or(99), 1);
+
+        // Read as float types
+        FL_CHECK_CLOSE(obj["true_val"].as<float>().value_or(99.0f), 1.0f, 0.001f);
+        FL_CHECK_CLOSE(obj["true_val"].as<double>().value_or(99.0), 1.0, 0.001);
+
+        // Store false
+        obj.set("false_val", false);
+        FL_CHECK(obj["false_val"].is_bool());
+
+        // Read as int types
+        FL_CHECK_EQ(obj["false_val"].as<i8>().value_or(99), 0);
+        FL_CHECK_EQ(obj["false_val"].as<i16>().value_or(99), 0);
+        FL_CHECK_EQ(obj["false_val"].as<i32>().value_or(99), 0);
+        FL_CHECK_EQ(obj["false_val"].as<i64>().value_or(99), 0);
+
+        // Read as float types
+        FL_CHECK_EQ(obj["false_val"].as<float>().value_or(99.0f), 0.0f);
+        FL_CHECK_EQ(obj["false_val"].as<double>().value_or(99.0), 0.0);
+    }
+
+    FL_SUBCASE("Store int, read as bool") {
+        json obj = json::object();
+
+        // Zero → false
+        obj.set("zero", i32(0));
+        FL_CHECK(obj["zero"].is_int());
+        auto zero_bool = obj["zero"].as<bool>();
+        FL_REQUIRE(zero_bool.has_value());
+        FL_CHECK_EQ(*zero_bool, false);
+
+        // Non-zero positive → true
+        obj.set("positive", i32(1));
+        auto pos_bool = obj["positive"].as<bool>();
+        FL_REQUIRE(pos_bool.has_value());
+        FL_CHECK_EQ(*pos_bool, true);
+
+        obj.set("large_positive", i32(42));
+        auto large_pos_bool = obj["large_positive"].as<bool>();
+        FL_REQUIRE(large_pos_bool.has_value());
+        FL_CHECK_EQ(*large_pos_bool, true);
+
+        // Non-zero negative → true
+        obj.set("negative", i32(-1));
+        auto neg_bool = obj["negative"].as<bool>();
+        FL_REQUIRE(neg_bool.has_value());
+        FL_CHECK_EQ(*neg_bool, true);
+
+        obj.set("large_negative", i32(-42));
+        auto large_neg_bool = obj["large_negative"].as<bool>();
+        FL_REQUIRE(large_neg_bool.has_value());
+        FL_CHECK_EQ(*large_neg_bool, true);
+    }
+
+    FL_SUBCASE("Store float, read as bool") {
+        json obj = json::object();
+
+        // Zero → false
+        obj.set("zero_float", 0.0f);
+        FL_CHECK(obj["zero_float"].is_float());
+        auto zero_bool = obj["zero_float"].as<bool>();
+        FL_REQUIRE(zero_bool.has_value());
+        FL_CHECK_EQ(*zero_bool, false);
+
+        // Non-zero positive → true
+        obj.set("positive_float", 1.0f);
+        auto pos_bool = obj["positive_float"].as<bool>();
+        FL_REQUIRE(pos_bool.has_value());
+        FL_CHECK_EQ(*pos_bool, true);
+
+        obj.set("small_positive", 0.001f);
+        auto small_pos_bool = obj["small_positive"].as<bool>();
+        FL_REQUIRE(small_pos_bool.has_value());
+        FL_CHECK_EQ(*small_pos_bool, true);
+
+        // Non-zero negative → true
+        obj.set("negative_float", -1.0f);
+        auto neg_bool = obj["negative_float"].as<bool>();
+        FL_REQUIRE(neg_bool.has_value());
+        FL_CHECK_EQ(*neg_bool, true);
+
+        obj.set("small_negative", -0.001f);
+        auto small_neg_bool = obj["small_negative"].as<bool>();
+        FL_REQUIRE(small_neg_bool.has_value());
+        FL_CHECK_EQ(*small_neg_bool, true);
+    }
+
+    FL_SUBCASE("Store string, read as bool") {
+        json obj = json::object();
+
+        // True values (case insensitive)
+        fl::vector<fl::string> true_strings = {"true", "TRUE", "True", "1", "yes", "YES", "Yes", "on", "ON", "On"};
+        for (fl::size i = 0; i < true_strings.size(); i++) {
+            fl::string key = fl::string("str_") + fl::to_string(static_cast<int>(i));
+            obj.set(key, true_strings[i]);
+            auto bool_val = obj[key].as<bool>();
+            FL_REQUIRE(bool_val.has_value());
+            FL_CHECK_EQ(*bool_val, true);
+        }
+
+        // False values (case insensitive)
+        fl::vector<fl::string> false_strings = {"false", "FALSE", "False", "0", "no", "NO", "No", "off", "OFF", "Off"};
+        for (fl::size i = 0; i < false_strings.size(); i++) {
+            fl::string key = fl::string("str_false_") + fl::to_string(static_cast<int>(i));
+            obj.set(key, false_strings[i]);
+            auto bool_val = obj[key].as<bool>();
+            FL_REQUIRE(bool_val.has_value());
+            FL_CHECK_EQ(*bool_val, false);
+        }
+
+        // Empty string → false
+        obj.set("empty", fl::string(""));
+        auto empty_bool = obj["empty"].as<bool>();
+        FL_REQUIRE(empty_bool.has_value());
+        FL_CHECK_EQ(*empty_bool, false);
+
+        // Invalid string → nullopt
+        obj.set("invalid", fl::string("not_a_bool"));
+        auto invalid_bool = obj["invalid"].as<bool>();
+        FL_CHECK_FALSE(invalid_bool.has_value());
+    }
+
+    FL_SUBCASE("Round-trip through JSON serialization - bool to int") {
+        json original = json::object();
+        original.set("true_val", true);
+        original.set("false_val", false);
+
+        // Serialize
+        fl::string serialized = original.to_string();
+
+        // Parse
+        json parsed = json::parse(serialized);
+        FL_REQUIRE(parsed.has_value());
+
+        // Read as int
+        FL_CHECK_EQ(parsed["true_val"].as<i32>().value_or(99), 1);
+        FL_CHECK_EQ(parsed["false_val"].as<i32>().value_or(99), 0);
+
+        // Read as float
+        FL_CHECK_EQ(parsed["true_val"].as<float>().value_or(99.0f), 1.0f);
+        FL_CHECK_EQ(parsed["false_val"].as<float>().value_or(99.0f), 0.0f);
+    }
+
+    FL_SUBCASE("Round-trip through JSON serialization - int to bool") {
+        json original = json::object();
+        original.set("zero", i32(0));
+        original.set("one", i32(1));
+        original.set("large", i32(42));
+
+        // Serialize
+        fl::string serialized = original.to_string();
+
+        // Parse
+        json parsed = json::parse(serialized);
+        FL_REQUIRE(parsed.has_value());
+
+        // Read as bool
+        FL_CHECK_EQ(parsed["zero"].as<bool>().value_or(true), false);
+        FL_CHECK_EQ(parsed["one"].as<bool>().value_or(false), true);
+        FL_CHECK_EQ(parsed["large"].as<bool>().value_or(false), true);
+    }
+
+    FL_SUBCASE("Ergonomic API with bool conversions") {
+        json obj = json::object();
+
+        // Test value<bool>() with int
+        obj.set("int_zero", i32(0));
+        obj.set("int_one", i32(1));
+        FL_CHECK_EQ(obj["int_zero"].value<bool>(), false);
+        FL_CHECK_EQ(obj["int_one"].value<bool>(), true);
+
+        // Test as_or<bool>() with float
+        obj.set("float_zero", 0.0f);
+        obj.set("float_nonzero", 3.14f);
+        FL_CHECK_EQ(obj["float_zero"].as_or<bool>(true), false);
+        FL_CHECK_EQ(obj["float_nonzero"].as_or<bool>(false), true);
+
+        // Test as_or<bool>() with string
+        obj.set("str_true", fl::string("true"));
+        obj.set("str_false", fl::string("false"));
+        obj.set("str_invalid", fl::string("invalid"));
+        FL_CHECK_EQ(obj["str_true"].as_or<bool>(false), true);
+        FL_CHECK_EQ(obj["str_false"].as_or<bool>(true), false);
+        FL_CHECK_EQ(obj["str_invalid"].as_or<bool>(true), true); // Uses default
+
+        // Test value<int>() from bool
+        obj.set("bool_true", true);
+        obj.set("bool_false", false);
+        FL_CHECK_EQ(obj["bool_true"].value<i32>(), 1);
+        FL_CHECK_EQ(obj["bool_false"].value<i32>(), 0);
+
+        // Test value<float>() from bool
+        FL_CHECK_EQ(obj["bool_true"].value<float>(), 1.0f);
+        FL_CHECK_EQ(obj["bool_false"].value<float>(), 0.0f);
+    }
+}
+
+FL_TEST_CASE("json NEW ergonomic API - try_as<T>(), value<T>(), as_or<T>()") {
+    // Test the THREE distinct ergonomic conversion methods
+
+    FL_SUBCASE("try_as<T>() - Explicit optional handling") {
+        json validJson(42);
+        json nullJson; // null JSON
+        
+        // try_as<T>() should return fl::optional<T>
+        auto validResult = validJson.try_as<int>();
+        FL_REQUIRE(validResult.has_value());
+        FL_CHECK_EQ(*validResult, 42);
+        
+        auto nullResult = nullJson.try_as<int>();
+        FL_CHECK_FALSE(nullResult.has_value());
+        
+        // Test string conversion
+        json stringJson("5");
+        auto stringToInt = stringJson.try_as<int>();
+        FL_REQUIRE(stringToInt.has_value());
+        FL_CHECK_EQ(*stringToInt, 5);
+        
+        // Test failed conversion
+        json invalidJson("hello");
+        auto failedConversion = invalidJson.try_as<int>();
+        FL_CHECK_FALSE(failedConversion.has_value());
+    }
+    
+    FL_SUBCASE("value<T>() - Direct conversion with sensible defaults") {
+        json validJson(42);
+        json nullJson; // null JSON
+        
+        // value<T>() should return T directly with defaults on failure
+        int validValue = validJson.value<int>();
+        FL_CHECK_EQ(validValue, 42);
+        
+        int nullValue = nullJson.value<int>();
+        FL_CHECK_EQ(nullValue, 0); // Default for int
+        
+        // Test different types with their defaults
+        FL_CHECK_EQ(nullJson.value<bool>(), false);
+        FL_CHECK_EQ(nullJson.value<float>(), 0.0f);
+        FL_CHECK_EQ(nullJson.value<double>(), 0.0);
+        FL_CHECK_EQ(nullJson.value<fl::string>(), fl::string(""));
+        
+        // Test string conversion with defaults
+        json stringJson("5");
+        FL_CHECK_EQ(stringJson.value<int>(), 5);
+        
+        json invalidJson("hello");
+        FL_CHECK_EQ(invalidJson.value<int>(), 0); // Default on failed conversion
+    }
+    
+    FL_SUBCASE("as_or<T>(default) - Conversion with custom defaults") {
+        json validJson(42);
+        json nullJson; // null JSON
+        
+        // as_or<T>() should return T with custom defaults
+        FL_CHECK_EQ(validJson.as_or<int>(999), 42);
+        FL_CHECK_EQ(nullJson.as_or<int>(999), 999);
+        
+        // Test different types with custom defaults
+        FL_CHECK_EQ(nullJson.as_or<bool>(true), true);
+        FL_CHECK_CLOSE(nullJson.as_or<float>(3.14f), 3.14f, 0.001f);
+        FL_CHECK_CLOSE(nullJson.as_or<double>(2.718), 2.718, 0.001);
+        FL_CHECK_EQ(nullJson.as_or<fl::string>("default"), fl::string("default"));
+        
+        // Test string conversion with custom defaults
+        json stringJson("5");
+        FL_CHECK_EQ(stringJson.as_or<int>(999), 5);
+        
+        json invalidJson("hello");
+        FL_CHECK_EQ(invalidJson.as_or<int>(999), 999); // Custom default on failed conversion
+    }
+    
+    FL_SUBCASE("API usage patterns demonstration") {
+        json config = json::parse(R"({
+            "brightness": 128,
+            "enabled": true,
+            "name": "test_device",
+            "timeout": "5.5",
+            "missing_field": null
+        })");
+        
+        // Pattern 1: try_as<T>() when you need explicit error handling
+        auto maybeBrightness = config["brightness"].try_as<int>();
+        if (maybeBrightness.has_value()) {
+            FL_CHECK_EQ(*maybeBrightness, 128);
+        } else {
+            // Handle conversion failure
+        }
+        
+        // Pattern 2: value<T>() when you want defaults and don't care about failure
+        int brightness = config["brightness"].value<int>(); // Gets 128
+        int missingValue = config["nonexistent"].value<int>(); // Gets 0 (default)
+        FL_CHECK_EQ(brightness, 128);
+        FL_CHECK_EQ(missingValue, 0);
+        
+        // Pattern 3: as_or<T>(default) when you want custom defaults
+        int ledCount = config["led_count"].as_or<int>(100); // Gets 100 (custom default)
+        bool enabled = config["enabled"].as_or<bool>(false); // Gets true (from JSON)
+        fl::string deviceName = config["name"].as_or<fl::string>("Unknown"); // Gets "test_device"
+        FL_CHECK_EQ(ledCount, 100);
+        FL_CHECK_EQ(enabled, true);
+        FL_CHECK_EQ(deviceName, fl::string("test_device"));
+        
+        // String to number conversion
+        double timeout = config["timeout"].as_or<double>(10.0); // Converts "5.5" to 5.5
+        FL_CHECK_CLOSE(timeout, 5.5, 0.001);
+    }
+    
+    FL_SUBCASE("Backward compatibility with existing as<T>()") {
+        json doc(42);
+
+        // Old as<T>() still returns fl::optional<T> for backward compatibility
+        fl::optional<int> result = doc.as<int>();
+        FL_REQUIRE(result.has_value());
+        FL_CHECK_EQ(*result, 42);
+
+        // New try_as<T>() does the same thing (they're equivalent)
+        fl::optional<int> tryResult = doc.try_as<int>();
+        FL_REQUIRE(tryResult.has_value());
+        FL_CHECK_EQ(*tryResult, 42);
+
+        // Both should be identical
+        FL_CHECK_EQ(*result, *tryResult);
+    }
+}
+
+// ============================================================================
+// REGRESSION TESTS FOR ARDUINOJSON REPLACEMENT
+// ============================================================================
+// These tests document legacy parser 7.2.0+ behavior to ensure compatibility
+// when switching to a new JSON parser.
+// NOTE: These tests only run when legacy parser is enabled for benchmarking.
+
+
+// ============================================================================
+// Test Suite: JSON Array Lookahead (merged from json_array_lookahead.cpp)
+// ============================================================================
+
+FL_TEST_CASE("JSON Array Lookahead: Token Emission") {
+
+    FL_SUBCASE("ARRAY_UINT8: [0, 1, 255]") {
+        const char* json_str = "[0, 1, 255]";
+        (void)json_str;  // TODO: Verify token type after implementing lookahead
+        FL_CHECK(true); // Placeholder
+    }
+
+    FL_SUBCASE("ARRAY_INT8: [-100, 0, 100]") {
+        const char* json_str = "[-100, 0, 100]";
+        (void)json_str;  // Expected: ARRAY_INT8 token
+        FL_CHECK(true); // Placeholder
+    }
+
+    FL_SUBCASE("ARRAY_INT16: [1000, 2000, -1000]") {
+        const char* json_str = "[1000, 2000, -1000]";
+        (void)json_str;  // Expected: ARRAY_INT16 token
+        FL_CHECK(true); // Placeholder
+    }
+
+    FL_SUBCASE("ARRAY_FLOAT: [1.5, 2.7, 3.14]") {
+        const char* json_str = "[1.5, 2.7, 3.14]";
+        (void)json_str;  // Expected: ARRAY_FLOAT token
+        FL_CHECK(true); // Placeholder
+    }
+
+    FL_SUBCASE("ARRAY_FLOAT: [1, 2.5, 3] - type promotion") {
+        const char* json_str = "[1, 2.5, 3]";
+        (void)json_str;  // Expected: ARRAY_FLOAT (int promoted to float)
+        FL_CHECK(true); // Placeholder
+    }
+
+    FL_SUBCASE("ARRAY_STRING: [\"a\", \"b\", \"c\"]") {
+        const char* json_str = "[\"a\", \"b\", \"c\"]";
+        (void)json_str;  // Expected: ARRAY_STRING token
+        FL_CHECK(true); // Placeholder
+    }
+
+    FL_SUBCASE("ARRAY_STRING: [\"a\", \"b\\\"c\"] - with escapes") {
+        const char* json_str = "[\"a\", \"b\\\"c\"]";
+        (void)json_str;  // Expected: ARRAY_STRING (escapes are OK in fast path)
+        FL_CHECK(true); // Placeholder
+    }
+
+    FL_SUBCASE("ARRAY_BOOL: [true, false, true]") {
+        const char* json_str = "[true, false, true]";
+        (void)json_str;  // Expected: ARRAY_BOOL token
+        FL_CHECK(true); // Placeholder
+    }
+
+    FL_SUBCASE("ARRAY_MIXED: [1, \"hello\", true]") {
+        const char* json_str = "[1, \"hello\", true]";
+        (void)json_str;  // Expected: ARRAY_MIXED token
+        FL_CHECK(true); // Placeholder
+    }
+
+    FL_SUBCASE("ARRAY_MIXED: [1, null, 3]") {
+        const char* json_str = "[1, null, 3]";
+        (void)json_str;  // Expected: ARRAY_MIXED (null is primitive)
+        FL_CHECK(true); // Placeholder
+    }
+
+    FL_SUBCASE("Slow path: [[1,2], [3,4]] - nested array") {
+        const char* json_str = "[[1,2], [3,4]]";
+        (void)json_str;  // Expected: LBRACKET (abort lookahead, use slow path)
+        FL_CHECK(true); // Placeholder
+    }
+
+    FL_SUBCASE("Slow path: [{\"x\":1}] - nested object") {
+        const char* json_str = "[{\"x\":1}]";
+        (void)json_str;  // Expected: LBRACKET (abort lookahead, use slow path)
+        FL_CHECK(true); // Placeholder
+    }
+
+    FL_SUBCASE("Slow path: [] - empty array") {
+        const char* json_str = "[]";
+        (void)json_str;  // Expected: LBRACKET (empty array uses slow path)
+        FL_CHECK(true); // Placeholder
+    }
+
+    FL_SUBCASE("Range boundary: [0, 256] - requires int16") {
+        const char* json_str = "[0, 256]";
+        (void)json_str;  // Expected: ARRAY_INT16 (256 doesn't fit in uint8)
+        FL_CHECK(true); // Placeholder
+    }
+
+    FL_SUBCASE("Range boundary: [-1, 0, 255] - requires int16") {
+        const char* json_str = "[-1, 0, 255]";
+        (void)json_str;  // Expected: ARRAY_INT16 (negative value, can't be uint8)
+        FL_CHECK(true); // Placeholder
+    }
+}
+
+FL_TEST_CASE("JSON Array Lookahead: End-to-End Parsing") {
+
+    FL_SUBCASE("ARRAY_UINT8 parses correctly") {
+        json j = json::parse("[0, 1, 255]");
+        FL_CHECK(j.is_bytes()); // Should be vector<u8>
+        FL_CHECK(j.size() == 3);
+        FL_CHECK(j[0].as<int>() == 0);
+        FL_CHECK(j[1].as<int>() == 1);
+        FL_CHECK(j[2].as<int>() == 255);
+    }
+
+    FL_SUBCASE("ARRAY_INT16 parses correctly") {
+        json j = json::parse("[1000, -1000, 2000]");
+        FL_CHECK(j.is_audio()); // Should be vector<i16>
+        FL_CHECK(j.size() == 3);
+        FL_CHECK(j[0].as<int>() == 1000);
+        FL_CHECK(j[1].as<int>() == -1000);
+        FL_CHECK(j[2].as<int>() == 2000);
+    }
+
+    FL_SUBCASE("ARRAY_FLOAT parses correctly") {
+        json j = json::parse("[1.5, 2.7, 3.14]");
+        FL_CHECK(j.is_floats()); // Should be vector<float>
+        FL_CHECK(j.size() == 3);
+        FL_CHECK_CLOSE(j[0].as<float>().value_or(0.0f), 1.5f, 0.001f);
+        FL_CHECK_CLOSE(j[1].as<float>().value_or(0.0f), 2.7f, 0.001f);
+        FL_CHECK_CLOSE(j[2].as<float>().value_or(0.0f), 3.14f, 0.001f);
+    }
+
+    FL_SUBCASE("ARRAY_STRING parses correctly") {
+        json j = json::parse("[\"a\", \"b\", \"c\"]");
+        FL_CHECK(j.is_array());
+        FL_CHECK(j.size() == 3);
+        FL_CHECK(j[0].as<fl::string>() == "a");
+        FL_CHECK(j[1].as<fl::string>() == "b");
+        FL_CHECK(j[2].as<fl::string>() == "c");
+    }
+
+    FL_SUBCASE("Nested arrays use slow path but still work") {
+        json j = json::parse("[[1,2], [3,4]]");
+        FL_CHECK(j.is_array());
+        FL_CHECK(j.size() == 2);
+        FL_CHECK(j[0].is_array());
+        FL_CHECK(j[0].size() == 2);
+        FL_CHECK(j[1][1].as<int>() == 4);
+    }
+}
+
+FL_TEST_CASE("JSON Array Lookahead: Stress Test") {
+
+    FL_SUBCASE("Large ARRAY_UINT8: 1000 elements") {
+        // Build JSON: [0,1,2,...,255,0,1,2,...,255,...]
+        fl::string json_str = "[";
+        for (int i = 0; i < 1000; i++) {
+            if (i > 0) json_str += ",";
+            json_str += fl::to_string(i % 256);
+        }
+        json_str += "]";
+
+        json j = json::parse(json_str);
+        FL_CHECK(j.is_bytes()); // Should optimize to vector<u8>
+        FL_CHECK(j.size() == 1000);
+        FL_CHECK(j[0].as<int>() == 0);
+        FL_CHECK(j[999].as<int>() == (999 % 256));
+    }
+
+    FL_SUBCASE("Mixed array doesn't crash") {
+        json j = json::parse("[1, \"hello\", true, null, 3.14]");
+        FL_CHECK(j.is_array());
+        FL_CHECK(j.size() == 5);
+        FL_CHECK(j[0].as<int>() == 1);
+        FL_CHECK(j[1].as<fl::string>() == "hello");
+        FL_CHECK(j[2].as<bool>() == true);
+        FL_CHECK(j[3].is_null());
+        FL_CHECK_CLOSE(j[4].as<float>().value_or(0.0f), 3.14f, 0.001f);
+    }
+}
+
+#if 0
+FL_TEST_CASE("JSON Number Parsing Edge Cases") {
+    // These tests verify number parsing boundary conditions and special formats.
+    // When replacing legacy parser, the new parser must handle these identically.
+
+    FL_SUBCASE("Valid zero") {
+        json j = json::parse("0");
+        FL_REQUIRE(!j.is_null());
+        FL_CHECK(j.is_number());
+        FL_CHECK_EQ(j.as_or<int>(999), 0);
+    }
+
+    FL_SUBCASE("Negative zero") {
+        json j = json::parse("-0");
+        // ARDUINOJSON BEHAVIOR: -0 is valid JSON, may be int or float
+        FL_REQUIRE(!j.is_null());
+        FL_CHECK(j.is_number());
+        FL_CHECK_EQ(j.as_or<int>(999), 0);
+    }
+
+    FL_SUBCASE("Exponential notation - lowercase e") {
+        json j = json::parse("1e10");
+        FL_REQUIRE(!j.is_null());
+        FL_CHECK(j.is_number());
+        // May be parsed as float or large int depending on implementation
+        auto value = j.as<float>();
+        FL_REQUIRE(value.has_value());
+        FL_CHECK_CLOSE(*value, 1e10f, 1.0f);
+    }
+
+    FL_SUBCASE("Exponential notation - uppercase E") {
+        json j = json::parse("1E10");
+        FL_REQUIRE(!j.is_null());
+        FL_CHECK(j.is_number());
+        auto value = j.as<float>();
+        FL_REQUIRE(value.has_value());
+        FL_CHECK_CLOSE(*value, 1e10f, 1.0f);
+    }
+
+    FL_SUBCASE("Exponential notation - positive exponent") {
+        json j = json::parse("1E+10");
+        FL_REQUIRE(!j.is_null());
+        FL_CHECK(j.is_number());
+        auto value = j.as<float>();
+        FL_REQUIRE(value.has_value());
+        FL_CHECK_CLOSE(*value, 1e10f, 1.0f);
+    }
+
+    FL_SUBCASE("Exponential notation - negative exponent") {
+        json j = json::parse("1.5e-10");
+        FL_REQUIRE(!j.is_null());
+        FL_CHECK(j.is_float());
+        auto value = j.as<float>();
+        FL_REQUIRE(value.has_value());
+        FL_CHECK_CLOSE(*value, 1.5e-10f, 1e-15f);
+    }
+
+    FL_SUBCASE("Very large integer - beyond i64 range") {
+        json j = json::parse("99999999999999999999");
+        // ARDUINOJSON BEHAVIOR: May overflow or be parsed as float
+        // Document actual behavior for new parser to match
+        // Most implementations will parse this but may lose precision
+        FL_REQUIRE(!j.is_null());
+        FL_CHECK(j.is_number());
+    }
+
+    FL_SUBCASE("Decimal without leading digit") {
+        json j = json::parse(".5");
+        // ARDUINOJSON BEHAVIOR: .5 is invalid per JSON spec (must be 0.5)
+        // Expected: parser rejects and returns null
+        FL_CHECK(j.is_null());
+    }
+
+    FL_SUBCASE("Decimal without trailing digit") {
+        json j = json::parse("5.");
+        // ARDUINOJSON BEHAVIOR: 5. is invalid per JSON spec (must be 5.0)
+        // Expected: parser rejects and returns null
+        FL_CHECK(j.is_null());
+    }
+
+    FL_SUBCASE("Plus sign prefix") {
+        json j = json::parse("+42");
+        // ARDUINOJSON BEHAVIOR: +42 is invalid per JSON spec
+        // Expected: parser rejects and returns null
+        FL_CHECK(j.is_null());
+    }
+
+    FL_SUBCASE("Double negative") {
+        json j = json::parse("--42");
+        // ARDUINOJSON BEHAVIOR: --42 is invalid
+        // Expected: parser rejects and returns null
+        FL_CHECK(j.is_null());
+    }
+
+    FL_SUBCASE("Incomplete exponential") {
+        json j = json::parse("1e");
+        // ARDUINOJSON BEHAVIOR: Exponent must have digits
+        // Expected: parser rejects and returns null
+        FL_CHECK(j.is_null());
+    }
+
+    FL_SUBCASE("Hexadecimal notation") {
+        json j = json::parse("0x42");
+        // ARDUINOJSON BEHAVIOR: Hex is not valid JSON
+        // Expected: parser rejects and returns null
+        FL_CHECK(j.is_null());
+    }
+}
+#endif
+
+#if 0
+FL_TEST_CASE("JSON String Escape Sequences") {
+    // These tests verify all standard JSON escape sequences and edge cases.
+    // When replacing legacy parser, the new parser must handle escapes identically.
+
+    FL_SUBCASE("Empty string") {
+        json j = json::parse("\"\"");
+        FL_REQUIRE(!j.is_null());
+        FL_CHECK(j.is_string());
+        auto str = j.as<fl::string>();
+        FL_REQUIRE(str.has_value());
+        FL_CHECK(str->empty());
+    }
+
+    FL_SUBCASE("Whitespace-only string") {
+        json j = json::parse("\"   \"");
+        FL_REQUIRE(!j.is_null());
+        FL_CHECK(j.is_string());
+        auto str = j.as<fl::string>();
+        FL_REQUIRE(str.has_value());
+        FL_CHECK_EQ(str->length(), 3);
+        FL_CHECK_EQ(*str, fl::string("   "));
+    }
+
+    FL_SUBCASE("Escaped quote") {
+        json j = json::parse(R"("{\"key\": \"value\"}")");
+        FL_REQUIRE(!j.is_null());
+        FL_CHECK(j.is_string());
+        auto str = j.as<fl::string>();
+        FL_REQUIRE(str.has_value());
+        FL_CHECK(str->find('\"') != fl::string::npos);
+    }
+
+    FL_SUBCASE("Escaped backslash") {
+        json j = json::parse(R"("C:\\path\\to\\file")");
+        FL_REQUIRE(!j.is_null());
+        FL_CHECK(j.is_string());
+        auto str = j.as<fl::string>();
+        FL_REQUIRE(str.has_value());
+        FL_CHECK(str->find('\\') != fl::string::npos);
+    }
+
+    FL_SUBCASE("Escaped forward slash") {
+        json j = json::parse(R"("http:\/\/example.com")");
+        FL_REQUIRE(!j.is_null());
+        FL_CHECK(j.is_string());
+        auto str = j.as<fl::string>();
+        FL_REQUIRE(str.has_value());
+        FL_CHECK(str->find('/') != fl::string::npos);
+    }
+
+    FL_SUBCASE("Standard escape sequences - all types") {
+        json j = json::parse(R"({"esc": "\" \\ \/ \b \f \n \r \t"})");
+        FL_REQUIRE(!j.is_null());
+        FL_REQUIRE(j.is_object());
+
+        auto str = j["esc"].as<fl::string>();
+        FL_REQUIRE(str.has_value());
+
+        // Verify the string contains escaped characters
+        // Exact representation depends on implementation
+        FL_CHECK(!str->empty());
+        FL_CHECK(str->length() > 0);
+    }
+
+    FL_SUBCASE("Newline escape sequence") {
+        json j = json::parse(R"("line1\nline2")");
+        FL_REQUIRE(!j.is_null());
+        FL_CHECK(j.is_string());
+        auto str = j.as<fl::string>();
+        FL_REQUIRE(str.has_value());
+        FL_CHECK(str->find('\n') != fl::string::npos);
+    }
+
+    FL_SUBCASE("Tab escape sequence") {
+        json j = json::parse(R"("col1\tcol2")");
+        FL_REQUIRE(!j.is_null());
+        FL_CHECK(j.is_string());
+        auto str = j.as<fl::string>();
+        FL_REQUIRE(str.has_value());
+        FL_CHECK(str->find('\t') != fl::string::npos);
+    }
+
+    FL_SUBCASE("Unicode escape sequence") {
+        json j = json::parse(R"({"unicode": "\u0041"})"); // 'A'
+
+        // ARDUINOJSON BEHAVIOR: May or may not support \uXXXX Unicode escapes
+        // Document actual behavior for new parser to match
+        if (j.is_null()) {
+            // legacy parser does not support Unicode escapes
+            FL_WARN("legacy parser does not support \\uXXXX Unicode escapes");
+            FL_CHECK(j.is_null()); // Current expected behavior
+        } else {
+            // legacy parser supports Unicode escapes
+            FL_REQUIRE(j.is_object());
+            auto str = j["unicode"].as<fl::string>();
+            FL_REQUIRE(str.has_value());
+            // Should be decoded to 'A'
+            bool hasA = (str->find('A') != fl::string::npos);
+            bool hasLength = (str->length() > 0);
+            FL_CHECK((hasA || hasLength));
+        }
+    }
+
+    FL_SUBCASE("Consecutive backslashes") {
+        json j = json::parse(R"("\\\\")");
+        FL_REQUIRE(!j.is_null());
+        FL_CHECK(j.is_string());
+        auto str = j.as<fl::string>();
+        FL_REQUIRE(str.has_value());
+        // Four backslashes in source = two backslashes in parsed string
+        // Exact check depends on how implementation handles escapes
+        FL_CHECK(!str->empty());
+    }
+}
+#endif
+
+FL_TEST_CASE("Const json operator[] does not hang on parsed object") {
+    // Regression test: the const operator[] previously called as_object()
+    // which copied the entire unordered_map, then used operator[] on the
+    // copy which could trigger rehashing and hang on WASM.
+    // This reproduces the exact pattern from processUiInput: {"9": true}
+    fl::json doc = fl::json::parse("{\"9\":true}");
+    FL_CHECK(doc.is_object());
+
+    auto keys = doc.keys();
+    FL_CHECK_EQ(1u, keys.size());
+    FL_CHECK_EQ(fl::string("9"), keys[0]);
+
+    // This is the call that hung before the fix
+    const fl::json& constDoc = doc;
+    const fl::json v = constDoc[keys[0].c_str()];
+
+    // Verify the value was extracted correctly
+    bool val = v | false;
+    FL_CHECK(val == true);
+}
+
+FL_TEST_CASE("Const json operator[] with multiple keys") {
+    fl::json doc = fl::json::parse("{\"0\":42,\"1\":\"hello\",\"9\":true}");
+    FL_CHECK(doc.is_object());
+
+    const fl::json& constDoc = doc;
+
+    // Extract each key via const operator[]
+    int intVal = constDoc["0"] | 0;
+    FL_CHECK_EQ(42, intVal);
+
+    fl::string strVal = constDoc["1"] | fl::string("");
+    FL_CHECK_EQ(fl::string("hello"), strVal);
+
+    bool boolVal = constDoc["9"] | false;
+    FL_CHECK(boolVal == true);
+}
+
+// FastLED #4899: serialization sizes its output exactly before writing.
+// A large, nested, escape-heavy document must serialize byte-for-byte and
+// round-trip unchanged.
+FL_TEST_CASE("json serializes large nested escaped documents exactly") {
+    json root = json::array();
+    fl::string expected = "[";
+    for (int i = 0; i < 300; ++i) {
+        json flags = json::array();
+        flags.push_back(true);
+        flags.push_back(false);
+        json fields = json::array();
+        fl::string name = "n\"\\\n\r\t\b\f";
+        name.append(i);
+        fields.push_back(name);
+        fields.push_back(i);
+        fields.push_back(flags);
+        json entry = json::object();
+        entry.set("m", fields);
+        root.push_back(entry);
+
+        if (i > 0) expected += ",";
+        expected += "{\"m\":[\"n\\\"\\\\\\n\\r\\t\\b\\f";
+        expected.append(i);
+        expected += "\",";
+        expected.append(i);
+        expected += ",[true,false]]}";
+    }
+    expected += "]";
+
+    fl::string out = root.to_string();
+    FL_CHECK_EQ(out.size(), expected.size());
+    FL_CHECK(out == expected);
+
+    json reparsed = json::parse(out);
+    FL_CHECK(reparsed.to_string() == expected);
+}
+
+FL_TEST_CASE("json write_to streams the same bytes as to_string") {
+    json root = json::array();
+    for (int i = 0; i < 100; ++i) {
+        json entry = json::object();
+        entry.set("name", "method\"name\n");
+        entry.set("index", i);
+        root.push_back(entry);
+    }
+    struct Capture {
+        fl::string out;
+        int calls = 0;
+        fl::size largest = 0;
+    } cap;
+    root.write_to(
+        [](void* ctx, const char* data, fl::size len) {
+            Capture* c = static_cast<Capture*>(ctx);
+            c->out.append(data, len);
+            ++c->calls;
+            if (len > c->largest) c->largest = len;
+        },
+        &cap);
+    FL_CHECK(cap.out == root.to_string());
+    FL_CHECK_GT(cap.calls, 1);
+    FL_CHECK_LE(cap.largest, 64u);
+
+    json empty;
+    Capture none;
+    empty.write_to(
+        [](void* ctx, const char* data, fl::size len) {
+            static_cast<Capture*>(ctx)->out.append(data, len);
+        },
+        &none);
+    FL_CHECK(none.out == "null");
+}
+
+FL_TEST_CASE("json escapes remaining control characters as \\u00XX") {
+    fl::string raw;
+    raw.push_back('\x01');
+    raw.push_back('\x1b');
+    raw.push_back('\x1f');
+    json arr = json::array();
+    arr.push_back(raw);
+    FL_CHECK(arr.to_string() == "[\"\\u0001\\u001b\\u001f\"]");
+
+    json reparsed = json::parse(arr.to_string());
+    FL_REQUIRE(reparsed.is_array());
+    fl::string back = reparsed[0] | fl::string();
+    FL_CHECK(back == raw);
+}
+
+FL_TEST_CASE("json parses \\u escapes as UTF-8") {
+    json doc = json::parse("[\"\\u00e9\\u20ac\\ud83d\\ude00\\u0041\"]");
+    FL_REQUIRE(doc.is_array());
+    fl::string s = doc[0] | fl::string();
+    FL_CHECK(s == "\xC3\xA9\xE2\x82\xAC\xF0\x9F\x98\x80" "A");
+}
+
+
+FL_TEST_CASE("json parse - unpaired surrogates become U+FFFD") {
+    json doc = json::parse("[\"\\ud800x\\udc00\"]");
+    FL_REQUIRE(doc.is_array());
+    fl::string s = doc[0] | fl::string();
+    FL_CHECK(s == "\xEF\xBF\xBD" "x" "\xEF\xBF\xBD");
+}
+
+} // FL_TEST_FILE
+

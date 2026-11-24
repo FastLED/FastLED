@@ -1,7 +1,7 @@
 """Extract the JChalka verifier CSV into a clean unit-test fixture.
 
 Reads the medium-patch-set verifier output (preserved on issue #3422) and
-emits `tests/misc/golden/verifier_known_bad.csv`, a stable vendored data file
+emits `tests/unit/misc/golden/verifier_known_bad.csv`, a stable vendored data file
 the colorimetric strategy harness reads at host-test time.
 
 Source: https://docs.google.com/spreadsheets/d/1GYxE3jcknTTUx9mYUp4wGJd8SEkBKI-sdCajryqsx6U
@@ -19,7 +19,7 @@ Output schema (columns):
     status                 - "ok" if dE within tolerance, "fail" if known-bad,
                              "skip" for degenerate (black, etc.)
 
-Provenance is preserved verbatim in `tests/misc/golden/README.md`.
+Provenance is preserved verbatim in `tests/unit/misc/golden/README.md`.
 """
 
 import argparse

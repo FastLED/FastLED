@@ -76,8 +76,8 @@ public:
      *
      * Initializes the 256-entry LUT to map byte values to GPIO masks
      * for the specified data pin.
-     * @return false, changing nothing, if a pin is outside 0-31, data lanes 0-7
-     *         repeat or sit on the clock, or a lane 8+ sits on lanes 0-7.
+     * @return false, changing nothing, if a pin is outside 0-31, or two data
+     *         pins share a pin or the clock.
      */
     FL_NO_DISCARD bool setPinMapping(u8 data, u8 clk) FL_NO_EXCEPT {
         // Validate first, so a rejected mapping leaves the last good one in place.

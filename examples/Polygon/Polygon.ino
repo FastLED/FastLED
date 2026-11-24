@@ -30,14 +30,15 @@
 //
 //   Exact   - exact per-pixel area coverage (256 levels). The default.
 //   ABuffer - 8x4 subpixel sampling (32 levels): faster on dense fills and
-//             a shallower stack. It ignores CHUNK.
+//             a smaller working set. It ignores CHUNK.
 //
-// MAXN is a compile-time vertex cap that sizes the kernel's stack frame;
+// MAXN is a compile-time vertex cap that sizes the kernel's working set;
 // vertices past MAXN are ignored. The default (FL_GFX_POLYGON_DEFAULT_MAXN)
-// is 8 on small-stack targets (AVR, ESP8266, ...) and 32 elsewhere, so a
-// polygon with more vertices must ask for a bigger MAXN, and a known small
-// polygon can ask for a smaller one to save stack. CHUNK (Exact only) is a
-// power-of-two column-chunk width; the default is fine.
+// is 8 on small-stack targets (AVR, Teensy LC, ...) and 32 elsewhere,
+// including ESP8266, whose fl::scratch side stack holds the 32-vertex
+// working set. A polygon with more vertices must ask for a bigger MAXN, and
+// a known small polygon can ask for a smaller one to save memory. CHUNK
+// (Exact only) is a power-of-two column-chunk width; the default is fine.
 
 // @filter
 // require:
@@ -53,6 +54,13 @@
 // s16x16, ABuffer at two MAXN tiers) plus soft-float math: ~50 KB of AVR
 // flash, more than the 16-48 KB parts above have. Mega 2560 fits (50.9 KB
 // flash, 940 B static RAM plus a ~1.2 KB worst-case polygon stack frame).
+// RAM is the limit on a 2 KB part (Uno, Nano) even for a single scene. In
+// the reference build (a 16x16 CRGB canvas, FastLED, Serial, no other
+// globals) ~950 B of stack remains: enough for ABuffer (~0.8 KB with
+// callees), not for the Exact fill (~1.2 KB), which overflows the stack.
+// Every extra global shrinks that margin, so ABuffer, or a 16x8 canvas for
+// Exact, can overflow too. Check your sketch's free stack before choosing a
+// backend (see fl/gfx/canvas.h).
 
 #include <Arduino.h>
 #include <FastLED.h>
@@ -180,7 +188,7 @@ static void sceneLayers(unsigned long t) {
 // A closed 2:3 Lissajous curve sampled at 14 points crosses itself several
 // times; even-odd fills alternate lobes. 14 vertices exceed the 8-vertex
 // default on small-stack targets, so MAXN is given explicitly (sized exactly, to
-// keep the stack frame small). The ABuffer backend has the shallower stack.
+// keep the stack frame small). The ABuffer backend has the smaller working set.
 static const int kKnotN = 14;
 
 static void sceneKnot(unsigned long t) {

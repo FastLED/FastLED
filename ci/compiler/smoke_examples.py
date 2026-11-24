@@ -6,7 +6,7 @@ example-specific break still shows up on the post-merge sweep.
 
 The set is:
 
-1. every sketch in ``tests/platforms/_standard/SMOKE_SKETCHES.txt``, then
+1. every sketch in ``tests/unit/platforms/_standard/SMOKE_SKETCHES.txt``, then
 2. every example the pull request itself changes, found by diffing the PR
    head against its base branch.
 

@@ -681,6 +681,7 @@ def main() -> None:
                 force_cpp_test_change = (
                     cpp_test_change
                     or (args.test is not None)
+                    or args.integration
                     or rebuild_mode != RebuildMode.CACHED
                 )
                 # Note: args.examples == [] means "all examples" (e.g., default mode or --examples flag)
@@ -735,6 +736,7 @@ def main() -> None:
             ) or args.example_group is not None
             running_all_tests = (
                 args.test is None
+                and not args.integration
                 and not running_specific_examples
                 and not args.no_fingerprint
                 and not args.check

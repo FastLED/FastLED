@@ -39,6 +39,9 @@
 #include "AutoResearchLegacyAsync.h"
 #include "AutoResearchLegacyAsyncErrors.h"
 #include "AutoResearchTimingDrift.h"  // timingDriftTest RPC (#2994 repro)
+#if defined(FL_IS_ESP32) // ok platform specific - fastPinLoopback spare pins are the ESP32 default SPI pins
+#include "AutoResearchFastPinLoopback.h"
+#endif
 #include "fl/chipsets/spi.h"
 #include "fl/channels/config.h"
 #include "fl/stl/span.h"
@@ -471,6 +474,34 @@ void AutoResearchRemoteControl::bindDriverMethods(fl::Remote& remote) {
         response.set("requestedKhz", 250);
         // Pass when the 250 kHz clock is no faster than requested (10% tolerance).
         response.set("success", primed && period >= 3600u);
+        return response;
+#endif
+    });
+    // Register "fastPinLoopback" — FastPin route over the discovered jumper (#5067).
+    remote.bind("fastPinLoopback", [this](const fl::json& args) -> fl::json {
+        (void)args;
+#if !defined(FL_IS_ESP32) // ok platform specific - spare pins are the ESP32 default SPI pins
+        (void)this;
+        fl::json response = fl::json::object();
+        response.set("success", false);
+        response.set("error", "Esp32Only");
+        return response;
+#else
+        const int tx = mState->pin_tx;
+        const int rx = mState->pin_rx;
+        fl::json response;
+        if (!mState->rx_channel || tx < 0 || tx > 23 || rx < 0 ||
+            tx == FL_PIN_SPI_CLOCK_1 || tx == FL_PIN_SPI_DATA_1 ||
+            rx == FL_PIN_SPI_CLOCK_1 || rx == FL_PIN_SPI_DATA_1) {
+            response = fl::json::object();
+            response.set("success", false);
+            response.set("error", "NeedsJumperOffSpareSpiPins");
+        } else {
+            response = autoresearch_fastpin::dispatch<FL_PIN_SPI_CLOCK_1, FL_PIN_SPI_DATA_1>(
+                tx, mState->rx_channel, rx);
+        }
+        response.set("txPin", tx);
+        response.set("rxPin", rx);
         return response;
 #endif
     });
@@ -1008,15 +1039,23 @@ void AutoResearchRemoteControl::bindDriverMethods(fl::Remote& remote) {
     // minimal sketch (35-LED WS2812B ring, setMaxRefreshRate(800),
     // millisDelay-gated 255-step fade, delay(1000) between sequences) and
     // returns per-sequence wall time so the host can build a histogram.
-    // Args: [{pin, numLeds, iterations}] (all optional;
-    //        default pin=4, numLeds=35, iterations=10; iterations clamped to
-    //        autoresearch::timing_drift::kMaxIterations)
+    // Args: [{pin, numLeds, iterations, rgbw, api, countInstructions}] (all optional;
+    //        default pin=4, numLeds=35, iterations=10, api="legacy";
+    //        api="channel" registers the strip with FastLED.add() instead of
+    //        addLeds (#5399); iterations clamped to
+    //        autoresearch::timing_drift::kMaxIterations). countInstructions=false
+    //        reads real cycles on supported cores without switching counter events.
+    //        coldWarm=true (#5422) instead times `repeats` (default 32) pairs of
+    //        show(): one right after the flash cache is emptied, then a warm one;
+    //        with api="channel" it also takes order="grb" (default) or "rgb".
     remote.bind("timingDriftTest", [](const fl::json& args) -> fl::json {
         fl::json response = fl::json::object();
 
         int pin = 4;
         int num_leds = 35;
         int iterations = 10;
+        bool rgbw = false;
+        fl::string api = "legacy";
 
         fl::json config;
         if (args.is_object()) {
@@ -1034,11 +1073,97 @@ void AutoResearchRemoteControl::bindDriverMethods(fl::Remote& remote) {
             if (config.contains("iterations") && config["iterations"].is_int()) {
                 iterations = static_cast<int>(config["iterations"].as_int().value());
             }
+            if (config.contains("rgbw") && config["rgbw"].is_bool()) {
+                rgbw = config["rgbw"].as_bool().value();
+            }
+            if (config.contains("api") && config["api"].is_string()) {
+                api = config["api"].as_string().value();
+            }
+        }
+        if (api != "legacy" && api != "channel") {
+            response.set("success", false);
+            response.set("error", "InvalidApi");
+            response.set("message", "api must be \"legacy\" or \"channel\"");
+            return response;
+        }
+        const bool channel = api == "channel";
+        if (channel && rgbw) {
+            response.set("success", false);
+            response.set("error", "InvalidArgs");
+            response.set("message", "rgbw applies to the legacy api only");
+            return response;
         }
 
-        auto r = autoresearch::timing_drift::run(pin, num_leds, iterations);
+        bool countInstructions = true;
+        if (config.contains("countInstructions") && config["countInstructions"].is_bool()) {
+            countInstructions = config["countInstructions"].as_bool().value();
+        }
+        if (config.contains("coldWarm") && config["coldWarm"].is_bool() &&
+            config["coldWarm"].as_bool().value()) {
+            // #5422: `repeats` pairs of (flash-cache-evicted show, warm show).
+            if (rgbw) {
+                response.set("success", false);
+                response.set("error", "InvalidArgs");
+                response.set("message", "coldWarm does not take rgbw");
+                return response;
+            }
+            int repeats = 32;
+            if (config.contains("repeats") && config["repeats"].is_int()) {
+                repeats = static_cast<int>(config["repeats"].as_int().value());
+            }
+            // order, api="channel" only: "grb" (default, as the legacy strip)
+            // or "rgb", the identity order with no per-run reorder (#5378).
+            fl::string order = "grb";
+            if (config.contains("order") && config["order"].is_string()) {
+                order = config["order"].as_string().value();
+            }
+            if ((order != "grb" && order != "rgb") || (order == "rgb" && !channel)) {
+                response.set("success", false);
+                response.set("error", "InvalidArgs");
+                response.set("message", "order is \"grb\", or \"rgb\" with api=\"channel\"");
+                return response;
+            }
+            auto cw = autoresearch::timing_drift::runColdWarm(pin, num_leds, repeats, channel, countInstructions,
+                                                              order == "rgb" ? RGB : GRB);
+            response.set("success", cw.valid_pin);
+            response.set("api", api);
+            response.set("order", order);
+            response.set("mode", "coldWarm");
+            response.set("pin", cw.pin);
+            if (!cw.valid_pin) {
+                response.set("error", "InvalidPin");
+                response.set("message", "pin is outside LegacyClocklessProxy range");
+                return response;
+            }
+            response.set("num_leds", cw.num_leds);
+            response.set("repeats", cw.repeats);
+            response.set("cpu_mhz", static_cast<int64_t>(cw.cpu_mhz));
+            response.set("cache_flush_supported", cw.supported);
+            response.set("counter", countInstructions ? "instructions" : "cycles");
+            response.set("ready_timeouts", static_cast<int64_t>(cw.ready_timeouts));
+            auto side = [&](const char* prefix, const autoresearch::timing_drift::ColdWarmSide& s) {
+                const fl::string p(prefix);
+                response.set(p + "_count", static_cast<int64_t>(s.count));
+                response.set(p + "_total_us", static_cast<int64_t>(s.total_us));
+                response.set(p + "_min_us", static_cast<int64_t>(s.min_us));
+                response.set(p + "_max_us", static_cast<int64_t>(s.max_us));
+                if (fl::InstructionCounter::kSupported) {
+                    if (countInstructions) {
+                        response.set(p + "_instr_total", static_cast<int64_t>(s.instr_total));
+                    } else {
+                        response.set(p + "_cycle_total", static_cast<int64_t>(s.cycle_total));
+                    }
+                }
+            };
+            side("cold", cw.cold);
+            side("warm", cw.warm);
+            return response;
+        }
+
+        auto r = autoresearch::timing_drift::run(pin, num_leds, iterations, rgbw, channel, countInstructions);
 
         response.set("success", r.valid_pin);
+        response.set("api", api);
         if (!r.valid_pin) {
             response.set("error", "InvalidPin");
             response.set("message",
@@ -1053,7 +1178,15 @@ void AutoResearchRemoteControl::bindDriverMethods(fl::Remote& remote) {
         response.set("show_count", static_cast<int64_t>(r.show_count));
         response.set("show_min_us", static_cast<int64_t>(r.show_min_us));
         response.set("show_max_us", static_cast<int64_t>(r.show_max_us));
+        response.set("show_draining_count", static_cast<int64_t>(r.show_draining_count));
+        response.set("show_ready_count", static_cast<int64_t>(r.show_ready_count));
+        response.set("show_cycle_count", static_cast<int64_t>(r.show_cycle_count));
+        response.set("show_cycle_total", static_cast<int64_t>(r.show_cycle_total));
         response.set("show_total_us", static_cast<int64_t>(r.show_total_us));
+        if (r.show_instr_count > 0) {
+            response.set("show_instr_count", static_cast<int64_t>(r.show_instr_count));
+            response.set("show_instr_total", static_cast<int64_t>(r.show_instr_total));
+        }
 
         fl::json iter_ms_arr = fl::json::array();
         for (int i = 0; i < r.iterations; ++i) {

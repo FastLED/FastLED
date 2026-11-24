@@ -594,22 +594,37 @@ inline void autoResearchLowMemorySetup() {
             const fl::u32 ticks_per_us = F_CPU / 1000000u;
             const fl::u32 half_ticks = half_us * ticks_per_us;
             const fl::i32 poll_guard = static_cast<fl::i32>(6u * ticks_per_us);
+            // IRQs are masked for the last few us before each edge and
+            // through its write (#5294). Otherwise an ISR that lands there
+            // (the 1 ms SysTick tick, whose phase against the edges is
+            // fixed for a whole run) delays the edge by its own length, and
+            // a run either always or never hits it. SysTick->VAL keeps
+            // counting, and a pending tick is served right after the write,
+            // so millis() loses nothing; the masked window is ~10 us. A 12 us
+            // guard measured worse (longer masked spins add their own jitter).
+            const fl::i32 irq_guard = static_cast<fl::i32>(5u * ticks_per_us);
             LowMemTickClock clock;
             fl::u32 deadline = clock.now();
             for (fl::u32 i = 0; i < 2u * cycles; ++i) {
                 fl::digitalWrite(tx_pin, (i & 1u) ? fl::PinValue::Low
                                                   : fl::PinValue::High);
+                __enable_irq();
                 rx->pollOnce();
                 deadline += half_ticks;
                 for (;;) {
                     const fl::i32 left = static_cast<fl::i32>(deadline - clock.now());
                     if (left <= 0) break;
-                    if (left > poll_guard) rx->pollOnce();
+                    if (left <= irq_guard) {
+                        __disable_irq();
+                    } else if (left > poll_guard) {
+                        rx->pollOnce();
+                    }
                 }
                 if ((i & 0xFFu) == 0u) {
                     fl::Watchdog::instance().feed();
                 }
             }
+            __enable_irq();
             rx->wait(1);
 
             // Static storage keeps this off the stack; the small fixed size

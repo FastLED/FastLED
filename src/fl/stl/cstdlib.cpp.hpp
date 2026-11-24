@@ -383,30 +383,16 @@ void detail::qsort_swap(char* a, char* b, size_t size) FL_NO_EXCEPT {
     }
 }
 
-// Insertion sort for small arrays (stable and efficient for small n)
+// Insertion sort for small arrays (stable and efficient for small n).
+// Shifts by adjacent swaps rather than through an element-sized temp buffer:
+// the old 256 B buffer was inlined into qsort_impl and made every recursion
+// level a 284 B frame on AVR (FastLED#5329).
 static void qsort_insertion_sort(char* base, size_t nmemb, size_t size, qsort_compare_fn compar) FL_NO_EXCEPT {
     for (size_t i = 1; i < nmemb; ++i) {
-        // Save current element in temp buffer
-        char temp[256]; // Stack buffer for elements up to 256 bytes
-        char* elem_i = base + i * size;
-
-        if (size <= sizeof(temp)) {
-            memcpy(temp, elem_i, size);
-
-            size_t j = i;
-            while (j > 0 && compar(temp, base + (j - 1) * size) < 0) {
-                memcpy(base + j * size, base + (j - 1) * size, size);
-                --j;
-            }
-
-            memcpy(base + j * size, temp, size);
-        } else {
-            // For large elements, use swaps instead of shifts
-            size_t j = i;
-            while (j > 0 && compar(elem_i, base + (j - 1) * size) < 0) {
-                detail::qsort_swap(base + j * size, base + (j - 1) * size, size);
-                --j;
-            }
+        size_t j = i;
+        while (j > 0 && compar(base + j * size, base + (j - 1) * size) < 0) {
+            detail::qsort_swap(base + j * size, base + (j - 1) * size, size);
+            --j;
         }
     }
 }
@@ -452,26 +438,26 @@ static size_t qsort_partition(char* base, size_t nmemb, size_t size, qsort_compa
     return i;
 }
 
-// Recursive quicksort implementation
+// Quicksort: recurse into the smaller partition and loop on the larger one,
+// so recursion depth is O(log n) even for adversarial input.
 void detail::qsort_impl(char* base, size_t nmemb, size_t size, qsort_compare_fn compar) FL_NO_EXCEPT {
-    if (nmemb <= 1) {
-        return;
-    }
-
     // Use insertion sort for small arrays (threshold of 16)
-    if (nmemb <= 16) {
-        qsort_insertion_sort(base, nmemb, size, compar);
-        return;
+    while (nmemb > 16) {
+        size_t pivot_idx = qsort_partition(base, nmemb, size, compar);
+        size_t left_n = pivot_idx;
+        size_t right_n = nmemb - pivot_idx - 1;
+        char* right = base + (pivot_idx + 1) * size;
+        if (left_n < right_n) {
+            qsort_impl(base, left_n, size, compar);
+            base = right;
+            nmemb = right_n;
+        } else {
+            qsort_impl(right, right_n, size, compar);
+            nmemb = left_n;
+        }
     }
-
-    size_t pivot_idx = qsort_partition(base, nmemb, size, compar);
-
-    // Sort left partition
-    qsort_impl(base, pivot_idx, size, compar);
-
-    // Sort right partition
-    if (pivot_idx + 1 < nmemb) {
-        qsort_impl(base + (pivot_idx + 1) * size, nmemb - pivot_idx - 1, size, compar);
+    if (nmemb > 1) {
+        qsort_insertion_sort(base, nmemb, size, compar);
     }
 }
 

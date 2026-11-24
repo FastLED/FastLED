@@ -21,10 +21,15 @@ FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_DEPRECATED_REGISTER
 
 // Scoped to chips that share the "modern" LPC GPIO controller (DIR / MASK /
-// PIN / MPIN / SET / CLR / NOT register layout at 0xA0000000):
-//   - LPC8xx       (LPC845 / LPC804)            — UM11029 / UM11065
-//   - LPC11Uxx     (LPC11U24 / LPC11U35)        — UM10462 §9   (#2845 Stage 4.1)
-//   - LPC15xx      (LPC15{17,18,19,47,48,49})   — UM11074      (#2845 Stage 4.2)
+// PIN / MPIN / SET / CLR / NOT at the same offsets from the block base):
+//   - LPC8xx   (LPC845 / LPC804)           base 0xA0000000, has DIRSET/DIRCLR
+//                                          (UM11029 / UM11065)
+//   - LPC11Uxx (LPC11U24 / LPC11U35)       base 0x50000000, no DIRSET/DIRCLR
+//                                          (UM10462 GPIO chapter; LPC_GPIO_Type
+//                                          in NXP LPC11Uxx.h)
+//   - LPC15xx  (LPC15{17,18,19,47,48,49})  base 0x1C000000, no DIRSET/DIRCLR
+//                                          (UM10736 GPIO chapter;
+//                                          LPC_GPIO_PORT_Type in NXP LPC15xx.h)
 //
 // LPC11xx legacy parts (LPC1110 / LPC1112 / LPC1114 / LPC1115) use the
 // older "legacy GPIO" controller at 0x50000000 with 12-bit masked-access
@@ -46,18 +51,36 @@ namespace fl {
 // board package provides one. Reduced host-side builds can still use the
 // documented LPC offset constants below without carrying a padded register
 // mirror solely to reach the handful of FastPin registers.
-#ifndef FL_LPC_GPIO_BASE
-#define FL_LPC_GPIO_BASE 0xA0000000UL
+// LPC11Uxx and LPC15xx have no DIRSET/DIRCLR aliases: their direction is the
+// DIR word only, so pin direction changes read-modify-write it.
+#if defined(FL_IS_ARM_LPC_11_USB)
+#define FL_LPC_GPIO_DEFAULT_BASE 0x50000000UL
+#define FL_LPC_GPIO_HAS_DIRSET 0
+#elif defined(FL_IS_ARM_LPC_15)
+#define FL_LPC_GPIO_DEFAULT_BASE 0x1C000000UL
+#define FL_LPC_GPIO_HAS_DIRSET 0
+#else
+#define FL_LPC_GPIO_DEFAULT_BASE 0xA0000000UL
+#define FL_LPC_GPIO_HAS_DIRSET 1
 #endif
 
+#ifndef FL_LPC_GPIO_BASE
+#define FL_LPC_GPIO_BASE FL_LPC_GPIO_DEFAULT_BASE
+#endif
+
+// Vendor block pointers: LPC_GPIO (LPC11Uxx.h), GPIO (LPC845.h / LPC804.h),
+// LPC_GPIO_PORT (LPC15xx.h).
 #if defined(LPC_GPIO)
 #define FL_LPC_GPIO_HW LPC_GPIO
 #elif defined(GPIO)
 #define FL_LPC_GPIO_HW GPIO
+#elif defined(LPC_GPIO_PORT)
+#define FL_LPC_GPIO_HW LPC_GPIO_PORT
 #endif
 
 namespace lpc_detail {
 
+constexpr u32 FL_LPC_GPIO_DIR_OFFSET    = 0x2000u;
 constexpr u32 FL_LPC_GPIO_PIN_OFFSET    = 0x2100u;
 constexpr u32 FL_LPC_GPIO_SET_OFFSET    = 0x2200u;
 constexpr u32 FL_LPC_GPIO_CLR_OFFSET    = 0x2280u;
@@ -71,12 +94,15 @@ FL_STATIC_ASSERT(FL_LPC_GPIO_CLR_OFFSET - FL_LPC_GPIO_PIN_OFFSET == 0x180u,
                  "LPC CLR offset must match clockless LO offset");
 
 #if defined(FL_LPC_GPIO_HW)
+static FASTLED_FORCE_INLINE volatile u32* lpc_gpio_dir() { return &FL_LPC_GPIO_HW->DIR[0]; }
 static FASTLED_FORCE_INLINE volatile u32* lpc_gpio_pin() { return &FL_LPC_GPIO_HW->PIN[0]; }
 static FASTLED_FORCE_INLINE volatile u32* lpc_gpio_set() { return &FL_LPC_GPIO_HW->SET[0]; }
 static FASTLED_FORCE_INLINE volatile u32* lpc_gpio_clr() { return &FL_LPC_GPIO_HW->CLR[0]; }
 static FASTLED_FORCE_INLINE volatile u32* lpc_gpio_not() { return &FL_LPC_GPIO_HW->NOT[0]; }
+#if FL_LPC_GPIO_HAS_DIRSET
 static FASTLED_FORCE_INLINE volatile u32* lpc_gpio_dirset() { return &FL_LPC_GPIO_HW->DIRSET[0]; }
 static FASTLED_FORCE_INLINE volatile u32* lpc_gpio_dirclr() { return &FL_LPC_GPIO_HW->DIRCLR[0]; }
+#endif
 #else
 static FASTLED_FORCE_INLINE volatile u32* lpc_gpio_reg(u32 offset) {
     // Constructing a peripheral pointer from a numeric base + offset is the
@@ -84,12 +110,40 @@ static FASTLED_FORCE_INLINE volatile u32* lpc_gpio_reg(u32 offset) {
     // to `reinterpret_cast` for this conversion; both lower to the same load.
     return fl::bit_cast<volatile u32*>(FL_LPC_GPIO_BASE + offset);
 }
+static FASTLED_FORCE_INLINE volatile u32* lpc_gpio_dir() { return lpc_gpio_reg(FL_LPC_GPIO_DIR_OFFSET); }
 static FASTLED_FORCE_INLINE volatile u32* lpc_gpio_pin() { return lpc_gpio_reg(FL_LPC_GPIO_PIN_OFFSET); }
 static FASTLED_FORCE_INLINE volatile u32* lpc_gpio_set() { return lpc_gpio_reg(FL_LPC_GPIO_SET_OFFSET); }
 static FASTLED_FORCE_INLINE volatile u32* lpc_gpio_clr() { return lpc_gpio_reg(FL_LPC_GPIO_CLR_OFFSET); }
 static FASTLED_FORCE_INLINE volatile u32* lpc_gpio_not() { return lpc_gpio_reg(FL_LPC_GPIO_NOT_OFFSET); }
+#if FL_LPC_GPIO_HAS_DIRSET
 static FASTLED_FORCE_INLINE volatile u32* lpc_gpio_dirset() { return lpc_gpio_reg(FL_LPC_GPIO_DIRSET_OFFSET); }
 static FASTLED_FORCE_INLINE volatile u32* lpc_gpio_dirclr() { return lpc_gpio_reg(FL_LPC_GPIO_DIRCLR_OFFSET); }
+#endif
+#endif
+
+// Direction backends. LPC8xx sets and clears direction bits with one store to
+// DIRSET/DIRCLR. LPC11Uxx/LPC15xx only have DIR, so the update is a
+// read-modify-write; like any RMW it is not atomic against an ISR that
+// changes another pin's direction on the same port.
+struct LpcGpioDirReadModifyWrite {
+    static FASTLED_FORCE_INLINE void setOutput(u32 mask) {
+        volatile u32* dir = lpc_gpio_dir();
+        *dir = *dir | mask;
+    }
+    static FASTLED_FORCE_INLINE void setInput(u32 mask) {
+        volatile u32* dir = lpc_gpio_dir();
+        *dir = *dir & ~mask;
+    }
+};
+
+#if FL_LPC_GPIO_HAS_DIRSET
+struct LpcGpioDirSetClr {
+    static FASTLED_FORCE_INLINE void setOutput(u32 mask) { *lpc_gpio_dirset() = mask; }
+    static FASTLED_FORCE_INLINE void setInput(u32 mask) { *lpc_gpio_dirclr() = mask; }
+};
+using LpcGpioDir = LpcGpioDirSetClr;
+#else
+using LpcGpioDir = LpcGpioDirReadModifyWrite;
 #endif
 
 }  // namespace lpc_detail
@@ -113,10 +167,10 @@ public:
     typedef u32           port_t;
 
     inline static void setOutput() __attribute__((always_inline)) {
-        *lpc_detail::lpc_gpio_dirset() = _MASK;
+        lpc_detail::LpcGpioDir::setOutput(_MASK);
     }
     inline static void setInput() __attribute__((always_inline)) {
-        *lpc_detail::lpc_gpio_dirclr() = _MASK;
+        lpc_detail::LpcGpioDir::setInput(_MASK);
     }
 
     inline static void hi() __attribute__((always_inline)) {
@@ -160,14 +214,12 @@ constexpr bool isLpcHardwarePin(const _ARMPIN<PIN, MASK>*) { return true; }
 constexpr bool isLpcHardwarePin(const void*) { return false; }
 #endif  // FL_FASTPIN_HAS_NO_PINMAP
 
-// FL_LPC_ENABLE_FAST_SOFTWARE_SPI: optimized bit-bang software SPI pin policy (default 0).
-// UNTESTED ON HARDWARE: no bench evidence exists for this platform yet.
-// Default 0 keeps the legacy bit-bang writer. Define it to 1 to enable the
-// optimized path at your own risk.
+// FL_LPC_ENABLE_FAST_SOFTWARE_SPI: optimized bit-bang software SPI pin policy (default 1).
+// Opt-out: define it to 0 to fall back to the legacy bit-bang writer.
 // Set it as a build flag (-D / build_flags), not a #define in the sketch: the
 // value must match in every translation unit, including FastLED's own sources.
 #ifndef FL_LPC_ENABLE_FAST_SOFTWARE_SPI
-#define FL_LPC_ENABLE_FAST_SOFTWARE_SPI 0
+#define FL_LPC_ENABLE_FAST_SOFTWARE_SPI 1
 #endif
 // The fast policy writes GPIO registers directly, bypassing forced core-API pins.
 #if FL_LPC_ENABLE_FAST_SOFTWARE_SPI && !defined(FL_FASTPIN_HAS_NO_PINMAP)

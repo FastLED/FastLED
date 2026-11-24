@@ -45,11 +45,11 @@ grouped by related policy area:
   (FastLED#4850). The
   name tables live in `lint_core/libc_reserved_names.rs`.
 - `libc_backstop.rs`: structural pass. Every `FlLibcTag` wrapper under `src/`
-  must be called unqualified in `tests/fl/stl/adl_barrier.cpp`'s
+  must be called unqualified in `tests/unit/fl/stl/adl_barrier.cpp`'s
   `libc_every_using_fl` block, and every wrapper with a `void*` parameter also
   in `libc_every_adl`; calls to names that are no longer wrappers fail
   (FastLED#4838).
 - `adl_barrier.rs`: structural pass. No function may be declared directly in
   `fl` with the name of a function in `fl::adl_barrier`, and every barrier
   function must be called as `fl::name` in the "every adl_barrier name is
-  reachable as fl::name" case of `tests/fl/stl/adl_barrier.cpp` (FastLED#4851).
+  reachable as fl::name" case of `tests/unit/fl/stl/adl_barrier.cpp` (FastLED#4851).

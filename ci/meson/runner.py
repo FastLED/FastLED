@@ -38,9 +38,18 @@ from ci.meson.sequential_runner import (
     run_sequential_compile,
 )
 from ci.meson.streaming_runner import StreamingContext, run_streaming_path
-from ci.meson.test_execution import MesonTestResult, run_meson_test
+from ci.meson.test_discovery import INTEGRATION_TEST_TIMEOUT_SECONDS
+from ci.meson.test_execution import (
+    INTEGRATION_SUITE,
+    MesonTestResult,
+    run_meson_test,
+)
 from ci.util.build_lock import libfastled_build_lock
 from ci.util.timestamp_print import ts_print as _ts_print
+
+
+# Ninja alias defined by tests/meson.build for the integration tier.
+INTEGRATION_TARGET = "integration_tests"
 
 
 def _resolve_test_name_candidates(
@@ -85,6 +94,7 @@ def run_meson_build_and_test(
     exclude_suites: Optional[list[str]] = None,
     test_file_filter: Optional[str] = None,
     log_failures: Optional[Path] = None,
+    integration: bool = False,
 ) -> MesonTestResult:
     """
     Complete Meson build and test workflow.
@@ -101,6 +111,9 @@ def run_meson_build_and_test(
         exclude_suites: Optional list of test suites to exclude (e.g., ['examples'])
         test_file_filter: Optional .hpp filename to filter test execution (e.g., "backbeat.hpp")
         log_failures: Optional directory to write per-test failure logs (<name>_compile.log, <name>_run.log)
+        integration: Build and run the integration tier (tests/integration/)
+            instead of the default unit tier. Ignored when test_name is set,
+            since a named test runs whichever tier it lives in.
 
     Returns:
         MesonTestResult with success status, duration, and test counts
@@ -211,6 +224,10 @@ def run_meson_build_and_test(
                     build_timer=build_timer,
                     build_optimizer=build_optimizer,
                 )
+                if integration:
+                    ctx.compile_target = INTEGRATION_TARGET
+                    ctx.include_suites = [INTEGRATION_SUITE]
+                    ctx.test_timeout = INTEGRATION_TEST_TIMEOUT_SECONDS
                 return run_streaming_path(ctx)
 
             seq_ctx = SequentialCompileContext(
@@ -273,7 +290,11 @@ def run_meson_build_and_test(
         )
 
     return run_meson_test(
-        build_dir, test_name=None, verbose=verbose, exclude_suites=exclude_suites
+        build_dir,
+        test_name=None,
+        verbose=verbose,
+        exclude_suites=exclude_suites,
+        include_suites=[INTEGRATION_SUITE] if integration else None,
     )
 
 
@@ -297,6 +318,11 @@ def main() -> None:
         "--check", action="store_true", help="Enable IWYU static analysis"
     )
     parser.add_argument("--build-dir", default=".build/meson", help="Build directory")
+    parser.add_argument(
+        "--integration",
+        action="store_true",
+        help="Build and run the integration tier (tests/integration/)",
+    )
 
     args = parser.parse_args()
 
@@ -312,6 +338,7 @@ def main() -> None:
         debug=args.debug,
         build_mode=args.build_mode,
         check=args.check,
+        integration=args.integration,
     )
 
     sys.exit(0 if result.success else 1)

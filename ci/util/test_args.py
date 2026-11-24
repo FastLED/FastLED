@@ -40,6 +40,14 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
         help="Run C++ tests only (equivalent to --unit --examples, suppresses Python tests)",
     )
     parser.add_argument("--unit", action="store_true", help="Run C++ unit tests only")
+    parser.add_argument(
+        "--integration",
+        action="store_true",
+        help=(
+            "Build and run the C++ integration tier (tests/integration/) instead of "
+            "the default unit tier. A named test runs in whichever tier it lives in."
+        ),
+    )
     parser.add_argument("--py", action="store_true", help="Run Python tests only")
     parser.add_argument(
         "test",
@@ -263,7 +271,17 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
         if parsed_args.log_failures
         else None,
         setup_only=parsed_args.setup_only,
+        integration=parsed_args.integration,
     )
+
+    # --integration is a C++-only run of the integration tier.
+    if test_args.integration:
+        if test_args.examples is not None or test_args.py or test_args.full:
+            parser.error(
+                "--integration cannot be combined with --examples, --py or --full"
+            )
+        test_args.cpp = True
+        test_args.unit = True
 
     # Save original test query before disambiguation modifies it
     test_args.raw_test_query = test_args.test
@@ -328,12 +346,14 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
                 ts_print(f"Found: {match.name} ({match.path}) [example]{filter_desc}")
             else:  # unit_test
                 # Convert path to Meson target name using the same logic as tests/test_helpers.py
-                # This ensures "fl async" → "tests/fl/async.cpp" → "fl_async" target
-                path_without_ext = match.path.replace(".cpp", "").replace(".ino", "")
+                # This ensures "fl async" → "tests/unit/fl/async.cpp" → "fl_async" target
+                from ci.util.smart_selector import (
+                    strip_test_tier,  # noqa: PLC0415 - lazy, see above
+                )
 
-                # Remove "tests/" prefix if present
-                if path_without_ext.startswith("tests/"):
-                    path_without_ext = path_without_ext[6:]  # Remove "tests/"
+                path_without_ext = strip_test_tier(
+                    match.path.replace(".cpp", "").replace(".ino", "")
+                )
 
                 # Convert to Meson target name format (following extract_test_name logic)
                 if path_without_ext.startswith("fl/"):

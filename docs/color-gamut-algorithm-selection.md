@@ -450,7 +450,7 @@ output depth the step is proportionally more visible — 0.31% of full drive
 is roughly 13 codes at 12-bit — so a device driving finer than 8 bits
 through a slow gradient is the case that would want re-measuring.
 
-`tests/fl/gfx/gamut_map.cpp` pins the bound at 1.5 codes, which six halvings
+`tests/unit/fl/gfx/gamut_map.cpp` pins the bound at 1.5 codes, which six halvings
 fails.
 
 ## Devices with a white emitter (C3)

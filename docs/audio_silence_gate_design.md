@@ -101,7 +101,7 @@ bool isSilent() const FL_NO_EXCEPT;
 - Cleared to `false` on `setSample()` (per-frame reset — Processor/Reactive must re-populate after NFT update).
 
 ### `audio::SilenceEnvelope` (new)
-See Layer 2 above. Lives in `src/fl/audio/silence_envelope.{h,cpp.hpp}`. Added to `src/fl/audio/_build.cpp.hpp` unity include. Unit test at `tests/fl/audio/silence_envelope.cpp`.
+See Layer 2 above. Lives in `src/fl/audio/silence_envelope.{h,cpp.hpp}`. Added to `src/fl/audio/_build.cpp.hpp` unity include. Unit test at `tests/unit/fl/audio/silence_envelope.cpp`.
 
 ### No breaking changes
 - All existing getters unchanged.

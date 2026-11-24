@@ -47,7 +47,7 @@ pwmDmaClCaptureStress for longer ones.
 
 **Silicon status.** This is the on-device version of the host-side
 TX->RX byte-flow readback in
-`tests/fl/channels/lpc_sct_dma_engine.cpp` (#3464/#3468). Same
+`tests/unit/fl/channels/lpc_sct_dma_engine.cpp` (#3464/#3468). Same
 byte-compare contract; the host test proves the engine correctly hands
 bytes to the transmitter, this runner proves the transmitter puts
 those bytes on the wire in the WS2812 protocol.

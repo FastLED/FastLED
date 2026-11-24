@@ -137,7 +137,7 @@ async def run_embedded_fs(args: Args) -> int:
     )
     inject_embedded_fs_fixture(
         project / "src/sketch",
-        root / "tests/platforms/esp/fs/embedded_fs_esp.hpp",
+        root / "tests/unit/platforms/esp/fs/embedded_fs_esp.hpp",
     )
     # These bundled libraries provide headers to the explicit Arduino provider;
     # the native path uses only the SDK C component, and drops their archives.

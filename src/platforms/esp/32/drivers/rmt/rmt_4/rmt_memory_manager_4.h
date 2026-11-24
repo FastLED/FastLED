@@ -19,7 +19,7 @@
 ///
 /// The accounting ledger has no ESP-IDF dependencies. Shared physical-span
 /// helpers live in the companion `_shared.cpp.hpp`, also included by host tests (see
-/// `tests/platforms/esp/32/drivers/rmt/rmt_4/rmt_memory_manager_4.cpp`).
+/// `tests/unit/platforms/esp/32/drivers/rmt/rmt_4/rmt_memory_manager_4.cpp`).
 /// Only the platform-default `instance()` singleton constructor lives
 /// out-of-line in the `.cpp.hpp` behind the usual `FL_IS_ESP32 &&
 /// !FASTLED_RMT5` guard.

@@ -352,6 +352,28 @@ void ownership_example() {
 }
 ```
 
+#### Large scratch buffers: `fl::scratch<T>` (`fl/stl/scratch.h`)
+
+Use `fl::scratch<T>` instead of a plain local for a multi-hundred-byte working set (edge tables, accumulators) in code that can run on a small-stack target (`FL_PLATFORM_HAS_SMALL_STACK`). Keep small locals as plain locals.
+
+```cpp
+#include "fl/stl/scratch.h"
+
+struct Frame { fl::i32 acc[64]; fl::u8 edges[32]; };  // trivially destructible
+
+void render() {
+    fl::scratch<Frame> f;
+    if (!f) return;   // side stack exhausted: skip the work
+    f->acc[0] = 0;
+}
+```
+
+- `FL_SCRATCH_STACK_BYTES == 0` (default except ESP8266): `T` is an ordinary member, so this is a stack local with zero overhead and `f` is always true.
+- `FL_SCRATCH_STACK_BYTES == N`: `T` comes from one fixed N-byte static "side stack" (LIFO bump allocator). Peak RAM is the deepest nesting of live scratches, not one buffer per template instantiation as with function `static`s. It never grows; when full, `f` is false. `fl::scratch_high_water()` reports the peak. ESP8266 defaults to 4608 B on single-threaded builds (its `loop()` stack is a fixed 4 KB) and to 0 when `FASTLED_MULTITHREADED` is set; other small-stack targets (AVR, LPC804, Teensy LC, nRF51, STM32G03x, low-density STM32F1) default to 0 because their stack and `.bss` share one SRAM, so an arena would only make a transient frame permanent; they opt in with `-DFL_SCRATCH_STACK_BYTES=N` (sizing guide in `fl/stl/scratch.h`). When nothing uses `fl::scratch`, `--gc-sections` drops the arena. The `drawPolygon` kernels lease their working sets this way when they fit the arena (`fl/gfx/poly_scratch.h`), and a large enough arena raises their default tier to 32/64 on small-stack targets.
+- Measured on AVR (avr-gcc 7.3 `-Os`, gc-sections), 989 B scratch: +46 B flash and the arena in `.bss`, and the function frame drops from 993 B to 2 B of stack. Unused, the arena costs nothing.
+- Scoped use only (not copyable/movable, LIFO release). `T` must be trivially destructible. Not ISR-safe or thread-safe: never use it from an interrupt. A non-zero capacity is a compile error on `FASTLED_MULTITHREADED` builds unless `FL_SCRATCH_ALLOW_MULTITHREADED=1`. Set the capacity build-wide with `-D`, never with a `#define` in one file.
+- Shrink or restructure before reaching for `fl::scratch`: on AVR the arena is 0 B by default, so it moves nothing there. To find large frames, run the AVR `-fstack-usage` inventory in `agents/docs/binary-size-reference.md` ("Stack inventory").
+
 ### Functional Utilities
 
 - Callables and lists: `fl/stl/function.h`, `functional.h`

@@ -1,3 +1,20 @@
-To run tests use
+FastLED host tests
+==================
 
-`uv run ci/cpp_test_run.py`
+C++ tests live in three tiers:
+
+  tests/unit/**         Fast doctest suites. Built and run by every `bash test`
+                        and `bash test --cpp`. New tests go here.
+  tests/integration/**  Heavy doctest suites with real pass/fail. Not built by
+                        default; run with `bash test --integration`, or name one:
+                        `bash test colorimetric_strategy_table`.
+  tests/profile/**      Standalone benchmark binaries; `bash profile <name>`.
+
+A test's name never includes its tier: tests/unit/fl/x/y.cpp is `fl_x_y`.
+
+Everything else at this level is shared by the tiers: test.h, test_pch.h,
+doctest_main.cpp, the crash handlers, shared/ (runner), data/ (fixtures),
+driver/ (ESP-IDF stub headers) and the Python discovery scripts
+(discover_tests.py, organize_tests.py, test_config.py, test_helpers.py).
+
+See agents/tests.md and agents/docs/testing-commands.md.

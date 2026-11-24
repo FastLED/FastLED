@@ -6,7 +6,9 @@
 // IWYU pragma: begin_keep
 #include "fl/system/arduino.h"
 #include "fl/stl/noexcept.h"
+#include "fl/stl/string.h"
 #include "platforms/avr/is_avr.h"
+#include "platforms/io.h"
 // IWYU pragma: end_keep
 
 // AVR: reference Arduino's `Serial` weakly (#4725).
@@ -133,12 +135,9 @@ int read() FL_NO_EXCEPT {
 // High-level line reading using Arduino's Serial.readStringUntil()
 // This handles USB CDC multi-packet transfers correctly via Stream::timedRead()
 // which uses yield() (immediate context switch) instead of delay(1) (1ms sleep).
-int readLineNative(char delimiter, char* out, int outLen) FL_NO_EXCEPT {
-    if (outLen <= 0) {
-        return 0;
-    }
+int readLineNative(char delimiter, fl::string& out) FL_NO_EXCEPT {
+    out.clear();
     if (!FL_ARDUINO_SERIAL_LINKED()) {
-        out[0] = '\0';
         return 0;
     }
 #if defined(FL_IS_AVR_ATTINY)
@@ -146,7 +145,6 @@ int readLineNative(char delimiter, char* out, int outLen) FL_NO_EXCEPT {
     // line-read behavior without allocating Arduino String.
     const unsigned long timeoutMs = 1000UL;
     unsigned long start = millis();
-    int len = 0;
     while (true) {
         if (!FL_ARDUINO_SERIAL_STREAM().available()) {
             if (millis() - start >= timeoutMs) {
@@ -163,20 +161,18 @@ int readLineNative(char delimiter, char* out, int outLen) FL_NO_EXCEPT {
         if (c == delimiter) {
             break;
         }
-        if (len < outLen - 1) {
-            out[len++] = c;
+        if (out.size() < static_cast<fl::size>(kReadLineNativeMaxLen)) {
+            out.push_back(c);
         }
         start = millis();
     }
-    out[len] = '\0';
-    return len;
+    return static_cast<int>(out.size());  // fl-lint: int-template-ok API returns int; size <= kReadLineNativeMaxLen
 #else
     String line = FL_ARDUINO_SERIAL_STREAM().readStringUntil(delimiter);
     int len = line.length();
-    if (len > outLen - 1) len = outLen - 1;
-    memcpy(out, line.c_str(), len);
-    out[len] = '\0';
-    return len;
+    if (len > kReadLineNativeMaxLen) len = kReadLineNativeMaxLen;
+    out.assign(line.c_str(), static_cast<fl::size>(len));
+    return static_cast<int>(out.size());  // fl-lint: int-template-ok API returns int; size <= kReadLineNativeMaxLen
 #endif
 }
 

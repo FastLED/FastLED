@@ -389,7 +389,7 @@ bool LpcSctDmaTransmitter::isDone() const FL_NO_EXCEPT {
 // Host-mode stubs — no peripheral access. The channels-API engine can
 // hold an instance and call into these, preserving the state-machine
 // behavior verified by
-// `tests/platforms/arm/lpc/drivers/sct_dma/channel_engine_lpc_sct_dma.cpp`.
+// `tests/unit/platforms/arm/lpc/drivers/sct_dma/channel_engine_lpc_sct_dma.cpp`.
 
 void LpcSctDmaTransmitter::init() FL_NO_EXCEPT {
     mInitialized = true;

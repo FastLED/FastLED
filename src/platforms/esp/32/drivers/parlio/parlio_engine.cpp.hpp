@@ -1401,6 +1401,7 @@ bool ParlioEngine::initialize(size_t dataWidth,
                           mTimingT3Ns == timing.t3_ns);
     if (mInitialized && mPeripheral && mPeripheral->isInitialized() && config_matches) {
         // Config matches but check if ring buffers need reallocation for larger LED count
+        bool ring_reallocated = false;
         if (maxLedsPerChannel > mMaxLedsPerChannel) {
             FL_LOG_PARLIO("PARLIO_INIT: Config matches but maxLeds increased from " << mMaxLedsPerChannel << " to " << maxLedsPerChannel << " - reallocating ring buffers");
 
@@ -1430,6 +1431,7 @@ bool ParlioEngine::initialize(size_t dataWidth,
                         return false;
                     }
                 }
+                ring_reallocated = true;
                 FL_LOG_PARLIO("PARLIO_INIT: Ring buffers reallocated (capacity=" << mRingBufferCapacity << ")");
             } else {
                 // Keep the existing (larger) allocation.
@@ -1439,13 +1441,31 @@ bool ParlioEngine::initialize(size_t dataWidth,
             mMaxLedsPerChannel = maxLedsPerChannel;
         }
 
-        // CRITICAL: Reinitialize the PARLIO TX unit when reusing the same config.
-        // The ESP32 PARLIO TX unit's internal DMA state machine can get stuck after
-        // channels are destroyed and recreated. A full deinit/reinit of the TX unit
-        // resets this state while keeping ring buffers allocated (avoiding fragmentation).
-        FL_LOG_PARLIO("PARLIO_INIT: Reinitializing TX unit for clean DMA state");
+        // Steady state (#5351): same pins, same clockless mode, same ring
+        // geometry -> the existing TX unit is already configured for this
+        // frame. Recreating it costs ~0.9 ms per show() on ESP32-C6, and
+        // beginTransmission() still runs its disable/enable cycle to reset
+        // the DMA state between frames.
+        if (!ring_reallocated && mEncodingMode == EncodingMode::CLOCKLESS &&
+            mPins == pins) {
+            return true;
+        }
+
+        // The pin set (or ring geometry) changed under the same width and
+        // timing, e.g. a lane was added or removed: rebuild the TX unit for
+        // the new pins while keeping ring buffers allocated (avoiding
+        // fragmentation).
+        FL_LOG_PARLIO("PARLIO_INIT: Reinitializing TX unit for new pins / ring geometry");
         mPeripheral->deinitialize();
         mTxUnitEnabled = false;
+        mPins = pins;
+        mActualChannels = 0;
+        for (size_t i = 0; i < pins.size(); i++) {
+            if (pins[i] >= 0) {
+                mActualChannels++;
+            }
+        }
+        mDummyLanes = mDataWidth - mActualChannels;
 
 #if PARLIO_FORCE_LSB_MODE
         constexpr auto packing = ParlioBitPackOrder::FL_PARLIO_LSB;
@@ -2172,9 +2192,9 @@ ParlioEngineState ParlioEngine::poll() FL_NO_EXCEPT {
                 }
             }
 
-            // Short delay for GPIO stabilization
-            mPeripheral->delayMicroseconds(100);
-
+            // No settle delay here (#5351): the frame's reset/latch low
+            // time is already in the DMA buffer (resetPaddingBytes), and
+            // delayMicroseconds() yields at least one FreeRTOS tick (~1 ms).
             return ParlioEngineState::READY;
         } else {
             // Still draining final transmission

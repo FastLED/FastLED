@@ -175,7 +175,7 @@ const NUMERIC_LIMIT_MACROS: &[&str] = &[
 ];
 
 const NUMERIC_LIMIT_EXCLUDED_SUFFIXES: &[&str] =
-    &["tests/fl/stl/cstdint.cpp", "tests/fl/stl/stdint.cpp"];
+    &["tests/unit/fl/stl/cstdint.cpp", "tests/unit/fl/stl/stdint.cpp"];
 
 const STD_BRIDGE_FILE_WHITELIST: &[&str] = &[
     "platforms/stub/mutex_stub_stl.h",
@@ -250,8 +250,10 @@ const PLATFORM_INCLUDE_LOCATIONS: &[&str] = &[
     "/src/fx/",
     "/src/lib8tion/",
     "/src/sensors/",
-    "/tests/fl/",
-    "/tests/fx/",
+    "/tests/unit/fl/",
+    "/tests/unit/fx/",
+    "/tests/integration/fl/",
+    "/tests/integration/fx/",
     "/examples/",
 ];
 
@@ -541,22 +543,22 @@ const TEST_CONFIG_EXCLUDED_DIRS: &[&str] = &[
     "tests/bin",
     "tests/example_compile_direct",
     "tests/fastled_js",
-    "tests/fl/chipsets/encoders",
-    "tests/fl/log",
-    "tests/fl/channels/detail/validation",
-    "tests/fl/remote/rpc",
-    "tests/fl/codec",
-    "tests/fl/fx/2d",
+    "tests/unit/fl/chipsets/encoders",
+    "tests/unit/fl/log",
+    "tests/unit/fl/channels/detail/validation",
+    "tests/unit/fl/remote/rpc",
+    "tests/unit/fl/codec",
+    "tests/unit/fl/fx/2d",
     "tests/fbuild_qemu_smoke",
 ];
 
 const TEST_AGGREGATED_DIRS: &[&str] = &[
-    "tests/fl/chipsets/encoders",
-    "tests/fl/log",
-    "tests/fl/channels/detail/validation",
-    "tests/fl/remote/rpc",
-    "tests/fl/codec",
-    "tests/fl/fx/2d",
+    "tests/unit/fl/chipsets/encoders",
+    "tests/unit/fl/log",
+    "tests/unit/fl/channels/detail/validation",
+    "tests/unit/fl/remote/rpc",
+    "tests/unit/fl/codec",
+    "tests/unit/fl/fx/2d",
 ];
 
 const TEST_INCLUDE_VALID_PREFIXES: &[&str] = &[

@@ -22,7 +22,6 @@ Usage:
 import argparse
 import json
 import sys
-from itertools import chain
 from pathlib import Path
 from typing import Dict, List, Set
 
@@ -51,31 +50,16 @@ def compute_test_files_hash(tests_dir: Path) -> str:
     Returns:
         SHA256 hash of all test file paths + contents
     """
-    # Find all *.cpp / *.ino files recursively, same logic as discover_tests.py
-    from discover_tests import TEST_SOURCE_GLOBS
+    # Same file set discover_tests.py hands to organize_tests.py.
+    from discover_tests import discover_test_files
     from test_config import EXCLUDED_TEST_DIRS, EXCLUDED_TEST_FILES
 
-    test_files: list[Path] = []
-
-    for f in sorted(chain.from_iterable(tests_dir.rglob(g) for g in TEST_SOURCE_GLOBS)):
-        resolved = f.resolve()
-
-        # Skip excluded files
-        if resolved in EXCLUDED_TEST_FILES:
-            continue
-
-        # Skip files inside excluded directories
-        if any(resolved.is_relative_to(d) for d in EXCLUDED_TEST_DIRS):
-            continue
-
-        # Skip hidden directories and .dir directories
-        rel = f.relative_to(tests_dir)
-        parent_parts = rel.parts[:-1]
-        if any(part.startswith(".") or part.endswith(".dir") for part in parent_parts):
-            continue
-        test_files.append(f)
-
-    unique_files = test_files  # already deduplicated by rglob + sorted
+    unique_files = [
+        tests_dir / rel
+        for rel in discover_test_files(
+            tests_dir, EXCLUDED_TEST_FILES, EXCLUDED_TEST_DIRS
+        )
+    ]
 
     return compute_files_content_hash(unique_files, tests_dir)
 

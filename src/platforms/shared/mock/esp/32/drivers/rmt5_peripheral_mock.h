@@ -128,6 +128,7 @@ public:
     u8* allocateDmaBuffer(size_t size) FL_NO_EXCEPT override = 0;
     void freeDmaBuffer(u8* buffer) FL_NO_EXCEPT override = 0;
     u32 getPinRouting(int pin) FL_NO_EXCEPT override = 0;
+    bool isPinRoutingCurrent(int pin, u32 routing) FL_NO_EXCEPT override = 0;
     bool rebindTxPin(void* channel_handle, int pin) FL_NO_EXCEPT override = 0;
 
     //=========================================================================
@@ -188,6 +189,7 @@ public:
 
     /// @brief Number of successful rebindTxPin() calls
     virtual size_t getPinRebindCount() const FL_NO_EXCEPT = 0;
+    virtual size_t getPinRoutingQueryCount() const FL_NO_EXCEPT = 0;
 
     //-------------------------------------------------------------------------
     // Waveform Capture (for validation)
@@ -226,6 +228,12 @@ public:
     /// @brief Check if a channel is enabled
     /// @param channel_handle Channel handle from createTxChannel()
     virtual bool isChannelEnabled(void* channel_handle) const FL_NO_EXCEPT = 0;
+
+    /// @brief Total number of successful enableChannel() calls
+    virtual size_t getEnableCount() const FL_NO_EXCEPT = 0;
+
+    /// @brief Total number of waitAllDone() calls
+    virtual size_t getWaitAllDoneCount() const FL_NO_EXCEPT = 0;
 
     /// @brief Reset mock to initial state (for testing)
     ///

@@ -169,7 +169,7 @@ decides whether it cares, rather than treating the file as corrupt.
 
 ### Playback with and without colour management (B6)
 
-**Without colour management (the default)** a `.fled` file plays exactly as it always has. Its RGB8 values reach the strip as bytes: colour order applied, scaled by brightness and legacy correction, and nothing else. `video.color` is carried and validated but changes no output. Existing files look the same on existing sketches; `tests/fl/channels/channel.cpp` pins the unbound output byte for byte on clockless and SPI chipsets.
+**Without colour management (the default)** a `.fled` file plays exactly as it always has. Its RGB8 values reach the strip as bytes: colour order applied, scaled by brightness and legacy correction, and nothing else. `video.color` is carried and validated but changes no output. Existing files look the same on existing sketches; `tests/unit/fl/channels/channel.cpp` pins the unbound output byte for byte on clockless and SPI chipsets.
 
 **With colour management** (a channel with `setColorProfile`), each pixel is interpreted through the channel's **source profile**: decoded to linear light, mapped into the strip's gamut, and solved per emitter. The same file therefore looks different, and should.
 

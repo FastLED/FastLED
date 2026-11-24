@@ -17,7 +17,14 @@
 // USB-on-boot builds (ARDUINO_USB_MODE=0 with CDC/MSC/DFU/USB on boot) keep the
 // stock startup: it calls into the TinyUSB class objects, which FastLED's copy
 // may not include.
-// Opt out with -DFL_ESP32_STOCK_ARDUINO_MAIN=1.
+// Opt out with -DFL_ESP32_STOCK_ARDUINO_MAIN=1, or with
+// `#define FL_ESP32_STOCK_ARDUINO_MAIN 1` before `#include "FastLED.h"` in
+// every non-FastLED file (sketch or other library) that includes it.
+// The define is enough on its own: the weak app_main lives only in those
+// objects (esp32_lazy_serial0_main.h). FastLED's own unity files define
+// FL_BUILDING_FASTLED_LIBRARY and never emit it, so without it the linker pulls
+// in the core's main.o, whether libraries are linked as objects (Arduino IDE)
+// or as archives (FastLED#5365).
 
 // ok no namespace fl
 

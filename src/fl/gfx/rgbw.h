@@ -222,6 +222,15 @@ using RgbwConvertFn = void (*)(const Rgbw& rgbw, const u8 (&raw)[3],
                                u8* b0, u8* b1, u8* b2, u8* b3);
 /// Null until enable_rgbw_conversion() has run.
 RgbwConvertFn rgbw_conversion() FL_NO_EXCEPT;
+/// Whole-run RGBW conversion (FastLED#5377): `n` raw source-order pixels
+/// (3 bytes each, one premixed scale for all of them) -> 4 wire bytes each
+/// at `out`. Byte-identical to calling RgbwConvertFn per pixel; the RGBW
+/// mode and W placement are resolved once per run instead of per pixel.
+using RgbwConvertBulkFn = void (*)(const Rgbw& rgbw, const u8* raw, int n,
+                                   const u8 (&premix)[3],
+                                   const u8 (&order)[3], u8* out);
+/// Null until enable_rgbw_conversion() has run.
+RgbwConvertBulkFn rgbw_conversion_bulk() FL_NO_EXCEPT;
 }  // namespace detail
 
 struct Rgbw {

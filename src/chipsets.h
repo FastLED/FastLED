@@ -396,7 +396,7 @@ FL_DISABLE_WARNING_SUBOBJECT_LINKAGE
 // For automated testing of all chipsets: uv run ci/test_led_timing_conversion.py
 // For C++ check out
 //   * converter: src/fl/clockless/timing_conversion.h
-//   * tests: tests/fl/clockless/timing_conversion.cpp
+//   * tests: tests/unit/fl/clockless/timing_conversion.cpp
 
 
 /// GE8822 controller @ 800 kHz - references centralized timing from fl::TIMING_GE8822_800KHZ

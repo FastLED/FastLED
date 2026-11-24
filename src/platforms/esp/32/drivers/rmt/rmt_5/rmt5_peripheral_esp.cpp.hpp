@@ -43,6 +43,9 @@ FL_EXTERN_C_BEGIN
 #include "soc/gpio_sig_map.h"  // For RMT_SIG_OUT0_IDX etc.
 // IWYU pragma: end_keep
 #include "soc/soc_caps.h"  // IWYU pragma: keep
+#include "soc/gpio_reg.h" // IWYU pragma: keep
+#include "soc/gpio_periph.h" // IWYU pragma: keep
+#include "soc/io_mux_reg.h" // IWYU pragma: keep
 FL_EXTERN_C_END
 
 // IDF 6 moved the RMT instance/channel counts from SoC caps to the HAL.
@@ -127,7 +130,8 @@ public:
     bool syncCache(void* buffer, size_t size) FL_NO_EXCEPT override;
     u8* allocateDmaBuffer(size_t size) FL_NO_EXCEPT override;
     void freeDmaBuffer(u8* buffer) FL_NO_EXCEPT override;
-    u32 getPinRouting(int pin) FL_NO_EXCEPT override;
+    FL_NO_INLINE u32 getPinRouting(int pin) FL_NO_EXCEPT override;
+    bool isPinRoutingCurrent(int pin, u32 routing) FL_NO_EXCEPT override;
     bool rebindTxPin(void* channel_handle, int pin) FL_NO_EXCEPT override;
 
 private:
@@ -542,22 +546,34 @@ void Rmt5PeripheralESPImpl::freeDmaBuffer(u8* buffer) FL_NO_EXCEPT {
 // Pin Routing (FastLED#4905)
 //=============================================================================
 
-// gpio_get_io_config() and rmt_tx_switch_gpio() both ship in the IDF 5.5
-// bundled with Arduino-ESP32 3.3; older cores keep the previous behaviour.
+// rmt_tx_switch_gpio() ships in IDF 5.5, bundled with Arduino-ESP32 3.3;
+// older cores keep the previous behaviour.
 #define FL_RMT5_CAN_REBIND_PIN (ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 5, 0))
 
 u32 Rmt5PeripheralESPImpl::getPinRouting(int pin) FL_NO_EXCEPT {
 #if FL_RMT5_CAN_REBIND_PIN
-    gpio_io_config_t io = {};
-    if (gpio_get_io_config(static_cast<gpio_num_t>(pin), &io) != ESP_OK) {
+    if (!GPIO_IS_VALID_GPIO(pin) || !GPIO_PIN_MUX_REG[pin]) {
         return kPinRoutingUnknown;
     }
-    return (io.sig_out & 0xFFFFu) | (io.oe ? (1u << 16) : 0u) |
-           ((io.fun_sel & 0xFFu) << 20);
+    // Keep the three-field token identical to the SPI peripheral's snapshot.
+    const u32 signal = REG_GET_FIELD(GPIO_FUNC0_OUT_SEL_CFG_REG + pin * 4, GPIO_FUNC0_OUT_SEL);
+    u32 enableRegister = GPIO_ENABLE_REG;
+#if SOC_GPIO_PIN_COUNT > 32
+    if (pin >= 32) {
+        enableRegister = GPIO_ENABLE1_REG;
+    }
+#endif
+    const u32 enabled = (REG_READ(enableRegister) >> (pin & 31)) & 1u;
+    const u32 function = REG_GET_FIELD(GPIO_PIN_MUX_REG[pin], MCU_SEL);
+    return (signal & 0xFFFFu) | (enabled << 16) | ((function & 0xFFu) << 20);
 #else
     (void)pin;
     return kPinRoutingUnknown;
 #endif
+}
+
+bool Rmt5PeripheralESPImpl::isPinRoutingCurrent(int pin, u32 routing) FL_NO_EXCEPT {
+    return Rmt5PeripheralESPImpl::getPinRouting(pin) == routing;
 }
 
 bool Rmt5PeripheralESPImpl::rebindTxPin(void* channel_handle, int pin) FL_NO_EXCEPT {
@@ -566,8 +582,9 @@ bool Rmt5PeripheralESPImpl::rebindTxPin(void* channel_handle, int pin) FL_NO_EXC
         return false;
     }
     rmt_channel_handle_t channel = static_cast<rmt_channel_handle_t>(channel_handle);
-    // rmt_tx_switch_gpio() requires a disabled channel. The engine keeps idle
-    // channels disabled and enables them per transmission, so leave it so.
+    // rmt_tx_switch_gpio() requires a disabled channel. The channel is left
+    // disabled; the caller must clear its enabled tracking and enable it
+    // again before the next transmission.
     esp_err_t err = rmt_disable(channel);
     if (err != ESP_OK && err != ESP_ERR_INVALID_STATE) {
         FL_WARN_ONCE("RMT5_PERIPH: rebind GPIO " << pin << ": rmt_disable failed: " << esp_err_to_name(err));

@@ -283,6 +283,25 @@
     // Arduino pins 32..34
     //_FL_DEFPIN(32, 21, 0); // D32 is P0.21 -- PIN_QSPI_DATA3
     //_FL_DEFPIN(33,  9, 0); // D33 is NFC1, only accessible via test point
+
+    // Default example pins: D1 (P0.24, UART RX) is excluded above, so the
+    // FL_PIN_SPI_DATA_1 fallback of 1 cannot be routed. Use the board's
+    // labelled SPI MOSI/SCK pads instead. See platforms/default_pins.h.
+    #ifndef FL_PIN_SPI_DATA_1
+    #define FL_PIN_SPI_DATA_1 25
+    #endif
+    #ifndef FL_PIN_SPI_CLOCK_1
+    #define FL_PIN_SPI_CLOCK_1 26
+    #endif
+    // Second clocked strip: the generic fallback pair (3/4) lands on D4, which
+    // is PIN_LED2 (blue) on the Sense, so both pins move. D6/D9 are broken out
+    // and are not UART or an onboard LED.
+    #ifndef FL_PIN_SPI_DATA_2
+    #define FL_PIN_SPI_DATA_2 6
+    #endif
+    #ifndef FL_PIN_SPI_CLOCK_2
+    #define FL_PIN_SPI_CLOCK_2 9
+    #endif
 #endif // defined (ARDUINO_NRF52840_FEATHER)
 
 
@@ -338,6 +357,25 @@
     // Arduino pins 32..34
     //_FL_DEF_INVALID_PIN(32, 21, 0); // D32 is P0.21 -- PIN_QSPI_DATA3
     //_FL_DEF_INVALID_PIN(33,  9, 0); // D33 is NFC1, only accessible via test point
+
+    // Default example pins: D1 (P0.24, UART RX) is excluded above, so the
+    // FL_PIN_SPI_DATA_1 fallback of 1 cannot be routed. Use the board's
+    // labelled SPI MOSI/SCK pads instead. See platforms/default_pins.h.
+    #ifndef FL_PIN_SPI_DATA_1
+    #define FL_PIN_SPI_DATA_1 25
+    #endif
+    #ifndef FL_PIN_SPI_CLOCK_1
+    #define FL_PIN_SPI_CLOCK_1 26
+    #endif
+    // Second clocked strip: the generic fallback pair (3/4) lands on D4, which
+    // is PIN_LED2 (blue) on the Sense, so both pins move. D6/D9 are broken out
+    // and are not UART or an onboard LED.
+    #ifndef FL_PIN_SPI_DATA_2
+    #define FL_PIN_SPI_DATA_2 6
+    #endif
+    #ifndef FL_PIN_SPI_CLOCK_2
+    #define FL_PIN_SPI_CLOCK_2 9
+    #endif
 #endif // defined (ARDUINO_NRF52840_FEATHER_SENSE)
 
 // Adafruit Bluefruit nRF52840 Metro Express
@@ -1292,6 +1330,26 @@
     // Arduino pins 32..34
     //_FL_DEFPIN(32, 21, 0); // D32 is P0.21 -- PIN_QSPI_DATA3
     //_FL_DEFPIN(33,  9, 0); // D33 is NFC1, only accessible via test point
+
+    // Default example pins: D1 is excluded above, so the FL_PIN_SPI_DATA_1
+    // fallback of 1 cannot be routed. D25/D26 are SPI MOSI/SCK in this
+    // Feather-derived fallback table; on an unrecognised board they are a
+    // guess, not a verified pad. See platforms/default_pins.h.
+    #ifndef FL_PIN_SPI_DATA_1
+    #define FL_PIN_SPI_DATA_1 25
+    #endif
+    #ifndef FL_PIN_SPI_CLOCK_1
+    #define FL_PIN_SPI_CLOCK_1 26
+    #endif
+    // Second clocked strip: the generic fallback pair (3/4) lands on D4, which
+    // is PIN_LED2 (blue) on the Sense, so both pins move. D6/D9 are broken out
+    // and are not UART or an onboard LED.
+    #ifndef FL_PIN_SPI_DATA_2
+    #define FL_PIN_SPI_DATA_2 6
+    #endif
+    #ifndef FL_PIN_SPI_CLOCK_2
+    #define FL_PIN_SPI_CLOCK_2 9
+    #endif
 #endif // defined (NRF52840_XXAA)
 
 #endif // __FASTPIN_ARM_NRF52_VARIANTS_H

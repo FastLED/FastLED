@@ -8,12 +8,21 @@ from ci.util.timestamp_print import ts_print
 from ci.util.zccache_config import show_zccache_stats
 
 
+# Test.ino's drawPolygon AVR-vs-host hash check (examples/Test/PolygonHashes.h,
+# FastLED#5324): host builds use a 32-bit int, so only the AVR run can catch
+# 16-bit-int overflows in these kernels.
+POLYGON_HASH_OK = "polygon hashes match host"
+POLYGON_HASH_MISMATCH = "polygon hash mismatch"
+
+
 def avr8js_run_succeeded(example: str, returncode: int, output: str) -> bool:
     """Require Test's serial markers; other sketches are bounded smoke runs."""
     if example == "Test":
         return (
             returncode == 0
             and "Test setup starting" in output
+            and POLYGON_HASH_OK in output
+            and POLYGON_HASH_MISMATCH not in output
             and "Test loop!" in output
         )
     if returncode == 0:
@@ -87,7 +96,7 @@ def run_avr8js_tests(args: TestArgs) -> None:
                         "--halt-on-success",
                         "Test loop!",
                         "--halt-on-error",
-                        "legacy libc copy mismatch",
+                        f"legacy libc copy mismatch|{POLYGON_HASH_MISMATCH}",
                     ]
                 )
             command.append(str(staged.build_dir))

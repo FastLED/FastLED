@@ -260,6 +260,20 @@ FL_REQUIRE_LT((map_range<int, int, long>(x, 0, 100, 0, 1000)), max_value)
 
 ---
 
+## Test Tiers
+
+Host C++ tests are split into three tiers. Shared infrastructure (`tests/shared/`, `tests/data/`, `tests/driver/` ESP-IDF stub headers, `test.h`, `test_pch.h`, `doctest_main.cpp`, the crash handlers and the runner) stays at the top of `tests/` and serves every tier.
+
+| Tier | Path | Runs | Use it for |
+|------|------|------|------------|
+| unit | `tests/unit/**` | every `bash test` / `bash test --cpp` | Fast doctest suites. **New tests go here.** |
+| integration | `tests/integration/**` | `bash test --integration`, or `bash test <name>` | Doctest suites with real pass/fail that are too heavy for every run (seconds of CPU, large sweeps, research tables). |
+| profile | `tests/profile/**` | `bash profile <name>` | Standalone benchmark binaries. Not doctest suites, not pass/fail. |
+
+- A test's name never includes its tier: `tests/unit/fl/x/y.cpp` is `fl_x_y`, `tests/unit/misc/containers.cpp` is `containers`. Moving a test between tiers keeps its name, and a name may exist in only one tier (discovery fails otherwise).
+- Integration-tier suites use the same runner, DLL and PCH machinery as unit tests, but they are not built by default and the default `meson test` run excludes their `integration` suite. Their watchdog is 300 s.
+- Put a suite in `tests/integration/` only when it is pass/fail but too slow for the default run. Keep its fast production checks in `tests/unit/`; share helpers through a header both tiers include (see `tests/unit/misc/colorimetric_strategies.hpp`).
+
 ## No main() in Test Files
 
 The shared runner calls registered `FL_TEST_CASE`s, so a `main()` under `tests/` never runs and its checks silently do nothing. `TestMainChecker` fails lint on one. For build-flag variants, keep the flags on a dedicated library in `tests/meson.build` and link a normal `FL_TEST_FILE` test DLL to it. A real entry point needs `// allow-test-main: <why>` on the same or preceding line; the reason is required. `tests/profile/` is exempt because those are standalone benchmarks.
@@ -283,9 +297,9 @@ The shared runner calls registered `FL_TEST_CASE`s, so a `main()` under `tests/`
 
 Some test directories use a **consolidation pattern** where multiple `.cpp` files in a subdirectory are `#include`d into a single parent `.cpp` file that compiles as one test binary. These subdirectories are listed in `EXCLUDED_TEST_DIRS` in `tests/test_config.py` so the auto-discovery system doesn't try to compile them individually.
 
-**Example:** `tests/fl/fx/2d/` contains individual test files (`animartrix_fp.cpp`, `chasing_spirals.cpp`, etc.) that are all `#include`d by the parent file `tests/fl/fx/2d.cpp`:
+**Example:** `tests/unit/fl/fx/2d/` contains individual test files (`animartrix_fp.cpp`, `chasing_spirals.cpp`, etc.) that are all `#include`d by the parent file `tests/unit/fl/fx/2d.cpp`:
 ```cpp
-// tests/fl/fx/2d.cpp
+// tests/unit/fl/fx/2d.cpp
 // ok standalone // ok cpp include
 #include "2d/animartrix_fp.cpp"
 #include "2d/chasing_spirals.cpp"
@@ -297,20 +311,20 @@ Some test directories use a **consolidation pattern** where multiple `.cpp` file
 - The `// ok standalone` comment at the top of these files is a **linter exemption** (tells lint checks the file is valid despite being `#include`d rather than compiled on its own). It is **not** a build system registration mechanism.
 - To add a new test file to a consolidated directory, add it to the parent `.cpp` file's `#include` list
 - Current consolidated directories (see `EXCLUDED_TEST_DIRS` in `tests/test_config.py`):
-  - `tests/fl/fx/2d/` → parent: `tests/fl/fx/2d.cpp`
-  - `tests/fl/chipsets/encoders/`
-  - `tests/fl/log/`
-  - `tests/fl/audio/detectors/`
-  - `tests/fl/channels/detail/validation/`
-  - `tests/fl/remote/rpc/`
-  - `tests/fl/codec/`
+  - `tests/unit/fl/fx/2d/` → parent: `tests/unit/fl/fx/2d.cpp`
+  - `tests/unit/fl/chipsets/encoders/`
+  - `tests/unit/fl/log/`
+  - `tests/unit/fl/audio/detectors/`
+  - `tests/unit/fl/channels/detail/validation/`
+  - `tests/unit/fl/remote/rpc/`
+  - `tests/unit/fl/codec/`
 
 ### TEST FILE PLACEMENT
-**🚨 NEVER create tests in `tests/misc/`** - this is a legacy catch-all that should not grow.
+**🚨 NEVER create tests in `tests/unit/misc/`** - this is a legacy catch-all that should not grow.
 
 When creating a new test file, **mirror the source directory structure**:
-- Source at `src/fl/stl/flat_map.h` → test at `tests/fl/stl/flat_map.cpp`
-- Source at `src/fl/channels/uart_wave_encoder.h` → test at `tests/fl/channels/uart_wave_encoder.cpp`
+- Source at `src/fl/stl/flat_map.h` → test at `tests/unit/fl/stl/flat_map.cpp`
+- Source at `src/fl/channels/uart_wave_encoder.h` → test at `tests/unit/fl/channels/uart_wave_encoder.cpp`
 
 Before creating a new file, always check:
 1. Is there an existing test file for the same source file? → **Add your test there**
@@ -322,7 +336,7 @@ Before creating a new file, always check:
 - ❌ **One test case per file** - consolidate related functionality
 - ❌ **Duplicate test patterns** across multiple files
 - ❌ **Scattered feature testing** - keep related tests together
-- ❌ **Putting tests in `tests/misc/`** - mirror source directory structure instead
+- ❌ **Putting tests in `tests/unit/misc/`** - mirror source directory structure instead
 
 ### DEVELOPMENT WORKFLOW
 1. **During Development/Bug Fixing:** Temporary test files are acceptable for rapid iteration
@@ -446,7 +460,7 @@ TEST_CASE("New test - fill in") {
 For test files in `tests/**/*`, use an **anonymous namespace** named after the test:
 
 ```cpp
-// File: tests/fl/chipsets/test_ucs7604.cpp
+// File: tests/unit/fl/chipsets/test_ucs7604.cpp
 
 #include "test.h"
 #include "FastLED.h"

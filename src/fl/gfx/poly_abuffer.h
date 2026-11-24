@@ -95,6 +95,8 @@
 #include "fl/stl/int.h"
 #include "fl/math/fixed_point/s16x16.h"
 #include "fl/gfx/canvas.h"
+#include "fl/gfx/poly_scratch.h"
+#include "fl/stl/scratch.h"
 #include "fastled_progmem.h"
 
 namespace fl {
@@ -215,36 +217,6 @@ inline fl::u8 polyABAlpha(fl::u32 mask) FL_NO_EXCEPT {
     return (p >= 32u) ? 255u : br;
 }
 
-/// Per-edge scanline state.
-///
-/// x0 is the Q16.16 crossing of sub-row 0 of the CURRENT scanline and
-/// advances exactly per scanline (x0 += xinc). Sub-row r's crossing is
-/// X_r = x0 + r*q + corr[r]:
-///   q    = xinc >> 2                 (integer part of the per-sub-row step)
-///   corr = floor((n0 + r*16384*m)/65536),
-///          n0 = (off*xinc) & 65535,  (off = 65536*py0 - ytop_q, the
-///          m  = xinc & 3             vertex's offset from py0's top)
-/// n0 is invariant across scanlines because off advances by exactly 65536
-/// (one pixel) per scanline. X_r is the edge's line at sub-row r's TOP
-/// grid line, measured exactly from the top vertex in Q16, so a vertex
-/// mid-sub-row introduces no quantization shift. ytop/ybot bound the
-/// in-range sub-rows in .2 (4 per pixel, half-open [ytop, ybot)): a
-/// sub-row is in range when its TOP grid line lies in the edge's
-/// [ytop_q, ybot_q) span (the segment reaches the sub-row's top), so a
-/// vertex shared by two edges (on the grid or mid-sub-row) never makes a
-/// sub-row claimed twice. py0/py1 are the canvas rows they span
-/// (identical row convention to the exact kernel).
-struct AbEdge {
-    fl::i64 x0;      // sub-row-0 crossing, Q16.16, current scanline
-    fl::i64 xinc;    // per-scanline step, Q16.16: floor(65536 * B / dy)
-    fl::i64 q;       // xinc >> 2
-    fl::u8  corr[4]; // per-sub-row correction, 0..3
-    fl::i32 ytop;    // first in-range sub-row, .2 (ceil of top vertex)
-    fl::i32 ybot;    // one past last in-range sub-row, .2 (ceil of bottom)
-    int py0;         // first active canvas row
-    int py1;         // last active canvas row
-};
-
 /// Fill a run of [x0, x1) pixels of row py with `color` at alpha br.
 /// The caller guarantees br > 0.
 template<typename PixelT>
@@ -266,12 +238,15 @@ inline void polyABFillRun(PixelT* pixels, int py, int width,
 /// MAXN caps the vertex count (vertices beyond it are ignored, polygon
 /// closes from #MAXN-1 back to #0 — same as the exact kernel). There is
 /// no accumulator to size: the working set is the per-edge state plus
-/// one u32 mask, so the stack stays shallow regardless of canvas size.
+/// one u32 mask, so the working set stays small regardless of canvas size.
 /// It still scales with MAXN: vertices (8*MAXN B) + edges (40-48*MAXN B) +
 /// crossing events (16*MAXN B), too much for an AVR Uno at MAXN = 32, so
 /// the default MAXN is platform-dependent (measured frames at
-/// FL_GFX_POLYGON_DEFAULT_MAXN in fl/gfx/canvas.h).
-template<typename PixelT, typename Coord, bool Overwrite, int MAXN>
+/// FL_GFX_POLYGON_DEFAULT_MAXN in fl/gfx/canvas.h). The working set
+/// (AbScratch) is leased through Scratch (PolyScratchLease by default; see
+/// drawPolygonCore): an exhausted side-stack arena makes the call a no-op.
+template<typename PixelT, typename Coord, bool Overwrite, int MAXN,
+         template<typename> class Scratch = PolyScratchLease>
 inline void drawPolygonABufferCore(Canvas<PixelT>& canvas, const PixelT& color,
                                    fl::span<const PolyPoint<Coord>> pts) FL_NO_EXCEPT {
     FL_STATIC_ASSERT(MAXN >= 3 && MAXN <= 256, "drawPolygon: MAXN must be in [3, 256]");
@@ -284,9 +259,19 @@ inline void drawPolygonABufferCore(Canvas<PixelT>& canvas, const PixelT& color,
 
     const int nv = (n < MAXN) ? n : MAXN;
 
+    // Working set (AbScratch): a stack local, or a side-stack lease that is
+    // empty when the arena is exhausted -- then draw nothing.
+    Scratch<AbScratch<MAXN>> scratch;
+    if (!scratch) return;
+    auto& vx = scratch->mVx;
+    auto& vy = scratch->mVy;
+    auto& edges = scratch->mEdges;
+    // Per-row scratch: crossing events, packed (pixel << 5) | (row << 3) |
+    // bitOffset. A sub-row crosses at most ONE pixel (its crossing X is
+    // fixed for the scanline), so a row has at most 4*nedges events.
+    auto& cp = scratch->mCp;
+
     // Convert vertices to Q16.16 (clamped to ±8191 px — i32-safe)
-    fl::i32 vx[MAXN];
-    fl::i32 vy[MAXN];
     for (int i = 0; i < nv; ++i) {
         vx[i] = polyABToQ16(pts[i].x);
         vy[i] = polyABToQ16(pts[i].y);
@@ -294,7 +279,6 @@ inline void drawPolygonABufferCore(Canvas<PixelT>& canvas, const PixelT& color,
 
     // Build per-edge scanline state. One i64 floor division per edge is
     // the only division in this function (it sets xinc exactly).
-    AbEdge edges[MAXN];
     int nedges = 0;
     int ymin = height, ymax = -1;
     for (int i = 0; i < nv; ++i) {
@@ -358,11 +342,6 @@ inline void drawPolygonABufferCore(Canvas<PixelT>& canvas, const PixelT& color,
         if (e.py1 > ymax) ymax = e.py1;
     }
     if (nedges == 0) return;
-
-    // Per-row scratch: crossing events, packed (pixel << 5) | (row << 3) |
-    // bitOffset. A sub-row crosses at most ONE pixel (its crossing X is
-    // fixed for the scanline), so a row has at most 4*nedges events.
-    fl::i32 cp[4 * MAXN];
 
     for (int py = ymin; py <= ymax; ++py) {
         fl::u32 mask = 0;   // the running 8x4 mask (per row: 0x00 or 0xFF)

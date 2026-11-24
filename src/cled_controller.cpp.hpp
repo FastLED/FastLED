@@ -125,14 +125,26 @@ void CLEDController::removeFromList(CLEDController* controller) FL_NO_EXCEPT {
 }
 
 ColorAdjustment CLEDController::getAdjustmentData(fl::u8 brightness) FL_NO_EXCEPT {
-    // *premixed = getAdjustment(brightness);
-    // if (color_correction) {
-    //     *color_correction = getAdjustment(255);
-    // }
+#if defined(FL_CONTROLLER_HAS_COLOR_ADJUSTMENT_CACHE) && SKETCH_HAS_LARGE_MEMORY && \
+    !(defined(NO_CORRECTION) && NO_CORRECTION == 1)
+    auto& cache = mAdjustmentCache;
+    if (cache.mBrightness != brightness || cache.mCorrection != mLegacySettings.mCorrection ||
+        cache.mTemperature != mLegacySettings.mTemperature) {
+        cache.mBrightness = brightness;
+        cache.mCorrection = mLegacySettings.mCorrection;
+        cache.mTemperature = mLegacySettings.mTemperature;
+#if FASTLED_HD_COLOR_MIXING
+        cache.mAdjustment = {getAdjustment(brightness), getAdjustment(255), brightness};
+#else
+        cache.mAdjustment = {getAdjustment(brightness)};
+#endif
+    }
+    return cache.mAdjustment;
+#else
     #if FASTLED_HD_COLOR_MIXING
-    ColorAdjustment out = {this->getAdjustment(brightness), this->getAdjustment(255), brightness};
+    return {getAdjustment(brightness), getAdjustment(255), brightness};
     #else
-    ColorAdjustment out = {getAdjustment(brightness)};
+    return {getAdjustment(brightness)};
     #endif
-    return out;
+#endif
 }

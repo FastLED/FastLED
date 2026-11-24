@@ -84,10 +84,17 @@ public:
     bool freeBus() FL_NO_EXCEPT override = 0;
     bool isInitialized() const FL_NO_EXCEPT override = 0;
     bool queueTransaction(const SpiTransaction& trans) FL_NO_EXCEPT override = 0;
-    bool pollTransaction(u32 timeout_ms) FL_NO_EXCEPT override = 0;
+    bool pollTransaction(u32 timeout_ms, void** out_user) FL_NO_EXCEPT override = 0;
+    bool pollingStart(const SpiTransaction& trans) FL_NO_EXCEPT override = 0;
+    bool pollingEnd(u32 timeout_ms) FL_NO_EXCEPT override = 0;
+    int getActualFrequencyKhz() const FL_NO_EXCEPT override = 0;
     bool registerCallback(void* callback, void* user_ctx) FL_NO_EXCEPT override = 0;
     u8* allocateDma(size_t size) FL_NO_EXCEPT override = 0;
     void freeDma(u8* buffer) FL_NO_EXCEPT override = 0;
+    u8* allocateInternal(size_t size) FL_NO_EXCEPT override = 0;
+    void freeInternal(u8* buffer) FL_NO_EXCEPT override = 0;
+    void resetPin(int pin) FL_NO_EXCEPT override = 0;
+    u32 getPinRouting(int pin) FL_NO_EXCEPT override = 0;
     void delay(u32 ms) FL_NO_EXCEPT override = 0;
     u64 getMicroseconds() FL_NO_EXCEPT override = 0;
 

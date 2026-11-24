@@ -23,6 +23,7 @@
 #include "fl/channels/bus_traits.h"
 #include "fl/stl/int.h"
 #include "fl/stl/noexcept.h"
+#include "fl/stl/type_traits.h"
 
 namespace fl {
 
@@ -99,14 +100,30 @@ inline bool bindDefaultDriver() FL_NO_EXCEPT {
     return bindDefaultDriverImpl<Chipset>(HasDefaultBus<Chipset>());
 }
 
+/// False only for `Bus::AUTO` on a platform with no `DefaultBus<Chipset>`:
+/// there is no bus to name, so `BusBinding` must not be instantiated.
+template<Bus B, typename Chipset>
+struct CanBindBus
+    : fl::integral_constant<bool,
+                            B != Bus::AUTO || HasDefaultBus<Chipset>::value> {};
+
+template<Bus B, typename Chipset, u8 Which>
+inline void bindDriverImpl(fl::true_type) FL_NO_EXCEPT {
+    DriverBindings::instance().push(BusBinding<B, Chipset, Which>::node());
+}
+
+template<Bus B, typename Chipset, u8 Which>
+inline void bindDriverImpl(fl::false_type) FL_NO_EXCEPT {}  // no default bus
+
 }  // namespace detail
 
 /// Enable one bus for `FastLED.add(cfg)`. `Bus::AUTO` names the platform
-/// default for `Chipset`. Links that bus only; construction is deferred.
+/// default for `Chipset`, and links nothing where the platform has none.
+/// Links that bus only; construction is deferred.
 template<Bus B, typename Chipset = ClocklessChipset, u8 Which = 0>
 inline void bindDriver() FL_NO_EXCEPT {
-    DriverBindings::instance().push(
-        detail::BusBinding<B, Chipset, Which>::node());
+    detail::bindDriverImpl<B, Chipset, Which>(
+        detail::CanBindBus<B, Chipset>());
 }
 
 }  // namespace fl

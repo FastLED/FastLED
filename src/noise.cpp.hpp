@@ -729,7 +729,9 @@ void fill_raw_noise16into8(fl::u8 *pData, fl::u8 num_points, fl::u8 octaves, fl:
   for(int o = 0; o < octaves; ++o) {
     for(int i = 0,xx=_xx; i < num_points; ++i, xx+=scx) {
       fl::u32 accum = (inoise16(xx,time))>>o;
-      accum += (pData[i]<<8);
+      // Widen before shifting: on 16-bit-int targets (AVR) pData[i]<<8
+      // overflowed int for pData[i] >= 128 and corrupted the clamp.
+      accum += ((fl::u32)pData[i] << 8);
       if(accum > 65535) { accum = 65535; }
       pData[i] = accum>>8;
     }
@@ -866,30 +868,54 @@ void fill_raw_2dnoise16into8(fl::u8 *pData, int width, int height, fl::u8 octave
   fill_raw_2dnoise16into8(pData, width, height, octaves, fl::q44(2,0), 171, 1, x, scalex, y, scaley, time);
 }
 
+// Per-pixel octave folds for the 1-D fill_noise8/16. Each point of
+// fill_raw_noise8 / fill_raw_noise16into8 depends only on its own index, so
+// folding the octaves per pixel gives the same values as the buffered
+// functions with no scratch planes (FastLED#5330). Same inoise calls, same
+// accumulation order. Both use the widened 16into8 accumulator, so AVR output
+// for octaves >= 2 changed where the old int shift overflowed.
+namespace noise_detail {
+
+static fl::u8 raw_noise8_at(int i, fl::u8 octaves, fl::u16 x, int scale, fl::u16 time) FL_NO_EXCEPT {
+  fl::u32 xx = x;
+  fl::u32 scx = scale;
+  fl::u8 v = 0;
+  for(int o = 0; o < octaves; ++o) {
+    v = qadd8(v, inoise8((fl::u16)(xx + (fl::u32)i * scx), time) >> o);
+    xx <<= 1;
+    scx <<= 1;
+  }
+  return v;
+}
+
+static fl::u8 raw_noise16into8_at(int i, fl::u8 octaves, fl::u32 x, int scale, fl::u32 time) FL_NO_EXCEPT {
+  fl::u32 xx = x;
+  fl::u32 scx = scale;
+  fl::u8 v = 0;
+  for(int o = 0; o < octaves; ++o) {
+    // The buffered loop keeps its coordinate in an int, so on 16-bit-int
+    // targets (AVR) it wraps to 16 bits and sign-extends into inoise16's
+    // u32 parameter. Narrow through int the same way; no-op for 32-bit int.
+    fl::u32 accum = (inoise16((fl::u32)(int)(xx + (fl::u32)i * scx), time)) >> o;
+    accum += (fl::u32)v << 8;
+    if(accum > 65535) { accum = 65535; }
+    v = accum >> 8;
+    xx <<= 1;
+    scx <<= 1;
+  }
+  return v;
+}
+
+}  // namespace noise_detail
+
+// Each 255-LED chunk restarts at x / hue_x (historical behaviour, kept).
 void fill_noise8(CRGB *leds, int num_leds,
             fl::u8 octaves, fl::u16 x, int scale,
             fl::u8 hue_octaves, fl::u16 hue_x, int hue_scale,
             fl::u16 time) FL_NO_EXCEPT {
-
-    if (num_leds <= 0) return;
-
-    for (int j = 0; j < num_leds; j += 255) {
-        const int LedsRemaining = num_leds - j;
-        const int LedsPer = LedsRemaining > 255 ? 255 : LedsRemaining;  // limit to 255 max
-
-        if (LedsPer <= 0) continue;
-        FASTLED_STACK_ARRAY(fl::u8, V, LedsPer);
-        FASTLED_STACK_ARRAY(fl::u8, H, LedsPer);
-
-        fl::memset(V, 0, LedsPer);
-        fl::memset(H, 0, LedsPer);
-
-        fill_raw_noise8(V, LedsPer, octaves, x, scale, time);
-        fill_raw_noise8(H, LedsPer, hue_octaves, hue_x, hue_scale, time);
-
-        for (int i = 0; i < LedsPer; ++i) {
-            leds[i + j] = CHSV(H[i], 255, V[i]);
-        }
+    for (int k = 0, i = 0; k < num_leds; ++k, i = (i == 254) ? 0 : i + 1) {
+        leds[k] = CHSV(noise_detail::raw_noise8_at(i, hue_octaves, hue_x, hue_scale, time), 255,
+                       noise_detail::raw_noise8_at(i, octaves, x, scale, time));
     }
 }
 
@@ -897,25 +923,10 @@ void fill_noise16(CRGB *leds, int num_leds,
             fl::u8 octaves, fl::u16 x, int scale,
             fl::u8 hue_octaves, fl::u16 hue_x, int hue_scale,
             fl::u16 time, fl::u8 hue_shift) FL_NO_EXCEPT {
-
-    if (num_leds <= 0) return;
-
-    for (int j = 0; j < num_leds; j += 255) {
-        const int LedsRemaining = num_leds - j;
-        const int LedsPer = LedsRemaining > 255 ? 255 : LedsRemaining;  // limit to 255 max
-        if (LedsPer <= 0) continue;
-        FASTLED_STACK_ARRAY(fl::u8, V, LedsPer);
-        FASTLED_STACK_ARRAY(fl::u8, H, LedsPer);
-
-        fl::memset(V, 0, LedsPer);
-        fl::memset(H, 0, LedsPer);
-
-        fill_raw_noise16into8(V, LedsPer, octaves, x, scale, time);
-        fill_raw_noise8(H, LedsPer, hue_octaves, hue_x, hue_scale, time);
-
-        for (int i = 0; i < LedsPer; ++i) {
-            leds[i + j] = CHSV(H[i] + hue_shift, 255, V[i]);
-        }
+    for (int k = 0, i = 0; k < num_leds; ++k, i = (i == 254) ? 0 : i + 1) {
+        fl::u8 hue = noise_detail::raw_noise8_at(i, hue_octaves, hue_x, hue_scale, time);
+        leds[k] = CHSV(hue + hue_shift, 255,
+                       noise_detail::raw_noise16into8_at(i, octaves, x, scale, time));
     }
 }
 
@@ -924,6 +935,11 @@ void fill_2dnoise8(CRGB *leds, int width, int height, bool serpentine,
             fl::u8 hue_octaves, fl::u16 hue_x, int hue_xscale, fl::u16 hue_y, fl::u16 hue_yscale,fl::u16 hue_time,bool blend) FL_NO_EXCEPT {
   const size_t array_size = (size_t)height * width;
   if (array_size <= 0) return;
+  // 2*W*H bytes of stack (512 B at 16x16), deliberately kept (FastLED#5307):
+  // both planes are needed at once and H is read 180-degree rotated, so the
+  // work cannot be split into row chunks without changing the octave math.
+  // On small-RAM targets keep the grid small, or call fill_raw_2dnoise8 with
+  // caller-owned buffers. See agents/docs/binary-size-reference.md.
   FASTLED_STACK_ARRAY(fl::u8, V, array_size);
   FASTLED_STACK_ARRAY(fl::u8, H, array_size);
 

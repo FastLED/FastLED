@@ -612,13 +612,12 @@ need one before the board could find its own jumpers.
 
 So `bash autoresearch lpc804` refuses while parsing its arguments
 (`LPC804_ENVS` in `ci/autoresearch/phases.py`); `--decode`, which only reads a
-capture file, still runs. The sketch's `@filter` still lists `lpcxpresso804`,
-so `bash compile lpcxpresso804 --examples AutoResearch` fails at link with the
-sizes above. On-silicon bring-up of the LPC804 native pin
+capture file, still runs. The sketch's `@filter` leaves `lpcxpresso804` out,
+so board compiles skip AutoResearch there instead of failing at link. On-silicon bring-up of the LPC804 native pin
 backend (#5261) would need an RPC transport that does not use `fl::Remote` and
 `fl::json`: a fixed-format line protocol that the host `RpcClient` can still
-parse. That is new infrastructure, not gating. No LPC804 board has been
-attached to measure it.
+parse. That is new infrastructure, not gating. The bench has no LPC804 board,
+only the LPC845-BRK.
 
 Full-memory boards, such as ESP32-family and Teensy 4.x:
 

@@ -10,9 +10,9 @@
 ///
 /// All helpers are header-inline — they appear in hot inner loops and the
 /// optimizer needs to fold them. Tests at
-/// `tests/fl/gfx/colorimetric_response.cpp` exercise them in isolation of
+/// `tests/unit/fl/gfx/colorimetric_response.cpp` exercise them in isolation of
 /// the RGBW topology, complementing the RGBW-flavored coverage in
-/// `tests/fl/gfx/rgbw_colorimetric.cpp`.
+/// `tests/unit/fl/gfx/rgbw_colorimetric.cpp`.
 ///
 /// Backward compatibility: the existing `fl::colorimetric_detail::`
 /// namespace re-exports every name from here via using-declarations, so

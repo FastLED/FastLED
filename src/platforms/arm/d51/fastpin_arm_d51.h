@@ -69,14 +69,12 @@ template <u8 PIN, u8 BIT, u32 MASK, int GRP>
 constexpr bool isD51HardwarePin(const _ARMPIN<PIN, BIT, MASK, GRP>*) { return true; }
 constexpr bool isD51HardwarePin(const void*) { return false; }
 
-// FL_SAMD_ENABLE_FAST_SOFTWARE_SPI: optimized bit-bang software SPI pin policy (default 0).
-// UNTESTED ON HARDWARE: no bench evidence exists for this platform yet.
-// Default 0 keeps the legacy bit-bang writer. Define it to 1 to enable the
-// optimized path at your own risk.
+// FL_SAMD_ENABLE_FAST_SOFTWARE_SPI: optimized bit-bang software SPI pin policy (default 1).
+// Opt-out: define it to 0 to fall back to the legacy bit-bang writer.
 // Set it as a build flag (-D / build_flags), not a #define in the sketch: the
 // value must match in every translation unit, including FastLED's own sources.
 #ifndef FL_SAMD_ENABLE_FAST_SOFTWARE_SPI
-#define FL_SAMD_ENABLE_FAST_SOFTWARE_SPI 0
+#define FL_SAMD_ENABLE_FAST_SOFTWARE_SPI 1
 #endif
 #if FL_SAMD_ENABLE_FAST_SOFTWARE_SPI
 /// Exclusive same-group bulk writes stream through the OUT latch; all other data
@@ -174,6 +172,14 @@ _FL_DEFPIN(24, 14, 0); _FL_DEFPIN(25,  13, 0); _FL_DEFPIN(26,  12, 0);
 // needs moving. See platforms/default_pins.h.
 #define FL_PIN_CLOCKLESS_1 5
 #define FL_PIN_SPI_CLOCK_1 4
+// The second SPI pair's fallback of 3/4 would land on a missing pin or on
+// FL_PIN_SPI_CLOCK_1, so it moves too.
+#ifndef FL_PIN_SPI_DATA_2
+#define FL_PIN_SPI_DATA_2 10
+#endif
+#ifndef FL_PIN_SPI_CLOCK_2
+#define FL_PIN_SPI_CLOCK_2 11
+#endif
 // D0-D13, including D8 (neopixel)  no pins 2 3
 _FL_DEFPIN( 0, 17, 1); _FL_DEFPIN( 1, 16, 1);
 _FL_DEFPIN( 4, 14, 0); _FL_DEFPIN( 5, 16, 0); _FL_DEFPIN( 6,  18, 0);
@@ -202,6 +208,14 @@ _FL_DEFPIN(23, 22, 1); _FL_DEFPIN(24,  23, 1); _FL_DEFPIN(25,  17, 0);
 // needs moving. See platforms/default_pins.h.
 #define FL_PIN_CLOCKLESS_1 5
 #define FL_PIN_SPI_CLOCK_1 4
+// The second SPI pair's fallback of 3/4 would land on a missing pin or on
+// FL_PIN_SPI_CLOCK_1, so it moves too.
+#ifndef FL_PIN_SPI_DATA_2
+#define FL_PIN_SPI_DATA_2 10
+#endif
+#ifndef FL_PIN_SPI_CLOCK_2
+#define FL_PIN_SPI_CLOCK_2 11
+#endif
 // D0-D13, including D8 (neopixel)  no pins 2 3
 _FL_DEFPIN( 0, 17, 1); _FL_DEFPIN( 1, 16, 1);
 _FL_DEFPIN( 4, 14, 0); _FL_DEFPIN( 5, 16, 0); _FL_DEFPIN( 6,  18, 0);

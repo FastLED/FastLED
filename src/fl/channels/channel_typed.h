@@ -80,43 +80,50 @@ public:
         BusSupports<kBus, Chipset, Which>::value,
         "TypedChannel: Bus does not support this Chipset family");
 
-    /// @brief Construct a runtime `Channel` from a typed configuration.
-    ///
-    /// The factory returns a `ChannelPtr` to the existing non-template
-    /// `fl::Channel` runtime object so the rest of the system (events,
-    /// manager, draw list) is unchanged.
-    static ChannelPtr create(const ChannelConfigOf<Chipset>& cfg) FL_NO_EXCEPT {
-        // Register only the compile-time-selected bus specialization and its
-        // associated driver(s). This retains the required translation unit(s)
-        // without pulling in enableAllDrivers().
-        detail::enable_clockless_for<Chipset, BusTraits<kBus, Which>>::apply();  // #4793
-        BusTraits<kBus, Which>::registerWithManager();
-        ChannelConfig erased = cfg.toErased();
-        erased.options.mBus = kBus;
-        erased.options.mBusWhich = Which;
-        return Channel::create(erased);
+    // Only the encoder/factory choice is duplicated at a constant call site.
+    // Registration, settings copies and attachment remain out of line.
+    // A constant chipset folds to a factory bound to its one encoder (#5162);
+    // an unknown chipset falls back to the shared selector.
+    template<typename ConfigChipset>
+    FL_ALWAYS_INLINE ChannelFactory factoryFor(const ConfigChipset& chipset) FL_NO_EXCEPT {
+        return EncoderAvailability::dispatch<FactoryBinder>(chipset);
     }
 
-    /// @brief Overload accepting the (type-erased) non-template config.
-    ///
-    /// Useful for callers that already hold a `ChannelConfig` but want
-    /// compile-time bus/chipset validation. The runtime chipset variant must
-    /// match `Chipset`. Reject a mismatch before registering the driver or
-    /// creating a channel, so an erased config cannot bypass the contract.
-    static ChannelPtr create(const ChannelConfig& cfg) FL_NO_EXCEPT {
-        if (!cfg.getChipset().is<Chipset>()) {
-            FL_ERROR("TypedChannel: configuration does not match the selected chipset family");
-            return nullptr;
-        }
-        detail::enable_clockless_for<Chipset, BusTraits<kBus, Which>>::apply();  // #4793
-        BusTraits<kBus, Which>::registerWithManager();
-        ChannelConfig erased = cfg;
-        erased.options.mBus = kBus;
-        erased.options.mBusWhich = Which;
-        return Channel::create(erased);
+    FL_ALWAYS_INLINE ChannelPtr create(const ChannelConfigOf<Chipset>& cfg) FL_NO_EXCEPT {
+        const auto factory = factoryFor(cfg.chipset);
+        return factory(cfg.toErased());
+    }
+
+    /// Runtime configurations share the library's complete encoder selector.
+    FL_NO_INLINE static ChannelPtr create(const ChannelConfig& cfg) FL_NO_EXCEPT {
+        return create(cfg, EncoderAvailability::select(cfg.chipset));
     }
 
 private:
+    struct FactoryBinder {
+        using Result = ChannelFactory;
+        template<EncoderAvailability::Getter Get>
+        FL_NO_INLINE static ChannelPtr createBound(const ChannelConfig& cfg) FL_NO_EXCEPT {
+            return TypedChannel::create(cfg, Get());
+        }
+        template<EncoderAvailability::Getter Get>
+        FL_ALWAYS_INLINE Result bind() FL_NO_EXCEPT { return &createBound<Get>; }
+        FL_ALWAYS_INLINE Result none() FL_NO_EXCEPT {
+            return static_cast<ChannelFactory>(&TypedChannel::create);
+        }
+    };
+
+    FL_NO_INLINE static ChannelPtr create(const ChannelConfig& cfg,
+                                         EncoderAvailability::PixelEncoder encoder) FL_NO_EXCEPT {
+        if (!cfg.chipset.is<Chipset>()) {
+            FL_ERROR("TypedChannel: configuration does not match the selected chipset family");
+            return nullptr;
+        }
+        detail::enable_clockless_for<Chipset, BusTraits<kBus, Which>>::apply();
+        BusTraits<kBus, Which>::registerWithManager();
+        return Channel::createWithEncoder(cfg, encoder, kBus, Which);
+    }
+
     TypedChannel() FL_NO_EXCEPT = delete;
 };
 

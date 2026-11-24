@@ -12,7 +12,7 @@ mod tests {
 
     fn test_main_lines(content: &str) -> Vec<usize> {
         TestMainChecker
-            .check_file_content(&file("tests/fl/x.cpp", content))
+            .check_file_content(&file("tests/unit/fl/x.cpp", content))
             .into_iter()
             .map(|(line, _)| line)
             .collect()
@@ -67,7 +67,7 @@ mod tests {
     #[test]
     fn test_main_scope() {
         let root = Path::new(".");
-        assert!(TestMainChecker.should_process_file("tests/fl/log/x.cpp", root));
+        assert!(TestMainChecker.should_process_file("tests/unit/fl/log/x.cpp", root));
         assert!(!TestMainChecker.should_process_file("tests/profile/audio/x.cpp", root));
         assert!(!TestMainChecker.should_process_file("src/fl/x.cpp", root));
     }
@@ -104,8 +104,26 @@ mod tests {
         let checker = RawAlignasChecker;
         let root = Path::new("/repo");
         assert!(!checker.should_process_file("/repo/src/fl/stl/align.h", root));
-        assert!(!checker.should_process_file("/repo/tests/fl/x.cpp", root));
+        assert!(!checker.should_process_file("/repo/tests/unit/fl/x.cpp", root));
         assert!(checker.should_process_file("/repo/src/fl/stl/vector.h", root));
+    }
+
+    #[test]
+    fn tests_relative_path_looks_past_the_tier_directory() {
+        // Path checks mirror src/, which has no tier directory (#5374).
+        assert_eq!(
+            tests_relative_path("tests/unit/fl/stl/vector.cpp").as_deref(),
+            Some("fl/stl/vector.cpp")
+        );
+        assert_eq!(
+            tests_relative_path("/repo/tests/integration/misc/table.cpp").as_deref(),
+            Some("misc/table.cpp")
+        );
+        assert_eq!(
+            tests_relative_path("/repo/tests/profile/audio/x.cpp").as_deref(),
+            Some("profile/audio/x.cpp")
+        );
+        assert_eq!(tests_relative_path("src/fl/x.h"), None);
     }
 
     fn legal_header(last_updated: &str, holders: &[&str]) -> String {

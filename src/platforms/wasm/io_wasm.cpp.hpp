@@ -15,6 +15,7 @@
 #include "fl/stl/cstdio.h"
 #include "fl/stl/cstddef.h"
 #include "fl/stl/stdint.h"
+#include "platforms/io.h"  // IWYU pragma: keep
 
 namespace fl {
 namespace platforms {
@@ -73,8 +74,8 @@ bool serial_ready() {
     return true;
 }
 
-int readLineNative(char delimiter, char* out, int outLen) {
-    (void)delimiter; (void)out; (void)outLen;
+int readLineNative(char delimiter, fl::string& out) {
+    (void)delimiter; (void)out;
     return -1;  // Not supported on WASM
 }
 

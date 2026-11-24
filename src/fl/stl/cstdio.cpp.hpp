@@ -188,27 +188,34 @@ bool readStringUntil(sstream& out, char delimiter, char skipChar, fl::optional<u
     return true;
 }
 
-fl::optional<fl::string> readLine(char delimiter, char skipChar, fl::optional<u32> timeoutMs) FL_NO_EXCEPT {
-    // Try platform-native line reading first (e.g., Arduino's Serial.readStringUntil).
-    // This is critical for USB CDC platforms (ESP32-C6/S3) where the native
-    // implementation uses yield() (immediate context switch) instead of
-    // delay(1) (1ms FreeRTOS sleep), enabling correct multi-packet assembly.
-    char nativeBuf[512];
-    int nativeLen = platforms::readLineNative(delimiter, nativeBuf, sizeof(nativeBuf));
-    if (nativeLen >= 0) {
-        fl::string result(nativeBuf, nativeLen);
-        return fl::string(result.trim());
-    }
-
-    // Fallback: character-by-character reading for non-Arduino platforms
+namespace {
+// Character-by-character fallback for platforms without readLineNative().
+// Out of line so its sstream does not sit in readLine()'s frame on platforms
+// that take the native path (FastLED#5307).
+FL_NO_INLINE fl::optional<fl::string> readLineFallback(char delimiter, char skipChar, fl::optional<u32> timeoutMs) FL_NO_EXCEPT {
     sstream buffer;
     if (!readStringUntil(buffer, delimiter, skipChar, timeoutMs)) {
         return fl::nullopt;  // Timeout occurred
     }
 
-    // Convert to string and trim whitespace (trim() returns a new fl::string)
-    fl::string result = buffer.str();
-    return fl::string(result.trim());
+    // Trim whitespace (trim() returns a new fl::string)
+    return buffer.str().trim();
+}
+}  // namespace
+
+fl::optional<fl::string> readLine(char delimiter, char skipChar, fl::optional<u32> timeoutMs) FL_NO_EXCEPT {
+    // Try platform-native line reading first (e.g., Arduino's Serial.readStringUntil).
+    // This is critical for USB CDC platforms (ESP32-C6/S3) where the native
+    // implementation uses yield() (immediate context switch) instead of
+    // delay(1) (1ms FreeRTOS sleep), enabling correct multi-packet assembly.
+    // The platform writes the line straight into a string, so no fixed-size
+    // line buffer sits in this frame (it was 512 B, FastLED#5307).
+    fl::string line;
+    if (platforms::readLineNative(delimiter, line) >= 0) {
+        return line.trim();
+    }
+
+    return readLineFallback(delimiter, skipChar, timeoutMs);
 }
 
 bool flush(u32 timeoutMs) FL_NO_EXCEPT {

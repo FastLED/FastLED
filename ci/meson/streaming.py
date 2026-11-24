@@ -77,7 +77,7 @@ class StreamingResult:
 
 
 # Ninja line announcing a test/example executable link, e.g.
-# ``[35/1084] Linking CXX executable tests/fl/test_foo``.
+# ``[35/1084] Linking CXX executable tests/unit/fl/test_foo``.
 _LINK_PATTERN = re.compile(r"^\[\d+/\d+\]\s+Linking (?:CXX executable|target)\s+(.+)$")
 
 

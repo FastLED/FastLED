@@ -45,6 +45,7 @@
 #include "ObjectFLEDDmaManager.h"
 
 #include "fl/stl/stdint.h"
+#include "platforms/arm/teensy/teensy4_common/drivers/objectfled/objectfled_pad_state.h"
 
 //Experimentally found DSE=3, SPEED=0 gave best LED overclocking
 //boot defaults DSE=6, SPEED=2.
@@ -232,6 +233,10 @@ private:
 	uint32_t numbytesLocal;
 	uint8_t pin_bitnumLocal[NUM_DIGITAL_PINS];
 	uint8_t pin_offsetLocal[NUM_DIGITAL_PINS];
+	// Each claimed pin's pad state from before begin(), restored by the
+	// destructor and by begin()'s failure paths (#5395).
+	ObjectFLEDPadState padStateLocal[NUM_DIGITAL_PINS];
+	void releasePads();
 	bool initialized = false;
 };	// class ObjectFLED
 

@@ -104,4 +104,4 @@ slim` is. All levers, their measured savings and the `--profile slim` recipe:
 - fbuild #434 — meta to rename `symbols` → `bloat` and write reports to `.fbuild/build/<env>/bloat-report/`
 
 - Companion pages: [scorecards](binary-size-scorecards.md) ·
-  [reference](binary-size-reference.md)
+  [reference](binary-size-reference.md) (AVR stack frames: "Stack inventory")

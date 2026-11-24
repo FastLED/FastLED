@@ -4,6 +4,10 @@
 /// when a sketch uses `fl::net::OTA` (FastLED #4726). The strong link chain is
 /// sketch -> `fl.net.ota+.cpp` (`fl::net::OTA`) -> `IOTA::create()` here.
 
+// Marks FastLED's own translation units. Sketch-side startup symbols
+// (esp32_lazy_serial0_main.h) must not be emitted here (FastLED#5365).
+#define FL_BUILDING_FASTLED_LIBRARY 1
+
 #include "platforms/new.h"
 
 // IWYU pragma: begin_keep

@@ -8,7 +8,7 @@
 /// frame on the wire decomposes into 8 freely-programmable pulses sandwiched
 /// between a HIGH leading idle and a LOW trailing transition — the exact
 /// topology of every WS281x-family / SK6812 / TM181x chipset (verified by
-/// the `wave8` framing invariant test in `tests/fl/channels/wave8.cpp`).
+/// the `wave8` framing invariant test in `tests/unit/fl/channels/wave8.cpp`).
 ///
 /// This header is the platform-agnostic seam between:
 ///
