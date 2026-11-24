@@ -166,8 +166,8 @@ public:
 #define FASTLED_UNUSABLE_PIN_MASK (0ULL | _FL_BIT(24) | _FL_BIT(25))
 
 #elif defined(FL_IS_ESP_32S31)
-// Use the SDK's valid output GPIO mask.
-#define FASTLED_UNUSABLE_PIN_MASK (0ULL)
+// GPIO 26-28 and 30-32 are typically used for SPI flash.
+#define FASTLED_UNUSABLE_PIN_MASK (0ULL | _FL_BIT(26) | _FL_BIT(27) | _FL_BIT(28) | _FL_BIT(30) | _FL_BIT(31) | _FL_BIT(32))
 
 #elif defined(FL_IS_ESP_32H2)
 // 22 GPIO pins.  ESPIDF defines all pins as valid.
