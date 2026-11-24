@@ -151,7 +151,7 @@ def select(event_name: str, event: dict, labels: dict[str, list[str]]) -> Select
     return Selection("selected" if requested else "minimal", sha, requested)
 
 
-def gate(board: str, labels: dict[str, list[str]]) -> str:
+def gate(board: str, labels: dict[str, list[str]], *, reserves_runner: bool = False) -> str:
     family = None
     if board.startswith("ci-test:"):
         family, board = board.split("|", 1)
@@ -169,15 +169,19 @@ def gate(board: str, labels: dict[str, list[str]]) -> str:
         f"contains(github.event.pull_request.labels.*.name, '{item}')"
         for item in candidates
     ]
+    event_condition = (
+        "!cancelled() && (github.event_name == 'workflow_dispatch' ||"
+        if reserves_runner else "github.event_name == 'workflow_dispatch' ||"
+    )
     return (
         MARKER
         + "    if: >-\n"
-        + "      github.event_name == 'workflow_dispatch' ||\n"
+        + f"      {event_condition}\n"
         + "      (github.event_name == 'pull_request' &&\n"
         + "       github.event.pull_request.head.repo.full_name == github.repository &&\n"
         + "       ("
         + " ||\n        ".join(tests)
-        + "))\n"
+        + (")))\n" if reserves_runner else "))\n")
     )
 
 
@@ -259,7 +263,8 @@ def rendered(path: Path, entries: dict[str, str], labels: dict[str, list[str]]) 
             for i in range(job_start + 1, job_end)
             if lines[i].startswith(("    uses:", "    runs-on:"))
         )
-        lines[insert:insert] = gate(board, labels).splitlines(keepends=True)
+        reserves_runner = "    needs: reserve-runner\n" in lines[job_start + 1 : insert]
+        lines[insert:insert] = gate(board, labels, reserves_runner=reserves_runner).splitlines(keepends=True)
         source = "".join(lines)
     return source
 

@@ -19,6 +19,11 @@ on:
         # so every board build died in the host meson step. Pin 24.04 like the
         # native lanes in #5224.
         default: "ubuntu-24.04"
+      reserved-runs-on:
+        description: 'JSON runner selection from the caller for this build only.'
+        type: string
+        required: false
+        default: ""
       timeout-minutes:
         description: 'Board-specific job timeout; only long all-example sweeps override 45.'
         type: number
@@ -48,16 +53,16 @@ jobs:
   # Self-hosted forge pool (forge-ci/gh-runner docs/pool.md): when the repo
   # variable FORGE_POOL_LABELS holds a JSON label array, trusted events (push
   # to master, merge_group, workflow_dispatch, schedule) ask pool-select right
-  # before the build whether the Ubuntu 24.04 pool has an idle runner or
-  # dispatcher capacity. When neither is available or the probe fails, the
-  # build runs hosted. The selector reads signal.forge-ci.com without a token.
+  # before the build whether the Ubuntu 24.04 pool has an idle runner. The
+  # build runs hosted when the pool has no idle runner or the probe fails.
   # Pull requests stay hosted (fork safety and volume).
   # Unset FORGE_POOL_LABELS to stop routing at once; unset the org variable
   # FORGE_QUICK_LABELS to run the selector itself on hosted runners (RUN-004).
   pool:
     name: Select runner
     if: >-
-      vars.FORGE_POOL_LABELS != ''
+      inputs.reserved-runs-on == ''
+      && vars.FORGE_POOL_LABELS != ''
       && (github.event_name == 'merge_group'
           || github.event_name == 'workflow_dispatch'
           || github.event_name == 'schedule'
@@ -72,17 +77,18 @@ jobs:
       - name: Select pool or hosted
         id: select
         continue-on-error: true
-        uses: forge-ci/ci.yml/actions/pool-select@82945f807590d469a2833f2a421a0a7861bc37d1
+        uses: forge-ci/ci.yml/actions/pool-select@ed73926bc2de1b5d71f50907cd93920daeecbe78
         with:
           labels: ${{ vars.FORGE_POOL_LABELS }}
           fallback: ${{ inputs.runs-on }}
+          count-room: 'false'
 
   build:
     needs: pool
     # Runs when the selector was skipped (pull requests, routing off) or
     # failed, too: the hosted inputs.runs-on is then the runner.
     if: ${{ !cancelled() }}
-    runs-on: ${{ fromJSON(needs.pool.outputs.runs-on || toJSON(inputs.runs-on)) }}
+    runs-on: ${{ fromJSON(inputs.reserved-runs-on || needs.pool.outputs.runs-on || toJSON(inputs.runs-on)) }}
     # Bound the job so a hang fails loudly instead of silently.
     #
     # Without this, GitHub's 360-minute default applies: a wedged compile sits
