@@ -358,15 +358,34 @@ template <u8 PIN> struct BitbangPin<FastPin<PIN>> : Esp32BitbangDelay<FastPin<PI
 /// Forced software pins write through the core API but keep the same delays.
 template <u8 PIN> struct BitbangPin<FastPin<PIN>> : Esp32BitbangDelay<FastPin<PIN>> {};
 #elif FL_ESP32_ENABLE_FAST_SOFTWARE_SPI
+template <class Pin, u8 REAL_PIN, u32 MASK, bool VALID>
+constexpr BitbangPinAccess esp32BitbangPinAccess(const _ESPPIN<REAL_PIN, MASK, VALID>*) FL_NO_EXCEPT {
+    return bitbangPinAccess<Pin, _ESPPIN<REAL_PIN, MASK, VALID>>();
+}
+template <class Pin>
+constexpr BitbangPinAccess esp32BitbangPinAccess(const void*) FL_NO_EXCEPT { return BitbangPinAccess::Default; }
+
 /// Software SPI data updates are atomic per pin. Whole-port streaming stays off
 /// because a port snapshot could overwrite concurrent GPIO updates.
 template <u8 PIN> struct BitbangPin<FastPin<PIN>> : Esp32BitbangDelay<FastPin<PIN>> {
-    static constexpr bool kAtomicWrite = true;
+    static constexpr auto kPinAccess = esp32BitbangPinAccess<FastPin<PIN>>(static_cast<const FastPin<PIN>*>(nullptr));
+    static constexpr bool kAtomicWrite = kPinAccess == BitbangPinAccess::Native;
+    static constexpr bool kRequiresPinWrites = kPinAccess == BitbangPinAccess::Custom;
     template <u8 BIT>
     FASTLED_FORCE_INLINE static void write(u8 value) FL_NO_EXCEPT {
+        writeImpl<BIT>(value, fl::integral_constant<bool, kAtomicWrite>());
+    }
+
+  private:
+    template <u8 BIT>
+    FASTLED_FORCE_INLINE static void writeImpl(u8 value, fl::integral_constant<bool, true>) FL_NO_EXCEPT {
         gpioStoreBarrier();
         writeBitSetClearNoBranch<BIT>(value, FastPin<PIN>::mask(), FastPin<PIN>::sport(), FastPin<PIN>::cport());
         gpioStoreBarrier();
+    }
+    template <u8 BIT>
+    FASTLED_FORCE_INLINE static void writeImpl(u8 value, fl::integral_constant<bool, false>) FL_NO_EXCEPT {
+        BitbangPinDefaults<FastPin<PIN>>::template write<BIT>(value);
     }
 };
 #endif  // FL_ESP32_ENABLE_FAST_SOFTWARE_SPI && FL_FASTPIN_HAS_NO_PINMAP
