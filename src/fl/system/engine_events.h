@@ -130,7 +130,7 @@ class EngineEvents {
     void _onBeginFrame() FL_NO_EXCEPT;
     void _onEndShowLeds() FL_NO_EXCEPT;
     void _onEndFrame() FL_NO_EXCEPT;
-    void _dispatchFrame(void (Listener::*callback)() FL_NO_EXCEPT) FL_NO_EXCEPT;
+    void _dispatchFrame(void (Listener::*callback)()) FL_NO_EXCEPT;
     void _onStripAdded(CLEDController *strip, fl::u32 num_leds) FL_NO_EXCEPT;
     void _onCanvasUiSet(CLEDController *strip, const ScreenMap &xymap) FL_NO_EXCEPT;
     void _onPlatformPreLoop() FL_NO_EXCEPT;

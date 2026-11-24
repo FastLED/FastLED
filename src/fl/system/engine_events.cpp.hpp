@@ -127,7 +127,7 @@ void EngineEvents::_onEndFrame() FL_NO_EXCEPT {
     _dispatchFrame(&Listener::onEndFrame);
 }
 
-void EngineEvents::_dispatchFrame(void (Listener::*callback)() FL_NO_EXCEPT) FL_NO_EXCEPT {
+void EngineEvents::_dispatchFrame(void (Listener::*callback)()) FL_NO_EXCEPT {
     const fl::size count = mListeners.size();
     if (count == 0) {
         return;
