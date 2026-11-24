@@ -86,17 +86,22 @@ _FL_DEFPIN(30, 30);
 _FL_DEFPIN(31, 31);
 _FL_DEFPIN(32, 32);
 
-/// True only for FastPin specializations backed by a real _APOLLO3PIN.
-template <u8 PIN, u8 PAD>
-constexpr bool isApollo3HardwarePin(const _APOLLO3PIN<PIN, PAD>*) { return true; }
-constexpr bool isApollo3HardwarePin(const void*) { return false; }
+/// Match FastPin specializations backed by a real _APOLLO3PIN.
+template <class Pin, u8 PIN, u8 PAD>
+constexpr BitbangPinAccess apollo3BitbangPinAccess(const _APOLLO3PIN<PIN, PAD>*) {
+    return bitbangPinAccess<Pin, _APOLLO3PIN<PIN, PAD>>();
+}
+template <class Pin>
+constexpr BitbangPinAccess apollo3BitbangPinAccess(const void*) { return BitbangPinAccess::Default; }
 
 /// _APOLLO3PIN writes through the fastgpio HAL and has no port register: port()
 /// is null and hival()/loval() are 0, so any two pins look like one port. The
 /// generic writer's whole-port words would then never pulse the clock, so these
 /// pins always take the per-pin hi()/lo() path (#5138).
 template <u8 PIN> struct BitbangPin<FastPin<PIN>> : BitbangPinDefaults<FastPin<PIN>> {
-    static constexpr bool kAtomicWrite = isApollo3HardwarePin(static_cast<const FastPin<PIN>*>(nullptr));
+    static constexpr auto kPinAccess = apollo3BitbangPinAccess<FastPin<PIN>>(static_cast<const FastPin<PIN>*>(nullptr));
+    static constexpr bool kAtomicWrite = kPinAccess == BitbangPinAccess::Native;
+    static constexpr bool kRequiresPinWrites = kPinAccess == BitbangPinAccess::Custom;
 };
 
 #define HAS_HARDWARE_PIN_SUPPORT

@@ -171,10 +171,13 @@ public:
     }
 };
 
-/// True only for FastPin specializations backed by the real legacy _ARMPIN.
-template <u8 PIN, u32 MASK, u8 PORT_INDEX>
-constexpr bool isLpc11LegacyHardwarePin(const _ARMPIN_LPC11LEGACY<PIN, MASK, PORT_INDEX>*) { return true; }
-constexpr bool isLpc11LegacyHardwarePin(const void*) { return false; }
+/// Match FastPin specializations backed by the real legacy _ARMPIN.
+template <class Pin, u8 PIN, u32 MASK, u8 PORT_INDEX>
+constexpr BitbangPinAccess lpc11LegacyBitbangPinAccess(const _ARMPIN_LPC11LEGACY<PIN, MASK, PORT_INDEX>*) {
+    return bitbangPinAccess<Pin, _ARMPIN_LPC11LEGACY<PIN, MASK, PORT_INDEX>>();
+}
+template <class Pin>
+constexpr BitbangPinAccess lpc11LegacyBitbangPinAccess(const void*) { return BitbangPinAccess::Default; }
 
 // FL_LPC_ENABLE_FAST_SOFTWARE_SPI: optimized bit-bang software SPI pin policy (default 1).
 // Opt-out: define it to 0 to fall back to the legacy bit-bang writer.
@@ -189,7 +192,9 @@ constexpr bool isLpc11LegacyHardwarePin(const void*) { return false; }
 /// here. kTwoWriteStream stays false: no vendor header or hardware has confirmed the
 /// full-port path. kMinWriteCycles stays at its default, so padding is kept.
 template <u8 PIN> struct BitbangPin<FastPin<PIN>> : BitbangPinDefaults<FastPin<PIN>> {
-    static constexpr bool kAtomicWrite = isLpc11LegacyHardwarePin(static_cast<const FastPin<PIN>*>(nullptr));
+    static constexpr auto kPinAccess = lpc11LegacyBitbangPinAccess<FastPin<PIN>>(static_cast<const FastPin<PIN>*>(nullptr));
+    static constexpr bool kAtomicWrite = kPinAccess == BitbangPinAccess::Native;
+    static constexpr bool kRequiresPinWrites = kPinAccess == BitbangPinAccess::Custom;
     template <u8 BIT>
     FASTLED_FORCE_INLINE static void write(u8 value) FL_NO_EXCEPT {
         writeImpl<BIT>(value, fl::integral_constant<bool, kAtomicWrite>());

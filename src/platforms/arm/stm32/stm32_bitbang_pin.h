@@ -16,10 +16,14 @@ namespace fl {
 
 /// Base of pin templates providing writeBsrr(), mask() and hi()/lo(). The legacy
 /// armpin.h template is not one: its F2 path has 16-bit BSRRL/BSRRH registers.
-struct Stm32BsrrPin {};
+template <class Native> struct Stm32BsrrPin {};
 
-constexpr bool isStm32BsrrPin(const Stm32BsrrPin*) { return true; }
-constexpr bool isStm32BsrrPin(const void*) { return false; }
+template <class Pin, class Native>
+constexpr BitbangPinAccess stm32BitbangPinAccess(const Stm32BsrrPin<Native>*) {
+    return bitbangPinAccess<Pin, Native>();
+}
+template <class Pin>
+constexpr BitbangPinAccess stm32BitbangPinAccess(const void*) { return BitbangPinAccess::Default; }
 
 // FL_STM32_ENABLE_FAST_SOFTWARE_SPI: optimized bit-bang software SPI pin policy (default 1).
 // Opt-out: define it to 0 to fall back to the legacy bit-bang writer.
@@ -32,10 +36,11 @@ constexpr bool isStm32BsrrPin(const void*) { return false; }
 /// Data updates use one BSRR store whose value selects set (low half) or reset
 /// (high half), so no family needs a separate clear address and no data-dependent
 /// branch is required. Streaming and kMinWriteCycles stay at their defaults, as no
-/// GPIO write latency has been measured here. A FastPin deriving from a BSRR
-/// template gets these stores even if it shadows hi()/lo().
+/// GPIO write latency has been measured here.
 template <u8 PIN> struct BitbangPin<FastPin<PIN>> : BitbangPinDefaults<FastPin<PIN>> {
-    static constexpr bool kAtomicWrite = isStm32BsrrPin(static_cast<const FastPin<PIN>*>(nullptr));
+    static constexpr auto kPinAccess = stm32BitbangPinAccess<FastPin<PIN>>(static_cast<const FastPin<PIN>*>(nullptr));
+    static constexpr bool kAtomicWrite = kPinAccess == BitbangPinAccess::Native;
+    static constexpr bool kRequiresPinWrites = kPinAccess == BitbangPinAccess::Custom;
     template <u8 BIT>
     FASTLED_FORCE_INLINE static void write(u8 value) FL_NO_EXCEPT {
         writeImpl<BIT>(value, fl::integral_constant<bool, kAtomicWrite>());

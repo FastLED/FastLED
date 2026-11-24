@@ -53,10 +53,13 @@ public:
   inline static port_t mask() __attribute__ ((always_inline)) { return _MASK; }
 };
 
-/// True only for FastPin specializations backed by a real KL26 _ARMPIN.
-template <u8 PIN, u32 MASK, typename PDOR, typename PSOR, typename PCOR, typename PTOR, typename PDIR, typename PDDR>
-constexpr bool isKl26HardwarePin(const _ARMPIN<PIN, MASK, PDOR, PSOR, PCOR, PTOR, PDIR, PDDR>*) { return true; }
-constexpr bool isKl26HardwarePin(const void*) { return false; }
+/// Match FastPin specializations backed by a real KL26 _ARMPIN.
+template <class Pin, u8 PIN, u32 MASK, typename PDOR, typename PSOR, typename PCOR, typename PTOR, typename PDIR, typename PDDR>
+constexpr BitbangPinAccess kl26BitbangPinAccess(const _ARMPIN<PIN, MASK, PDOR, PSOR, PCOR, PTOR, PDIR, PDDR>*) {
+    return bitbangPinAccess<Pin, _ARMPIN<PIN, MASK, PDOR, PSOR, PCOR, PTOR, PDIR, PDDR>>();
+}
+template <class Pin>
+constexpr BitbangPinAccess kl26BitbangPinAccess(const void*) { return BitbangPinAccess::Default; }
 
 // FL_TEENSY_ENABLE_FAST_SOFTWARE_SPI: optimized bit-bang software SPI pin policy (default 1).
 // Opt-out: define it to 0 to fall back to the legacy bit-bang writer.
@@ -70,7 +73,9 @@ constexpr bool isKl26HardwarePin(const void*) { return false; }
 /// use PSOR/PCOR without a data branch. kMinWriteCycles stays at its default: no
 /// GPIO write latency has been measured here, so existing padding is kept.
 template <u8 PIN> struct BitbangPin<FastPin<PIN>> : BitbangPinDefaults<FastPin<PIN>> {
-  static constexpr bool kAtomicWrite = isKl26HardwarePin(static_cast<const FastPin<PIN>*>(nullptr));
+  static constexpr auto kPinAccess = kl26BitbangPinAccess<FastPin<PIN>>(static_cast<const FastPin<PIN>*>(nullptr));
+  static constexpr bool kAtomicWrite = kPinAccess == BitbangPinAccess::Native;
+  static constexpr bool kRequiresPinWrites = kPinAccess == BitbangPinAccess::Custom;
   static constexpr bool kTwoWriteStream = kAtomicWrite;
   template <u8 BIT>
   FASTLED_FORCE_INLINE static void write(u8 value) FL_NO_EXCEPT {

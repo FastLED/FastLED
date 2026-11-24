@@ -66,6 +66,10 @@ class GenericSoftwareSPIOutput {
 #ifdef FAST_SPI_INTERRUPTS_WRITE_PINS
 		return true;
 #else
+		if (BitbangPin<fl::FastPin<DATA_PIN>>::kRequiresPinWrites ||
+			BitbangPin<fl::FastPin<CLOCK_PIN>>::kRequiresPinWrites) {
+			return true;
+		}
 		// Keep the combined-port optimization where a pin policy opts into
 		// streaming. Otherwise atomic pins never take whole-port snapshots.
 		// A no-pin-map pin has no port, so per-pin writes are its only safe form.

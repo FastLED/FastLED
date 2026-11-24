@@ -48,10 +48,13 @@ namespace fl {
 
 template <fl::u8 PIN> class FastPin;
 
-/// True only for FastPin specializations backed by a real _AVRPIN output latch.
-template <fl::u8 PIN, fl::u8 MASK, typename PortReg, typename DdrReg, typename PinReg>
-constexpr bool isAvrHardwarePin(const _AVRPIN<PIN, MASK, PortReg, DdrReg, PinReg>*) { return true; }
-constexpr bool isAvrHardwarePin(const void*) { return false; }
+/// Match FastPin specializations backed by a real _AVRPIN output latch.
+template <class Pin, fl::u8 PIN, fl::u8 MASK, typename PortReg, typename DdrReg, typename PinReg>
+constexpr BitbangPinAccess avrBitbangPinAccess(const _AVRPIN<PIN, MASK, PortReg, DdrReg, PinReg>*) {
+    return bitbangPinAccess<Pin, _AVRPIN<PIN, MASK, PortReg, DdrReg, PinReg>>();
+}
+template <class Pin>
+constexpr BitbangPinAccess avrBitbangPinAccess(const void*) { return BitbangPinAccess::Default; }
 
 // FL_AVR_ENABLE_FAST_SOFTWARE_SPI: optimized bit-bang software SPI pin policy (default 1).
 // Opt-out: define it to 0 to fall back to the legacy bit-bang writer.
@@ -65,8 +68,9 @@ constexpr bool isAvrHardwarePin(const void*) { return false; }
 /// same-port software SPI path can merge each falling edge with the next data
 /// update. Forced software pins are not _AVRPINs and keep the per-bit writer.
 template <fl::u8 PIN> struct BitbangPin<FastPin<PIN>> : BitbangPinDefaults<FastPin<PIN>> {
-    static constexpr bool kTwoWriteStream =
-        isAvrHardwarePin(static_cast<const FastPin<PIN>*>(nullptr));
+    static constexpr auto kPinAccess = avrBitbangPinAccess<FastPin<PIN>>(static_cast<const FastPin<PIN>*>(nullptr));
+    static constexpr bool kTwoWriteStream = kPinAccess == BitbangPinAccess::Native;
+    static constexpr bool kRequiresPinWrites = kPinAccess == BitbangPinAccess::Custom;
 };
 #endif  // FL_AVR_ENABLE_FAST_SOFTWARE_SPI
 

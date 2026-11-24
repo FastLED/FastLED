@@ -36,7 +36,7 @@ namespace fl {
 /// @tparam _GPIO GPIO port struct (GPIOA, GPIOB, etc.)
 /// @tparam HAS_BRR true if family has BRR register, false if must use BSRR upper bits
 template<u8 PIN, u8 _BIT, u32 _MASK, typename _GPIO, bool HAS_BRR>
-class _ARMPIN_STM32 : public Stm32BsrrPin {
+class _ARMPIN_STM32 : public Stm32BsrrPin<_ARMPIN_STM32<PIN, _BIT, _MASK, _GPIO, HAS_BRR>> {
 public:
   typedef volatile u32 * port_ptr_t;
   typedef u32 port_t;

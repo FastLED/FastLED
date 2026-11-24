@@ -208,10 +208,13 @@ public:
     }
 };
 
-/// True only for FastPin specializations backed by the real modern LPC _ARMPIN.
-template <u8 PIN, u32 MASK>
-constexpr bool isLpcHardwarePin(const _ARMPIN<PIN, MASK>*) { return true; }
-constexpr bool isLpcHardwarePin(const void*) { return false; }
+/// Match FastPin specializations backed by the real modern LPC _ARMPIN.
+template <class Pin, u8 PIN, u32 MASK>
+constexpr BitbangPinAccess lpcBitbangPinAccess(const _ARMPIN<PIN, MASK>*) {
+    return bitbangPinAccess<Pin, _ARMPIN<PIN, MASK>>();
+}
+template <class Pin>
+constexpr BitbangPinAccess lpcBitbangPinAccess(const void*) { return BitbangPinAccess::Default; }
 #endif  // FL_FASTPIN_HAS_NO_PINMAP
 
 // FL_LPC_ENABLE_FAST_SOFTWARE_SPI: optimized bit-bang software SPI pin policy (default 1).
@@ -228,7 +231,9 @@ constexpr bool isLpcHardwarePin(const void*) { return false; }
 /// Every other data update uses SET/CLR. kMinWriteCycles stays at its
 /// default: no GPIO write latency has been measured, so existing padding is kept.
 template <u8 PIN> struct BitbangPin<FastPin<PIN>> : BitbangPinDefaults<FastPin<PIN>> {
-    static constexpr bool kAtomicWrite = isLpcHardwarePin(static_cast<const FastPin<PIN>*>(nullptr));
+    static constexpr auto kPinAccess = lpcBitbangPinAccess<FastPin<PIN>>(static_cast<const FastPin<PIN>*>(nullptr));
+    static constexpr bool kAtomicWrite = kPinAccess == BitbangPinAccess::Native;
+    static constexpr bool kRequiresPinWrites = kPinAccess == BitbangPinAccess::Custom;
     static constexpr bool kTwoWriteStream = kAtomicWrite;
     template <u8 BIT>
     FASTLED_FORCE_INLINE static void write(u8 value) FL_NO_EXCEPT {

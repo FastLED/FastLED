@@ -100,10 +100,13 @@ template <> class FastPin<1> : public ClearCoreFastPin<1, 1> {};
 template <> class FastPin<2> : public ClearCoreFastPin<2, 6> {};
 template <> class FastPin<3> : public ClearCoreFastPin<3, 7> {};
 
-/// True only for pins backed by the active-low ClearCore template.
-template <u8 PIN, u8 BIT>
-constexpr bool isClearCoreHardwarePin(const ClearCoreFastPin<PIN, BIT>*) { return true; }
-constexpr bool isClearCoreHardwarePin(const void*) { return false; }
+/// Match pins backed by the active-low ClearCore template.
+template <class Pin, u8 PIN, u8 BIT>
+constexpr BitbangPinAccess clearCoreBitbangPinAccess(const ClearCoreFastPin<PIN, BIT>*) {
+    return bitbangPinAccess<Pin, ClearCoreFastPin<PIN, BIT>>();
+}
+template <class Pin>
+constexpr BitbangPinAccess clearCoreBitbangPinAccess(const void*) { return BitbangPinAccess::Default; }
 
 /// The generic writer's whole-port words treat a set clock bit as logical high,
 /// which is backwards on these connectors. Atomic writes keep every path on the
@@ -111,7 +114,9 @@ constexpr bool isClearCoreHardwarePin(const void*) { return false; }
 /// polarity-aware stream exists. kMinWriteCycles stays at its default: no GPIO
 /// write latency has been measured here, so existing padding is kept.
 template <u8 PIN> struct BitbangPin<FastPin<PIN>> : BitbangPinDefaults<FastPin<PIN>> {
-    static constexpr bool kAtomicWrite = isClearCoreHardwarePin(static_cast<const FastPin<PIN>*>(nullptr));
+    static constexpr auto kPinAccess = clearCoreBitbangPinAccess<FastPin<PIN>>(static_cast<const FastPin<PIN>*>(nullptr));
+    static constexpr bool kAtomicWrite = kPinAccess == BitbangPinAccess::Native;
+    static constexpr bool kRequiresPinWrites = kPinAccess == BitbangPinAccess::Custom;
     template <u8 BIT>
     FASTLED_FORCE_INLINE static void write(u8 value) FL_NO_EXCEPT {
         writeImpl<BIT>(value, fl::integral_constant<bool, kAtomicWrite>());

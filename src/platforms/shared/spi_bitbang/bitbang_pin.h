@@ -88,10 +88,34 @@ FASTLED_FORCE_INLINE void bitbangDelay(fl::integral_constant<bool, true>) FL_NO_
     fl::delaycycles<CYCLES>();
 }
 
+enum class BitbangPinAccess { Default, Native, Custom };
+
+namespace detail {
+template <void (*Hi)(), void (*Lo)()> struct BitbangPinFunctions {};
+
+template <class Pin, class Native, class Functions = BitbangPinFunctions<&Pin::hi, &Pin::lo>>
+constexpr bool bitbangUsesNativeFunctions(int) FL_NO_EXCEPT {
+    return fl::is_same<Functions, BitbangPinFunctions<&Native::hi, &Native::lo>>::value;
+}
+
+template <class Pin, class Native>
+constexpr bool bitbangUsesNativeFunctions(...) FL_NO_EXCEPT { return false; }
+} // namespace detail
+
+/// Detect whether a hardware-backed pin still uses the base's zero-argument
+/// hi()/lo(). Match the function identities without taking their addresses at runtime.
+template <class Pin, class Native>
+constexpr BitbangPinAccess bitbangPinAccess(bool nativeAvailable = true) FL_NO_EXCEPT {
+    return detail::bitbangUsesNativeFunctions<Pin, Native>(0)
+        ? (nativeAvailable ? BitbangPinAccess::Native : BitbangPinAccess::Default)
+        : BitbangPinAccess::Custom;
+}
+
 /// Default pin access; a platform may specialize the data-write operation
 /// while the generic SPI writer continues to own bit order and clock timing.
 template <class Pin> struct BitbangPinDefaults {
     static constexpr bool kAtomicWrite = false;
+    static constexpr bool kRequiresPinWrites = false;
     static constexpr bool kTwoWriteStream = false;
     static constexpr cycle_t kMinWriteCycles = 0;
     /// ESP32 with its fast policy off: GenericSoftwareSPIOutput::writeBit()

@@ -175,7 +175,7 @@ _FL_DEFPIN(8,15); _FL_DEFPIN(9,3); _FL_DEFPIN(10,1);
 #endif
 // The fast policy writes GPIO registers directly, bypassing forced core-API pins.
 #if FL_ESP8266_ENABLE_FAST_SOFTWARE_SPI && !defined(FL_FASTPIN_HAS_NO_PINMAP)
-template <u8 PIN> struct BitbangPin<FastPin<PIN>> {
+template <u8 PIN> struct BitbangPin<FastPin<PIN>> : BitbangPinDefaults<FastPin<PIN>> {
     static constexpr bool kAtomicWrite = true;
     static constexpr bool kEsp32LegacyWriteBit = false;  // generic writer trait
     static constexpr bool kTwoWriteStream = FastPin<PIN>::kRealPin < 16;

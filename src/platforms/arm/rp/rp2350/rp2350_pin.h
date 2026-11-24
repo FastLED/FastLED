@@ -61,11 +61,14 @@ public:
   inline static port_t mask() __attribute__ ((always_inline)) { return _MASK; }
 };
 
-/// True only for GPIO0-31 backed by a real _RP2350PIN. GPIO32-47 (GPIO_HI bank)
+/// Enable native writes for GPIO0-31 backed by _RP2350PIN. GPIO32-47 (GPIO_HI bank)
 /// keep the plain hi()/lo() writer: the set/clear stream is only audited for bank 0.
-template <uint PIN, u32 MASK>
-constexpr bool isRp2350LowBankPin(const _RP2350PIN<PIN, MASK>*) { return PIN < 32; }
-constexpr bool isRp2350LowBankPin(const void*) { return false; }
+template <class Pin, uint PIN, u32 MASK>
+constexpr BitbangPinAccess rp2350BitbangPinAccess(const _RP2350PIN<PIN, MASK>*) {
+    return bitbangPinAccess<Pin, _RP2350PIN<PIN, MASK>>(PIN < 32);
+}
+template <class Pin>
+constexpr BitbangPinAccess rp2350BitbangPinAccess(const void*) { return BitbangPinAccess::Default; }
 
 // FL_RP_ENABLE_FAST_SOFTWARE_SPI: optimized bit-bang software SPI pin policy (default 1).
 // Opt-out: define it to 0 to fall back to the legacy bit-bang writer.
@@ -83,7 +86,9 @@ constexpr bool isRp2350LowBankPin(const void*) { return false; }
 /// that owns all of SIO. kMinWriteCycles stays at its default:
 /// no SIO write latency has been measured here, so existing padding is kept.
 template <u8 PIN> struct BitbangPin<FastPin<PIN>> : BitbangPinDefaults<FastPin<PIN>> {
-  static constexpr bool kAtomicWrite = isRp2350LowBankPin(static_cast<const FastPin<PIN>*>(nullptr));
+  static constexpr auto kPinAccess = rp2350BitbangPinAccess<FastPin<PIN>>(static_cast<const FastPin<PIN>*>(nullptr));
+  static constexpr bool kAtomicWrite = kPinAccess == BitbangPinAccess::Native;
+  static constexpr bool kRequiresPinWrites = kPinAccess == BitbangPinAccess::Custom;
   static constexpr bool kTwoWriteStream = kAtomicWrite;
   template <u8 BIT>
   FASTLED_FORCE_INLINE static void write(u8 value) FL_NO_EXCEPT {
