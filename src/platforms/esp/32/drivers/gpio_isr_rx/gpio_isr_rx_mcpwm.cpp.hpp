@@ -69,6 +69,9 @@ FL_EXTERN_C_BEGIN
 #include "esp_attr.h"
 #include "esp_err.h"
 #include "esp_intr_alloc.h"  // For esp_intr_alloc, intr_handle_t
+#if defined(__riscv) && ESP_IDF_VERSION_6_OR_HIGHER
+#include "hal/gpio_ll.h"  // For GPIO_LL_INTR_SOURCE0
+#endif
 #include "soc/gpio_reg.h"  // For GPIO_IN_REG (and GPIO_IN1_REG on chips with >32 GPIOs)
 #include "soc/interrupts.h"  // For ETS_GPIO_INTR_SOURCE
 #include "freertos/FreeRTOS.h"
@@ -104,12 +107,13 @@ bool install_direct_gpio_isr(int gpio_num, void* isr_context, intr_handle_t* int
     FL_DBG("Installing direct GPIO ISR for pin " << gpio_num);
 
     // Step 1: Determine GPIO interrupt source
-    // ESP32-P4 has per-CPU GPIO interrupt sources (ETS_GPIO_INTR0_SOURCE..3)
-    // instead of a single ETS_GPIO_INTR_SOURCE.
-#if defined(FL_IS_ESP_32P4)
-    int intr_source = ETS_GPIO_INTR0_SOURCE;
+    // Use the same GPIO interrupt source as the SDK's GPIO driver.
+#if defined(GPIO_LL_INTR_SOURCE0)
+    const int intr_source = GPIO_LL_INTR_SOURCE0;
+#elif defined(FL_IS_ESP_32P4)
+    const int intr_source = ETS_GPIO_INTR0_SOURCE;
 #else
-    int intr_source = ETS_GPIO_INTR_SOURCE;
+    const int intr_source = ETS_GPIO_INTR_SOURCE;
 #endif
     FL_DBG("GPIO interrupt source: " << intr_source);
 

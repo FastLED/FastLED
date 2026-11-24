@@ -165,6 +165,10 @@ public:
 // NOTE: GPIO 24 & 25 commonly used for USB and may cause flashes when uploading.
 #define FASTLED_UNUSABLE_PIN_MASK (0ULL | _FL_BIT(24) | _FL_BIT(25))
 
+#elif defined(FL_IS_ESP_32S31)
+// GPIO 26-28 and 30-32 are typically used for SPI flash.
+#define FASTLED_UNUSABLE_PIN_MASK (0ULL | _FL_BIT(26) | _FL_BIT(27) | _FL_BIT(28) | _FL_BIT(30) | _FL_BIT(31) | _FL_BIT(32))
+
 #elif defined(FL_IS_ESP_32H2)
 // 22 GPIO pins.  ESPIDF defines all pins as valid.
 // GPIO 15-21 are typically reserved for SPI0/1 flash communication.
