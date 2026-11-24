@@ -48,10 +48,10 @@ jobs:
   # Self-hosted forge pool (forge-ci/gh-runner docs/pool.md): when the repo
   # variable FORGE_POOL_LABELS holds a JSON label array, trusted events (push
   # to master, merge_group, workflow_dispatch, schedule) ask pool-select right
-  # before the build whether the pool's Ubuntu 24.04 runners have an idle
-  # slot, and run there only if so; otherwise, or on any error, the build runs
-  # hosted. It reads https://signal.forge-ci.com/v1/pool with no token. Pull
-  # requests never run the selector and stay hosted (fork safety and volume).
+  # before the build whether the Ubuntu 24.04 pool has an idle runner or
+  # dispatcher capacity. When neither is available or the probe fails, the
+  # build runs hosted. The selector reads signal.forge-ci.com without a token.
+  # Pull requests stay hosted (fork safety and volume).
   # Unset FORGE_POOL_LABELS to stop routing at once; unset the org variable
   # FORGE_QUICK_LABELS to run the selector itself on hosted runners (RUN-004).
   pool:
@@ -72,7 +72,7 @@ jobs:
       - name: Select pool or hosted
         id: select
         continue-on-error: true
-        uses: forge-ci/ci.yml/actions/pool-select@a36bc81ad6ada5fb17398e3e7ba38435cc67a951
+        uses: forge-ci/ci.yml/actions/pool-select@82945f807590d469a2833f2a421a0a7861bc37d1
         with:
           labels: ${{ vars.FORGE_POOL_LABELS }}
           fallback: ${{ inputs.runs-on }}
