@@ -69,6 +69,9 @@ constexpr PinProbeLinkPins kLinkPins = {43, 44, 19, 20, 26, -1};
 #elif defined(FL_IS_ESP_32S3)
 // SPICS1 (GPIO26) is the PSRAM chip select.
 constexpr PinProbeLinkPins kLinkPins = {43, 44, 19, 20, 26, -1};
+#elif defined(FL_IS_ESP_32S31)
+// Native USB Serial/JTAG uses GPIO33/34, and UART0 uses GPIO58/59.
+constexpr PinProbeLinkPins kLinkPins = {58, 59, 33, 34, -1, -1};
 #elif defined(FL_IS_ESP_32C5)
 constexpr PinProbeLinkPins kLinkPins = {11, 12, 13, 14, -1, -1};
 #elif defined(FL_IS_ESP_32C6)
