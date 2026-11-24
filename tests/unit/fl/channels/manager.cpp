@@ -41,6 +41,7 @@ public:
 
     // Controllable state
     DriverState::Value mState = DriverState::READY;
+    const char* mError = "";
     int showCount = 0;
     int enqueueCount = 0;
     int pollCount = 0;
@@ -48,7 +49,7 @@ public:
     bool canHandle(const ChannelDataPtr&) const override { return true; }
     void enqueue(ChannelDataPtr) override { enqueueCount++; }
     void show() override { showCount++; }
-    DriverState poll() override { pollCount++; return DriverState(mState); }
+    DriverState poll() override { pollCount++; return DriverState(mState, mError); }
     fl::string getName() const override { return mName; }
 
     Capabilities getCapabilities() const override {
@@ -298,13 +299,38 @@ FL_TEST_CASE("a BUSY driver is polled until READY even when it settles async #53
     FL_CHECK_EQ(driver->pollCount, 4);
 }
 
+FL_TEST_CASE("ChannelManager::poll propagates errors without a message") {
+    ChannelManager mgr;
+    auto first = fl::make_shared<StatefulMockDriver>("FIRST_ERROR");
+    auto second = fl::make_shared<StatefulMockDriver>("SECOND_DRIVER");
+    mgr.addDriver(20, first);
+    mgr.addDriver(10, second);
+
+    first->mState = DriverState::ERROR;
+    for (auto state : {DriverState::READY, DriverState::DRAINING, DriverState::BUSY}) {
+        second->mState = state;
+        const auto result = mgr.poll();
+        FL_CHECK_EQ(result.state, DriverState::ERROR);
+        FL_CHECK_EQ(result.error[0], '\0');
+    }
+
+    second->mState = DriverState::ERROR;
+    second->mError = "driver timeout";
+    const auto result = mgr.poll();
+    FL_CHECK_EQ(result.state, DriverState::ERROR);
+    FL_CHECK_EQ(fl::string(result.error), fl::string("driver timeout"));
+
+    first->mError = "first driver error";
+    FL_CHECK_EQ(fl::string(mgr.poll().error), fl::string("first driver error"));
+}
+
 FL_TEST_CASE("an ERROR without error text never seeds the all-ready cache #5381") {
     ChannelManager mgr;
     auto driver = fl::make_shared<StatefulMockDriver>("ERR_CACHE");
     mgr.addDriver(10, driver);
 
     driver->mState = DriverState::ERROR;  // DriverState(ERROR): empty text
-    mgr.onEndFrame();
+    mgr.poll();
     const int before = driver->pollCount;
     driver->mState = DriverState::READY;
     mgr.onBeginFrame();
