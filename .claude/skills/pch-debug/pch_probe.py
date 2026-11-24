@@ -11,7 +11,7 @@ Subcommands:
 Usage (from the repo root):
   uv run python .claude/skills/pch-debug/pch_probe.py inputs
   uv run python .claude/skills/pch-debug/pch_probe.py tu tests/unit/fl/stl/adl_barrier.cpp
-  uv run python .claude/skills/pch-debug/pch_probe.py tu adl_barrier --build-dir .build/meson-debug
+  uv run python .claude/skills/pch-debug/pch_probe.py --build-dir .build/meson-debug tu adl_barrier
 
 Read-only: it never writes into the build tree (output goes to the null device).
 """
