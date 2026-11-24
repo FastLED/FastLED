@@ -658,13 +658,12 @@ struct Rmt5EncoderImpl {
 
     // Factory method to create encoder instance
     static Rmt5EncoderImpl* create(const ChipsetTiming& timing, u32 resolution_hz) FL_NO_EXCEPT {
-        Rmt5EncoderImpl* impl = new Rmt5EncoderImpl(timing, resolution_hz);  // ok bare allocation
+        Rmt5EncoderImpl* impl = new Rmt5EncoderImpl();  // ok bare allocation
         if (impl == nullptr) {
             FL_WARN("Rmt5EncoderImpl::create: Failed to allocate encoder");
             return nullptr;
         }
-        if (impl->getHandle() == nullptr) {
-            FL_WARN("Rmt5EncoderImpl::create: Encoder initialization failed");
+        if (impl->initialize(timing, resolution_hz) != ESP_OK) {
             delete impl;  // ok bare allocation
             return nullptr;
         }
@@ -683,7 +682,7 @@ struct Rmt5EncoderImpl {
 
 private:
     // Private constructor - use create() factory method
-    Rmt5EncoderImpl(const ChipsetTiming& timing, u32 resolution_hz) FL_NO_EXCEPT
+    Rmt5EncoderImpl() FL_NO_EXCEPT
         : mBytesEncoder(nullptr), mCopyEncoder(nullptr), mState(0),
           mBit0HighTicks(0), mBit0LowTicks(0), mBit1HighTicks(0),
           mBit1LowTicks(0), mResetTicks(0) {
@@ -695,11 +694,6 @@ private:
         mResetCode.level0 = 0;
         mResetCode.duration1 = 0;
         mResetCode.level1 = 0;
-
-        esp_err_t ret = initialize(timing, resolution_hz);
-        if (ret != ESP_OK) {
-            FL_WARN("Rmt5EncoderImpl: Initialization failed: " << esp_err_to_name(ret));
-        }
     }
 
     // Private methods
@@ -816,8 +810,6 @@ private:
 #if FL_HAS_WARN
             emitRmt5EncoderCreateFailure("copy", ret);
 #endif
-            rmt_del_encoder(mBytesEncoder);
-            mBytesEncoder = nullptr;
             return ret;
         }
 
