@@ -162,11 +162,9 @@ IChannelDriver::DriverState ChannelDriverLcdSpi::poll() FL_NO_EXCEPT {
         return DriverState::READY;
     }
 
-    // Stream complete: ISR processed all chunks and peripheral is idle
-    bool streamDone = mIsrCtx.mStreamComplete;
-    bool peripheralIdle = mPeripheral && !mPeripheral->isBusy();
-
-    if (streamDone || peripheralIdle) {
+    // The peripheral can appear idle before the ISR submits the next chunk.
+    // Keep the frame until the callback finishes the stream and DMA is idle.
+    if (mIsrCtx.mStreamComplete && mPeripheral && !mPeripheral->isBusy()) {
         mBusy = false;
         mIsrCtx.mStreamComplete = false;
         for (auto &channel : mTransmittingChannels) {
@@ -176,7 +174,7 @@ IChannelDriver::DriverState ChannelDriverLcdSpi::poll() FL_NO_EXCEPT {
         return DriverState::READY;
     }
 
-    return mBusy ? DriverState::DRAINING : DriverState::READY;
+    return DriverState::DRAINING;
 }
 
 //=============================================================================
