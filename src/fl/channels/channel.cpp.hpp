@@ -39,6 +39,7 @@ class ReorderingPixelIteratorAny {
     static fl::vector<CRGB>& getReorderBufferTLS() FL_NO_EXCEPT {
         return SingletonThreadLocal<fl::vector<CRGB>>::instance();
     }
+    // Initialized before mPixelIterator, which may reference it.
     fl::optional<PixelController<RGB, 1, 0xFFFFFFFF>> mAddressedController;
     PixelIteratorAny mPixelIterator;
 #if FL_COLOR_PROFILE_RUNTIME
@@ -56,6 +57,47 @@ class ReorderingPixelIteratorAny {
     FL_ALIGNAS(8) unsigned char mManagedIteratorStorage[kColorPipelineIteratorStorage];
     PixelIterator* mManagedIterator = nullptr;
 #endif
+
+    PixelController<RGB, 1, 0xFFFFFFFF>& applyAddressing(
+        PixelController<RGB, 1, 0xFFFFFFFF>& pixels,
+        const XYMap* addressing, const fl::string& channelName) FL_NO_EXCEPT {
+        FL_UNUSED(channelName);  // only consumed by FL_ERROR, a no-op on small platforms
+        if (!addressing) {
+            return pixels;
+        }
+
+        u16 numLeds = pixels.size();
+        u16 width = addressing->getWidth();
+        u16 height = addressing->getHeight();
+        u16 expectedLeds = width * height;
+
+        // Validate that XYMap dimensions match channel LED count
+        if (expectedLeds != numLeds) {
+            FL_ERROR("Channel '" << channelName << "': XYMap dimensions (" << width << "x" << height << "=" << expectedLeds << ") don't match LED count (" << numLeds << "). Addressing transformation may produce unexpected results.");
+        }
+
+        // Cast mData to CRGB array
+        const CRGB* pixelArray = (const CRGB*)pixels.mData;
+
+        // Get thread-local buffer (reuses allocation if size unchanged)
+        fl::vector<CRGB>& buffer = getReorderBufferTLS();
+        buffer.clear();
+        buffer.resize(numLeds);
+
+        // Fill buffer by mapping each physical index to its source
+        for (u16 physicalIdx = 0; physicalIdx < numLeds; physicalIdx++) {
+            u16 x = physicalIdx % width;
+            u16 y = physicalIdx / width;
+            u16 sourceIdx = addressing->mapToIndex(x, y);
+            buffer[physicalIdx] = (sourceIdx < numLeds) ? pixelArray[sourceIdx] : CRGB::Black;
+        }
+
+        // Construct PixelController with reordered buffer
+        mAddressedController.emplace(
+            buffer.data(), buffer.size(),
+            pixels.mColorAdjustment, DISABLE_DITHER);
+        return mAddressedController.value();
+    }
 
   public:
     /// @brief Construct pixel iterator with optional addressing transformation
@@ -77,46 +119,11 @@ class ReorderingPixelIteratorAny {
         StreamingPipelineQ16* pipeline,
 #endif
         u8 ditherPhase, u8 brightness) FL_NO_EXCEPT
-        : mPixelIterator(pixels, rgbOrder, rgbw, rgbww) {
+        : mPixelIterator(applyAddressing(pixels, addressing, channelName),
+                         rgbOrder, rgbw, rgbww) {
         FL_UNUSED(pipeline);
         FL_UNUSED(ditherPhase);  // read only by the colour-managed source
         FL_UNUSED(brightness);   // read only by the colour-managed source
-        FL_UNUSED(channelName);  // only consumed by FL_ERROR, a no-op on small platforms
-
-        // Apply addressing transformation if configured
-        if (addressing) {
-            u16 numLeds = pixels.size();
-            u16 width = addressing->getWidth();
-            u16 height = addressing->getHeight();
-            u16 expectedLeds = width * height;
-
-            // Validate that XYMap dimensions match channel LED count
-            if (expectedLeds != numLeds) {
-                FL_ERROR("Channel '" << channelName << "': XYMap dimensions (" << width << "x" << height << "=" << expectedLeds << ") don't match LED count (" << numLeds << "). Addressing transformation may produce unexpected results.");
-            }
-
-            // Cast mData to CRGB array
-            const CRGB* pixelArray = (const CRGB*)pixels.mData;
-
-            // Get thread-local buffer (reuses allocation if size unchanged)
-            fl::vector<CRGB>& buffer = getReorderBufferTLS();
-            buffer.clear();
-            buffer.resize(numLeds);
-
-            // Fill buffer by mapping each physical index to its source
-            for (u16 physicalIdx = 0; physicalIdx < numLeds; physicalIdx++) {
-                u16 x = physicalIdx % width;
-                u16 y = physicalIdx / width;
-                u16 sourceIdx = addressing->mapToIndex(x, y);
-                buffer[physicalIdx] = (sourceIdx < numLeds) ? pixelArray[sourceIdx] : CRGB::Black;
-            }
-
-            // Construct PixelController with reordered buffer
-            mAddressedController.emplace(
-                buffer.data(), buffer.size(),
-                pixels.mColorAdjustment, DISABLE_DITHER);
-            mPixelIterator = PixelIteratorAny(mAddressedController.value(), rgbOrder, rgbw, rgbww);
-        }
 
 #if FL_COLOR_PROFILE_RUNTIME
         const ColorPipelineHooks& hooks = colorPipelineHooks();
