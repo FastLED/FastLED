@@ -509,4 +509,7 @@
 # RMT5 retiming now keeps the working encoder until the replacement is ready.
 # Hosted ESP32-S3 Blink run 45572609799 measured 318559 B of image flash,
 # 92 B below the previous pin. The budget ceilings are unchanged.
-318559
+# Keeping RMT5 DMA channels across network changes removes their rebuild path.
+# Hosted ESP32-S3 Blink run 45581810817 measured 318479 B of image flash,
+# 80 B below the prior pin. The budget ceilings are unchanged.
+318479
