@@ -23,6 +23,7 @@
 #include "fl/log/log.h"
 #include "fl/stl/bit_cast.h"
 #include "fl/stl/array.h"
+#include "fl/stl/limits.h"
 
 // Include ESP-IDF headers ONLY in .cpp file
 FL_EXTERN_C_BEGIN
@@ -35,9 +36,6 @@ FL_EXTERN_C_BEGIN
 #include "esp_cache.h"
 #include "esp_heap_caps.h"
 #include "esp_log.h"
-// IWYU pragma: begin_keep
-#include "freertos/FreeRTOS.h"
-// IWYU pragma: end_keep
 #include "esp_rom_gpio.h"  // For esp_rom_gpio_connect_out_signal
 // IWYU pragma: begin_keep
 #include "soc/gpio_sig_map.h"  // For RMT_SIG_OUT0_IDX etc.
@@ -345,12 +343,12 @@ bool Rmt5PeripheralESPImpl::waitAllDone(void* channel_handle, u32 timeout_ms) FL
     // Delegate to ESP-IDF
     rmt_channel_handle_t channel = static_cast<rmt_channel_handle_t>(channel_handle);
 
-    // Convert timeout to FreeRTOS ticks (portMAX_DELAY if timeout_ms == 0)
-    TickType_t timeout_ticks = (timeout_ms == 0)
-        ? portMAX_DELAY
-        : pdMS_TO_TICKS(timeout_ms);
-
-    esp_err_t err = rmt_tx_wait_all_done(channel, timeout_ticks);
+    // ESP-IDF converts milliseconds to ticks internally. Zero polls the queue.
+    constexpr i32 max_timeout_ms = (fl::numeric_limits<i32>::max)();
+    const i32 sdk_timeout_ms = timeout_ms > static_cast<u32>(max_timeout_ms)
+        ? max_timeout_ms
+        : static_cast<i32>(timeout_ms);
+    esp_err_t err = rmt_tx_wait_all_done(channel, sdk_timeout_ms);
 
     if (err != ESP_OK) {
         if (err == ESP_ERR_TIMEOUT) {
