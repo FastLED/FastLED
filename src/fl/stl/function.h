@@ -7,7 +7,6 @@
 #include "fl/stl/align.h"
 #include "fl/stl/pair.h"
 #include "fl/stl/vector.h"
-#include "fl/stl/algorithm.h"  // for fl::sort
 #include "fl/stl/noexcept.h"
 #include "fl/stl/static_assert.h"
 #include "fl/system/sketch_macros.h"  // for FL_PLATFORM_HAS_LARGE_MEMORY
@@ -390,14 +389,6 @@ class function_list {
 };
 
 namespace detail {
-// The priority vector is independent of the callback signature. Keep one sort
-// implementation for all function_list instantiations with subscribers.
-FL_NO_INLINE inline void sortFunctionListPriorities(fl::vector_inlined<int, 16>& priorities) FL_NO_EXCEPT {
-    fl::sort(priorities.begin(), priorities.end(), [](int a, int b) FL_NO_EXCEPT { return a > b; });
-}
-} // namespace detail
-
-namespace detail {
 template <typename Signature, bool Large> class FunctionListImpl;
 
 // A stack activation retains the actual callable across an active list move.
@@ -643,20 +634,33 @@ class FunctionListImpl<void(Args...), false> {
         if (!invokeSize) return;
         const u32 revision = mRevision;
         DispatchGuard guard(*this);
-        fl::vector_inlined<int, 16> priorities;
+        // Scan for successive priority groups to keep temporary storage
+        // constant on small stacks. Pending additions stay outside this scan.
+        int priority = 0;
+        bool foundPriority = false;
         for (size_t i = 0; i < invokeSize; ++i) {
-            if (!mFunctions[i].isValid()) continue;
-            int priority = mFunctions[i].priority;
-            if (priorities.find(priority) == priorities.end()) priorities.push_back(priority);
+            const auto& entry = mFunctions[i];
+            if (entry.isValid() && (!foundPriority || entry.priority > priority)) {
+                priority = entry.priority;
+                foundPriority = true;
+            }
         }
-        sortFunctionListPriorities(priorities);
-        for (size_t p = 0; p < priorities.size(); ++p) {
+        while (foundPriority) {
+            int nextPriority = 0;
+            foundPriority = false;
             for (size_t i = 0; i < invokeSize; ++i) {
                 if (mRevision != revision) return;
-                if (mFunctions[i].isValid() && mFunctions[i].priority == priorities[p]) {
-                    mFunctions[i].invoke(args...);
+                auto& entry = mFunctions[i];
+                if (!entry.isValid()) continue;
+                if (entry.priority == priority) {
+                    entry.invoke(args...);
+                } else if (entry.priority < priority &&
+                           (!foundPriority || entry.priority > nextPriority)) {
+                    nextPriority = entry.priority;
+                    foundPriority = true;
                 }
             }
+            priority = nextPriority;
         }
     }
     void operator()(Args... args) FL_NO_EXCEPT { invoke(args...); }
