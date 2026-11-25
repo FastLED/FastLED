@@ -711,7 +711,7 @@ FL_TEST_CASE("I2sEsp32Dev - pure clockless batch still succeeds") {
 FL_TEST_CASE("I2sEsp32Dev - pure SPI batch — Phase 2c delegate path") {
     // FastLED#3526 Phase 2c — SPI batches now delegate to the tested
     // ChannelDriverI2sSpi. On host builds the delegate factory returns
-    // nullptr (no ESP peripheral), so the engine drops to ERROR
+    // no driver, so the engine drops to ERROR
     // cleanly with the "SPI delegate unavailable" path. On device
     // (esp32dev) the delegate is functional and the batch reaches BUSY.
     resetMockState();
@@ -731,6 +731,56 @@ FL_TEST_CASE("I2sEsp32Dev - pure SPI batch — Phase 2c delegate path") {
     auto state = engine.currentState();
     FL_CHECK(state == IChannelDriver::DriverState::BUSY ||
              state == IChannelDriver::DriverState::ERROR);
+}
+
+FL_TEST_CASE("I2sEsp32Dev - a queued frame cannot replace a draining SPI frame") {
+    class SpiDelegate : public IChannelDriver {
+      public:
+        void enqueue(ChannelDataPtr data) FL_NO_EXCEPT override { channel = fl::move(data); }
+        void show() FL_NO_EXCEPT override { channel->setInUse(true); }
+        DriverState poll() FL_NO_EXCEPT override {
+            if (!done) {
+                return DriverState::DRAINING;
+            }
+            channel->setInUse(false);
+            return DriverState::READY;
+        }
+        Capabilities getCapabilities() const FL_NO_EXCEPT override { return {}; }
+        bool canHandle(const ChannelDataPtr &data) const FL_NO_EXCEPT override {
+            return data && data->isSpi();
+        }
+
+        ChannelDataPtr channel;
+        bool done = false;
+    };
+
+    resetMockState();
+    auto delegate = fl::make_shared<SpiDelegate>();
+    ChannelEngineI2sEsp32Dev engine(createMockPeripheral(), 1, delegate);
+    auto spi = makeSpiChannelData(23, 18, 6, 0xCC);
+    auto clockless = makeChannelData(17, 6);
+    engine.enqueue(spi);
+    engine.show();
+    FL_REQUIRE(spi->isInUse());
+
+    engine.enqueue(clockless);
+    engine.show();
+    FL_CHECK(spi->isInUse());
+    FL_CHECK_FALSE(clockless->isInUse());
+    FL_CHECK_EQ(I2sPeripheralEsp32DevMock::instance().getTransmitCount(), 0u);
+    FL_CHECK(engine.poll() == IChannelDriver::DriverState::DRAINING);
+
+    delegate->done = true;
+    FL_CHECK(engine.poll() == IChannelDriver::DriverState::READY);
+    FL_CHECK_FALSE(spi->isInUse());
+
+    engine.enqueue(clockless);
+    engine.show();
+    FL_CHECK(engine.poll() == IChannelDriver::DriverState::BUSY);
+    FL_CHECK(clockless->isInUse());
+    I2sPeripheralEsp32DevMock::instance().simulateTransmitDone();
+    FL_CHECK(engine.poll() == IChannelDriver::DriverState::READY);
+    FL_CHECK_FALSE(clockless->isInUse());
 }
 
 FL_TEST_CASE("I2sEsp32Dev - mixed clockless+SPI batch rejected") {
