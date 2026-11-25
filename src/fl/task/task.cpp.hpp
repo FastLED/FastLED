@@ -37,11 +37,9 @@ namespace task {
 
 class Coroutine {
 public:
-    using TaskFunction = fl::function<void()>;
-
-    Coroutine(fl::string name, TaskFunction function, size_t stack_size = 4096, u8 priority = 5, int core_id = -1)
-        FL_NO_EXCEPT : mImpl(platforms::createTaskCoroutine(fl::move(name), fl::move(function), stack_size, priority, core_id)) {
-    }
+    explicit Coroutine(const CoroutineConfig& config) FL_NO_EXCEPT
+        : mImpl(platforms::createTaskCoroutine(config.name, config.func, config.stack_size, config.priority,
+                                               config.core_id.has_value() ? config.core_id.value() : -1)) {}
 
     ~Coroutine() FL_NO_EXCEPT = default;
 
@@ -218,8 +216,7 @@ public:
     CoroutineTask(const CoroutineConfig& config)
         FL_NO_EXCEPT : mTaskId(next_task_id())
         , mTraceLabel(config.trace ? make_unique<string>(make_trace_label(*config.trace)) : nullptr)
-        , mCoroutine(make_unique<Coroutine>(config.name, config.func, config.stack_size, config.priority,
-                                                 config.core_id.has_value() ? config.core_id.value() : -1)) {}
+        , mCoroutine(make_unique<Coroutine>(config)) {}
 
     void set_then(function<void()>) FL_NO_EXCEPT override { /* Coroutine tasks don't use then */ }
     void set_catch(function<void(const Error&)>) FL_NO_EXCEPT override { /* Coroutine tasks don't use catch */ }
