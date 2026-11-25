@@ -576,6 +576,37 @@ FL_TEST_CASE("ChannelDriverLcdSpi - second show waits for first") {
     FL_CHECK(driver.poll() == IChannelDriver::DriverState::READY);
 }
 
+FL_TEST_CASE("ChannelDriverLcdSpi - timeout preserves the active frame") {
+    resetMockState();
+    auto peripheral = createMockPeripheral();
+    ChannelDriverLcdSpi driver(peripheral);
+    auto &mock = LcdSpiPeripheralMock::instance();
+
+    auto active = createSpiTestChannelData(5, 18, 10);
+    auto skipped = createSpiTestChannelData(5, 18, 10);
+    driver.enqueue(active);
+    driver.show();
+    FL_REQUIRE(active->isInUse());
+
+    driver.enqueue(skipped);
+    driver.show();
+    FL_CHECK_EQ(mock.getTransmitCount(), 1);
+    FL_CHECK(active->isInUse());
+    FL_CHECK_FALSE(skipped->isInUse());
+
+    mock.simulateTransmitComplete();
+    FL_CHECK(driver.poll() == IChannelDriver::DriverState::READY);
+    FL_CHECK_FALSE(active->isInUse());
+
+    driver.show();
+    FL_CHECK_EQ(mock.getTransmitCount(), 1);
+    driver.enqueue(skipped);
+    driver.show();
+    FL_CHECK_EQ(mock.getTransmitCount(), 2);
+    mock.simulateTransmitComplete();
+    FL_CHECK(driver.poll() == IChannelDriver::DriverState::READY);
+}
+
 //=============================================================================
 // Buffer growth without peripheral reinit
 //=============================================================================

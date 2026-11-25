@@ -127,27 +127,24 @@ void ChannelDriverLcdSpi::enqueue(ChannelDataPtr channelData) FL_NO_EXCEPT {
 }
 
 void ChannelDriverLcdSpi::show() FL_NO_EXCEPT {
-    // Release channels from any completed previous transmission
-    poll();
+    // Release channels from any completed previous transmission.
+    auto state = poll();
 
     if (mEnqueuedChannels.empty()) {
         return;
     }
 
-    // Wait for previous transmission to complete (max ~5 seconds)
+    // Wait for the previous transmission to complete (max ~5 seconds).
     constexpr int kMaxIterations = 20000;
-    int iterations = 0;
-    while (mBusy && iterations++ < kMaxIterations) {
-        poll();
+    for (int i = 0; state == DriverState::DRAINING && i < kMaxIterations; ++i) {
         fl::task::yield_system(250);
+        state = poll();
     }
-    if (mBusy) {
-        FL_WARN("ChannelDriverLcdSpi: DMA hung â€” forcing release");
-        mBusy = false;
-        for (auto &channel : mTransmittingChannels) {
-            channel->setInUse(false);
-        }
-        mTransmittingChannels.clear();
+    if (state == DriverState::DRAINING) {
+        FL_WARN("ChannelDriverLcdSpi: DMA wait timed out; dropping queued frame");
+        // The chunk callback can still read the active channel data and ring buffers.
+        mEnqueuedChannels.clear();
+        return;
     }
 
     mTransmittingChannels = fl::move(mEnqueuedChannels);
