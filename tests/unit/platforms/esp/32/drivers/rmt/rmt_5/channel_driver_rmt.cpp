@@ -1059,21 +1059,20 @@ FL_TEST_CASE("RMT5 driver - empty enqueue") {
     FL_CHECK(mock.getTransmissionCount() == 0);
 }
 
-// TODO: Re-enable after fixing driver 0-byte buffer handling
-// FL_TEST_CASE("RMT5 driver - zero LED channel") {
-//     resetMock();
-//     auto driver = ChannelEngineRMT::create();
+FL_TEST_CASE("RMT5 driver - zero LED channel leaves the hardware idle") {
+    resetMock();
+    auto& mock = Rmt5PeripheralMock::instance();
+    auto driver = ChannelEngineRMT::create();
+    auto ch = createChannelData(18, 0);
 
-//     auto ch = createChannelData(18, 0);  // Zero LEDs
+    driver->enqueue(ch);
+    driver->show();
 
-//     driver->enqueue(ch);
-//     driver->show();
-
-//     // Should handle gracefully (0 bytes = no transmission, immediate READY)
-//     auto state = driver->poll();
-//     FL_CHECK(state == DriverState::READY);
-//     FL_CHECK(ch->isInUse() == false);  // Should not be in use (no valid transmission)
-// }
+    FL_CHECK_FALSE(ch->isInUse());
+    FL_CHECK(driver->poll() == DriverState::READY);
+    FL_CHECK_EQ(mock.getChannelCount(), 0u);
+    FL_CHECK_EQ(mock.getTransmissionCount(), 0u);
+}
 
 FL_TEST_CASE("RMT5 driver - show timeout preserves the active frame") {
     resetMock();

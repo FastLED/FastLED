@@ -319,6 +319,9 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
     }
 
     void enqueue(ChannelDataPtr channelData) FL_NO_EXCEPT override {
+        if (channelData->getSize() == 0) {
+            return;
+        }
         mEnqueuedChannels.push_back(channelData);
     }
 
