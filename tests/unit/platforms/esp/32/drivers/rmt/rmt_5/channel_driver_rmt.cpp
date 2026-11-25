@@ -582,29 +582,39 @@ FL_TEST_CASE("RMT5 driver - strips beyond channel limit wait for a free channel"
     mock.setMaxChannels(0);
 }
 
-// TODO: Re-enable after fixing driver failure handling
-// FL_TEST_CASE("RMT5 driver - handle transmission failure") {
-//     resetMock();
-//     auto& mock = Rmt5PeripheralMock::instance();
-//     auto driver = ChannelEngineRMT::create();
+FL_TEST_CASE("RMT5 driver - failed submission releases the frame") {
+    resetMock();
+    auto& mock = Rmt5PeripheralMock::instance();
+    auto driver = ChannelEngineRMT::create();
+    auto first = createChannelData(18, 10);
+    auto second = createChannelData(19, 1);
+    auto retry = first;
+    uintptr_t retryHandle = 1;
 
-//     // Inject failure
-//     mock.setTransmitFailure(true);
+    mock.setTransmitFailure(true);
+    driver->enqueue(first);
+    FL_SUBCASE("single strip") {}
+    FL_SUBCASE("multiple strips") {
+        driver->enqueue(second);
+        // The mock assigns a new handle when the idle channel changes pins.
+        retry = second;
+        retryHandle = 2;
+    }
+    driver->show();
+    mock.setTransmitFailure(false);
 
-//     auto ch = createChannelData(18, 1);
-//     driver->enqueue(ch);
-//     driver->show();
+    FL_CHECK_EQ(mock.getTransmissionCount(), 0u);
+    FL_REQUIRE(driver->poll() == DriverState::READY);
+    FL_CHECK_FALSE(first->isInUse());
+    FL_CHECK_FALSE(second->isInUse());
 
-//     // Engine should handle failure gracefully (no crash)
-//     auto state = driver->poll();
-//     (void)state; // May be READY or ERROR depending on implementation
-
-//     // Disable failure for next test
-//     mock.setTransmitFailure(false);
-
-//     // Note: The channel may be in an error state and stuck BUSY.
-//     // The driver destructor has a timeout to handle this gracefully.
-// }
+    driver->enqueue(retry);
+    driver->show();
+    FL_REQUIRE_EQ(mock.getTransmissionCount(), 1u);
+    mock.simulateTransmitDone(reinterpret_cast<void*>(retryHandle));
+    FL_CHECK(driver->poll() == DriverState::READY);
+    FL_CHECK_FALSE(retry->isInUse());
+}
 
 //=============================================================================
 // Test Suite: Edge Cases
