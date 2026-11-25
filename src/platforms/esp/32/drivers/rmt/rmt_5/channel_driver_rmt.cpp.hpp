@@ -1097,10 +1097,10 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
     /// pinMode()) could take its pin. The channel kept transmitting into a
     /// pin that no longer carried its signal, so every later frame on that
     /// pin was lost.
-    void reclaimPin(ChannelState *state) FL_NO_EXCEPT {
+    bool reclaimPin(ChannelState *state) FL_NO_EXCEPT {
         if (state->pinRouting == IRMT5Peripheral::kPinRoutingUnknown ||
             mPeripheral.getPinRouting(state->pin) == state->pinRouting) {
-            return;
+            return true;
         }
         FL_LOG_RMT("GPIO " << state->pin << " was rerouted while idle - reclaiming it");
         // Keep the original baseline when the rebind fails, so a later frame
@@ -1114,6 +1114,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
         if (rebound) {
             state->pinRouting = mPeripheral.getPinRouting(state->pin);
         }
+        return rebound;
     }
 
     /// @brief Delete a channel's RMT handle, disabling it first if enabled.
@@ -1670,8 +1671,10 @@ ChannelEngineRMTImpl::ChannelState *ChannelEngineRMTImpl::acquireChannel(
                     }
                 }
 #endif
-                if (!mPeripheral.isPinRoutingCurrent(pin, ch.pinRouting)) {
-                    reclaimPin(&ch);
+                if (!mPeripheral.isPinRoutingCurrent(pin, ch.pinRouting) &&
+                    !reclaimPin(&ch)) {
+                    ch.inUse = false;
+                    return nullptr;
                 }
                 return &ch;
             }
@@ -1698,8 +1701,16 @@ ChannelEngineRMTImpl::ChannelState *ChannelEngineRMTImpl::acquireChannelSlow(
             // reconfiguration path.
 #else
             configureChannel(&ch, pin, timing, dataSize);
+            if (!ch.channel || !ch.encoder) {
+                ch.inUse = false;
+                mAllocationFailed = true;
+                return nullptr;
+            }
 #endif
-            reclaimPin(&ch);
+            if (!reclaimPin(&ch)) {
+                ch.inUse = false;
+                return nullptr;
+            }
             FL_LOG_RMT("Reusing " << ((ch.useDMA ? "DMA" : "non-DMA")) << " channel for pin " << (static_cast<int>(pin)));
             return &ch;
         }
