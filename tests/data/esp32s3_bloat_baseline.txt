@@ -522,4 +522,8 @@
 # and retry channels whose drain or removal interrupted network resizing.
 # Hosted Blink run 45590718199 measured 318643 B of image flash and
 # 22519 B of attributed RAM. The budget ceilings are unchanged.
-318643
+# +28 B, FastLED#5356 follow-up: account for learned RMT5 TX memory
+# reductions after the peripheral accepts the smaller allocation.
+# Hosted Blink run 45594591749 measured 318671 B of image flash and
+# 22519 B of attributed RAM. The budget ceilings are unchanged.
+318671

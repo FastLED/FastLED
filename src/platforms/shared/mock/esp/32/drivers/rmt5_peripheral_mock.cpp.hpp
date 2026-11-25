@@ -120,6 +120,9 @@ public:
         mShouldFailEncoderCreation = should_fail;
     }
     void setMaxChannels(size_t max_channels) FL_NO_EXCEPT override;
+    void setMaxSymbolsPerChannel(size_t max_symbols) FL_NO_EXCEPT override {
+        mMaxSymbolsPerChannel = max_symbols;
+    }
     void simulatePinReroute(int pin) FL_NO_EXCEPT override;
     void setPinRebindDisableFailure(bool should_fail) FL_NO_EXCEPT override {
         mShouldFailPinRebindDisable = should_fail;
@@ -157,6 +160,7 @@ private:
     bool mShouldFailEncoderCreation = false;
     bool mShouldFailCallbackRegistration = false;
     size_t mMaxChannels;  // 0 = unlimited
+    size_t mMaxSymbolsPerChannel = 0;
 
     // Pin routing: the channel id that owns each pin, or kOtherPeripheral
     fl::flat_map<fl::i32, u32> mPinRouting;
@@ -191,6 +195,28 @@ Rmt5PeripheralMock& Rmt5PeripheralMock::instance() FL_NO_EXCEPT {
 
 u8 RmtMemoryManager::lastTxAllocationId() const FL_NO_EXCEPT {
     return mLastTxAllocationId;
+}
+
+void RmtMemoryManager::setTxAllocationWords(fl::size words) FL_NO_EXCEPT {
+    mTxAllocationWords = words;
+}
+
+fl::size RmtMemoryManager::recoveryAllocationCount() const FL_NO_EXCEPT {
+    return mRecoveryAllocationCount;
+}
+
+u8 RmtMemoryManager::lastRecoveryAllocationId() const FL_NO_EXCEPT {
+    return mLastRecoveryAllocationId;
+}
+
+fl::size RmtMemoryManager::lastRecoveryAllocationWords() const FL_NO_EXCEPT {
+    return mLastRecoveryAllocationWords;
+}
+
+void RmtMemoryManager::recordRecoveryAllocation(u8 channel_id, fl::size words, bool) FL_NO_EXCEPT {
+    ++mRecoveryAllocationCount;
+    mLastRecoveryAllocationId = channel_id;
+    mLastRecoveryAllocationWords = words;
 }
 
 //=============================================================================
@@ -293,6 +319,10 @@ bool Rmt5PeripheralMockImpl::createTxChannel(const Rmt5ChannelConfig& config,
     }
     if (mMaxChannels != 0 && mChannels.size() >= mMaxChannels) {
         FL_DBG("RMT5_MOCK: TX channel limit reached (" << mMaxChannels << ")");
+        return false;
+    }
+
+    if (mMaxSymbolsPerChannel != 0 && config.mem_block_symbols > mMaxSymbolsPerChannel) {
         return false;
     }
 
@@ -720,6 +750,7 @@ void Rmt5PeripheralMockImpl::reset() FL_NO_EXCEPT {
     mShouldFailDisable = false;
     mShouldFailEncoderCreation = false;
     mMaxChannels = 0;
+    mMaxSymbolsPerChannel = 0;
     mPinRouting.clear();
     mShouldFailPinRebindDisable = false;
     mShouldFailPinRebind = false;
