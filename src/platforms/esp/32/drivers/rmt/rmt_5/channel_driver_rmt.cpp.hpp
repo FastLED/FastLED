@@ -1251,8 +1251,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
 
     FL_NO_INLINE FL_COLD void releaseFailedPendingChannel(
         ChannelState* channel, bool disable_channel) FL_NO_EXCEPT {
-        if (disable_channel) {
-            mPeripheral.disableChannel(channel->channel);
+        if (disable_channel && mPeripheral.disableChannel(channel->channel)) {
             channel->enabled = false;
         }
         if (channel->useDMA) {
