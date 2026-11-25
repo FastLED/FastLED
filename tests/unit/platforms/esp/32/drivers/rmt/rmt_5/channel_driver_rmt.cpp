@@ -1150,6 +1150,38 @@ FL_TEST_CASE("RMT5 driver - long strip still uses DMA when available") {
     FL_CHECK(frameUsedDma(300, true) == true);
 }
 
+FL_TEST_CASE("RMT5 driver - network reconfiguration keeps the DMA channel") {
+    resetMock();
+    auto& mock = Rmt5PeripheralMock::instance();
+    auto& network = fl::detail::NetworkStateTracker::instance();
+    auto& memMgr = RmtMemoryManager::instance();
+    memMgr.setDMAHardwareAvailable(true);
+    auto driver = ChannelEngineRMT::create();
+    auto data = createChannelData(18, 300);
+
+    driver->enqueue(data);
+    driver->show();
+    mock.simulateTransmitDone(reinterpret_cast<void*>(1));
+    FL_CHECK(driver->poll() == DriverState::READY);
+
+    network.setActive(true);
+    driver->enqueue(data);
+    driver->show();
+    network.setActive(false);
+    network.hasChanged();
+    memMgr.setDMAHardwareAvailable(false);
+
+    const auto& history = mock.getTransmissionHistory();
+    FL_CHECK_EQ(history.size(), 2u);
+    if (history.size() == 2) {
+        FL_CHECK(history.front().used_dma);
+        FL_CHECK(history.back().used_dma);
+    }
+    mock.simulateTransmitDone(reinterpret_cast<void*>(1));
+    mock.simulateTransmitDone(reinterpret_cast<void*>(2));
+    FL_CHECK(driver->poll() == DriverState::READY);
+}
+
 FL_TEST_CASE("RMT5 driver - no DMA hardware means no DMA channel") {
     // Sanity check on the stub hook itself: with no DMA hardware the channel is
     // always on-chip, however long the strip.
