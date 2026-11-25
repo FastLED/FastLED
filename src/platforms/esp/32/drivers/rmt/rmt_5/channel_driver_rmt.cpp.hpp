@@ -42,6 +42,7 @@
 #include "fl/stl/bit_cast.h"
 #include "fl/stl/assert.h"
 #include "fl/stl/optional.h"
+#include "fl/stl/scope_exit.h"
 #include "fl/stl/sstream.h"
 #include "fl/stl/chrono.h"
 #include "fl/stl/unique_ptr.h"
@@ -170,7 +171,6 @@ enum class RmtChannelWarning : u8 {
     RX_DMA_CONFLICT,
     DMA_TX_ALLOCATION_FAILED,
     DMA_LEDGER_ALLOCATION_FAILED,
-    DMA_ENCODER_CREATION_FAILED,
     DMA_CHANNEL_CREATION_FAILED,
     TX_ALLOCATION_FAILED,
     ENCODER_CREATION_FAILED,
@@ -193,9 +193,6 @@ FL_NO_INLINE FL_COLD void emitRmtChannelWarning(
         break;
     case RmtChannelWarning::DMA_LEDGER_ALLOCATION_FAILED:
         FL_WARN("DMA hardware creation succeeded but memory manager allocation failed");
-        break;
-    case RmtChannelWarning::DMA_ENCODER_CREATION_FAILED:
-        FL_WARN("Failed to create encoder for DMA channel");
         break;
     case RmtChannelWarning::DMA_CHANNEL_CREATION_FAILED:
         FL_WARN("DMA channel creation failed - unexpected failure on DMA-capable platform, falling back to non-DMA");
@@ -808,6 +805,18 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
         // Get memory manager reference
         auto &memMgr = RmtMemoryManager::instance();
 
+        // Allocate the encoder first so a failure cannot strand a hardware channel.
+        auto *encoder = mPeripheral.createEncoder(timing, FASTLED_RMT5_CLOCK_HZ);
+        if (!encoder) {
+#if FL_HAS_WARN
+            emitRmtChannelWarning(RmtChannelWarning::ENCODER_CREATION_FAILED);
+#endif
+            return false;
+        }
+        auto releaseEncoder = fl::make_scope_exit([this, encoder] {
+            mPeripheral.deleteEncoder(encoder);
+        });
+
         // Get current Network state for memory allocation.
         // Under FL_RMT_STATIC_ALLOCATION the user has asserted no
         // network during LED transmission, so this resolves to a compile-
@@ -946,21 +955,8 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
                 state->useDMA = true;
                 state->transmissionComplete.store(false, fl::memory_order_release);
 
-                // Create encoder for this DMA channel
-                state->encoder = mPeripheral.createEncoder(timing, FASTLED_RMT5_CLOCK_HZ);
-                if (!state->encoder) {
-#if FL_HAS_WARN
-                    emitRmtChannelWarning(
-                        RmtChannelWarning::DMA_ENCODER_CREATION_FAILED);
-#endif
-                    deleteHwChannel(state);
-                    state->channel = nullptr;
-                    mDMAChannelsInUse--;
-                    // Free DMA and memory allocation
-                    memMgr.rollbackDMA(state->memoryChannelId, true);
-                    memMgr.rollbackAllocation(state->memoryChannelId, true);
-                    return false;
-                }
+                state->encoder = encoder;
+                releaseEncoder.release();
 
                 FL_LOG_RMT("TX Channel #" << ((mChannels.size() + 1)) << ": DMA enabled on GPIO " << (static_cast<int>(pin)) << " (" << dma_mem_block_symbols << " symbols)");
                 state->pinRouting = mPeripheral.getPinRouting(pin);
@@ -1072,19 +1068,8 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
         state->useDMA = false; // Non-DMA channel
         state->transmissionComplete.store(false, fl::memory_order_release);
 
-        // Create encoder for this channel
-        state->encoder = mPeripheral.createEncoder(timing, FASTLED_RMT5_CLOCK_HZ);
-        if (!state->encoder) {
-#if FL_HAS_WARN
-            emitRmtChannelWarning(
-                RmtChannelWarning::ENCODER_CREATION_FAILED);
-#endif
-            deleteHwChannel(state);
-            state->channel = nullptr;
-            // Free memory allocation
-            memMgr.rollbackAllocation(state->memoryChannelId, true);
-            return false;
-        }
+        state->encoder = encoder;
+        releaseEncoder.release();
 
         FL_LOG_RMT("[RMT TX] Channel created on GPIO " << (static_cast<int>(pin)) << " (" << mem_block_symbols << " symbols, non-DMA)");
         state->pinRouting = mPeripheral.getPinRouting(pin);

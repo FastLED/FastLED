@@ -412,6 +412,29 @@ FL_TEST_CASE("RMT5 driver - failed timing change preserves the existing encoder"
     FL_CHECK_EQ(driver->poll().state, DriverState::READY);
 }
 
+FL_TEST_CASE("RMT5 driver - encoder allocation failure leaves no hardware channel") {
+    resetMock();
+    auto& mock = Rmt5PeripheralMock::instance();
+    auto driver = ChannelEngineRMT::create();
+    auto data = createChannelData(18, 1);
+    mock.setMaxChannels(1);
+    mock.setEncoderCreationFailure(true);
+    mock.setChannelDeletionFailure(true);
+
+    driver->enqueue(data);
+    driver->show();
+    FL_CHECK_EQ(driver->poll().state, DriverState::READY);
+    FL_CHECK_EQ(mock.getChannelCount(), 0u);
+
+    mock.setEncoderCreationFailure(false);
+    mock.setChannelDeletionFailure(false);
+    driver->enqueue(data);
+    driver->show();
+    FL_REQUIRE_EQ(mock.getTransmissionCount(), 1u);
+    mock.simulateTransmitDone(reinterpret_cast<void*>(1));
+    FL_CHECK_EQ(driver->poll().state, DriverState::READY);
+}
+
 // FastLED#4905: another peripheral (or pinMode) can take the pin of an idle
 // cached channel. Reusing that channel must route the pin back to it, and
 // must leave an untouched pin alone.
