@@ -777,6 +777,28 @@ FL_TEST_CASE("RMT5 driver - strips beyond channel limit wait for a free channel"
     mock.setMaxChannels(0);
 }
 
+FL_TEST_CASE("RMT5 driver - failed submission and disable preserve channel ownership") {
+    resetMock();
+    auto& mock = Rmt5PeripheralMock::instance();
+    auto driver = ChannelEngineRMT::create();
+    auto data = createChannelData(18, 1);
+    void* handle = reinterpret_cast<void*>(1);
+
+    mock.setTransmitFailure(true);
+    mock.setDisableFailure(true);
+    driver->enqueue(data);
+    driver->show();
+    FL_CHECK_EQ(mock.getTransmissionCount(), 0u);
+    FL_CHECK(driver->poll() == DriverState::READY);
+    FL_CHECK_FALSE(data->isInUse());
+    FL_CHECK(mock.isChannelEnabled(handle));
+
+    mock.setTransmitFailure(false);
+    mock.setDisableFailure(false);
+    driver.reset();
+    FL_CHECK_EQ(mock.getChannelCount(), 0u);
+}
+
 FL_TEST_CASE("RMT5 driver - failed submission releases the frame") {
     resetMock();
     auto& mock = Rmt5PeripheralMock::instance();

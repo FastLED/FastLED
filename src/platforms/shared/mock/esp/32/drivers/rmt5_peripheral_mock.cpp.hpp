@@ -104,6 +104,9 @@ public:
 
     void simulateTransmitDone(void* channel_handle) FL_NO_EXCEPT override;
     void setTransmitFailure(bool should_fail) FL_NO_EXCEPT override;
+    void setDisableFailure(bool should_fail) FL_NO_EXCEPT override {
+        mShouldFailDisable = should_fail;
+    }
     void setCallbackRegistrationFailure(bool should_fail) FL_NO_EXCEPT override {
         mShouldFailCallbackRegistration = should_fail;
     }
@@ -144,6 +147,7 @@ private:
 
     // Simulation settings
     bool mShouldFailTransmit;
+    bool mShouldFailDisable = false;
     bool mShouldFailCallbackRegistration = false;
     size_t mMaxChannels;  // 0 = unlimited
 
@@ -357,6 +361,9 @@ bool Rmt5PeripheralMockImpl::disableChannel(void* channel_handle) FL_NO_EXCEPT {
         return false;
     }
 
+    if (mShouldFailDisable) {
+        return false;
+    }
     channel->enabled = false;
     FL_DBG("RMT5_MOCK: Disabled channel " << channel->id);
     return true;
@@ -699,6 +706,7 @@ void Rmt5PeripheralMockImpl::reset() FL_NO_EXCEPT {
     mNextChannelId = 1;
     mNextEncoderId = 1;
     mShouldFailTransmit = false;
+    mShouldFailDisable = false;
     mMaxChannels = 0;
     mPinRouting.clear();
     mShouldFailPinRebindDisable = false;
