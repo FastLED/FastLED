@@ -1591,9 +1591,10 @@ FL_TEST_CASE("Runtime WS2812 drops an incomplete frame and retries") {
 
 FL_TEST_CASE("Runtime channel preserves a frame still owned by a ready driver") {
     auto& manager = ChannelManager::instance();
+    manager.clearAllDrivers();
+    auto cleanup = fl::make_scope_exit([&] { manager.clearAllDrivers(); });
     auto driver = fl::make_shared<ByteCapturingMockEngine>("WS2812_OWNED_FRAME");
     manager.addDriver(9400, driver);
-    auto removeDriver = fl::make_scope_exit([&] { manager.removeDriver(driver); });
     FL_REQUIRE_TRUE(manager.setExclusiveDriverByName("WS2812_OWNED_FRAME"));
 
     CRGB leds[] = {CRGB::Red};
