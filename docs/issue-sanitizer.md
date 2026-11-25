@@ -35,12 +35,11 @@ of other resources still follows the gate below.
    bodies too, as additional conservative evidence. Their inclusion can hold a
    verdict but does not extend the gate's authorization to review text. Items
    written by a trusted actor are excluded; everything else forms the corpus.
-3. **A maintainer event on a labelled container is a no-op.**  When the event's
-   `sender` is `zackees` (not a bot) and the payload already shows `sanitized`,
-   nothing is revoked, read or judged: maintainer text is never screened, so it
-   cannot change the verdict on external text. External events, unlabelled
-   containers and `workflow_dispatch` always screen. Otherwise,
-   **the gate label is revoked before any GitHub read.**  `sanitized` is a
+3. Automatic events sent by `zackees`, CodeRabbit, or GitHub Actions skip
+   the screening job regardless of the container's labels. Skipped jobs cannot
+   cancel screening queued or running for the same issue or PR. Other senders
+   and manual dispatches run the screening job, which revokes
+   **the gate label before any GitHub read.**  `sanitized` is a
    claim about the covered fields as they stand at screening time. A run that
    has not finished screening has not earned it, so it is dropped at the start and re-added only on a passing
    verdict.  A crash, a timeout, a cancellation or an unreadable answer
@@ -68,9 +67,9 @@ Text is excluded from the corpus when its author is:
 | `author_association` in `OWNER`, `MEMBER`, `COLLABORATOR` | the same set the repository's `claude.yml` gate uses |
 
 Bot-authored text is screened even when the bot has a trusted repository
-association: integrations can relay attacker-controlled text.  The one
-exception is CodeRabbit (`coderabbitai[bot]`, author type `Bot`): the
-maintainer accepts its review comments as safe, so they are not screened.
+association: integrations can relay attacker-controlled text. The trusted
+exceptions are CodeRabbit (`coderabbitai[bot]`) and GitHub Actions
+(`github-actions[bot]`), both with author type `Bot`.
 
 Everyone else — `CONTRIBUTOR`, `FIRST_TIME_CONTRIBUTOR`, `FIRST_TIMER`, `NONE`
 — is screened.  Note the consequence: **one untrusted comment holds the whole

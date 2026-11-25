@@ -122,12 +122,14 @@ LABEL_SPECS: dict[str, tuple[str, str]] = {
 # Authors whose text is not screened: the maintainer's own words are trusted by
 # definition, as are repository members and invited collaborators. Bot text
 # is screened too: integrations can relay attacker-controlled content, except
-# for the review bots in TRUSTED_BOT_LOGINS, which the maintainer has accepted.
-# Keep in sync with the maintainer concurrency group in sanitize_issues.yml.
+# for the project integrations listed in TRUSTED_BOT_LOGINS.
+# Keep the event sender allowlist in sync with sanitize_issues.yml.
 TRUSTED_LOGINS: frozenset[str] = frozenset({"zackees"})
 # Matched only when the author's type is "Bot"; GitHub reserves the "[bot]"
 # suffix for apps, so a user account cannot claim these logins.
-TRUSTED_BOT_LOGINS: frozenset[str] = frozenset({"coderabbitai[bot]"})
+TRUSTED_BOT_LOGINS: frozenset[str] = frozenset(
+    {"coderabbitai[bot]", "github-actions[bot]"}
+)
 TRUSTED_ASSOCIATIONS: frozenset[str] = frozenset({"OWNER", "MEMBER", "COLLABORATOR"})
 
 # One ``noul``-style question per signal: the probability that the statement in
@@ -250,6 +252,7 @@ HTTP_BACKOFF = 2.0
 
 DECISION_SANITIZE = "sanitize"
 DECISION_HOLD = "hold"
+DECISION_SKIP = "skip"
 
 # Hold reasons that mean "the judge never answered" rather than "the judge said
 # no".  They still revoke the gate label, but they must not tag the tracker.
@@ -1183,13 +1186,8 @@ def event_label_names(event: dict[str, Any]) -> list[str]:
     return [str(as_dict(label).get("name") or "") for label in labels]
 
 
-def trusted_event_keeps_label(args: argparse.Namespace) -> bool:
-    """True when a maintainer event on a sanitized container needs no screen.
-
-    The maintainer's own text is never judged, so it cannot change a verdict on
-    the container's external text; revoking would only erase a valid claim. An
-    unlabelled container is still screened, and a dispatch always re-screens.
-    """
+def is_internal_event(args: argparse.Namespace) -> bool:
+    """Check the sender of an automatic event. Explicit dispatch always screens."""
     if args.issue:
         return False
     event_path = args.event_path or os.environ.get("GITHUB_EVENT_PATH")
@@ -1197,14 +1195,11 @@ def trusted_event_keeps_label(args: argparse.Namespace) -> bool:
         return False
     event = as_dict(json.loads(Path(event_path).read_text(encoding="utf-8")))
     sender = as_dict(event.get("sender"))
-    if str(sender.get("login") or "").lower() not in TRUSTED_LOGINS:
-        return False
-    if str(sender.get("type") or "") == "Bot":
-        return False
-    # GitHub label names, and the workflow's contains(), ignore case.
-    return SANITIZED_LABEL.lower() in {
-        name.lower() for name in event_label_names(event)
-    }
+    login = str(sender.get("login") or "").lower()
+    sender_type = sender.get("type")
+    if sender_type == "Bot":
+        return login in TRUSTED_BOT_LOGINS
+    return sender_type == "User" and login in TRUSTED_LOGINS
 
 
 def run(
@@ -1229,14 +1224,19 @@ def run(
             raise SanitizerError("GITHUB_TOKEN (or GH_TOKEN) is not set")
         github = GitHubClient(token, repo)
     kind, number = resolve_target(args, github)
-    if trusted_event_keeps_label(args):
-        verdict = Verdict(decision=DECISION_SANITIZE, reason="trusted_event")
+    if is_internal_event(args):
         corpus = Corpus(target=f"{kind} #{number}")
-        print(f"{corpus.target}: trusted maintainer event, label kept, not screened")
+        print(f"{corpus.target}: internal event skipped")
         event_path = args.event_path or os.environ["GITHUB_EVENT_PATH"]
         labels = event_label_names(
             as_dict(json.loads(Path(event_path).read_text(encoding="utf-8")))
         )
+        decision = (
+            DECISION_SANITIZE
+            if SANITIZED_LABEL in {name.lower() for name in labels}
+            else DECISION_SKIP
+        )
+        verdict = Verdict(decision=decision, reason="trusted_event")
         return RunOutcome(
             container=kind,
             number=number,
