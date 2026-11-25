@@ -1222,23 +1222,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
             // here)
             if (!registerChannelCallback(state)) {
                 FL_WARN("Failed to register callback after reconfiguration");
-                if (state->encoder) {
-                    mPeripheral.deleteEncoder(state->encoder);
-                    state->encoder = nullptr;
-                }
-                deleteHwChannel(state);
-                state->channel = nullptr;
-
-                // Free DMA and memory allocation
-                auto &memMgr = RmtMemoryManager::instance();
-                if (state->useDMA) {
-                    memMgr.rollbackDMA(state->memoryChannelId,
-                                       true); // true = TX channel
-                    mDMAChannelsInUse--;
-                }
-                memMgr.rollbackAllocation(state->memoryChannelId, true);
-
-                state->useDMA = false;
+                rollbackUnregisteredChannel(*state);
                 return false;
             }
         }
@@ -1325,7 +1309,9 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
 
         bool enable_success = channel->enabled;
         if (!enable_success) {
-            enable_success = mPeripheral.enableChannel(channel->channel);
+            // An unregistered channel is retained if its deletion failed.
+            enable_success = (channel->owner || registerChannelCallback(channel)) &&
+                             mPeripheral.enableChannel(channel->channel);
             channel->enabled = enable_success;
         }
         if (!enable_success) {
@@ -1460,8 +1446,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
     /// Callback registration failure is exceptional. Keep its diagnostic and
     /// rollback sequence out of the normal network-reconfiguration loop.
     FL_NO_INLINE FL_COLD void handleReconfigureCallbackFailure(
-        ChannelState &state, RmtMemoryManager &memMgr,
-        fl::size channel_index) FL_NO_EXCEPT {
+        ChannelState &state, fl::size channel_index) FL_NO_EXCEPT {
 #if FL_HAS_WARN
         emitRmtChannelWarning(
             RmtChannelWarning::RECONFIGURE_CALLBACK_FAILED,
@@ -1469,10 +1454,16 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
 #else
         (void)channel_index;
 #endif
-        if (state.channel) {
-            deleteHwChannel(&state);
-            state.channel = nullptr;
+        rollbackUnregisteredChannel(state);
+    }
+
+    FL_NO_INLINE FL_COLD void rollbackUnregisteredChannel(
+        ChannelState &state) FL_NO_EXCEPT {
+        if (!deleteHwChannel(&state)) {
+            return;
         }
+        state.channel = nullptr;
+        auto &memMgr = RmtMemoryManager::instance();
         if (state.encoder) {
             mPeripheral.deleteEncoder(state.encoder);
             state.encoder = nullptr;
@@ -1566,7 +1557,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
             if (createChannel(&state, state.pin, state.timing, 0)) {
                 // Re-register callback for the recreated channel
                 if (!registerChannelCallback(&state)) {
-                    handleReconfigureCallbackFailure(state, memMgr, i);
+                    handleReconfigureCallbackFailure(state, i);
                 } else {
                     reconfigured++;
                     FL_DBG("Successfully reconfigured channel " << i);
@@ -1755,16 +1746,11 @@ ChannelEngineRMTImpl::ChannelState *ChannelEngineRMTImpl::acquireChannelSlow(
         ChannelState *stablePtr = &mChannels.back();
         if (!registerChannelCallback(stablePtr)) {
             FL_WARN("Failed to register callback for new channel");
-            // Free memory allocation that createChannel() made
-            auto &memMgr = RmtMemoryManager::instance();
-            if (stablePtr->useDMA) {
-                memMgr.rollbackDMA(stablePtr->memoryChannelId, true);
-                mDMAChannelsInUse--;
+            stablePtr->inUse = false;
+            rollbackUnregisteredChannel(*stablePtr);
+            if (!stablePtr->channel) {
+                mChannels.pop_back();
             }
-            memMgr.rollbackAllocation(stablePtr->memoryChannelId, true);
-            deleteHwChannel(stablePtr);
-            mPeripheral.deleteEncoder(stablePtr->encoder);
-            mChannels.pop_back();
             mAllocationFailed = true; // Mark failure
             return nullptr;
         }
@@ -1833,6 +1819,7 @@ bool ChannelEngineRMTImpl::registerChannelCallback(ChannelState *state) FL_NO_EX
         &transmitDoneCallback,
         state);
     if (!success) {
+        state->owner = nullptr;
         FL_WARN("Failed to register callbacks");
         return false;
     }
