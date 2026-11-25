@@ -1761,6 +1761,7 @@ ChannelEngineRMTImpl::ChannelState *ChannelEngineRMTImpl::acquireChannelSlow(
             }
             memMgr.rollbackAllocation(stablePtr->memoryChannelId, true);
             deleteHwChannel(stablePtr);
+            mPeripheral.deleteEncoder(stablePtr->encoder);
             mChannels.pop_back();
             mAllocationFailed = true; // Mark failure
             return nullptr;

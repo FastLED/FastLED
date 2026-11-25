@@ -537,6 +537,35 @@ FL_TEST_CASE("RMT5 driver - failed channel setup rolls back and allows retry") {
     FL_CHECK_FALSE(valid->isInUse());
 }
 
+FL_TEST_CASE("RMT5 driver - callback registration failure releases the new channel and encoder") {
+    resetMock();
+    auto& mock = Rmt5PeripheralMock::instance();
+    auto driver = ChannelEngineRMT::create();
+    auto frame = createChannelData(18, 1);
+
+    mock.setCallbackRegistrationFailure(true);
+    driver->enqueue(frame);
+    driver->show();
+
+    FL_CHECK_EQ(mock.getChannelCount(), 0u);
+    FL_CHECK_EQ(mock.getEncoderCount(), 0u);
+    FL_CHECK_EQ(mock.getTransmissionCount(), 0u);
+    FL_REQUIRE(driver->poll() == DriverState::READY);
+    FL_CHECK_FALSE(frame->isInUse());
+
+    mock.setCallbackRegistrationFailure(false);
+    driver->enqueue(frame);
+    driver->show();
+
+    FL_CHECK_EQ(mock.getChannelCount(), 1u);
+    FL_CHECK_EQ(mock.getEncoderCount(), 1u);
+    FL_REQUIRE_EQ(mock.getTransmissionCount(), 1u);
+
+    mock.simulateTransmitDone(reinterpret_cast<void*>(2));
+    FL_CHECK(driver->poll() == DriverState::READY);
+    FL_CHECK_FALSE(frame->isInUse());
+}
+
 FL_TEST_CASE("RMT5 driver - failed pin changes leave a reusable slot") {
     resetMock();
     auto& mock = Rmt5PeripheralMock::instance();
