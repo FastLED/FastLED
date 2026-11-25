@@ -610,6 +610,14 @@ FL_TEST_CASE("Slim SPI legacy controller preserves channel worker scheduling #50
         FL_CHECK_EQ(mock->enqueueCount, 1);
         FL_CHECK_EQ(mock->requestedCore, Core::Core1);
         FL_CHECK_EQ(mock->requestedPriority, Priority::Medium);
+        controller.channelData()->setInUse(true);
+        leds[0] = CRGB::Green;
+        controller.showLeds(255);
+        FL_CHECK_EQ(mock->enqueueCount, 1);
+
+        controller.channelData()->setInUse(false);
+        controller.showLeds(255);
+        FL_CHECK_EQ(mock->enqueueCount, 2);
         controller.setLeds(nullptr, 0);
     }
     manager.removeDriver(mock);

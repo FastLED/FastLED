@@ -381,7 +381,7 @@ FL_TEST_CASE("FastLED.show() flushes the frame and calls driver show() once") {
 
 FL_TEST_CASE("Disabled driver: addLeds falls back to the enabled driver") {
     SlimBridgeFixture fixture;
-    TestController controller;
+    ExposedTestController controller;
     CRGB leds[4] = {};
     FastLED.addLeds(&controller, leds, 4);
     auto cleanup = fl::make_scope_exit([&]() { FastLED.clear(true); });
@@ -395,6 +395,8 @@ FL_TEST_CASE("Disabled driver: addLeds falls back to the enabled driver") {
     auto fallback = fl::make_shared<FallbackDriver>();
     ChannelManager& mgr = ChannelManager::registry();
     mgr.addDriver(1000, fallback);
+    controller.show(leds, 4, 255);
+    controller.channelData()->setInUse(true);
     mgr.setDriverEnabled("SLIM_BRIDGE_MOCK", false);
     auto restore = fl::make_scope_exit([&]() {
         mgr.setDriverEnabled("SLIM_BRIDGE_MOCK", true);
@@ -402,6 +404,12 @@ FL_TEST_CASE("Disabled driver: addLeds falls back to the enabled driver") {
     });
 
     int enqueueBefore = mockDriverInstance().enqueueCount;
+    leds[0] = CRGB::Red;
+    controller.show(leds, 4, 255);
+    FL_CHECK_EQ(fallback->enqueueCount, 0);
+    FL_CHECK_EQ(controller.channelData()->getData()[1], 0u);
+
+    controller.channelData()->setInUse(false);
     FastLED.show();
     // Never enqueued to the disabled driver; the frame went to the fallback.
     FL_CHECK_EQ(mockDriverInstance().enqueueCount, enqueueBefore);
@@ -526,6 +534,7 @@ FL_TEST_CASE("BUSY driver with failing waitForReady suppresses enqueue, READY re
     FL_CHECK_EQ(mockDriverInstance().enqueueCount, enqueueBefore);
 
     mockDriverInstance().mState = DriverState::READY;
+    controller.channelData()->setInUse(false);
     controller.show(leds, 1, 255);
     FL_CHECK_EQ(mockDriverInstance().enqueueCount, enqueueBefore + 1);
 }

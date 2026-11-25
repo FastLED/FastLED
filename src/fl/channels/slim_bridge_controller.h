@@ -309,14 +309,12 @@ protected:
         }
         IChannelDriver& driver = fallback ? *fallback : wanted;
 
-        // (A8) If the previous frame's buffer is still in flight, block
-        // (bounded) until the driver reports it can accept more work rather
-        // than racing the driver's in-progress DMA/RMT transfer.
-        if (mData->isInUse()) {
-            if (!driver.waitForReady()) {
-                FL_WARN_ONCE("SlimBridgeController: driver '" << driver.getName().c_str() << "' did not become ready in time - dropping frame");
-                return;
-            }
+        // Runtime routing can select a different driver while the previous
+        // frame still owns this buffer. READY alone cannot release it.
+        if (mData->isInUse() &&
+            (!driver.waitForReady() || mData->isInUse())) {
+            FL_WARN_ONCE("SlimBridgeController: previous frame still owns the buffer - dropping frame");
+            return;
         }
 
         // (A5) Publish the pixel byte layout so the driver (and any
