@@ -704,6 +704,8 @@ FL_TEST_CASE("RMT5 driver - learned allocation reduction updates later ledger en
 
     FL_CHECK_EQ(mock.getTransmissionCount(), 2u);
     FL_CHECK_EQ(memMgr.recoveryAllocationCount(), recoveries + 2);
+    FL_CHECK_EQ(memMgr.lastRecoveryAllocationId(), 1u);
+    FL_CHECK_EQ(memMgr.lastRecoveryAllocationWords(), SOC_RMT_MEM_WORDS_PER_CHANNEL);
     mock.simulateTransmitDone(reinterpret_cast<void*>(1));
     mock.simulateTransmitDone(reinterpret_cast<void*>(2));
     FL_CHECK(driver->poll() == DriverState::READY);
