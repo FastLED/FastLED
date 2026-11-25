@@ -25,9 +25,11 @@ void resetMockState() {
     mock.reset();
 }
 
-fl::shared_ptr<ILcdSpiPeripheral> createMockPeripheral() {
+fl::shared_ptr<ILcdSpiPeripheral> createMockPeripheral(bool reportIdle = false) {
     class MockWrapper : public ILcdSpiPeripheral {
       public:
+        explicit MockWrapper(bool reportIdle) : mReportIdle(reportIdle) {}
+
         bool initialize(const LcdSpiConfig &config) FL_NO_EXCEPT override {
             return LcdSpiPeripheralMock::instance().initialize(config);
         }
@@ -53,7 +55,7 @@ fl::shared_ptr<ILcdSpiPeripheral> createMockPeripheral() {
                 timeout_ms);
         }
         bool isBusy() const FL_NO_EXCEPT override {
-            return LcdSpiPeripheralMock::instance().isBusy();
+            return !mReportIdle && LcdSpiPeripheralMock::instance().isBusy();
         }
         bool registerTransmitCallback(void *callback,
                                       void *user_ctx) FL_NO_EXCEPT override {
@@ -69,9 +71,11 @@ fl::shared_ptr<ILcdSpiPeripheral> createMockPeripheral() {
         void delay(u32 ms) FL_NO_EXCEPT override {
             LcdSpiPeripheralMock::instance().delay(ms);
         }
+      private:
+        bool mReportIdle;
     };
 
-    return fl::make_shared<MockWrapper>();
+    return fl::make_shared<MockWrapper>(reportIdle);
 }
 
 ChannelDataPtr createSpiTestChannelData(int dataPin, int clockPin,
@@ -572,6 +576,58 @@ FL_TEST_CASE("ChannelDriverLcdSpi - second show waits for first") {
     driver.show();
     FL_CHECK(mock.getTransmitCount() == 2);
 
+    mock.simulateTransmitComplete();
+    FL_CHECK(driver.poll() == IChannelDriver::DriverState::READY);
+}
+
+FL_TEST_CASE("ChannelDriverLcdSpi - idle peripheral does not end a pending stream") {
+    resetMockState();
+    ChannelDriverLcdSpi driver(createMockPeripheral(true));
+    auto &mock = LcdSpiPeripheralMock::instance();
+    driver.setChunkInputBytesForTest(4);
+
+    auto active = createSpiTestChannelData(5, 18, 10);
+    driver.enqueue(active);
+    driver.show();
+    FL_REQUIRE(active->isInUse());
+
+    // The peripheral can report idle after one chunk completes and before
+    // the callback queues the next one.
+    FL_CHECK(driver.poll() == IChannelDriver::DriverState::DRAINING);
+    FL_CHECK(active->isInUse());
+
+    mock.simulateTransmitComplete();
+    FL_CHECK(driver.poll() == IChannelDriver::DriverState::READY);
+    FL_CHECK_FALSE(active->isInUse());
+}
+
+FL_TEST_CASE("ChannelDriverLcdSpi - timeout preserves the active frame") {
+    resetMockState();
+    auto peripheral = createMockPeripheral();
+    ChannelDriverLcdSpi driver(peripheral);
+    auto &mock = LcdSpiPeripheralMock::instance();
+
+    auto active = createSpiTestChannelData(5, 18, 10);
+    auto skipped = createSpiTestChannelData(5, 18, 10);
+    driver.enqueue(active);
+    driver.show();
+    FL_REQUIRE(active->isInUse());
+
+    driver.enqueue(skipped);
+    driver.show();
+    FL_CHECK_EQ(mock.getTransmitCount(), 1);
+    FL_CHECK(active->isInUse());
+    FL_CHECK_FALSE(skipped->isInUse());
+
+    mock.simulateTransmitComplete();
+    FL_CHECK(driver.poll() == IChannelDriver::DriverState::READY);
+    FL_CHECK_FALSE(active->isInUse());
+
+    driver.show();
+    FL_CHECK_EQ(mock.getTransmitCount(), 1);
+    driver.enqueue(skipped);
+    driver.show();
+    FL_CHECK_EQ(mock.getTransmitCount(), 2);
     mock.simulateTransmitComplete();
     FL_CHECK(driver.poll() == IChannelDriver::DriverState::READY);
 }
