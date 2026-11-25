@@ -518,4 +518,8 @@
 # of attributed RAM. The budget ceilings are unchanged.
 # The retry after a failed reduction adds 28 B. Hosted Blink run 45587274281
 # measured 318587 B of image flash and 22519 B of attributed RAM.
-318587
+# +56 B, FastLED#5356 follow-up: remember the on-chip allocation mode
+# and retry channels whose drain or removal interrupted network resizing.
+# Hosted Blink run 45590718199 measured 318643 B of image flash and
+# 22519 B of attributed RAM. The budget ceilings are unchanged.
+318643
