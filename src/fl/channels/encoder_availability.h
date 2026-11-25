@@ -11,7 +11,8 @@ class PixelIterator;
 /// Library-owned optional encoder selection. Caller feature macros never
 /// affect these declarations or the inline chipset-to-encoder mapping.
 struct EncoderAvailability {
-    using PixelEncoder = void (*)(Channel&, PixelIterator&, bool, vector_psram<u8>&);
+    // Return false if the output could not hold a complete frame.
+    using PixelEncoder = bool (*)(Channel&, PixelIterator&, bool, vector_psram<u8>&);
     using Getter = PixelEncoder (*)();
 
     FL_NO_INLINE static PixelEncoder select(const ChipsetVariant&) FL_NO_EXCEPT;

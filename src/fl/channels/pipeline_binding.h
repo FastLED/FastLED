@@ -28,6 +28,10 @@
 
 namespace fl {
 
+namespace detail {
+class ChannelFrameOutput;
+} // namespace detail
+
 class CLEDController;
 class Channel;
 
@@ -142,7 +146,7 @@ struct ColorPipelineHooks {
     /// Returns true if it encoded the frame, false to let the caller encode
     /// as before. Through the hook so none of it links into a sketch that
     /// binds no profile.
-    bool (*encodeManagedSpi)(PixelIterator& pixels, vector_psram<u8>* out,
+    bool (*encodeManagedSpi)(PixelIterator& pixels, detail::ChannelFrameOutput* out,
                              SpiChipset chip, const Channel& controller);
 };
 

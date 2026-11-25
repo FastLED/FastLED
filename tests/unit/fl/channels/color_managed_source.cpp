@@ -1366,7 +1366,9 @@ FL_TEST_CASE("[#4457] a managed non-HD APA102/SK9822 holds its field at 31") {
         ColorManagedPixelSource source(controller, RGB, pipeline);
         PixelIterator iterator(&source, Rgbw(), Rgbww());
         fl::vector_psram<u8> out;
-        FL_REQUIRE(hooks.encodeManagedSpi(iterator, &out, chip, *channel));
+        detail::ChannelFrameOutput frame(out);
+        FL_REQUIRE(hooks.encodeManagedSpi(iterator, &frame, chip, *channel));
+        FL_REQUIRE_FALSE(frame.failed());
         FL_REQUIRE_GE(out.size(), 12u);
         for (int led = 0; led < 2; ++led) {
             i32 drives[3];

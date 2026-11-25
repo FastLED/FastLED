@@ -643,7 +643,7 @@ namespace {
 /// leaves avoids duplicating the optional pipeline hook in every writer.
 FL_NO_INLINE
 bool tryEncodeManagedSpi(Channel& channel, PixelIterator& pixels,
-                         bool managed, fl::vector_psram<u8>& output,
+                         bool managed, detail::ChannelFrameOutput& output,
                          SpiChipset chipset)
     FL_NO_EXCEPT {
 #if FL_COLOR_PROFILE_RUNTIME
@@ -672,141 +672,156 @@ SpiChipset spiChipsetFor(const Channel& channel) FL_NO_EXCEPT {
 }  // anonymous namespace
 
 FL_NO_INLINE
-void Channel::encodeWS2812(Channel&, PixelIterator& pixels,
+bool Channel::encodeWS2812(Channel&, PixelIterator& pixels,
                            bool, fl::vector_psram<u8>& output) FL_NO_EXCEPT {
     pixels.writeWS2812(&output);
+    return true;
 }
 
 FL_NO_INLINE
-void Channel::encodeTM1812RGBWW(Channel&, PixelIterator& pixels,
+bool Channel::encodeTM1812RGBWW(Channel&, PixelIterator& pixels,
                                 bool, fl::vector_psram<u8>& output) FL_NO_EXCEPT {
     pixels.writeTM1812RGBWW(&output);
+    return true;
 }
 
 FL_NO_INLINE
-void Channel::encodeTM1908(Channel&, PixelIterator& pixels,
+bool Channel::encodeTM1908(Channel&, PixelIterator& pixels,
                            bool, fl::vector_psram<u8>& output) FL_NO_EXCEPT {
     pixels.writeTM1908(&output);
+    return true;
 }
 
 FL_NO_INLINE
-void Channel::encodeUCS7604(Channel& channel, PixelIterator& pixels,
+bool Channel::encodeUCS7604(Channel& channel, PixelIterator& pixels,
                             bool managed,
                             fl::vector_psram<u8>& output) FL_NO_EXCEPT {
     const ClocklessChipset* clockless =
         channel.mChipset.ptr<ClocklessChipset>();
     writeUCS7604(&output, pixels, clockless->encoder, channel.mSettings,
                  channel.mRgbOrder, managed);
+    return true;
 }
 
 FL_NO_INLINE
-void Channel::encodeAPA102(Channel& channel, PixelIterator& pixels,
+bool Channel::encodeAPA102(Channel& channel, PixelIterator& pixels,
                            bool managed, fl::vector_psram<u8>& output)
     FL_NO_EXCEPT {
+    detail::ChannelFrameOutput frame(output);
     const SpiChipset chipset = spiChipsetFor(channel);
-    if (tryEncodeManagedSpi(channel, pixels, managed, output, chipset)) {
-        return;
+    if (!tryEncodeManagedSpi(channel, pixels, managed, frame, chipset)) {
+        const bool hdGamma = chipset == SpiChipset::APA102HD ||
+                             chipset == SpiChipset::DOTSTARHD ||
+                             chipset == SpiChipset::HD107HD;
+        pixels.writeAPA102(&frame, hdGamma);
     }
-    const bool hdGamma = chipset == SpiChipset::APA102HD ||
-                         chipset == SpiChipset::DOTSTARHD ||
-                         chipset == SpiChipset::HD107HD;
-    pixels.writeAPA102(&output, hdGamma);
+    return !frame.failed();
 }
 
 FL_NO_INLINE
-void Channel::encodeSK9822(Channel& channel, PixelIterator& pixels,
+bool Channel::encodeSK9822(Channel& channel, PixelIterator& pixels,
                            bool managed, fl::vector_psram<u8>& output)
     FL_NO_EXCEPT {
+    detail::ChannelFrameOutput frame(output);
     const SpiChipset chipset = spiChipsetFor(channel);
-    if (tryEncodeManagedSpi(channel, pixels, managed, output, chipset)) {
-        return;
+    if (!tryEncodeManagedSpi(channel, pixels, managed, frame, chipset)) {
+        pixels.writeSK9822(&frame, chipset == SpiChipset::SK9822HD);
     }
-    pixels.writeSK9822(&output, chipset == SpiChipset::SK9822HD);
+    return !frame.failed();
 }
 
 FL_NO_INLINE
-void Channel::encodeWS2801(Channel& channel, PixelIterator& pixels,
+bool Channel::encodeWS2801(Channel& channel, PixelIterator& pixels,
                            bool managed, fl::vector_psram<u8>& output)
     FL_NO_EXCEPT {
-    if (tryEncodeManagedSpi(channel, pixels, managed, output,
+    detail::ChannelFrameOutput frame(output);
+    if (!tryEncodeManagedSpi(channel, pixels, managed, frame,
                            spiChipsetFor(channel))) {
-        return;
+        pixels.writeWS2801(&frame);
     }
-    pixels.writeWS2801(&output);
+    return !frame.failed();
 }
 
 FL_NO_INLINE
-void Channel::encodeWS2803(Channel& channel, PixelIterator& pixels,
+bool Channel::encodeWS2803(Channel& channel, PixelIterator& pixels,
                            bool managed, fl::vector_psram<u8>& output)
     FL_NO_EXCEPT {
-    if (tryEncodeManagedSpi(channel, pixels, managed, output,
+    detail::ChannelFrameOutput frame(output);
+    if (!tryEncodeManagedSpi(channel, pixels, managed, frame,
                            spiChipsetFor(channel))) {
-        return;
+        pixels.writeWS2803(&frame);
     }
-    pixels.writeWS2803(&output);
+    return !frame.failed();
 }
 
 FL_NO_INLINE
-void Channel::encodeP9813(Channel& channel, PixelIterator& pixels,
+bool Channel::encodeP9813(Channel& channel, PixelIterator& pixels,
                           bool managed, fl::vector_psram<u8>& output)
     FL_NO_EXCEPT {
-    if (tryEncodeManagedSpi(channel, pixels, managed, output,
+    detail::ChannelFrameOutput frame(output);
+    if (!tryEncodeManagedSpi(channel, pixels, managed, frame,
                            spiChipsetFor(channel))) {
-        return;
+        pixels.writeP9813(&frame);
     }
-    pixels.writeP9813(&output);
+    return !frame.failed();
 }
 
 FL_NO_INLINE
-void Channel::encodeLPD8806(Channel& channel, PixelIterator& pixels,
+bool Channel::encodeLPD8806(Channel& channel, PixelIterator& pixels,
                             bool managed, fl::vector_psram<u8>& output)
     FL_NO_EXCEPT {
-    if (tryEncodeManagedSpi(channel, pixels, managed, output,
+    detail::ChannelFrameOutput frame(output);
+    if (!tryEncodeManagedSpi(channel, pixels, managed, frame,
                            spiChipsetFor(channel))) {
-        return;
+        pixels.writeLPD8806(&frame);
     }
-    pixels.writeLPD8806(&output);
+    return !frame.failed();
 }
 
 FL_NO_INLINE
-void Channel::encodeLPD6803(Channel& channel, PixelIterator& pixels,
+bool Channel::encodeLPD6803(Channel& channel, PixelIterator& pixels,
                             bool managed, fl::vector_psram<u8>& output)
     FL_NO_EXCEPT {
-    if (tryEncodeManagedSpi(channel, pixels, managed, output,
+    detail::ChannelFrameOutput frame(output);
+    if (!tryEncodeManagedSpi(channel, pixels, managed, frame,
                            spiChipsetFor(channel))) {
-        return;
+        pixels.writeLPD6803(&frame);
     }
-    pixels.writeLPD6803(&output);
+    return !frame.failed();
 }
 
 FL_NO_INLINE
-void Channel::encodeSM16716(Channel& channel, PixelIterator& pixels,
+bool Channel::encodeSM16716(Channel& channel, PixelIterator& pixels,
                             bool managed, fl::vector_psram<u8>& output)
     FL_NO_EXCEPT {
-    if (tryEncodeManagedSpi(channel, pixels, managed, output,
+    detail::ChannelFrameOutput frame(output);
+    if (!tryEncodeManagedSpi(channel, pixels, managed, frame,
                            spiChipsetFor(channel))) {
-        return;
+        pixels.writeSM16716(&frame);
     }
-    pixels.writeSM16716(&output);
+    return !frame.failed();
 }
 
 FL_NO_INLINE
-void Channel::encodeHD108(Channel& channel, PixelIterator& pixels,
+bool Channel::encodeHD108(Channel& channel, PixelIterator& pixels,
                           bool managed, fl::vector_psram<u8>& output)
     FL_NO_EXCEPT {
-    if (tryEncodeManagedSpi(channel, pixels, managed, output,
+    detail::ChannelFrameOutput frame(output);
+    if (!tryEncodeManagedSpi(channel, pixels, managed, frame,
                            spiChipsetFor(channel))) {
-        return;
+        pixels.writeHD108(&frame, managed);
     }
-    pixels.writeHD108(&output, managed);
+    return !frame.failed();
 }
 
 FL_NO_INLINE
-void Channel::encodeMY9221(Channel& channel, PixelIterator& pixels,
+bool Channel::encodeMY9221(Channel& channel, PixelIterator& pixels,
                            bool managed, fl::vector_psram<u8>& output)
     FL_NO_EXCEPT {
-    (void)tryEncodeManagedSpi(channel, pixels, managed, output,
+    detail::ChannelFrameOutput frame(output);
+    (void)tryEncodeManagedSpi(channel, pixels, managed, frame,
                              spiChipsetFor(channel));
+    return !frame.failed();
 }
 
 /// @brief Resolve the driver for this channel. Handles dynamic
@@ -1006,10 +1021,10 @@ bool Channel::encodeFrame(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) FL_NO_EXC
         const bool usesWS2812 =
             clockless != nullptr && clockless->encoder == ClocklessEncoder::CLOCKLESS_ENCODER_WS2812;
         const auto pixelCount = usesWS2812 ? pixelIterator.size() : 0;
-        mPixelEncoder(*this, pixelIterator, iterator.isManaged(), data);
+        const bool complete = mPixelEncoder(*this, pixelIterator, iterator.isManaged(), data);
         // A failed buffer growth can leave a prefix of the frame in data.
-        if (usesWS2812 &&
-            data.size() != static_cast<u64>(pixelCount) * mChannelData->getBytesPerPixel()) {
+        if (!complete || (usesWS2812 &&
+            data.size() != static_cast<u64>(pixelCount) * mChannelData->getBytesPerPixel())) {
             data.clear();
             return false;
         }

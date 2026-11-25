@@ -624,22 +624,28 @@ FL_TEST_CASE("Slim SPI legacy controller preserves channel worker scheduling #50
     manager.removeDriver(mock);
 }
 
+namespace {
+
+struct FrameMemory : fl::memory_resource {
+    bool limitAllocation = true;
+
+    void* do_allocate(fl::size bytes) FL_NO_EXCEPT override {
+        if (limitAllocation && bytes > 16) {
+            return nullptr;
+        }
+        return fl::default_memory_resource()->allocate(bytes);
+    }
+
+    void do_deallocate(void* ptr, fl::size bytes) FL_NO_EXCEPT override {
+        fl::default_memory_resource()->deallocate(ptr, bytes);
+    }
+};
+
+} // namespace
+
 FL_TEST_CASE("Slim SPI bridge drops an incomplete frame and retries after allocation recovers") {
     using Controller = SlimSpiBridgeController<SpiChipset::APA102, RGB, Bus::AUTO, 0>;
-    struct FrameMemory : fl::memory_resource {
-        bool limitAllocation = true;
-
-        void* do_allocate(fl::size bytes) FL_NO_EXCEPT override {
-            if (limitAllocation && bytes > 16) {
-                return nullptr;
-            }
-            return fl::default_memory_resource()->allocate(bytes);
-        }
-
-        void do_deallocate(void* ptr, fl::size bytes) FL_NO_EXCEPT override {
-            fl::default_memory_resource()->deallocate(ptr, bytes);
-        }
-    } memory;
+    FrameMemory memory;
 
     auto mock = fl::make_shared<SpiCaptureMock>("SPI_ALLOCATION_FAILURE");
     auto& manager = ChannelManager::instance();
@@ -661,6 +667,51 @@ FL_TEST_CASE("Slim SPI bridge drops an incomplete frame and retries after alloca
 
     memory.limitAllocation = false;
     controller.showLeds(255);
+    FL_REQUIRE_EQ(mock->capturedData.size(), 1u);
+    FL_CHECK_EQ(mock->capturedData.front().size(), 72u);
+}
+
+FL_TEST_CASE("Runtime SPI drops an incomplete frame and retries after allocation recovers") {
+    struct CapturingDriver : SpiCaptureMock {
+        CapturingDriver() : SpiCaptureMock("RUNTIME_SPI_ALLOCATION_FAILURE") {}
+
+        void enqueue(ChannelDataPtr data) override {
+            mLastChannel = data;
+            SpiCaptureMock::enqueue(data);
+        }
+
+        ChannelDataPtr mLastChannel;
+    };
+
+    FrameMemory memory;
+    auto mock = fl::make_shared<CapturingDriver>();
+    auto& manager = ChannelManager::instance();
+    manager.clearAllDrivers();
+    auto cleanup = fl::make_scope_exit([&] { manager.clearAllDrivers(); });
+    manager.addDriver(1000, mock);
+    FL_REQUIRE_TRUE(manager.setExclusiveDriverByName("RUNTIME_SPI_ALLOCATION_FAILURE"));
+
+    CRGB leds[16] = {};
+    ChannelOptions options;
+    options.mDitherMode = BINARY_DITHER;
+    auto channel = Channel::create(
+        ChannelConfig(SpiChipsetConfig(5, 6, SpiEncoder::apa102()), leds, RGB, options));
+    FL_REQUIRE(channel != nullptr);
+    channel->showLeds(255);
+    FL_REQUIRE(mock->mLastChannel != nullptr);
+    auto& bytes = mock->mLastChannel->getData();
+    fl::vector<u8> frameBuffer(&memory);
+    bytes.swap(frameBuffer);
+    mock->reset();
+    const auto phase = channel->ditherPhase();
+
+    channel->showLeds(255);
+    FL_CHECK_EQ(mock->enqueueCount, 0);
+    FL_CHECK(bytes.empty());
+    FL_CHECK_EQ(channel->ditherPhase(), phase);
+
+    memory.limitAllocation = false;
+    channel->showLeds(255);
     FL_REQUIRE_EQ(mock->capturedData.size(), 1u);
     FL_CHECK_EQ(mock->capturedData.front().size(), 72u);
 }

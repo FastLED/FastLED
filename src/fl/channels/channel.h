@@ -367,33 +367,33 @@ private:
     /// retain only their encoder. Erased construction uses the full selector.
     /// The encoder callbacks remain channel-side: drivers receive
     /// ChannelData only after it has been encoded.
-    FL_NO_INLINE static void encodeWS2812(Channel&, PixelIterator&, bool,
+    FL_NO_INLINE static bool encodeWS2812(Channel&, PixelIterator&, bool,
                                          fl::vector_psram<u8>&) FL_NO_EXCEPT;
-    FL_NO_INLINE static void encodeTM1812RGBWW(Channel&, PixelIterator&, bool,
+    FL_NO_INLINE static bool encodeTM1812RGBWW(Channel&, PixelIterator&, bool,
                                                fl::vector_psram<u8>&) FL_NO_EXCEPT;
-    FL_NO_INLINE static void encodeTM1908(Channel&, PixelIterator&, bool,
+    FL_NO_INLINE static bool encodeTM1908(Channel&, PixelIterator&, bool,
                                          fl::vector_psram<u8>&) FL_NO_EXCEPT;
-    FL_NO_INLINE static void encodeUCS7604(Channel&, PixelIterator&, bool,
+    FL_NO_INLINE static bool encodeUCS7604(Channel&, PixelIterator&, bool,
                                            fl::vector_psram<u8>&) FL_NO_EXCEPT;
-    FL_NO_INLINE static void encodeAPA102(Channel&, PixelIterator&, bool,
+    FL_NO_INLINE static bool encodeAPA102(Channel&, PixelIterator&, bool,
                                           fl::vector_psram<u8>&) FL_NO_EXCEPT;
-    FL_NO_INLINE static void encodeSK9822(Channel&, PixelIterator&, bool,
+    FL_NO_INLINE static bool encodeSK9822(Channel&, PixelIterator&, bool,
                                           fl::vector_psram<u8>&) FL_NO_EXCEPT;
-    FL_NO_INLINE static void encodeWS2801(Channel&, PixelIterator&, bool,
+    FL_NO_INLINE static bool encodeWS2801(Channel&, PixelIterator&, bool,
                                           fl::vector_psram<u8>&) FL_NO_EXCEPT;
-    FL_NO_INLINE static void encodeWS2803(Channel&, PixelIterator&, bool,
+    FL_NO_INLINE static bool encodeWS2803(Channel&, PixelIterator&, bool,
                                           fl::vector_psram<u8>&) FL_NO_EXCEPT;
-    FL_NO_INLINE static void encodeP9813(Channel&, PixelIterator&, bool,
+    FL_NO_INLINE static bool encodeP9813(Channel&, PixelIterator&, bool,
                                          fl::vector_psram<u8>&) FL_NO_EXCEPT;
-    FL_NO_INLINE static void encodeLPD8806(Channel&, PixelIterator&, bool,
+    FL_NO_INLINE static bool encodeLPD8806(Channel&, PixelIterator&, bool,
                                            fl::vector_psram<u8>&) FL_NO_EXCEPT;
-    FL_NO_INLINE static void encodeLPD6803(Channel&, PixelIterator&, bool,
+    FL_NO_INLINE static bool encodeLPD6803(Channel&, PixelIterator&, bool,
                                            fl::vector_psram<u8>&) FL_NO_EXCEPT;
-    FL_NO_INLINE static void encodeSM16716(Channel&, PixelIterator&, bool,
+    FL_NO_INLINE static bool encodeSM16716(Channel&, PixelIterator&, bool,
                                            fl::vector_psram<u8>&) FL_NO_EXCEPT;
-    FL_NO_INLINE static void encodeHD108(Channel&, PixelIterator&, bool,
+    FL_NO_INLINE static bool encodeHD108(Channel&, PixelIterator&, bool,
                                          fl::vector_psram<u8>&) FL_NO_EXCEPT;
-    FL_NO_INLINE static void encodeMY9221(Channel&, PixelIterator&, bool,
+    FL_NO_INLINE static bool encodeMY9221(Channel&, PixelIterator&, bool,
                                           fl::vector_psram<u8>&) FL_NO_EXCEPT;
 
 private:
