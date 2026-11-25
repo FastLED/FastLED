@@ -574,9 +574,8 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
             if (result == TransmissionResult::STARTED) {
                 return;
             }
-            if (result == TransmissionResult::NO_CHANNEL &&
-                mAllocationFailed && !hasChannelInUse()) {
-                // Match the queued path: failed setup cannot progress this frame.
+            if (!hasChannelInUse()) {
+                // A failed submission has no completion callback to retry it.
                 mAllocationFailed = false;
                 return;
             }
@@ -1396,31 +1395,16 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
             const auto& pending = mPendingChannels[i];
 
             const auto result = transmitChannel(pending.data);
-            if (result == TransmissionResult::NO_CHANNEL) {
-                if (mAllocationFailed && !hasChannelInUse()) {
-                    // A failed setup with no active transmission cannot make
-                    // progress until the next frame, when acquireChannel() is
-                    // allowed to retry. Drop this pending item so poll() can
-                    // return READY and clear its ChannelData in-use flag
-                    // instead of pinning the driver in BUSY forever. While a
-                    // channel is in use, keep waiting: its release lets this
-                    // strip reuse the channel (more strips than channels).
-                    if (i < mPendingChannels.size() - 1) {
-                        mPendingChannels[i] = mPendingChannels.back();
-                    }
-                    mPendingChannels.pop_back();
-                    // The failure belonged to the dropped strip; give each
-                    // remaining strip its own setup attempt this frame.
-                    mAllocationFailed = false;
+            if (result != TransmissionResult::STARTED) {
+                // Only a running transfer can trigger another attempt via poll().
+                if (hasChannelInUse()) {
+                    ++i;
                     continue;
                 }
-                ++i;  // Channels may still become available after active TX completes.
-                continue;
-            }
-
-            if (result == TransmissionResult::RETRY) {
-                ++i;
-                continue;
+                if (result == TransmissionResult::NO_CHANNEL) {
+                    // Give the remaining strips their own setup attempt.
+                    mAllocationFailed = false;
+                }
             }
 
             // Remove from pending queue (swap with last and pop)
