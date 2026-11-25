@@ -372,6 +372,46 @@ FL_TEST_CASE("RMT5 driver - cached pin skips routing query until changed") {
     FL_CHECK_EQ(mock.getTransmissionHistory().back().gpio_pin, 19);
 }
 
+FL_TEST_CASE("RMT5 driver - failed timing change preserves the existing encoder") {
+    resetMock();
+    auto& mock = Rmt5PeripheralMock::instance();
+    auto driver = ChannelEngineRMT::create();
+    void* channel_handle = reinterpret_cast<void*>(1);
+    auto original = createChannelData(18, 1);
+    auto timing = createWS2812Timing();
+    timing.t1_ns += 50;
+    auto retimed = ChannelData::create(18, timing, fl::vector_psram<uint8_t>{0, 0, 0});
+
+    driver->enqueue(original);
+    driver->show();
+    FL_REQUIRE_EQ(mock.getTransmissionCount(), 1u);
+    mock.simulateTransmitDone(channel_handle);
+    FL_REQUIRE_EQ(driver->poll().state, DriverState::READY);
+
+    mock.setEncoderCreationFailure(true);
+    driver->enqueue(retimed);
+    driver->show();
+    FL_CHECK_EQ(mock.getTransmissionCount(), 1u);
+    FL_CHECK_EQ(mock.getChannelCount(), 1u);
+    FL_CHECK_EQ(mock.getEncoderCount(), 1u);
+
+    driver->enqueue(original);
+    driver->show();
+    FL_CHECK_EQ(mock.getTransmissionCount(), 2u);
+    FL_CHECK_EQ(mock.getTransmissionHistory().back().timing.T1, createWS2812Timing().t1_ns);
+    mock.simulateTransmitDone(channel_handle);
+    FL_CHECK_EQ(driver->poll().state, DriverState::READY);
+
+    mock.setEncoderCreationFailure(false);
+    driver->enqueue(retimed);
+    driver->show();
+    FL_CHECK_EQ(mock.getTransmissionCount(), 3u);
+    FL_CHECK_EQ(mock.getTransmissionHistory().back().timing.T1, timing.t1_ns);
+    FL_CHECK_EQ(mock.getEncoderCount(), 1u);
+    mock.simulateTransmitDone(channel_handle);
+    FL_CHECK_EQ(driver->poll().state, DriverState::READY);
+}
+
 // FastLED#4905: another peripheral (or pinMode) can take the pin of an idle
 // cached channel. Reusing that channel must route the pin back to it, and
 // must leave an untouched pin alone.

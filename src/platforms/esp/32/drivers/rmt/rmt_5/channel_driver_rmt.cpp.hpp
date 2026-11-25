@@ -1178,35 +1178,18 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
             FL_LOG_RMT("  Old: T1=" << state->timing.T1 << " T2=" << state->timing.T2 << " T3=" << state->timing.T3);
             FL_LOG_RMT("  New: T1=" << timing.T1 << " T2=" << timing.T2 << " T3=" << timing.T3);
 
-            // Wait for any pending transmission to complete
-            mPeripheral.waitAllDone(state->channel, 100);
-
-            // Delete old encoder
-            if (state->encoder) {
-                mPeripheral.deleteEncoder(state->encoder);
-                state->encoder = nullptr;
-            }
-
-            // Create new encoder with updated timing
-            state->encoder = mPeripheral.createEncoder(timing, FASTLED_RMT5_CLOCK_HZ);
-            if (!state->encoder) {
-                FL_WARN("Failed to recreate encoder with new timing");
-                // Channel is still valid but encoder is broken - mark channel
-                // as unusable
-                deleteHwChannel(state);
-                state->channel = nullptr;
-
-                // Free DMA and memory allocation
-                auto &memMgr = RmtMemoryManager::instance();
-                if (state->useDMA) {
-                    memMgr.rollbackDMA(state->memoryChannelId, true);
-                    mDMAChannelsInUse--;
-                }
-                memMgr.rollbackAllocation(state->memoryChannelId, true);
-
-                state->useDMA = false;
+            if (!mPeripheral.waitAllDone(state->channel, 100)) {
                 return false;
             }
+
+            // Keep the existing encoder usable if the replacement cannot be allocated.
+            auto *encoder = mPeripheral.createEncoder(timing, FASTLED_RMT5_CLOCK_HZ);
+            if (!encoder) {
+                FL_WARN("Failed to recreate encoder with new timing");
+                return false;
+            }
+            mPeripheral.deleteEncoder(state->encoder);
+            state->encoder = encoder;
 
             FL_LOG_RMT("Encoder recreated successfully with new timing");
         }

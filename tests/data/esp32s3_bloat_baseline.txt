@@ -506,4 +506,7 @@
 # Wi-Fi reconfiguration cannot delete the channel, and avoid a second wait
 # in the same show(). Hosted ESP32-S3 Blink run 45565570676 measured
 # 318651 B flash and 22519 B attributed RAM. Budget ceilings are unchanged.
-318651
+# RMT5 retiming now keeps the working encoder until the replacement is ready.
+# Hosted ESP32-S3 Blink run 45572609799 measured 318559 B of image flash,
+# 92 B below the previous pin. The budget ceilings are unchanged.
+318559
