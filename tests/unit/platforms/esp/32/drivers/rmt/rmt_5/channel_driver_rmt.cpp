@@ -804,14 +804,21 @@ FL_TEST_CASE("RMT5 driver - network reconfiguration preserves a channel that can
     driver->enqueue(data);
     driver->show();
     mock.setChannelDeletionFailure(false);
-    network.setActive(false);
-    network.hasChanged();
 
     FL_CHECK_EQ(mock.getChannelCount(), 1u);
     FL_CHECK_EQ(mock.getEncoderCount(), 1u);
     FL_CHECK_EQ(fl::detail::RmtMemoryManager::instance().rollbackAllocationCount(), rollbacks);
     FL_CHECK_EQ(mock.getTransmissionCount(), 2u);
     mock.simulateTransmitDone(originalHandle);
+    FL_REQUIRE(driver->poll() == DriverState::READY);
+
+    driver->enqueue(data);
+    driver->show();
+    network.setActive(false);
+    network.hasChanged();
+
+    FL_CHECK_EQ(fl::detail::RmtMemoryManager::instance().rollbackAllocationCount(), rollbacks + 1);
+    FL_CHECK_EQ(mock.getTransmissionCount(), 3u);
     mock.simulateTransmitDone(reinterpret_cast<void*>(2));
     FL_CHECK(driver->poll() == DriverState::READY);
     driver.reset();

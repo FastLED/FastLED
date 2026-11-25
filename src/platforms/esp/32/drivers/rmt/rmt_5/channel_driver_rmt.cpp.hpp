@@ -68,7 +68,6 @@
     #include "platforms/esp/32/drivers/rmt/rmt_5/common.h"  // ESP32 constants (FASTLED_RMT5_CLOCK_HZ, IRAM_ATTR, etc.)
     #include "platforms/esp/32/drivers/rmt/rmt_5/rmt_memory_manager.h"  // RmtMemoryManager
     #include "platforms/esp/32/drivers/rmt/rmt_5/buffer_pool.h"  // RMTBufferPool
-    #include "platforms/esp/32/drivers/rmt/rmt_5/network_detector.h"  // NetworkDetector
     #include "platforms/esp/32/drivers/rmt/rmt_5/network_state_tracker.h"  // NetworkStateTracker
 #else
     // Stub platform: Mock implementations for testing
@@ -92,7 +91,6 @@ using detail::Rmt5ChannelConfig;
 // On stub platforms: These types are in detail:: namespace
 #ifdef FASTLED_STUB_IMPL
 using detail::RmtMemoryManager;
-using detail::NetworkDetector;
 using detail::NetworkStateTracker;
 using detail::RMTBufferPool;
 #endif
@@ -472,6 +470,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
               inUse(false),
               useDMA(false),
               enabled(false),
+              mAllocatedWithNetwork(false),
               reset_us(0),
               pooledBuffer(),
               memoryChannelId(0),
@@ -487,6 +486,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
               inUse(other.inUse),
               useDMA(other.useDMA),
               enabled(other.enabled),
+              mAllocatedWithNetwork(other.mAllocatedWithNetwork),
               reset_us(other.reset_us),
               pooledBuffer(other.pooledBuffer),
               memoryChannelId(other.memoryChannelId),
@@ -505,6 +505,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
                 inUse = other.inUse;
                 useDMA = other.useDMA;
                 enabled = other.enabled;
+                mAllocatedWithNetwork = other.mAllocatedWithNetwork;
                 reset_us = other.reset_us;
                 pooledBuffer = other.pooledBuffer;
                 memoryChannelId = other.memoryChannelId;
@@ -529,6 +530,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
         bool inUse;
         bool useDMA; // Whether this channel uses DMA
         bool enabled; // rmt_enable() done; stays set across frames (#5359)
+        bool mAllocatedWithNetwork; // On-chip allocation mode
         u32 reset_us;
         fl::span<u8> pooledBuffer; // Buffer acquired from pool (must be
                                         // released on complete)
@@ -826,7 +828,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
 #if FL_RMT_STATIC_ALLOCATION
         constexpr bool networkActive = false;
 #else
-        bool networkActive = NetworkDetector::isAnyNetworkActive();
+        const bool networkActive = NetworkStateTracker::instance().isActive();
 #endif
 
         // ============================================================================
@@ -1066,6 +1068,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
         state->pin = pin;
         state->timing = timing;
         state->useDMA = false; // Non-DMA channel
+        state->mAllocatedWithNetwork = networkActive;
         state->transmissionComplete.store(false, fl::memory_order_release);
 
         state->encoder = encoder;
@@ -1443,27 +1446,20 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
     /// as needed)
     void reconfigureForNetwork() FL_NO_EXCEPT {
         auto& networkTracker = NetworkStateTracker::instance();
-        if (!networkTracker.hasChanged() && !mNetworkReductionPending) {
+        if (!networkTracker.hasChanged() && !mNetworkReconfigurationPending) {
             return;
         }
 
-        bool networkActive = networkTracker.isActive();
-        bool wasNetworkActive = !networkActive;  // Previous state is opposite of current
-        FL_DBG("Network state changed: " << ((networkActive ? "ACTIVE" : "INACTIVE")) << " (was: " << ((wasNetworkActive ? "ACTIVE" : "INACTIVE")) << ")");
-
-        // Check if memory allocation size would actually change
-        // On platforms like ESP32-C3/C6/H2 with limited memory, network state doesn't affect memory blocks
-        auto& memMgr = RmtMemoryManager::instance();
-        size_t oldMemBlocks = RmtMemoryManager::calculateMemoryBlocks(wasNetworkActive);
-        size_t newMemBlocks = RmtMemoryManager::calculateMemoryBlocks(networkActive);
-
-        if (oldMemBlocks == newMemBlocks) {
-            FL_DBG("Network state changed but memory allocation size unchanged (" << newMemBlocks << "x blocks) - skipping reconfiguration");
-            return;  // Memory allocation size doesn't change - no need to reconfigure
+        const bool networkActive = networkTracker.isActive();
+        // The live ledger can report equal sizes under pressure. Finish a
+        // pending reconfiguration even if those estimates now match.
+        if (!mNetworkReconfigurationPending &&
+            RmtMemoryManager::calculateMemoryBlocks(!networkActive) ==
+                RmtMemoryManager::calculateMemoryBlocks(networkActive)) {
+            return;
         }
 
-        FL_DBG("Memory allocation changing from " << oldMemBlocks << "x to " << newMemBlocks << "x blocks due to network state change");
-
+        auto& memMgr = RmtMemoryManager::instance();
         // Calculate target channel count for new Network state
         size_t targetChannels = calculateTargetChannelCount(networkActive);
         FL_DBG("Target channel count: " << targetChannels << " (current: " << mChannels.size() << ")");
@@ -1471,10 +1467,10 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
         // PHASE 1: Free on-chip memory for larger network-mode buffers.
         if (networkActive && mChannels.size() > targetChannels &&
             !reduceOnChipChannels(targetChannels)) {
-            mNetworkReductionPending = true;
+            mNetworkReconfigurationPending = true;
             return;
         }
-        mNetworkReductionPending = false;
+        mNetworkReconfigurationPending = false;
 
         // PHASE 2: Reconfigure remaining idle channels with new memory allocation
         // This ensures existing channels use Network-appropriate memory (2x vs 3x blocks)
@@ -1484,15 +1480,14 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
             ChannelState& state = mChannels[i];
 
             // DMA channels do not use the on-chip blocks being resized.
-            if (state.inUse || !state.channel || state.useDMA) {
+            if (!state.channel || state.useDMA ||
+                state.mAllocatedWithNetwork == networkActive) {
                 continue;
             }
 
-            // Destroy the channel and its encoder
-            FL_DBG("Reconfiguring idle channel " << i << " (pin: " << (static_cast<int>(state.pin)) << ")");
-
-            if (!mPeripheral.waitAllDone(state.channel, 100) ||
+            if (state.inUse || !mPeripheral.waitAllDone(state.channel, 100) ||
                 !deleteHwChannel(&state)) {
+                mNetworkReconfigurationPending = true;
                 continue;
             }
             state.channel = nullptr;
@@ -1570,8 +1565,8 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
     /// @brief Track allocation failures to avoid hammering the driver
     bool mAllocationFailed;
 
-    /// @brief Retry a failed reduction even after the network edge was consumed.
-    bool mNetworkReductionPending = false;
+    /// @brief Retry resizing channels after the network edge was consumed.
+    bool mNetworkReconfigurationPending = false;
 
     /// @brief Progressive retry: Memory reduction offset (symbols to reduce per retry)
     /// When RMT allocation fails, progressively reduce memory allocation by this amount
