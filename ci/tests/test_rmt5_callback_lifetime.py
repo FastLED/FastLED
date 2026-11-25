@@ -1,4 +1,4 @@
-"""Regress #4993 using the real ESP RMT5 adapter against a minimal host SDK."""
+"""Test the real ESP RMT5 adapter against a minimal host SDK."""
 
 import shutil
 from pathlib import Path
@@ -13,6 +13,7 @@ SOURCE = ROOT / "src/platforms/esp/32/drivers/rmt/rmt_5/rmt5_peripheral_esp.cpp.
 # These declarations replace SDK dependencies, not the production implementation.
 SDK = r"""
 #pragma once
+#include <climits>
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
@@ -63,7 +64,7 @@ constexpr int ESP_LOG_NONE=0, ESP_LOG_WARN=0, RMT_CLK_SRC_DEFAULT=0, MALLOC_CAP_
 constexpr int ESP_CACHE_MSYNC_FLAG_DIR_C2M=1, ESP_CACHE_MSYNC_FLAG_UNALIGNED=2;
 using TickType_t = unsigned;
 constexpr TickType_t portMAX_DELAY=~0u;
-#define pdMS_TO_TICKS(x) (x)
+#define pdMS_TO_TICKS(x) ((x) / 10u)
 using gpio_num_t = int;
 struct gpio_io_config_t { unsigned sig_out=0, oe=0, fun_sel=0; };
 inline esp_err_t gpio_get_io_config(gpio_num_t, gpio_io_config_t*) { return ESP_ERR_INVALID_ARG; }
@@ -122,7 +123,11 @@ inline esp_err_t rmt_disable(rmt_channel_handle_t) { return ESP_OK; }
 inline esp_err_t rmt_tx_switch_gpio(rmt_channel_handle_t, gpio_num_t, bool) { return ESP_OK; }
 inline esp_err_t rmt_transmit(rmt_channel_handle_t, rmt_encoder_handle_t,
     const void*, size_t, const rmt_transmit_config_t*) { return ESP_OK; }
-inline esp_err_t rmt_tx_wait_all_done(rmt_channel_handle_t, TickType_t) { return ESP_OK; }
+inline int last_wait_timeout_ms = -1;
+inline esp_err_t rmt_tx_wait_all_done(rmt_channel_handle_t, int timeout_ms) {
+    last_wait_timeout_ms = timeout_ms;
+    return ESP_OK;
+}
 inline esp_err_t rmt_new_bytes_encoder(const rmt_bytes_encoder_config_t*, rmt_encoder_handle_t*) {
     return ESP_ERR_INVALID_ARG;
 }
@@ -137,6 +142,7 @@ inline void heap_caps_free(void* ptr) { std::free(ptr); }
 namespace fl {
 using std::array;
 using u8=uint8_t; using u32=uint32_t; using u64=uint64_t;
+using i32=int32_t;
 inline void delayMicroseconds(unsigned) {}
 struct ChipsetTiming { u32 T1, T2, T3, RESET; };
 template<class T> struct Singleton { static T& instance() { static T value; return value; } };
@@ -222,6 +228,16 @@ int main(int argc, char**) {
     const size_t initial=live_allocations;
     void* handle=nullptr;
     REQUIRE(peripheral.createTxChannel(config, &handle));
+    if (argc==6) {
+        REQUIRE(peripheral.waitAllDone(handle, 100));
+        REQUIRE(last_wait_timeout_ms==100);
+        REQUIRE(peripheral.waitAllDone(handle, 0));
+        REQUIRE(last_wait_timeout_ms==0);
+        REQUIRE(peripheral.waitAllDone(handle, UINT32_MAX));
+        REQUIRE(last_wait_timeout_ms==INT_MAX);
+        REQUIRE(peripheral.deleteChannel(handle));
+        return 0;
+    }
     REQUIRE(peripheral.registerTxCallback(handle, onDone, &first));
     REQUIRE(fire(handle, event));
     REQUIRE(first.calls==1 && first.channel==handle && first.event==&event);
@@ -366,15 +382,23 @@ def callback_binary(
 
 @pytest.mark.parametrize(
     "scenario",
-    ["recreate", "register-failure", "replace", "delete-failure", "multiple-channels"],
+    [
+        "recreate",
+        "register-failure",
+        "replace",
+        "delete-failure",
+        "multiple-channels",
+        "wait-timeout",
+    ],
 )
-def test_callback_context_lifetime(callback_binary: Path, scenario: str) -> None:
+def test_rmt5_peripheral(callback_binary: Path, scenario: str) -> None:
     count = [
         "recreate",
         "register-failure",
         "replace",
         "delete-failure",
         "multiple-channels",
+        "wait-timeout",
     ].index(scenario)
     result = RunningProcess.run(
         [str(callback_binary), *(["scenario"] * count)],
