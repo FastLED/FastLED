@@ -188,6 +188,7 @@ def gate(board: str, labels: dict[str, list[str]], *, reserves_runner: bool = Fa
 def rendered(path: Path, entries: dict[str, str], labels: dict[str, list[str]]) -> str:
     """Mechanically update only event and job-gate blocks, retaining hand edits."""
     source = path.read_text(encoding="utf-8")
+    jobs = yaml.load(source, Loader=yaml.BaseLoader)["jobs"]
     lines = source.splitlines(keepends=True)
     on_start = next(i for i, line in enumerate(lines) if line == "on:\n")
     on_end = next(
@@ -263,7 +264,10 @@ def rendered(path: Path, entries: dict[str, str], labels: dict[str, list[str]]) 
             for i in range(job_start + 1, job_end)
             if lines[i].startswith(("    uses:", "    runs-on:"))
         )
-        reserves_runner = "    needs: reserve-runner\n" in lines[job_start + 1 : insert]
+        dependencies = jobs[job_id].get("needs", [])
+        if isinstance(dependencies, str):
+            dependencies = [dependencies]
+        reserves_runner = "reserve-runner" in dependencies
         lines[insert:insert] = gate(board, labels, reserves_runner=reserves_runner).splitlines(keepends=True)
         source = "".join(lines)
     return source
