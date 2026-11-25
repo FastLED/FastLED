@@ -488,16 +488,10 @@ void ChannelDriverLcdClockless::show() FL_NO_EXCEPT {
 
     // A failed start owns no active transfer. Retry it directly rather than
     // waiting for its latched ERROR state to become READY by itself.
-    if (mStartError == StartError::None) {
-        (void)waitForReady(2000);
-    }
-    if (mBusy) {
-        FL_WARN("ChannelDriverLcdClockless: DMA hung â€” forcing release");
-        mBusy = false;
-        for (auto &channel : mTransmittingChannels) {
-            channel->setInUse(false);
-        }
-        mTransmittingChannels.clear();
+    if (mStartError == StartError::None && !waitForReady(2000)) {
+        // The DMA callback and worker can still read the active buffers.
+        mEnqueuedChannels.clear();
+        return;
     }
 
     mTransmittingChannels = fl::move(mEnqueuedChannels);
