@@ -934,13 +934,14 @@ void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) FL_NO_EXCE
     return;
 #endif
 
-    encodeFrame(pixels);
-    submitFrame(driver);
+    if (encodeFrame(pixels)) {
+        submitFrame(driver);
+    }
 }
 
 // Encode `pixels` into mChannelData with the construction-bound encoder and
 // fire onChannelDataEncoded (#4566: out of line from showPixels()).
-void Channel::encodeFrame(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) FL_NO_EXCEPT {
+bool Channel::encodeFrame(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) FL_NO_EXCEPT {
     // Build pixel iterator with optional addressing transformation
     // (#2558) Pass both Rgbw and Rgbww from the current rendering settings; the iterator
     // carries both, and the encoder dispatch below picks the right path based
@@ -1002,7 +1003,17 @@ void Channel::encodeFrame(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) FL_NO_EXC
     }
 
     if (mPixelEncoder != nullptr) {
+        const auto* clockless = mChipset.ptr<ClocklessChipset>();
+        const bool usesWS2812 =
+            clockless != nullptr && clockless->encoder == ClocklessEncoder::CLOCKLESS_ENCODER_WS2812;
+        const auto pixelCount = usesWS2812 ? pixelIterator.size() : 0;
         mPixelEncoder(*this, pixelIterator, iterator.isManaged(), data);
+        // A failed buffer growth can leave a prefix of the frame in data.
+        if (usesWS2812 &&
+            data.size() != static_cast<u64>(pixelCount) * mChannelData->getBytesPerPixel()) {
+            data.clear();
+            return false;
+        }
     }
 
     // Fire event after encoding completes
@@ -1010,6 +1021,7 @@ void Channel::encodeFrame(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) FL_NO_EXC
         auto& events = ChannelEvents::instance();
         events.onChannelDataEncoded(*this, *mChannelData);
     }
+    return true;
 }
 
 // Submit the encoded frame to `driver` (#4566: out of line from showPixels()).
