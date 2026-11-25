@@ -563,6 +563,38 @@ FL_TEST_CASE("ChannelDriverI2sSpi - second show waits for first") {
     FL_CHECK(driver.poll() == IChannelDriver::DriverState::READY);
 }
 
+FL_TEST_CASE("ChannelDriverI2sSpi - timeout retains the active frame") {
+    resetMockState();
+    auto peripheral = createMockPeripheral();
+    ChannelDriverI2sSpi driver(peripheral);
+    auto &mock = I2sSpiPeripheralMock::instance();
+
+    auto active = createSpiTestChannelData(5, 18, 10);
+    driver.enqueue(active);
+    driver.show();
+    FL_REQUIRE(active->isInUse());
+
+    auto dropped = createSpiTestChannelData(5, 18, 20);
+    driver.enqueue(dropped);
+    driver.show();
+    FL_CHECK(active->isInUse());
+    FL_CHECK_FALSE(dropped->isInUse());
+    FL_CHECK(mock.getTransmitCount() == 1);
+    FL_CHECK(driver.poll() == IChannelDriver::DriverState::DRAINING);
+
+    mock.simulateTransmitComplete();
+    FL_CHECK(driver.poll() == IChannelDriver::DriverState::READY);
+    FL_CHECK_FALSE(active->isInUse());
+
+    auto next = createSpiTestChannelData(5, 18, 10);
+    driver.enqueue(next);
+    driver.show();
+    FL_CHECK(next->isInUse());
+    FL_CHECK(mock.getTransmitCount() == 2);
+    mock.simulateTransmitComplete();
+    FL_CHECK(driver.poll() == IChannelDriver::DriverState::READY);
+}
+
 #endif // FASTLED_STUB_IMPL
 
 } // FL_TEST_FILE

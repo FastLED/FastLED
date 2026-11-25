@@ -89,12 +89,9 @@ void ChannelDriverI2sSpi::show() FL_NO_EXCEPT {
         fl::task::yield_system(250);
     }
     if (mBusy) {
-        FL_WARN("ChannelDriverI2sSpi: DMA hung — forcing release");
-        mBusy = false;
-        for (auto &channel : mTransmittingChannels) {
-            channel->setInUse(false);
-        }
-        mTransmittingChannels.clear();
+        FL_WARN("ChannelDriverI2sSpi: DMA still active, dropping queued frame");
+        mEnqueuedChannels.clear();
+        return;
     }
 
     // Move enqueued to transmitting
