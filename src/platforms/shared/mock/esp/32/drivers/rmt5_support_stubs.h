@@ -7,7 +7,7 @@
 ///
 /// Classes provided:
 /// - NetworkDetector: Stub network detection (always returns false)
-/// - NetworkStateTracker: Stub network state tracking (no-op)
+/// - NetworkStateTracker: Controllable network state tracking
 /// - RmtMemoryManager: Stub RMT memory management (always succeeds)
 /// - RMTBufferPool: Stub buffer pool (uses std::vector)
 ///
@@ -27,6 +27,9 @@
 #define SOC_RMT_MEM_WORDS_PER_CHANNEL 64  // Stub value (doesn't matter for host tests)
 #define FL_RMT5_INTERRUPT_LEVEL 3  // Stub value
 #define CONFIG_IDF_TARGET "stub"  // Platform identifier
+#ifndef FASTLED_RMT_NETWORK_REDUCE_CHANNELS
+#define FASTLED_RMT_NETWORK_REDUCE_CHANNELS 1
+#endif
 #define IRAM_ATTR  // Stub: No IRAM attribute on host
 
 // Stub ESP-IDF error types
@@ -63,15 +66,24 @@ public:
 
 /// @brief Stub network state tracker for host testing
 ///
-/// No-op implementation - network state never changes in host tests.
 class NetworkStateTracker {
 public:
     static NetworkStateTracker& instance() FL_NO_EXCEPT {
         // Process-wide registry: one instance across DLLs (#4641).
         return fl::SingletonShared<NetworkStateTracker>::instance();
     }
-    bool hasChanged() FL_NO_EXCEPT { return false; }
-    bool isActive() FL_NO_EXCEPT { return false; }
+    bool hasChanged() FL_NO_EXCEPT {
+        const bool changed = mActive != mLastActive;
+        mLastActive = mActive;
+        return changed;
+    }
+
+    bool isActive() FL_NO_EXCEPT { return mActive; }
+    void setActive(bool active) FL_NO_EXCEPT { mActive = active; }
+
+private:
+    bool mActive = false;
+    bool mLastActive = false;
 };
 
 //=============================================================================
@@ -94,7 +106,7 @@ public:
         return fl::SingletonShared<RmtMemoryManager>::instance();
     }
 
-    static fl::size calculateMemoryBlocks(bool) FL_NO_EXCEPT { return 2; }
+    static fl::size calculateMemoryBlocks(bool active) FL_NO_EXCEPT { return active ? 3 : 2; }
 
     fl::size rollbackAllocationCount() const FL_NO_EXCEPT {
         return mRollbackAllocationCount;

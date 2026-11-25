@@ -502,4 +502,8 @@
 # +4 B, FastLED#5356 follow-up: preserve the enabled state when failed
 # submission cannot disable an RMT5 channel. Hosted ESP32-S3 Blink run
 # 45558463828 measured 318619 B flash and 22519 B attributed RAM.
-318619
+# +32 B, FastLED#5356 follow-up: retain the RMT5 channel and encoder when
+# Wi-Fi reconfiguration cannot delete the channel, and avoid a second wait
+# in the same show(). Hosted ESP32-S3 Blink run 45565570676 measured
+# 318651 B flash and 22519 B attributed RAM. Budget ceilings are unchanged.
+318651

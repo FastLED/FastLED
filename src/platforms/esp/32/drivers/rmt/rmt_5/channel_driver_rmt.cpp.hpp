@@ -1413,12 +1413,12 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
 
     /// @brief Destroy a single channel and free resources
     /// @param state Channel state to destroy (must not be in use)
-    void destroyChannel(ChannelState *state) FL_NO_EXCEPT;
+    bool destroyChannel(ChannelState *state) FL_NO_EXCEPT;
 
     /// @brief Destroy least-used channels to free resources
     /// @param count Number of channels to destroy (from end of mChannels
     /// vector)
-    void destroyLeastUsedChannels(size_t count) FL_NO_EXCEPT;
+    bool destroyLeastUsedChannels(size_t count) FL_NO_EXCEPT;
 
     /// @brief Calculate target channel count based on network state and
     /// platform
@@ -1519,7 +1519,9 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
         if (networkActive && mChannels.size() > targetChannels) {
             size_t channelsToDestroy = mChannels.size() - targetChannels;
             FL_DBG("Network activated - destroying " << channelsToDestroy << " excess channels");
-            destroyLeastUsedChannels(channelsToDestroy);
+            if (!destroyLeastUsedChannels(channelsToDestroy)) {
+                return;
+            }
         }
 
         // PHASE 2: Reconfigure remaining idle channels with new memory allocation
@@ -1537,17 +1539,14 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
             // Destroy the channel and its encoder
             FL_DBG("Reconfiguring idle channel " << i << " (pin: " << (static_cast<int>(state.pin)) << ")");
 
-            // Delete encoder first
+            if (!mPeripheral.waitAllDone(state.channel, 100) ||
+                !deleteHwChannel(&state)) {
+                continue;
+            }
+            state.channel = nullptr;
             if (state.encoder) {
                 mPeripheral.deleteEncoder(state.encoder);
                 state.encoder = nullptr;
-            }
-
-            // Delete channel
-            if (state.channel) {
-                mPeripheral.waitAllDone(state.channel, 100);
-                deleteHwChannel(&state);
-                state.channel = nullptr;
             }
 
             // Free DMA if this channel was using it
@@ -1846,31 +1845,24 @@ bool ChannelEngineRMTImpl::registerChannelCallback(ChannelState *state) FL_NO_EX
 // Network-Aware Channel Destruction Helpers
 //=============================================================================
 
-void ChannelEngineRMTImpl::destroyChannel(ChannelState *state) FL_NO_EXCEPT {
+bool ChannelEngineRMTImpl::destroyChannel(ChannelState *state) FL_NO_EXCEPT {
     FL_ASSERT(state != nullptr, "destroyChannel called with nullptr");
 
     if (!state->channel) {
-        return; // Already destroyed
+        return true; // Already destroyed
     }
 
-    // Wait for transmission to complete (should already be done if !inUse)
-    bool wait_success = mPeripheral.waitAllDone(state->channel, 100);
-    if (!wait_success) {
-        FL_WARN("destroyChannel: Wait all done timeout for pin " << (static_cast<int>(state->pin)));
+    if (!mPeripheral.waitAllDone(state->channel, 100) ||
+        !deleteHwChannel(state)) {
+        FL_WARN("destroyChannel: Failed to delete channel");
+        return false;
     }
+    state->channel = nullptr;
 
-    // Delete encoder
     if (state->encoder) {
         mPeripheral.deleteEncoder(state->encoder);
         state->encoder = nullptr;
     }
-
-    // Delete channel
-    bool del_success = deleteHwChannel(state);
-    if (!del_success) {
-        FL_WARN("destroyChannel: Failed to delete channel");
-    }
-    state->channel = nullptr;
 
     // Free memory resources
     auto &memMgr = RmtMemoryManager::instance();
@@ -1883,11 +1875,12 @@ void ChannelEngineRMTImpl::destroyChannel(ChannelState *state) FL_NO_EXCEPT {
     state->useDMA = false;
 
     FL_LOG_RMT("Destroyed channel on pin " << (static_cast<int>(state->pin)) << " (memoryChannelId: " << (static_cast<int>(state->memoryChannelId)) << ")");
+    return true;
 }
 
-void ChannelEngineRMTImpl::destroyLeastUsedChannels(size_t count) FL_NO_EXCEPT {
+bool ChannelEngineRMTImpl::destroyLeastUsedChannels(size_t count) FL_NO_EXCEPT {
     if (count == 0) {
-        return;
+        return true;
     }
 
     FL_LOG_RMT("Destroying " << count << " least-used channels");
@@ -1901,7 +1894,9 @@ void ChannelEngineRMTImpl::destroyLeastUsedChannels(size_t count) FL_NO_EXCEPT {
 
         // Only destroy if not in use
         if (!state.inUse) {
-            destroyChannel(&state);
+            if (!destroyChannel(&state)) {
+                return false;
+            }
             mChannels.pop_back();
             destroyed++;
         } else {
@@ -1913,6 +1908,7 @@ void ChannelEngineRMTImpl::destroyLeastUsedChannels(size_t count) FL_NO_EXCEPT {
     }
 
     FL_LOG_RMT("Destroyed " << destroyed << " channels (requested: " << count << ")");
+    return true;
 }
 
 //=============================================================================
