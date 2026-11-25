@@ -1175,10 +1175,8 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
             memMgr.rollbackAllocation(state->memoryChannelId, true);
 
             state->useDMA = false;
-        }
-
-        // If timing changed but channel exists, recreate encoder
-        if (timingChanged) {
+        } else if (timingChanged) {
+            // Only replace the encoder when keeping the channel.
             FL_LOG_RMT("Timing changed for pin " << (static_cast<int>(pin)) << ", recreating encoder");
             FL_LOG_RMT("  Old: T1=" << state->timing.T1 << " T2=" << state->timing.T2 << " T3=" << state->timing.T3);
             FL_LOG_RMT("  New: T1=" << timing.T1 << " T2=" << timing.T2 << " T3=" << timing.T3);
