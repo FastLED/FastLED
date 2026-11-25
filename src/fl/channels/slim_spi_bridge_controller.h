@@ -51,6 +51,7 @@
 #include "fl/channels/bus_traits.h"  // IWYU pragma: keep (DriverTraits<Bus::X> satisfies the DriverTraits contract)
 #include "fl/channels/channel_typed.h"  // IWYU pragma: keep (detail::resolve_bus, BusSupports)
 #include "fl/channels/config.h"
+#include "fl/channels/slim_spi_bridge_controller.impl.hpp"
 #include "fl/chipsets/encoders/pixel_iterator.h"
 #include "fl/log/log.h"
 
@@ -60,33 +61,6 @@ namespace platforms {
 void registerNativeSpiDriver() FL_NO_EXCEPT;
 }
 #endif
-
-namespace detail {
-
-class SpiFrameOutput {
-public:
-    using value_type = u8;
-
-    explicit SpiFrameOutput(fl::vector_psram<u8>& bytes) FL_NO_EXCEPT
-        : mBytes(bytes) {}
-
-    void push_back(u8 byte) FL_NO_EXCEPT {
-        if (mFailed) {
-            return;
-        }
-        const auto previousSize = mBytes.size();
-        mBytes.push_back(byte);
-        mFailed = mBytes.size() == previousSize;
-    }
-
-    bool failed() const FL_NO_EXCEPT { return mFailed; }
-
-private:
-    fl::vector_psram<u8>& mBytes;
-    bool mFailed = false;
-};
-
-} // namespace detail
 
 /// @brief Shared legacy `addLeds<ESPIChipsets ...>()` bridge controller over
 ///        an `IChannelDriver`, for chipsets whose encoding never needs the
