@@ -25,6 +25,7 @@
 #include "fl/channels/data.h"
 #include "fl/channels/config.h"
 #include "fl/channels/driver.h"
+#include "fl/stl/chrono.h"
 #include "fl/stl/vector.h"
 #include "test.h"
 
@@ -647,6 +648,45 @@ FL_TEST_CASE("RMT5 driver - empty enqueue") {
 //     FL_CHECK(state == DriverState::READY);
 //     FL_CHECK(ch->isInUse() == false);  // Should not be in use (no valid transmission)
 // }
+
+FL_TEST_CASE("RMT5 driver - show timeout preserves the active frame") {
+    resetMock();
+    auto& mock = Rmt5PeripheralMock::instance();
+    auto driver = ChannelEngineRMT::create();
+    auto active = createChannelData(18, 1);
+    auto next = createChannelData(19, 1);
+
+    driver->enqueue(active);
+    driver->show();
+    FL_REQUIRE_EQ(mock.getTransmissionCount(), 1u);
+    FL_CHECK(active->isInUse());
+
+    driver->enqueue(next);
+    fl::u32 nowMs = 0;
+    fl::inject_time_provider([&nowMs]() { return nowMs += 1000; });
+    driver->show();
+    fl::clear_time_provider();
+
+    const auto submitted = mock.getTransmissionCount();
+    FL_CHECK_EQ(submitted, 1u);
+    FL_CHECK(active->isInUse());
+    FL_CHECK_FALSE(next->isInUse());
+
+    mock.simulateTransmitDone(reinterpret_cast<void*>(1));
+    if (submitted > 1) {
+        // Drain the unexpected transfer so the regression can fail immediately.
+        mock.simulateTransmitDone(reinterpret_cast<void*>(2));
+    }
+    FL_REQUIRE(driver->poll() == DriverState::READY);
+    FL_REQUIRE_FALSE(active->isInUse());
+
+    driver->enqueue(next);
+    driver->show();
+    FL_CHECK_EQ(mock.getTransmissionCount(), 2u);
+    mock.simulateTransmitDone(reinterpret_cast<void*>(2));
+    FL_CHECK(driver->poll() == DriverState::READY);
+    FL_CHECK_FALSE(next->isInUse());
+}
 
 FL_TEST_CASE("RMT5 driver - rapid show() calls") {
     resetMock();
