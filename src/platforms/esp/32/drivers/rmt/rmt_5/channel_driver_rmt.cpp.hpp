@@ -1097,11 +1097,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
     /// pinMode()) could take its pin. The channel kept transmitting into a
     /// pin that no longer carried its signal, so every later frame on that
     /// pin was lost.
-    void reclaimPin(ChannelState *state) FL_NO_EXCEPT {
-        if (state->pinRouting == IRMT5Peripheral::kPinRoutingUnknown ||
-            mPeripheral.getPinRouting(state->pin) == state->pinRouting) {
-            return;
-        }
+    bool reclaimPin(ChannelState *state) FL_NO_EXCEPT {
         FL_LOG_RMT("GPIO " << state->pin << " was rerouted while idle - reclaiming it");
         // Keep the original baseline when the rebind fails, so a later frame
         // retries instead of accepting the stolen routing (the peripheral
@@ -1114,6 +1110,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
         if (rebound) {
             state->pinRouting = mPeripheral.getPinRouting(state->pin);
         }
+        return rebound;
     }
 
     /// @brief Delete a channel's RMT handle, disabling it first if enabled.
@@ -1657,22 +1654,23 @@ ChannelEngineRMTImpl::ChannelState *ChannelEngineRMTImpl::acquireChannel(
         if (cached && cached <= mChannels.size()) {
             auto &ch = mChannels[cached - 1];
             if (!ch.inUse && ch.channel && ch.pin == pin) {
-                ch.inUse = true;
 #if !FL_RMT_STATIC_ALLOCATION
                 if (ch.timing.T1 != timing.T1 ||
                     ch.timing.T2 != timing.T2 || ch.timing.T3 != timing.T3 ||
                     ch.timing.RESET != timing.RESET) {
                     configureChannel(&ch, pin, timing, dataSize);
                     if (!ch.channel || !ch.encoder) {
-                        ch.inUse = false;
                         mAllocationFailed = true;
                         return nullptr;
                     }
                 }
 #endif
-                if (!mPeripheral.isPinRoutingCurrent(pin, ch.pinRouting)) {
-                    reclaimPin(&ch);
+                if (ch.pinRouting != IRMT5Peripheral::kPinRoutingUnknown &&
+                    !mPeripheral.isPinRoutingCurrent(pin, ch.pinRouting) &&
+                    !reclaimPin(&ch)) {
+                    return nullptr;
                 }
+                ch.inUse = true;
                 return &ch;
             }
         }
@@ -1691,15 +1689,23 @@ ChannelEngineRMTImpl::ChannelState *ChannelEngineRMTImpl::acquireChannelSlow(
     FL_LOG_RMT("acquireChannel: Finding channel with matching pin " << (static_cast<int>(pin)));
     for (auto &ch : mChannels) {
         if (!ch.inUse && ch.channel && ch.pin == pin) {
-            ch.inUse = true;
 #if FL_RMT_STATIC_ALLOCATION
             // The static-allocation contract keeps the channel's pin and
             // timing immutable after setup, so reuse it without the dynamic
             // reconfiguration path.
 #else
             configureChannel(&ch, pin, timing, dataSize);
+            if (!ch.channel || !ch.encoder) {
+                mAllocationFailed = true;
+                return nullptr;
+            }
 #endif
-            reclaimPin(&ch);
+            if (ch.pinRouting != IRMT5Peripheral::kPinRoutingUnknown &&
+                !mPeripheral.isPinRoutingCurrent(pin, ch.pinRouting) &&
+                !reclaimPin(&ch)) {
+                return nullptr;
+            }
+            ch.inUse = true;
             FL_LOG_RMT("Reusing " << ((ch.useDMA ? "DMA" : "non-DMA")) << " channel for pin " << (static_cast<int>(pin)));
             return &ch;
         }

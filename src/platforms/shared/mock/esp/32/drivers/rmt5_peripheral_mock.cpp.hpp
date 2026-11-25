@@ -109,6 +109,9 @@ public:
     }
     void setMaxChannels(size_t max_channels) FL_NO_EXCEPT override;
     void simulatePinReroute(int pin) FL_NO_EXCEPT override;
+    void setPinRebindFailure(bool should_fail) FL_NO_EXCEPT override {
+        mShouldFailPinRebind = should_fail;
+    }
     size_t getPinRebindCount() const FL_NO_EXCEPT override;
     size_t getPinRoutingQueryCount() const FL_NO_EXCEPT override;
     const fl::vector<TransmissionRecord>& getTransmissionHistory() const FL_NO_EXCEPT override;
@@ -140,6 +143,7 @@ private:
 
     // Pin routing: the channel id that owns each pin, or kOtherPeripheral
     fl::flat_map<fl::i32, u32> mPinRouting;
+    bool mShouldFailPinRebind = false;
     size_t mPinRebindCount;
     size_t mPinRoutingQueryCount = 0;
     size_t mEnableCount;
@@ -559,6 +563,9 @@ bool Rmt5PeripheralMockImpl::rebindTxPin(void* channel_handle, int pin) FL_NO_EX
     // Like the ESP implementation: rmt_tx_switch_gpio() needs a disabled
     // channel, so the rebind leaves it disabled.
     channel->enabled = false;
+    if (mShouldFailPinRebind) {
+        return false;
+    }
     channel->config.gpio_num = pin;
     mPinRouting[pin] = static_cast<u32>(channel->id);
     mPinRebindCount++;
@@ -678,6 +685,7 @@ void Rmt5PeripheralMockImpl::reset() FL_NO_EXCEPT {
     mShouldFailTransmit = false;
     mMaxChannels = 0;
     mPinRouting.clear();
+    mShouldFailPinRebind = false;
     mPinRebindCount = 0;
     mPinRoutingQueryCount = 0;
     mEnableCount = 0;

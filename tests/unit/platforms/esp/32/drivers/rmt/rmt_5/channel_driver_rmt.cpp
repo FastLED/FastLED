@@ -409,6 +409,38 @@ FL_TEST_CASE("RMT5 driver - reused channel reclaims a rerouted pin") {
     FL_CHECK(mock.getPinRebindCount() == 1);
 }
 
+FL_TEST_CASE("RMT5 driver - failed pin rebind skips submission and retries next frame") {
+    resetMock();
+    auto& mock = Rmt5PeripheralMock::instance();
+    auto driver = ChannelEngineRMT::create();
+    auto data = createChannelData(18, 1);
+    void* handle = reinterpret_cast<void*>(1);
+
+    driver->enqueue(data);
+    driver->show();
+    mock.simulateTransmitDone(handle);
+    FL_REQUIRE(driver->poll() == DriverState::READY);
+
+    mock.simulatePinReroute(18);
+    mock.setPinRebindFailure(true);
+    driver->enqueue(data);
+    driver->show();
+    FL_CHECK_EQ(mock.getTransmissionCount(), 1u);
+    if (mock.getTransmissionCount() > 1u) {
+        mock.simulateTransmitDone(handle);
+    }
+    FL_CHECK(driver->poll() == DriverState::READY);
+    FL_CHECK_FALSE(data->isInUse());
+
+    mock.setPinRebindFailure(false);
+    driver->enqueue(data);
+    driver->show();
+    FL_CHECK_EQ(mock.getTransmissionCount(), 2u);
+    FL_CHECK_EQ(mock.getPinRebindCount(), 1u);
+    mock.simulateTransmitDone(handle);
+    FL_CHECK(driver->poll() == DriverState::READY);
+}
+
 // FastLED#5356: enabling and disabling the RMT channel around every frame
 // cost ~45 us of show() latency on an ESP32-C6. A channel reused on the same
 // pin stays enabled between frames, so it is enabled exactly once.
