@@ -73,9 +73,11 @@ class ChannelEngineI2sEsp32Dev : public IChannelDriver {
     ///        Phase 1): 1 = primary bank (`Bus::FLEX_IO` instance 0),
     ///        0 = second bank (`Bus::FLEX_IO` instance 1, contended
     ///        with the clocked-SPI driver via the port-claim registry).
+    /// @param spi_delegate Optional SPI driver. Hardware creates it on demand.
     explicit ChannelEngineI2sEsp32Dev(
         fl::shared_ptr<II2sPeripheralEsp32Dev> peripheral,
-        u8 i2s_port = 1) FL_NO_EXCEPT;
+        u8 i2s_port = 1,
+        fl::shared_ptr<IChannelDriver> spi_delegate = nullptr) FL_NO_EXCEPT;
 
     ~ChannelEngineI2sEsp32Dev() override;
 
@@ -139,6 +141,7 @@ class ChannelEngineI2sEsp32Dev : public IChannelDriver {
     void showClocklessBatch() FL_NO_EXCEPT;
     /// Acquire the peripheral on first clockless use (ESP32), #4809.
     bool ensurePeripheral() FL_NO_EXCEPT;
+    bool hasActiveSpiFrame() const FL_NO_EXCEPT;
     void registerPeripheralCallback() FL_NO_EXCEPT;
 #if defined(FL_IS_ESP32)
     static void (ChannelEngineI2sEsp32Dev::*sClocklessBatch)();

@@ -57,7 +57,8 @@ fl::shared_ptr<II2sPeripheralEsp32Dev> makeI2sEsp32DevPeripheral(u8 port) FL_NO_
 
 ChannelEngineI2sEsp32Dev::ChannelEngineI2sEsp32Dev(
     fl::shared_ptr<II2sPeripheralEsp32Dev> peripheral,
-    u8 i2s_port) FL_NO_EXCEPT
+    u8 i2s_port,
+    fl::shared_ptr<IChannelDriver> spi_delegate) FL_NO_EXCEPT
     : mPeripheral(fl::move(peripheral)),
       mEnqueuedChannels(),
       mInFlightChannels(),
@@ -66,6 +67,7 @@ ChannelEngineI2sEsp32Dev::ChannelEngineI2sEsp32Dev(
       mState(DriverState::READY),
       mTransmitCompleted(false),
       mPeripheralInitialized(false),
+      mSpiDelegate(fl::move(spi_delegate)),
       mWave8ByteLut(),
       mCachedT1(0),
       mCachedT2(0),
@@ -177,6 +179,11 @@ void ChannelEngineI2sEsp32Dev::enqueue(ChannelDataPtr data) FL_NO_EXCEPT {
     mEnqueuedChannels.push_back(data);
 }
 
+bool ChannelEngineI2sEsp32Dev::hasActiveSpiFrame() const FL_NO_EXCEPT {
+    return mSpiDelegate && !mInFlightChannels.empty() &&
+           mInFlightChannels.front()->isSpi();
+}
+
 void ChannelEngineI2sEsp32Dev::show() FL_NO_EXCEPT {
     if (mEnqueuedChannels.empty()) {
         if (mState == DriverState::BUSY || mState == DriverState::DRAINING) {
@@ -184,6 +191,12 @@ void ChannelEngineI2sEsp32Dev::show() FL_NO_EXCEPT {
         } else {
             mState = DriverState::READY;
         }
+        return;
+    }
+
+    if (hasActiveSpiFrame() && !waitDone(/*timeoutMs=*/5000)) {
+        FL_WARN("ChannelEngineI2sEsp32Dev: SPI DMA still active, dropping queued frame");
+        mEnqueuedChannels.clear();
         return;
     }
 
@@ -245,6 +258,7 @@ void ChannelEngineI2sEsp32Dev::show() FL_NO_EXCEPT {
         if (!mSpiDelegate) {
             mSpiDelegate = fl::createI2sSpiEngine();
         }
+#endif
         if (!mSpiDelegate) {
             FL_WARN("ChannelEngineI2sEsp32Dev: SPI delegate unavailable");
             for (auto &data : mInFlightChannels) {
@@ -269,17 +283,6 @@ void ChannelEngineI2sEsp32Dev::show() FL_NO_EXCEPT {
         mSpiDelegate->show();
         mState = DriverState::BUSY;
         return;
-#else
-        FL_WARN("ChannelEngineI2sEsp32Dev: SPI mode unavailable on this target");
-        for (auto &data : mInFlightChannels) {
-            if (data) {
-                data->setInUse(false);
-            }
-        }
-        mInFlightChannels.clear();
-        mState = DriverState::ERROR;
-        return;
-#endif
     }
     // Clockless batch. On ESP32 the pipeline is reached only through
     // sClocklessBatch, installed by enableClockless() from every clockless
@@ -453,8 +456,7 @@ IChannelDriver::DriverState ChannelEngineI2sEsp32Dev::poll() FL_NO_EXCEPT {
     // READY / ERROR) up to our own callers. Switch statement enforces
     // full enum coverage — if a new DriverState value gets added, the
     // compiler flags the missing arm.
-    if (mSpiDelegate && (mState == DriverState::BUSY ||
-                         mState == DriverState::DRAINING)) {
+    if (hasActiveSpiFrame()) {
         const DriverState delegate_state = mSpiDelegate->poll();
         switch (delegate_state.state) {
         case DriverState::READY:
