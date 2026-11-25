@@ -1705,10 +1705,11 @@ ChannelEngineRMTImpl::ChannelState *ChannelEngineRMTImpl::acquireChannelSlow(
         }
     }
 
-    // Strategy 2: Find any idle non-DMA channel (requires reconfiguration)
+    // Strategy 2: Reuse an idle non-DMA slot, including one left vacant by
+    // failed reconfiguration. A vacant slot needs a fresh hardware allocation.
 #if !FL_RMT_STATIC_ALLOCATION
     for (auto &ch : mChannels) {
-        if (!ch.inUse && ch.channel && !ch.useDMA) {
+        if (!ch.inUse && !ch.useDMA && (ch.channel || !mAllocationFailed)) {
             ch.inUse = true;
             configureChannel(&ch, pin, timing, dataSize);
             if (!ch.channel || !ch.encoder) {

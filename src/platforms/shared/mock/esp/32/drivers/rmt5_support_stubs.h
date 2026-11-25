@@ -101,7 +101,10 @@ public:
     }
 
     AllocationResult allocateTx(u8, bool, bool) FL_NO_EXCEPT { return AllocationResult{}; }
-    bool tryAllocateTx(u8, bool, bool, fl::size& out_words) FL_NO_EXCEPT {
+    u8 lastTxAllocationId() const FL_NO_EXCEPT { return mLastTxAllocationId; }
+
+    bool tryAllocateTx(u8 channel_id, bool, bool, fl::size& out_words) FL_NO_EXCEPT {
+        mLastTxAllocationId = channel_id;
         out_words = 64;
         return true;
     }
@@ -131,6 +134,7 @@ public:
 
 private:
     fl::size mRollbackAllocationCount = 0;
+    u8 mLastTxAllocationId = 0;
     bool mDMAHardwareAvailable = false;
 };
 

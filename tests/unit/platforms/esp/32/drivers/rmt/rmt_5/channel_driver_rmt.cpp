@@ -537,6 +537,31 @@ FL_TEST_CASE("RMT5 driver - failed channel setup rolls back and allows retry") {
     FL_CHECK_FALSE(valid->isInUse());
 }
 
+FL_TEST_CASE("RMT5 driver - failed pin changes leave a reusable slot") {
+    resetMock();
+    auto& mock = Rmt5PeripheralMock::instance();
+    auto& memMgr = RmtMemoryManager::instance();
+    auto driver = ChannelEngineRMT::create();
+    auto valid = createChannelData(18, 1);
+    auto invalid = createChannelData(-1, 1);
+
+    for (size_t frame = 0; frame < 3; ++frame) {
+        driver->enqueue(valid);
+        driver->show();
+        FL_REQUIRE_EQ(mock.getTransmissionCount(), frame + 1);
+        FL_CHECK_EQ(memMgr.lastTxAllocationId(), 0u);
+        mock.simulateTransmitDone(
+            reinterpret_cast<void*>(static_cast<uintptr_t>(frame + 1)));
+        FL_REQUIRE(driver->poll() == DriverState::READY);
+
+        driver->enqueue(invalid);
+        driver->show();
+        FL_REQUIRE(driver->poll() == DriverState::READY);
+        FL_CHECK_FALSE(invalid->isInUse());
+        FL_CHECK_EQ(mock.getChannelCount(), 0u);
+    }
+}
+
 FL_TEST_CASE("RMT5 driver - failed strip setup does not drop a valid strip") {
     resetMock();
     auto& mock = Rmt5PeripheralMock::instance();
