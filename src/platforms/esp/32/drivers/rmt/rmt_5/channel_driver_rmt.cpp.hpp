@@ -1487,8 +1487,8 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
         for (size_t i = 0; i < mChannels.size(); ++i) {
             ChannelState& state = mChannels[i];
 
-            // Skip channels that are in use or already destroyed
-            if (state.inUse || !state.channel) {
+            // DMA channels do not use the on-chip blocks being resized.
+            if (state.inUse || !state.channel || state.useDMA) {
                 continue;
             }
 
@@ -1503,14 +1503,6 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
             if (state.encoder) {
                 mPeripheral.deleteEncoder(state.encoder);
                 state.encoder = nullptr;
-            }
-
-            // Free DMA if this channel was using it
-            if (state.useDMA) {
-                memMgr.rollbackDMA(state.memoryChannelId,
-                                   true);  // true = TX channel
-                mDMAChannelsInUse--;
-                state.useDMA = false;
             }
 
             // Free memory allocation
