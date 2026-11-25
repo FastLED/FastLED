@@ -568,21 +568,27 @@ class PixelIterator {
     void writeWS2812WhiteChannel(CONTAINER_UIN8_T* out) FL_NO_EXCEPT {
         auto back_ins = fl::back_inserter(*out);
         if (mRgbww.active()) {
+#if !defined(FL_IS_AVR)
+            // AVR's RawPremixBinder never supplies a bulk loader. Keep the
+            // unreachable bulk encoder's scratch buffer out of its stack frame.
             if (mLoadRawBulk != nullptr && mRgbwwConvertBulk != nullptr) {
                 writeWhiteBulk<5>(out, [this](const u8* raw, int n, const u8 (&premix)[3], u8* dst) {
                     mRgbwwConvertBulk(mRgbww, raw, n, premix, mWireOrder, dst);
                 });
                 return;
             }
+#endif
             auto range = makeScaledPixelRangeRGBWW(this);
             encodeWS2812_RGBWW(range.first, range.second, back_ins);
         } else if (mRgbw.active()) {
+#if !defined(FL_IS_AVR)
             if (mLoadRawBulk != nullptr && mRgbwConvertBulk != nullptr) {
                 writeWhiteBulk<4>(out, [this](const u8* raw, int n, const u8 (&premix)[3], u8* dst) {
                     mRgbwConvertBulk(mRgbw, raw, n, premix, mWireOrder, dst);
                 });
                 return;
             }
+#endif
             auto range = makeScaledPixelRangeRGBW(this);
             encodeWS2812_RGBW(range.first, range.second, back_ins);
         }
