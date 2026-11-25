@@ -96,7 +96,7 @@ public:
     void freeDmaBuffer(u8* buffer) FL_NO_EXCEPT override;
     u32 getPinRouting(int pin) FL_NO_EXCEPT override;
     bool isPinRoutingCurrent(int pin, u32 routing) FL_NO_EXCEPT override;
-    bool rebindTxPin(void* channel_handle, int pin) FL_NO_EXCEPT override;
+    PinRebindResult rebindTxPin(void* channel_handle, int pin) FL_NO_EXCEPT override;
 
     //=========================================================================
     // Mock-Specific API
@@ -109,6 +109,9 @@ public:
     }
     void setMaxChannels(size_t max_channels) FL_NO_EXCEPT override;
     void simulatePinReroute(int pin) FL_NO_EXCEPT override;
+    void setPinRebindDisableFailure(bool should_fail) FL_NO_EXCEPT override {
+        mShouldFailPinRebindDisable = should_fail;
+    }
     void setPinRebindFailure(bool should_fail) FL_NO_EXCEPT override {
         mShouldFailPinRebind = should_fail;
     }
@@ -143,6 +146,7 @@ private:
 
     // Pin routing: the channel id that owns each pin, or kOtherPeripheral
     fl::flat_map<fl::i32, u32> mPinRouting;
+    bool mShouldFailPinRebindDisable = false;
     bool mShouldFailPinRebind = false;
     size_t mPinRebindCount;
     size_t mPinRoutingQueryCount = 0;
@@ -555,21 +559,24 @@ u32 Rmt5PeripheralMockImpl::getPinRouting(int pin) FL_NO_EXCEPT {
     return it == mPinRouting.end() ? kPinRoutingUnknown : it->second;
 }
 
-bool Rmt5PeripheralMockImpl::rebindTxPin(void* channel_handle, int pin) FL_NO_EXCEPT {
+IRMT5Peripheral::PinRebindResult Rmt5PeripheralMockImpl::rebindTxPin(void* channel_handle, int pin) FL_NO_EXCEPT {
     MockChannel* channel = findChannel(channel_handle);
     if (channel == nullptr) {
-        return false;
+        return PinRebindResult::Failed;
     }
     // Like the ESP implementation: rmt_tx_switch_gpio() needs a disabled
     // channel, so the rebind leaves it disabled.
+    if (mShouldFailPinRebindDisable) {
+        return PinRebindResult::Failed;
+    }
     channel->enabled = false;
     if (mShouldFailPinRebind) {
-        return false;
+        return PinRebindResult::Disabled;
     }
     channel->config.gpio_num = pin;
     mPinRouting[pin] = static_cast<u32>(channel->id);
     mPinRebindCount++;
-    return true;
+    return PinRebindResult::Rebound;
 }
 
 bool Rmt5PeripheralMockImpl::isPinRoutingCurrent(int pin, u32 routing) FL_NO_EXCEPT {
@@ -685,6 +692,7 @@ void Rmt5PeripheralMockImpl::reset() FL_NO_EXCEPT {
     mShouldFailTransmit = false;
     mMaxChannels = 0;
     mPinRouting.clear();
+    mShouldFailPinRebindDisable = false;
     mShouldFailPinRebind = false;
     mPinRebindCount = 0;
     mPinRoutingQueryCount = 0;

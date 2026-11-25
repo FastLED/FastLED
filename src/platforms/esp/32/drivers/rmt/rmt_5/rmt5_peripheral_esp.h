@@ -101,7 +101,7 @@ public:
     void freeDmaBuffer(u8* buffer) FL_NO_EXCEPT override = 0;
     u32 getPinRouting(int pin) FL_NO_EXCEPT override = 0;
     bool isPinRoutingCurrent(int pin, u32 routing) FL_NO_EXCEPT override = 0;
-    bool rebindTxPin(void* channel_handle, int pin) FL_NO_EXCEPT override = 0;
+    PinRebindResult rebindTxPin(void* channel_handle, int pin) FL_NO_EXCEPT override = 0;
 
 protected:
     /// @brief Protected constructor for singleton

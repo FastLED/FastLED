@@ -135,7 +135,7 @@ public:
     void freeDmaBuffer(u8* buffer) FL_NO_EXCEPT override;
     FL_NO_INLINE u32 getPinRouting(int pin) FL_NO_EXCEPT override;
     bool isPinRoutingCurrent(int pin, u32 routing) FL_NO_EXCEPT override;
-    bool rebindTxPin(void* channel_handle, int pin) FL_NO_EXCEPT override;
+    PinRebindResult rebindTxPin(void* channel_handle, int pin) FL_NO_EXCEPT override;
 
 private:
     fl::array<TxCallbackContext, kTxCallbackSlots> mTxCallbacks;
@@ -587,30 +587,29 @@ bool Rmt5PeripheralESPImpl::isPinRoutingCurrent(int pin, u32 routing) FL_NO_EXCE
     return Rmt5PeripheralESPImpl::getPinRouting(pin) == routing;
 }
 
-bool Rmt5PeripheralESPImpl::rebindTxPin(void* channel_handle, int pin) FL_NO_EXCEPT {
+IRMT5Peripheral::PinRebindResult Rmt5PeripheralESPImpl::rebindTxPin(void* channel_handle, int pin) FL_NO_EXCEPT {
 #if FL_RMT5_CAN_REBIND_PIN
     if (channel_handle == nullptr) {
-        return false;
+        return PinRebindResult::Failed;
     }
     rmt_channel_handle_t channel = static_cast<rmt_channel_handle_t>(channel_handle);
-    // rmt_tx_switch_gpio() requires a disabled channel. The channel is left
-    // disabled; the caller must clear its enabled tracking and enable it
-    // again before the next transmission.
+    // rmt_tx_switch_gpio() requires a disabled channel.
     esp_err_t err = rmt_disable(channel);
     if (err != ESP_OK && err != ESP_ERR_INVALID_STATE) {
         FL_WARN_ONCE("RMT5_PERIPH: rebind GPIO " << pin << ": rmt_disable failed: " << esp_err_to_name(err));
-        return false;
+        return PinRebindResult::Failed;
     }
+    const bool disabled = err == ESP_OK;
     err = rmt_tx_switch_gpio(channel, static_cast<gpio_num_t>(pin), false);
     if (err != ESP_OK) {
         FL_WARN_ONCE("RMT5_PERIPH: rebind GPIO " << pin << " failed: " << esp_err_to_name(err));
-        return false;
+        return disabled ? PinRebindResult::Disabled : PinRebindResult::Failed;
     }
-    return true;
+    return PinRebindResult::Rebound;
 #else
     (void)channel_handle;
     (void)pin;
-    return false;
+    return PinRebindResult::Failed;
 #endif
 }
 

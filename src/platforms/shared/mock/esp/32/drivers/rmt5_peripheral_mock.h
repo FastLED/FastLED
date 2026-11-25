@@ -129,7 +129,7 @@ public:
     void freeDmaBuffer(u8* buffer) FL_NO_EXCEPT override = 0;
     u32 getPinRouting(int pin) FL_NO_EXCEPT override = 0;
     bool isPinRoutingCurrent(int pin, u32 routing) FL_NO_EXCEPT override = 0;
-    bool rebindTxPin(void* channel_handle, int pin) FL_NO_EXCEPT override = 0;
+    PinRebindResult rebindTxPin(void* channel_handle, int pin) FL_NO_EXCEPT override = 0;
 
     //=========================================================================
     // Mock-Specific API (for unit tests)
@@ -177,6 +177,8 @@ public:
 
     /// Set whether TX callback registration fails.
     virtual void setCallbackRegistrationFailure(bool should_fail) FL_NO_EXCEPT = 0;
+
+    virtual void setPinRebindDisableFailure(bool should_fail) FL_NO_EXCEPT = 0;
 
     virtual void setPinRebindFailure(bool should_fail) FL_NO_EXCEPT = 0;
 
