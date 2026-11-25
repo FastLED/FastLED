@@ -104,6 +104,9 @@ public:
 
     void simulateTransmitDone(void* channel_handle) FL_NO_EXCEPT override;
     void setTransmitFailure(bool should_fail) FL_NO_EXCEPT override;
+    void setCallbackRegistrationFailure(bool should_fail) FL_NO_EXCEPT override {
+        mShouldFailCallbackRegistration = should_fail;
+    }
     void setMaxChannels(size_t max_channels) FL_NO_EXCEPT override;
     void simulatePinReroute(int pin) FL_NO_EXCEPT override;
     size_t getPinRebindCount() const FL_NO_EXCEPT override;
@@ -132,6 +135,7 @@ private:
 
     // Simulation settings
     bool mShouldFailTransmit;
+    bool mShouldFailCallbackRegistration = false;
     size_t mMaxChannels;  // 0 = unlimited
 
     // Pin routing: the channel id that owns each pin, or kOtherPeripheral
@@ -429,6 +433,10 @@ bool Rmt5PeripheralMockImpl::registerTxCallback(void* channel_handle,
         return false;
     }
 
+    if (mShouldFailCallbackRegistration) {
+        return false;
+    }
+
     channel->callback = callback;
     channel->user_ctx = user_ctx;
 
@@ -651,6 +659,7 @@ bool Rmt5PeripheralMockImpl::isChannelEnabled(void* channel_handle) const FL_NO_
 }
 
 void Rmt5PeripheralMockImpl::reset() FL_NO_EXCEPT {
+    mShouldFailCallbackRegistration = false;
     // Delete all allocated channels
     for (auto pair : mChannels) {
         delete pair.second;  // ok bare allocation
