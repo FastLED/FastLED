@@ -3,6 +3,7 @@
 #include "fl/channels/pipeline_binding.h"
 
 #include "fl/channels/channel_events.h"
+#include "fl/channels/data.h"
 #include "fl/channels/color_managed_source.h"
 #include "fl/channels/five_bit_semantics.h"
 #include "fl/channels/channel.h"
@@ -238,7 +239,7 @@ u32 colorPipelineUnscaledPowerMilliwatts(
 #endif  // FL_COLOR_PIPELINE_SHARED
 
 bool encodeColorPipelineManagedSpi(PixelIterator& pixels,
-                                   vector_psram<u8>* out, SpiChipset chip,
+                                   detail::ChannelFrameOutput* out, SpiChipset chip,
                                    const Channel& controller) FL_NO_EXCEPT {
 #if !FL_PLATFORM_HAS_TINY_MEMORY
     switch (chip) {
