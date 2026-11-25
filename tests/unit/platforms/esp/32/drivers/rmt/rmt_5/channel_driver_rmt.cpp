@@ -686,6 +686,29 @@ FL_TEST_CASE("RMT5 driver - callback registration failure releases the new chann
     FL_CHECK_FALSE(frame->isInUse());
 }
 
+FL_TEST_CASE("RMT5 driver - learned allocation reduction updates later ledger entries") {
+    resetMock();
+    auto& mock = Rmt5PeripheralMock::instance();
+    auto& memMgr = RmtMemoryManager::instance();
+    auto driver = ChannelEngineRMT::create();
+    const auto recoveries = memMgr.recoveryAllocationCount();
+
+    // The first channel learns the smaller limit. The next channel fits on
+    // its first hardware attempt but must also record the smaller allocation.
+    mock.setMaxSymbolsPerChannel(SOC_RMT_MEM_WORDS_PER_CHANNEL);
+    memMgr.setTxAllocationWords(2 * SOC_RMT_MEM_WORDS_PER_CHANNEL);
+    driver->enqueue(createChannelData(18, 2));
+    driver->enqueue(createChannelData(19, 1));
+    driver->show();
+    memMgr.setTxAllocationWords(SOC_RMT_MEM_WORDS_PER_CHANNEL);
+
+    FL_CHECK_EQ(mock.getTransmissionCount(), 2u);
+    FL_CHECK_EQ(memMgr.recoveryAllocationCount(), recoveries + 2);
+    mock.simulateTransmitDone(reinterpret_cast<void*>(1));
+    mock.simulateTransmitDone(reinterpret_cast<void*>(2));
+    FL_CHECK(driver->poll() == DriverState::READY);
+}
+
 FL_TEST_CASE("RMT5 driver - failed callback cleanup retains the channel for retry") {
     resetMock();
     auto& mock = Rmt5PeripheralMock::instance();

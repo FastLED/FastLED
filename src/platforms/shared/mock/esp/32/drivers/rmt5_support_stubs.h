@@ -115,9 +115,16 @@ public:
     AllocationResult allocateTx(u8, bool, bool) FL_NO_EXCEPT { return AllocationResult{}; }
     u8 lastTxAllocationId() const FL_NO_EXCEPT;
 
+    void setTxAllocationWords(fl::size words) FL_NO_EXCEPT {
+        mTxAllocationWords = words;
+    }
+    fl::size recoveryAllocationCount() const FL_NO_EXCEPT {
+        return mRecoveryAllocationCount;
+    }
+
     bool tryAllocateTx(u8 channel_id, bool, bool, fl::size& out_words) FL_NO_EXCEPT {
         mLastTxAllocationId = channel_id;
-        out_words = 64;
+        out_words = mTxAllocationWords;
         return true;
     }
     bool tryAllocateRx(u8, fl::size, bool, fl::size& out_words) FL_NO_EXCEPT {
@@ -126,7 +133,9 @@ public:
     }
     void free(u8, bool) FL_NO_EXCEPT {}  // ok bare allocation
     void rollbackAllocation(u8, bool) FL_NO_EXCEPT { ++mRollbackAllocationCount; }
-    void recordRecoveryAllocation(u8, fl::size, bool) FL_NO_EXCEPT {}
+    void recordRecoveryAllocation(u8, fl::size, bool) FL_NO_EXCEPT {
+        ++mRecoveryAllocationCount;
+    }
     /// @brief Test hook: pretend the chip has RMT DMA hardware
     ///
     /// The stub has no real DMA peripheral, so `isDMAAvailable()` is false by
@@ -146,6 +155,8 @@ public:
 
 private:
     fl::size mRollbackAllocationCount = 0;
+    fl::size mRecoveryAllocationCount = 0;
+    fl::size mTxAllocationWords = SOC_RMT_MEM_WORDS_PER_CHANNEL;
     u8 mLastTxAllocationId = 0;
     bool mDMAHardwareAvailable = false;
 };

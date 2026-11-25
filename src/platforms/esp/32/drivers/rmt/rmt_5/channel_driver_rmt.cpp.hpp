@@ -1001,6 +1001,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
 
         // Apply previously discovered memory reduction offset (from self-healing)
         // This prevents re-running the progressive retry on every allocation
+        const size_t reserved_symbols = mem_block_symbols;
         if (mMemoryReductionOffset > 0 && mem_block_symbols > mMemoryReductionOffset) {
             FL_LOG_RMT("Applying memory reduction offset: " << mMemoryReductionOffset << " symbols (learned from previous recovery)");
             mem_block_symbols -= mMemoryReductionOffset;
@@ -1043,7 +1044,13 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
         // - Reduce by 1 symbol per retry until success or minimum reached
         // - Minimum: SOC_RMT_MEM_WORDS_PER_CHANNEL (1 block)
 
-        if (!success && mem_block_symbols > SOC_RMT_MEM_WORDS_PER_CHANNEL) {
+        if (success) {
+            if (mem_block_symbols != reserved_symbols) {
+                // Match the ledger to the size accepted by the peripheral.
+                memMgr.rollbackAllocation(state->memoryChannelId, true);
+                memMgr.recordRecoveryAllocation(state->memoryChannelId, mem_block_symbols, true);
+            }
+        } else if (mem_block_symbols > SOC_RMT_MEM_WORDS_PER_CHANNEL) {
             // Progressive memory-reduction recovery is a cold path: extracted
             // into an FL_NO_INLINE helper so its FL_WARN/FL_LOG_RMT operator<<
             // instantiations don't bloat the hot createChannel body.
@@ -1051,10 +1058,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
             if (!attemptAllocationRecovery(state, pin, intr_priority, mem_block_symbols)) {
                 return false;
             }
-            success = true;
-        }
-
-        if (!success) {
+        } else {
             // Non-recoverable error (already at minimum or other failure)
             FL_LOG_RMT("Failed to create non-DMA RMT channel on pin " << (static_cast<int>(pin)));
             state->channel = nullptr;

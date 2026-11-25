@@ -195,6 +195,7 @@ public:
     /// Models hardware with fewer RMT TX channels than strips, so
     /// createTxChannel() fails once the limit is reached.
     virtual void setMaxChannels(size_t max_channels) FL_NO_EXCEPT = 0;
+    virtual void setMaxSymbolsPerChannel(size_t max_symbols) FL_NO_EXCEPT = 0;
 
     /// @brief Hand @p pin to another peripheral (FastLED#4905)
     ///
