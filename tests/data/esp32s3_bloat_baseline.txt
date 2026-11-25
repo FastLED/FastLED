@@ -526,4 +526,8 @@
 # reductions after the peripheral accepts the smaller allocation.
 # Hosted Blink run 45594591749 measured 318671 B of image flash and
 # 22519 B of attributed RAM. The budget ceilings are unchanged.
-318671
+# +52 B, FastLED#5356 follow-up: filter empty RMT5 submissions at show
+# time while allowing callers to populate queued data before the frame.
+# Hosted Blink run 45599916964 measured 318723 B of image flash and
+# 22519 B of attributed RAM. The budget ceilings are unchanged.
+318723
