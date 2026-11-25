@@ -1182,6 +1182,46 @@ FL_TEST_CASE("RMT5 driver - network reconfiguration keeps the DMA channel") {
     FL_CHECK(driver->poll() == DriverState::READY);
 }
 
+FL_TEST_CASE("RMT5 driver - network channel reduction evicts on-chip hardware before DMA") {
+    resetMock();
+    auto& mock = Rmt5PeripheralMock::instance();
+    auto& network = fl::detail::NetworkStateTracker::instance();
+    auto& memMgr = RmtMemoryManager::instance();
+    auto driver = ChannelEngineRMT::create();
+    auto onChip = createChannelData(18, 301);
+    auto dma = createChannelData(19, 300);
+    void* onChipHandle = reinterpret_cast<void*>(1);
+    void* dmaHandle = reinterpret_cast<void*>(2);
+
+    // Seed an on-chip channel, then put the DMA channel in the last slot.
+    driver->enqueue(onChip);
+    driver->show();
+    mock.simulateTransmitDone(onChipHandle);
+    FL_REQUIRE(driver->poll() == DriverState::READY);
+    memMgr.setDMAHardwareAvailable(true);
+    driver->enqueue(onChip);
+    driver->enqueue(dma);
+    driver->show();
+    mock.simulateTransmitDone(onChipHandle);
+    mock.simulateTransmitDone(dmaHandle);
+    FL_CHECK(driver->poll() == DriverState::READY);
+
+    network.setActive(true);
+    driver->enqueue(dma);
+    driver->show();
+    network.setActive(false);
+    network.hasChanged();
+    memMgr.setDMAHardwareAvailable(false);
+
+    const auto& history = mock.getTransmissionHistory();
+    FL_REQUIRE_EQ(history.size(), 4u);
+    FL_CHECK(history[2].used_dma);
+    FL_CHECK(history.back().used_dma);
+    FL_CHECK_EQ(mock.getChannelCount(), 1u);
+    mock.simulateTransmitDone(dmaHandle);
+    FL_CHECK(driver->poll() == DriverState::READY);
+}
+
 FL_TEST_CASE("RMT5 driver - no DMA hardware means no DMA channel") {
     // Sanity check on the stub hook itself: with no DMA hardware the channel is
     // always on-chip, however long the strip.
