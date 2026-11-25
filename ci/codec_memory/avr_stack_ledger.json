@@ -34,7 +34,7 @@
     "caleido3.cpp.hpp:virtual void fl::Caleido3::draw(fl::Context&)": 140,
     "caleido3.cpp.hpp:virtual void fl::Caleido3_FP::draw(fl::Context&)": 176,
     "center_field.cpp.hpp:virtual void fl::Center_Field_FP::draw(fl::Context&)": 128,
-    "channel.cpp.hpp:void fl::Channel::encodeFrame(PixelController<(fl::EOrder)10, 1, 4294967295>&)": 255,
+    "channel.cpp.hpp:bool fl::Channel::encodeFrame(PixelController<(fl::EOrder)10, 1, 4294967295>&)": 192,
     "chasing_spirals.cpp.hpp:fl::simd::simd_u32x4 fl::{anonymous}::simd4_processChannel(fl::simd::simd_u32x4, fl::simd::simd_u32x4, fl::i32, fl::i32, const i32*, const u8*, fl::i32, fl::i32, fl::simd::simd_u32x4)": 279,
     "chasing_spirals.cpp.hpp:virtual void fl::Chasing_Spirals_Q31::draw(fl::Context&)": 234,
     "chasing_spirals.cpp.hpp:virtual void fl::Chasing_Spirals_Q31_SIMD::draw(fl::Context&)": 348,
