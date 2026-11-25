@@ -40,7 +40,7 @@ jobs:
       runs-on: ${{ steps.reserve.outputs.runs-on }}
     steps:
       - id: reserve
-        uses: forge-ci/ci.yml/actions/pool-select@ed73926bc2de1b5d71f50907cd93920daeecbe78
+        uses: forge-ci/ci.yml/actions/pool-select@52f6ada3ed0cb8622e31f1a16d506fb853b731b0
         with:
           source: lease
           labels: ${{ vars.FORGE_POOL_LABELS }}
