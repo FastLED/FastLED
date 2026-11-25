@@ -147,7 +147,11 @@ struct Rmt5ChannelConfig {
     size_t mem_block_symbols=64, trans_queue_depth=1;
     bool invert_out=false, with_dma=false; int intr_priority=0;
 };
-class Rmt5PeripheralESP {
+class IRMT5Peripheral {
+public:
+    enum class PinRebindResult : u8 { Failed, Disabled, Rebound };
+};
+class Rmt5PeripheralESP : public IRMT5Peripheral {
 public:
     static Rmt5PeripheralESP& instance() noexcept;
     virtual ~Rmt5PeripheralESP();
@@ -168,7 +172,7 @@ public:
     virtual void freeDmaBuffer(u8*) noexcept=0;
     virtual u32 getPinRouting(int) noexcept=0;
     virtual bool isPinRoutingCurrent(int, u32) noexcept=0;
-    virtual bool rebindTxPin(void*, int) noexcept=0;
+    virtual PinRebindResult rebindTxPin(void*, int) noexcept=0;
 };
 }
 }
