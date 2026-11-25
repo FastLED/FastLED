@@ -102,10 +102,17 @@ bool ChannelEngineI2sEsp32Dev::ensurePeripheral() FL_NO_EXCEPT {
 }
 
 ChannelEngineI2sEsp32Dev::~ChannelEngineI2sEsp32Dev() {
-    // Drain any in-flight transmit so we don't tear down while the
-    // peripheral is still writing into the scratch buffer.
+    // Give an in-flight transmission time to finish before stopping DMA.
     if (mPeripheral && mPeripheral->isBusy()) {
         (void)mPeripheral->waitTransmitDone(/*timeout_ms=*/1000);
+    }
+
+    if (mPeripheral && mPeripheralInitialized) {
+        mPeripheral->deinitialize();
+        mPeripheralInitialized = false;
+    }
+    if (mPeripheral) {
+        (void)mPeripheral->registerTransmitCallback(nullptr, nullptr);
     }
 
     // Release channels' in-use marks.
@@ -121,16 +128,6 @@ ChannelEngineI2sEsp32Dev::~ChannelEngineI2sEsp32Dev() {
     }
 
     freeScratchBuffer();
-
-    // Clear our callback registration so a future re-init doesn't
-    // hold a dangling `this`.
-    if (mPeripheral) {
-        (void)mPeripheral->registerTransmitCallback(nullptr, nullptr);
-    }
-    if (mPeripheral && mPeripheralInitialized) {
-        mPeripheral->deinitialize();
-        mPeripheralInitialized = false;
-    }
 }
 
 //=============================================================================
