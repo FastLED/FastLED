@@ -51,7 +51,6 @@
 #include "fl/channels/bus_traits.h"  // IWYU pragma: keep (DriverTraits<Bus::X> satisfies the DriverTraits contract)
 #include "fl/channels/channel_typed.h"  // IWYU pragma: keep (detail::resolve_bus, BusSupports)
 #include "fl/channels/config.h"
-#include "fl/channels/slim_spi_bridge_controller.impl.hpp"
 #include "fl/chipsets/encoders/pixel_iterator.h"
 #include "fl/log/log.h"
 
@@ -156,7 +155,7 @@ protected:
         auto& bytes = mData->getData();
         bytes.clear();
         fl::PixelIterator it(&pixels, this->getRgbw(), this->getRgbww());
-        detail::SpiFrameOutput output(bytes);
+        detail::ChannelFrameOutput output(bytes);
         encode(it, output);
         if (output.failed()) {
             bytes.clear();
@@ -220,7 +219,7 @@ private:
     ///        Mirrors the `managed == false` branch of `Channel::encodeAPA102()`
     ///        .. `Channel::encodeHD108()` (`channel.cpp.hpp`, ~712-815) -- see
     ///        file-level comment for why `managed` is always `false` here.
-    static void encode(fl::PixelIterator& it, detail::SpiFrameOutput& out) FL_NO_EXCEPT {
+    static void encode(fl::PixelIterator& it, detail::ChannelFrameOutput& out) FL_NO_EXCEPT {
         switch (CHIPSET) {
             case fl::SpiChipset::APA102:
             case fl::SpiChipset::DOTSTAR:

@@ -15,6 +15,23 @@
 
 namespace fl {
 
+namespace detail {
+
+class ChannelFrameOutput {
+public:
+    using value_type = u8;
+
+    explicit ChannelFrameOutput(fl::vector_psram<u8>& bytes) FL_NO_EXCEPT;
+    void push_back(u8 byte) FL_NO_EXCEPT;
+    bool failed() const FL_NO_EXCEPT;
+
+private:
+    fl::vector_psram<u8>& mBytes;
+    bool mFailed = false;
+};
+
+} // namespace detail
+
 class ChannelData;
 FASTLED_SHARED_PTR(ChannelData);
 
