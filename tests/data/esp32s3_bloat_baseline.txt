@@ -512,4 +512,8 @@
 # Keeping RMT5 DMA channels across network changes removes their rebuild path.
 # Hosted ESP32-S3 Blink run 45581810817 measured 318479 B of image flash,
 # 80 B below the prior pin. The budget ceilings are unchanged.
-318479
+# +80 B, FastLED#5356 follow-up: network-triggered reduction counts occupied
+# channels and skips DMA slots while preserving surviving callback addresses.
+# Hosted Blink run 45585436446 measured 318559 B of image flash and 22519 B
+# of attributed RAM. The budget ceilings are unchanged.
+318559
