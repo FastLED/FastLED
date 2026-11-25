@@ -179,15 +179,11 @@ void ChannelEngineI2sEsp32Dev::enqueue(ChannelDataPtr data) FL_NO_EXCEPT {
 
 void ChannelEngineI2sEsp32Dev::show() FL_NO_EXCEPT {
     if (mEnqueuedChannels.empty()) {
-        // Nothing to do — release any pending in-use marks and stay
-        // in READY.
-        for (auto &data : mEnqueuedChannels) {
-            if (data) {
-                data->setInUse(false);
-            }
+        if (mState == DriverState::BUSY || mState == DriverState::DRAINING) {
+            poll();
+        } else {
+            mState = DriverState::READY;
         }
-        mEnqueuedChannels.clear();
-        mState = DriverState::READY;
         return;
     }
 

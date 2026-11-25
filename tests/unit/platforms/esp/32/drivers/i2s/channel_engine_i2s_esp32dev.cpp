@@ -222,6 +222,25 @@ FL_TEST_CASE("I2sEsp32Dev - show() with no enqueued channels stays READY") {
     FL_CHECK(I2sPeripheralEsp32DevMock::instance().getTransmitCount() == 0u);
 }
 
+FL_TEST_CASE("I2sEsp32Dev - empty show leaves the active frame in flight") {
+    resetMockState();
+    ChannelEngineI2sEsp32Dev engine(createMockPeripheral());
+    auto &mock = I2sPeripheralEsp32DevMock::instance();
+    auto active = makeChannelData(0, 3);
+    engine.enqueue(active);
+    engine.show();
+    FL_REQUIRE(active->isInUse());
+
+    engine.show();
+    FL_CHECK(engine.poll() == IChannelDriver::DriverState::BUSY);
+    FL_CHECK(active->isInUse());
+    FL_CHECK(mock.getTransmitCount() == 1u);
+
+    mock.simulateTransmitDone();
+    FL_CHECK(engine.poll() == IChannelDriver::DriverState::READY);
+    FL_CHECK_FALSE(active->isInUse());
+}
+
 FL_TEST_CASE("I2sEsp32Dev - show() with data initializes peripheral once") {
     resetMockState();
     ChannelEngineI2sEsp32Dev engine(createMockPeripheral());
