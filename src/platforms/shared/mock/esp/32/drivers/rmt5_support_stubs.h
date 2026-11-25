@@ -115,18 +115,10 @@ public:
     AllocationResult allocateTx(u8, bool, bool) FL_NO_EXCEPT { return AllocationResult{}; }
     u8 lastTxAllocationId() const FL_NO_EXCEPT;
 
-    void setTxAllocationWords(fl::size words) FL_NO_EXCEPT {
-        mTxAllocationWords = words;
-    }
-    fl::size recoveryAllocationCount() const FL_NO_EXCEPT {
-        return mRecoveryAllocationCount;
-    }
-    u8 lastRecoveryAllocationId() const FL_NO_EXCEPT {
-        return mLastRecoveryAllocationId;
-    }
-    fl::size lastRecoveryAllocationWords() const FL_NO_EXCEPT {
-        return mLastRecoveryAllocationWords;
-    }
+    void setTxAllocationWords(fl::size words) FL_NO_EXCEPT;
+    fl::size recoveryAllocationCount() const FL_NO_EXCEPT;
+    u8 lastRecoveryAllocationId() const FL_NO_EXCEPT;
+    fl::size lastRecoveryAllocationWords() const FL_NO_EXCEPT;
 
     bool tryAllocateTx(u8 channel_id, bool, bool, fl::size& out_words) FL_NO_EXCEPT {
         mLastTxAllocationId = channel_id;
@@ -139,11 +131,7 @@ public:
     }
     void free(u8, bool) FL_NO_EXCEPT {}  // ok bare allocation
     void rollbackAllocation(u8, bool) FL_NO_EXCEPT { ++mRollbackAllocationCount; }
-    void recordRecoveryAllocation(u8 channel_id, fl::size words, bool) FL_NO_EXCEPT {
-        ++mRecoveryAllocationCount;
-        mLastRecoveryAllocationId = channel_id;
-        mLastRecoveryAllocationWords = words;
-    }
+    void recordRecoveryAllocation(u8 channel_id, fl::size words, bool) FL_NO_EXCEPT;
     /// @brief Test hook: pretend the chip has RMT DMA hardware
     ///
     /// The stub has no real DMA peripheral, so `isDMAAvailable()` is false by

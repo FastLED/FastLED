@@ -197,6 +197,28 @@ u8 RmtMemoryManager::lastTxAllocationId() const FL_NO_EXCEPT {
     return mLastTxAllocationId;
 }
 
+void RmtMemoryManager::setTxAllocationWords(fl::size words) FL_NO_EXCEPT {
+    mTxAllocationWords = words;
+}
+
+fl::size RmtMemoryManager::recoveryAllocationCount() const FL_NO_EXCEPT {
+    return mRecoveryAllocationCount;
+}
+
+u8 RmtMemoryManager::lastRecoveryAllocationId() const FL_NO_EXCEPT {
+    return mLastRecoveryAllocationId;
+}
+
+fl::size RmtMemoryManager::lastRecoveryAllocationWords() const FL_NO_EXCEPT {
+    return mLastRecoveryAllocationWords;
+}
+
+void RmtMemoryManager::recordRecoveryAllocation(u8 channel_id, fl::size words, bool) FL_NO_EXCEPT {
+    ++mRecoveryAllocationCount;
+    mLastRecoveryAllocationId = channel_id;
+    mLastRecoveryAllocationWords = words;
+}
+
 //=============================================================================
 // Constructor / Destructor
 //=============================================================================
