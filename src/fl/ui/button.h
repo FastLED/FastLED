@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fl/stl/function.h"
+#include "fl/stl/move.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/string.h"
 #include "fl/stl/compiler_control.h"  // IWYU pragma: keep
@@ -76,7 +77,7 @@ class UIButton : public UIElement {
     }
 
     int onChanged(function<void(UIButton &)> callback) FL_NO_EXCEPT {
-        int id = mCallbacks.add(callback);
+        int id = mCallbacks.add(fl::move(callback));
         mListener.addToEngineEventsOnce();
         return id;
     }
