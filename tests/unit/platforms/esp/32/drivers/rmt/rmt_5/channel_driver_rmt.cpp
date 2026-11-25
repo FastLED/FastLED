@@ -1074,6 +1074,23 @@ FL_TEST_CASE("RMT5 driver - zero LED channel leaves the hardware idle") {
     FL_CHECK_EQ(mock.getTransmissionCount(), 0u);
 }
 
+FL_TEST_CASE("RMT5 driver - queued payload can be populated before show") {
+    resetMock();
+    auto& mock = Rmt5PeripheralMock::instance();
+    auto driver = ChannelEngineRMT::create();
+    auto ch = createChannelData(18, 0);
+
+    driver->enqueue(ch);
+    ch->getData() = createChannelData(18, 1)->getData();
+    driver->show();
+
+    FL_REQUIRE_EQ(mock.getTransmissionCount(), 1u);
+    FL_CHECK_TRUE(ch->isInUse());
+    mock.simulateTransmitDone(reinterpret_cast<void*>(1));
+    FL_CHECK(driver->poll() == DriverState::READY);
+    FL_CHECK_FALSE(ch->isInUse());
+}
+
 FL_TEST_CASE("RMT5 driver - show timeout preserves the active frame") {
     resetMock();
     auto& mock = Rmt5PeripheralMock::instance();
