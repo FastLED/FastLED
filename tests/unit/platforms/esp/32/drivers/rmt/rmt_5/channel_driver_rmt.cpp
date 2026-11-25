@@ -1059,6 +1059,34 @@ FL_TEST_CASE("RMT5 driver - empty enqueue") {
     FL_CHECK(mock.getTransmissionCount() == 0);
 }
 
+FL_TEST_CASE("RMT5 driver - queued strips on one pin transmit serially") {
+    resetMock();
+    auto& mock = Rmt5PeripheralMock::instance();
+    auto driver = ChannelEngineRMT::create();
+    auto first = createChannelData(18, 2);
+    auto second = createChannelData(18, 1);
+
+    driver->enqueue(first);
+    driver->enqueue(second);
+    driver->show();
+
+    FL_CHECK_EQ(mock.getChannelCount(), 1u);
+    FL_CHECK_EQ(mock.getTransmissionCount(), 1u);
+    FL_CHECK(driver->poll() == DriverState::BUSY);
+
+    auto handle = reinterpret_cast<void*>(1);
+    mock.simulateTransmitDone(handle);
+    driver->poll();
+    FL_CHECK_EQ(mock.getTransmissionCount(), 2u);
+    FL_CHECK_EQ(mock.getChannelCount(), 1u);
+
+    mock.simulateTransmitDone(handle);
+    mock.simulateTransmitDone(reinterpret_cast<void*>(2));
+    FL_CHECK(driver->poll() == DriverState::READY);
+    FL_CHECK_FALSE(first->isInUse());
+    FL_CHECK_FALSE(second->isInUse());
+}
+
 FL_TEST_CASE("RMT5 driver - zero LED channel leaves the hardware idle") {
     resetMock();
     auto& mock = Rmt5PeripheralMock::instance();

@@ -1640,7 +1640,11 @@ ChannelEngineRMTImpl::ChannelState *ChannelEngineRMTImpl::acquireChannelSlow(
     // This applies to both DMA and non-DMA channels
     FL_LOG_RMT("acquireChannel: Finding channel with matching pin " << (static_cast<int>(pin)));
     for (auto &ch : mChannels) {
-        if (!ch.inUse && ch.channel && ch.pin == pin) {
+        if (ch.channel && ch.pin == pin) {
+            // A second channel would take over the GPIO routing mid-frame.
+            if (ch.inUse) {
+                return nullptr;
+            }
 #if FL_RMT_STATIC_ALLOCATION
             // The static-allocation contract keeps the channel's pin and
             // timing immutable after setup, so reuse it without the dynamic
