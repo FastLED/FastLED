@@ -73,8 +73,11 @@ TypeConversionResult json_convert_to_bool_core(const json_value& val,
     }
     if (auto* p = val.data.template ptr<i64>()) {
         *out_value = (*p != 0);
-        result.addWarning(fl::string("int ") + fl::to_string(*p) +
-                          " converted to bool " + (*out_value ? "true" : "false"));
+        fl::string warning("int ");
+        warning += fl::to_string(*p);
+        warning += " converted to bool ";
+        warning += *out_value ? "true" : "false";
+        result.addWarning(warning);
         return result;
     }
     if (auto* p = val.data.template ptr<float>()) {
