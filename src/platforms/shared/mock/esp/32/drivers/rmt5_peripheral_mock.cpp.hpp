@@ -107,6 +107,9 @@ public:
     void setCallbackRegistrationFailure(bool should_fail) FL_NO_EXCEPT override {
         mShouldFailCallbackRegistration = should_fail;
     }
+    void setChannelDeletionFailure(bool should_fail) FL_NO_EXCEPT override {
+        mShouldFailChannelDeletion = should_fail;
+    }
     void setMaxChannels(size_t max_channels) FL_NO_EXCEPT override;
     void simulatePinReroute(int pin) FL_NO_EXCEPT override;
     void setPinRebindDisableFailure(bool should_fail) FL_NO_EXCEPT override {
@@ -146,6 +149,7 @@ private:
 
     // Pin routing: the channel id that owns each pin, or kOtherPeripheral
     fl::flat_map<fl::i32, u32> mPinRouting;
+    bool mShouldFailChannelDeletion = false;
     bool mShouldFailPinRebindDisable = false;
     bool mShouldFailPinRebind = false;
     size_t mPinRebindCount;
@@ -304,6 +308,10 @@ bool Rmt5PeripheralMockImpl::deleteChannel(void* channel_handle) FL_NO_EXCEPT {
     MockChannel* channel = findChannel(channel_handle);
     if (channel == nullptr) {
         FL_WARN("Rmt5PeripheralMock: Invalid channel handle");
+        return false;
+    }
+
+    if (mShouldFailChannelDeletion) {
         return false;
     }
 
@@ -674,6 +682,7 @@ bool Rmt5PeripheralMockImpl::isChannelEnabled(void* channel_handle) const FL_NO_
 
 void Rmt5PeripheralMockImpl::reset() FL_NO_EXCEPT {
     mShouldFailCallbackRegistration = false;
+    mShouldFailChannelDeletion = false;
     // Delete all allocated channels
     for (auto pair : mChannels) {
         delete pair.second;  // ok bare allocation

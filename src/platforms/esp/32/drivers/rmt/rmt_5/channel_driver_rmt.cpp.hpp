@@ -1135,7 +1135,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
 
     /// @brief Configure existing channel (handle pin/timing changes)
     /// @param dataSize Size of LED data in bytes (0 = use default buffer size)
-    void configureChannel(ChannelState *state, int pin,
+    bool configureChannel(ChannelState *state, int pin,
                           const ChipsetTiming &timing, fl::size dataSize = 0) FL_NO_EXCEPT {
         // Check if timing changed - if so, encoder must be recreated
         bool timingChanged =
@@ -1151,16 +1151,16 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
             // Wait for any pending transmission to complete
             mPeripheral.waitAllDone(state->channel, 100);
 
-            // Delete encoder before deleting channel
+            // Keep the old pin, encoder, and allocation if the hardware
+            // channel could not be released.
+            if (!deleteHwChannel(state)) {
+                return false;
+            }
+            state->channel = nullptr;
             if (state->encoder) {
                 mPeripheral.deleteEncoder(state->encoder);
                 state->encoder = nullptr;
             }
-
-            // deleteHwChannel() disables first: rmt_del_channel() rejects an
-            // enabled channel.
-            deleteHwChannel(state);
-            state->channel = nullptr;
 
             // Free DMA and memory allocation
             auto &memMgr = RmtMemoryManager::instance();
@@ -1205,7 +1205,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
                 memMgr.rollbackAllocation(state->memoryChannelId, true);
 
                 state->useDMA = false;
-                return;
+                return false;
             }
 
             FL_LOG_RMT("Encoder recreated successfully with new timing");
@@ -1215,7 +1215,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
         if (!state->channel) {
             if (!createChannel(state, pin, timing, dataSize)) {
                 FL_LOG_RMT("Failed to recreate channel for pin " << (static_cast<int>(pin)));
-                return;
+                return false;
             }
 
             // Register callback after creation (state pointer is already stable
@@ -1239,13 +1239,14 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
                 memMgr.rollbackAllocation(state->memoryChannelId, true);
 
                 state->useDMA = false;
-                return;
+                return false;
             }
         }
 
         // Update timing
         state->timing = timing;
         state->transmissionComplete.store(false, fl::memory_order_release);
+        return true;
     }
 
     FL_NO_INLINE FL_COLD void releaseFailedPendingChannel(
@@ -1658,8 +1659,7 @@ ChannelEngineRMTImpl::ChannelState *ChannelEngineRMTImpl::acquireChannel(
                 if (ch.timing.T1 != timing.T1 ||
                     ch.timing.T2 != timing.T2 || ch.timing.T3 != timing.T3 ||
                     ch.timing.RESET != timing.RESET) {
-                    configureChannel(&ch, pin, timing, dataSize);
-                    if (!ch.channel || !ch.encoder) {
+                    if (!configureChannel(&ch, pin, timing, dataSize)) {
                         mAllocationFailed = true;
                         return nullptr;
                     }
@@ -1694,8 +1694,7 @@ ChannelEngineRMTImpl::ChannelState *ChannelEngineRMTImpl::acquireChannelSlow(
             // timing immutable after setup, so reuse it without the dynamic
             // reconfiguration path.
 #else
-            configureChannel(&ch, pin, timing, dataSize);
-            if (!ch.channel || !ch.encoder) {
+            if (!configureChannel(&ch, pin, timing, dataSize)) {
                 mAllocationFailed = true;
                 return nullptr;
             }
@@ -1729,8 +1728,7 @@ ChannelEngineRMTImpl::ChannelState *ChannelEngineRMTImpl::acquireChannelSlow(
     }
     if (reusable) {
         reusable->inUse = true;
-        configureChannel(reusable, pin, timing, dataSize);
-        if (!reusable->channel || !reusable->encoder) {
+        if (!configureChannel(reusable, pin, timing, dataSize)) {
             reusable->inUse = false;
             mAllocationFailed = true;
             return nullptr;
