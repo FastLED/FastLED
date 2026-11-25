@@ -96,8 +96,11 @@ void ChannelEngineLcdRgb::show() FL_NO_EXCEPT {
         return;
     }
 
-    // Wait for previous transmission to complete
-    waitForReady();
+    if (!waitForReady()) {
+        // Drop the new batch while the previous frame still owns the DMA buffers.
+        mEnqueuedChannels.clear();
+        return;
+    }
 
     // Group channels by timing configuration
     mChipsetGroups.clear();

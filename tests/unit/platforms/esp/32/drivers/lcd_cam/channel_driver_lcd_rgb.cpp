@@ -41,11 +41,13 @@ void resetMockState() {
 }
 
 /// @brief Create mock peripheral as shared_ptr
-fl::shared_ptr<ILcdRgbPeripheral> createMockPeripheral() {
+fl::shared_ptr<ILcdRgbPeripheral> createMockPeripheral(fl::shared_ptr<bool> holdBusy = {}) {
     // Wrap the singleton mock in a shared_ptr
     // The wrapper delegates to the singleton without owning it
     class MockWrapper : public ILcdRgbPeripheral {
     public:
+        explicit MockWrapper(fl::shared_ptr<bool> holdBusy) : mHoldBusy(holdBusy) {}
+
         bool initialize(const LcdRgbPeripheralConfig& config) override {
             return LcdRgbPeripheralMock::instance().initialize(config);
         }
@@ -68,7 +70,7 @@ fl::shared_ptr<ILcdRgbPeripheral> createMockPeripheral() {
             return LcdRgbPeripheralMock::instance().waitFrameDone(timeout_ms);
         }
         bool isBusy() const override {
-            return LcdRgbPeripheralMock::instance().isBusy();
+            return (mHoldBusy && *mHoldBusy) || LcdRgbPeripheralMock::instance().isBusy();
         }
         bool registerDrawCallback(void* callback, void* user_ctx) override {
             return LcdRgbPeripheralMock::instance().registerDrawCallback(callback, user_ctx);
@@ -82,9 +84,11 @@ fl::shared_ptr<ILcdRgbPeripheral> createMockPeripheral() {
         void delay(uint32_t ms) override {
             LcdRgbPeripheralMock::instance().delay(ms);
         }
+    private:
+        fl::shared_ptr<bool> mHoldBusy;
     };
 
-    return fl::make_shared<MockWrapper>();
+    return fl::make_shared<MockWrapper>(holdBusy);
 }
 
 /// @brief Create channel data with RGB pattern
@@ -363,6 +367,37 @@ FL_TEST_CASE("ChannelEngineLcdRgb - encoding mixed color") {
 //=============================================================================
 // Test Suite: Error Handling
 //=============================================================================
+
+FL_TEST_CASE("ChannelEngineLcdRgb - show timeout preserves the in-flight frame") {
+    resetMockState();
+    auto holdBusy = fl::make_shared<bool>(true);
+    ChannelEngineLcdRgb driver(createMockPeripheral(holdBusy));
+    auto& mock = LcdRgbPeripheralMock::instance();
+
+    auto active = createTestChannelData(1, 10);
+    driver.enqueue(active);
+    driver.show();
+    FL_CHECK(active->isInUse());
+
+    auto dropped = createTestChannelData(1, 20);
+    driver.enqueue(dropped);
+    driver.show();
+
+    *holdBusy = false;
+    FL_CHECK_EQ(mock.getDrawCount(), 1u);
+    FL_CHECK(active->isInUse());
+    FL_CHECK_FALSE(dropped->isInUse());
+    FL_CHECK(driver.poll() == IChannelDriver::DriverState::READY);
+    FL_CHECK_FALSE(active->isInUse());
+
+    auto next = createTestChannelData(1, 30);
+    driver.enqueue(next);
+    driver.show();
+    FL_CHECK_EQ(mock.getDrawCount(), 2u);
+    FL_CHECK(next->isInUse());
+    FL_CHECK_FALSE(dropped->isInUse());
+    FL_CHECK(driver.poll() == IChannelDriver::DriverState::READY);
+}
 
 FL_TEST_CASE("ChannelEngineLcdRgb - draw failure handling") {
     resetMockState();
