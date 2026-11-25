@@ -1366,10 +1366,8 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
     /// @param state Channel state to destroy (must not be in use)
     bool destroyChannel(ChannelState *state) FL_NO_EXCEPT;
 
-    /// @brief Destroy least-used channels to free resources
-    /// @param count Number of channels to destroy (from end of mChannels
-    /// vector)
-    bool destroyLeastUsedChannels(size_t count) FL_NO_EXCEPT;
+    /// @brief Reach the total channel target by releasing idle on-chip channels.
+    bool reduceOnChipChannels(size_t targetChannels) FL_NO_EXCEPT;
 
     /// @brief Calculate target channel count based on network state and
     /// platform
@@ -1444,10 +1442,9 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
     /// @brief Reconfigure channels for network state change (destroy/recreate
     /// as needed)
     void reconfigureForNetwork() FL_NO_EXCEPT {
-        // Check if Network state changed using singleton tracker
         auto& networkTracker = NetworkStateTracker::instance();
-        if (!networkTracker.hasChanged()) {
-            return;  // No change - nothing to do
+        if (!networkTracker.hasChanged() && !mNetworkReductionPending) {
+            return;
         }
 
         bool networkActive = networkTracker.isActive();
@@ -1471,14 +1468,13 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
         size_t targetChannels = calculateTargetChannelCount(networkActive);
         FL_DBG("Target channel count: " << targetChannels << " (current: " << mChannels.size() << ")");
 
-        // PHASE 1: Destroy excess channels if Network activated and we exceed target
-        if (networkActive && mChannels.size() > targetChannels) {
-            size_t channelsToDestroy = mChannels.size() - targetChannels;
-            FL_DBG("Network activated - destroying " << channelsToDestroy << " excess channels");
-            if (!destroyLeastUsedChannels(channelsToDestroy)) {
-                return;
-            }
+        // PHASE 1: Free on-chip memory for larger network-mode buffers.
+        if (networkActive && mChannels.size() > targetChannels &&
+            !reduceOnChipChannels(targetChannels)) {
+            mNetworkReductionPending = true;
+            return;
         }
+        mNetworkReductionPending = false;
 
         // PHASE 2: Reconfigure remaining idle channels with new memory allocation
         // This ensures existing channels use Network-appropriate memory (2x vs 3x blocks)
@@ -1573,6 +1569,9 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
 
     /// @brief Track allocation failures to avoid hammering the driver
     bool mAllocationFailed;
+
+    /// @brief Retry a failed reduction even after the network edge was consumed.
+    bool mNetworkReductionPending = false;
 
     /// @brief Progressive retry: Memory reduction offset (symbols to reduce per retry)
     /// When RMT allocation fails, progressively reduce memory allocation by this amount
@@ -1822,37 +1821,29 @@ bool ChannelEngineRMTImpl::destroyChannel(ChannelState *state) FL_NO_EXCEPT {
     return true;
 }
 
-bool ChannelEngineRMTImpl::destroyLeastUsedChannels(size_t count) FL_NO_EXCEPT {
-    if (count == 0) {
-        return true;
-    }
-
-    FL_LOG_RMT("Destroying " << count << " least-used channels");
-
-    // Destroy channels from end of vector (FIFO - oldest channels at end)
-    // NOTE: Future enhancement could track lastUsedTimestamp for true LRU
-    // behavior
-    size_t destroyed = 0;
-    while (destroyed < count && !mChannels.empty()) {
-        auto &state = mChannels.back();
-
-        // Only destroy if not in use
-        if (!state.inUse) {
-            if (!destroyChannel(&state)) {
-                return false;
-            }
-            mChannels.pop_back();
-            destroyed++;
-        } else {
-            // Cannot destroy in-use channel - skip for now
-            // This could happen if WiFi activates during transmission
-            FL_WARN("destroyLeastUsedChannels: Cannot destroy in-use channel on pin " << (static_cast<int>(state.pin)) << ", skipping");
-            break;
+bool ChannelEngineRMTImpl::reduceOnChipChannels(size_t targetChannels) FL_NO_EXCEPT {
+    size_t activeChannels = 0;
+    for (const auto &state : mChannels) {
+        if (state.channel) {
+            ++activeChannels;
         }
     }
 
-    FL_LOG_RMT("Destroyed " << destroyed << " channels (requested: " << count << ")");
-    return true;
+    // Walk backward without moving surviving slots. SDK callbacks retain their addresses.
+    for (size_t i = mChannels.size(); i > 0 && activeChannels > targetChannels; --i) {
+        auto &state = mChannels[i - 1];
+        if (!state.channel || state.useDMA || state.inUse) {
+            continue;
+        }
+        if (!destroyChannel(&state)) {
+            return false;
+        }
+        --activeChannels;
+    }
+    while (!mChannels.empty() && !mChannels.back().channel) {
+        mChannels.pop_back();
+    }
+    return activeChannels <= targetChannels;
 }
 
 //=============================================================================
