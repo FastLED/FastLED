@@ -113,6 +113,9 @@ public:
     void setChannelDeletionFailure(bool should_fail) FL_NO_EXCEPT override {
         mShouldFailChannelDeletion = should_fail;
     }
+    void setWaitFailure(bool should_fail) FL_NO_EXCEPT override {
+        mShouldFailWait = should_fail;
+    }
     void setEncoderCreationFailure(bool should_fail) FL_NO_EXCEPT override {
         mShouldFailEncoderCreation = should_fail;
     }
@@ -157,6 +160,7 @@ private:
 
     // Pin routing: the channel id that owns each pin, or kOtherPeripheral
     fl::flat_map<fl::i32, u32> mPinRouting;
+    bool mShouldFailWait = false;
     bool mShouldFailChannelDeletion = false;
     bool mShouldFailPinRebindDisable = false;
     bool mShouldFailPinRebind = false;
@@ -441,10 +445,8 @@ bool Rmt5PeripheralMockImpl::waitAllDone(void* channel_handle, u32 timeout_ms) F
         return false;
     }
 
-    // Mock implementation: Always return true immediately
-    // (transmission is instant in mock)
     FL_DBG("RMT5_MOCK: Wait all done for channel " << channel->id);
-    return true;
+    return !mShouldFailWait;
 }
 
 //=============================================================================
@@ -698,6 +700,7 @@ bool Rmt5PeripheralMockImpl::isChannelEnabled(void* channel_handle) const FL_NO_
 void Rmt5PeripheralMockImpl::reset() FL_NO_EXCEPT {
     mShouldFailCallbackRegistration = false;
     mShouldFailChannelDeletion = false;
+    mShouldFailWait = false;
     // Delete all allocated channels
     for (auto pair : mChannels) {
         delete pair.second;  // ok bare allocation
