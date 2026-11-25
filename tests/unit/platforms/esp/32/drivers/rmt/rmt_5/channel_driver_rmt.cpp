@@ -299,6 +299,25 @@ FL_TEST_CASE("RMT5 driver - same pin sequential frames") {
     }
 }
 
+FL_TEST_CASE("RMT5 driver - changing pin and timing leaves one encoder") {
+    resetMock();
+    auto& mock = Rmt5PeripheralMock::instance();
+    auto driver = ChannelEngineRMT::create();
+
+    driver->enqueue(createChannelData(18, 1));
+    driver->show();
+    mock.simulateTransmitDone(reinterpret_cast<void*>(1));
+    FL_REQUIRE(driver->poll() == DriverState::READY);
+
+    const ChipsetTimingConfig timing(400, 400, 450, 80, "alternate timing");
+    driver->enqueue(ChannelData::create(19, timing, fl::vector_psram<uint8_t>{0, 0, 0}));
+    driver->show();
+    FL_CHECK_EQ(mock.getTransmissionCount(), 2u);
+    FL_CHECK_EQ(mock.getEncoderCount(), 1u);
+    mock.simulateTransmitDone(reinterpret_cast<void*>(2));
+    FL_CHECK(driver->poll() == DriverState::READY);
+}
+
 FL_TEST_CASE("RMT5 driver - cached pin skips routing query until changed") {
     resetMock();
     auto& mock = Rmt5PeripheralMock::instance();
