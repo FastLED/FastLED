@@ -9,6 +9,27 @@
 
 namespace fl {
 
+namespace detail {
+
+ChannelFrameOutput::ChannelFrameOutput(fl::vector_psram<u8>& bytes) FL_NO_EXCEPT
+    : mBytes(bytes) {}
+
+void ChannelFrameOutput::push_back(u8 byte) FL_NO_EXCEPT {
+    if (mFailed) {
+        return;
+    }
+    // A failed vector append leaves its size unchanged.
+    const auto previousSize = mBytes.size();
+    mBytes.push_back(byte);
+    mFailed = mBytes.size() == previousSize;
+}
+
+bool ChannelFrameOutput::failed() const FL_NO_EXCEPT {
+    return mFailed;
+}
+
+} // namespace detail
+
 ChannelDataPtr ChannelData::create(
     const ChipsetVariant& chipset,
     fl::vector_psram<u8>&& encodedData,

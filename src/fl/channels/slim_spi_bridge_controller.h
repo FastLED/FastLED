@@ -152,9 +152,16 @@ protected:
 
         // (A3) Re-encode into the same buffer every frame -- clear() keeps
         // capacity, so steady-state operation is allocation-free.
-        mData->getData().clear();
+        auto& bytes = mData->getData();
+        bytes.clear();
         fl::PixelIterator it(&pixels, this->getRgbw(), this->getRgbww());
-        encode(it, mData->getData());
+        detail::ChannelFrameOutput output(bytes);
+        encode(it, output);
+        if (output.failed()) {
+            bytes.clear();
+            FL_WARN_ONCE("SlimSpiBridgeController: incomplete encoded frame - dropping frame");
+            return;
+        }
 
         driver->enqueue(mData);
         // Presented, per the driver contract: an accepted enqueue is the
@@ -212,7 +219,7 @@ private:
     ///        Mirrors the `managed == false` branch of `Channel::encodeAPA102()`
     ///        .. `Channel::encodeHD108()` (`channel.cpp.hpp`, ~712-815) -- see
     ///        file-level comment for why `managed` is always `false` here.
-    static void encode(fl::PixelIterator& it, fl::vector_psram<u8>& out) FL_NO_EXCEPT {
+    static void encode(fl::PixelIterator& it, detail::ChannelFrameOutput& out) FL_NO_EXCEPT {
         switch (CHIPSET) {
             case fl::SpiChipset::APA102:
             case fl::SpiChipset::DOTSTAR:

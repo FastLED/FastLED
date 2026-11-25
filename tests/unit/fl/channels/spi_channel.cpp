@@ -12,6 +12,7 @@
 #include "fl/channels/manager.h"
 #include "fl/channels/slim_spi_bridge_controller.h"
 #include "fl/chipsets/spi.h"
+#include "fl/stl/memory_resource.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/move.h"
 #include "fl/stl/scope_exit.h"
@@ -621,6 +622,47 @@ FL_TEST_CASE("Slim SPI legacy controller preserves channel worker scheduling #50
         controller.setLeds(nullptr, 0);
     }
     manager.removeDriver(mock);
+}
+
+FL_TEST_CASE("Slim SPI bridge drops an incomplete frame and retries after allocation recovers") {
+    using Controller = SlimSpiBridgeController<SpiChipset::APA102, RGB, Bus::AUTO, 0>;
+    struct FrameMemory : fl::memory_resource {
+        bool limitAllocation = true;
+
+        void* do_allocate(fl::size bytes) FL_NO_EXCEPT override {
+            if (limitAllocation && bytes > 16) {
+                return nullptr;
+            }
+            return fl::default_memory_resource()->allocate(bytes);
+        }
+
+        void do_deallocate(void* ptr, fl::size bytes) FL_NO_EXCEPT override {
+            fl::default_memory_resource()->deallocate(ptr, bytes);
+        }
+    } memory;
+
+    auto mock = fl::make_shared<SpiCaptureMock>("SPI_ALLOCATION_FAILURE");
+    auto& manager = ChannelManager::instance();
+    manager.addDriver(1000, mock);
+    auto removeMock = fl::make_scope_exit([&] { manager.removeDriver(mock); });
+    FL_REQUIRE_TRUE(manager.setExclusiveDriverByName("SPI_ALLOCATION_FAILURE"));
+
+    CRGB leds[16] = {};
+    Controller controller(SpiChipsetConfig(5, 6, SpiEncoder::apa102()));
+    controller.setLeds(leds, 16);
+    auto resetLeds = fl::make_scope_exit([&] { controller.setLeds(nullptr, 0); });
+    fl::vector<fl::u8> frameBuffer(&memory);
+    auto& bytes = controller.channelData()->getData();
+    bytes.swap(frameBuffer);
+
+    controller.showLeds(255);
+    FL_CHECK_EQ(mock->enqueueCount, 0);
+    FL_CHECK(bytes.empty());
+
+    memory.limitAllocation = false;
+    controller.showLeds(255);
+    FL_REQUIRE_EQ(mock->capturedData.size(), 1u);
+    FL_CHECK_EQ(mock->capturedData.front().size(), 72u);
 }
 
 FL_TEST_CASE("APA102 channel routes through ChannelManager") {
