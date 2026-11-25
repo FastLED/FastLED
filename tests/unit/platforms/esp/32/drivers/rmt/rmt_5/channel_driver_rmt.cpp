@@ -686,6 +686,75 @@ FL_TEST_CASE("RMT5 driver - failed deletion keeps the original pin channel reusa
     FL_CHECK_EQ(mock.getChannelCount(), 0u);
 }
 
+FL_TEST_CASE("RMT5 driver - network reconfiguration preserves a channel that cannot be deleted") {
+    resetMock();
+    auto& mock = Rmt5PeripheralMock::instance();
+    auto& network = fl::detail::NetworkStateTracker::instance();
+    auto driver = ChannelEngineRMT::create();
+    auto data = createChannelData(18, 1);
+    void* originalHandle = reinterpret_cast<void*>(1);
+
+    driver->enqueue(data);
+    driver->show();
+    mock.simulateTransmitDone(originalHandle);
+    FL_REQUIRE(driver->poll() == DriverState::READY);
+
+    const auto rollbacks = fl::detail::RmtMemoryManager::instance().rollbackAllocationCount();
+    network.setActive(true);
+    mock.setChannelDeletionFailure(true);
+    driver->enqueue(data);
+    driver->show();
+    mock.setChannelDeletionFailure(false);
+    network.setActive(false);
+    network.hasChanged();
+
+    FL_CHECK_EQ(mock.getChannelCount(), 1u);
+    FL_CHECK_EQ(mock.getEncoderCount(), 1u);
+    FL_CHECK_EQ(fl::detail::RmtMemoryManager::instance().rollbackAllocationCount(), rollbacks);
+    FL_CHECK_EQ(mock.getTransmissionCount(), 2u);
+    mock.simulateTransmitDone(originalHandle);
+    mock.simulateTransmitDone(reinterpret_cast<void*>(2));
+    FL_CHECK(driver->poll() == DriverState::READY);
+    driver.reset();
+    FL_CHECK_EQ(mock.getChannelCount(), 0u);
+}
+
+FL_TEST_CASE("RMT5 driver - network channel reduction retains an undeletable slot") {
+    resetMock();
+    auto& mock = Rmt5PeripheralMock::instance();
+    auto& network = fl::detail::NetworkStateTracker::instance();
+    auto driver = ChannelEngineRMT::create();
+    auto first = createChannelData(18, 2);
+    auto second = createChannelData(19, 1);
+    void* firstHandle = reinterpret_cast<void*>(1);
+    void* secondHandle = reinterpret_cast<void*>(2);
+
+    driver->enqueue(first);
+    driver->enqueue(second);
+    driver->show();
+    mock.simulateTransmitDone(firstHandle);
+    mock.simulateTransmitDone(secondHandle);
+    FL_REQUIRE(driver->poll() == DriverState::READY);
+
+    const auto waits = mock.getWaitAllDoneCount();
+    network.setActive(true);
+    mock.setChannelDeletionFailure(true);
+    driver->enqueue(second);
+    driver->show();
+    mock.setChannelDeletionFailure(false);
+    network.setActive(false);
+    network.hasChanged();
+
+    FL_CHECK_EQ(mock.getWaitAllDoneCount(), waits + 1);
+    FL_CHECK_EQ(mock.getChannelCount(), 2u);
+    FL_CHECK_EQ(mock.getEncoderCount(), 2u);
+    FL_CHECK_EQ(mock.getTransmissionCount(), 3u);
+    mock.simulateTransmitDone(secondHandle);
+    FL_CHECK(driver->poll() == DriverState::READY);
+    driver.reset();
+    FL_CHECK_EQ(mock.getChannelCount(), 0u);
+}
+
 FL_TEST_CASE("RMT5 driver - idle hardware takes priority over a vacant slot") {
     resetMock();
     auto& mock = Rmt5PeripheralMock::instance();
