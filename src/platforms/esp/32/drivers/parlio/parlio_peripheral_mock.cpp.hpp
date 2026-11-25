@@ -100,6 +100,7 @@ public:
     void setTransmitDelay(u32 microseconds) FL_NO_EXCEPT override;
     void simulateTransmitComplete() FL_NO_EXCEPT override;
     void setTransmitFailure(bool should_fail) FL_NO_EXCEPT override;
+    void setWaitFailure(bool should_fail) FL_NO_EXCEPT override;
     const fl::vector<TransmissionRecord>& getTransmissionHistory() const FL_NO_EXCEPT override;
     void clearTransmissionHistory() FL_NO_EXCEPT override;
     fl::span<const u8> getTransmissionDataForPin(int gpio_pin) const FL_NO_EXCEPT override;
@@ -125,6 +126,7 @@ private:
     // Simulation settings
     u32 mTransmitDelayUs;
     bool mShouldFailTransmit;
+    bool mShouldFailWait = false;
 
     // Waveform capture
     fl::vector<TransmissionRecord> mHistory;
@@ -292,6 +294,9 @@ bool ParlioPeripheralMockImpl::transmit(const u8* buffer, size_t bit_count, u16 
 
 bool ParlioPeripheralMockImpl::waitAllDone(u32 timeout_ms) FL_NO_EXCEPT {
     (void)timeout_ms;
+    if (mShouldFailWait) {
+        return false;
+    }
     if (!mInitialized) {
         FL_WARN("ParlioPeripheralMock: Cannot wait - not initialized");
         return false;
@@ -446,6 +451,10 @@ void ParlioPeripheralMockImpl::setTransmitFailure(bool should_fail) FL_NO_EXCEPT
     mShouldFailTransmit = should_fail;
 }
 
+void ParlioPeripheralMockImpl::setWaitFailure(bool should_fail) FL_NO_EXCEPT {
+    mShouldFailWait = should_fail;
+}
+
 const fl::vector<ParlioPeripheralMock::TransmissionRecord>&
 ParlioPeripheralMockImpl::getTransmissionHistory() const FL_NO_EXCEPT {
     return mHistory;
@@ -503,6 +512,7 @@ void ParlioPeripheralMockImpl::reset() FL_NO_EXCEPT {
     mUserCtx = nullptr;
     mTransmitDelayUs = 0;
     mShouldFailTransmit = false;
+    mShouldFailWait = false;
     mHistory.clear();
     mPerPinData.clear();
     mPendingTransmissions = 0;

@@ -541,6 +541,34 @@ FL_TEST_CASE("ParlioEngine mock - transmit failure injection") {
     mock.setTransmitFailure(false);
 }
 
+FL_TEST_CASE("ParlioEngine mock - failed drain prevents a new transmission") {
+    resetMockFull();
+    auto& driver = ParlioEngine::getInstance();
+    auto& mock = ParlioPeripheralMock::instance();
+    const fl::vector<int> pins = {1};
+    const u8 frame[] = {0, 128, 255};
+    FL_REQUIRE(driver.initialize(1, pins, getWS2812Timing(), 1));
+
+    // The failed submission leaves the TX unit enabled, but software idle.
+    mock.setTransmitFailure(true);
+    const bool firstStarted = driver.beginTransmission(frame, sizeof(frame), 1, sizeof(frame));
+    mock.setTransmitFailure(false);
+    FL_REQUIRE_FALSE(firstStarted);
+    FL_REQUIRE(driver.poll() == ParlioEngineState::ERROR);
+
+    mock.setWaitFailure(true);
+    const bool startedWhileUndrained =
+        driver.beginTransmission(frame, sizeof(frame), 1, sizeof(frame));
+    mock.setWaitFailure(false);
+    FL_CHECK_FALSE(startedWhileUndrained);
+    FL_CHECK(mock.getTransmissionHistory().empty());
+    FL_CHECK(driver.poll() == ParlioEngineState::READY);
+
+    FL_CHECK(driver.beginTransmission(frame, sizeof(frame), 1, sizeof(frame)));
+    FL_CHECK_FALSE(mock.getTransmissionHistory().empty());
+    FL_CHECK(driver.poll() == ParlioEngineState::READY);
+}
+
 //=============================================================================
 // Ring Buffer Streaming
 //=============================================================================
