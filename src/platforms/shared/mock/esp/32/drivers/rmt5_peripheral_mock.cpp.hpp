@@ -113,6 +113,9 @@ public:
     void setChannelDeletionFailure(bool should_fail) FL_NO_EXCEPT override {
         mShouldFailChannelDeletion = should_fail;
     }
+    void setEncoderCreationFailure(bool should_fail) FL_NO_EXCEPT override {
+        mShouldFailEncoderCreation = should_fail;
+    }
     void setMaxChannels(size_t max_channels) FL_NO_EXCEPT override;
     void simulatePinReroute(int pin) FL_NO_EXCEPT override;
     void setPinRebindDisableFailure(bool should_fail) FL_NO_EXCEPT override {
@@ -148,6 +151,7 @@ private:
     // Simulation settings
     bool mShouldFailTransmit;
     bool mShouldFailDisable = false;
+    bool mShouldFailEncoderCreation = false;
     bool mShouldFailCallbackRegistration = false;
     size_t mMaxChannels;  // 0 = unlimited
 
@@ -490,6 +494,10 @@ bool Rmt5PeripheralMockImpl::syncCache(void* buffer, size_t size) FL_NO_EXCEPT {
 
 void* Rmt5PeripheralMockImpl::createEncoder(const ChipsetTiming& timing,
                                               u32 resolution_hz) FL_NO_EXCEPT {
+    if (mShouldFailEncoderCreation) {
+        return nullptr;
+    }
+
     // Create mock encoder
     int encoder_id = mNextEncoderId++;
     MockEncoder* encoder = new MockEncoder();  // ok bare allocation
@@ -707,6 +715,7 @@ void Rmt5PeripheralMockImpl::reset() FL_NO_EXCEPT {
     mNextEncoderId = 1;
     mShouldFailTransmit = false;
     mShouldFailDisable = false;
+    mShouldFailEncoderCreation = false;
     mMaxChannels = 0;
     mPinRouting.clear();
     mShouldFailPinRebindDisable = false;
