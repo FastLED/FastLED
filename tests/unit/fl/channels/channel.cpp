@@ -19,6 +19,7 @@
 #include "fl/math/screenmap.h"
 #include "fl/math/xymap.h"
 #include "fl/math/xmap.h"
+#include "fl/stl/memory_resource.h"
 #include "fl/stl/scope_exit.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/span.h"
@@ -1534,6 +1535,59 @@ fl::vector<u8> showOnce4566(fl::span<CRGB> pixels, u8 brightness,
 }
 
 }  // namespace
+
+FL_TEST_CASE("Runtime WS2812 drops an incomplete frame and retries") {
+    struct FrameMemory : fl::memory_resource {
+        bool mLimitAllocation = true;
+
+        void* do_allocate(fl::size bytes) FL_NO_EXCEPT override {
+            if (mLimitAllocation && bytes > 96) {
+                return nullptr;
+            }
+            return fl::default_memory_resource()->allocate(bytes);
+        }
+
+        void do_deallocate(void* ptr, fl::size bytes) FL_NO_EXCEPT override {
+            fl::default_memory_resource()->deallocate(ptr, bytes);
+        }
+    } memory;
+
+    auto& manager = ChannelManager::instance();
+    auto driver = fl::make_shared<ByteCapturingMockEngine>("WS2812_ALLOCATION_FAILURE");
+    manager.addDriver(9400, driver);
+    auto removeDriver = fl::make_scope_exit([&] { manager.removeDriver(driver); });
+    FL_REQUIRE_TRUE(manager.setExclusiveDriverByName("WS2812_ALLOCATION_FAILURE"));
+
+    CRGB leds[33] = {};
+    ChannelOptions options;
+    options.mDitherMode = BINARY_DITHER;
+    auto timing = makeTimingConfig<TIMING_WS2812_800KHZ>();
+    auto channel = Channel::create(ChannelConfig(141, timing, leds, GRB, options));
+    FL_REQUIRE(channel != nullptr);
+    channel->showLeds(255);
+    FL_REQUIRE_EQ(driver->mCapturedChannels.size(), 1u);
+    fl::vector<u8> frameBuffer(&memory);
+    auto& bytes = driver->mCapturedChannels.front()->getData();
+    bytes.swap(frameBuffer);
+    driver->mCapturedChannels.clear();
+
+    int encodedEvents = 0;
+    auto& onEncoded = ChannelEvents::instance().onChannelDataEncoded;
+    int listener = onEncoded.add([&](const IChannel&, const ChannelData&) { ++encodedEvents; });
+    auto removeListener = fl::make_scope_exit([&] { onEncoded.remove(listener); });
+    const auto phase = channel->ditherPhase();
+
+    channel->showLeds(255);
+    FL_CHECK(driver->mCapturedChannels.empty());
+    FL_CHECK_EQ(encodedEvents, 0);
+    FL_CHECK_EQ(channel->ditherPhase(), phase);
+
+    memory.mLimitAllocation = false;
+    channel->showLeds(255);
+    FL_REQUIRE_EQ(driver->mCapturedChannels.size(), 1u);
+    FL_CHECK_EQ(bytes.size(), 99u);
+    FL_CHECK_EQ(encodedEvents, 1);
+}
 
 FL_TEST_CASE("[#4566] dynamic WS2812 channel encodes GRB and enqueues once per show") {
     auto& mgr = ChannelManager::instance();

@@ -355,7 +355,7 @@ private:
 
     /// @brief Encode `pixels` into mChannelData and fire
     ///        `onChannelDataEncoded` (#4566).
-    FL_NO_INLINE void encodeFrame(PixelController<RGB, 1, 0xFFFFFFFF>& pixels) FL_NO_EXCEPT;
+    FL_NO_INLINE bool encodeFrame(PixelController<RGB, 1, 0xFFFFFFFF>& pixels) FL_NO_EXCEPT;
 
     /// @brief Submit the encoded frame to `driver`: disabled-driver drop +
     ///        one-shot diagnostic, enqueue, dither advance, and
