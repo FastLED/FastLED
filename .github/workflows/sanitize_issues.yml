@@ -66,22 +66,22 @@ permissions:
   issues: write
   pull-requests: write
 
-concurrency:
-  # One run per container: an edit that lands while a run is in flight would
-  # otherwise race the label writes with a stale corpus.
-  # A maintainer event on a labelled container is a no-op (see the script), so it
-  # gets a group of its own: it must never cancel an external run before that
-  # run has revoked the label.
-  group: sanitize-${{ github.event.issue.number || github.event.pull_request.number || inputs.issue }}${{ (github.event.sender.login == 'zackees' && github.event.sender.type != 'Bot' && (contains(github.event.issue.labels.*.name, 'sanitized') || contains(github.event.pull_request.labels.*.name, 'sanitized'))) && format('-maintainer-{0}', github.run_id) || '' }}
-  cancel-in-progress: true
-
 jobs:
   sanitize:
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    # A fork of the repository has no reason to screen anything, and its runs
-    # would only burn minutes.
-    if: github.repository == 'FastLED/FastLED'
+    # Keep these sender identities in sync with ci/issue_sanitizer.py.
+    # Dispatch is an explicit request to re-screen, regardless of sender.
+    if: >-
+      github.repository == 'FastLED/FastLED' &&
+      (github.event_name == 'workflow_dispatch' ||
+       !((github.event.sender.type == 'User' && github.event.sender.login == 'zackees') ||
+         (github.event.sender.type == 'Bot' &&
+          contains(fromJSON('["coderabbitai[bot]", "github-actions[bot]"]'), github.event.sender.login))))
+    concurrency:
+      # Only jobs that screen can cancel an in-flight screen for this container.
+      group: sanitize-${{ github.event.issue.number || github.event.pull_request.number || inputs.issue }}
+      cancel-in-progress: true
     steps:
       # SECURITY: no `ref:` here, ever -- see invariant #2.
       - uses: actions/checkout@v4

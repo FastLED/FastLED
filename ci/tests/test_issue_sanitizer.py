@@ -851,15 +851,23 @@ class TestRun(unittest.TestCase):
         run(args, github=github, jev=FakeJev(signals(instruction_override=0.9)))
         self.assertEqual(github.removed, [(4912, SANITIZED_LABEL)])
 
-    def test_maintainer_event_on_unlabelled_container_still_screens(self) -> None:
-        event = self._labelled_event("zackees")
-        event["issue"]["labels"] = []
-        github = FakeGitHub(fake_container(), [])
-        args = self.event_args(event)
-        outcome = run(
-            args, github=github, jev=FakeJev(signals(instruction_override=0.9))
-        )
-        self.assertFalse(outcome.verdict.sanitized)
+    def test_internal_event_on_unlabelled_container_skips(self) -> None:
+        for login, user_type in (
+            ("zackees", "User"),
+            ("coderabbitai[bot]", "Bot"),
+            ("github-actions[bot]", "Bot"),
+        ):
+            with self.subTest(login=login):
+                event = self._labelled_event(login, user_type)
+                event["issue"]["labels"] = []
+                github = FakeGitHub(fake_container(), [])
+                judge = FakeJev(signals(instruction_override=0.9))
+                outcome = run(self.event_args(event), github=github, jev=judge)
+                self.assertEqual(outcome.verdict.reason, "trusted_event")
+                self.assertFalse(outcome.verdict.sanitized)
+                self.assertEqual(judge.calls, 0)
+                self.assertEqual(github.removed, [])
+                self.assertEqual(github.added, [])
 
     def test_trusted_issue_never_asks_the_judge(self) -> None:
         github = FakeGitHub(fake_container(author="zackees", association="OWNER"), [])
