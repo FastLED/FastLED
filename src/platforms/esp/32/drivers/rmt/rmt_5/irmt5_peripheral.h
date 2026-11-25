@@ -420,11 +420,13 @@ public:
     /// Must observe external SDK/pinMode changes too, not just driver events.
     virtual bool isPinRoutingCurrent(int pin, u32 routing) FL_NO_EXCEPT;
 
-    /// @brief Route @p pin back to this TX channel
-    /// @return true on success, false on failure or when unsupported
-    ///
-    /// Maps to ESP-IDF: rmt_disable() + rmt_tx_switch_gpio() + rmt_enable()
-    virtual bool rebindTxPin(void* channel_handle, int pin) FL_NO_EXCEPT = 0;
+    enum class PinRebindResult : u8 { Failed, Disabled, Rebound };
+
+    /// @brief Route @p pin back to this TX channel.
+    /// Disabled means the channel was disabled but the pin switch failed.
+    /// Rebound means the pin switch succeeded and the channel is disabled.
+    /// Failed means the caller should retain its previous enabled state.
+    virtual PinRebindResult rebindTxPin(void* channel_handle, int pin) FL_NO_EXCEPT = 0;
 
     static constexpr u32 kPinRoutingUnknown = 0xFFFFFFFFu;
 };

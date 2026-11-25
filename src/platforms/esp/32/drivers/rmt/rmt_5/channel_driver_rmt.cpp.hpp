@@ -1102,15 +1102,15 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
         // Keep the original baseline when the rebind fails, so a later frame
         // retries instead of accepting the stolen routing (the peripheral
         // warns only once).
-        // rebindTxPin() disables the channel (rmt_tx_switch_gpio() needs it
-        // disabled), even when the switch itself then fails, so the next
-        // transmission must enable it again.
-        const bool rebound = mPeripheral.rebindTxPin(state->channel, state->pin);
-        state->enabled = false;
-        if (rebound) {
-            state->pinRouting = mPeripheral.getPinRouting(state->pin);
+        const auto result = mPeripheral.rebindTxPin(state->channel, state->pin);
+        if (result != IRMT5Peripheral::PinRebindResult::Failed) {
+            state->enabled = false;
         }
-        return rebound;
+        if (result != IRMT5Peripheral::PinRebindResult::Rebound) {
+            return false;
+        }
+        state->pinRouting = mPeripheral.getPinRouting(state->pin);
+        return true;
     }
 
     /// @brief Delete a channel's RMT handle, disabling it first if enabled.
