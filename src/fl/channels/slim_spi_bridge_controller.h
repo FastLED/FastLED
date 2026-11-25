@@ -61,6 +61,33 @@ void registerNativeSpiDriver() FL_NO_EXCEPT;
 }
 #endif
 
+namespace detail {
+
+class SpiFrameOutput {
+public:
+    using value_type = u8;
+
+    explicit SpiFrameOutput(fl::vector_psram<u8>& bytes) FL_NO_EXCEPT
+        : mBytes(bytes) {}
+
+    void push_back(u8 byte) FL_NO_EXCEPT {
+        if (mFailed) {
+            return;
+        }
+        const auto previousSize = mBytes.size();
+        mBytes.push_back(byte);
+        mFailed = mBytes.size() == previousSize;
+    }
+
+    bool failed() const FL_NO_EXCEPT { return mFailed; }
+
+private:
+    fl::vector_psram<u8>& mBytes;
+    bool mFailed = false;
+};
+
+} // namespace detail
+
 /// @brief Shared legacy `addLeds<ESPIChipsets ...>()` bridge controller over
 ///        an `IChannelDriver`, for chipsets whose encoding never needs the
 ///        colour-managed pipeline (see file-level comment).
@@ -152,9 +179,16 @@ protected:
 
         // (A3) Re-encode into the same buffer every frame -- clear() keeps
         // capacity, so steady-state operation is allocation-free.
-        mData->getData().clear();
+        auto& bytes = mData->getData();
+        bytes.clear();
         fl::PixelIterator it(&pixels, this->getRgbw(), this->getRgbww());
-        encode(it, mData->getData());
+        detail::SpiFrameOutput output(bytes);
+        encode(it, output);
+        if (output.failed()) {
+            bytes.clear();
+            FL_WARN_ONCE("SlimSpiBridgeController: incomplete encoded frame - dropping frame");
+            return;
+        }
 
         driver->enqueue(mData);
         // Presented, per the driver contract: an accepted enqueue is the
@@ -212,7 +246,7 @@ private:
     ///        Mirrors the `managed == false` branch of `Channel::encodeAPA102()`
     ///        .. `Channel::encodeHD108()` (`channel.cpp.hpp`, ~712-815) -- see
     ///        file-level comment for why `managed` is always `false` here.
-    static void encode(fl::PixelIterator& it, fl::vector_psram<u8>& out) FL_NO_EXCEPT {
+    static void encode(fl::PixelIterator& it, detail::SpiFrameOutput& out) FL_NO_EXCEPT {
         switch (CHIPSET) {
             case fl::SpiChipset::APA102:
             case fl::SpiChipset::DOTSTAR:
