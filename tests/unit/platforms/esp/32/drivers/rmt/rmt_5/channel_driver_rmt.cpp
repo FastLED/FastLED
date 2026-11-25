@@ -559,7 +559,11 @@ FL_TEST_CASE("RMT5 driver - callback registration failure releases the new chann
 
     FL_CHECK_EQ(mock.getChannelCount(), 1u);
     FL_CHECK_EQ(mock.getEncoderCount(), 1u);
-    FL_CHECK_EQ(mock.getTransmissionCount(), 1u);
+    FL_REQUIRE_EQ(mock.getTransmissionCount(), 1u);
+
+    mock.simulateTransmitDone(reinterpret_cast<void*>(2));
+    FL_CHECK(driver->poll() == DriverState::READY);
+    FL_CHECK_FALSE(frame->isInUse());
 }
 
 FL_TEST_CASE("RMT5 driver - failed pin changes leave a reusable slot") {
