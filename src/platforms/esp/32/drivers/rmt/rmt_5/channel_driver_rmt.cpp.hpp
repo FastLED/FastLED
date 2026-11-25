@@ -1148,12 +1148,9 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
         if (state->channel && state->pin != pin) {
             FL_LOG_RMT("Pin changed from " << (static_cast<int>(state->pin)) << " to " << (static_cast<int>(pin)) << ", recreating channel");
 
-            // Wait for any pending transmission to complete
-            mPeripheral.waitAllDone(state->channel, 100);
-
-            // Keep the old pin, encoder, and allocation if the hardware
-            // channel could not be released.
-            if (!deleteHwChannel(state)) {
+            // Preserve the original channel until it drains and can be deleted.
+            if (!mPeripheral.waitAllDone(state->channel, 100) ||
+                !deleteHwChannel(state)) {
                 return false;
             }
             state->channel = nullptr;

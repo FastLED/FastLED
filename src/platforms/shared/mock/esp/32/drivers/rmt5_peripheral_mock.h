@@ -180,6 +180,9 @@ public:
     virtual void setCallbackRegistrationFailure(bool should_fail) FL_NO_EXCEPT = 0;
 
     virtual void setChannelDeletionFailure(bool should_fail) FL_NO_EXCEPT = 0;
+
+    virtual void setWaitFailure(bool should_fail) FL_NO_EXCEPT = 0;
+
     /// @brief Inject encoder creation failure for negative testing
     virtual void setEncoderCreationFailure(bool should_fail) FL_NO_EXCEPT = 0;
 
