@@ -80,11 +80,9 @@ public:
     /// @note Drivers are automatically sorted by priority on each insertion
     /// @note Driver name is obtained via driver->getName()
     /// @note If driver->getName() returns empty string, driver is rejected (emits FL_WARN and returns)
-    /// @note If a driver with the same name already exists, it will be replaced:
-    ///       1. FL_WARN emitted about replacement
-    ///       2. All drivers polled until READY state (1 second timeout)
-    ///       3. Old driver removed (shared_ptr may trigger deletion)
-    ///       4. New driver added with specified priority
+    /// @note Replacing an existing driver with the same name waits for all
+    ///       drivers to become READY. On timeout (1 second), the existing
+    ///       driver stays registered and the caller can retry later.
     void addDriver(int priority, fl::shared_ptr<IChannelDriver> driver) FL_NO_EXCEPT;
 
     /// @brief Remove a driver from the manager

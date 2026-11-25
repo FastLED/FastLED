@@ -118,10 +118,11 @@ FL_NO_INLINE FL_COLD bool ChannelManager::addDriverSlow(
                 FL_DBG("ChannelManager::addDriver() - '" << engineName->c_str() << "' already registered at priority " << priority << " (idempotent no-op)");
                 return false;
             }
-            FL_WARN("ChannelManager::addDriver() - Replacing existing driver '" << engineName->c_str() << "'");
-
             FL_DBG("ChannelManager: Waiting for all drivers to become READY before replacement");
-            waitForReady();
+            if (!waitForReady()) {
+                return false;
+            }
+            FL_WARN("ChannelManager::addDriver() - Replacing existing driver '" << engineName->c_str() << "'");
 
             // Re-scan after waiting: task pumping in waitForReady() can run
             // callbacks, so do not retain an index or iterator across it.

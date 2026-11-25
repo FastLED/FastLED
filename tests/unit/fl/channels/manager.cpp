@@ -22,6 +22,7 @@
 #include "fl/channels/data.h"
 #include "fl/channels/manager.h"
 #include "fl/chipsets/chipset_timing_config.h"
+#include "fl/stl/chrono.h"
 #include "fl/stl/scope_exit.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/string.h"
@@ -190,6 +191,26 @@ FL_TEST_CASE("poll propagates worst state across multiple drivers") {
     driverB->mState = DriverState::READY;
     mgr.removeDriver(driverA);
     mgr.removeDriver(driverB);
+}
+
+FL_TEST_CASE("ChannelManager preserves the draining driver on replacement timeout") {
+    ChannelManager manager;
+    auto active = fl::make_shared<StatefulMockDriver>("REPLACE");
+    auto replacement = fl::make_shared<StatefulMockDriver>("REPLACE");
+    manager.addDriver(10, active);
+    active->mState = DriverState::DRAINING;
+
+    fl::u32 timeMs = 0;
+    fl::inject_time_provider([&timeMs]() { return timeMs += 1000; });
+    auto resetTime = fl::make_scope_exit([] { fl::clear_time_provider(); });
+    manager.addDriver(20, replacement);
+
+    FL_CHECK(manager.getDriverByName("REPLACE") == active);
+    FL_CHECK(manager.poll() == DriverState::DRAINING);
+
+    active->mState = DriverState::READY;
+    manager.addDriver(20, replacement);
+    FL_CHECK(manager.getDriverByName("REPLACE") == replacement);
 }
 
 FL_TEST_CASE("isDriverEnabled(driver) matches by instance, falls back to name (#4799)") {
