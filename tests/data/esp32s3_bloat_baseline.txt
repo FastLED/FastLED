@@ -496,4 +496,8 @@
 # and release SDK allocations before returning. Hosted ESP32-S3 Blink run
 # 45509906148 measured 318603 B image flash (+4 B against the prior pin)
 # and 22519 B attributed RAM after keeping timing values local to initialization.
-318603
+# RMT5 timeout recovery (#5450): release the rejected frame while the
+# in-flight frame retains its buffers until the late completion interrupt.
+# Hosted ESP32-S3 Blink run 45534896530 measured 318623 B image flash
+# (+20 B) and 22519 B attributed RAM. The flash and RAM budgets are unchanged.
+318623
