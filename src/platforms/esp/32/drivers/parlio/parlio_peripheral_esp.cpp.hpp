@@ -20,6 +20,7 @@
 #include "fl/log/log.h"
 #include "fl/stl/sstream.h"
 #include "fl/stl/charconv.h"  // For fl::to_hex
+#include "fl/stl/limits.h"
 
 // Include ESP-IDF headers ONLY in .cpp file
 FL_EXTERN_C_BEGIN
@@ -123,7 +124,7 @@ ParlioPeripheralESPImpl::~ParlioPeripheralESPImpl() {
     // Clean up TX unit if initialized
     if (mTxUnit != nullptr) {
         // Wait for any pending transmissions (with timeout)
-        esp_err_t err = parlio_tx_unit_wait_all_done(mTxUnit, pdMS_TO_TICKS(1000));
+        esp_err_t err = parlio_tx_unit_wait_all_done(mTxUnit, 1000);
         if (err != ESP_OK) {
             FL_LOG_PARLIO("ParlioPeripheralESP: Wait timeout during cleanup: " << err);
         }
@@ -368,16 +369,12 @@ bool ParlioPeripheralESPImpl::waitAllDone(u32 timeout_ms) FL_NO_EXCEPT {
         return false;
     }
 
-    // Convert timeout to FreeRTOS ticks
-    TickType_t timeout_ticks;
-    if (timeout_ms == 0) {
-        timeout_ticks = 0;  // Non-blocking poll
-    } else {
-        timeout_ticks = pdMS_TO_TICKS(timeout_ms);
-    }
-
-    // Delegate to ESP-IDF
-    esp_err_t err = parlio_tx_unit_wait_all_done(mTxUnit, timeout_ticks);
+    // ESP-IDF converts milliseconds to ticks internally. Zero polls the queue.
+    constexpr i32 max_timeout_ms = (fl::numeric_limits<i32>::max)();
+    const i32 sdk_timeout_ms = timeout_ms > static_cast<u32>(max_timeout_ms)
+        ? max_timeout_ms
+        : static_cast<i32>(timeout_ms);
+    esp_err_t err = parlio_tx_unit_wait_all_done(mTxUnit, sdk_timeout_ms);
 
     // ESP_OK means all done, ESP_ERR_TIMEOUT means still busy (not an error)
     return (err == ESP_OK);
