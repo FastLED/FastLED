@@ -194,8 +194,11 @@ void ChannelEngineI2sEsp32Dev::show() FL_NO_EXCEPT {
     // If a prior clockless transmit is still in flight, wait for it
     // before we potentially reconfigure the peripheral. Callers who care
     // about throughput can pump `poll()` first.
-    if (mPeripheralInitialized && mPeripheral->isBusy()) {  // initialized implies non-null
-        (void)mPeripheral->waitTransmitDone(/*timeout_ms=*/500);
+    if (mPeripheralInitialized && mPeripheral->isBusy() &&
+        !mPeripheral->waitTransmitDone(/*timeout_ms=*/500)) {
+        FL_WARN("ChannelEngineI2sEsp32Dev: DMA still active, dropping queued frame");
+        mEnqueuedChannels.clear();
+        return;
     }
 
     // Move the enqueued list into the in-flight slot so future

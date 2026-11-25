@@ -494,6 +494,39 @@ FL_TEST_CASE("I2sEsp32Dev - marks channels inUse for the transmit window") {
     FL_CHECK_FALSE(data->isInUse());
 }
 
+FL_TEST_CASE("I2sEsp32Dev - timeout retains the active clockless frame") {
+    resetMockState();
+    ChannelEngineI2sEsp32Dev engine(createMockPeripheral());
+    auto &mock = I2sPeripheralEsp32DevMock::instance();
+
+    auto active = makeChannelData(0, 3);
+    engine.enqueue(active);
+    engine.show();
+    FL_REQUIRE(active->isInUse());
+    const auto allocationCount = mock.getAllocateBufferCount();
+
+    auto dropped = makeChannelData(0, 30);
+    engine.enqueue(dropped);
+    engine.show();
+    FL_CHECK(active->isInUse());
+    FL_CHECK_FALSE(dropped->isInUse());
+    FL_CHECK(mock.getAllocateBufferCount() == allocationCount);
+    FL_CHECK(mock.getTransmitCount() == 1u);
+    FL_CHECK(engine.poll() == IChannelDriver::DriverState::BUSY);
+
+    mock.simulateTransmitDone();
+    FL_CHECK(engine.poll() == IChannelDriver::DriverState::READY);
+    FL_CHECK_FALSE(active->isInUse());
+
+    auto next = makeChannelData(0, 30);
+    engine.enqueue(next);
+    engine.show();
+    FL_CHECK(next->isInUse());
+    FL_CHECK(mock.getTransmitCount() == 2u);
+    mock.simulateTransmitDone();
+    FL_CHECK(engine.poll() == IChannelDriver::DriverState::READY);
+}
+
 FL_TEST_CASE("I2sEsp32Dev - enqueue during BUSY doesn't mutate in-flight set") {
     resetMockState();
     ChannelEngineI2sEsp32Dev engine(createMockPeripheral());
