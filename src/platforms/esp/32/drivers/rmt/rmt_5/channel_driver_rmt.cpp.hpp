@@ -324,6 +324,14 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
 
     void show() FL_NO_EXCEPT override {
         FL_SCOPED_TRACE;
+        // Callers can populate queued data up until show().
+        auto end = fl::remove_if(mEnqueuedChannels.begin(), mEnqueuedChannels.end(),
+                                 [](const ChannelDataPtr& channel) FL_NO_EXCEPT {
+                                     return channel->getSize() == 0;
+                                 });
+        while (end != mEnqueuedChannels.end()) {
+            mEnqueuedChannels.pop_back();
+        }
         if (mEnqueuedChannels.empty()) {
             return;
         }
