@@ -320,7 +320,9 @@ dependencies = [
     # 2.5.53 stops the daemon self-evicting mid-build when one of several
     # concurrent operations finishes, which under load killed builds, dropped
     # device leases and spawned competing daemons (FastLED/fbuild#2143).
-    "fbuild>=2.5.53",
+    # 2.5.55 keeps a contended cache checkpoint from aborting the daemon
+    # during a build (FastLED/fbuild#2180).
+    "fbuild>=2.5.55",
     # Decodes the FastLED/boards `usb-vids.proto.zstd` registry artifact in
     # ci/util/audit_usb_registry.py. Declared explicitly rather than relied on
     # transitively (clang-tool-chain-bins pulls it in today) so the documented
