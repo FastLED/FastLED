@@ -129,12 +129,11 @@ void KeyDetector::update(shared_ptr<Context> context) FL_NO_EXCEPT {
     // Update temporal averaging
     updateChromaHistory(chroma);
 
-    // Get averaged chroma for stable detection
-    float avgChroma[12] = {0};
-    getAveragedChroma(avgChroma);
+    // Reuse the chroma buffer after saving the current values to history.
+    getAveragedChroma(chroma);
 
     // Detect key from averaged chroma
-    Key detectedKey = detectKey(avgChroma, timestamp);
+    Key detectedKey = detectKey(chroma, timestamp);
 
     // Update key duration if same key
     if (mKeyActive && detectedKey == mCurrentKey) {
