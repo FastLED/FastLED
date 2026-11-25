@@ -178,6 +178,8 @@ public:
     /// Set whether TX callback registration fails.
     virtual void setCallbackRegistrationFailure(bool should_fail) FL_NO_EXCEPT = 0;
 
+    virtual void setChannelDeletionFailure(bool should_fail) FL_NO_EXCEPT = 0;
+
     virtual void setPinRebindDisableFailure(bool should_fail) FL_NO_EXCEPT = 0;
 
     virtual void setPinRebindFailure(bool should_fail) FL_NO_EXCEPT = 0;

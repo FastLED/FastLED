@@ -648,6 +648,44 @@ FL_TEST_CASE("RMT5 driver - failed pin changes leave a reusable slot") {
     }
 }
 
+FL_TEST_CASE("RMT5 driver - failed deletion keeps the original pin channel reusable") {
+    resetMock();
+    auto& mock = Rmt5PeripheralMock::instance();
+    auto driver = ChannelEngineRMT::create();
+    auto original = createChannelData(18, 1);
+    auto replacement = createChannelData(19, 1);
+    void* originalHandle = reinterpret_cast<void*>(1);
+
+    driver->enqueue(original);
+    driver->show();
+    mock.simulateTransmitDone(originalHandle);
+    FL_REQUIRE(driver->poll() == DriverState::READY);
+
+    mock.setChannelDeletionFailure(true);
+    driver->enqueue(replacement);
+    driver->show();
+    mock.setChannelDeletionFailure(false);
+    FL_REQUIRE_EQ(mock.getTransmissionCount(), 1u);
+    FL_REQUIRE(driver->poll() == DriverState::READY);
+    FL_CHECK_FALSE(replacement->isInUse());
+    FL_CHECK_EQ(mock.getChannelCount(), 1u);
+    FL_CHECK_EQ(mock.getEncoderCount(), 1u);
+
+    driver->enqueue(original);
+    driver->show();
+    FL_REQUIRE_EQ(mock.getTransmissionCount(), 2u);
+    mock.simulateTransmitDone(originalHandle);
+    FL_REQUIRE(driver->poll() == DriverState::READY);
+
+    driver->enqueue(replacement);
+    driver->show();
+    FL_REQUIRE_EQ(mock.getTransmissionCount(), 3u);
+    mock.simulateTransmitDone(reinterpret_cast<void*>(2));
+    FL_REQUIRE(driver->poll() == DriverState::READY);
+    driver.reset();
+    FL_CHECK_EQ(mock.getChannelCount(), 0u);
+}
+
 FL_TEST_CASE("RMT5 driver - idle hardware takes priority over a vacant slot") {
     resetMock();
     auto& mock = Rmt5PeripheralMock::instance();

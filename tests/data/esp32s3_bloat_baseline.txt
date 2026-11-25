@@ -496,4 +496,7 @@
 # and release SDK allocations before returning. Hosted ESP32-S3 Blink run
 # 45509906148 measured 318603 B image flash (+4 B against the prior pin)
 # and 22519 B attributed RAM after keeping timing values local to initialization.
-318603
+# +12 B, FastLED#5356 follow-up: propagate RMT5 pin-change deletion failure
+# so the original channel, encoder, and allocation remain usable. Hosted
+# ESP32-S3 Blink run 45556127308 measured 318615 B flash and 22519 B attributed RAM.
+318615
