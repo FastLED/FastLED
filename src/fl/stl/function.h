@@ -420,7 +420,7 @@ struct FunctionListEntry {
     Activation* active = nullptr;
 
     FunctionListEntry() FL_NO_EXCEPT : id(-1), priority(0), fn() {}
-    FunctionListEntry(int value, int rank, FunctionType callback) FL_NO_EXCEPT
+    FunctionListEntry(int value, int rank, FunctionType&& callback) FL_NO_EXCEPT
         : id(value), priority(rank), fn(fl::move(callback)) {}
     FunctionListEntry(const FunctionListEntry& other) FL_NO_EXCEPT
         : id(other.id), priority(other.priority), fn(copyFunction(other)) {}
