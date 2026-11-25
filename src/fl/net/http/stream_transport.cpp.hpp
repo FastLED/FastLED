@@ -139,7 +139,8 @@ bool HttpStreamTransport::resolveRpc(const fl::json& msg, const fl::string& idKe
 
     // Check for error
     if (msg.contains("error")) {
-        fl::task::Error err(msg["error"]["message"].as_string().value());
+        const fl::json error = msg["error"];
+        fl::task::Error err(error["message"].as_string().value());
         pending->promise.complete_with_error(err);
         mPendingCalls.erase(idKey);
         return true;
@@ -168,7 +169,8 @@ bool HttpStreamTransport::resolveRpcStream(const fl::json& msg, const fl::string
 
     // Check for error
     if (msg.contains("error")) {
-        fl::task::Error err(msg["error"]["message"].as_string().value());
+        const fl::json error = msg["error"];
+        fl::task::Error err(error["message"].as_string().value());
         pending->promise.complete_with_error(err);
         mPendingStreams.erase(idKey);
         return true;
