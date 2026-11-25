@@ -1,0 +1,6 @@
+repos:
+  - repo: https://github.com/corridor/gglint-pre-commit
+    rev: v0.5.1
+    hooks:
+      - id: gglint-secrets
+
