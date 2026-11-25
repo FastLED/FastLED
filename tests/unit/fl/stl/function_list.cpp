@@ -593,6 +593,22 @@ FL_TEST_CASE("function_list - small tier add has no State allocation failure") {
 }
 #endif
 
+FL_TEST_CASE("function_list - small tier dispatches many signed priorities in order") {
+    fl::detail::FunctionListImpl<void(), false> callbacks;
+    int expected = 9;
+    bool ordered = true;
+    for (int priority = -9; priority <= 9; ++priority) {
+        callbacks.add([&, priority]() {
+            ordered &= priority == expected;
+            --expected;
+        }, priority);
+    }
+
+    callbacks();
+    FL_CHECK(ordered);
+    FL_CHECK_EQ(expected, -10);
+}
+
 template <typename List>
 void mutableCallbackAndCopy() {
     List callbacks;
