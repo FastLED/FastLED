@@ -899,8 +899,7 @@ bool Channel::waitForInUseBuffer() FL_NO_EXCEPT {
         FL_ERROR("Channel '" << mName << "': Timeout occurred while waiting for driver to become READY");
         return false;
     }
-    FL_WARN("Channel '" << mName << "': Engine became READY after waiting");
-    return true;
+    return !mChannelData->isInUse();
 }
 
 // showPixels() is only a dispatcher (#4566): in-use wait, driver resolution,
