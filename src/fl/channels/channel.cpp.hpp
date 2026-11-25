@@ -564,7 +564,7 @@ namespace {
 /// @param encoder ClocklessEncoder value identifying the UCS7604 mode
 /// @param settings Channel settings (for gamma override)
 /// @param rgbOrder RGB ordering for current control reordering
-void writeUCS7604(fl::vector_psram<u8>* data, PixelIterator& pixelIterator,
+bool writeUCS7604(fl::vector_psram<u8>* data, PixelIterator& pixelIterator,
                   ClocklessEncoder encoder, const ChannelOptions& settings,
                   EOrder rgbOrder, bool managed) FL_NO_EXCEPT {
     // Map encoder enum to UCS7604Mode
@@ -630,9 +630,15 @@ void writeUCS7604(fl::vector_psram<u8>* data, PixelIterator& pixelIterator,
                      "silence this warning.");
     }
 
-    // Encode into the data buffer
+    // The frame includes a 15-byte preamble and up to two padding bytes.
+    constexpr size_t maxSize = static_cast<size_t>(-1);
+    if (num_leds > (maxSize - 17) / ucs7604BytesPerLed(mode, is_rgbw)) {
+        return false;
+    }
+    const size_t expectedSize = ucs7604FrameBytes(num_leds, mode, is_rgbw);
     encodeUCS7604(pixelIterator, num_leds, fl::back_inserter(*data),
                   mode, wire_current, is_rgbw, gamma8.get(), wide_source);
+    return data->size() == expectedSize;
 }
 
 } // anonymous namespace
@@ -681,15 +687,20 @@ bool Channel::encodeWS2812(Channel&, PixelIterator& pixels,
 FL_NO_INLINE
 bool Channel::encodeTM1812RGBWW(Channel&, PixelIterator& pixels,
                                 bool, fl::vector_psram<u8>& output) FL_NO_EXCEPT {
+    const auto pixelCount = static_cast<u64>(pixels.size());
+    // Two logical pixels per 12-byte IC frame, including a padded odd pixel.
+    const u64 expectedSize = ((pixelCount + 1) / 2) * 12;
     pixels.writeTM1812RGBWW(&output);
-    return true;
+    return output.size() == expectedSize;
 }
 
 FL_NO_INLINE
 bool Channel::encodeTM1908(Channel&, PixelIterator& pixels,
                            bool, fl::vector_psram<u8>& output) FL_NO_EXCEPT {
+    // Nine command bytes followed by three bytes per pixel.
+    const u64 expectedSize = 9 + static_cast<u64>(pixels.size()) * 3;
     pixels.writeTM1908(&output);
-    return true;
+    return output.size() == expectedSize;
 }
 
 FL_NO_INLINE
@@ -698,9 +709,8 @@ bool Channel::encodeUCS7604(Channel& channel, PixelIterator& pixels,
                             fl::vector_psram<u8>& output) FL_NO_EXCEPT {
     const ClocklessChipset* clockless =
         channel.mChipset.ptr<ClocklessChipset>();
-    writeUCS7604(&output, pixels, clockless->encoder, channel.mSettings,
-                 channel.mRgbOrder, managed);
-    return true;
+    return writeUCS7604(&output, pixels, clockless->encoder, channel.mSettings,
+                        channel.mRgbOrder, managed);
 }
 
 FL_NO_INLINE
