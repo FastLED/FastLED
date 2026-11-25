@@ -332,8 +332,11 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
         if (mEnqueuedChannels.empty()) {
             return;
         }
-        // Wait for previous transmission to complete
-        waitForReady();
+        if (!waitForReady()) {
+            // Preserve the active frame until its completion callback arrives.
+            mEnqueuedChannels.clear();
+            return;
+        }
 
         // Mark all channels as in use before transmission
         for (auto &channel : mEnqueuedChannels) {
