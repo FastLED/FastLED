@@ -253,6 +253,37 @@ FL_TEST_CASE("ObjectFLED engine - poll drains active DMA/latch state") {
     FL_CHECK(ch->isInUse() == false);
 }
 
+FL_TEST_CASE("ObjectFLED engine - show timeout preserves the draining frame") {
+    auto mock = fl::make_shared<ObjectFLEDPeripheralMock>();
+    mock->setBusyAfterShow(true);
+    ChannelEngineObjectFLED engine(mock);
+    auto active = createRGBChannelData(2, 1);
+    auto next = createRGBChannelData(3, 1);
+
+    engine.enqueue(active);
+    engine.show();
+    auto* instance = mock->getLastInstance();
+    FL_REQUIRE(instance != nullptr);
+    FL_REQUIRE(engine.poll() == DriverState::DRAINING);
+
+    engine.enqueue(active);
+    engine.enqueue(next);
+    engine.show();
+
+    FL_REQUIRE(mock->getCreateCount() == 1);
+    FL_CHECK(instance->getShowCount() == 1);
+    FL_CHECK(active->isInUse());
+    FL_CHECK_FALSE(next->isInUse());
+
+    instance->complete();
+    FL_CHECK(engine.poll() == DriverState::READY);
+    FL_CHECK_FALSE(active->isInUse());
+
+    engine.enqueue(next);
+    engine.show();
+    FL_CHECK(mock->getCreateCount() == 2);
+}
+
 FL_TEST_CASE("ObjectFLED engine - timing groups sequence after busy completion") {
     auto mock = fl::make_shared<ObjectFLEDPeripheralMock>();
     mock->setBusyAfterShow(true);

@@ -19,6 +19,7 @@
 
 // #3416 FX-LOW-3 mirror: duplicate include removed.
 #include "fl/log/log.h"
+#include "fl/stl/algorithm.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/noexcept.h"
 
@@ -175,7 +176,17 @@ void ChannelEngineObjectFLED::show() FL_NO_EXCEPT {
         return;
     }
 
-    waitForReady();
+    if (!waitForReady()) {
+        // Drop the new frame while poll() still owns the active DMA frame.
+        for (auto& channel : mEnqueuedChannels) {
+            if (fl::find(mTransmittingChannels.begin(), mTransmittingChannels.end(), channel) ==
+                mTransmittingChannels.end()) {
+                channel->setInUse(false);
+            }
+        }
+        mEnqueuedChannels.clear();
+        return;
+    }
 
     // Move enqueued -> transmitting
     mTransmittingChannels.swap(mEnqueuedChannels);
