@@ -89,6 +89,34 @@ FL_TEST_CASE("ChannelEngineSpi - idle channel rebuilds its bus after a pin rerou
     mock.reset();
 }
 
+FL_TEST_CASE("ChannelEngineSpi - show timeout preserves the in-flight pipeline") {
+    auto& mock = detail::SpiPeripheralMock::instance();
+    mock.reset();
+    ChannelEngineSpi driver(mock);
+
+    auto active = createClocklessChannelData(5);
+    driver.enqueue(active);
+    driver.show();
+    FL_CHECK(active->isInUse());
+
+    auto dropped = createClocklessChannelData(6);
+    driver.enqueue(dropped);
+    driver.show();
+    FL_CHECK_EQ(mock.getTransactionCount(), 1u);
+    FL_CHECK(active->isInUse());
+    FL_CHECK_FALSE(dropped->isInUse());
+
+    for (int i = 0; i < 100 && driver.poll() != IChannelDriver::DriverState::READY; ++i) {
+        mock.simulateTransactionComplete();
+    }
+    FL_CHECK(driver.poll() == IChannelDriver::DriverState::READY);
+    FL_CHECK_FALSE(active->isInUse());
+
+    showFrame(driver, mock, 5);
+    FL_CHECK_EQ(mock.getTransactionCount(), 2u);
+    FL_CHECK_FALSE(dropped->isInUse());
+}
+
 FL_TEST_CASE("ChannelEngineSpi - canHandle accepts WS2812 (clockless)") {
     ChannelEngineSpi driver;
 

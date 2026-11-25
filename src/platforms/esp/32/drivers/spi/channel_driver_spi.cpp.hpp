@@ -284,16 +284,16 @@ void ChannelEngineSpi::show() FL_NO_EXCEPT {
         return;
     }
 
-    // Wait for any previous pipeline to complete before starting new frame
-    waitForReady();
+    if (!waitForReady()) {
+        // Drop the new batch while DMA still owns the active pipeline.
+        mEnqueuedChannels.clear();
+        return;
+    }
 
     // Release any channels from previous frame
     for (auto &channel : mChannels) {
         if (!channel.inUse) continue;
         if (channel.transmissionComplete) {
-            if (channel.sourceData) {
-                channel.sourceData->setInUse(false);
-            }
             releaseChannel(&channel);
         }
     }
@@ -348,9 +348,6 @@ IChannelDriver::DriverState ChannelEngineSpi::poll() FL_NO_EXCEPT {
     for (auto &channel : mChannels) {
         if (!channel.inUse) continue;
         if (channel.transmissionComplete) {
-            if (channel.sourceData) {
-                channel.sourceData->setInUse(false);
-            }
             releaseChannel(&channel);
         } else {
             anyDraining = true;
@@ -377,9 +374,6 @@ IChannelDriver::DriverState ChannelEngineSpi::pollChannels() FL_NO_EXCEPT {
             continue;
 
         if (channel.transmissionComplete) {
-            if (channel.sourceData) {
-                channel.sourceData->setInUse(false);
-            }
             releaseChannel(&channel);
         } else {
             anyDraining = true;
@@ -762,8 +756,10 @@ void ChannelEngineSpi::releaseChannel(SpiChannelState *channel) FL_NO_EXCEPT {
         channel->stagingOffset = 0;
         channel->currentStaging = channel->stagingA; // Reset to buffer A
 
-        // Release reference to source data
-        channel->sourceData = nullptr;
+        if (channel->sourceData) {
+            channel->sourceData->setInUse(false);
+            channel->sourceData = nullptr;
+        }
 
         // Clear transaction flags
         channel->transAInFlight = false;
