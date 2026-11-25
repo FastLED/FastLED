@@ -164,9 +164,9 @@ IChannelDriver::DriverState ChannelDriverLcdSpi::poll() FL_NO_EXCEPT {
 
     // The peripheral can appear idle before the ISR submits the next chunk.
     // Keep the frame until the callback finishes the stream and DMA is idle.
-    if (mIsrCtx.mStreamComplete && mPeripheral && !mPeripheral->isBusy()) {
+    if (mIsrCtx.mStreamComplete.load(fl::memory_order_acquire) &&
+        mPeripheral && !mPeripheral->isBusy()) {
         mBusy = false;
-        mIsrCtx.mStreamComplete = false;
         for (auto &channel : mTransmittingChannels) {
             channel->setInUse(false);
         }
@@ -226,8 +226,7 @@ bool ChannelDriverLcdSpi::isrChunkDone(void *panel_io, const void *edata,
 
     // All chunks transmitted?
     if (ctx.mNextByteOffset >= ctx.mTotalBytes) {
-        ctx.mStreamComplete = true;
-        self->mBusy = false;
+        ctx.mStreamComplete.store(true, fl::memory_order_release);
         return false;
     }
 
@@ -258,8 +257,7 @@ bool ChannelDriverLcdSpi::isrChunkDone(void *panel_io, const void *edata,
     size_t dmaBytes = chunkBytes * 8 * sizeof(u16);
     if (!self->mPeripheral->transmit(buf, dmaBytes)) {
         // Transmit failed â€” abort stream
-        ctx.mStreamComplete = true;
-        self->mBusy = false;
+        ctx.mStreamComplete.store(true, fl::memory_order_release);
         FL_WARN("ChannelDriverLcdSpi: ISR transmit failed");
     }
 

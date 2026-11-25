@@ -22,6 +22,7 @@
 #include "fl/stl/compiler_control.h"
 #include "fl/channels/data.h"
 #include "fl/channels/driver.h"
+#include "fl/stl/atomic.h"
 #include "fl/stl/noexcept.h"
 #include "fl/stl/span.h"
 #include "fl/stl/shared_ptr.h"
@@ -115,13 +116,10 @@ class ChannelDriverLcdSpi : public IChannelDriver {
 
     /// @brief Stream state for ISR-driven chunked DMA
     ///
-    /// Memory model (follows PARLIO's parlio_isr_context.h):
-    /// - ISR writes volatile fields (mStreamComplete, mNextByteOffset, etc.)
-    /// - Main thread reads volatile fields directly
-    /// - After detecting mStreamComplete==true, main reads non-volatile fields
+    /// The ISR publishes completion with release semantics. The task acquires
+    /// that flag before releasing the active frame data.
     struct IsrContext {
-        // Volatile: ISR writes, main reads
-        volatile bool mStreamComplete;
+        fl::atomic<bool> mStreamComplete{false};
         volatile size_t mNextByteOffset; // next source byte to transpose
         volatile size_t mRingWriteIdx;   // next ring slot to write (0-2)
 
@@ -130,7 +128,7 @@ class ChannelDriverLcdSpi : public IChannelDriver {
         size_t mChunkInputBytes;  // source bytes per chunk
 
         void reset() FL_NO_EXCEPT {
-            mStreamComplete = false;
+            mStreamComplete.store(false, fl::memory_order_relaxed);
             mNextByteOffset = 0;
             mRingWriteIdx = 0;
             mTotalBytes = 0;
@@ -152,7 +150,7 @@ class ChannelDriverLcdSpi : public IChannelDriver {
     size_t mRingCapacity; // DMA bytes per ring slot
 
     int mNumLanes;
-    volatile bool mBusy;
+    bool mBusy;
     IsrContext mIsrCtx;
     size_t mChunkInputBytesOverride; // 0 = use kDefaultChunkInputBytes
 };
