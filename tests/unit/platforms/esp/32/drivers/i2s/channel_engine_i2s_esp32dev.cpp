@@ -45,9 +45,12 @@ void resetMockState() { I2sPeripheralEsp32DevMock::instance().reset(); }
 /// lightweight wrapper that forwards every call into the singleton.
 /// Follows the S3 sibling's exact pattern
 /// (`tests/.../channel_driver_i2s.cpp:43-87`).
-fl::shared_ptr<II2sPeripheralEsp32Dev> createMockPeripheral() {
+fl::shared_ptr<II2sPeripheralEsp32Dev> createMockPeripheral(bool checkIdleBeforeFree = false) {
     class MockWrapper : public II2sPeripheralEsp32Dev {
       public:
+        explicit MockWrapper(bool checkIdleBeforeFree)
+            : mCheckIdleBeforeFree(checkIdleBeforeFree) {}
+
         bool initialize(const I2sEsp32DevPeripheralConfig &cfg)
             FL_NO_EXCEPT override {
             return I2sPeripheralEsp32DevMock::instance().initialize(cfg);
@@ -63,7 +66,11 @@ fl::shared_ptr<II2sPeripheralEsp32Dev> createMockPeripheral() {
                 size_bytes);
         }
         void freeBuffer(u8 *buffer) FL_NO_EXCEPT override {
-            I2sPeripheralEsp32DevMock::instance().freeBuffer(buffer);
+            auto &mock = I2sPeripheralEsp32DevMock::instance();
+            if (mCheckIdleBeforeFree) {
+                FL_CHECK_FALSE(mock.isBusy());
+            }
+            mock.freeBuffer(buffer);
         }
         bool transmit(const u8 *buffer,
                       size_t size_bytes) FL_NO_EXCEPT override {
@@ -90,8 +97,10 @@ fl::shared_ptr<II2sPeripheralEsp32Dev> createMockPeripheral() {
         getConfig() const FL_NO_EXCEPT override {
             return I2sPeripheralEsp32DevMock::instance().getConfig();
         }
+      private:
+        bool mCheckIdleBeforeFree;
     };
-    return fl::make_shared<MockWrapper>();
+    return fl::make_shared<MockWrapper>(checkIdleBeforeFree);
 }
 
 /// @brief Build a minimal `ChannelData` with N bytes of test pixel
@@ -446,6 +455,21 @@ FL_TEST_CASE("I2sEsp32Dev - destructor frees the scratch buffer") {
     FL_CHECK(
         I2sPeripheralEsp32DevMock::instance().getOutstandingBufferCount() ==
         0u);
+}
+
+FL_TEST_CASE("I2sEsp32Dev - destructor stops DMA before freeing the frame") {
+    resetMockState();
+    auto &mock = I2sPeripheralEsp32DevMock::instance();
+    auto active = makeChannelData(0, 30);
+    {
+        ChannelEngineI2sEsp32Dev engine(createMockPeripheral(true));
+        engine.enqueue(active);
+        engine.show();
+        FL_REQUIRE(mock.isBusy());
+        FL_REQUIRE(active->isInUse());
+    }
+    FL_CHECK_FALSE(active->isInUse());
+    FL_CHECK(mock.getOutstandingBufferCount() == 0u);
 }
 
 //=============================================================================
