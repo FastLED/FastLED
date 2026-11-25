@@ -164,6 +164,9 @@ public:
     /// ```
     virtual void setTransmitFailure(bool should_fail) FL_NO_EXCEPT = 0;
 
+    /// Force waitAllDone() to report that the queue could not be drained.
+    virtual void setWaitFailure(bool should_fail) FL_NO_EXCEPT = 0;
+
     //-------------------------------------------------------------------------
     // Waveform Capture (for validation)
     //-------------------------------------------------------------------------

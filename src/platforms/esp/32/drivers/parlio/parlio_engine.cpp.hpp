@@ -1900,8 +1900,9 @@ bool ParlioEngine::beginTransmission(const u8* scratchBuffer,
     // The ESP-IDF PARLIO driver's internal DMA queue may still have the last buffer
     // queued even after our ISR context shows mStreamComplete=true. Without this,
     // consecutive transmissions with the same config fail silently (0 bytes output).
-    if (mTxUnitEnabled) {
-        mPeripheral->waitAllDone(100);  // 100ms timeout - should be near-instant
+    if (mTxUnitEnabled && !mPeripheral->waitAllDone(100)) {
+        FL_LOG_PARLIO("PARLIO_TX: Previous transmission did not drain");
+        return false;
     }
 
     // Check if already transmitting
