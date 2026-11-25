@@ -1442,10 +1442,9 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
     /// @brief Reconfigure channels for network state change (destroy/recreate
     /// as needed)
     void reconfigureForNetwork() FL_NO_EXCEPT {
-        // Check if Network state changed using singleton tracker
         auto& networkTracker = NetworkStateTracker::instance();
-        if (!networkTracker.hasChanged()) {
-            return;  // No change - nothing to do
+        if (!networkTracker.hasChanged() && !mNetworkReductionPending) {
+            return;
         }
 
         bool networkActive = networkTracker.isActive();
@@ -1472,8 +1471,10 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
         // PHASE 1: Free on-chip memory for larger network-mode buffers.
         if (networkActive && mChannels.size() > targetChannels &&
             !reduceOnChipChannels(targetChannels)) {
+            mNetworkReductionPending = true;
             return;
         }
+        mNetworkReductionPending = false;
 
         // PHASE 2: Reconfigure remaining idle channels with new memory allocation
         // This ensures existing channels use Network-appropriate memory (2x vs 3x blocks)
@@ -1568,6 +1569,9 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
 
     /// @brief Track allocation failures to avoid hammering the driver
     bool mAllocationFailed;
+
+    /// @brief Retry a failed reduction even after the network edge was consumed.
+    bool mNetworkReductionPending = false;
 
     /// @brief Progressive retry: Memory reduction offset (symbols to reduce per retry)
     /// When RMT allocation fails, progressively reduce memory allocation by this amount

@@ -818,7 +818,7 @@ FL_TEST_CASE("RMT5 driver - network reconfiguration preserves a channel that can
     FL_CHECK_EQ(mock.getChannelCount(), 0u);
 }
 
-FL_TEST_CASE("RMT5 driver - network channel reduction retains an undeletable slot") {
+FL_TEST_CASE("RMT5 driver - network channel reduction retries an undeletable slot") {
     resetMock();
     auto& mock = Rmt5PeripheralMock::instance();
     auto& network = fl::detail::NetworkStateTracker::instance();
@@ -841,14 +841,24 @@ FL_TEST_CASE("RMT5 driver - network channel reduction retains an undeletable slo
     driver->enqueue(second);
     driver->show();
     mock.setChannelDeletionFailure(false);
-    network.setActive(false);
-    network.hasChanged();
 
     FL_CHECK_EQ(mock.getWaitAllDoneCount(), waits + 1);
     FL_CHECK_EQ(mock.getChannelCount(), 2u);
     FL_CHECK_EQ(mock.getEncoderCount(), 2u);
     FL_CHECK_EQ(mock.getTransmissionCount(), 3u);
     mock.simulateTransmitDone(secondHandle);
+    FL_CHECK(driver->poll() == DriverState::READY);
+
+    driver->enqueue(first);
+    driver->show();
+    network.setActive(false);
+    network.hasChanged();
+
+    FL_CHECK_EQ(mock.getChannelCount(), 1u);
+    FL_CHECK_EQ(mock.getEncoderCount(), 1u);
+    FL_CHECK_EQ(mock.getTransmissionCount(), 4u);
+    mock.simulateTransmitDone(firstHandle);
+    mock.simulateTransmitDone(reinterpret_cast<void*>(3));
     FL_CHECK(driver->poll() == DriverState::READY);
     driver.reset();
     FL_CHECK_EQ(mock.getChannelCount(), 0u);
