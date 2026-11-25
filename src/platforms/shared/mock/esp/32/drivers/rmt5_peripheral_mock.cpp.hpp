@@ -9,6 +9,7 @@
 #if defined(FASTLED_STUB_IMPL) || (!defined(ARDUINO) && (defined(FL_IS_LINUX) || defined(FL_IS_APPLE) || defined(FL_IS_WIN)))
 
 #include "platforms/shared/mock/esp/32/drivers/rmt5_peripheral_mock.h"
+#include "platforms/shared/mock/esp/32/drivers/rmt5_support_stubs.h"
 #include "fl/log/log.h"
 #include "fl/log/log.h"
 #include "fl/stl/allocator.h"
@@ -158,6 +159,10 @@ private:
 
 Rmt5PeripheralMock& Rmt5PeripheralMock::instance() FL_NO_EXCEPT {
     return Singleton<Rmt5PeripheralMockImpl>::instance();
+}
+
+u8 RmtMemoryManager::lastTxAllocationId() const FL_NO_EXCEPT {
+    return mLastTxAllocationId;
 }
 
 //=============================================================================

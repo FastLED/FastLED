@@ -1705,24 +1705,32 @@ ChannelEngineRMTImpl::ChannelState *ChannelEngineRMTImpl::acquireChannelSlow(
         }
     }
 
-    // Strategy 2: Reuse an idle non-DMA slot, including one left vacant by
-    // failed reconfiguration. A vacant slot needs a fresh hardware allocation.
+    // Strategy 2: Prefer an idle non-DMA channel that already owns hardware.
+    // If none is available, a vacant slot can hold a fresh allocation.
 #if !FL_RMT_STATIC_ALLOCATION
+    ChannelState *reusable = nullptr;
     for (auto &ch : mChannels) {
-        if (!ch.inUse && !ch.useDMA && (ch.channel || !mAllocationFailed)) {
-            ch.inUse = true;
-            configureChannel(&ch, pin, timing, dataSize);
-            if (!ch.channel || !ch.encoder) {
-                // Reconfiguration destroyed the old channel and could not
-                // build a new one (e.g. invalid pin). Report failure instead
-                // of handing out a dead channel.
-                ch.inUse = false;
-                mAllocationFailed = true;
-                return nullptr;
-            }
-            FL_LOG_RMT("Reconfiguring idle non-DMA channel for pin " << (static_cast<int>(pin)));
-            return &ch;
+        if (ch.inUse || ch.useDMA) {
+            continue;
         }
+        if (ch.channel) {
+            reusable = &ch;
+            break;
+        }
+        if (!reusable && !mAllocationFailed) {
+            reusable = &ch;
+        }
+    }
+    if (reusable) {
+        reusable->inUse = true;
+        configureChannel(reusable, pin, timing, dataSize);
+        if (!reusable->channel || !reusable->encoder) {
+            reusable->inUse = false;
+            mAllocationFailed = true;
+            return nullptr;
+        }
+        FL_LOG_RMT("Reconfigured idle channel for pin " << (static_cast<int>(pin)));
+        return reusable;
     }
 #endif
 
