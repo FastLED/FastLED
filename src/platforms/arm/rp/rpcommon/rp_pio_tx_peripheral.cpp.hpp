@@ -63,12 +63,17 @@ bool RpPioTxPeripheral::createProgram(const ChipsetTimingConfig& timing) FL_NO_E
     if (mProgram == nullptr) return false;
     mProgram->instructions[0] = static_cast<pio_instr>(
         PIO_INSTR_OUT | PIO_OUT_DST_X | PIO_OUT_CNT(mLaneCount));
+    // High and low phases use MOV to the OUT pins, not SET: SET reaches at
+    // most 5 pins and `set pins, 1` raises only the base pin, so with 8 lanes
+    // (SET_COUNT overflows to 0) lanes were never driven high or low by the
+    // program and a final 1 bit stayed high until the next frame.
     mProgram->instructions[1] = static_cast<pio_instr>(
-        PIO_INSTR_SET | PIO_SET_DST_PINS | PIO_SET_DATA(1) | PIO_DELAY(t1 - 1, 0));
+        PIO_INSTR_MOV | PIO_MOV_DST_PINS | PIO_MOV_OP_INVERT | PIO_MOV_SRC_NULL |
+        PIO_DELAY(t1 - 1, 0));
     mProgram->instructions[2] = static_cast<pio_instr>(
         PIO_INSTR_MOV | PIO_MOV_DST_PINS | PIO_MOV_SRC_X | PIO_DELAY(t2 - 1, 0));
     mProgram->instructions[3] = static_cast<pio_instr>(
-        PIO_INSTR_SET | PIO_SET_DST_PINS | PIO_SET_DATA(0) | PIO_DELAY(t3 - 2, 0));
+        PIO_INSTR_MOV | PIO_MOV_DST_PINS | PIO_MOV_SRC_NULL | PIO_DELAY(t3 - 2, 0));
     mProgram->program.instructions = mProgram->instructions;
     mProgram->program.length = 4;
     mProgram->program.origin = -1;
@@ -86,7 +91,6 @@ bool RpPioTxPeripheral::createProgram(const ChipsetTimingConfig& timing) FL_NO_E
     pio_sm_config config = pio_get_default_sm_config();
     sm_config_set_wrap(&config, static_cast<uint>(mProgramOffset),
                        static_cast<uint>(mProgramOffset + 3));
-    sm_config_set_set_pins(&config, static_cast<uint>(mPin), mLaneCount);
     sm_config_set_out_pins(&config, static_cast<uint>(mPin), mLaneCount);
     // Packed (#4621): autopull after one whole transfer (8/16/32 bits); the
     // stream length is an exact multiple, so no zero padding is emitted.
