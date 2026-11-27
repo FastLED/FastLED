@@ -35,7 +35,7 @@ FL_EXTERN_C_END
 // Original ESP32 / ESP32-S3 / ESP32-P4 are dual-core; everything else is
 // single-core from an SMP-FreeRTOS perspective.
 #ifndef SOC_CPU_CORES_NUM
-#if defined(FL_IS_ESP_32DEV) || defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32P4)
+#if defined(FL_IS_ESP_32DEV) || defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32P4) || defined(FL_IS_ESP_32S31)
 #define SOC_CPU_CORES_NUM 2
 #else
 #define SOC_CPU_CORES_NUM 1
@@ -109,7 +109,7 @@ FL_EXTERN_C_END
 // Helper macro: Platforms that ONLY support RMT5 (no RMT4 fallback)
 // These chips have newer RMT architecture incompatible with legacy RMT4 driver
 #if defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32C5) || \
-    defined(CONFIG_IDF_TARGET_ESP32P4) || defined(CONFIG_IDF_TARGET_ESP32H2)
+    defined(CONFIG_IDF_TARGET_ESP32P4) || defined(CONFIG_IDF_TARGET_ESP32H2) || defined(FL_IS_ESP_32S31)
 #define FASTLED_ESP32_RMT5_ONLY_PLATFORM 1
 #else
 #define FASTLED_ESP32_RMT5_ONLY_PLATFORM 0
