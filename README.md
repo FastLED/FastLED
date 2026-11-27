@@ -529,7 +529,7 @@ Lots of improvements in this release, read the full [change list here](https://g
 #### Links
 
   * This demo -> [FxWave2d](https://github.com/FastLED/FastLED/blob/master/examples/FxWave2d/FxWave2d.ino)
-    * [Wave Simulation Library](https://github.com/FastLED/FastLED/blob/master/src/fl/wave_simulation.h)
+    * [Wave Simulation Library](https://github.com/FastLED/FastLED/blob/master/src/fl/math/wave/wave_simulation.h)
   * [FireCylinder](https://github.com/FastLED/FastLED/blob/master/examples/FireCylinder/FireCylinder.ino)
     * Wraps around so that (0,y) ~= (width-1,y)
   * [TimeAlpha](https://github.com/FastLED/FastLED/blob/master/src/fl/math/time_alpha.h)
