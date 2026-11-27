@@ -1,0 +1,20 @@
+#!/usr/bin/env -S uv run --no-sync python
+"""Prove lint (and, with --test, the host unit tests) on HEAD, push, open the PR.
+
+A thin delegate to `prooft --push` (forge-ci/ci.yml GATE-014); every argument
+passes through. Lanes live in ci-attestations.yml, the check in ci/prooft_push.py.
+"""
+
+import os
+import sys
+from pathlib import Path
+
+
+ROOT = Path(__file__).resolve().parent
+sys.path.insert(0, str(ROOT))
+os.chdir(ROOT)
+
+from ci.prooft_push import main  # noqa: E402
+
+
+sys.exit(main(sys.argv[1:]))
