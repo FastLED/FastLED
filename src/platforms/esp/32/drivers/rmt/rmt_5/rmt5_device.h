@@ -49,7 +49,7 @@ FL_EXTERN_C_END
     RMT.conf_ch[channel_id].conf1.mem_rd_rst = 0; \
     RMT.conf_ch[channel_id].conf1.apb_mem_rst = 1; \
     RMT.conf_ch[channel_id].conf1.apb_mem_rst = 0
-#elif defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2) || defined(FL_IS_ESP_32C5) || defined(FL_IS_ESP_32P4)
+#elif defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2) || defined(FL_IS_ESP_32C5) || defined(FL_IS_ESP_32P4) || defined(FL_IS_ESP_32S31)
 #define RMT5_RESET_MEMORY_READ_POINTER(channel_id) \
     RMT.chnconf0[channel_id].mem_rd_rst_chn = 1; \
     RMT.chnconf0[channel_id].mem_rd_rst_chn = 0; \
@@ -81,7 +81,7 @@ FL_EXTERN_C_END
  */
 #if defined(FL_IS_ESP_32DEV) || defined(FL_IS_ESP_32S2)
 #define RMT5_TX_DONE_BIT(channel_id) ((channel_id) * 3)
-#elif defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32C3) || defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2) || defined(FL_IS_ESP_32C5) || defined(FL_IS_ESP_32P4)
+#elif defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32C3) || defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2) || defined(FL_IS_ESP_32C5) || defined(FL_IS_ESP_32P4) || defined(FL_IS_ESP_32S31)
 #define RMT5_TX_DONE_BIT(channel_id) (channel_id)
 #else
 #define RMT5_TX_DONE_BIT(channel_id) (channel_id)
@@ -103,7 +103,7 @@ FL_EXTERN_C_END
 #define RMT5_TX_THRESHOLD_BIT(channel_id) ((channel_id) + 24)
 #elif defined(FL_IS_ESP_32S2)
 #define RMT5_TX_THRESHOLD_BIT(channel_id) ((channel_id) + 12)
-#elif defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32C3) || defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2) || defined(FL_IS_ESP_32C5) || defined(FL_IS_ESP_32P4)
+#elif defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32C3) || defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2) || defined(FL_IS_ESP_32C5) || defined(FL_IS_ESP_32P4) || defined(FL_IS_ESP_32S31)
 #define RMT5_TX_THRESHOLD_BIT(channel_id) ((channel_id) + 8)
 #else
 #define RMT5_TX_THRESHOLD_BIT(channel_id) ((channel_id) + 8)
@@ -191,7 +191,7 @@ FL_EXTERN_C_END
 #define RMT5_ENABLE_TX_CHANNEL(channel_id) \
     RMT.conf_ch[channel_id].conf1.tx_conti_mode = 0; \
     RMT.conf_ch[channel_id].conf1.mem_tx_wrap_en = 0
-#elif defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2) || defined(FL_IS_ESP_32C5) || defined(FL_IS_ESP_32P4)
+#elif defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2) || defined(FL_IS_ESP_32C5) || defined(FL_IS_ESP_32P4) || defined(FL_IS_ESP_32S31)
 #define RMT5_ENABLE_TX_CHANNEL(channel_id) \
     RMT.chnconf0[channel_id].mem_tx_wrap_en_chn = 0; \
     RMT.chnconf0[channel_id].conf_update_chn = 1
@@ -212,7 +212,7 @@ FL_EXTERN_C_END
 #if defined(FL_IS_ESP_32DEV)
 #define RMT5_START_TRANSMISSION(channel_id) \
     RMT.conf_ch[channel_id].conf1.tx_start = 1
-#elif defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2) || defined(FL_IS_ESP_32C5) || defined(FL_IS_ESP_32P4)
+#elif defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2) || defined(FL_IS_ESP_32C5) || defined(FL_IS_ESP_32P4) || defined(FL_IS_ESP_32S31)
 #define RMT5_START_TRANSMISSION(channel_id) \
     RMT.chnconf0[channel_id].tx_start_chn = 1; \
     RMT.chnconf0[channel_id].conf_update_chn = 1
@@ -233,7 +233,7 @@ FL_EXTERN_C_END
 #if defined(FL_IS_ESP_32DEV)
 #define RMT5_STOP_TRANSMISSION(channel_id) \
     RMT.conf_ch[channel_id].conf1.tx_start = 0
-#elif defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2) || defined(FL_IS_ESP_32C5) || defined(FL_IS_ESP_32P4)
+#elif defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2) || defined(FL_IS_ESP_32C5) || defined(FL_IS_ESP_32P4) || defined(FL_IS_ESP_32S31)
 #define RMT5_STOP_TRANSMISSION(channel_id) \
     RMT.chnconf0[channel_id].tx_start_chn = 0; \
     RMT.chnconf0[channel_id].conf_update_chn = 1
@@ -258,7 +258,7 @@ FL_EXTERN_C_END
         RMT.conf_ch[channel_id].conf1.mem_rd_rst = 1; \
         RMT.conf_ch[channel_id].conf1.mem_rd_rst = 0; \
     } while(0)
-#elif defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2) || defined(FL_IS_ESP_32C5) || defined(FL_IS_ESP_32P4)
+#elif defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2) || defined(FL_IS_ESP_32C5) || defined(FL_IS_ESP_32P4) || defined(FL_IS_ESP_32S31)
 #define RMT5_HARD_RESET_CHANNEL(channel_id) \
     do { \
         RMT.chnconf0[channel_id].mem_rd_rst_chn = 1; \
@@ -290,7 +290,7 @@ FL_EXTERN_C_END
 #if defined(FL_IS_ESP_32DEV)
 #define RMT5_GET_STATE(channel_id) \
     ((RMT.status_ch[channel_id] >> 22) & 0x7)
-#elif defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2) || defined(FL_IS_ESP_32C5) || defined(FL_IS_ESP_32P4)
+#elif defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2) || defined(FL_IS_ESP_32C5) || defined(FL_IS_ESP_32P4) || defined(FL_IS_ESP_32S31)
 #define RMT5_GET_STATE(channel_id) \
     (RMT.chnstatus[channel_id].state_chn)
 #elif defined(FL_IS_ESP_32C3)
@@ -328,7 +328,7 @@ FL_EXTERN_C_END
 #elif defined(FL_IS_ESP_32C3)
 #define RMT5_SET_THRESHOLD_LIMIT(channel_id, threshold) \
     RMT.tx_lim[channel_id].limit = (threshold)
-#elif defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2) || defined(FL_IS_ESP_32C5) || defined(FL_IS_ESP_32P4)
+#elif defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2) || defined(FL_IS_ESP_32C5) || defined(FL_IS_ESP_32P4) || defined(FL_IS_ESP_32S31)
 #define RMT5_SET_THRESHOLD_LIMIT(channel_id, threshold) \
     RMT.chn_tx_lim[channel_id].tx_lim_chn = (threshold)
 #else
@@ -369,7 +369,7 @@ FL_EXTERN_C_END
 // ESP32-C3: tx_status has mem_raddr_ex field (9 bits)
 #define RMT5_GET_READ_ADDRESS(channel_id) \
     (RMT.tx_status[channel_id].mem_raddr_ex)
-#elif defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2) || defined(FL_IS_ESP_32C5)
+#elif defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2) || defined(FL_IS_ESP_32C5) || defined(FL_IS_ESP_32S31)
 // ESP32-C6, ESP32-H2, ESP32-C5: chnstatus has mem_raddr_ex_chn field (9 bits)
 #define RMT5_GET_READ_ADDRESS(channel_id) \
     (RMT.chnstatus[channel_id].mem_raddr_ex_chn)
@@ -397,7 +397,7 @@ FL_EXTERN_C_END
 // ESP32: Extract from status_ch bit 25 (mem_empty)
 #define RMT5_IS_MEM_EMPTY(channel_id) \
     (((RMT.status_ch[channel_id] >> 25) & 0x1) != 0)
-#elif defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2) || defined(FL_IS_ESP_32C5) || defined(FL_IS_ESP_32P4)
+#elif defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2) || defined(FL_IS_ESP_32C5) || defined(FL_IS_ESP_32P4) || defined(FL_IS_ESP_32S31)
 // ESP32-S3/C6/H2/C5/P4: chnstatus.mem_empty_chn
 #define RMT5_IS_MEM_EMPTY(channel_id) \
     (RMT.chnstatus[channel_id].mem_empty_chn != 0)
@@ -419,7 +419,7 @@ FL_EXTERN_C_END
 #if defined(FL_IS_ESP_32DEV)
 // ESP32: Not available
 #define RMT5_HAS_MEM_WR_ERROR(channel_id) 0
-#elif defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2) || defined(FL_IS_ESP_32C5) || defined(FL_IS_ESP_32P4)
+#elif defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2) || defined(FL_IS_ESP_32C5) || defined(FL_IS_ESP_32P4) || defined(FL_IS_ESP_32S31)
 // ESP32-S3/C6/H2/C5/P4: chnstatus.apb_mem_wr_err_chn
 #define RMT5_HAS_MEM_WR_ERROR(channel_id) \
     (RMT.chnstatus[channel_id].apb_mem_wr_err_chn != 0)
@@ -441,7 +441,7 @@ FL_EXTERN_C_END
 #if defined(FL_IS_ESP_32DEV)
 // ESP32: Not available
 #define RMT5_HAS_MEM_RD_ERROR(channel_id) 0
-#elif defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2) || defined(FL_IS_ESP_32C5) || defined(FL_IS_ESP_32P4)
+#elif defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2) || defined(FL_IS_ESP_32C5) || defined(FL_IS_ESP_32P4) || defined(FL_IS_ESP_32S31)
 // ESP32-S3/C6/H2/C5/P4: chnstatus.apb_mem_rd_err_chn
 #define RMT5_HAS_MEM_RD_ERROR(channel_id) \
     (RMT.chnstatus[channel_id].apb_mem_rd_err_chn != 0)
@@ -464,7 +464,7 @@ FL_EXTERN_C_END
 #if defined(FL_IS_ESP_32DEV)
 #define RMT5_SET_IDLE_OUTPUT_LEVEL(channel_id, level) \
     RMT.conf_ch[channel_id].conf1.idle_out_lv = (level)
-#elif defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2) || defined(FL_IS_ESP_32C5) || defined(FL_IS_ESP_32P4)
+#elif defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2) || defined(FL_IS_ESP_32C5) || defined(FL_IS_ESP_32P4) || defined(FL_IS_ESP_32S31)
 #define RMT5_SET_IDLE_OUTPUT_LEVEL(channel_id, level) \
     RMT.chnconf0[channel_id].idle_out_lv_chn = (level)
 #elif defined(FL_IS_ESP_32C3)
@@ -483,7 +483,7 @@ FL_EXTERN_C_END
 #if defined(FL_IS_ESP_32DEV)
 #define RMT5_SET_IDLE_OUTPUT_ENABLE(channel_id, enable) \
     RMT.conf_ch[channel_id].conf1.idle_out_en = (enable)
-#elif defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2) || defined(FL_IS_ESP_32C5) || defined(FL_IS_ESP_32P4)
+#elif defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2) || defined(FL_IS_ESP_32C5) || defined(FL_IS_ESP_32P4) || defined(FL_IS_ESP_32S31)
 #define RMT5_SET_IDLE_OUTPUT_ENABLE(channel_id, enable) \
     RMT.chnconf0[channel_id].idle_out_en_chn = (enable)
 #elif defined(FL_IS_ESP_32C3)
@@ -503,7 +503,7 @@ FL_EXTERN_C_END
 #if defined(FL_IS_ESP_32DEV)
 #define RMT5_SET_CLOCK_DIVIDER(channel_id, divider) \
     RMT.conf_ch[channel_id].conf0.div_cnt = (divider)
-#elif defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2) || defined(FL_IS_ESP_32C5) || defined(FL_IS_ESP_32P4)
+#elif defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2) || defined(FL_IS_ESP_32C5) || defined(FL_IS_ESP_32P4) || defined(FL_IS_ESP_32S31)
 #define RMT5_SET_CLOCK_DIVIDER(channel_id, divider) \
     RMT.chnconf0[channel_id].div_cnt_chn = (divider)
 #elif defined(FL_IS_ESP_32C3)
@@ -523,7 +523,7 @@ FL_EXTERN_C_END
 #if defined(FL_IS_ESP_32DEV)
 #define RMT5_SET_CARRIER_ENABLE(channel_id, enable) \
     RMT.conf_ch[channel_id].conf0.carrier_en = (enable)
-#elif defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2) || defined(FL_IS_ESP_32C5) || defined(FL_IS_ESP_32P4)
+#elif defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2) || defined(FL_IS_ESP_32C5) || defined(FL_IS_ESP_32P4) || defined(FL_IS_ESP_32S31)
 #define RMT5_SET_CARRIER_ENABLE(channel_id, enable) \
     RMT.chnconf0[channel_id].carrier_en_chn = (enable)
 #elif defined(FL_IS_ESP_32C3)
@@ -542,7 +542,7 @@ FL_EXTERN_C_END
 #if defined(FL_IS_ESP_32DEV)
 #define RMT5_SET_CARRIER_OUTPUT_LEVEL(channel_id, level) \
     RMT.conf_ch[channel_id].conf0.carrier_out_lv = (level)
-#elif defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2) || defined(FL_IS_ESP_32C5) || defined(FL_IS_ESP_32P4)
+#elif defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2) || defined(FL_IS_ESP_32C5) || defined(FL_IS_ESP_32P4) || defined(FL_IS_ESP_32S31)
 #define RMT5_SET_CARRIER_OUTPUT_LEVEL(channel_id, level) \
     RMT.chnconf0[channel_id].carrier_out_lv_chn = (level)
 #elif defined(FL_IS_ESP_32C3)
@@ -564,7 +564,7 @@ FL_EXTERN_C_END
 #if defined(FL_IS_ESP_32DEV)
 // ESP32: No-op (not required)
 #define RMT5_UPDATE_CONFIG(channel_id) ((void)0)
-#elif defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2) || defined(FL_IS_ESP_32C5) || defined(FL_IS_ESP_32P4)
+#elif defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2) || defined(FL_IS_ESP_32C5) || defined(FL_IS_ESP_32P4) || defined(FL_IS_ESP_32S31)
 #define RMT5_UPDATE_CONFIG(channel_id) \
     RMT.chnconf0[channel_id].conf_update_chn = 1
 #elif defined(FL_IS_ESP_32C3)
@@ -626,7 +626,7 @@ FL_EXTERN_C_END
 #if defined(FL_IS_ESP_32DEV)
 #define RMT5_GET_CONTINUOUS_MODE(channel_id) \
     (RMT.conf_ch[channel_id].conf1.tx_conti_mode != 0)
-#elif defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2) || defined(FL_IS_ESP_32C5) || defined(FL_IS_ESP_32P4)
+#elif defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2) || defined(FL_IS_ESP_32C5) || defined(FL_IS_ESP_32P4) || defined(FL_IS_ESP_32S31)
 #define RMT5_GET_CONTINUOUS_MODE(channel_id) \
     (RMT.chnconf0[channel_id].tx_conti_mode_chn != 0)
 #elif defined(FL_IS_ESP_32C3)
@@ -646,7 +646,7 @@ FL_EXTERN_C_END
 #if defined(FL_IS_ESP_32DEV)
 #define RMT5_SET_CONTINUOUS_MODE(channel_id, enable) \
     RMT.conf_ch[channel_id].conf1.tx_conti_mode = (enable)
-#elif defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2) || defined(FL_IS_ESP_32C5) || defined(FL_IS_ESP_32P4)
+#elif defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2) || defined(FL_IS_ESP_32C5) || defined(FL_IS_ESP_32P4) || defined(FL_IS_ESP_32S31)
 #define RMT5_SET_CONTINUOUS_MODE(channel_id, enable) \
     do { \
         RMT.chnconf0[channel_id].tx_conti_mode_chn = (enable); \
@@ -671,7 +671,7 @@ FL_EXTERN_C_END
 #if defined(FL_IS_ESP_32DEV)
 #define RMT5_SET_REF_ALWAYS_ON(channel_id, always_on) \
     RMT.conf_ch[channel_id].conf1.ref_always_on = (always_on)
-#elif defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2) || defined(FL_IS_ESP_32C5) || defined(FL_IS_ESP_32P4)
+#elif defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2) || defined(FL_IS_ESP_32C5) || defined(FL_IS_ESP_32P4) || defined(FL_IS_ESP_32S31)
 #define RMT5_SET_REF_ALWAYS_ON(channel_id, always_on) \
     do { \
         RMT.chnconf0[channel_id].ref_always_on_chn = (always_on); \
